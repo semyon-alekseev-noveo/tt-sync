@@ -10,6 +10,7 @@
 
 	let isWorking: boolean = false;
 	let syncNotes: boolean = false;
+	let abyssTasksFormat: boolean = false;
 	let resetTasksText: string = '';
 	$: resetTasksText = syncNotes
 		? 'Get all Notes from TickTick?'
@@ -27,6 +28,7 @@
 	// Load current settings on mount
 	onMount(() => {
 		syncNotes = $settingsStore.syncNotes;
+		abyssTasksFormat = $settingsStore.abyssTasksFormat ?? false;
 		if ($settingsStore.noteDelimiter === '' || $settingsStore.noteDelimiter == null) {
 			delimiterOption = 'none';
 			customDelimiter = '';
@@ -102,6 +104,18 @@
 		{#if syncNotes}
 			<div>Notes will be synchronized.</div>
 			<br>
+			<div class="setting-item">
+				<div class="setting-item-info">
+					<div class="setting-item-name">Abyss Tasks format</div>
+					<div class="setting-item-description">Store notes as <code>- &gt; </code> description lines and <code>- </code> comment lines (Abyss Tasks). Overrides Note Delimiter.</div>
+				</div>
+				<div class="setting-item-control">
+					<label class="checkbox-container" class:is-enabled={abyssTasksFormat}>
+						<input type="checkbox" bind:checked={abyssTasksFormat}
+							on:change={async () => { settingsStore.update(s => ({ ...s, abyssTasksFormat })); await plugin.saveSettings(); }} />
+					</label>
+				</div>
+			</div>
 			<div class="setting-item delimiter-settings">
 				<div class="setting-item-info">
 					<div class="setting-item-name">Note Delimiter</div>

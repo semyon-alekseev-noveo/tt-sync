@@ -1,3 +1,4 @@
+import { abyssLinesToNote, noteToAbyssLines } from '@/abyssFormat';
 import { type App, type MetadataCache, Notice } from 'obsidian';
 import type TickTickSync from '@/main';
 import type { ITask, ITaskItem, Reminder } from '@/api/types/Task';
@@ -730,6 +731,9 @@ export class TaskParser {
 
 	getNoteString(taskRecord: ITaskRecord, id?: string) {
 		let textContent = '';
+		if (getSettings().abyssTasksFormat) {
+			return abyssLinesToNote(taskRecord.taskLines ?? []);
+		}
 		if (taskRecord.taskLines) {
 			let descriptionStrings = [...taskRecord.taskLines];
 
@@ -1227,6 +1231,10 @@ export class TaskParser {
 				}
 			}
 
+		}
+		if (getSettings().abyssTasksFormat) {
+			const abyssLines = noteToAbyssLines(noteLines.filter(l => l.search(linkRegex) < 0).join('\n'), numbTabs);
+			return abyssLines.length ? `${resultLine}\n${abyssLines.join('\n')}` : resultLine;
 		}
 		const prefix = '\n' + '\t'.repeat(numbTabs) + '  ';
 		// resultLine = `${resultLine}${prefix}=== start ${type} ${this.getTickTickId(resultLine)}`;

@@ -24,6 +24,8 @@ export interface ITickTickSyncSettings {
 	keepProjectFolders: boolean;
 	syncNotes: boolean;
 	noteDelimiter: string;
+	// Abyss Tasks format: notes as `- > ` lines, comments as `- ` lines
+	abyssTasksFormat: boolean;
 	fileLinksInTickTick: string;
 	taskLinksInObsidian: string;
 	bkupFolder: string;
@@ -77,6 +79,7 @@ export const DEFAULT_SETTINGS: ITickTickSyncSettings = {
 	keepProjectFolders: false,
 	syncNotes: true,
 	noteDelimiter: '-------------------------------------------------------------',
+	abyssTasksFormat: false,
 	fileLinksInTickTick: 'taskLink',
 	taskLinksInObsidian: 'taskLink',
 	bkupFolder: '/',

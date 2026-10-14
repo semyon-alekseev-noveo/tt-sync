@@ -1,3 +1,4 @@
+import { isAbyssNoteLine } from '@/abyssFormat';
 import { App, type ListItemCache, TFile } from 'obsidian';
 import type { ITask } from '@/api/types/Task';
 import type TickTickSync from '@/main';
@@ -487,6 +488,13 @@ export class NewFileMap {
 		taskRecord.parentId = this.getParentIDByIdx(taskIdx);
 		taskRecord.task = taskLine;
 
+		if (getSettings().abyssTasksFormat) {
+			for (let j = taskIdx + 1; j < this.fileLines.length && isAbyssNoteLine(this.fileLines[j], numTabs); j++) {
+				taskLines.push(this.fileLines[j]);
+			}
+			taskRecord.taskLines = taskLines;
+			return taskRecord;
+		}
 		const cfgDelim = getSettings().noteDelimiter as unknown;
 		const hasConfiguredDelimiter = (typeof cfgDelim === 'string') && (cfgDelim.length > 0);
 
