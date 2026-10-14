@@ -1,3 +1,4 @@
+import { stripFileLinks } from '@/projectScheme';
 import { detachInContent, enrichDeletionItems } from '@/detach';
 import { markerName } from '@/taskParser';
 import TickTickSync from '@/main';
@@ -572,7 +573,7 @@ export class SyncMan {
 			//   convertLineToTask
 			if (getSettings().fileLinksInTickTick === 'taskLink') {
 				if (taskURL) {
-					parentTask.title = parentTask.title + ' ' + taskURL;
+					parentTask.title = stripFileLinks(parentTask.title) + ' ' + taskURL;
 				}
 			}
 		}

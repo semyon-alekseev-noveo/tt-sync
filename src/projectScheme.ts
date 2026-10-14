@@ -31,6 +31,11 @@ export function isDoneStatus(s: unknown): boolean {
 	return typeof s === 'string' && /done|✅|заверш|выполн/i.test(s);
 }
 
+/** Remove Obsidian file links ([file](obsidian://open?...)) the plugin appends to TickTick titles. */
+export function stripFileLinks(t: string): string {
+	return t.replace(/\s*\[[^\]]*\]\(obsidian:\/\/[^)]*\)/g, '').trim();
+}
+
 export function sanitizeTitle(t: string): string {
 	return t.replace(/\[[^\]]*\]\(obsidian:\/\/[^)]*\)/g, '').replace(/[\\/:*?"<>|#^[\]]/g, '-').replace(/\s+/g, ' ').trim();
 }

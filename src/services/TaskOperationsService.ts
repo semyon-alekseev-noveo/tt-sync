@@ -1,3 +1,4 @@
+import { stripFileLinks } from '@/projectScheme';
 import { markerName } from '@/taskParser';
 /**
  * TaskOperationsService - Handles task state operations
@@ -79,9 +80,11 @@ export class TaskOperationsService {
 		try {
 			for (const localTask of tasks) {
 				const task = localTask.task;
+				// Project parents never carry a file link: they live in their note, not in a line.
+				if (this.plugin.projectScheme?.isParentTask(task)) continue;
 
 				// Add URL to task title
-				task.title = task.title + ' ' + taskURL;
+				task.title = stripFileLinks(task.title) + ' ' + taskURL;
 
 				// Backwards compatibility: keep the "ticktick" tag injected on
 				// the TickTick task unless the user opted out (see

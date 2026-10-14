@@ -1,3 +1,4 @@
+import { stripFileLinks } from '@/projectScheme';
 /**
  * TaskDeletionHandler - Handles task deletion detection and execution
  * Extracts deletion logic from SyncModule (lines ~39-156, 791-834)
@@ -200,7 +201,7 @@ export class TaskDeletionHandler {
 			// Add Obsidian URL if configured
 			const taskURL = this.plugin.taskParser.getObsidianUrlFromFilepath(filepath);
 			if (taskURL && getSettings().fileLinksInTickTick === 'taskLink') {
-				task.title = task.title + ' ' + taskURL;
+				task.title = stripFileLinks(task.title) + ' ' + taskURL;
 			}
 
 			const updatedTask = await this.plugin.tickTickRestAPI?.updateTask(task);

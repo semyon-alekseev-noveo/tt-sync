@@ -7,7 +7,7 @@ import { getAllProjects } from '@/db/projects';
 import log from '@/utils/logger';
 import {
 	isProjectNote, linkTarget, isDoneStatus, planProjects, renderProjectNote, sanitizeTitle,
-	STATUS_ACTIVE, STATUS_DONE, type NoteSide, type ParentSide, type Snap,
+	STATUS_ACTIVE, STATUS_DONE, type NoteSide, type ParentSide, type Snap, stripFileLinks,
 } from '@/projectScheme';
 
 export class ProjectSchemeService {
@@ -75,6 +75,11 @@ export class ProjectSchemeService {
 		for (const n of notes) {
 			if (!n.id) continue;
 			const t = await api?.getTaskById(n.id, this.listId);
+			if (t && stripFileLinks(t.title) !== t.title) {
+				// repair titles polluted by a file link (parent once tracked as an inbox line)
+				t.title = stripFileLinks(t.title);
+				try { await api?.updateTask(t); } catch (e) { log.error('ProjectScheme: title repair failed', e); }
+			}
 			if (t) parents.push({ id: t.id, title: t.title, done: (t.status ?? 0) > 0, content: t.content });
 		}
 		for (const t of updated) {
