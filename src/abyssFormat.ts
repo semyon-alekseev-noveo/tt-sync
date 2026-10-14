@@ -109,5 +109,6 @@ export function mergeAbyssBlock(newText: string, oldChild: string[]): string {
 	gen.forEach((l, i) => {
 		if (genKinds[i] === 'comment' || (genKinds[i] === 'cont' && comments.length)) comments.push(l);
 	});
-	return [head, ...descs, ...pick(['item']), ...kept, ...comments].join('\n');
+	const tidy = (l: string) => l.replace(/[ \t]+$/, '').replace(/ {2,}%%/, ' %%');
+	return [head, ...[...descs, ...pick(['item']), ...kept, ...comments].map(tidy)].join('\n');
 }

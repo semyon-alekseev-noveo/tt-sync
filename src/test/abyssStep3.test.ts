@@ -104,3 +104,10 @@ describe('project mapping', () => {
 		expect(pathForProjectId('p2', map, projects)).toBeUndefined();
 	});
 });
+
+describe('merge tidies whitespace', () => {
+	it('strips trailing spaces and double space before item id', () => {
+		const out = mergeAbyssBlock('- [ ] t\n\t- [ ] item  %%aaaaaaaaaaaaaaaaaaaaaaaa%%\n\t- comment ', []).split('\n');
+		expect(out).toEqual(['- [ ] t', '\t- [ ] item %%aaaaaaaaaaaaaaaaaaaaaaaa%%', '\t- comment']);
+	});
+});
