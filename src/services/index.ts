@@ -165,6 +165,11 @@ export class TickTickService {
 	}
 
 	async synchronization(fullSync: boolean = false) {
+		if (this.plugin.redo) return this.plugin.redo.session('sync', () => this.synchronizationInner(fullSync));
+		return this.synchronizationInner(fullSync);
+	}
+
+	async synchronizationInner(fullSync: boolean = false) {
 		const startTime = performance.now();
 		try {
 

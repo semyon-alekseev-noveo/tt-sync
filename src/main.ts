@@ -1,3 +1,6 @@
+import { RedoLog } from '@/redo/log';
+import { makeAdapter, instrumentVault, instrumentApi } from '@/redo/obsidian';
+import { RedoCommands } from '@/redo/commands';
 import { tagRenames, renameTagsInText, folderOf } from '@/settingsMigration';
 const snap = (x: { tagListMappings?: unknown; statusMappings?: unknown; tagMappings?: unknown; projectsFolder?: string }) => JSON.parse(JSON.stringify({ tagListMappings: x.tagListMappings ?? [], statusMappings: x.statusMappings ?? [], tagMappings: x.tagMappings ?? [], projectsFolder: x.projectsFolder })) as Parameters<typeof tagRenames>[0];
 import { ProjectSchemeService } from '@/services/ProjectSchemeService';
@@ -193,6 +196,8 @@ export default class TickTickSync extends Plugin {
 		log.debug(`TickTickSync unloaded!`);
 	}
 
+	redo?: RedoLog;
+	redoCommands?: RedoCommands;
 	private migrating = false;
 	private migrationAgain = false;
 	/** Compare current mapping/folder settings with the last applied snapshot (kept in data.json, so
@@ -604,6 +609,15 @@ export default class TickTickSync extends Plugin {
 		this.addSettingTab(new TickTickSyncSettingTab(this.app, this));
 
 		const isSettingsLoaded = await this.loadSettings();
+		if (!this.redo) {
+			// write-ahead redo log (.tickticksync/journal), see src/redo
+			this.redo = new RedoLog(makeAdapter(this.app));
+			instrumentVault(this.app, this.redo);
+			instrumentApi(this, this.redo);
+			this.redoCommands = new RedoCommands(this, this.redo);
+			this.redoCommands.register();
+			void this.redo.prune(getSettings().redoLogRetentionDays ?? 30).catch(e => log.warn('redo log prune failed', e));
+		}
 		if (!isSettingsLoaded) {
 			new Notice('Settings failed to load. Please reload the TickTickSync plugin.');
 			return;

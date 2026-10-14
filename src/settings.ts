@@ -66,6 +66,7 @@ export interface ITickTickSyncSettings {
 	debugMode: boolean;
 	logLevel: string;
 	journalRetentionDays: number;
+	redoLogRetentionDays: number;
 	deletedTaskRetentionDays: number;
 	skipBackup?: boolean;
 
@@ -94,6 +95,7 @@ export const DEFAULT_SETTINGS: ITickTickSyncSettings = {
 	debugMode: false,
 	logLevel: 'info',
 	journalRetentionDays: 3,
+	redoLogRetentionDays: 30,
 	deletedTaskRetentionDays: 7,
 	SyncProject: '',
 	SyncTag: '',
