@@ -1,3 +1,4 @@
+import { editedSince } from '@/utils/editedSince';
 import { healTagListMappings } from '@/listMapping';
 import { idsPresentInVault, dedupeTaskIds } from '@/utils/vaultIdScan';
 import { shouldBackupToday } from '@/backupPolicy';
@@ -114,6 +115,17 @@ export class TickTickService {
 		return null;
 	}
 
+	async pushLocalEditsFirst() {
+		const meta = await db.meta.get("sync");
+		const last = Math.max(meta?.lastFullSync ?? 0, meta?.lastDeltaSync ?? 0);
+		if (!last) return;
+		const files = await this.plugin.fileMetadataService?.getAllFileMetadata();
+		for (const path of editedSince(this.plugin.app, Object.keys(files ?? {}), last)) {
+			try { await this.plugin.taskModificationDetector.checkFileForModifications(path); }
+			catch (e) { log.warn('pre-pull push failed', path, e); }
+		}
+	}
+
 	async synchronization(fullSync: boolean = false) {
 		const startTime = performance.now();
 		try {
@@ -153,6 +165,10 @@ export class TickTickService {
 
 					// Ensure all vault files are registered in Files metadata
 					await this.ensureVaultFilesRegistered();
+					// Push vault edits made since the last sync BEFORE pulling, otherwise the pull
+					// re-renders the line from TickTick and the local edit is lost (seen on [x] lines
+					// edited outside the editor, where no editor-change check fires).
+					await this.pushLocalEditsFirst();
 					await syncTickTickWithDexie(this.plugin.tickTickRestAPI, fullSync);
 					if (projects?.length) {
 						const healed = healTagListMappings(getSettings().tagListMappings, projects);

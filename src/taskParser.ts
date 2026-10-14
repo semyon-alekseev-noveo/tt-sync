@@ -112,7 +112,7 @@ export const REGEX = {
 		REMOVE_COMPLETION_DATE: new RegExp(completion_date_strip_regex, 'gmu'),
 		REMOVE_INLINE_METADATA: /%%\[\w+::\s*\w+\]%%/g,
 		REMOVE_RECURRENCE: /🔁\s+[^🔁➕⏳🛫📅✅❌⏰\n]+/gu,
-		REMOVE_REMINDER: /⏰\s+[^⏰➕⏳🛫📅✅❌🔁🔺⏫🔼🔽⏬\n]+/gu,
+		REMOVE_REMINDER: /⏰\s+(?!\d{1,2}:\d{2}(?![\d:]))[^⏰➕⏳🛫📅✅❌🔁🔺⏫🔼🔽⏬\n]+/gu,
 		REMOVE_CHECKBOX: /^(-|\*)\s+\[(.)\]\s/,
 		REMOVE_CHECKBOX_WITH_INDENTATION: /^([ \t]*)?(-|\*)\s+\[(.)\]\s/,
 		REMOVE_TickTick_LINK: /\[link\]\(.*?\)/
@@ -125,7 +125,7 @@ export const REGEX = {
 	priorityRegex: /^.*([🔺⏫🔼🔽⏬]).*$/u,
 	BLANK_LINE: /^\s*$/,
 	RECURRENCE_RULE: /🔁\s+([^🔁➕⏳🛫📅✅❌⏰]+?)(?=\s*[➕⏳🛫📅✅❌⏰]|\s*$)/u,
-	REMINDER_RULE: /⏰\s+([^⏰➕⏳🛫📅✅❌🔁🔺⏫🔼🔽⏬\n]+?)(?=\s*(?:[➕⏳🛫📅✅❌🔁⏰🔺⏫🔼🔽⏬]|#|%%|\[)|\s*$)/gu,
+	REMINDER_RULE: /⏰\s+(?!\d{1,2}:\d{2}(?![\d:]))([^⏰➕⏳🛫📅✅❌🔁🔺⏫🔼🔽⏬\n]+?)(?=\s*(?:[➕⏳🛫📅✅❌🔁⏰🔺⏫🔼🔽⏬]|#|%%|\[)|\s*$)/gu,
 	TickTick_EVENT_DATE: /(\d{4})-(\d{2})-(\d{2})/,
 	ITEM_LINE: /\[(.*?)\]\s*(.*?)\s*%%(.*?)%%/,
 	LINE_ITEM_ID: /%%(?!\[ticktick_id::\s)[a-f0-9]{24}%%/g

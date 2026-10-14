@@ -70,6 +70,9 @@ export class DateMan {
 			fromTime = times[1];
 			toTime = times[2];
 		}
+		// Abyss Tasks time-of-day token: `⏰ 14:30` (a reminder is `⏰ 30m`, never HH:MM).
+		const abyssTime = inString.match(/⏰\s*(\d{1,2}:\d{2})(?![\d:])/u);
+		if (!fromTime && abyssTime) fromTime = abyssTime[1];
 		// log.debug('fromTime: ', fromTime, 'toTime: ', toTime);
 
 		for (const [key, value] of Object.entries(date_emoji)) {
@@ -164,7 +167,12 @@ export class DateMan {
 			log.error('Date Holder Keys Not found.');
 		}
 
-		if (!task.isAllDay) {
+		const single = (startDatetimeString !== '') !== (dueDatetimeString !== '');
+		if (!task.isAllDay && getSettings().abyssTasksFormat && single) {
+			// Abyss Tasks reads time as `⏰ HH:MM` next to the date (the old `[HH:MM]` prefix is still parsed).
+			const t = dueDatetimeString || startDatetimeString;
+			if (t) dateStrings.push(`⏰ ${t}`);
+		} else if (!task.isAllDay) {
 			let startOfTask = inString.indexOf(']', 0); //assume the first ] is where we want to start adding stuff.
 			startOfTask = startOfTask + 1;
 			if ((startDatetimeString != '') && (dueDatetimeString != '')) {
@@ -200,7 +208,7 @@ export class DateMan {
 		retString = inString.replace(datesRegEx, '');
 		// log.debug('stripDatesFromLine - dates :', retString);
 		const times_regex = /\[\s*(\d{1,2}:\d{2})(?:\s*-\s*(\d{1,2}:\d{2}))?\s*\]/gus;
-		retString = retString.replace(times_regex, '');
+		retString = retString.replace(times_regex, '').replace(/\s*⏰\s*\d{1,2}:\d{2}(?![\d:])/gu, '');
 		// log.debug('stripDatesFromLine - out :', retString);
 		return retString;
 	}
