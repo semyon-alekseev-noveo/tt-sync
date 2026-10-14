@@ -622,6 +622,13 @@ export class Tick {
 	}
 
 
+	/** Partial batch update that only moves tasks (sortOrder); other fields stay untouched in TickTick. */
+	async setSortOrders(items: { id: string; projectId: string; sortOrder: number }[]): Promise<unknown> {
+		if (!items.length) return null;
+		const payload = { add: [], addAttachments: [], delete: [], deleteAttachments: [], updateAttachments: [], update: items } as unknown as UpdatePayload;
+		return this.makeRequest('Set Sort Orders', `${this.apiUrl}/${updateTaskEndPoint}`, 'POST', payload);
+	}
+
 	async deleteTask(deleteTaskId: string, deletedTaskprojectId: string): Promise<unknown> {
 		if (!deleteTaskId || !deletedTaskprojectId) {
 			throw new Error('Both Task Id and Project ID are required for a delete, otherwise TickTick will fail silently.');

@@ -1,3 +1,4 @@
+import { childBlocks, sortOrdersFromLines, reorderLinesBySortOrder } from '@/subtaskOrder';
 import { editedSince } from '@/utils/editedSince';
 import { healTagListMappings } from '@/listMapping';
 import { idsPresentInVault, dedupeTaskIds } from '@/utils/vaultIdScan';
@@ -115,14 +116,51 @@ export class TickTickService {
 		return null;
 	}
 
+	private locallyEdited = new Set<string>();
 	async pushLocalEditsFirst() {
+		this.locallyEdited = new Set();
 		const meta = await db.meta.get("sync");
 		const last = Math.max(meta?.lastFullSync ?? 0, meta?.lastDeltaSync ?? 0);
 		if (!last) return;
 		const files = await this.plugin.fileMetadataService?.getAllFileMetadata();
+		this.locallyEdited = new Set(editedSince(this.plugin.app, Object.keys(files ?? {}), last));
 		for (const path of editedSince(this.plugin.app, Object.keys(files ?? {}), last)) {
 			try { await this.plugin.taskModificationDetector.checkFileForModifications(path); }
 			catch (e) { log.warn('pre-pull push failed', path, e); }
+			try { await this.pushSubtaskOrder(path); } catch (e) { log.warn('subtask order push failed', path, e); }
+		}
+	}
+
+	/** Obsidian -> TickTick: sibling line order under a parent becomes child sortOrder. */
+	async pushSubtaskOrder(path: string) {
+		const f = this.plugin.app.vault.getAbstractFileByPath(path);
+		if (!(f instanceof TFile)) return;
+		const lines = (await this.plugin.app.vault.read(f)).split('\n');
+		const upd: { id: string; projectId: string; sortOrder: number }[] = [];
+		for (const [, blocks] of childBlocks(lines)) {
+			const so: Record<string, number | undefined> = {}; const pid: Record<string, string> = {};
+			for (const b of blocks) { const t = await this.plugin.taskRepository.loadTaskById(b.id); so[b.id] = t?.sortOrder; pid[b.id] = t?.projectId ?? ''; }
+			for (const [id, sortOrder] of Object.entries(sortOrdersFromLines(blocks.map(b => b.id), so))) {
+				upd.push({ id, projectId: pid[id], sortOrder });
+				const t = await this.plugin.taskRepository.loadTaskById(id);
+				if (t) { t.sortOrder = sortOrder; await this.plugin.taskRepository.upsertTask(t, path, Date.now()); }
+			}
+		}
+		if (upd.length) { await this.plugin.tickTickRestAPI?.api?.setSortOrders(upd); log.info(`Subtask order pushed for ${upd.length} task(s) in ${path}`); }
+	}
+
+	/** TickTick -> Obsidian: reorder sibling lines to TickTick sortOrder (files not edited locally). */
+	async pullSubtaskOrder(skip: Set<string>) {
+		const files = await this.plugin.fileMetadataService?.getAllFileMetadata();
+		for (const path of Object.keys(files ?? {})) {
+			if (skip.has(path)) continue;
+			const f = this.plugin.app.vault.getAbstractFileByPath(path);
+			if (!(f instanceof TFile)) continue;
+			const text = await this.plugin.app.vault.read(f);
+			const lines = text.split('\n'); const so: Record<string, number | undefined> = {};
+			for (const [, blocks] of childBlocks(lines)) for (const b of blocks) so[b.id] = (await this.plugin.taskRepository.loadTaskById(b.id))?.sortOrder;
+			const out = reorderLinesBySortOrder(lines, so);
+			if (out) { await this.plugin.app.vault.process(f, d => d === text ? out.join('\n') : d); log.info(`Subtasks reordered from TickTick in ${path}`); }
 		}
 	}
 
@@ -191,6 +229,7 @@ export class TickTickService {
 					} catch (e) { log.warn('vanished-list check failed', e); }
 					//NEW: Use VaultSyncCoordinator
 					await this.plugin.vaultSyncCoordinator.syncVaultWithDatabase();
+					try { await this.pullSubtaskOrder(this.locallyEdited); } catch (e) { log.warn('subtask order pull failed', e); }
 				}
 			});
 			await this.syncFiles(false);
