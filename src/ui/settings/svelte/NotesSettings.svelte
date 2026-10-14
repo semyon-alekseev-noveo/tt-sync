@@ -21,9 +21,10 @@
 	let statusMappingText = '';
 	let projectMappingText = '';
 	let tagListText = '';
+	let onTickTickDeletion: 'ask' | 'cancel' = 'ask';
 	async function saveAbyss() {
 		settingsStore.update(s => ({ ...s, abyssTasksFormat, abyssIndent, scheduledAsStartDate, tagMappings: parseTagMappingText(tagMappingText),
-			statusMappings: parseStatusMappingText(statusMappingText), projectMappings: parseProjectMappingText(projectMappingText), tagListMappings: parseTagListText(tagListText) }));
+			statusMappings: parseStatusMappingText(statusMappingText), projectMappings: parseProjectMappingText(projectMappingText), tagListMappings: parseTagListText(tagListText), onTickTickDeletion }));
 		await plugin.saveSettings();
 	}
 	let resetTasksText: string = '';
@@ -50,6 +51,7 @@
 		statusMappingText = statusMappingToText($settingsStore.statusMappings);
 		projectMappingText = projectMappingToText($settingsStore.projectMappings);
 		tagListText = tagListToText($settingsStore.tagListMappings);
+		onTickTickDeletion = $settingsStore.onTickTickDeletion ?? 'ask';
 		if ($settingsStore.noteDelimiter === '' || $settingsStore.noteDelimiter == null) {
 			delimiterOption = 'none';
 			customDelimiter = '';
@@ -150,6 +152,12 @@
 				<div class="setting-item-control"><textarea rows="4" bind:value={statusMappingText} on:change={saveAbyss}></textarea></div>
 			</div>
 			{/if}
+			<div class="setting-item">
+				<div class="setting-item-info"><div class="setting-item-name">On TickTick deletion</div>
+					<div class="setting-item-description">Ask (confirmation dialog) or mark the line cancelled <code>[-]</code> and detach it from sync (never re-created in TickTick).</div></div>
+				<div class="setting-item-control"><select class="dropdown" bind:value={onTickTickDeletion} on:change={saveAbyss}>
+					<option value="ask">Ask</option><option value="cancel">Mark cancelled &amp; detach</option></select></div>
+			</div>
 			<div class="setting-item">
 				<div class="setting-item-info"><div class="setting-item-name">Tag → list mapping</div>
 					<div class="setting-item-description">Tag decides the TickTick list (beats file default); moving the task in TickTick rewrites the tag. E.g. <code>type/next = nextAction</code></div></div>

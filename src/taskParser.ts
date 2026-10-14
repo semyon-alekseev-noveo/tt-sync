@@ -1,3 +1,4 @@
+import { isDetached } from '@/detach';
 import { abyssLinesToNote, noteToAbyssLines, childIndent } from '@/abyssFormat';
 import { mapObsidianTag, mapTickTickTag } from '@/tagMapping';
 import { isListTag, listForTags, tagForList } from '@/listMapping';
@@ -816,6 +817,7 @@ export class TaskParser {
 	}
 
 	hasTickTickTag(text: string) {
+		if (isDetached(text)) return false;
 		if (this.isMarkdownTask(text)) {
 			// log.debug("hasTickTickTag", `${text}
 			// ${REGEX.TickTick_TAG}

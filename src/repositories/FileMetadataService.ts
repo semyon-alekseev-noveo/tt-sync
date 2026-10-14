@@ -288,16 +288,17 @@ export class FileMetadataService {
 	/**
 	 * Get items for deletion confirmation
 	 */
-	async getDeletionItems(taskIds: string[]): Promise<Array<{ title: string; filePath: string }>> {
+	async getDeletionItems(taskIds: string[]): Promise<Array<{ title: string; filePath: string; id: string }>> {
 		try {
-			const items: Array<{ title: string; filePath: string }> = [];
+			const items: Array<{ title: string; filePath: string; id: string }> = [];
 
 			for (const taskId of taskIds) {
 				const localTask = await db.tasks.where("taskId").equals(taskId).first();
 				if (localTask) {
 					items.push({
 						title: localTask.task.title || taskId,
-						filePath: localTask.file || "Unknown"
+						filePath: localTask.file || "Unknown",
+						id: taskId
 					});
 				}
 			}

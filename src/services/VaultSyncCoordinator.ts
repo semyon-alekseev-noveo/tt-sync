@@ -1,3 +1,5 @@
+import { detachInContent, enrichDeletionItems } from '@/detach';
+import { markerName } from '@/taskParser';
 /**
  * VaultSyncCoordinator - Coordinates syncing between database and vault files
  * Extracts vault sync logic from SyncModule
@@ -277,7 +279,25 @@ export class VaultSyncCoordinator {
 			return true;
 		}
 
-		const items = await this.plugin.fileMetadataService.getDeletionItems(tasksToConfirmDeletionIds);
+		if (getSettings().onTickTickDeletion === 'cancel') {
+			// No modal: detach these lines ([-], no id) and drop them from the delete lists.
+			const ids = new Set(tasksToConfirmDeletionIds);
+			for (const [filePath, group] of fileGroups) {
+				const mine = group.toDelete.filter(t => ids.has((t.id || (t as { taskId?: string }).taskId) ?? ''));
+				if (!mine.length) continue;
+				group.toDelete = group.toDelete.filter(t => !mine.includes(t));
+				const f = this.app.vault.getAbstractFileByPath(filePath);
+				for (const t of mine) {
+					const id = (t.id || (t as { taskId?: string }).taskId) ?? '';
+					await this.plugin.fileMetadataService.clearTaskFile(id);
+					await this.plugin.taskRepository.deleteTask(id);
+					if (f instanceof TFile) await this.app.vault.process(f, d => detachInContent(d, id, markerName()) ?? d);
+				}
+			}
+			return true;
+		}
+
+		const items = await enrichDeletionItems(this.app, await this.plugin.fileMetadataService.getDeletionItems(tasksToConfirmDeletionIds));
 		const modal = new TaskDeletionModal(
 			this.app,
 			items,

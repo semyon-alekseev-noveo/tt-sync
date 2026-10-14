@@ -51,3 +51,8 @@ Setting `tagListMappings` (`type/next = nextAction`, list by name or id), `src/l
 
 ## Step 5: single file for new TickTick tasks
 Setting `newTasksFile` (e.g. `00 Inbox/TickTick.md`): `FileMetadataService.getFilepathForProjectId` returns it for every list; `fileOperation` skips file-relocation on list change (list is driven by type tag, line rewritten in place); `ProjectSyncService.checkProjectRename` doesn't rename per-list files.
+
+## Step 6: TickTick deletions
+- Modal (`TaskDeletionModal`) shows path, title, id and current line (`enrichDeletionItems`).
+- Setting `onTickTickDeletion`: `ask` (default) | `cancel`. `cancel` (both paths: `syncModule` and `VaultSyncCoordinator.confirmDeletions`): tombstone + clear file link in DB, rewrite line via `detachLine` → `[-]`, no id/link/marker, `%%tt-detached%%`.
+- No-recreate: `hasTickTickTag` false and `markAllTasks` skips any line with `%%tt-detached%%` (even if marker tag re-added). `TaskDeletionHandler.findMissingTaskIds` ignores tombstoned tasks (no "removed from file" modal).

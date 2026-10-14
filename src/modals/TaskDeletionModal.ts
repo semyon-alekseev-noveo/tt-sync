@@ -4,6 +4,8 @@ import { App, Modal, Setting } from 'obsidian';
 export interface DeletionItem {
 	title: string;
 	filePath?: string;
+	id?: string;
+	line?: string;
 }
 
 export class TaskDeletionModal extends Modal {
@@ -37,13 +39,13 @@ export class TaskDeletionModal extends Modal {
 		contentEl.createEl('p', { text: `${this.message}${this.reason}` });
 
 		// Group items by filePath
-		const groupedItems: Record<string, string[]> = {};
+		const groupedItems: Record<string, DeletionItem[]> = {};
 		this.items.forEach(item => {
 			const path = item.filePath || 'Unknown File';
 			if (!groupedItems[path]) {
 				groupedItems[path] = [];
 			}
-			groupedItems[path].push(item.title);
+			groupedItems[path].push(item);
 		});
 
 		for (const [filePath, titles] of Object.entries(groupedItems)) {
@@ -51,8 +53,10 @@ export class TaskDeletionModal extends Modal {
 				contentEl.createEl('strong', { text: filePath, attr: { style: 'display: block; margin-top: 10px;' } });
 			}
 			const unorderedList = contentEl.createEl('ul', { attr: { style: 'margin-top: 5px;' } });
-			titles.forEach((title) => {
-				unorderedList.createEl('li', { text: title });
+			titles.forEach((item) => {
+				const li = unorderedList.createEl('li', { text: item.title });
+				if (item.id) li.createEl('div', { text: `id: ${item.id}`, attr: { style: 'font-size: smaller; opacity: 0.7;' } });
+				if (item.line) li.createEl('code', { text: item.line, attr: { style: 'display: block; white-space: pre-wrap; font-size: smaller;' } });
 			});
 		}
 

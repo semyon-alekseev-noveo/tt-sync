@@ -1,3 +1,4 @@
+import { isDetached } from '@/detach';
 import { abyssRegionEnd, mergeAbyssBlock } from '@/abyssFormat';
 import { App, type ListItemCache, TFile } from 'obsidian';
 import type { ITask } from '@/api/types/Task';
@@ -282,7 +283,7 @@ export class NewFileMap {
 			if (!this.plugin.taskParser?.isMarkdownTask(line)) {
 				continue;
 			}
-			if (this.plugin.taskParser?.getTaskContentFromLineText(line) == '') {
+			if (this.plugin.taskParser?.getTaskContentFromLineText(line) == '' || isDetached(line)) {
 				continue;
 			}
 			if (this.plugin.taskParser?.hasTickTickId(line)) {

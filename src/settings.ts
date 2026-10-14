@@ -37,6 +37,8 @@ export interface ITickTickSyncSettings {
 	// If set: every TickTick list maps to this one file for NEW tasks; lists are
 	// decided by tags, and list moves don't relocate lines between files.
 	newTasksFile: string;
+	// What to do when a task is deleted in TickTick: ask (modal) | cancel ([-] + detach)
+	onTickTickDeletion: 'ask' | 'cancel';
 	fileLinksInTickTick: string;
 	taskLinksInObsidian: string;
 	bkupFolder: string;
@@ -99,6 +101,7 @@ export const DEFAULT_SETTINGS: ITickTickSyncSettings = {
 	tagListMappings: [],
 	syncMarkerTag: 'ticktick',
 	newTasksFile: '',
+	onTickTickDeletion: 'ask',
 	fileLinksInTickTick: 'taskLink',
 	taskLinksInObsidian: 'taskLink',
 	bkupFolder: '/',

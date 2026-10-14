@@ -1,3 +1,5 @@
+import { detachInContent, enrichDeletionItems } from '@/detach';
+import { markerName } from '@/taskParser';
 import TickTickSync from '@/main';
 import {
 	App,
@@ -9,7 +11,7 @@ import {
 import type { ITask } from '@/api/types/Task';
 import type { IProjectGroup } from '@/api/types/ProjectGroup';
 import ObjectID from 'bson-objectid';
-import { TaskDeletionModal } from '@/modals/TaskDeletionModal';
+import { TaskDeletionModal, type DeletionItem } from '@/modals/TaskDeletionModal';
 import { getSettings } from '@/settings';
 import { NewFileMap, type ITaskItemRecord } from '@/services/NewFileMap';
 import log from '@/utils/logger';
@@ -206,7 +208,25 @@ export class SyncMan {
 			if (reallyDeletedTickTickTasks.length > 0) {
 				const taskTitlesForConfirmation = reallyDeletedTickTickTasks.map((task: ITask) => task.id);
 
-				const bConfirm = await this.confirmDeletion(taskTitlesForConfirmation, 'tasks deleted from TickTick');
+				if (getSettings().onTickTickDeletion === 'cancel') {
+					// No modal: mark cancelled + detach so it is never re-created in TickTick.
+					for (const task of reallyDeletedTickTickTasks) {
+						try {
+							const fp = await this.plugin.fileMetadataService?.getFilepathForTask(task.id);
+							await this.plugin.fileMetadataService?.clearTaskFile(task.id);
+							await this.plugin.taskRepository.deleteTask(task.id);
+							const f = fp ? this.app.vault.getAbstractFileByPath(fp) : null;
+							if (f instanceof TFile) {
+								await this.app.vault.process(f, data => detachInContent(data, task.id, markerName()) ?? data);
+							}
+							bModifiedFileSystem = true;
+						} catch (error) {
+							log.error('Detach after TickTick deletion failed.', error);
+						}
+					}
+				}
+				const bConfirm = getSettings().onTickTickDeletion === 'cancel' ? false
+					: await this.confirmDeletion(taskTitlesForConfirmation, 'tasks deleted from TickTick');
 
 				if (bConfirm) {
 					//Need to have deletes in parentage order else everything goes Tango Uniform
@@ -417,7 +437,8 @@ export class SyncMan {
 	}
 
 	private async confirmDeletion(taskIds: string[], reason: string) {
-		const items = await this.plugin.fileMetadataService?.getDeletionItems(taskIds);
+		const items = await this.plugin.fileMetadataService?.getDeletionItems(taskIds) ?? [];
+		await enrichDeletionItems(this.app, items as DeletionItem[]);
 
 
 		const myModal = new TaskDeletionModal(this.app, items, reason, (result) => {

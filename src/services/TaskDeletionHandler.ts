@@ -100,7 +100,8 @@ export class TaskDeletionHandler {
 
 		// Get taskIds that should be in this file (from database)
 		const tasksInFile = await this.fileTaskQueries.getTasksInFile(filePath);
-		const dbTaskIds = tasksInFile.map(lt => lt.taskId).filter(id => !!id);
+		// Tombstoned tasks (deleted in TickTick, e.g. detached lines) are not "missing".
+		const dbTaskIds = tasksInFile.filter(lt => !lt.deleted).map(lt => lt.taskId).filter(id => !!id);
 
 		// Find tasks in DB but not in file
 		let missingTaskIds = dbTaskIds.filter(taskId =>
