@@ -64,3 +64,18 @@ it('pull keeps local comments TickTick does not have yet', () => {
 	const out = mergeAbyssBlock('- [ ] T\n\t- 2026-10-14 12:40: первый', ['\t- 2026-10-14 12:40: первый', '\t- 2026-10-14 12:58: пятый', '\t  продолжение'], 'Comments:\n2026-10-14 12:40: первый');
 	expect(out.split('\n')).toEqual(['- [ ] T', '\t- 2026-10-14 12:40: первый', '\t- 2026-10-14 12:58: пятый', '\t  продолжение']);
 });
+
+import { fencedLines } from '@/utils/vaultIdScan';
+it('code-block lines are excluded', () => {
+	expect([...fencedLines(['a', '```', '- [ ] x #ticktick', '```', '- [ ] y', '~~~md', 'z', '~~~'])]).toEqual([1, 2, 3, 5, 6, 7]);
+});
+
+import { healTagListMappings, listForTags } from '@/listMapping';
+it('list mapping survives a TickTick list rename', () => {
+	const map = [{ tag: 'type/waiting', list: 'waitingFor' }];
+	const learned = healTagListMappings(map, [{ id: 'w1', name: 'waitingFor' }])!;
+	expect(learned[0].listId).toBe('w1');
+	const renamed = [{ id: 'w1', name: 'Ждём' }];
+	expect(listForTags(['type/waiting'], learned, renamed)).toBe('w1');
+	expect(healTagListMappings(learned, renamed)![0].list).toBe('Ждём');
+});

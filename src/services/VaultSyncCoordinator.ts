@@ -1,3 +1,4 @@
+import { stripFileLinks } from '@/projectScheme';
 import { idsPresentInVault } from '@/utils/vaultIdScan';
 import { detachInContent, enrichDeletionItems, childIdsInContent } from '@/detach';
 import { markerName } from '@/taskParser';
@@ -130,6 +131,20 @@ export class VaultSyncCoordinator {
 				// Task doesn't match current filter but already exists in vault.
 				// Leave it alone -- do not delete user's existing tasks.
 				continue;
+			}
+		}
+
+		// Line moved to another note / note renamed: fix the file link in the TickTick title.
+		if (getSettings().fileLinksInTickTick === 'taskLink') {
+			for (const lt of tasks) {
+				const t = lt.task; const at = t?.id ? presentAt.get(t.id) : undefined;
+				if (!at || lt.deleted || scheme?.isParentTask(t)) continue;
+				const url = this.plugin.taskParser.getObsidianUrlFromFilepath(at);
+				if (!url || t.title?.includes(url) || !/\]\(obsidian:\/\//.test(t.title ?? '')) continue;
+				try {
+					const upd = await this.plugin.tickTickRestAPI?.updateTask({ ...t, title: stripFileLinks(t.title) + ' ' + url } as ITask);
+					if (upd) { upd.dateHolder = t.dateHolder; upd.lineHash = t.lineHash; await this.plugin.taskRepository.upsertTask(upd, at, Date.now()); }
+				} catch (e) { log.warn('file link refresh failed', t.id, e); }
 			}
 		}
 

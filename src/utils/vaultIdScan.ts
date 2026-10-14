@@ -43,3 +43,14 @@ export function dedupeTaskIds(files: { path: string; text: string }[], owner: (i
 	}
 	return changed;
 }
+
+/** Line indexes inside fenced code blocks (``` or ~~~), fences included. Tasks there must never sync. */
+export function fencedLines(lines: string[]): Set<number> {
+	const out = new Set<number>(); let fence: string | null = null;
+	lines.forEach((l, i) => {
+		const m = l.match(/^\s*(?:>\s*)*(`{3,}|~{3,})/);
+		if (fence) { out.add(i); if (m && m[1][0] === fence[0] && m[1].length >= fence.length) fence = null; }
+		else if (m) { fence = m[1]; out.add(i); }
+	});
+	return out;
+}

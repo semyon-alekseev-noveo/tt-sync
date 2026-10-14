@@ -1,3 +1,4 @@
+import { fencedLines } from '@/utils/vaultIdScan';
 import { activeZoneInsertLine } from '@/projectScheme';
 import { isDetached } from '@/detach';
 import { abyssRegionEnd, mergeAbyssBlock } from '@/abyssFormat';
@@ -282,8 +283,10 @@ export class NewFileMap {
 		let modified = false;
 		const lines = this.fileLines;
 		let parentTabs = 0;
+		const fenced = fencedLines(lines);
 		for (let i = 0; i < lines.length; i++) {
 			const line = lines[i];
+			if (fenced.has(i)) continue;
 			if (!this.plugin.taskParser?.isMarkdownTask(line)) {
 				continue;
 			}

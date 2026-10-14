@@ -1,3 +1,4 @@
+import { healTagListMappings } from '@/listMapping';
 import { idsPresentInVault, dedupeTaskIds } from '@/utils/vaultIdScan';
 import { shouldBackupToday } from '@/backupPolicy';
 import TickTickSync from '@/main';
@@ -20,7 +21,7 @@ import { getTick } from '@/api/tick_singleton_factory'
 import { syncTickTickWithDexie } from '@/sync/sync';
 import { db, initDB } from "@/db/dexie";
 import { getAllProjects, getProjectById, upsertProjects } from '@/db/projects';
-import { loadTasksFromCache } from "@/db/tasks";
+import { loadTasksFromCache, markTaskDeleted } from "@/db/tasks";
 import { getAllFiles, getFile, upsertFile } from "@/db/files";
 import type { IProject } from '@/api/types/Project';
 
@@ -153,6 +154,25 @@ export class TickTickService {
 					// Ensure all vault files are registered in Files metadata
 					await this.ensureVaultFilesRegistered();
 					await syncTickTickWithDexie(this.plugin.tickTickRestAPI, fullSync);
+					if (projects?.length) {
+						const healed = healTagListMappings(getSettings().tagListMappings, projects);
+						const pl = getSettings().projectsListId ? projects.find(p => p.id === getSettings().projectsListId) : projects.find(p => p.name.toLowerCase() === (getSettings().projectsListName || 'Projects').toLowerCase());
+						const plUpd = pl && (pl.id !== getSettings().projectsListId || pl.name !== getSettings().projectsListName) ? { projectsListId: pl.id, projectsListName: pl.name } : {};
+						if (healed || Object.keys(plUpd).length) { updateSettings({ ...(healed ? { tagListMappings: healed } : {}), ...plUpd }); await this.plugin.saveSettings(); log.info('List mapping refreshed (rename-safe)'); }
+					}
+					// A list deleted in TickTick takes its tasks with it but they are not reported as deleted:
+					// treat tasks of vanished lists as deleted (guarded against a partial/failed project fetch).
+					try {
+						const live = new Set((projects ?? []).map(p => p.id));
+						if (projects && live.size > 0) {
+							const all = (await db.tasks.toArray()).filter(lt => !lt.deleted && lt.task?.projectId);
+							const gone = all.filter(lt => !lt.task.projectId.startsWith('inbox') && !live.has(lt.task.projectId));
+							if (gone.length && gone.length <= Math.max(5, all.length / 2)) {
+								for (const lt of gone) await markTaskDeleted(lt.task.id);
+								log.warn(`${gone.length} task(s) belonged to deleted TickTick lists; detaching`, gone.map(g => g.task.id));
+							} else if (gone.length) log.error(`Refusing to detach ${gone.length} tasks of missing lists (looks like a partial fetch)`);
+						}
+					} catch (e) { log.warn('vanished-list check failed', e); }
 					//NEW: Use VaultSyncCoordinator
 					await this.plugin.vaultSyncCoordinator.syncVaultWithDatabase();
 				}

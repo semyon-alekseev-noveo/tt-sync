@@ -1,3 +1,5 @@
+import { nextOccurrence, rollRecurringLines } from '@/recurrence';
+import { fencedLines } from '@/utils/vaultIdScan';
 import { mergeTask, conflictNote } from '@/merge3';
 import { isBlankTitle, stripFileLinks } from '@/projectScheme';
 import { mergeAbyssBlock } from '@/abyssFormat';
@@ -207,7 +209,9 @@ export class TaskModificationDetector {
 
 		// Check each line for new tasks
 		const lines = fileMap.getFileLines().split('\n');
+		const fenced = fencedLines(lines);
 		for (let line = 0; line < lines.length; line++) {
+			if (fenced.has(line)) continue; // task inside a code block: documentation, not a task
 			const linetxt = lines[line];
 			await this.addNewTask(linetxt, line, null, null, fileMap);
 		}
@@ -483,7 +487,7 @@ export class TaskModificationDetector {
 
 		// Handle status change (complete/incomplete)
 		if (modifications.statusModified) {
-			await this.handleStatusChange(lineTask);
+			await this.handleStatusChange(lineTask, filepath);
 			modified = true;
 		}
 
@@ -638,7 +642,8 @@ export class TaskModificationDetector {
 	/**
 	 * Handle task status change (complete/incomplete)
 	 */
-	private async handleStatusChange(lineTask: ITask): Promise<void> {
+	private async handleStatusChange(lineTask: ITask, filepath?: string): Promise<void> {
+		if (lineTask.status != 0 && lineTask.repeatFlag && filepath && await this.rollRecurring(lineTask, filepath)) return;
 		if (lineTask.status != 0) {
 			await this.plugin.tickTickRestAPI?.CloseTask(lineTask.id, lineTask.projectId);
 			await this.plugin.taskRepository.closeTask(lineTask.id);
@@ -647,6 +652,33 @@ export class TaskModificationDetector {
 			await this.plugin.taskRepository.reopenTask(lineTask.id);
 		}
 		new Notice(`Task ${lineTask.id} status updated`);
+	}
+
+	/** Completed a recurring task: move TickTick to the next date (API close would end the series). */
+	private async rollRecurring(lineTask: ITask, filepath: string): Promise<boolean> {
+		const api = this.plugin.tickTickRestAPI;
+		const remote = await api?.getTaskById(lineTask.id, lineTask.projectId);
+		const base = remote?.dueDate || remote?.startDate;
+		const next = nextOccurrence(remote?.repeatFlag, base);
+		if (!remote || !base || !next) return false;
+		const delta = new Date(next.replace(/([+-]\d{2})(\d{2})$/, '$1:$2')).getTime() - new Date(base.replace(/([+-]\d{2})(\d{2})$/, '$1:$2')).getTime();
+		const shift = (d?: string) => d ? new Date(new Date(d.replace(/([+-]\d{2})(\d{2})$/, '$1:$2')).getTime() + delta).toISOString().replace('Z', '+0000') : d;
+		const upd = { ...remote, status: 0, dueDate: shift(remote.dueDate), startDate: shift(remote.startDate), completedTime: undefined } as ITask;
+		const saved = await api?.updateTask(upd) as ITask;
+		const f = this.app.vault.getAbstractFileByPath(filepath);
+		if (f instanceof TFile) {
+			await this.app.vault.process(f, data => {
+				const lines = data.split('\n');
+				const i = lines.findIndex(l => l.includes(`ticktick_id:: ${lineTask.id}`));
+				if (i < 0) return data;
+				const [open, done] = rollRecurringLines(lines[i], base, next, remote.timeZone);
+				lines.splice(i, 1, open, done);
+				return lines.join('\n');
+			});
+		}
+		if (saved) { this.plugin.dateMan?.addDateHolderToTask(saved, undefined); await this.plugin.taskRepository.upsertTask(saved, filepath, Date.now()); }
+		new Notice(`Recurring task rolled to ${next.slice(0, 10)}`);
+		return true;
 	}
 
 	/**

@@ -32,7 +32,8 @@ export interface ITickTickSyncSettings {
 	tagMappings: { obsidian: string; ticktick: string }[];
 	statusMappings: { char: string; tag: string }[];
 	projectMappings: { path: string; project: string }[];
-	tagListMappings: { tag: string; list: string }[];
+	tagListMappings: { tag: string; list: string; listId?: string }[];
+	projectsListId?: string;
 	syncMarkerTag: string;
 	// If set: every TickTick list maps to this one file for NEW tasks; lists are
 	// decided by tags, and list moves don't relocate lines between files.

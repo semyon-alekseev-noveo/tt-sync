@@ -70,7 +70,7 @@ export class ProjectSchemeService {
 	async run(updated: ITask[]): Promise<void> {
 		if (!this.enabled()) return;
 		const lists = await getAllProjects();
-		this.listId = lists.find(p => p.name.toLowerCase() === (getSettings().projectsListName || 'Projects').toLowerCase())?.id ?? '';
+		this.listId = (getSettings().projectsListId && lists.find(p => p.id === getSettings().projectsListId)?.id) || lists.find(p => p.name.toLowerCase() === (getSettings().projectsListName || 'Projects').toLowerCase())?.id || '';
 		if (!this.listId) { log.warn('ProjectScheme: list not found'); return; }
 		const api = this.plugin.tickTickRestAPI;
 		const notes = this.projectNotes();
