@@ -354,9 +354,11 @@ export class TaskModificationDetector {
 		await fileMap.init();
 
 		const lines: string[] = fileMap.getFileLines().split('\n');
+		const fenced = fencedLines(lines);
 
 		for (let i = 0; i < lines.length; i++) {
 			const line = lines[i];
+			if (fenced.has(i)) continue; // code-block examples are not tasks
 			if (this.plugin.taskParser?.isMarkdownTask(line)) {
 				try {
 					await this.checkLineForModifications(filepath, line, i, fileMap, pendingDeletions);
@@ -669,7 +671,8 @@ export class TaskModificationDetector {
 		if (f instanceof TFile) {
 			await this.app.vault.process(f, data => {
 				const lines = data.split('\n');
-				const i = lines.findIndex(l => l.includes(`ticktick_id:: ${lineTask.id}`));
+				const fl = fencedLines(lines);
+				const i = lines.findIndex((l, j) => !fl.has(j) && l.includes(`ticktick_id:: ${lineTask.id}`));
 				if (i < 0) return data;
 				const [open, done] = rollRecurringLines(lines[i], base, next, remote.timeZone);
 				lines.splice(i, 1, open, done);

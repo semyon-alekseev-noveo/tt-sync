@@ -247,7 +247,8 @@ export class NewFileMap {
 	}
 
 	getTaskIndex(ID: string): number {
-		return this.fileLines.findIndex(str => this.plugin.taskParser.isMarkdownTask(str) && str.includes(ID));
+		const fenced = fencedLines(this.fileLines);
+		return this.fileLines.findIndex((str, i) => !fenced.has(i) && this.plugin.taskParser.isMarkdownTask(str) && str.includes(ID));
 	}
 
 	getTaskString(taskId: string): string {
@@ -337,6 +338,10 @@ export class NewFileMap {
 		return this.entries.map(e => e.id);
 	}
 
+	private fencedIds: Set<string> = new Set();
+	/** id occurs only inside a fenced code block in this file */
+	isFencedOnly(id: string): boolean { this.rebuildEntries(); return this.fencedIds.has(id) && !this.entries.some(e => e.id === id); }
+
 	private rebuildEntries() {
 		this.entries = [];
 		const lineEntries: TaskEntry[] = [];
@@ -349,8 +354,16 @@ export class NewFileMap {
 			}
 		}
 
+		const fenced = fencedLines(this.fileLines);
+		this.fencedIds = new Set();
 		for (let i = 0; i < this.fileLines.length; i++) {
 			const line = this.fileLines[i];
+			if (fenced.has(i)) {
+				// code-block examples are never touched: not indexed, so never updated/deleted/moved
+				const fid = this.plugin.taskParser.getTickTickId(line);
+				if (fid) this.fencedIds.add(fid);
+				continue;
+			}
 			if (this.plugin.taskParser.isMarkdownTask(line)) {
 				const id = this.plugin.taskParser.getTickTickId(line);
 				if (id) {
@@ -615,6 +628,7 @@ export class NewFileMap {
 
 	private deleteTaskAndLines(id: string) {
 		const taskIdx = this.getTaskIndex(id);
+		if (taskIdx < 0) return;
 		const linesToDelete = this.getTaskEndLineByTaskID(id) - taskIdx + 1;
 		this.fileLines.splice(taskIdx, linesToDelete);
 	}

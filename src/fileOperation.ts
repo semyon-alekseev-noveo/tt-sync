@@ -531,6 +531,9 @@ export class FileOperation {
 				} else {
 					fileMap.addTask(task, lineText);
 				}
+			} else if (fileMap.getTaskIndex(task.id) == -1 && fileMap.isFencedOnly(task.id)) {
+				log.debug('Task only appears inside a code block, leaving it alone: ', task.id);
+				bLinePersisted = false;
 			} else if (fileMap.getTaskIndex(task.id) == -1) {
 				//it's in the cache, but not in the file. Just add it.
 				//Mirrors the add branch above: without this the update is a silent

@@ -33,9 +33,10 @@ export function dedupeTaskIds(files: { path: string; text: string }[], owner: (i
 	const changed: { path: string; text: string; ids: string[] }[] = [];
 	for (const f of files) {
 		const kept = new Set<string>(); const ids: string[] = [];
-		const lines = f.text.split('\n').map(l => {
+		const raw = f.text.split('\n'); const fenced = fencedLines(raw);
+		const lines = raw.map((l, i) => {
 			const id = l.match(ID_RE)?.[1];
-			if (!id) return l;
+			if (!id || fenced.has(i)) return l; // code-block copies are examples: never strip
 			if (seen.get(id) === f.path && !kept.has(id)) { kept.add(id); return l; }
 			ids.push(id); return stripTaskId(l);
 		});

@@ -1,3 +1,4 @@
+import { fencedLines } from '@/utils/vaultIdScan';
 // Detach a task line from TickTick sync after the task was deleted in TickTick.
 // Result: `[-]` (cancelled), no ticktick_id, no TickTick link, no sync-marker tag,
 // plus DETACH_MARK so the line is never tagged/pushed again (even in full-vault mode).
@@ -22,7 +23,8 @@ export function detachLine(line: string, marker: string): string {
 /** Apply to file content: detach the line carrying this ticktick id. Returns null if not found. */
 export function detachInContent(content: string, taskId: string, marker: string): string | null {
 	const lines = content.split('\n');
-	const idx = lines.findIndex(l => l.includes(`ticktick_id:: ${taskId}`));
+	const fenced = fencedLines(lines);
+	const idx = lines.findIndex((l, i) => !fenced.has(i) && l.includes(`ticktick_id:: ${taskId}`));
 	if (idx < 0) return null;
 	lines[idx] = detachLine(lines[idx], marker);
 	return lines.join('\n');
@@ -56,7 +58,8 @@ export function descendantsOf<T extends { id: string; parentId?: string | null }
 /** Ids of task lines indented under the line carrying `taskId` (its subtree in the note). */
 export function childIdsInContent(content: string, taskId: string): string[] {
 	const lines = content.split('\n');
-	const idx = lines.findIndex(l => l.includes(`ticktick_id:: ${taskId}`));
+	const fenced = fencedLines(lines);
+	const idx = lines.findIndex((l, i) => !fenced.has(i) && l.includes(`ticktick_id:: ${taskId}`));
 	if (idx < 0) return [];
 	const ind = (l: string) => (l.match(/^[\t ]*/)?.[0] ?? '').replace(/ {4}/g, '\t').length;
 	const base = ind(lines[idx]); const out: string[] = [];
