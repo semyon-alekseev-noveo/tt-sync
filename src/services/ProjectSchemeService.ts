@@ -6,7 +6,7 @@ import { getSettings, updateSettings } from '@/settings';
 import { getAllProjects } from '@/db/projects';
 import log from '@/utils/logger';
 import {
-	isProjectNote, linkTarget, isDoneStatus, planProjects, renderProjectNote, sanitizeTitle,
+	isProjectNote, linkTarget, isDoneStatus, planProjects, renderProjectNote, sanitizeTitle, pickProjectNote,
 	STATUS_ACTIVE, STATUS_DONE, type NoteSide, type ParentSide, type Snap, stripFileLinks,
 } from '@/projectScheme';
 
@@ -44,10 +44,14 @@ export class ProjectSchemeService {
 			const target = linkTarget(fm?.project);
 			if (!target) return undefined;
 			const dest = this.app.metadataCache.getFirstLinkpathDest(target, path);
-			if (!dest) return undefined;
-			projPath = dest.path;
-			fm = this.fm(projPath);
-			if (!isProjectNote(projPath, fm, this.folder())) return undefined;
+			projPath = dest?.path ?? '';
+			fm = projPath ? this.fm(projPath) : undefined;
+			if (!projPath || !isProjectNote(projPath, fm, this.folder())) {
+				// same-named non-project note shadows the project: fall back to project notes by name
+				const alt = pickProjectNote(target, this.projectNotes().map(n => n.path));
+				if (!alt) return undefined;
+				projPath = alt; fm = this.fm(alt);
+			}
 		}
 		const id = fm?.ticktick_id ? String(fm.ticktick_id) : '';
 		return id ? { parentId: id, listId: this.listId } : undefined;

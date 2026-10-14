@@ -1,3 +1,4 @@
+import { idsPresentInVault } from '@/utils/vaultIdScan';
 import { stripFileLinks } from '@/projectScheme';
 /**
  * TaskDeletionHandler - Handles task deletion detection and execution
@@ -217,6 +218,11 @@ export class TaskDeletionHandler {
 		}
 	}
 
+	private async filterStillReferenced(ids: string[]): Promise<string[]> {
+		const present = await idsPresentInVault(this.app, ids);
+		return ids.filter(id => !present.has(id));
+	}
+
 	/**
 	 * Delete tasks by their IDs with user confirmation
 	 */
@@ -225,6 +231,9 @@ export class TaskDeletionHandler {
 			return [];
 		}
 
+		// Never delete project parents; skip ids that still exist in some note (file recreated / task moved).
+		taskIds = await this.filterStillReferenced(taskIds.filter(id => !this.plugin.projectScheme?.isParentId(id)));
+		if (taskIds.length === 0) return [];
 		// Get confirmation from user
 		const confirmed = await this.confirmDeletion(taskIds, 'The tasks were removed from the file');
 		if (!confirmed) {

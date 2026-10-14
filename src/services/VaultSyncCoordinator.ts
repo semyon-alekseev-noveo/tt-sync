@@ -1,3 +1,4 @@
+import { idsPresentInVault } from '@/utils/vaultIdScan';
 import { detachInContent, enrichDeletionItems } from '@/detach';
 import { markerName } from '@/taskParser';
 /**
@@ -47,6 +48,9 @@ export class VaultSyncCoordinator {
 		const projectIdToFilepathCache: Map<string, string> = new Map();
 		const movedTaskIds: Set<string> = new Set();
 
+		// Where each task id actually sits in the vault right now (self-heals a stale DB `file`).
+		const presentAt = await idsPresentInVault(this.app, tasks.filter(lt => !lt.deleted).map(lt => lt.task?.id ?? ''));
+
 		// Categorize tasks by their target file and action needed
 		for (const lt of tasks) {
 			const task = lt.task;
@@ -74,6 +78,14 @@ export class VaultSyncCoordinator {
 				targetFile = lt.file;
 			}
 
+			// The line already lives in another note than the DB says: follow the vault, fix the DB.
+			const actualFile = !lt.deleted ? presentAt.get(task.id) : undefined;
+			if (actualFile && actualFile !== lt.file && actualFile !== targetFile) {
+				dbUpdates.push({ localId: lt.localId, changes: { file: actualFile, lastVaultSync: Date.now() } });
+				targetFile = actualFile;
+				lt.file = actualFile;
+			}
+
 			if (!targetFile) continue;
 
 			// Normalize targetFile to existing mapping if it only differs by case
@@ -92,7 +104,11 @@ export class VaultSyncCoordinator {
 				}
 			} else if (matchesFilter) {
 				const actionNeeded = this.determineActionNeeded(lt, targetFile);
-				if (actionNeeded.action === 'add') {
+				const realFile = presentAt.get(task.id);
+				if (actionNeeded.action === 'add' && realFile && realFile !== targetFile) {
+					// Line already exists in another note: adopt that location instead of writing a duplicate.
+					dbUpdates.push({ localId: lt.localId, changes: { file: realFile, lastVaultSync: Date.now() } });
+				} else if (actionNeeded.action === 'add') {
 					group.toAdd.push(task);
 					dbUpdates.push({ localId: lt.localId, changes: { file: targetFile, lastVaultSync: Date.now() } });
 				} else if (actionNeeded.action === 'move') {

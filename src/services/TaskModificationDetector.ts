@@ -1,3 +1,4 @@
+import { isBlankTitle } from '@/projectScheme';
 import { mergeAbyssBlock } from '@/abyssFormat';
 /**
  * TaskModificationDetector - Detects task changes in markdown files
@@ -100,6 +101,10 @@ export class TaskModificationDetector {
 
 		// Check if it's a new task (has #ticktick tag but no ID yet)
 		if (!this.plugin.taskParser.hasTickTickId(lineTxt) && this.plugin.taskParser.hasTickTickTag(lineTxt)) {
+			if (isBlankTitle(this.plugin.taskParser.getTaskContentFromLineText(lineTxt.trimStart()))) {
+				log.warn('Skipping task with empty title:', lineTxt);
+				return;
+			}
 			try {
 				// Convert markdown to task object
 				const currentTask = await this.plugin.taskParser.convertLineToTask(

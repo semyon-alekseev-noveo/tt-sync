@@ -27,6 +27,20 @@ export function linkTarget(v: unknown): string | undefined {
 	return (m ? m[1] : s).trim();
 }
 
+/** Pick the project note a `project:` link means when Obsidian resolves it to a non-project note
+ * (e.g. a same-named note elsewhere). Matches by basename / path suffix among project notes. */
+export function pickProjectNote(target: string, projectPaths: string[]): string | undefined {
+	const t = target.replace(/\.md$/i, '').toLowerCase();
+	const hits = projectPaths.filter(p => {
+		const x = p.replace(/\.md$/i, '').toLowerCase();
+		return x === t || x.endsWith('/' + t);
+	});
+	return hits.length === 1 ? hits[0] : undefined;
+}
+
+/** A task line whose title is empty after stripping tags/markers must not be sent to TickTick. */
+export const isBlankTitle = (title: string | undefined | null) => !stripFileLinks(title ?? '').replace(/#[^\s#]+/g, '').trim();
+
 export function isDoneStatus(s: unknown): boolean {
 	return typeof s === 'string' && /done|✅|заверш|выполн/i.test(s);
 }

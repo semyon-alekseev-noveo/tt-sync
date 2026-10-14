@@ -1,3 +1,4 @@
+import { idsPresentInVault } from '@/utils/vaultIdScan';
 import { shouldBackupToday } from '@/backupPolicy';
 import TickTickSync from '@/main';
 import { Tick } from '@/api';
@@ -836,6 +837,13 @@ export class TickTickService {
 				}
 			}
 
+			// Metadata-only "duplicates" whose line really exists in just one note are stale bookkeeping
+			// (e.g. after a parallel sync); don't block sync on them.
+			for (const taskId of Object.keys(duplicates)) {
+				if (fileResult?.duplicates?.[taskId] && fileResult.duplicates[taskId].length > 1) continue;
+				const where = await idsPresentInVault(this.plugin.app, [taskId]);
+				if (where.size === 1) { log.warn('Ignoring stale metadata duplicate', taskId, duplicates[taskId]); delete duplicates[taskId]; }
+			}
 			const hasDuplicates = Object.keys(duplicates).length > 0;
 			if (hasDuplicates) {
 				const modal = new FoundDuplicateTasksModal(this.plugin.app, this.plugin, duplicates, taskIds);

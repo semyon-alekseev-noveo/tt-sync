@@ -1,3 +1,4 @@
+import { idsPresentInVault } from '@/utils/vaultIdScan';
 import { stripFileLinks } from '@/projectScheme';
 import { detachInContent, enrichDeletionItems } from '@/detach';
 import { markerName } from '@/taskParser';
@@ -186,7 +187,10 @@ export class SyncMan {
 				});
 				// Group by file
 				const tasksByFile = new Map<string, ITask[]>();
+				// a task created from a note moments ago (or by a parallel sync) is already in the vault: don't write it twice
+				const alreadyInVault = await idsPresentInVault(this.app, newTickTickTasks.map(t => t.id));
 				for (const task of newTickTickTasks) {
+					if (alreadyInVault.has(task.id)) continue;
 					let taskFile = this.plugin.projectScheme?.noteForParent(task.parentId)
 						?? await this.plugin.fileMetadataService.getFilepathForProjectId(task.projectId);
 					if (!taskFile) {
@@ -319,8 +323,10 @@ export class SyncMan {
 			if (recentUpdates.length > 0) {
 				// Group by file
 				const tasksByFile = new Map<string, ITask[]>();
+				const presentAt = await idsPresentInVault(this.app, recentUpdates.map(t => t.id));
 				for (const task of recentUpdates) {
-  				const taskFile = await this.plugin.fileMetadataService.getFilepathForTask(task.id);
+					// prefer where the line really is; the DB path can be stale (would write a duplicate line)
+					const taskFile = presentAt.get(task.id) ?? await this.plugin.fileMetadataService.getFilepathForTask(task.id);
 					if (taskFile) {
 						if (!tasksByFile.has(taskFile)) tasksByFile.set(taskFile, []);
 						tasksByFile.get(taskFile)!.push(task);
