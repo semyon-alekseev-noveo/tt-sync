@@ -34,6 +34,9 @@ export interface ITickTickSyncSettings {
 	projectMappings: { path: string; project: string }[];
 	tagListMappings: { tag: string; list: string }[];
 	syncMarkerTag: string;
+	// If set: every TickTick list maps to this one file for NEW tasks; lists are
+	// decided by tags, and list moves don't relocate lines between files.
+	newTasksFile: string;
 	fileLinksInTickTick: string;
 	taskLinksInObsidian: string;
 	bkupFolder: string;
@@ -95,6 +98,7 @@ export const DEFAULT_SETTINGS: ITickTickSyncSettings = {
 	projectMappings: [],
 	tagListMappings: [],
 	syncMarkerTag: 'ticktick',
+	newTasksFile: '',
 	fileLinksInTickTick: 'taskLink',
 	taskLinksInObsidian: 'taskLink',
 	bkupFolder: '/',

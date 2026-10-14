@@ -48,3 +48,6 @@ Setting `tagListMappings` (`type/next = nextAction`, list by name or id), `src/l
 - Push (`convertLineToTask`): first mapped tag decides projectId; beats file default and upstream name-matching; parent-subtask rule still wins for children. The mapped tag is not sent as a TickTick tag.
 - Pull (`convertTaskToLine`): list of the task → its tag; other mapped tags removed. Task in a non-mapped list (e.g. KB) loses its type tag.
 - Moving: projectId change is detected by upstream (`TaskOperationsService` moveTaskProject).
+
+## Step 5: single file for new TickTick tasks
+Setting `newTasksFile` (e.g. `00 Inbox/TickTick.md`): `FileMetadataService.getFilepathForProjectId` returns it for every list; `fileOperation` skips file-relocation on list change (list is driven by type tag, line rewritten in place); `ProjectSyncService.checkProjectRename` doesn't rename per-list files.

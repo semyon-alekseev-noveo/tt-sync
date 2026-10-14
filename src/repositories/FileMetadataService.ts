@@ -1,3 +1,4 @@
+import { getSettings } from '@/settings';
 /**
  * FileMetadataService - Manages file-to-task mappings and file metadata
  * Extracts metadata management logic from CacheOperation
@@ -124,6 +125,8 @@ export class FileMetadataService {
 	 * Get the filepath for a project ID (based on file's default project)
 	 */
 	async getFilepathForProjectId(projectId: string): Promise<string | undefined> {
+		const single = getSettings().newTasksFile?.trim();
+		if (single) return single.endsWith('.md') ? single : single + '.md';
 		try {
 			const files = await getAllFiles();
 			const file = files.find(f => f.defaultProjectId === projectId);

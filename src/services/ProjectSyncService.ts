@@ -137,6 +137,7 @@ export class ProjectSyncService {
 
 			return;
 		}
+		if (getSettings().newTasksFile?.trim()) return; // single-file mode: never rename files per list
 		if (project && project.name !== ttProjectName) {
 			log.debug(`Project Name Changed from ${project?.name} to ${ttProjectName}`)
 

@@ -548,7 +548,7 @@ export class FileOperation {
 					const vaultTask: ITask = { ...task, projectId: vaultProjectId ?? '', parentId: vaultParentId ?? '' };
 
 					//Only check for Project/Parent change if task is in cache.
-					if ((await this.plugin.taskParser?.isProjectIdChanged(vaultTask, task))) {
+					if (!getSettings().newTasksFile?.trim() && (await this.plugin.taskParser?.isProjectIdChanged(vaultTask, task))) {
 						log.debug('Moving Task: ', task.id, task.title, ' from Project: ', vaultTask.projectId, ' to Project: ', task.projectId);
 						filePath = await this.handleTickTickStructureMove(task, vaultTask, lineText, fileMap);
 						//because we need to update the OBS URL in TT and fix up the cache.
