@@ -489,7 +489,7 @@ export class NewFileMap {
 		taskRecord.task = taskLine;
 
 		if (getSettings().abyssTasksFormat) {
-			for (let j = taskIdx + 1; j < this.fileLines.length && isAbyssNoteLine(this.fileLines[j], numTabs); j++) {
+			for (let j = taskIdx + 1; j < this.fileLines.length && isAbyssNoteLine(this.fileLines[j], taskLine); j++) {
 				taskLines.push(this.fileLines[j]);
 			}
 			taskRecord.taskLines = taskLines;

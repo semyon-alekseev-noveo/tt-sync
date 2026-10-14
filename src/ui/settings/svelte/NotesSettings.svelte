@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { parseTagMappingText, tagMappingToText } from '@/tagMapping';
 	import { getDefaultFolder, updateSettings } from '@/settings';
 	import type TickTickSync from '@/main';
 	import './SettingsStyles.css';
@@ -11,6 +12,13 @@
 	let isWorking: boolean = false;
 	let syncNotes: boolean = false;
 	let abyssTasksFormat: boolean = false;
+	let abyssIndent: 'tab' | 'spaces' = 'tab';
+	let scheduledAsStartDate: boolean = false;
+	let tagMappingText = '';
+	async function saveAbyss() {
+		settingsStore.update(s => ({ ...s, abyssTasksFormat, abyssIndent, scheduledAsStartDate, tagMappings: parseTagMappingText(tagMappingText) }));
+		await plugin.saveSettings();
+	}
 	let resetTasksText: string = '';
 	$: resetTasksText = syncNotes
 		? 'Get all Notes from TickTick?'
@@ -29,6 +37,9 @@
 	onMount(() => {
 		syncNotes = $settingsStore.syncNotes;
 		abyssTasksFormat = $settingsStore.abyssTasksFormat ?? false;
+		abyssIndent = $settingsStore.abyssIndent ?? 'tab';
+		scheduledAsStartDate = $settingsStore.scheduledAsStartDate ?? false;
+		tagMappingText = tagMappingToText($settingsStore.tagMappings);
 		if ($settingsStore.noteDelimiter === '' || $settingsStore.noteDelimiter == null) {
 			delimiterOption = 'none';
 			customDelimiter = '';
@@ -112,9 +123,28 @@
 				<div class="setting-item-control">
 					<label class="checkbox-container" class:is-enabled={abyssTasksFormat}>
 						<input type="checkbox" bind:checked={abyssTasksFormat}
-							on:change={async () => { settingsStore.update(s => ({ ...s, abyssTasksFormat })); await plugin.saveSettings(); }} />
+							on:change={saveAbyss} />
 					</label>
 				</div>
+			</div>
+			{#if abyssTasksFormat}
+			<div class="setting-item">
+				<div class="setting-item-info"><div class="setting-item-name">Abyss child indent</div>
+					<div class="setting-item-description">Indent written for <code>- &gt;</code>/comment lines (match Obsidian "Use tabs"). Both are read.</div></div>
+				<div class="setting-item-control"><select class="dropdown" bind:value={abyssIndent} on:change={saveAbyss}>
+					<option value="tab">Tab</option><option value="spaces">4 spaces</option></select></div>
+			</div>
+			{/if}
+			<div class="setting-item">
+				<div class="setting-item-info"><div class="setting-item-name">Sync ⏳ scheduled as TickTick start date</div>
+					<div class="setting-item-description">When a task has ⏳ and no 🛫, ⏳ is sent as TickTick start date and comes back as ⏳.</div></div>
+				<div class="setting-item-control"><label class="checkbox-container" class:is-enabled={scheduledAsStartDate}>
+					<input type="checkbox" bind:checked={scheduledAsStartDate} on:change={saveAbyss} /></label></div>
+			</div>
+			<div class="setting-item">
+				<div class="setting-item-info"><div class="setting-item-name">Tag mapping</div>
+					<div class="setting-item-description">One per line: <code>obsidian/tag = ticktick-tag</code></div></div>
+				<div class="setting-item-control"><textarea rows="5" bind:value={tagMappingText} on:change={saveAbyss} placeholder="type/next = next"></textarea></div>
 			</div>
 			<div class="setting-item delimiter-settings">
 				<div class="setting-item-info">

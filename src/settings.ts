@@ -26,6 +26,10 @@ export interface ITickTickSyncSettings {
 	noteDelimiter: string;
 	// Abyss Tasks format: notes as `- > ` lines, comments as `- ` lines
 	abyssTasksFormat: boolean;
+	abyssIndent: 'tab' | 'spaces';
+	// ⏳ scheduled <-> TickTick startDate (when no 🛫)
+	scheduledAsStartDate: boolean;
+	tagMappings: { obsidian: string; ticktick: string }[];
 	fileLinksInTickTick: string;
 	taskLinksInObsidian: string;
 	bkupFolder: string;
@@ -80,6 +84,9 @@ export const DEFAULT_SETTINGS: ITickTickSyncSettings = {
 	syncNotes: true,
 	noteDelimiter: '-------------------------------------------------------------',
 	abyssTasksFormat: false,
+	abyssIndent: 'tab',
+	scheduledAsStartDate: false,
+	tagMappings: [],
 	fileLinksInTickTick: 'taskLink',
 	taskLinksInObsidian: 'taskLink',
 	bkupFolder: '/',

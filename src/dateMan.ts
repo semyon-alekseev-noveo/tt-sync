@@ -12,6 +12,7 @@
 // https://forum.obsidian.md/t/task-time-editing-ux-ui-advice/86124/2?u=thesamim
 import type { ITask } from './api/types/Task';
 import log from '@/utils/logger';
+import { getSettings } from '@/settings';
 
 enum date_emoji {
 	createdTime = '➕',
@@ -224,7 +225,12 @@ export class DateMan {
 			// think a date changed on the pull-write-reparse round trip, which
 			// pushed a task update back to TickTick and reset the completion
 			// date -- issue #209).
-			if (task.startDate && task.startDate !== task.dueDate) {
+			const schedMode = getSettings().scheduledAsStartDate && !oldTask?.dateHolder?.startDate;
+			if (schedMode && task.startDate && (task.startDate !== task.dueDate || oldTask?.dateHolder?.scheduled_date)) {
+				// ⏳ mode: TickTick startDate comes back as scheduled unless the line used 🛫.
+				const sched = this.getDateAndTime(task.startDate, task.isAllDay, date_emoji.scheduled_date);
+				if (sched) dates.scheduled_date = sched;
+			} else if (task.startDate && task.startDate !== task.dueDate) {
 				//If they're different also save off the startdate because it's a duration.
 				const startDate = this.getDateAndTime(task.startDate, task.isAllDay, date_emoji.startDate);
 				if (startDate) {
@@ -246,7 +252,7 @@ export class DateMan {
 			if (oldTask.dateHolder.createdTime) {
 				dates.createdTime = oldTask.dateHolder.createdTime;
 			}
-			if (oldTask.dateHolder.scheduled_date) {
+			if (oldTask.dateHolder.scheduled_date && (!getSettings().scheduledAsStartDate || oldTask.dateHolder.startDate)) {
 				dates.scheduled_date = oldTask.dateHolder.scheduled_date;
 			}
 		}

@@ -1,4 +1,5 @@
-import { abyssLinesToNote, noteToAbyssLines } from '@/abyssFormat';
+import { abyssLinesToNote, noteToAbyssLines, childIndent } from '@/abyssFormat';
+import { mapObsidianTag, mapTickTickTag } from '@/tagMapping';
 import { type App, type MetadataCache, Notice } from 'obsidian';
 import type TickTickSync from '@/main';
 import type { ITask, ITaskItem, Reminder } from '@/api/types/Task';
@@ -365,7 +366,10 @@ export class TaskParser {
 			//TickTick tag, if present, will be added at the end.
 			if (!tag.match(regEx)) {
 				let display: string;
-				if (tagSvc) {
+				const mapped = mapTickTickTag(tag, getSettings().tagMappings);
+				if (mapped) {
+					display = mapped;
+				} else if (tagSvc) {
 					// Try hierarchical display (parent/child) first
 					const hierarchical = tagSvc.resolveHierarchicalLabel(tag);
 					if (hierarchical) {
@@ -580,15 +584,18 @@ export class TaskParser {
 		}
 
 		let tags: string[];
+		const tagMap = getSettings().tagMappings;
+		const mappedTags = rawTags.map(raw => mapObsidianTag(raw, tagMap));
 		if (tagSvc) {
-			tags = rawTags.map(raw => {
+			tags = rawTags.map((raw, i) => {
+				if (mappedTags[i]) return mappedTags[i] as string;
 				const parts = this.effectiveTagForHierarchy(raw).split('/');
 				if (parts.length === 1) return tagSvc.resolveToName(raw);
 				if (parts.length === 2) return tagSvc.resolveToName(parts[1]);
 				return tagSvc.resolveToName(parts.slice(1).join('-'));
 			});
 		} else {
-			tags = rawTags.map(raw => raw.toLowerCase().replace(/[/\s]+/g, '-').replace(/-+/g, '-'));
+			tags = rawTags.map((raw, i) => mappedTags[i] ?? raw.toLowerCase().replace(/[/\s]+/g, '-').replace(/-+/g, '-'));
 		}
 
 		let projectId = await this.plugin.fileTaskQueries?.getDefaultProjectIdForFilepath(filepath);
@@ -625,6 +632,8 @@ export class TaskParser {
 
 		let actualStartDate = allDatesStruct?.startDate ?
 			allDatesStruct?.startDate.isoDate : //there's a start date
+			(getSettings().scheduledAsStartDate && allDatesStruct?.scheduled_date) ?
+				allDatesStruct.scheduled_date.isoDate : // ⏳ mapped to TickTick start date
 			allDatesStruct?.dueDate ? //there are neither start date nor scheduled date.
 				allDatesStruct?.dueDate.isoDate : '';  //use the due date if there is one.
 
@@ -1233,7 +1242,7 @@ export class TaskParser {
 
 		}
 		if (getSettings().abyssTasksFormat) {
-			const abyssLines = noteToAbyssLines(noteLines.filter(l => l.search(linkRegex) < 0).join('\n'), numbTabs);
+			const abyssLines = noteToAbyssLines(noteLines.filter(l => l.search(linkRegex) < 0).join('\n'), childIndent(numbTabs, getSettings().abyssIndent));
 			return abyssLines.length ? `${resultLine}\n${abyssLines.join('\n')}` : resultLine;
 		}
 		const prefix = '\n' + '\t'.repeat(numbTabs) + '  ';
