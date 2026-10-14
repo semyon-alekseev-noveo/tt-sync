@@ -32,6 +32,8 @@ export class VaultSyncCoordinator {
 	 */
 	async syncVaultWithDatabase(): Promise<void> {
 		const tasks = await db.tasks.toArray();
+		const scheme = this.plugin.projectScheme;
+		if (scheme?.enabled()) await scheme.run(tasks.filter(lt => !lt.deleted).map(lt => lt.task));
 		let syncTag = getSettings().SyncTag?.toLowerCase();
 		if (syncTag && syncTag.includes('/')) {
 			syncTag = syncTag.replace(/\//g, '-');
@@ -48,6 +50,8 @@ export class VaultSyncCoordinator {
 		// Categorize tasks by their target file and action needed
 		for (const lt of tasks) {
 			const task = lt.task;
+			// Project parents are represented by project notes, never by task lines.
+			if (scheme?.isParentTask(task)) continue;
 			const matchesFilter = this.matchesFilter(task, syncTag, syncProject, andOr);
 
 			let targetFile: string | undefined;
@@ -63,7 +67,8 @@ export class VaultSyncCoordinator {
 					}
 				}
 				if (!targetFile) {
-					targetFile = await this.determineTargetFile(task, projectIdToFilepathCache);
+					targetFile = scheme?.noteForParent(task.parentId)
+						?? await this.determineTargetFile(task, projectIdToFilepathCache);
 				}
 			} else {
 				targetFile = lt.file;

@@ -56,3 +56,9 @@ Setting `newTasksFile` (e.g. `00 Inbox/TickTick.md`): `FileMetadataService.getFi
 - Modal (`TaskDeletionModal`) shows path, title, id and current line (`enrichDeletionItems`).
 - Setting `onTickTickDeletion`: `ask` (default) | `cancel`. `cancel` (both paths: `syncModule` and `VaultSyncCoordinator.confirmDeletions`): tombstone + clear file link in DB, rewrite line via `detachLine` → `[-]`, no id/link/marker, `%%tt-detached%%`.
 - No-recreate: `hasTickTickTag` false and `markAllTasks` skips any line with `%%tt-detached%%` (even if marker tag re-added). `TaskDeletionHandler.findMissingTaskIds` ignores tombstoned tasks (no "removed from file" modal).
+
+## Step 7: project scheme (pilot, setting `projectSchemeEnabled`)
+- `src/projectScheme.ts` (pure: detection, template, Active Zone insert, plan), `src/services/ProjectSchemeService.ts` (IO).
+- Runs at start of `VaultSyncCoordinator.syncVaultWithDatabase` on all DB tasks; parents (list `Projects` + tag `project`, or id in a project note's `ticktick_id`) are never written as lines; their subtasks route to the project note (`## Active Zone` insert in `NewFileMap.addTask`).
+- Push: `convertLineToTask` → task in project note or in a note whose `project:` links to one gets `parentId` = project parent, list = Projects, type tags stay tags. Pull: no tag→list rewrite for project subtasks.
+- Status: frontmatter `status` done-like ↔ parent completed, 3-way via `projectSnapshot`.

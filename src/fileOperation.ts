@@ -509,7 +509,7 @@ export class FileOperation {
 		for (const task of tasks) {
 			let numParentTabs = 0;
 			const parentID = task.parentId;
-			if (parentID) {
+			if (parentID && fileMap.getTaskIndex(parentID) >= 0) {
 				const parentTabs = fileMap.getNumParentTabs(parentID);
 				numParentTabs = parentTabs + 1;
 			}

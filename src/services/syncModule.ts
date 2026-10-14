@@ -57,6 +57,11 @@ export class SyncMan {
 			const allTaskDetails = allResources['syncTaskBean'] as { update: ITask[]; delete: Array<{ taskId: string }> };
 
 			let tasksFromTickTic = allTaskDetails.update;
+			// Project scheme: sync project notes <-> parent tasks, then hide parents from line sync.
+			if (this.plugin.projectScheme?.enabled()) {
+				await this.plugin.projectScheme.run(tasksFromTickTic);
+				tasksFromTickTic = tasksFromTickTic.filter(t => !this.plugin.projectScheme.isParentTask(t));
+			}
 			let deletedTasks = allTaskDetails.delete;
 			// this.dumpArray("tick Tick ", tasksFromTickTic)
 			// this.dumpArray("deleted  ", deletedTasks)
@@ -181,7 +186,8 @@ export class SyncMan {
 				// Group by file
 				const tasksByFile = new Map<string, ITask[]>();
 				for (const task of newTickTickTasks) {
-					let taskFile = await this.plugin.fileMetadataService.getFilepathForProjectId(task.projectId);
+					let taskFile = this.plugin.projectScheme?.noteForParent(task.parentId)
+						?? await this.plugin.fileMetadataService.getFilepathForProjectId(task.projectId);
 					if (!taskFile) {
 						taskFile = await this.plugin.fileMetadataService.getFilepathForProjectId(getSettings().defaultProjectId);
 					}

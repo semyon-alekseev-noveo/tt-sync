@@ -1,3 +1,4 @@
+import { activeZoneInsertLine } from '@/projectScheme';
 import { isDetached } from '@/detach';
 import { abyssRegionEnd, mergeAbyssBlock } from '@/abyssFormat';
 import { App, type ListItemCache, TFile } from 'obsidian';
@@ -93,7 +94,10 @@ export class NewFileMap {
 				if (parentEntry) {
 					insertLine = parentEntry.subtreeEndLine + 1;
 				} else {
-					insertLine = this.fileLines.length;
+					// Project subtask (parent lives in TickTick only): append to `## Active Zone`.
+					const az = activeZoneInsertLine(this.fileLines);
+					insertLine = az >= 0 ? az : this.fileLines.length;
+					if (az >= 0) addLineNumber = az;
 				}
 			} else {
 				insertLine = this.fileLines.length;

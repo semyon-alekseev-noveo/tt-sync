@@ -156,7 +156,7 @@ export class TaskParser {
 			lineTags = r.tags;
 		}
 		const listMapP = getSettings().tagListMappings;
-		if (listMapP?.length) {
+		if (listMapP?.length && !this.plugin?.projectScheme?.isParentId?.(task.parentId)) {
 			const projects = await getAllProjects();
 			const lt = tagForList(task.projectId, listMapP, projects);
 			lineTags = (lineTags ?? []).filter(t => !isListTag(t, listMapP));
@@ -626,7 +626,10 @@ export class TaskParser {
 			tags = rawTags.map((raw, i) => mappedTags[i] ?? raw.toLowerCase().replace(/[/\s]+/g, '-').replace(/-+/g, '-'));
 		}
 
-		if (getSettings().tagListMappings?.length) {
+		const projectOf = hasParent ? undefined : this.plugin.projectScheme?.resolveForFile?.(filepath);
+		if (projectOf) {
+			parentId = projectOf.parentId; // project task = subtask of the project parent
+		} else if (getSettings().tagListMappings?.length) {
 			tags = tags.filter((_, i) => !isListTag(rawTags[i], getSettings().tagListMappings));
 		}
 		let projectId = await this.plugin.fileTaskQueries?.getDefaultProjectIdForFilepath(filepath);
@@ -636,9 +639,10 @@ export class TaskParser {
 				projectId = parentTaskObject.projectId;
 			}
 		} else {
+			if (projectOf) projectId = projectOf.listId;
 			// Explicit tag -> list table wins over file default and name-matching.
 			const listMap = getSettings().tagListMappings;
-			const mappedList = listMap?.length ? listForTags(rawTags, listMap, await getAllProjects()) : undefined;
+			const mappedList = (!projectOf && listMap?.length) ? listForTags(rawTags, listMap, await getAllProjects()) : undefined;
 			if (mappedList) {
 				projectId = mappedList;
 			} else

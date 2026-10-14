@@ -1,3 +1,4 @@
+import { ProjectSchemeService } from '@/services/ProjectSchemeService';
 import '@/static/styles.css';
 
 import { type Editor, type MarkdownFileInfo, MarkdownView, Notice, Plugin } from 'obsidian';
@@ -79,6 +80,7 @@ export default class TickTickSync extends Plugin {
 	taskModificationDetector!: TaskModificationDetector;
 	taskDeletionHandler!: TaskDeletionHandler;
 	taskOperationsService!: TaskOperationsService;
+	projectScheme!: ProjectSchemeService;
 	folderSyncService!: FolderSyncService;
 	folderMigrationService!: FolderMigrationService;
 
@@ -278,6 +280,7 @@ export default class TickTickSync extends Plugin {
 		this.taskModificationDetector = new TaskModificationDetector(this.app, this, this.folderSyncService);
 		this.taskDeletionHandler = new TaskDeletionHandler(this.app, this);
 		this.taskOperationsService = new TaskOperationsService(this.app, this);
+		this.projectScheme = new ProjectSchemeService(this.app, this);
 
 		// Device ID and Label are now managed in the DB and loaded into memory during initDB
 		// They are no longer stored in settings to prevent sync conflicts

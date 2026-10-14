@@ -40,6 +40,11 @@ export interface ITickTickSyncSettings {
 	// What to do when a task is deleted in TickTick: ask (modal) | cancel ([-] + detach)
 	onTickTickDeletion: 'ask' | 'cancel';
 	lastBackupDate: string; // YYYY-MM-DD of last startup backup
+	projectSchemeEnabled: boolean;
+	projectsFolder: string;
+	projectsListName: string;
+	projectTaskTags: string[];
+	projectSnapshot: Record<string, { noteDone: boolean; ttDone: boolean }>;
 	fileLinksInTickTick: string;
 	taskLinksInObsidian: string;
 	bkupFolder: string;
@@ -104,6 +109,11 @@ export const DEFAULT_SETTINGS: ITickTickSyncSettings = {
 	newTasksFile: '',
 	onTickTickDeletion: 'ask',
 	lastBackupDate: '',
+	projectSchemeEnabled: false,
+	projectsFolder: '10 Projects',
+	projectsListName: 'Projects',
+	projectTaskTags: ['project', 'obsidian'],
+	projectSnapshot: {},
 	fileLinksInTickTick: 'taskLink',
 	taskLinksInObsidian: 'taskLink',
 	bkupFolder: '/',
