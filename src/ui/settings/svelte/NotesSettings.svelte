@@ -22,9 +22,11 @@
 	let projectMappingText = '';
 	let tagListText = '';
 	let onTickTickDeletion: 'ask' | 'cancel' = 'ask';
+	let autoCleanupDatabase = false;
+	let projectSchemeEnabled = false;
 	async function saveAbyss() {
 		settingsStore.update(s => ({ ...s, abyssTasksFormat, abyssIndent, scheduledAsStartDate, tagMappings: parseTagMappingText(tagMappingText),
-			statusMappings: parseStatusMappingText(statusMappingText), projectMappings: parseProjectMappingText(projectMappingText), tagListMappings: parseTagListText(tagListText), onTickTickDeletion }));
+			statusMappings: parseStatusMappingText(statusMappingText), projectMappings: parseProjectMappingText(projectMappingText), tagListMappings: parseTagListText(tagListText), onTickTickDeletion, autoCleanupDatabase, projectSchemeEnabled }));
 		await plugin.saveSettings();
 	}
 	let resetTasksText: string = '';
@@ -52,6 +54,8 @@
 		projectMappingText = projectMappingToText($settingsStore.projectMappings);
 		tagListText = tagListToText($settingsStore.tagListMappings);
 		onTickTickDeletion = $settingsStore.onTickTickDeletion ?? 'ask';
+		autoCleanupDatabase = $settingsStore.autoCleanupDatabase ?? false;
+		projectSchemeEnabled = $settingsStore.projectSchemeEnabled ?? false;
 		if ($settingsStore.noteDelimiter === '' || $settingsStore.noteDelimiter == null) {
 			delimiterOption = 'none';
 			customDelimiter = '';
@@ -157,6 +161,18 @@
 					<div class="setting-item-description">Ask (confirmation dialog) or mark the line cancelled <code>[-]</code> and detach it from sync (never re-created in TickTick).</div></div>
 				<div class="setting-item-control"><select class="dropdown" bind:value={onTickTickDeletion} on:change={saveAbyss}>
 					<option value="ask">Ask</option><option value="cancel">Mark cancelled &amp; detach</option></select></div>
+			</div>
+			<div class="setting-item">
+				<div class="setting-item-info"><div class="setting-item-name">Auto clean up database</div>
+					<div class="setting-item-description">Forget files deleted from the vault without asking.</div></div>
+				<div class="setting-item-control"><label class="checkbox-container" class:is-enabled={autoCleanupDatabase}>
+					<input type="checkbox" bind:checked={autoCleanupDatabase} on:change={saveAbyss} /></label></div>
+			</div>
+			<div class="setting-item">
+				<div class="setting-item-info"><div class="setting-item-name">Project scheme (pilot)</div>
+					<div class="setting-item-description">Notes tagged <code>system/project</code> in <code>10 Projects/</code> ↔ parent tasks in list Projects.</div></div>
+				<div class="setting-item-control"><label class="checkbox-container" class:is-enabled={projectSchemeEnabled}>
+					<input type="checkbox" bind:checked={projectSchemeEnabled} on:change={saveAbyss} /></label></div>
 			</div>
 			<div class="setting-item">
 				<div class="setting-item-info"><div class="setting-item-name">Tag → list mapping</div>

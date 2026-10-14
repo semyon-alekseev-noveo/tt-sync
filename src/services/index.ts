@@ -614,8 +614,8 @@ export class TickTickService {
 		// Offer to clean up DB entries for files that no longer exist in the vault
 		if (deletedFiles.length > 0) {
 			log.debug(`Found ${deletedFiles.length} DB entries for non-existent files.`);
-			const cleanupModal = new CleanupDatabaseModal(this.plugin.app, deletedFiles);
-			const shouldCleanup = await cleanupModal.showModal();
+			const shouldCleanup = getSettings().autoCleanupDatabase
+				|| await new CleanupDatabaseModal(this.plugin.app, deletedFiles).showModal();
 			if (shouldCleanup) {
 				for (const filepath of deletedFiles) {
 					log.debug(`Removing DB entry for non-existent file: ${filepath}`);
@@ -870,8 +870,8 @@ export class TickTickService {
 		}
 
 		if (filesMissingFromVault.length > 0) {
-			const cleanupModal = new CleanupDatabaseModal(this.plugin.app, filesMissingFromVault);
-			const shouldCleanup = await cleanupModal.showModal();
+			const shouldCleanup = getSettings().autoCleanupDatabase
+				|| await new CleanupDatabaseModal(this.plugin.app, filesMissingFromVault).showModal();
 
 			for (const fileKey of filesMissingFromVault) {
 				if (shouldCleanup) {

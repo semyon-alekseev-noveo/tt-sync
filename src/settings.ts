@@ -41,6 +41,8 @@ export interface ITickTickSyncSettings {
 	onTickTickDeletion: 'ask' | 'cancel';
 	lastBackupDate: string; // YYYY-MM-DD of last startup backup
 	projectSchemeEnabled: boolean;
+	// Remove DB entries of files deleted from the vault without asking
+	autoCleanupDatabase: boolean;
 	projectsFolder: string;
 	projectsListName: string;
 	projectTaskTags: string[];
@@ -110,6 +112,7 @@ export const DEFAULT_SETTINGS: ITickTickSyncSettings = {
 	onTickTickDeletion: 'ask',
 	lastBackupDate: '',
 	projectSchemeEnabled: false,
+	autoCleanupDatabase: false,
 	projectsFolder: '10 Projects',
 	projectsListName: 'Projects',
 	projectTaskTags: ['project', 'obsidian'],

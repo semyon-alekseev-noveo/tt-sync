@@ -626,7 +626,15 @@ export class TaskParser {
 			tags = rawTags.map((raw, i) => mappedTags[i] ?? raw.toLowerCase().replace(/[/\s]+/g, '-').replace(/-+/g, '-'));
 		}
 
-		const projectOf = hasParent ? undefined : this.plugin.projectScheme?.resolveForFile?.(filepath);
+		let projectOf = hasParent ? undefined : this.plugin.projectScheme?.resolveForFile?.(filepath);
+		if (!hasParent && !projectOf && TickTick_id && this.plugin.projectScheme?.enabled?.()) {
+			// A project subtask stays in its project wherever its line lives (file location
+			// must not drop the TickTick parent).
+			const cached = await this.plugin.taskRepository?.loadTaskById(TickTick_id);
+			if (cached?.parentId && this.plugin.projectScheme.isParentId(cached.parentId)) {
+				projectOf = { parentId: cached.parentId, listId: cached.projectId };
+			}
+		}
 		if (projectOf) {
 			parentId = projectOf.parentId; // project task = subtask of the project parent
 		} else if (getSettings().tagListMappings?.length) {
