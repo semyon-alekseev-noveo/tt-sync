@@ -1,7 +1,9 @@
+import { tagRenames, renameTagsInText, folderOf } from '@/settingsMigration';
+const snap = (x: { tagListMappings?: unknown; statusMappings?: unknown; tagMappings?: unknown; projectsFolder?: string }) => JSON.parse(JSON.stringify({ tagListMappings: x.tagListMappings ?? [], statusMappings: x.statusMappings ?? [], tagMappings: x.tagMappings ?? [], projectsFolder: x.projectsFolder })) as Parameters<typeof tagRenames>[0];
 import { ProjectSchemeService } from '@/services/ProjectSchemeService';
 import '@/static/styles.css';
 
-import { type Editor, type MarkdownFileInfo, MarkdownView, Notice, Plugin } from 'obsidian';
+import { type Editor, type MarkdownFileInfo, MarkdownView, Notice, Plugin, TFolder } from 'obsidian';
 
 //settings
 import { DEFAULT_SETTINGS, getSettings, mergeDeviceLists, updateSettings } from './settings';
@@ -191,6 +193,69 @@ export default class TickTickSync extends Plugin {
 		log.debug(`TickTickSync unloaded!`);
 	}
 
+	private migrating = false;
+	private migrationAgain = false;
+	/** Compare current mapping/folder settings with the last applied snapshot (kept in data.json, so
+	 *  edits of data.json and changes from another device are caught too) and migrate notes. */
+	async checkSettingsMigration() {
+		if (this.migrating) { this.migrationAgain = true; return; }
+		this.migrating = true; this.migrationAgain = false;
+		try {
+			const cur = snap(getSettings());
+			const prev = (getSettings() as { migrationSnapshot?: ReturnType<typeof snap> }).migrationSnapshot;
+			log.debug('settings migration check', prev?.projectsFolder, '->', cur.projectsFolder);
+			if (prev && JSON.stringify(prev) === JSON.stringify(cur)) return;
+			if (prev) await this.migrateSettingsChange(prev, cur).catch(e => log.error('Settings migration failed', e));
+			updateSettings({ migrationSnapshot: cur } as never);
+			await this.saveSettings();
+		} finally { this.migrating = false; }
+		if (this.migrationAgain) await this.checkSettingsMigration();
+	}
+
+	/** data.json changed outside (hand edit / another device). Never swap settings under a running sync. */
+	syncRunning = false;
+	private pendingExternal = false;
+	async onExternalSettingsChange() {
+		this.pendingExternal = true;
+		if (!this.syncRunning) await this.applyExternalSettings();
+	}
+	async applyExternalSettings() {
+		if (!this.pendingExternal) return;
+		this.pendingExternal = false;
+		const data = await this.loadData() as Record<string, unknown> | null;
+		if (data) { updateSettings(Object.assign({}, getSettings(), data)); await this.checkSettingsMigration(); }
+	}
+
+	/** Tag/status/list mapping renamed or projects folder changed: carry existing notes over. */
+	async migrateSettingsChange(prev: ReturnType<typeof snap>, next: ReturnType<typeof snap>) {
+		const renames = tagRenames(prev, next);
+		if (Object.keys(renames).length) {
+			let n = 0;
+			for (const f of this.app.vault.getMarkdownFiles()) {
+				await this.app.vault.process(f, d => { const o = renameTagsInText(d, renames); if (o !== d) n++; return o; });
+			}
+			log.info('Tag mapping change migrated', renames, n, 'file(s)');
+			new Notice(`TickTickSync: renamed ${Object.entries(renames).map(([a, b]) => `#${a} → #${b}`).join(', ')} in ${n} note(s)`);
+		}
+		const from = folderOf(prev), to = folderOf(next);
+		if (from !== to && to) {
+			const old = this.app.vault.getAbstractFileByPath(from);
+			if (old instanceof TFolder) {
+				let moved = 0;
+				const files = this.app.vault.getMarkdownFiles().filter(f => f.path.startsWith(from + '/'));
+				for (const f of files) {
+					const dest = to + f.path.slice(from.length);
+					if (this.app.vault.getAbstractFileByPath(dest)) { log.warn('Projects folder move: target exists, kept', f.path); continue; }
+					const dir = dest.slice(0, dest.lastIndexOf('/'));
+					if (dir && !this.app.vault.getAbstractFileByPath(dir)) await this.app.vault.createFolder(dir).catch(() => undefined);
+					await this.app.vault.rename(f, dest); moved++; // vault.rename: fileManager.renameFile may block on an 'Update links?' prompt
+				}
+				if (moved) new Notice(`TickTickSync: moved ${moved} project note(s) from ${from} to ${to}`);
+				log.info(`Projects folder ${from} -> ${to}: moved ${moved}`);
+			}
+		}
+	}
+
 	async loadSettings() {
 		try {
 			let data = await this.loadData() as Record<string, unknown> | null;
@@ -217,6 +282,8 @@ export default class TickTickSync extends Plugin {
 	}
 
 	async saveSettings() {
+		// a hand edit of data.json is waiting for the running sync to end: don't overwrite it now
+		if (this.pendingExternal && this.syncRunning) { log.info('Settings save deferred: external data.json change pending'); return; }
 		try {
 			const inMemorySettings = getSettings();
 			// Verify that the setting exists and is not empty
@@ -246,6 +313,7 @@ export default class TickTickSync extends Plugin {
 				}
 
 				await this.saveData(settingsToSave);
+				await this.checkSettingsMigration();
 			} else {
 				log.warn('Settings are empty or invalid, not saving to avoid data loss.');
 			}

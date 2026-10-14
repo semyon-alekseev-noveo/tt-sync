@@ -170,6 +170,9 @@ export class TickTickService {
 
 			log.debug(`TickTick scheduled synchronization task started at ${new Date().toLocaleString()}`);
 			// NEW: Use TaskCache
+			this.plugin.syncRunning = true;
+			await this.plugin.applyExternalSettings();
+			await this.plugin.checkSettingsMigration();
 			await this.plugin.taskCache?.fill();
 
 			await doWithLock(LOCK_TASKS, async () => {
@@ -238,6 +241,8 @@ export class TickTickService {
 		} finally {
 			// NEW: Clear TaskCache
 			this.plugin.taskCache?.clear();
+			this.plugin.syncRunning = false;
+			try { await this.plugin.applyExternalSettings(); } catch (e) { log.error('Applying external settings failed', e); }
 			const endTime = performance.now();
 			log.debug(`TickTick scheduled synchronization task completed at ${new Date().toLocaleString()}, took ${(endTime - startTime).toFixed(2)} ms`);
 		}

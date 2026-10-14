@@ -124,6 +124,16 @@ export class ProjectSchemeService {
 				} else if (a.type === 'createNote') {
 					const title = sanitizeTitle(a.parent.title) || a.parent.id;
 					const path = `${this.folder()}/${title}.md`;
+					// note already exists elsewhere (e.g. projects folder changed mid-run): adopt and move it, never duplicate
+					const existing = this.app.vault.getMarkdownFiles().find(f => String(this.fm(f.path)?.ticktick_id ?? '') === a.parent.id);
+					if (existing) {
+						if (!this.app.vault.getAbstractFileByPath(this.folder())) await this.app.vault.createFolder(this.folder());
+						let at = existing.path;
+						if (!this.app.vault.getAbstractFileByPath(path)) { await this.app.vault.rename(existing, path); at = path; }
+						log.info(`ProjectScheme: adopted existing project note ${existing.path} -> ${at}`);
+						this.parents.set(a.parent.id, at);
+						continue;
+					}
 					if (!this.app.vault.getAbstractFileByPath(this.folder())) await this.app.vault.createFolder(this.folder());
 					if (!this.app.vault.getAbstractFileByPath(path))
 						await this.app.vault.create(path, renderProjectNote({ title, ticktickId: a.parent.id, note: a.parent.content, done: a.parent.done, now: new Date() }));
