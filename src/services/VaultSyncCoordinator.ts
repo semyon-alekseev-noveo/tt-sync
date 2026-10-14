@@ -356,6 +356,7 @@ export class VaultSyncCoordinator {
 	 * This covers projects that have no tasks yet but still need a file created.
 	 */
 	private async ensureProjectFilesExist(): Promise<void> {
+		if (getSettings().newTasksFile?.trim()) return; // single-file mode: no per-list files
 		const allFileRecords = await db.files.toArray();
 		const managedFiles = allFileRecords.filter(f => f.defaultProjectId);
 

@@ -1,3 +1,4 @@
+import { shouldBackupToday } from '@/backupPolicy';
 import TickTickSync from '@/main';
 import { Tick } from '@/api';
 import { getDefaultFolder, getSettings, updateSettings } from '@/settings';
@@ -65,7 +66,12 @@ export class TickTickService {
 		return false;
 	}
 
+	/** Startup backup, at most once per local day (settings.lastBackupDate). */
 	backup() {
+		const today = shouldBackupToday(getSettings().lastBackupDate, new Date());
+		if (!today) return;
+		updateSettings({ lastBackupDate: today });
+		void this.plugin.saveSettings();
 		void this.tickTickSync?.backupTickTickAllResources();
 	}
 
