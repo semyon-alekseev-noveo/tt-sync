@@ -42,3 +42,28 @@ export async function enrichDeletionItems<T extends { filePath?: string; id?: st
 	}
 	return items;
 }
+
+/** All descendants (by parentId) of the given roots, excluding the roots themselves. */
+export function descendantsOf<T extends { id: string; parentId?: string | null }>(rootIds: string[], tasks: T[]): T[] {
+	const out: T[] = []; const seen = new Set(rootIds); let frontier = [...rootIds];
+	while (frontier.length) {
+		const kids = tasks.filter(t => t.parentId && frontier.includes(t.parentId) && !seen.has(t.id));
+		kids.forEach(k => seen.add(k.id)); out.push(...kids); frontier = kids.map(k => k.id);
+	}
+	return out;
+}
+
+/** Ids of task lines indented under the line carrying `taskId` (its subtree in the note). */
+export function childIdsInContent(content: string, taskId: string): string[] {
+	const lines = content.split('\n');
+	const idx = lines.findIndex(l => l.includes(`ticktick_id:: ${taskId}`));
+	if (idx < 0) return [];
+	const ind = (l: string) => (l.match(/^[\t ]*/)?.[0] ?? '').replace(/ {4}/g, '\t').length;
+	const base = ind(lines[idx]); const out: string[] = [];
+	for (let i = idx + 1; i < lines.length; i++) {
+		if (!lines[i].trim()) continue;
+		if (ind(lines[i]) <= base) break;
+		const m = lines[i].match(/ticktick_id::\s*([0-9a-f]+)/); if (m) out.push(m[1]);
+	}
+	return out;
+}

@@ -1,4 +1,5 @@
-import { isBlankTitle } from '@/projectScheme';
+import { mergeTask, conflictNote } from '@/merge3';
+import { isBlankTitle, stripFileLinks } from '@/projectScheme';
 import { mergeAbyssBlock } from '@/abyssFormat';
 /**
  * TaskModificationDetector - Detects task changes in markdown files
@@ -115,8 +116,11 @@ export class TaskModificationDetector {
 					null
 				);
 
+				// Marker removed by hand? Re-attach to the TickTick task that used to live here (same title+file).
+				const orphan = await this.findOrphanByTitle(fileMap.getFilePath(), currentTask.title, fileMap);
+				if (orphan) log.warn(`Re-attaching line to existing TickTick task ${orphan.id} (marker was removed)`);
 				// Create task in TickTick
-				const newTask = await this.plugin.tickTickRestAPI?.createTask(currentTask) as ITask | null;
+				const newTask = (orphan ?? await this.plugin.tickTickRestAPI?.createTask(currentTask)) as ITask | null;
 				if (!newTask) {
 					// createTask already surfaced the API error in a Notice.
 					return;
@@ -165,6 +169,18 @@ export class TaskModificationDetector {
 				);
 			}
 		}
+	}
+
+	private async findOrphanByTitle(filepath: string, title: string, fileMap: NewFileMap): Promise<ITask | undefined> {
+		const want = stripFileLinks(title ?? '').trim().toLowerCase();
+		if (!want) return undefined;
+		const f = this.app.vault.getAbstractFileByPath(filepath);
+		if (!(f instanceof TFile)) return undefined;
+		const text = await this.app.vault.cachedRead(f);
+		const rows = await this.plugin.taskRepository.loadTasksForFile(filepath);
+		const hits = (rows ?? []).filter(t => t?.id && !text.includes(t.id)
+			&& stripFileLinks(t.title ?? '').trim().toLowerCase() === want);
+		return hits.length === 1 ? hits[0] : undefined;
 	}
 
 	/**
@@ -473,6 +489,21 @@ export class TaskModificationDetector {
 
 		// Update task if any content changed
 		if (this.hasContentChanges(modifications)) {
+			// Both sides edited since last sync? merge per field instead of blindly overwriting TickTick.
+			let mergedFromRemote = false;
+			try {
+				const remote = await this.plugin.tickTickRestAPI?.getTaskById(taskId, savedTask.projectId);
+				if (remote) {
+					const r = mergeTask(savedTask as never, lineTask as never, remote as never);
+					mergedFromRemote = r.taken.length + r.conflicts.length > 0;
+					if (r.taken.length) log.info(`Merged TickTick-side change(s) ${r.taken.join(', ')} into ${taskId}`);
+					if (r.conflicts.length) {
+						const note = conflictNote(r.conflicts, new Date());
+						lineTask.content = [lineTask.content, note].filter(Boolean).join('\n');
+						log.warn(`Edit conflict on ${taskId}: kept Obsidian, saved TickTick version as note`, r.conflicts);
+					}
+				}
+			} catch (e) { log.warn('merge check failed', e); }
 			savedTask.modifiedTime = this.plugin.dateMan?.formatDateToISO(new Date());
 			const saveDateHolder = lineTask.dateHolder;
 			// Preserve reminder fields from saved task when the line task lacks
@@ -491,6 +522,14 @@ export class TaskModificationDetector {
 			const targetPath: string | undefined = modifications.projectMoved ? filepath : undefined;
 			await this.plugin.taskRepository.upsertTask(updatedTask, targetPath, Date.now());
 			modified = true;
+			// show merged TickTick values / conflict note in the note right away
+			if (mergedFromRemote) {
+				// make the pull step treat TickTick as newer so the line is re-rendered with merged values
+				const fresh = { ...updatedTask, modifiedTime: '2000-01-01T00:00:00.000+0000', dateHolder: undefined } as unknown as ITask;
+				this.plugin.dateMan?.addDateHolderToTask(fresh, undefined);
+				await this.plugin.taskRepository.upsertTask(fresh, targetPath, Date.now());
+				try { await this.plugin.fileOperation?.synchronizeToVault(filepath, [fresh], true); } catch (e) { log.warn('merge write-back failed', e); }
+			}
 
 			this.notifyUserOfChanges(taskId, modifications);
 		}

@@ -541,6 +541,8 @@ export class FileOperation {
 				//For updates doing the dateHolder mambo here because we need to make sure we get old dates....
 				const oldTask = await this.plugin.taskRepository.loadTaskById(task.id);
 				this.plugin.dateMan?.addDateHolderToTask(task, oldTask);
+				// last-synced note text, so the merge can tell new local comments from ones deleted in TickTick
+				Object.defineProperty(task, '__baseContent', { value: oldTask?.content ?? '', enumerable: false, configurable: true });
 				if (oldTask) {
 					// Compare incoming task (from DB/TickTick) with current vault state
 					const vaultProjectId = await this.plugin.fileTaskQueries?.getDefaultProjectIdForFilepath(file.path);

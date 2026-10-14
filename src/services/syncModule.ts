@@ -1,6 +1,6 @@
 import { idsPresentInVault } from '@/utils/vaultIdScan';
 import { stripFileLinks } from '@/projectScheme';
-import { detachInContent, enrichDeletionItems } from '@/detach';
+import { detachInContent, enrichDeletionItems, descendantsOf } from '@/detach';
 import { markerName } from '@/taskParser';
 import TickTickSync from '@/main';
 import {
@@ -221,7 +221,15 @@ export class SyncMan {
 
 				if (getSettings().onTickTickDeletion === 'cancel') {
 					// No modal: mark cancelled + detach so it is never re-created in TickTick.
-					for (const task of reallyDeletedTickTickTasks) {
+					// Subtasks of a deleted parent go with it (as TickTick's UI does); otherwise they
+					// would stay orphaned in TickTick and come back as new tasks.
+					const kids = descendantsOf(reallyDeletedTickTickTasks.filter(t => !this.plugin.projectScheme?.isParentId(t.id)).map(t => t.id), tasksInCache)
+						.filter(k => !reallyDeletedTickTickTasks.some(t => t.id === k.id) && !this.plugin.projectScheme?.isParentId(k.id));
+					for (const k of kids) {
+						try { await this.plugin.tickTickRestAPI?.deleteTask(k.id, k.projectId); } catch (e) { log.warn('child delete failed', k.id, e); }
+					}
+					const toDetach = [...reallyDeletedTickTickTasks, ...kids];
+					for (const task of toDetach) {
 						try {
 							const fp = await this.plugin.fileMetadataService?.getFilepathForTask(task.id);
 							await this.plugin.fileMetadataService?.clearTaskFile(task.id);

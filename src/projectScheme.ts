@@ -108,7 +108,14 @@ export function activeZoneInsertLine(lines: string[], heading = ACTIVE_ZONE): nu
 
 export interface NoteSide { path: string; title: string; id?: string; done: boolean }
 export interface ParentSide { id: string; title: string; done: boolean; content?: string }
-export interface Snap { noteDone: boolean; ttDone: boolean }
+export interface Snap { noteDone: boolean; ttDone: boolean; title?: string }
+
+/** Title sync for a linked project: who renamed since the last snapshot? Obsidian wins a tie. */
+export function planTitle(noteTitle: string, ttTitle: string, last: string | undefined): { to: 'tt' | 'note'; title: string } | undefined {
+	if (noteTitle === ttTitle) return undefined;
+	if (last !== undefined && noteTitle === last) return { to: 'note', title: ttTitle }; // renamed in TickTick
+	return { to: 'tt', title: noteTitle }; // renamed in Obsidian (or unknown history)
+}
 export type Action =
 	| { type: 'createParent'; note: NoteSide }
 	| { type: 'createNote'; parent: ParentSide }

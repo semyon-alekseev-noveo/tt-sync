@@ -1,4 +1,9 @@
-import { App, Modal, Setting } from 'obsidian';
+import { App, Modal, Notice, Setting } from 'obsidian';
+
+/** Prompts never block the sync queue: unanswered within this time = skip (nothing deleted). */
+export const PROMPT_TIMEOUT_MS = { value: 15_000 };
+/** Deletions skipped by timeout, for the user to review later. */
+export const pendingDeletions: DeletionItem[] = [];
 
 
 export interface DeletionItem {
@@ -95,9 +100,21 @@ export class TaskDeletionModal extends Modal {
 	}
 
 	public showModal(): Promise<boolean> {
+		// Already skipped once and still unanswered: don't ask again every sync, keep it pending.
+		if (this.items.length && this.items.every(it => pendingDeletions.some(p => p.id === it.id))) {
+			return Promise.resolve(false);
+		}
 		this.open();
-		return new Promise(
-			(resolve) => (this.resolvePromise = resolve)
-		);
+		return new Promise((resolve) => {
+			let done = false;
+			const timer = window.setTimeout(() => {
+				if (done) return;
+				this.result = false;
+				for (const it of this.items) if (!pendingDeletions.some(p => p.id === it.id)) pendingDeletions.push(it);
+				new Notice(`TickTickSync: deletion of ${this.items.length} task(s) skipped (no answer). Pending: ${pendingDeletions.length}.`, 10000);
+				this.close();
+			}, PROMPT_TIMEOUT_MS.value);
+			this.resolvePromise = (v) => { if (done) return; done = true; window.clearTimeout(timer); resolve(v); };
+		});
 	}
 }

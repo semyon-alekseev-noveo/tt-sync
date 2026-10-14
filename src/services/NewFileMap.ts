@@ -130,7 +130,7 @@ export class NewFileMap {
 
 		const linesToReplaceCount = oldContentEndLine - oldLineIdx + 1;
 		if (getSettings().abyssTasksFormat) {
-			taskLine = mergeAbyssBlock(taskLine, this.fileLines.slice(oldLineIdx + 1, oldContentEndLine + 1));
+			taskLine = mergeAbyssBlock(taskLine, this.fileLines.slice(oldLineIdx + 1, oldContentEndLine + 1), (task as { __baseContent?: string }).__baseContent);
 		}
 		const arTaskLines = taskLine.split('\n');
 		this.fileLines.splice(oldLineIdx, linesToReplaceCount, ...arTaskLines);

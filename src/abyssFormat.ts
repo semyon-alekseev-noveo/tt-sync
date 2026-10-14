@@ -98,7 +98,14 @@ export function classifyChildren(lines: string[]): ChildKind[] {
  * with the old child region: canonical order = task, descriptions, checklist items,
  * preserved lines (subtasks & their children, original order), comments.
  */
-export function mergeAbyssBlock(newText: string, oldChild: string[]): string {
+/** `- 2026-10-14 12:58: text` -> Date (local time) or undefined. */
+export function commentStamp(line: string): Date | undefined {
+	const m = line.trim().match(/^- (\d{4})-(\d{2})-(\d{2})(?: (\d{1,2}):(\d{2}))?/);
+	return m ? new Date(+m[1], +m[2] - 1, +m[3], +(m[4] ?? 0), +(m[5] ?? 0)) : undefined;
+}
+
+/** `base` = note text last synced with TickTick: a local comment absent from it is new (not deleted in TickTick), so keep it. */
+export function mergeAbyssBlock(newText: string, oldChild: string[], base?: string): string {
 	const [head, ...gen] = newText.split('\n');
 	const genKinds = classifyChildren(gen);
 	const pick = (k: ChildKind[]) => gen.filter((_, i) => k.includes(genKinds[i]));
@@ -108,6 +115,14 @@ export function mergeAbyssBlock(newText: string, oldChild: string[]): string {
 	const comments: string[] = [];
 	gen.forEach((l, i) => {
 		if (genKinds[i] === 'comment' || (genKinds[i] === 'cont' && comments.length)) comments.push(l);
+	});
+	// Never drop a local comment TickTick hasn't seen yet (it is pushed on the next local change).
+	const have = new Set(comments.map(l => l.trim()));
+	let carry = false;
+	oldChild.forEach((l, i) => {
+		if (oldKinds[i] === 'comment') { const body = l.trim().slice(2); carry = base !== undefined && !base.includes(body) && !have.has(l.trim()); }
+		else if (oldKinds[i] !== 'cont') carry = false;
+		if (carry && (oldKinds[i] === 'comment' || oldKinds[i] === 'cont')) comments.push(l);
 	});
 	const tidy = (l: string) => l.replace(/[ \t]+$/, '').replace(/ {2,}%%/, ' %%');
 	return [head, ...[...descs, ...pick(['item']), ...kept, ...comments].map(tidy)].join('\n');

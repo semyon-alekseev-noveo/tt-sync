@@ -6,7 +6,7 @@ import { getSettings, updateSettings } from '@/settings';
 import { getAllProjects } from '@/db/projects';
 import log from '@/utils/logger';
 import {
-	isProjectNote, linkTarget, isDoneStatus, planProjects, renderProjectNote, sanitizeTitle, pickProjectNote,
+	isProjectNote, linkTarget, isDoneStatus, planProjects, renderProjectNote, sanitizeTitle, pickProjectNote, planTitle,
 	STATUS_ACTIVE, STATUS_DONE, type NoteSide, type ParentSide, type Snap, stripFileLinks,
 } from '@/projectScheme';
 
@@ -76,6 +76,7 @@ export class ProjectSchemeService {
 		const notes = this.projectNotes();
 		this.parents = new Map(notes.filter(n => n.id).map(n => [n.id as string, n.path]));
 		const parents: ParentSide[] = [];
+		const titles = new Map<string, string>();
 		for (const n of notes) {
 			if (!n.id) continue;
 			const t = await api?.getTaskById(n.id, this.listId);
@@ -84,7 +85,23 @@ export class ProjectSchemeService {
 				t.title = stripFileLinks(t.title);
 				try { await api?.updateTask(t); } catch (e) { log.error('ProjectScheme: title repair failed', e); }
 			}
-			if (t) parents.push({ id: t.id, title: t.title, done: (t.status ?? 0) > 0, content: t.content });
+			if (t) {
+				const snap0 = (getSettings().projectSnapshot ?? {})[t.id];
+				const plan = planTitle(n.title, sanitizeTitle(t.title), snap0?.title);
+				try {
+					if (plan?.to === 'tt') { t.title = plan.title; await api?.updateTask(t); }
+					else if (plan?.to === 'note') {
+						const f = this.app.vault.getAbstractFileByPath(n.path);
+						const dest = `${n.path.slice(0, n.path.lastIndexOf('/') + 1)}${plan.title}.md`;
+						if (f instanceof TFile && !this.app.vault.getAbstractFileByPath(dest)) {
+							await this.app.fileManager.renameFile(f, dest);
+							n.path = dest; n.title = plan.title; this.parents.set(t.id, dest);
+						}
+					}
+				} catch (e) { log.error('ProjectScheme: title sync failed', e); }
+				titles.set(t.id, n.title);
+				parents.push({ id: t.id, title: t.title, done: (t.status ?? 0) > 0, content: t.content });
+			}
 		}
 		for (const t of updated) {
 			if (!this.parents.has(t.id) && this.isParentTask(t) && !parents.some(p => p.id === t.id))
@@ -127,6 +144,7 @@ export class ProjectSchemeService {
 		for (const p of parents) {
 			const n = notes.find(x => x.id === p.id);
 			if (n && n.done === p.done) snap[p.id] = { noteDone: n.done, ttDone: p.done };
+			if (snap[p.id] && titles.has(p.id)) snap[p.id].title = titles.get(p.id);
 		}
 		updateSettings({ projectSnapshot: snap });
 		await this.plugin.saveSettings();

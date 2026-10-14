@@ -1,3 +1,4 @@
+import { PROMPT_TIMEOUT_MS } from '@/modals/TaskDeletionModal';
 import { App, Modal, Setting, TFile } from 'obsidian';
 import TickTickSync from '@/main';
 import log from '@/utils/logger';
@@ -83,16 +84,16 @@ export class FoundDuplicateTasksModal extends Modal {
             .addButton(btn => btn
                 .setButtonText('Cancel & abort sync')
                 .onClick(() => {
-                    this.close();
                     this.resolvePromise(false);
+                    this.close();
                 }))
             .addButton(btn => btn
                 .setButtonText('Apply & continue sync')
                 .setCta()
                 .onClick(async () => {
                     await this.performDeletions();
-                    this.close();
                     this.resolvePromise(true);
+                    this.close();
                 }));
     }
 
@@ -227,12 +228,15 @@ export class FoundDuplicateTasksModal extends Modal {
 
     onClose() {
         this.contentEl.empty();
+        this.resolvePromise?.(false); // Escape / X = cancel, never hang the sync queue
     }
 
     public showModal(): Promise<boolean> {
         this.open();
         return new Promise(resolve => {
-            this.resolvePromise = resolve;
+            let done = false;
+            const timer = window.setTimeout(() => this.close(), PROMPT_TIMEOUT_MS.value);
+            this.resolvePromise = (v: boolean) => { if (done) return; done = true; window.clearTimeout(timer); resolve(v); };
         });
     }
 }

@@ -1,12 +1,13 @@
 import { isDetached } from '@/detach';
 import { abyssLinesToNote, noteToAbyssLines, childIndent } from '@/abyssFormat';
 import { mapObsidianTag, mapTickTickTag } from '@/tagMapping';
-import { isListTag, listForTags, tagForList } from '@/listMapping';
-import { checkboxChar, restoreStatus, tagForStatusChar, isStatusTag } from '@/statusMapping';
+import { isListTag, listForTags, tagForList, type ITagListMapping } from '@/listMapping';
+import { checkboxChar, restoreStatus, tagForStatusChar, isStatusTag, type IStatusMapping } from '@/statusMapping';
+const warnedConflicts = new Set<string>();
 import { type App, type MetadataCache, Notice } from 'obsidian';
 import type TickTickSync from '@/main';
 import type { ITask, ITaskItem, Reminder } from '@/api/types/Task';
-import { getSettings } from '@/settings';
+import { getSettings, updateSettings } from '@/settings';
 import { sha256 } from 'crypto-hash';
 import type { NewFileMap, ITaskRecord } from '@/services/NewFileMap';
 import { getAllProjects } from '@/db/projects';
@@ -129,6 +130,17 @@ export const REGEX = {
 	ITEM_LINE: /\[(.*?)\]\s*(.*?)\s*%%(.*?)%%/,
 	LINE_ITEM_ID: /%%(?!\[ticktick_id::\s)[a-f0-9]{24}%%/g
 };
+
+/** foo/Bar baz -> foo-bar-baz (TickTick tag names cannot contain `/`). */
+export const flatTagName = (raw: string) => raw.toLowerCase().replace(/[/\s]+/g, '-').replace(/-+/g, '-');
+
+/** Tags that lose a conflict: status tags disagreeing with the checkbox, and every list-mapped tag after the first. */
+export function abyssTagConflicts(tags: string[], ch: string | undefined, smap: IStatusMapping[] | undefined, lmap: ITagListMapping[] | undefined): string[] {
+	const want = tagForStatusChar(ch, smap)?.toLowerCase();
+	const lost = tags.filter(t => isStatusTag(t, smap) && t.replace(/^#/, '').toLowerCase() !== want);
+	const typeTags = tags.filter(t => isListTag(t, lmap));
+	return [...lost, ...typeTags.slice(1)];
+}
 
 export class TaskParser {
 	app: App;
@@ -386,8 +398,13 @@ export class TaskParser {
 			if (!tag.match(regEx)) {
 				let display: string;
 				const mapped = mapTickTickTag(tag, getSettings().tagMappings);
+				const pathBack = getSettings().abyssTasksFormat ? (getSettings().tagPathMap?.[tag.toLowerCase()]
+					?? [...(getSettings().tagListMappings ?? []).map(m => m.tag), ...(getSettings().statusMappings ?? []).map(m => m.tag)]
+						.map(t => t.replace(/^#/, '')).find(t => t.includes('/') && flatTagName(t) === tag.toLowerCase())) : undefined;
 				if (mapped) {
 					display = mapped;
+				} else if (pathBack) {
+					display = pathBack; // full Abyss path pushed as foo-bar -> back to foo/bar
 				} else if (tagSvc) {
 					// Try hierarchical display (parent/child) first
 					const hierarchical = tagSvc.resolveHierarchicalLabel(tag);
@@ -541,6 +558,12 @@ export class TaskParser {
 			// Abyss custom status char -> TickTick tag (e.g. `[/]` -> status/in-progress)
 			const smap = getSettings().statusMappings;
 			const kept = rawTags.filter(t => !isStatusTag(t, smap));
+			const stCh = checkboxChar(textWithoutIndentation);
+			const lost = abyssTagConflicts(rawTags, stCh, smap, getSettings().tagListMappings);
+			if (lost.length) {
+				const msg = `TickTickSync: "${this.getTaskContentFromLineText(textWithoutIndentation).slice(0, 40)}" — tag(s) ${lost.map(t => '#' + t).join(', ')} conflict with the checkbox / first type tag and will be dropped.`;
+				if (!warnedConflicts.has(msg)) { warnedConflicts.add(msg); log.warn(msg); new Notice(msg, 8000); }
+			}
 			rawTags.length = 0;
 			rawTags.push(...kept);
 			const stTag = tagForStatusChar(checkboxChar(textWithoutIndentation), smap);
@@ -550,7 +573,7 @@ export class TaskParser {
 		// Resolve tags: handle hierarchy and create unknown tags in TickTick
 		const tagSvc = this.plugin?.tagService;
 		const api = this.plugin?.tickTickRestAPI;
-		const tagsToCreate: { label: string; name: string; parent: string | null }[] = [];
+		const tagsToCreate: { label: string; name: string; parent: string | null; localLabel?: string }[] = [];
 
 		if (tagSvc) {
 			for (const raw of rawTags) {
@@ -565,6 +588,11 @@ export class TaskParser {
 						const name = raw.toLowerCase().replace(/[/\s]+/g, '-').replace(/-+/g, '-');
 						tagsToCreate.push({ label: raw, name, parent: null });
 					}
+				} else if (getSettings().abyssTasksFormat && raw.includes('/') && !mapObsidianTag(raw, getSettings().tagMappings)) {
+					// Abyss: keep the full path (foo/bar -> TT tag `foo-bar`, label kept locally as foo/bar),
+					// so it round-trips and never collides with another `bar`.
+					const name = flatTagName(raw);
+					if (!tagSvc.getLabel(name) || tagSvc.getLabel(name) !== raw) tagsToCreate.push({ label: name, name, parent: null, localLabel: raw });
 				} else {
 					const parts = this.effectiveTagForHierarchy(raw).split('/');
 					if (parts.length === 1) {
@@ -603,10 +631,12 @@ export class TaskParser {
 		}
 
 		if (tagsToCreate.length > 0 && api) {
-			const created = await api.CreateTags(tagsToCreate);
+			const created = await api.CreateTags(tagsToCreate.map(({ localLabel: _l, ...t }) => t));
+			// full-path labels are a local mapping: record them even if TT already had the tag
+			for (const t of tagsToCreate) if (t.localLabel && !created) await tagSvc.addTag(t.name, t.localLabel, null);
 			if (created) {
 				for (const t of tagsToCreate) {
-					await tagSvc.addTag(t.name, t.label, t.parent);
+					await tagSvc.addTag(t.name, t.localLabel ?? t.label, t.parent);
 				}
 			}
 		}
@@ -617,6 +647,12 @@ export class TaskParser {
 		if (tagSvc) {
 			tags = rawTags.map((raw, i) => {
 				if (mappedTags[i]) return mappedTags[i] as string;
+				if (getSettings().abyssTasksFormat && raw.includes('/')) {
+					const flat = flatTagName(raw);
+					const pm = getSettings().tagPathMap ?? {};
+					if (pm[flat] !== raw) updateSettings({ tagPathMap: { ...pm, [flat]: raw } });
+					return flat;
+				}
 				const parts = this.effectiveTagForHierarchy(raw).split('/');
 				if (parts.length === 1) return tagSvc.resolveToName(raw);
 				if (parts.length === 2) return tagSvc.resolveToName(parts[1]);
@@ -1027,6 +1063,7 @@ export class TaskParser {
 	 */
 	isTaskItem(line: string, parentTabs: number): boolean {
 		if (!this.isMarkdownTask(line)) return false;
+		if (isDetached(line)) return false; // a detached line is plain text, never a TickTick checklist item
 		const lineTabs = this.getNumTabs(line);
 		if (lineTabs !== parentTabs + 1) return false;
 		const afterTabs = line.slice(lineTabs);

@@ -214,7 +214,10 @@ export class DateMan {
 			(task as { dateHolder: date_holder_type }).dateHolder = dates;
 		} else {
 			const dueDate = this.getDateAndTime(task.dueDate, task.isAllDay, date_emoji.dueDate);
-			if (dueDate) {
+			// ⏳-only line: TickTick mirrors startDate into dueDate; don't invent a 📅 on pull.
+			const schedOnly = getSettings().scheduledAsStartDate && !!oldTask?.dateHolder?.scheduled_date
+				&& !oldTask?.dateHolder?.dueDate && !!task.startDate && task.startDate === task.dueDate;
+			if (dueDate && !schedOnly) {
 				dates.dueDate = dueDate;
 			}
 			// TickTick may report empty/null dates for a task that simply has

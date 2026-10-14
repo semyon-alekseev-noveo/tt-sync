@@ -1,5 +1,5 @@
 import { idsPresentInVault } from '@/utils/vaultIdScan';
-import { detachInContent, enrichDeletionItems } from '@/detach';
+import { detachInContent, enrichDeletionItems, childIdsInContent } from '@/detach';
 import { markerName } from '@/taskParser';
 /**
  * VaultSyncCoordinator - Coordinates syncing between database and vault files
@@ -308,8 +308,20 @@ export class VaultSyncCoordinator {
 				if (!mine.length) continue;
 				group.toDelete = group.toDelete.filter(t => !mine.includes(t));
 				const f = this.app.vault.getAbstractFileByPath(filePath);
+				// subtasks of a deleted parent go with it (TickTick UI does the same)
+				const content = f instanceof TFile ? await this.app.vault.read(f) : '';
+				const kidIds = new Set<string>();
 				for (const t of mine) {
-					const id = (t.id || (t as { taskId?: string }).taskId) ?? '';
+					const pid = (t.id || (t as { taskId?: string }).taskId) ?? '';
+					if (this.plugin.projectScheme?.isParentId(pid)) continue;
+					for (const k of childIdsInContent(content, pid)) if (!ids.has(k)) kidIds.add(k);
+				}
+				for (const k of kidIds) {
+					const pr = await this.plugin.taskRepository.getProjectIdForTask(k);
+					try { if (pr) await this.plugin.tickTickRestAPI?.deleteTask(k, pr); } catch (e) { log.warn('child delete failed', k, e); }
+				}
+				const allIds = [...mine.map(t => (t.id || (t as { taskId?: string }).taskId) ?? ''), ...kidIds];
+				for (const id of allIds) {
 					await this.plugin.fileMetadataService.clearTaskFile(id);
 					await this.plugin.taskRepository.deleteTask(id);
 					if (f instanceof TFile) await this.app.vault.process(f, d => detachInContent(d, id, markerName()) ?? d);

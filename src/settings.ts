@@ -46,7 +46,9 @@ export interface ITickTickSyncSettings {
 	projectsFolder: string;
 	projectsListName: string;
 	projectTaskTags: string[];
-	projectSnapshot: Record<string, { noteDone: boolean; ttDone: boolean }>;
+	/** Abyss: flat TickTick tag name -> original Obsidian tag path (foo-bar -> foo/bar). */
+	tagPathMap?: Record<string, string>;
+	projectSnapshot: Record<string, { noteDone: boolean; ttDone: boolean; title?: string }>;
 	fileLinksInTickTick: string;
 	taskLinksInObsidian: string;
 	bkupFolder: string;

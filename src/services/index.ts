@@ -1,4 +1,4 @@
-import { idsPresentInVault } from '@/utils/vaultIdScan';
+import { idsPresentInVault, dedupeTaskIds } from '@/utils/vaultIdScan';
 import { shouldBackupToday } from '@/backupPolicy';
 import TickTickSync from '@/main';
 import { Tick } from '@/api';
@@ -789,6 +789,23 @@ export class TickTickService {
 			newFilesToSync = Object.fromEntries(Object.entries(filesToSync).filter(([key, value]) =>
 				value.defaultProjectId === getSettings().SyncProject));
 		}
+
+		// Duplicated task lines (copy-pasted marker): keep the original, the copy becomes a new task.
+		try {
+			const mdFiles = this.plugin.app.vault.getMarkdownFiles();
+			const texts: { path: string; text: string }[] = [];
+			for (const f of mdFiles) { const text = await this.plugin.app.vault.cachedRead(f); if (text.includes('ticktick_id::')) texts.push({ path: f.path, text }); }
+			const owners = new Map<string, string>();
+			for (const lt of await db.tasks.toArray()) if (lt.file && !lt.deleted) owners.set(lt.task?.id ?? lt.taskId, lt.file);
+			for (const c of dedupeTaskIds(texts, id => owners.get(id))) {
+				const f = this.plugin.app.vault.getAbstractFileByPath(c.path);
+				if (f instanceof TFile) {
+					await this.plugin.app.vault.modify(f, c.text);
+					const msg = `TickTickSync: duplicated task line(s) in ${c.path} detached from ${c.ids.join(', ')} — they will sync as new tasks.`;
+					log.warn(msg); new Notice(msg, 8000);
+				}
+			}
+		} catch (e) { log.error('dedupe failed', e); }
 
 		//Check for duplicates before we do anything
 		try {
