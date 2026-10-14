@@ -2,6 +2,7 @@
 	import { parseTagMappingText, tagMappingToText } from '@/tagMapping';
 	import { parseStatusMappingText, statusMappingToText } from '@/statusMapping';
 	import { parseProjectMappingText, projectMappingToText } from '@/projectMapping';
+	import { parseTagListText, tagListToText } from '@/listMapping';
 	import { getDefaultFolder, updateSettings } from '@/settings';
 	import type TickTickSync from '@/main';
 	import './SettingsStyles.css';
@@ -19,9 +20,10 @@
 	let tagMappingText = '';
 	let statusMappingText = '';
 	let projectMappingText = '';
+	let tagListText = '';
 	async function saveAbyss() {
 		settingsStore.update(s => ({ ...s, abyssTasksFormat, abyssIndent, scheduledAsStartDate, tagMappings: parseTagMappingText(tagMappingText),
-			statusMappings: parseStatusMappingText(statusMappingText), projectMappings: parseProjectMappingText(projectMappingText) }));
+			statusMappings: parseStatusMappingText(statusMappingText), projectMappings: parseProjectMappingText(projectMappingText), tagListMappings: parseTagListText(tagListText) }));
 		await plugin.saveSettings();
 	}
 	let resetTasksText: string = '';
@@ -47,6 +49,7 @@
 		tagMappingText = tagMappingToText($settingsStore.tagMappings);
 		statusMappingText = statusMappingToText($settingsStore.statusMappings);
 		projectMappingText = projectMappingToText($settingsStore.projectMappings);
+		tagListText = tagListToText($settingsStore.tagListMappings);
 		if ($settingsStore.noteDelimiter === '' || $settingsStore.noteDelimiter == null) {
 			delimiterOption = 'none';
 			customDelimiter = '';
@@ -147,6 +150,11 @@
 				<div class="setting-item-control"><textarea rows="4" bind:value={statusMappingText} on:change={saveAbyss}></textarea></div>
 			</div>
 			{/if}
+			<div class="setting-item">
+				<div class="setting-item-info"><div class="setting-item-name">Tag → list mapping</div>
+					<div class="setting-item-description">Tag decides the TickTick list (beats file default); moving the task in TickTick rewrites the tag. E.g. <code>type/next = nextAction</code></div></div>
+				<div class="setting-item-control"><textarea rows="4" bind:value={tagListText} on:change={saveAbyss}></textarea></div>
+			</div>
 			<div class="setting-item">
 				<div class="setting-item-info"><div class="setting-item-name">Project mapping</div>
 					<div class="setting-item-description">Note or folder = TickTick list (name or id), e.g. <code>projects/Client.md = Client</code> or <code>projects/ = Work</code></div></div>

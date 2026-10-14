@@ -32,6 +32,7 @@ export interface ITickTickSyncSettings {
 	tagMappings: { obsidian: string; ticktick: string }[];
 	statusMappings: { char: string; tag: string }[];
 	projectMappings: { path: string; project: string }[];
+	tagListMappings: { tag: string; list: string }[];
 	fileLinksInTickTick: string;
 	taskLinksInObsidian: string;
 	bkupFolder: string;
@@ -91,6 +92,7 @@ export const DEFAULT_SETTINGS: ITickTickSyncSettings = {
 	tagMappings: [],
 	statusMappings: [{ char: '/', tag: 'status/in-progress' }, { char: '-', tag: 'status/cancelled' }],
 	projectMappings: [],
+	tagListMappings: [],
 	fileLinksInTickTick: 'taskLink',
 	taskLinksInObsidian: 'taskLink',
 	bkupFolder: '/',

@@ -1,5 +1,6 @@
 import { abyssLinesToNote, noteToAbyssLines, childIndent } from '@/abyssFormat';
 import { mapObsidianTag, mapTickTickTag } from '@/tagMapping';
+import { isListTag, listForTags, tagForList } from '@/listMapping';
 import { checkboxChar, restoreStatus, tagForStatusChar, isStatusTag } from '@/statusMapping';
 import { type App, type MetadataCache, Notice } from 'obsidian';
 import type TickTickSync from '@/main';
@@ -150,6 +151,13 @@ export class TaskParser {
 			const r = restoreStatus(task.status, task.tags, getSettings().statusMappings);
 			checkChar = r.char;
 			lineTags = r.tags;
+		}
+		const listMapP = getSettings().tagListMappings;
+		if (listMapP?.length) {
+			const projects = await getAllProjects();
+			const lt = tagForList(task.projectId, listMapP, projects);
+			lineTags = (lineTags ?? []).filter(t => !isListTag(t, listMapP));
+			if (lt) lineTags = [...lineTags, lt];
 		}
 		resultLine += `- [${checkChar}] ${task.title}`;
 
@@ -615,6 +623,9 @@ export class TaskParser {
 			tags = rawTags.map((raw, i) => mappedTags[i] ?? raw.toLowerCase().replace(/[/\s]+/g, '-').replace(/-+/g, '-'));
 		}
 
+		if (getSettings().tagListMappings?.length) {
+			tags = tags.filter((_, i) => !isListTag(rawTags[i], getSettings().tagListMappings));
+		}
 		let projectId = await this.plugin.fileTaskQueries?.getDefaultProjectIdForFilepath(filepath);
 
 		if (hasParent) {
@@ -622,6 +633,12 @@ export class TaskParser {
 				projectId = parentTaskObject.projectId;
 			}
 		} else {
+			// Explicit tag -> list table wins over file default and name-matching.
+			const listMap = getSettings().tagListMappings;
+			const mappedList = listMap?.length ? listForTags(rawTags, listMap, await getAllProjects()) : undefined;
+			if (mappedList) {
+				projectId = mappedList;
+			} else
 			//Check if we need to add this to a specific project by tag.
 			// Use rawTags (pre-resolution) so underscores are preserved for matching
 			if (rawTags) {

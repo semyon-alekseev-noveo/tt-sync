@@ -42,3 +42,9 @@ Limitations: description lines placed *after* subtasks aren't collected; `taskLi
 - `classifyChildren`: base-level `- > ` desc, `- ` comment (+deeper continuation), checkbox with item-id = TT checklist item, other checkbox = Abyss subtask → `keep` with all its deeper lines.
 - Write-back `mergeAbyssBlock` (in `NewFileMap.updateTask` and `TaskModificationDetector` replace): canonical order **task, descriptions, checklist items, kept subtasks (original order), comments**. Idempotent; tested no loss/dup.
 - Known: blank line inside a block ends the region; children nested under a TT checklist item are kept but moved after items.
+
+## Step 4: tag → list (GTD)
+Setting `tagListMappings` (`type/next = nextAction`, list by name or id), `src/listMapping.ts`.
+- Push (`convertLineToTask`): first mapped tag decides projectId; beats file default and upstream name-matching; parent-subtask rule still wins for children. The mapped tag is not sent as a TickTick tag.
+- Pull (`convertTaskToLine`): list of the task → its tag; other mapped tags removed. Task in a non-mapped list (e.g. KB) loses its type tag.
+- Moving: projectId change is detected by upstream (`TaskOperationsService` moveTaskProject).
