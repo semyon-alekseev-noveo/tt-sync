@@ -1,3 +1,4 @@
+import { markerName } from '@/taskParser';
 import { App, Notice, TFile, TFolder } from 'obsidian';
 import TickTickSync from '@/main';
 import type { ITask } from './api/types/Task';
@@ -595,8 +596,8 @@ export class FileOperation {
 			// Backwards compatibility: keep the "ticktick" tag injected on
 			// the TickTick task unless the user opted out (see
 			// stopInjectingTickTickTag setting).
-			if (!getSettings().stopInjectingTickTickTag && !task.tags?.includes('ticktick')) {
-				task.tags = [...(task.tags || []), 'ticktick'];
+			if (!getSettings().stopInjectingTickTickTag && !task.tags?.includes(markerName())) {
+				task.tags = [...(task.tags || []), markerName()];
 			}
 
 			if (!bUpdating) {

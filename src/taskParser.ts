@@ -30,8 +30,10 @@ enum Priority {
 // - [x] #task Has a done date ✅ 2023-04-17
 // - [-] #task Has a cancelled date ❌ 2023-04-18
 
+// Sync marker tag is configurable (settings.syncMarkerTag, default `ticktick`).
+export const markerName = () => (getSettings().syncMarkerTag || 'ticktick').replace(/^#/, '').toLowerCase();
 const keywords = {
-	TickTick_TAG: '#ticktick',
+	get TickTick_TAG() { return '#' + markerName(); },
 	DUE_DATE: '⏳|🗓️|📅|📆|🗓',
 	TIME: '⌚',
 	TASK_DUE_DATE: '📅',
@@ -89,7 +91,7 @@ const taskRegex = new RegExp(
 
 export const REGEX = {
 	//hopefully tighter find.
-	TickTick_TAG: new RegExp(`^[\\s]*[-] \\[[x ]\\] [\\s\\S]*${keywords.TickTick_TAG}[\\s\\S]*$`, 'i'),
+	get TickTick_TAG() { return new RegExp(`^[\\s]*[-] \\[.\\] [\\s\\S]*${keywords.TickTick_TAG}(?![\\w/-])[\\s\\S]*$`, 'i'); },
 
 	TickTick_ID: /\[ticktick_id::\s*[\d\S]+\]/,
 	TickTick_ID_NUM: /\[ticktick_id::\s*(.*?)\s*\]/,
@@ -354,9 +356,9 @@ export class TaskParser {
 	 */
 	preserveTickTickTag(lineTask: ITask, savedTask: ITask | null | undefined): void {
 		if (!getSettings().stopInjectingTickTickTag) return;
-		if (savedTask?.tags?.some(t => t.toLowerCase() === 'ticktick') &&
-			!lineTask.tags?.some(t => t.toLowerCase() === 'ticktick')) {
-			lineTask.tags = [...(lineTask.tags || []), 'ticktick'];
+		if (savedTask?.tags?.some(t => t.toLowerCase() === markerName()) &&
+			!lineTask.tags?.some(t => t.toLowerCase() === markerName())) {
+			lineTask.tags = [...(lineTask.tags || []), markerName()];
 		}
 	}
 
@@ -367,7 +369,7 @@ export class TaskParser {
 	 * preserveTickTickTag. The caller decides when to strip vs preserve.
 	 */
 	stripTickTickTag(lineTask: ITask): void {
-		lineTask.tags = (lineTask.tags || []).filter(t => t.toLowerCase() !== 'ticktick');
+		lineTask.tags = (lineTask.tags || []).filter(t => t.toLowerCase() !== markerName());
 	}
 
 	addTagsToLine(resultLine: string, tags: string[]) {
@@ -533,7 +535,7 @@ export class TaskParser {
 		// update -- see preserveTickTickTag for the step that keeps a
 		// *genuinely* TT-side "ticktick" tag if one already exists there.
 		const rawTags = this.getAllTagsFromLineText(textWithoutIndentation)
-			.filter(t => getSettings().stopInjectingTickTickTag ? t.toLowerCase() !== 'ticktick' : true);
+			.filter(t => getSettings().stopInjectingTickTickTag ? t.toLowerCase() !== markerName() : true);
 		if (getSettings().abyssTasksFormat) {
 			// Abyss custom status char -> TickTick tag (e.g. `[/]` -> status/in-progress)
 			const smap = getSettings().statusMappings;
