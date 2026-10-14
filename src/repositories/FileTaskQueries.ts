@@ -11,6 +11,8 @@ import { getAllFiles, getFile } from "@/db/files";
 import type { LocalTask } from "@/db/schema";
 import log from "@/utils/logger";
 import { getSettings } from '@/settings';
+import { getAllProjects } from '@/db/projects';
+import { pathForProjectId, projectIdForPath } from '@/projectMapping';
 
 export class FileTaskQueries {
 	/**
@@ -194,6 +196,8 @@ export class FileTaskQueries {
 	 */
 	async getFilepathForProject(projectId: string): Promise<string | undefined> {
 		try {
+			const mapped = pathForProjectId(projectId, getSettings().projectMappings, await getAllProjects());
+			if (mapped) return mapped;
 			const files = await getAllFiles();
 			const file = files.find(f => f.defaultProjectId === projectId);
 			return file?.path;
@@ -255,6 +259,8 @@ export class FileTaskQueries {
 			if (file && file.defaultProjectId) {
 				return file.defaultProjectId;
 			}
+			const mapped = projectIdForPath(filepath, getSettings().projectMappings, await getAllProjects());
+			if (mapped) return mapped;
 			let defaultProjectId = getSettings().defaultProjectId;
 			if (!defaultProjectId) {
 				defaultProjectId = getSettings().inboxID;

@@ -21,24 +21,19 @@ export function isAbyssNoteLine(line: string, taskLine: string): boolean {
 
 /** Abyss child lines (contiguous, only direct-level bullets + their continuations) -> TickTick note text. */
 export function abyssLinesToNote(lines: string[]): string {
+	const kinds = classifyChildren(lines);
 	const desc: string[] = [];
 	const comments: string[] = [];
-	let base = -1;
-	let last: 'd' | 'c' | '' = '';
-	for (const raw of lines) {
-		const w = indentWidth(raw);
+	let last: ChildKind = 'keep';
+	lines.forEach((raw, i) => {
+		const k = kinds[i];
 		const t = raw.trim();
-		if (base < 0 && isBullet(raw)) base = w;
-		if (isBullet(raw) && w === base) {
-			const body = t.slice(2);
-			if (t === '- >' || body.startsWith('> ')) { desc.push(t === '- >' ? '' : body.slice(2)); last = 'd'; }
-			else { comments.push(body); last = 'c'; }
-		} else if (last === 'c') {
-			comments.push('  ' + t); // continuation of a multi-line comment
-		} else if (last === 'd') {
-			desc[desc.length - 1] += '\n' + t;
-		}
-	}
+		if (k === 'desc') desc.push(t === '- >' ? '' : t.slice(4));
+		else if (k === 'comment') comments.push(t.slice(2));
+		else if (k === 'cont' && last === 'comment') comments.push('  ' + t);
+		else if (k === 'cont' && last === 'desc') desc[desc.length - 1] += '\n' + t;
+		if (k !== 'cont') last = k;
+	});
 	let note = desc.join('\n');
 	if (comments.length) note += (note ? '\n\n' : '') + COMMENTS_HEADER + '\n' + comments.join('\n');
 	return note;
@@ -63,4 +58,56 @@ export function noteToAbyssLines(note: string, ind: string): string[] {
 export function childIndent(numTabs: number, style: 'tab' | 'spaces' | undefined): string {
 	const unit = style === 'spaces' ? '    ' : '\t';
 	return unit.repeat(numTabs + 1);
+}
+
+// ---- child block classification (step 3) ----
+export type ChildKind = 'desc' | 'comment' | 'cont' | 'item' | 'keep';
+const TT_ID = /%%\[ticktick_id::/;
+const ITEM_ID = /%%(?!\[ticktick_id::\s)[a-f0-9]{24}%%/;
+
+/** End index (inclusive) of the Abyss child region of the task at taskIdx. */
+export function abyssRegionEnd(lines: string[], taskIdx: number): number {
+	const w = indentWidth(lines[taskIdx]);
+	let j = taskIdx + 1;
+	while (j < lines.length && lines[j].trim() !== '' && indentWidth(lines[j]) > w && !TT_ID.test(lines[j])) j++;
+	return j - 1;
+}
+
+/** Classify each child line. Base level = shallowest indent in the region. */
+export function classifyChildren(lines: string[]): ChildKind[] {
+	if (!lines.length) return [];
+	const base = Math.min(...lines.map(indentWidth));
+	let owner: ChildKind = 'keep';
+	return lines.map(l => {
+		const t = l.trim();
+		if (indentWidth(l) === base) {
+			if (isCheckbox(l)) owner = ITEM_ID.test(l) ? 'item' : 'keep';
+			else if (t === '- >' || t.startsWith('- > ')) owner = 'desc';
+			else if (t.startsWith('- ')) owner = 'comment';
+			else owner = 'keep';
+			return owner;
+		}
+		// deeper / continuation line
+		if (owner === 'comment' || owner === 'desc') return 'cont';
+		return owner === 'item' ? 'keep' : owner; // children of subtasks/items are preserved
+	});
+}
+
+/**
+ * Merge a freshly generated block (task line + generated `- >`/comment/item lines)
+ * with the old child region: canonical order = task, descriptions, checklist items,
+ * preserved lines (subtasks & their children, original order), comments.
+ */
+export function mergeAbyssBlock(newText: string, oldChild: string[]): string {
+	const [head, ...gen] = newText.split('\n');
+	const genKinds = classifyChildren(gen);
+	const pick = (k: ChildKind[]) => gen.filter((_, i) => k.includes(genKinds[i]));
+	const oldKinds = classifyChildren(oldChild);
+	const kept = oldChild.filter((_, i) => oldKinds[i] === 'keep');
+	const descs = gen.filter((_, i) => genKinds[i] === 'desc');
+	const comments: string[] = [];
+	gen.forEach((l, i) => {
+		if (genKinds[i] === 'comment' || (genKinds[i] === 'cont' && comments.length)) comments.push(l);
+	});
+	return [head, ...descs, ...pick(['item']), ...kept, ...comments].join('\n');
 }

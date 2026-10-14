@@ -15,8 +15,8 @@
 | `\t- > text` under task | note (`content`/`desc`) | **done** (step 1) |
 | `\t- text` (comment) | note, after line `Comments:` | **done**; parsed back to `- ` lines |
 | indented `- [ ]` | checklist item / subtask (unchanged) | upstream |
-| custom status `[/]`,`[-]`… | tag `status/<name>`; restored to checkbox char on pull | TODO: `convertLineToTask` status + `convertTaskToLine` checkbox; table char↔name in settings |
-| note in `projects/X.md` | list X | TODO: settings table path→projectId (wrap `getDefaultProjectIdForFilepath` in services/index.ts) |
+| custom status `[/]`,`[-]`… | tag `status/<name>`; restored to checkbox char on pull | **done** (`src/statusMapping.ts`; push in `convertLineToTask` rawTags, pull in `convertTaskToLine`; `REMOVE_CHECKBOX` widened to any char). Defaults `/`→status/in-progress, `-`→status/cancelled; TickTick task stays open (status 0); matched by full/hyphen/child-name spelling |
+| note in `projects/X.md` | list X | **done** (`src/projectMapping.ts`, hooks in `FileTaskQueries.getDefaultProjectIdForFilepath` / `getFilepathForProject`). Priority: per-file default > exact file entry > longest folder prefix (`projects/`) > global default. Reverse (TT→file) only exact entries |
 | `#type/next`, `#context/work` | setting `tagMappings` (`obsidian/tag = ticktick-tag`), both directions; unmapped → upstream hierarchy logic | **done** (`src/tagMapping.ts`, hooks in `convertLineToTask` tag resolve + `addTagsToLine`) |
 | ⏳ scheduled | setting `scheduledAsStartDate`: ⏳ → TickTick `startDate` when line has no 🛫; on pull `startDate` → ⏳ unless the previous local task had 🛫 | **done** (`convertLineToTask` actualStartDate, `DateMan.addDateHolderToTask`) |
 | priority, 📅/🛫/🔁/⏰ | as upstream | upstream |
@@ -36,3 +36,9 @@ Limitations: description lines placed *after* subtasks aren't collected; `taskLi
 - Statuses default: ` ` todo, `/` in-progress, `x` done, `-` cancelled (`settings/defaults.ts`); user-definable.
 - New comments/subtasks are appended at end of the child block → a comment after subtasks is not in our contiguous block (limitation; next step: collect all direct non-checkbox children, requires block-aware rewrite in fileOperation).
 - Blockquote/callout-nested tasks (`> - [ ]`) not supported by TickTickSync.
+
+## Step 3: whole child block
+- Region = lines after the task, non-blank, deeper indent, until a line with `ticktick_id` (child TT task) — `abyssRegionEnd`; used by `getTaskLinesByIdx`, `computeContentEndLine`, `getTaskEndLineByIdx`.
+- `classifyChildren`: base-level `- > ` desc, `- ` comment (+deeper continuation), checkbox with item-id = TT checklist item, other checkbox = Abyss subtask → `keep` with all its deeper lines.
+- Write-back `mergeAbyssBlock` (in `NewFileMap.updateTask` and `TaskModificationDetector` replace): canonical order **task, descriptions, checklist items, kept subtasks (original order), comments**. Idempotent; tested no loss/dup.
+- Known: blank line inside a block ends the region; children nested under a TT checklist item are kept but moved after items.

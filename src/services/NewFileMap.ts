@@ -1,4 +1,4 @@
-import { isAbyssNoteLine } from '@/abyssFormat';
+import { abyssRegionEnd, mergeAbyssBlock } from '@/abyssFormat';
 import { App, type ListItemCache, TFile } from 'obsidian';
 import type { ITask } from '@/api/types/Task';
 import type TickTickSync from '@/main';
@@ -124,6 +124,9 @@ export class NewFileMap {
 		const oldTabs = entry.tabs;
 
 		const linesToReplaceCount = oldContentEndLine - oldLineIdx + 1;
+		if (getSettings().abyssTasksFormat) {
+			taskLine = mergeAbyssBlock(taskLine, this.fileLines.slice(oldLineIdx + 1, oldContentEndLine + 1));
+		}
 		const arTaskLines = taskLine.split('\n');
 		this.fileLines.splice(oldLineIdx, linesToReplaceCount, ...arTaskLines);
 
@@ -380,7 +383,9 @@ export class NewFileMap {
 			}
 
 			// ensure items/notes past the metadata cache end are included
-			entry.contentEndLine = Math.max(entry.contentEndLine, this.computeContentEndLine(entry.lineIdx));
+			entry.contentEndLine = getSettings().abyssTasksFormat
+				? this.computeContentEndLine(entry.lineIdx)
+				: Math.max(entry.contentEndLine, this.computeContentEndLine(entry.lineIdx));
 		}
 
 		for (let i = 0; i < lineEntries.length; i++) {
@@ -408,6 +413,7 @@ export class NewFileMap {
 	}
 
 	private computeContentEndLine(taskIdx: number): number {
+		if (getSettings().abyssTasksFormat) return abyssRegionEnd(this.fileLines, taskIdx);
 		const taskTabs = this.plugin.taskParser.getTabs(this.fileLines[taskIdx]);
 		const numTaskTabs = taskTabs.length;
 		const notePrefix = taskTabs + '  ';
@@ -450,6 +456,7 @@ export class NewFileMap {
 	}
 
 	private getTaskEndLineByIdx(taskIdx: number) {
+		if (getSettings().abyssTasksFormat) return abyssRegionEnd(this.fileLines, taskIdx);
 		const taskTabs = this.plugin.taskParser.getTabs(this.fileLines[taskIdx]);
 		const numTaskTabs = taskTabs.length;
 		const notePrefix = taskTabs + '  ';
@@ -489,9 +496,7 @@ export class NewFileMap {
 		taskRecord.task = taskLine;
 
 		if (getSettings().abyssTasksFormat) {
-			for (let j = taskIdx + 1; j < this.fileLines.length && isAbyssNoteLine(this.fileLines[j], taskLine); j++) {
-				taskLines.push(this.fileLines[j]);
-			}
+			taskLines.push(...this.fileLines.slice(taskIdx + 1, abyssRegionEnd(this.fileLines, taskIdx) + 1));
 			taskRecord.taskLines = taskLines;
 			return taskRecord;
 		}

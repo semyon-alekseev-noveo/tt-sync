@@ -1,3 +1,4 @@
+import { mergeAbyssBlock } from '@/abyssFormat';
 /**
  * TaskModificationDetector - Detects task changes in markdown files
  * Extracts modification detection logic from SyncModule (lines ~158-756)
@@ -742,13 +743,16 @@ export class TaskModificationDetector {
 		newTaskCopy.items = [];
 
 		const numTabs = this.plugin.taskParser.getNumTabs(lineTxt);
-		const decoratedText = await this.plugin.taskParser?.convertTaskToLine(newTaskCopy, numTabs);
+		let decoratedText = await this.plugin.taskParser?.convertTaskToLine(newTaskCopy, numTabs);
 
 
 		try {
 			const taskLine = line ?? cursor?.line ?? 0;
 			const taskRec = await fileMap.getTaskRecordByLine(taskLine);
 			const noteLineCount = taskRec.taskLines ? taskRec.taskLines.length : 0;
+			if (getSettings().abyssTasksFormat) {
+				decoratedText = mergeAbyssBlock(decoratedText, taskRec.taskLines ?? []);
+			}
 
 			if (editor && cursor) {
 				const from = { line: cursor.line, ch: 0 };

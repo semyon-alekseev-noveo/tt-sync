@@ -1,5 +1,6 @@
 import { abyssLinesToNote, noteToAbyssLines, childIndent } from '@/abyssFormat';
 import { mapObsidianTag, mapTickTickTag } from '@/tagMapping';
+import { checkboxChar, restoreStatus, tagForStatusChar, isStatusTag } from '@/statusMapping';
 import { type App, type MetadataCache, Notice } from 'obsidian';
 import type TickTickSync from '@/main';
 import type { ITask, ITaskItem, Reminder } from '@/api/types/Task';
@@ -107,8 +108,8 @@ export const REGEX = {
 		REMOVE_INLINE_METADATA: /%%\[\w+::\s*\w+\]%%/g,
 		REMOVE_RECURRENCE: /🔁\s+[^🔁➕⏳🛫📅✅❌⏰\n]+/gu,
 		REMOVE_REMINDER: /⏰\s+[^⏰➕⏳🛫📅✅❌🔁🔺⏫🔼🔽⏬\n]+/gu,
-		REMOVE_CHECKBOX: /^(-|\*)\s+\[(x|X| )\]\s/,
-		REMOVE_CHECKBOX_WITH_INDENTATION: /^([ \t]*)?(-|\*)\s+\[(x|X| )\]\s/,
+		REMOVE_CHECKBOX: /^(-|\*)\s+\[(.)\]\s/,
+		REMOVE_CHECKBOX_WITH_INDENTATION: /^([ \t]*)?(-|\*)\s+\[(.)\]\s/,
 		REMOVE_TickTick_LINK: /\[link\]\(.*?\)/
 	}, //todo: this and remove_tags are redundant. Probably some of the other stuff to. Rationalize this lot.
 	ALL_TAGS: tag_regex,
@@ -143,12 +144,19 @@ export class TaskParser {
 
 		task.title = this.stripOBSUrl(task.title);
 
-		resultLine += `- [${task.status > 0 ? 'x' : ' '}] ${task.title}`;
+		let checkChar = task.status > 0 ? 'x' : ' ';
+		let lineTags = task.tags;
+		if (getSettings().abyssTasksFormat) {
+			const r = restoreStatus(task.status, task.tags, getSettings().statusMappings);
+			checkChar = r.char;
+			lineTags = r.tags;
+		}
+		resultLine += `- [${checkChar}] ${task.title}`;
 
 
 		//add Tags
-		if (task.tags) {
-			resultLine = this.addTagsToLine(resultLine, task.tags);
+		if (lineTags) {
+			resultLine = this.addTagsToLine(resultLine, lineTags);
 		}
 		resultLine = this.addTickTickTag(resultLine);
 
@@ -518,6 +526,15 @@ export class TaskParser {
 		// *genuinely* TT-side "ticktick" tag if one already exists there.
 		const rawTags = this.getAllTagsFromLineText(textWithoutIndentation)
 			.filter(t => getSettings().stopInjectingTickTickTag ? t.toLowerCase() !== 'ticktick' : true);
+		if (getSettings().abyssTasksFormat) {
+			// Abyss custom status char -> TickTick tag (e.g. `[/]` -> status/in-progress)
+			const smap = getSettings().statusMappings;
+			const kept = rawTags.filter(t => !isStatusTag(t, smap));
+			rawTags.length = 0;
+			rawTags.push(...kept);
+			const stTag = tagForStatusChar(checkboxChar(textWithoutIndentation), smap);
+			if (stTag) rawTags.push(stTag);
+		}
 
 		// Resolve tags: handle hierarchy and create unknown tags in TickTick
 		const tagSvc = this.plugin?.tagService;

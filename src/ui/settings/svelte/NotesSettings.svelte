@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { parseTagMappingText, tagMappingToText } from '@/tagMapping';
+	import { parseStatusMappingText, statusMappingToText } from '@/statusMapping';
+	import { parseProjectMappingText, projectMappingToText } from '@/projectMapping';
 	import { getDefaultFolder, updateSettings } from '@/settings';
 	import type TickTickSync from '@/main';
 	import './SettingsStyles.css';
@@ -15,8 +17,11 @@
 	let abyssIndent: 'tab' | 'spaces' = 'tab';
 	let scheduledAsStartDate: boolean = false;
 	let tagMappingText = '';
+	let statusMappingText = '';
+	let projectMappingText = '';
 	async function saveAbyss() {
-		settingsStore.update(s => ({ ...s, abyssTasksFormat, abyssIndent, scheduledAsStartDate, tagMappings: parseTagMappingText(tagMappingText) }));
+		settingsStore.update(s => ({ ...s, abyssTasksFormat, abyssIndent, scheduledAsStartDate, tagMappings: parseTagMappingText(tagMappingText),
+			statusMappings: parseStatusMappingText(statusMappingText), projectMappings: parseProjectMappingText(projectMappingText) }));
 		await plugin.saveSettings();
 	}
 	let resetTasksText: string = '';
@@ -40,6 +45,8 @@
 		abyssIndent = $settingsStore.abyssIndent ?? 'tab';
 		scheduledAsStartDate = $settingsStore.scheduledAsStartDate ?? false;
 		tagMappingText = tagMappingToText($settingsStore.tagMappings);
+		statusMappingText = statusMappingToText($settingsStore.statusMappings);
+		projectMappingText = projectMappingToText($settingsStore.projectMappings);
 		if ($settingsStore.noteDelimiter === '' || $settingsStore.noteDelimiter == null) {
 			delimiterOption = 'none';
 			customDelimiter = '';
@@ -134,7 +141,17 @@
 				<div class="setting-item-control"><select class="dropdown" bind:value={abyssIndent} on:change={saveAbyss}>
 					<option value="tab">Tab</option><option value="spaces">4 spaces</option></select></div>
 			</div>
+			<div class="setting-item">
+				<div class="setting-item-info"><div class="setting-item-name">Status mapping</div>
+					<div class="setting-item-description">Checkbox char = TickTick tag, e.g. <code>/ = status/in-progress</code></div></div>
+				<div class="setting-item-control"><textarea rows="4" bind:value={statusMappingText} on:change={saveAbyss}></textarea></div>
+			</div>
 			{/if}
+			<div class="setting-item">
+				<div class="setting-item-info"><div class="setting-item-name">Project mapping</div>
+					<div class="setting-item-description">Note or folder = TickTick list (name or id), e.g. <code>projects/Client.md = Client</code> or <code>projects/ = Work</code></div></div>
+				<div class="setting-item-control"><textarea rows="4" bind:value={projectMappingText} on:change={saveAbyss}></textarea></div>
+			</div>
 			<div class="setting-item">
 				<div class="setting-item-info"><div class="setting-item-name">Sync ⏳ scheduled as TickTick start date</div>
 					<div class="setting-item-description">When a task has ⏳ and no 🛫, ⏳ is sent as TickTick start date and comes back as ⏳.</div></div>

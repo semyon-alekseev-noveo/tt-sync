@@ -30,6 +30,8 @@ export interface ITickTickSyncSettings {
 	// ⏳ scheduled <-> TickTick startDate (when no 🛫)
 	scheduledAsStartDate: boolean;
 	tagMappings: { obsidian: string; ticktick: string }[];
+	statusMappings: { char: string; tag: string }[];
+	projectMappings: { path: string; project: string }[];
 	fileLinksInTickTick: string;
 	taskLinksInObsidian: string;
 	bkupFolder: string;
@@ -87,6 +89,8 @@ export const DEFAULT_SETTINGS: ITickTickSyncSettings = {
 	abyssIndent: 'tab',
 	scheduledAsStartDate: false,
 	tagMappings: [],
+	statusMappings: [{ char: '/', tag: 'status/in-progress' }, { char: '-', tag: 'status/cancelled' }],
+	projectMappings: [],
 	fileLinksInTickTick: 'taskLink',
 	taskLinksInObsidian: 'taskLink',
 	bkupFolder: '/',
