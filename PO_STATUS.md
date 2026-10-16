@@ -4,7 +4,7 @@
 **Audience:** Product owner / decision maker  
 **Repo:** `tickticksync` branch `abyss-mapping`  
 **Test vault:** `/home/sam/obsidian/Thinkpad-tts-test` (copy only; live vault untouched)  
-**Install:** BRAT → `https://github.com/semyon-alekseev-noveo/tt-sync` track **latest release** (not branch); plugin id **`tickticksync-abyss`** — see `docs/BRAT_INSTALL.md`. CI/release: [GitHub Actions for BRAT](89dae985-0ff4-43e7-829f-48e3deb6ff02#changes); first release tag `2.0.15` pushed to trigger workflow.
+**Install:** BRAT → `https://github.com/semyon-alekseev-noveo/tt-sync` track **latest release** (`2.0.17`+); plugin id **`tickticksync-abyss`** — `docs/BRAT_INSTALL.md`. Settings gear fix: [Obsidian 1.13 settings tab](f63a14a4-27db-436b-87f5-e158441a9b16#changes); fallback command **Open TickTickSync settings**.
 
 ---
 
@@ -104,11 +104,15 @@ Full analysis: `GTD_SYNC_RESEARCH.md` (hypotheses A/B, recommended R, test plans
 
 **Pilot sync checklist**
 
-1. Open `Thinkpad-tts-test` → TickTickSync → verify **GTD and projects** (six `TTS-*` lists ticked).
-2. In TickTick: one parent in `TTS-Projects` with tag `tts-test` → Sync now → note under `10 Projects/` from MOC template.
-3. In Obsidian: new `system/project` in `10 Projects/` → Sync now → parent in `TTS-Projects`.
-4. Inline line in `30 Tasks/` with `#ticktick` `#type/next` `#tts-test` → lands in `TTS-nextAction` file under `30 Tasks/TickTick/`.
-5. Sync with **zero** lists ticked → notice, no pull (safe default).
+| Step | Status | Owner action |
+|------|--------|----------------|
+| 1 | **Ready** — `data.json` matches `TTS-data-preset.json`; plugin **2.0.17** in vault; settings UI confirmed on 2.0.17 | Open vault → **GTD and projects** → confirm six `TTS-*` lists ticked |
+| 2 | **Ready** — TT parent `TTS-PILOT: Dishwasher project` (`6ad1c7878f0841315e89a10c`, `#tts-test`) in `TTS-Projects` | Command palette → **`TickTickSync: Synchronize`** → note under `10 Projects/` (MOC template) |
+| 3 | Pending user | New `system/project` in `10 Projects/` → **Synchronize** → parent in `TTS-Projects` |
+| 4 | Pending user | Inline in `30 Tasks/`: `#ticktick` `#type/next` `#tts-test` → **Synchronize** → `30 Tasks/TickTick/TTS-nextAction.md` + TT list |
+| 5 | Pending user | Untick all lists → **Synchronize** → notice, no pull |
+
+Runbook: test vault `00 Inbox/TTS-PILOT-RUN.md`.
 
 **Still open:** reverse `projectMappings`; dual hub + per-list files; existing installs that relied on `SyncTag` only need `syncedLists` set.
 

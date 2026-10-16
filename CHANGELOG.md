@@ -1,5 +1,19 @@
 # Changelog
 
+### Iteration 2026-10-16 06:50 UTC
+
+- Context: Owner confirmed settings UI on plugin 2.0.17; pilot soak on `Thinkpad-tts-test` next.
+- Target: Harden vault `data.json`, one TT pilot parent, operator runbook, PO checklist status.
+- Actions log:
+  - Merged `00 Inbox/TTS-data-preset.json` into test-vault `tickticksync-abyss/data.json` (kept session fields); fixed drift (`syncedLists` empty, scheme off, wrong `projectsListId`).
+  - Verified vault `manifest.json` **2.0.17** and `main.js` matches repo `dist/`.
+  - TickTick MCP: created parent **TTS-PILOT: Dishwasher project** in `TTS-Projects` (`6ad1c7878f0841315e89a10c`, tags `tts-test`, `project`, `obsidian`).
+  - Added `00 Inbox/TTS-PILOT-RUN.md`; updated `PO_STATUS.md` pilot checklist table.
+- Validation: `node` merge script printed expected GTD keys; `cmp` dist vs vault `main.js` identical.
+- Problems: `data.json` had regressed to pre-pilot defaults before merge (`open`, mitigated).
+- To Be Done: User runs Phases B–E in `TTS-PILOT-RUN.md`; optional commit/push docs on `tt-sync`.
+- References: `CHANGELOG.md`, `PO_STATUS.md`, `00 Inbox/TTS-PILOT-RUN.md` (test vault), `TTS-data-preset.json` (test vault)
+
 ### Iteration 2026-10-16 06:45 UTC
 
 - Context: Thinkpad-tts-test Obsidian 1.13.7 — plugin 2.0.16 enabled but no gear on Installed row; vault `main.js` matched release build.
