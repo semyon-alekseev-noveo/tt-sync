@@ -42,7 +42,7 @@ async function trackDeviceInSettings(deviceId: string, deviceLabel: string): Pro
 		return;
 	}
 
-	updateSettings({ devices: updatedDevices });
+	updateSettings({ devices: updatedDevices }, { persist: false });
 
 	// Persist device list to DB meta
 	await db.meta.update("sync", { devices: updatedDevices });

@@ -107,12 +107,14 @@ export default class TickTickSync extends Plugin {
 	private markdownProcessor?: MarkdownProcessor;
 	/** False until loadSettings finishes; blocks premature saves during enable. */
 	settingsReady = false;
+	private settingsLoadPromise: Promise<void> | null = null;
 
 	onload() {
 		// addSettingTab must run synchronously in onload; awaiting loadSettings first left no gear if loadData hung.
 		this.registerSettingsTab();
 		this.app.workspace.onLayoutReady(async () => {
 			await this.waitForObsidianSync();
+			await this.ensureSettingsLoaded();
 			try {
 				await this.pluginLoad();
 			} catch (error) {
@@ -120,6 +122,14 @@ export default class TickTickSync extends Plugin {
 				new Notice('TickTickSync: sync features failed to start; settings remain available.');
 			}
 		});
+	}
+
+	/** Single flight: load data.json before pluginLoad / initDB can trigger saves. */
+	ensureSettingsLoaded(): Promise<void> {
+		if (!this.settingsLoadPromise) {
+			this.settingsLoadPromise = this.completeSettingsLoad();
+		}
+		return this.settingsLoadPromise;
 	}
 
 	/** Register settings tab synchronously; load data.json afterward. */
@@ -135,7 +145,7 @@ export default class TickTickSync extends Plugin {
 			});
 		}
 		this.registerOpenSettingsCommand();
-		void this.completeSettingsLoad();
+		void this.ensureSettingsLoaded();
 	}
 
 	private async completeSettingsLoad(): Promise<void> {
@@ -343,6 +353,7 @@ export default class TickTickSync extends Plugin {
 			if (!data) {
 				data = { version: this.manifest.version };
 			}
+			const versionBefore = data.version as string | undefined;
 			try {
 				data = await this.migrateData(data);
 			} catch (error) {
@@ -355,7 +366,9 @@ export default class TickTickSync extends Plugin {
 			const merged = mergeSettingsWithDefaults(data ?? {});
 			updateSettings(merged, { persist: false });
 			this.settingsReady = true;
-			if (migrationOk) {
+			// Do not save on every enable — that rewrites data.json from memory and races with initDB.
+			const versionAfter = merged.version;
+			if (migrationOk && versionAfter !== versionBefore) {
 				await this.saveSettings();
 			}
 		} catch (error) {

@@ -40,9 +40,12 @@ export function settingsLoad(plugin: TickTickSync) {
 		set: (value: ITickTickSyncSettings) => {
 			svelteSet(value);
 			syncAll(value);
-			currentPlugin?.saveSettings()?.catch((e) => {
-				console.error('settingsStore.set: saveSettings failed', e);
-			});
+			// Never persist while plugin is still loading defaults (disable/enable race with initDB).
+			if (currentPlugin?.settingsReady) {
+				currentPlugin.saveSettings()?.catch((e) => {
+					console.error('settingsStore.set: saveSettings failed', e);
+				});
+			}
 		},
 	};
 }

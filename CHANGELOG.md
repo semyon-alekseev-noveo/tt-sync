@@ -1,5 +1,20 @@
 # Changelog
 
+### Iteration 2026-10-16 07:25 UTC
+
+- Context: Disabling and re-enabling the plugin cleared GTD keys in `data.json` (`syncedLists`, mappings) even when disk had a full preset.
+- Target: No `data.json` rewrite on enable unless version migration actually changed; sync/init must not run before settings load completes.
+- Actions log:
+  - `ensureSettingsLoaded()` single-flight promise; `onLayoutReady` awaits it before `pluginLoad()` / `initDB`.
+  - `loadSettings`: save only when `merged.version !== versionBefore` (not every enable).
+  - `settingsStore.set`: auto-save only when `plugin.settingsReady`.
+  - `trackDeviceInSettings`: `updateSettings(..., { persist: false })`.
+  - Version **2.0.22**.
+- Validation: `npm test` — 491 passed; `npm run build` OK.
+- Problems: Prior wipes on disk need preset merge once (`open` for affected vaults).
+- To Be Done: BRAT to **2.0.22**; disable/enable plugin twice; confirm GTD section and `data.json` unchanged.
+- References: `CHANGELOG.md`, `src/main.ts`, `src/ui/settings/settingsstore.ts`, `src/db/dexie.ts`
+
 ### Iteration 2026-10-16 07:12 UTC
 
 - Context: On **2.0.20**, Thinkpad test vault `data.json` had six `syncedLists` and four `tagListMappings` on disk but GTD UI showed empty checkboxes and tag textarea (API list fetch empty + Svelte store still on defaults).
