@@ -21,12 +21,14 @@
 
 ## Validation
 
-- Build: `npm run build` in repo root.
+- Build: `npm run build` in repo root; CI on `abyss-mapping` via `.github/workflows/ci.yml`.
+- BRAT installs: GitHub Release assets from `.github/workflows/release.yml` (see `docs/BRAT_INSTALL.md`).
 - TT cleanup verified 2026-10-16 via MCP (no `ticktick` tag left on polluted set).
 - Next soak: Projects-only / limited Sync Tag — see `PO_STATUS.md` §4.
 
 ## Problems
 
+- BRAT 2.0.15 missing settings gear until layout/sync (`resolved` in 2.0.16 — `registerSettingsTab` in `onload`).
 - Stub `.md` files for every TickTick list and no multi-list/folder scope (`mitigated` in code 2026-10-16; verify in Obsidian soak).
 - Test vault `data.json` drifted from `PO_STATUS.md` §2 (empty Sync Tag/Project) — do not Sync now (`open`).
 - First sync used unlimited defaults and polluted live TT titles/tags (`resolved` via MCP cleanup).

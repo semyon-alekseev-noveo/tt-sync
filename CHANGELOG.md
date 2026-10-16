@@ -1,5 +1,20 @@
 # Changelog
 
+### Iteration 2026-10-16 06:30 UTC
+
+- Context: BRAT install 2.0.15 on Thinkpad-tts-test — no settings gear on **Settings → Community plugins → Installed** row.
+- Target: Settings tab registers on enable; release 2.0.16 with same install layout as 2.0.15.
+- Actions log:
+  - Vault check: folder `tickticksync-abyss`, `community-plugins.json` id match, `data.json` present, `main.js` 649 KiB, `node --check` OK.
+  - Release 2.0.15 assets: flat `manifest.json` + `main.js` + `styles.css`; zip `tickticksync-abyss/{main.js,manifest.json,styles.css}` (not a wrong folder name).
+  - Root cause: `addSettingTab` ran only inside `onLayoutReady` after `waitForObsidianSync` → gear absent until layout + sync idle (sync can wait indefinitely).
+  - `registerSettingsTab()` in `onload` before deferred work; `pluginLoad` no longer loads settings or adds tab; try/catch on deferred load.
+  - Version 2.0.16; `docs/BRAT_INSTALL.md` notes Installed-list gear vs catalog page.
+- Validation: `npm test -- --run` 481 passed; `npm run build` OK; copied `dist/` to test vault.
+- Problems: Users on 2.0.15 need BRAT **Check for updates** or tag `2.0.16` release (`open`).
+- To Be Done: Push `abyss-mapping`, publish GitHub release `2.0.16`, reload plugin in Obsidian and confirm gear on Installed row.
+- References: `CHANGELOG.md`, `src/main.ts`, `docs/BRAT_INSTALL.md`
+
 ### Iteration 2026-10-16 06:22 UTC
 
 - Context: BRAT v1.1+ installs from GitHub release assets; `tt-sync` had no releases and no CI on `abyss-mapping`.

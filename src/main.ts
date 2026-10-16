@@ -103,10 +103,34 @@ export default class TickTickSync extends Plugin {
 	settingsReady = false;
 
 	async onload() {
+		// Settings gear is tied to addSettingTab; register before layout/sync deferral.
+		await this.registerSettingsTab();
 		this.app.workspace.onLayoutReady(async () => {
 			await this.waitForObsidianSync();
-			await this.pluginLoad();
+			try {
+				await this.pluginLoad();
+			} catch (error) {
+				log.error('TickTickSync: deferred plugin load failed', error);
+				new Notice('TickTickSync: sync features failed to start; settings remain available.');
+			}
 		});
+	}
+
+	/** Load settings and register the tab even when migration or loadData fails. */
+	private async registerSettingsTab(): Promise<void> {
+		try {
+			const isSettingsLoaded = await this.loadSettings();
+			this.addSettingTab(new TickTickSyncSettingTab(this.app, this));
+			if (!isSettingsLoaded) {
+				new Notice('TickTickSync: settings had load errors; open plugin settings to review.');
+			}
+		} catch (error) {
+			log.error('TickTickSync: failed to register settings tab', error);
+			updateSettings(mergeSettingsWithDefaults({ version: this.manifest.version }), { persist: false });
+			this.settingsReady = true;
+			this.addSettingTab(new TickTickSyncSettingTab(this.app, this));
+			new Notice('TickTickSync: settings failed to load; using defaults — open plugin settings to review.');
+		}
 	}
 
 	/**
@@ -656,12 +680,6 @@ export default class TickTickSync extends Plugin {
 	}
 
 	private async pluginLoad() {
-		const isSettingsLoaded = await this.loadSettings();
-		// Settings tab mounts Svelte UI; only after data.json is merged into memory.
-		this.addSettingTab(new TickTickSyncSettingTab(this.app, this));
-		if (!isSettingsLoaded) {
-			new Notice('TickTickSync: settings had load errors; open plugin settings to review.');
-		}
 		if (!this.redo) {
 			// write-ahead redo log (.tickticksync/journal), see src/redo
 			this.redo = new RedoLog(makeAdapter(this.app));

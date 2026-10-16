@@ -19,7 +19,11 @@ BRAT does **not** compile the plugin from source. Since BRAT v1.1.0 it installs 
 
 In BRAT: **Add a beta plugin** → paste the repository URL → leave version on **latest** (or pick a frozen tag) → enable **TickTickSync (Abyss fork)** under **Community plugins**.
 
+Open plugin settings from **Settings → Community plugins → Installed** (the list of enabled plugins): use the **gear** on the **TickTickSync (Abyss fork)** row. The community catalog detail page for a beta plugin does not show that gear.
+
 If BRAT reports **no releases**, publish the first release (see below), then use **Check for updates** or re-add the plugin.
+
+Use release **2.0.16** or newer so the settings tab registers on plugin enable (not only after Obsidian layout / Sync).
 
 ## Obsidian steps (new install)
 

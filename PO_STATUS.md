@@ -4,7 +4,7 @@
 **Audience:** Product owner / decision maker  
 **Repo:** `tickticksync` branch `abyss-mapping`  
 **Test vault:** `/home/sam/obsidian/Thinkpad-tts-test` (copy only; live vault untouched)  
-**Install:** BRAT → `https://github.com/semyon-alekseev-noveo/tt-sync` branch `abyss-mapping`; plugin id **`tickticksync-abyss`** — see `docs/BRAT_INSTALL.md`
+**Install:** BRAT → `https://github.com/semyon-alekseev-noveo/tt-sync` track **latest release** (not branch); plugin id **`tickticksync-abyss`** — see `docs/BRAT_INSTALL.md`. CI/release: [GitHub Actions for BRAT](89dae985-0ff4-43e7-829f-48e3deb6ff02#changes); first release tag `2.0.15` pushed to trigger workflow.
 
 ---
 
