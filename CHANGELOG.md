@@ -1,5 +1,94 @@
 # Changelog
 
+### Iteration 2026-10-16 15:36 UTC
+
+- Context: Owner reported P6 on pilot project note (duplicate parent checkbox; subtasks under Metadata); continue Step 4–5 hardening.
+- Target: Scheme parents never sync as lines; children insert into Active Zone, not under duplicate parent / callout.
+- Actions log:
+  - `projectScheme.ts` — `isProjectParentDuplicateLine`, `stripProjectParentDuplicateLines`.
+  - `ProjectSchemeService` — strip duplicate parent line on scheme run; `lineDuplicatesProjectParent`.
+  - `NewFileMap` — do not nest under scheme parent id; Active Zone insert on parent move.
+  - `taskParser`, `TaskModificationDetector`, `fileOperation` — ignore/push-skip duplicate parent lines.
+  - Tests in `projectScheme.test.ts`.
+- Validation: `npm test -- --run` → 493 passed; `npm run build` ok.
+- Problems: Existing mis-placed lines need one sync after plugin deploy to relocate (`open` on test vault).
+- To Be Done: Copy `dist/` to test vault; sync; Step 4 scope-based push without line tag.
+- References: `CHANGELOG.md`, `GTD_SYNC_CASES.md` CASE-P6, `src/projectScheme.ts`
+
+### Iteration 2026-10-16 15:30 UTC
+
+- Context: Owner chose Step 3 Option B (untagged inbox + ignore sync marker in Abyss); asked to record presets and explain `taskIgnoreQuery`.
+- Target: Close §3.1 in plan; apply B on test vault; document in pilot runbook.
+- Actions log:
+  - `ABYSS_FIRST_PLAN.md` §3.1 — **Option B** + one-liner.
+  - Test vault: `TTS-abyss-preset.json`; `abyss-tasks/data.json` `taskIgnoreQuery` → `#ticktick`.
+  - `TTS-PILOT-RUN.md` Phase A — Abyss preset step; `TODO.md`, `PROJECT_STATE.md` updated.
+- Validation: `abyss-tasks/data.json` contains `"taskIgnoreQuery": "#ticktick"`; preset file present under `00 Inbox/`.
+- Problems: Inbox UI behavior after reload still needs owner verify (`open`).
+- To Be Done: Reload Obsidian; Inbox (`I`) spot-check; Step 4 no-tag sync in plugin.
+- References: `CHANGELOG.md`, `ABYSS_FIRST_PLAN.md`, test vault `00 Inbox/TTS-abyss-preset.json`, `TTS-PILOT-RUN.md`
+
+### Iteration 2026-10-16 14:12 UTC
+
+- Context: Owner asked to execute Abyss-first Step 2 and expand Step 3 inbox options.
+- Target: Align test vault Abyss config with sync; document Step 3 A/B/C in depth.
+- Actions log:
+  - Test vault: `abyss-tasks/data.json` — `membershipQuery` `10 Projects/`, project insert `## Active Zone`, `taskFilePath` `00 Inbox/abyss-active.md`; created `00 Inbox/abyss-active.md`.
+  - Expanded `ABYSS_FIRST_PLAN.md` Step 3 (variants, comparison table, preset note).
+- Validation: Settings match MOC template Active Zone heading; capture path inside `syncScopeFolders`.
+- Problems: Step 3 decision still open; Option B needs UI verify for `taskIgnoreQuery`.
+- To Be Done: Reload Obsidian; verify Abyss Projects + add task in MOC; pick Step 3 A/B/C.
+- References: `CHANGELOG.md`, `ABYSS_FIRST_PLAN.md`, test vault `abyss-tasks/data.json`
+
+### Iteration 2026-10-16 14:05 UTC
+
+- Context: Owner confirmed Abyss-first principles P1–P6 for the sync plan.
+- Target: Close Step 1 in `ABYSS_FIRST_PLAN.md`; record PO sign-off.
+- Actions log: Marked Step 1 done in plan, `PO_STATUS.md`, `PROJECT_STATE.md`, `TODO.md`.
+- Validation: Owner message "confirmed" in chat.
+- Problems: Step 3 inbox/marker choice still open.
+- To Be Done: Step 2 (Abyss vault config on test vault); Step 3 decision.
+- References: `CHANGELOG.md`, `ABYSS_FIRST_PLAN.md`, `PO_STATUS.md`
+
+### Iteration 2026-10-16 13:55 UTC
+
+- Context: Owner overwhelmed by topology R complexity; wants sync aligned with Abyss Tasks logic, planned in steps.
+- Target: Single phased plan; park CASE-T4 / canonical list-file requirement for v1.
+- Actions log:
+  - Added `ABYSS_FIRST_PLAN.md` — principles P1–P6, Steps 1–8, inbox options A/B/C, scope cut, AF-* case outline.
+  - Updated `PROJECT_STATE.md`, `PO_STATUS.md` (step 4 / T4), `TODO.md` checklist.
+- Validation: No code changes; plan cross-check with `GTD_SYNC_RESEARCH.md` §2.
+- Problems: Step 3 inbox choice and Step 3.1 still pending owner input (`open`).
+- To Be Done: Owner Step 1 + 3; vault Step 2 on test vault.
+- References: `CHANGELOG.md`, `ABYSS_FIRST_PLAN.md`, `PROJECT_STATE.md`
+
+### Iteration 2026-10-16 12:20 UTC
+
+- Context: Owner asked for detailed real-world GTD sync cases, not a short summary.
+- Target: Single catalog testers and implementers can execute and sign off against.
+- Actions log:
+  - Added `GTD_SYNC_CASES.md` — vocabulary, pilot preset, 22 CASE-* scenarios (safety, project scheme, topology R tasks, pull, negatives, migration), pilot matrix, engineering sequence.
+  - Linked from `PO_STATUS.md`, `PROJECT_STATE.md`, `GTD_SYNC_RESEARCH.md`; test vault `TTS-PILOT-RUN.md` phase → case map.
+- Validation: Cross-check against pilot journal ids and `TTS-PILOT-RUN.md` outcomes (2026-10-16).
+- Problems: **CASE-T4** (list-file mirror) and **CASE-P6** (parent as duplicate checkbox) remain open.
+- To Be Done: Implement CASE-T4 for **2.0.25**; exercise untested cases in §9 matrix.
+- References: `CHANGELOG.md`, `GTD_SYNC_CASES.md`, `PO_STATUS.md`, `GTD_SYNC_RESEARCH.md`
+
+### Iteration 2026-10-16 08:15 UTC
+
+- Context: Owner asked for hands-on pilot testing (Phases C–E) on `Thinkpad-tts-test` after **2.0.24**.
+- Target: Verify sync end-to-end against `TTS-PILOT-RUN.md` success criteria.
+- Actions log:
+  - Created `10 Projects/TTS-PILOT- Phase C test.md` and `30 Tasks/TTS-PILOT-tag-routing.md`; triggered sync via `obsidian://adv-uri` + `tickticksync-abyss:tts-sync`.
+  - Phase C pass: parent `6ad1dc711befa8582aceadd7` in **TTS-Projects**, `ticktick_id` on note, no link in TT title.
+  - Phase D partial: task `6ad1dc721befa8582aceadd8` in **TTS-nextAction**; vault line in source file only (list stub still empty).
+  - Phase E spot: `syncedLists=[]` sync did not append journal pulls; preset restored.
+  - Updated test vault `TTS-PILOT-RUN.md` checkboxes; `PO_STATUS.md` pilot table.
+- Validation: TickTick MCP task/list lookup; redo journal `sync-mvaowegq-l-tv6y` at 08:12 UTC.
+- Problems: Per-list file mirror for obs-created tasks (`open`); legacy vault root stubs from first unlimited sync (`open`).
+- To Be Done: Product decision on list-file vs source-file; optional soak; live `Thinkpad` still blocked.
+- References: `CHANGELOG.md`, `PO_STATUS.md`, `00 Inbox/TTS-PILOT-RUN.md` (test vault)
+
 ### Iteration 2026-10-16 07:58 UTC
 
 - Context: Settings UI duplicated GTD/project controls under Notes and legacy Limit sync conflicted with synced lists.

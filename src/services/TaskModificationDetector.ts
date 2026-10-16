@@ -242,6 +242,11 @@ export class TaskModificationDetector {
 		}
 		// Only process full tasks here.  taskParser.isTaskItem handles item
 		// identification; note-level content is skipped entirely.
+		const taskIdEarly = this.plugin.taskParser.getTickTickId(lineText) ?? '';
+		if (taskIdEarly && this.plugin.projectScheme?.lineDuplicatesProjectParent?.(filepath!, taskIdEarly)) {
+			return false;
+		}
+
 		if (!this.plugin.taskParser?.hasTickTickId(lineText) ||
 			!this.plugin.taskParser?.hasTickTickTag(lineText)) {
 			// Not a full task — check if it's a genuine task item.

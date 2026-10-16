@@ -34,7 +34,15 @@
 - [ ] Сбрасывать журнал на диск (fsync) до отправки в TickTick; тест «процесс убит посреди синка». https://jepsen.io/
 - [ ] Предпросмотр отката с показом разницы; удалённые задачи восстанавливать в прежнюю заметку. https://help.obsidian.md/Plugins/File+recovery
 
-## GTD-синк (исследование `GTD_SYNC_RESEARCH.md`) — следующие шаги
+## Abyss-first sync (`ABYSS_FIRST_PLAN.md`) — текущий план
+- [x] Step 1: PO подтвердить принципы P1–P6; T4 / topology R — out of scope v1 (2026-10-16).
+- [x] Step 2: Abyss `membershipQuery` → `10 Projects/`, вставка задач в `## Active Zone` (test vault 2026-10-16).
+- [x] Step 3: **Option B** — `taskIgnoreQuery: #ticktick`, untagged inbox (2026-10-16).
+- [ ] Step 3.2: UI verify — synced line with only `#ticktick` stays in Abyss Inbox after reload.
+- [ ] Step 4–5: код — строки не переезжают; единое определение проекта; P6.
+- [ ] Step 6–7: кейсы AF-* и пилот на `Thinkpad-tts-test`.
+
+## GTD-синк (архив / `GTD_SYNC_RESEARCH.md` + `GTD_SYNC_CASES.md`)
 - [x] Не создавать пустые файлы для всех списков TickTick: файл списка только для разрешённых списков и по первой задаче (`ProjectSyncService.checkProjectRename`, `VaultSyncCoordinator.ensureProjectFilesExist`).
 - [x] Настройка `syncedLists` (несколько списков вместо одного `SyncProject`); пустой список = ничего не синкать.
 - [x] Настройка `syncScopeFolders`: отправлять в TickTick только строки из этих папок.
@@ -44,4 +52,4 @@
 - [ ] Подключить обратный `projectMappings` (`pathForProjectId`) или удалить мёртвый код.
 - [ ] Пилот: скопировать новую сборку в тестовое хранилище, выбрать `TTS-*` в «GTD and projects», Sync now (см. CHANGELOG 2026-10-16 05:00).
 - [ ] Если `SyncTag` задан без `SyncProject`, после апдейта `syncedLists` пуст — проверить, нужна ли миграция «все списки».
-- [ ] Прогнать план A/B из `GTD_SYNC_RESEARCH.md` §4.3/§5.3 на тестовом хранилище (тестовые списки `TTS-*`).
+- [ ] Прогнать кейсы из `GTD_SYNC_CASES.md` §9 (пилот) и оставшиеся «Not exercised» на `Thinkpad-tts-test` (`TTS-*`).

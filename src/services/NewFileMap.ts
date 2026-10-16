@@ -91,11 +91,12 @@ export class NewFileMap {
 			insertLine = addLineNumber;
 		} else {
 			if (task.parentId) {
-				const parentEntry = this.entries.find(e => e.id === task.parentId);
+				const parentLineIdx = this.parentLineIdxForInsert(task.parentId);
+				const parentEntry = parentLineIdx >= 0 ? this.entries.find(e => e.lineIdx === parentLineIdx) : undefined;
 				if (parentEntry) {
 					insertLine = parentEntry.subtreeEndLine + 1;
 				} else {
-					// Project subtask (parent lives in TickTick only): append to `## Active Zone`.
+					// Project subtask (parent lives in frontmatter / TickTick only): append to `## Active Zone`.
 					const az = activeZoneInsertLine(this.fileLines);
 					insertLine = az >= 0 ? az : this.fileLines.length;
 					if (az >= 0) addLineNumber = az;
@@ -141,11 +142,12 @@ export class NewFileMap {
 
 			let newPositionIdx: number;
 			if (task.parentId) {
-				const parentLineIdx = this.getTaskIndex(task.parentId);
+				const parentLineIdx = this.parentLineIdxForInsert(task.parentId);
 				if (parentLineIdx >= 0) {
 					newPositionIdx = this.getTaskEndLineByIdx(parentLineIdx) + 1;
 				} else {
-					newPositionIdx = this.fileLines.length;
+					const az = activeZoneInsertLine(this.fileLines);
+					newPositionIdx = az >= 0 ? az : this.fileLines.length;
 				}
 			} else {
 				newPositionIdx = this.fileLines.length;
@@ -341,6 +343,13 @@ export class NewFileMap {
 	private fencedIds: Set<string> = new Set();
 	/** id occurs only inside a fenced code block in this file */
 	isFencedOnly(id: string): boolean { this.rebuildEntries(); return this.fencedIds.has(id) && !this.entries.some(e => e.id === id); }
+
+	/** Line index of a parent task for nesting; scheme parents never anchor children on a duplicate line. */
+	private parentLineIdxForInsert(parentId: string): number {
+		if (!parentId) return -1;
+		if (this.plugin.projectScheme?.isParentId(parentId)) return -1;
+		return this.getTaskIndex(parentId);
+	}
 
 	private rebuildEntries() {
 		this.entries = [];

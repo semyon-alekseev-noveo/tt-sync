@@ -7,8 +7,8 @@ import { getAllProjects } from '@/db/projects';
 import { isListAllowed, normalizeSyncTag, resolveProjectsList, resolveSyncedListIds, type TaskSyncLimitOptions, taskMatchesSyncLimit } from '@/syncScope';
 import log from '@/utils/logger';
 import {
-	isProjectNote, isSchemeParentTask, linkTarget, isDoneStatus, planProjects, renderProjectNote, renderProjectTemplate, sanitizeTitle, pickProjectNote, planTitle,
-	STATUS_ACTIVE, STATUS_DONE, type NoteSide, type ParentSide, type Snap, stripFileLinks,
+	isProjectNote, isSchemeParentTask, isProjectParentDuplicateLine, linkTarget, isDoneStatus, planProjects, renderProjectNote, renderProjectTemplate, sanitizeTitle, pickProjectNote, planTitle,
+	STATUS_ACTIVE, STATUS_DONE, stripProjectParentDuplicateLines, type NoteSide, type ParentSide, type Snap, stripFileLinks,
 } from '@/projectScheme';
 
 export class ProjectSchemeService {
@@ -27,6 +27,10 @@ export class ProjectSchemeService {
 
 	isParentId(id: string | undefined | null): boolean { return !!id && this.parents.has(id); }
 	noteForParent(id: string | undefined | null): string | undefined { return id ? this.parents.get(id) : undefined; }
+	/** Checkbox line that reuses the note's `ticktick_id` (invalid; parent is not a line). */
+	lineDuplicatesProjectParent(path: string, lineTaskId: string): boolean {
+		return isProjectParentDuplicateLine(path, this.fm(path), this.folder(), lineTaskId);
+	}
 	/** A TickTick task that represents a project (never written as a line). */
 	isParentTask(t: ITask): boolean {
 		if (!this.enabled() || this.blocked || !this.listId) return false;
@@ -212,7 +216,29 @@ export class ProjectSchemeService {
 			if (n && n.done === p.done) snap[p.id] = { noteDone: n.done, ttDone: p.done };
 			if (snap[p.id] && titles.has(p.id)) snap[p.id].title = titles.get(p.id);
 		}
+		for (const n of notes) {
+			if (n.id) await this.stripDuplicateParentLine(n.path, n.id);
+		}
 		updateSettings({ projectSnapshot: snap });
 		await this.plugin.saveSettings();
+	}
+
+	private async stripDuplicateParentLine(path: string, parentId: string) {
+		const f = this.app.vault.getAbstractFileByPath(path);
+		if (!(f instanceof TFile)) return;
+		const text = await this.app.vault.read(f);
+		const lines = text.split('\n');
+		const tp = this.plugin.taskParser;
+		const next = stripProjectParentDuplicateLines(
+			lines,
+			parentId,
+			l => tp.isMarkdownTask(l),
+			l => tp.getTickTickId(l),
+		);
+		const out = next.join('\n');
+		if (out !== text) {
+			log.info(`ProjectScheme: removed duplicate parent checkbox from ${path}`);
+			await this.app.vault.modify(f, out);
+		}
 	}
 }

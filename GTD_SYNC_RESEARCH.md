@@ -2,7 +2,7 @@
 
 **Date:** 2026-10-16 · **Branch:** `abyss-mapping` · **Test vault:** `/home/sam/obsidian/Thinkpad-tts-test` (copy; live vault untouched)
 **Team:** Analyst 1 (plugin internals) · Analyst 2 (Obsidian / Abyss Tasks / GTD) · Product Owner (stories, ACs, priorities)
-**Status:** research only. No plugin code or vault files were changed. `npm test` → 52 files / 437 tests pass.
+**Status:** research + pilot (2026-10-16). For step-by-step **real cases** (preconditions, expected vault + TickTick, pass/fail), use **`GTD_SYNC_CASES.md`**. This file stays the code-path and gap analysis.
 
 > Facts below are from code and vault reads. Anything I could not verify without running Obsidian is marked **(unverified)**. No tokens or secrets are quoted. `data.json` was read only for non-secret keys.
 

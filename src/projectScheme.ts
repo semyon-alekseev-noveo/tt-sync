@@ -20,6 +20,33 @@ export function isProjectNote(path: string, fm: Record<string, unknown> | undefi
 	return fmTags(fm).includes(PROJECT_NOTE_TAG);
 }
 
+/** CASE-P6: a task line must not reuse the project parent's TickTick id (parent lives in frontmatter). */
+export function isProjectParentDuplicateLine(
+	path: string,
+	fm: Record<string, unknown> | undefined,
+	folder: string,
+	lineTaskId: string,
+): boolean {
+	if (!lineTaskId?.trim() || !fm?.ticktick_id) return false;
+	if (!isProjectNote(path, fm, folder)) return false;
+	return String(fm.ticktick_id).trim() === lineTaskId.trim();
+}
+
+/** Remove checkbox lines that duplicate the project parent id (in-place filter). */
+export function stripProjectParentDuplicateLines(
+	lines: string[],
+	parentTaskId: string,
+	isTaskLine: (line: string) => boolean,
+	lineTaskId: (line: string) => string | null,
+): string[] {
+	if (!parentTaskId) return lines;
+	return lines.filter(line => {
+		if (!isTaskLine(line)) return true;
+		const id = lineTaskId(line);
+		return id !== parentTaskId;
+	});
+}
+
 /** `"[[10 Projects/Foo|Foo]]"` / `[[Foo]]` / `Foo` -> `10 Projects/Foo` / `Foo`. */
 export function linkTarget(v: unknown): string | undefined {
 	const s = Array.isArray(v) ? v[0] : v;

@@ -1,7 +1,21 @@
 import { describe, expect, it } from 'vitest';
-import { isProjectNote, isListRoot, isSchemeParentTask, linkTarget, isDoneStatus, planProjects, renderProjectNote, renderProjectTemplate, activeZoneInsertLine, sanitizeTitle, stripActiveZonePlaceholders, fmTags } from '@/projectScheme';
+import { isProjectNote, isListRoot, isSchemeParentTask, isProjectParentDuplicateLine, linkTarget, isDoneStatus, planProjects, renderProjectNote, renderProjectTemplate, activeZoneInsertLine, sanitizeTitle, stripActiveZonePlaceholders, stripProjectParentDuplicateLines, fmTags } from '@/projectScheme';
 
 describe('project scheme helpers', () => {
+	it('detects duplicate parent checkbox lines (P6)', () => {
+		const fm = { tags: ['system/project'], ticktick_id: 'parent1' };
+		expect(isProjectParentDuplicateLine('10 Projects/P.md', fm, '10 Projects', 'parent1')).toBe(true);
+		expect(isProjectParentDuplicateLine('10 Projects/P.md', fm, '10 Projects', 'child1')).toBe(false);
+		const lines = [
+			'## Active Zone',
+			'- [ ] parent dup %%[ticktick_id:: parent1]%%',
+			'- [ ] real child %%[ticktick_id:: child1]%%',
+		];
+		const out = stripProjectParentDuplicateLines(lines, 'parent1', l => /^- \[[ x]\]/.test(l), l => l.match(/ticktick_id:: (\w+)/)?.[1] ?? null);
+		expect(out).toHaveLength(2);
+		expect(out[1]).toContain('child1');
+	});
+
 	it('detects project notes by tag + folder', () => {
 		expect(isProjectNote('10 Projects/A.md', { tags: ['system/moc', 'system/project'] }, '10 Projects')).toBe(true);
 		expect(isProjectNote('10 Projects/A.md', { tags: '#system/project' }, '10 Projects/')).toBe(true);

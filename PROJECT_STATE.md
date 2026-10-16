@@ -15,9 +15,9 @@
 
 ## Target
 
-- **Approved:** TT list **Projects** ↔ Obsidian project notes (project-scheme template under `10 Projects/`).
-- Sync: interval 0. Enabling the plugin does not sync. Next: set options, then Sync now.
-- GTD scope (implemented, not yet soaked): `syncedLists` allow-list (empty = pull nothing), `syncScopeFolders` push scope, `projectTemplatePath`; settings in Sync Control → "GTD and projects".
+- **Direction (2026-10-16):** **Abyss-first** — tasks stay where Abyss puts them; TickTick mirrors tags/lists and project parents. See `ABYSS_FIRST_PLAN.md` (topology R / CASE-T4 parked).
+- **Still valid:** TT **Projects** ↔ project notes under `10 Projects/`; safety: `syncedLists`, `syncScopeFolders`, manual sync.
+- **Next execution order:** Steps 1–3 **B chosen** (PO 2026-10-16; `TTS-abyss-preset.json` on test vault) → verify Inbox UI → Steps 4–5 (code) → AF-* pilot (`ABYSS_FIRST_PLAN.md` §6–7).
 
 ## Validation
 
@@ -37,15 +37,16 @@
 
 ## To Be Done
 
-1. Owner confirms `PO_STATUS.md` §6 and the open questions in `GTD_SYNC_RESEARCH.md` §9.
-2. (done in code) GTD MVP: no stub files, `syncedLists`, `syncScopeFolders`, settings UI. Remaining: wire or drop reverse `projectMappings`.
-3. Projects-only / GTD soak on Thinkpad-tts-test with `TTS-*` lists (install new build first).
-4. Remaining items in `TODO.md` after that soak.
+1. Vault: Step 3.2 — confirm Abyss Inbox with `taskIgnoreQuery` (reload Obsidian on test vault).
+2. Vault: Step 2 **done** on `Thinkpad-tts-test` (see `ABYSS_FIRST_PLAN.md` Step 2 table).
+3. Engineering: Steps 4–5 — no line relocate; P6 fix; optional AF-* doc.
+4. Pilot: Step 7 — AF-* on `Thinkpad-tts-test` before live vault.
 
 ## References
 
+- `ABYSS_FIRST_PLAN.md`
+- `GTD_SYNC_CASES.md`
 - `GTD_SYNC_RESEARCH.md`
-
 - `CHANGELOG.md`
 - `PO_STATUS.md`
 - `TODO.md`

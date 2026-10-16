@@ -506,6 +506,33 @@ export class TaskParser {
 
 		const TickTick_id = this.getTickTickId(textWithoutIndentation) ?? '';
 
+		if (TickTick_id && this.plugin.projectScheme?.lineDuplicatesProjectParent?.(filepath, TickTick_id)) {
+			return {
+				id: TickTick_id,
+				projectId: '',
+				title: '',
+				content: '',
+				desc: '',
+				items: [],
+				parentId: '',
+				childIds: [],
+				sortOrder: 0,
+				reminder: '',
+				reminders: [],
+				progress: 0,
+				deleted: 1,
+				lineHash: '',
+				dueDate: '',
+				startDate: '',
+				completedTime: '',
+				isAllDay: false,
+				tags: [],
+				priority: 0,
+				modifiedTime: '',
+				status: 0,
+			};
+		}
+
 		const allDatesStruct = this.plugin.dateMan?.parseDates(textWithoutIndentation);
 
 		const recurrenceMatch = textWithoutIndentation.match(REGEX.RECURRENCE_RULE);

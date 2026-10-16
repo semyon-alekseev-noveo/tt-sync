@@ -4,7 +4,7 @@
 **Audience:** Product owner / decision maker  
 **Repo:** `tickticksync` branch `abyss-mapping`  
 **Test vault:** `/home/sam/obsidian/Thinkpad-tts-test` (copy only; live vault untouched)  
-**Install:** BRAT → `https://github.com/semyon-alekseev-noveo/tt-sync` track **latest release** (**2.0.23**+); plugin id **`tickticksync-abyss`** — `docs/BRAT_INSTALL.md`. GTD wipe on upgrade: **2.0.23** (`buildPersistedSettings`, no store auto-save). Preset: `00 Inbox/TTS-data-preset.json`.
+**Install:** BRAT → `https://github.com/semyon-alekseev-noveo/tt-sync` track **latest release** (**2.0.24**+); plugin id **`tickticksync-abyss`** — `docs/BRAT_INSTALL.md`. Preset: `00 Inbox/TTS-data-preset.json`.
 
 ---
 
@@ -77,9 +77,15 @@ Still open for later (not blocking): defaults in §3 (items 1–5).
 
 **Next:** limited soak — sync **only** list `Projects`, one parent task / one note.
 
-## 6. PO decision (proposed 2026-10-16, pending owner confirmation)
+## 6. PO decision (2026-10-16)
 
-Full analysis: `GTD_SYNC_RESEARCH.md` (hypotheses A/B, recommended R, test plans, open questions §9).
+**Abyss-first principles P1–P6:** **confirmed** — see `ABYSS_FIRST_PLAN.md` §1. Topology R canonical list-file (CASE-T4) **parked** for v1.
+
+---
+
+## 6a. PO decision (proposed 2026-10-16, topology R era)
+
+Full analysis: `GTD_SYNC_RESEARCH.md` (hypotheses A/B, recommended R, test plans, open questions §9). **Executable scenarios:** `GTD_SYNC_CASES.md` (CASE-* IDs, preconditions, expected Obsidian + TickTick, pilot matrix §9).
 
 **Answers to §3 open points**
 
@@ -110,18 +116,20 @@ Full analysis: `GTD_SYNC_RESEARCH.md` (hypotheses A/B, recommended R, test plans
 |------|--------|----------------|
 | 1 | **Ready** — preset + six `TTS-*` lists; deploy plugin **2.0.20** (`dist/` → test vault) | GTD settings → confirm lists; `projectsListName=TTS-Projects` (name wins over stale `projectsListId`) |
 | 2 | **Retest (2.0.18)** — Phase B core passed on 2.0.17 but **FAIL** scoped pull (16 legacy project notes + wrong list id); fix in 2.0.18 | **Synchronize** → only `#tts-test` parent creates/updates; other `10 Projects/` notes untouched; `TTS-Projects.md` stub under `30 Tasks/TickTick/` |
-| 3 | Pending user | New `system/project` in `10 Projects/` → **Synchronize** → parent in `TTS-Projects` |
-| 4 | Pending user | Inline in `30 Tasks/`: `#ticktick` `#type/next` `#tts-test` → **Synchronize** → `30 Tasks/TickTick/TTS-nextAction.md` + TT list |
-| 5 | Pending user | Untick all lists → **Synchronize** → notice, no pull |
+| 3 | **Pass (2026-10-16)** — `TTS-PILOT- Phase C test` → TT parent `6ad1dc711befa8582aceadd7` in **TTS-Projects**, clean title | Optional: add `tts-test` tag on TT parent (note had YAML tag) |
+| 4 | **Partial (legacy R)** — TT list OK; line in source note — **acceptable under Abyss-first** (`ABYSS_FIRST_PLAN.md`); CASE-T4 **parked** | Step 4: confirm no relocate policy in code/docs |
+| 5 | **Pass (spot)** — empty `syncedLists` sync added no journal pulls | Formal UI test still useful |
 
 **Phase B validation (2026-10-16, subagent):** pilot parent + MOC note — pass; five list stubs — pass; missing `TTS-Projects.md` — fixed in 2.0.18; 16 unrelated project notes updated — **fail** (fixed in 2.0.18 via scheme scope + `resolveProjectsList`).
 
-Runbook: test vault `00 Inbox/TTS-PILOT-RUN.md`.
+Runbook: test vault `00 Inbox/TTS-PILOT-RUN.md` (phases map to **CASE-*** in `GTD_SYNC_CASES.md`).
 
 **Still open:** reverse `projectMappings`; dual hub + per-list files; existing installs that relied on `SyncTag` only need `syncedLists` set.
 
 ### References
 
+- `ABYSS_FIRST_PLAN.md` (current step-by-step alignment with Abyss)  
+- `GTD_SYNC_CASES.md` (legacy TickTick/topology-R case catalog)  
 - `GTD_SYNC_RESEARCH.md` (GTD research and recommendation)  
 - `ABYSS_MAPPING.md` (step 7 project scheme)  
 - `TODO.md`  
