@@ -2,8 +2,7 @@
 	import { parseTagMappingText, tagMappingToText } from '@/tagMapping';
 	import { parseStatusMappingText, statusMappingToText } from '@/statusMapping';
 	import { parseProjectMappingText, projectMappingToText } from '@/projectMapping';
-	import { parseTagListText, tagListToText } from '@/listMapping';
-	import { getDefaultFolder, updateSettings } from '@/settings';
+	import { getSettings } from '@/settings';
 	import type TickTickSync from '@/main';
 	import './SettingsStyles.css';
 	import { onMount } from 'svelte';
@@ -20,17 +19,28 @@
 	let tagMappingText = '';
 	let statusMappingText = '';
 	let projectMappingText = '';
-	let tagListText = '';
 	let onTickTickDeletion: 'ask' | 'cancel' = 'ask';
 	let autoCleanupDatabase = false;
-	let projectSchemeEnabled = false;
 	let notesHydrated = false;
-	async function saveAbyss() {
+
+	$: schemeEnabled = $settingsStore.projectSchemeEnabled ?? getSettings().projectSchemeEnabled ?? false;
+
+	async function saveFormat() {
 		if (!notesHydrated || !plugin.settingsReady) return;
-		settingsStore.update(s => ({ ...s, abyssTasksFormat, abyssIndent, scheduledAsStartDate, tagMappings: parseTagMappingText(tagMappingText),
-			statusMappings: parseStatusMappingText(statusMappingText), projectMappings: parseProjectMappingText(projectMappingText), tagListMappings: parseTagListText(tagListText), onTickTickDeletion, autoCleanupDatabase, projectSchemeEnabled }));
+		settingsStore.update(s => ({
+			...s,
+			abyssTasksFormat,
+			abyssIndent,
+			scheduledAsStartDate,
+			tagMappings: parseTagMappingText(tagMappingText),
+			statusMappings: parseStatusMappingText(statusMappingText),
+			projectMappings: parseProjectMappingText(projectMappingText),
+			onTickTickDeletion,
+			autoCleanupDatabase,
+		}));
 		await plugin.saveSettings();
 	}
+
 	let resetTasksText: string = '';
 	$: resetTasksText = syncNotes
 		? 'Get all Notes from TickTick?'
@@ -41,11 +51,9 @@
 	}
 
 	let delimiterOption: 'none' | 'custom' = 'none';
-	let customDelimiter: string = ''; // e.g., "---", "**", etc.
+	let customDelimiter: string = '';
 	let previewExample = '';
-	let folderPath = $settingsStore.defaultFolderPath;
 
-	// Load current settings on mount
 	onMount(() => {
 		syncNotes = $settingsStore.syncNotes;
 		abyssTasksFormat = $settingsStore.abyssTasksFormat ?? false;
@@ -54,10 +62,8 @@
 		tagMappingText = tagMappingToText($settingsStore.tagMappings);
 		statusMappingText = statusMappingToText($settingsStore.statusMappings);
 		projectMappingText = projectMappingToText($settingsStore.projectMappings);
-		tagListText = tagListToText($settingsStore.tagListMappings);
 		onTickTickDeletion = $settingsStore.onTickTickDeletion ?? 'ask';
 		autoCleanupDatabase = $settingsStore.autoCleanupDatabase ?? false;
-		projectSchemeEnabled = $settingsStore.projectSchemeEnabled ?? false;
 		if ($settingsStore.noteDelimiter === '' || $settingsStore.noteDelimiter == null) {
 			delimiterOption = 'none';
 			customDelimiter = '';
@@ -77,34 +83,28 @@
 		tagMappingText = tagMappingToText($settingsStore.tagMappings);
 		statusMappingText = statusMappingToText($settingsStore.statusMappings);
 		projectMappingText = projectMappingToText($settingsStore.projectMappings);
-		tagListText = tagListToText($settingsStore.tagListMappings);
 		onTickTickDeletion = $settingsStore.onTickTickDeletion ?? 'ask';
 		autoCleanupDatabase = $settingsStore.autoCleanupDatabase ?? false;
-		projectSchemeEnabled = $settingsStore.projectSchemeEnabled ?? false;
 		notesHydrated = true;
 	}
 
-
-	// Handle when option is changed
 	function handleOptionChange(option: 'none' | 'custom') {
 		delimiterOption = option;
 		if (option === 'none') {
 			customDelimiter = '';
 			saveDelimiter('');
 		} else if (!customDelimiter) {
-			customDelimiter = '---'; // some sane default for custom input
+			customDelimiter = '---';
 			saveDelimiter(customDelimiter);
 		}
 		updatePreview();
 	}
 
-	// Save the delimiter to settings
 	async function saveDelimiter(value: string) {
 		settingsStore.update(s => ({ ...s, noteDelimiter: value }));
 		await plugin.saveSettings();
 	}
 
-	// Handle when custom field changes
 	function handleCustomChange(e: Event) {
 		const input = e.target as HTMLInputElement;
 		customDelimiter = input.value;
@@ -112,25 +112,24 @@
 		updatePreview();
 	}
 
-	// Example preview
 	function updatePreview() {
 		previewExample =
 			delimiterOption === 'none'
 				? '☐ Task Title \n   Note 1\n   Note 2'
 				: `☐ Task Title \n   ${customDelimiter}\n   Note 1\n   Note 2\n   ${customDelimiter}`;
-
 	}
-
-
 </script>
 <div class="{isWorking ? 'wait-cursor' : 'default-cursor'}">
+	<div class="notes-settings">
+		<p class="setting-item-description" style="margin-bottom: 1em;">
+			How task lines and note bodies look in Obsidian. List allow-list, tag → list routing, and project scheme are
+			in <strong>Sync Control → GTD and projects</strong>.
+		</p>
 
-
-	<div class="notes-settings ">
 		<div class="setting-item">
 			<div class="setting-item-info">
 				<div class="setting-item-name">Sync Notes</div>
-				<div class="setting-item-description">Synchronize Notes</div>
+				<div class="setting-item-description">Pull task descriptions from TickTick into vault lines.</div>
 			</div>
 			<div class="setting-item-control">
 				<label class="checkbox-container" class:is-enabled={syncNotes}>
@@ -140,88 +139,134 @@
 						on:change={async () => {
 							settingsStore.update(s => ({ ...s, syncNotes: syncNotes }));
 							await plugin.saveSettings();
-					  }}
+						}}
 					/>
 				</label>
 			</div>
 		</div>
 
-		{#if syncNotes}
-			<div>Notes will be synchronized.</div>
-			<br>
-			<div class="setting-item">
-				<div class="setting-item-info">
-					<div class="setting-item-name">Abyss Tasks format</div>
-					<div class="setting-item-description">Store notes as <code>- &gt; </code> description lines and <code>- </code> comment lines (Abyss Tasks). Overrides Note Delimiter.</div>
-				</div>
-				<div class="setting-item-control">
-					<label class="checkbox-container" class:is-enabled={abyssTasksFormat}>
-						<input type="checkbox" bind:checked={abyssTasksFormat}
-							on:change={saveAbyss} />
-					</label>
+		<div class="setting-item">
+			<div class="setting-item-info">
+				<div class="setting-item-name">On TickTick deletion</div>
+				<div class="setting-item-description">
+					Ask (confirmation dialog) or mark the line cancelled <code>[-]</code> and detach it from sync.
 				</div>
 			</div>
-			{#if abyssTasksFormat}
-			<div class="setting-item">
-				<div class="setting-item-info"><div class="setting-item-name">Abyss child indent</div>
-					<div class="setting-item-description">Indent written for <code>- &gt;</code>/comment lines (match Obsidian "Use tabs"). Both are read.</div></div>
-				<div class="setting-item-control"><select class="dropdown" bind:value={abyssIndent} on:change={saveAbyss}>
-					<option value="tab">Tab</option><option value="spaces">4 spaces</option></select></div>
+			<div class="setting-item-control">
+				<select class="dropdown" bind:value={onTickTickDeletion} on:change={saveFormat}>
+					<option value="ask">Ask</option>
+					<option value="cancel">Mark cancelled &amp; detach</option>
+				</select>
 			</div>
-			<div class="setting-item">
-				<div class="setting-item-info"><div class="setting-item-name">Status mapping</div>
-					<div class="setting-item-description">Checkbox char = TickTick tag, e.g. <code>/ = status/in-progress</code></div></div>
-				<div class="setting-item-control"><textarea rows="4" bind:value={statusMappingText} on:change={saveAbyss}></textarea></div>
+		</div>
+
+		<div class="setting-item">
+			<div class="setting-item-info">
+				<div class="setting-item-name">Auto clean up database</div>
+				<div class="setting-item-description">Forget files deleted from the vault without asking.</div>
 			</div>
-			{/if}
-			<div class="setting-item">
-				<div class="setting-item-info"><div class="setting-item-name">On TickTick deletion</div>
-					<div class="setting-item-description">Ask (confirmation dialog) or mark the line cancelled <code>[-]</code> and detach it from sync (never re-created in TickTick).</div></div>
-				<div class="setting-item-control"><select class="dropdown" bind:value={onTickTickDeletion} on:change={saveAbyss}>
-					<option value="ask">Ask</option><option value="cancel">Mark cancelled &amp; detach</option></select></div>
+			<div class="setting-item-control">
+				<label class="checkbox-container" class:is-enabled={autoCleanupDatabase}>
+					<input type="checkbox" bind:checked={autoCleanupDatabase} on:change={saveFormat} />
+				</label>
 			</div>
-			<div class="setting-item">
-				<div class="setting-item-info"><div class="setting-item-name">Auto clean up database</div>
-					<div class="setting-item-description">Forget files deleted from the vault without asking.</div></div>
-				<div class="setting-item-control"><label class="checkbox-container" class:is-enabled={autoCleanupDatabase}>
-					<input type="checkbox" bind:checked={autoCleanupDatabase} on:change={saveAbyss} /></label></div>
+		</div>
+
+		<div class="setting-item">
+			<div class="setting-item-info">
+				<div class="setting-item-name">Sync ⏳ scheduled as TickTick start date</div>
+				<div class="setting-item-description">
+					When a task has ⏳ and no 🛫, ⏳ is sent as TickTick start date and comes back as ⏳.
+				</div>
 			</div>
-			<div class="setting-item">
-				<div class="setting-item-info"><div class="setting-item-name">Project scheme (pilot)</div>
-					<div class="setting-item-description">Notes tagged <code>system/project</code> in <code>10 Projects/</code> ↔ parent tasks in list Projects.</div></div>
-				<div class="setting-item-control"><label class="checkbox-container" class:is-enabled={projectSchemeEnabled}>
-					<input type="checkbox" bind:checked={projectSchemeEnabled} on:change={saveAbyss} /></label></div>
+			<div class="setting-item-control">
+				<label class="checkbox-container" class:is-enabled={scheduledAsStartDate}>
+					<input type="checkbox" bind:checked={scheduledAsStartDate} on:change={saveFormat} />
+				</label>
 			</div>
-			<div class="setting-item">
-				<div class="setting-item-info"><div class="setting-item-name">Tag → list mapping</div>
-					<div class="setting-item-description">Tag decides the TickTick list (beats file default); moving the task in TickTick rewrites the tag. E.g. <code>type/next = nextAction</code></div></div>
-				<div class="setting-item-control"><textarea rows="4" bind:value={tagListText} on:change={saveAbyss}></textarea></div>
+		</div>
+
+		<div class="setting-item">
+			<div class="setting-item-info">
+				<div class="setting-item-name">Abyss Tasks format</div>
+				<div class="setting-item-description">
+					Store notes as <code>- &gt; </code> description lines and <code>- </code> comment lines. Overrides
+					note delimiter when enabled.
+				</div>
 			</div>
-			<div class="setting-item">
-				<div class="setting-item-info"><div class="setting-item-name">Project mapping</div>
-					<div class="setting-item-description">Note or folder = TickTick list (name or id), e.g. <code>projects/Client.md = Client</code> or <code>projects/ = Work</code></div></div>
-				<div class="setting-item-control"><textarea rows="4" bind:value={projectMappingText} on:change={saveAbyss}></textarea></div>
+			<div class="setting-item-control">
+				<label class="checkbox-container" class:is-enabled={abyssTasksFormat}>
+					<input type="checkbox" bind:checked={abyssTasksFormat} on:change={saveFormat} />
+				</label>
 			</div>
+		</div>
+
+		{#if abyssTasksFormat}
 			<div class="setting-item">
-				<div class="setting-item-info"><div class="setting-item-name">Sync ⏳ scheduled as TickTick start date</div>
-					<div class="setting-item-description">When a task has ⏳ and no 🛫, ⏳ is sent as TickTick start date and comes back as ⏳.</div></div>
-				<div class="setting-item-control"><label class="checkbox-container" class:is-enabled={scheduledAsStartDate}>
-					<input type="checkbox" bind:checked={scheduledAsStartDate} on:change={saveAbyss} /></label></div>
-			</div>
-			<div class="setting-item">
-				<div class="setting-item-info"><div class="setting-item-name">Tag mapping</div>
-					<div class="setting-item-description">One per line: <code>obsidian/tag = ticktick-tag</code></div></div>
-				<div class="setting-item-control"><textarea rows="5" bind:value={tagMappingText} on:change={saveAbyss} placeholder="type/next = next"></textarea></div>
-			</div>
-			<div class="setting-item delimiter-settings">
 				<div class="setting-item-info">
-					<div class="setting-item-name">Note Delimiter</div>
+					<div class="setting-item-name">Abyss child indent</div>
 					<div class="setting-item-description">
-						Choose how Notes are separated from a Task. <br>Changes will be applied on next update from
-						TickTick.
+						Indent for <code>- &gt;</code>/comment lines (match Obsidian "Use tabs").
 					</div>
 				</div>
+				<div class="setting-item-control">
+					<select class="dropdown" bind:value={abyssIndent} on:change={saveFormat}>
+						<option value="tab">Tab</option>
+						<option value="spaces">4 spaces</option>
+					</select>
+				</div>
+			</div>
+			<div class="setting-item">
+				<div class="setting-item-info">
+					<div class="setting-item-name">Status mapping</div>
+					<div class="setting-item-description">
+						Checkbox char = TickTick tag, e.g. <code>/ = status/in-progress</code>
+					</div>
+				</div>
+				<div class="setting-item-control">
+					<textarea rows="4" bind:value={statusMappingText} on:change={saveFormat}></textarea>
+				</div>
+			</div>
+		{/if}
 
+		<div class="setting-item">
+			<div class="setting-item-info">
+				<div class="setting-item-name">Tag mapping</div>
+				<div class="setting-item-description">Obsidian tag → TickTick tag name, one per line.</div>
+			</div>
+			<div class="setting-item-control">
+				<textarea
+					rows="5"
+					bind:value={tagMappingText}
+					on:change={saveFormat}
+					placeholder="obsidian/tag = ticktick-tag"
+				></textarea>
+			</div>
+		</div>
+
+		{#if !schemeEnabled}
+			<div class="setting-item">
+				<div class="setting-item-info">
+					<div class="setting-item-name">Project mapping (legacy)</div>
+					<div class="setting-item-description">
+						Note or folder → TickTick list. Not used when <strong>project scheme</strong> is on (configure in
+						GTD and projects).
+					</div>
+				</div>
+				<div class="setting-item-control">
+					<textarea rows="4" bind:value={projectMappingText} on:change={saveFormat}></textarea>
+				</div>
+			</div>
+		{/if}
+
+		{#if syncNotes && !abyssTasksFormat}
+			<div class="setting-item delimiter-settings">
+				<div class="setting-item-info">
+					<div class="setting-item-name">Note delimiter</div>
+					<div class="setting-item-description">
+						Separator between task title and note lines (next TickTick update).
+					</div>
+				</div>
 			</div>
 			<div class="setting-item delimiter-settings">
 				<div class="setting-item-info">
@@ -233,10 +278,10 @@
 						<option value="none">No delimiter</option>
 						<option value="custom">Custom</option>
 					</select>
-					{#if delimiterOption === "custom"}
+					{#if delimiterOption === 'custom'}
 						<input
 							type="text"
-							placeholder="Enter delimiter (e.g., ---)"
+							placeholder="e.g. ---"
 							bind:value={customDelimiter}
 							on:input={handleCustomChange}
 							maxlength={61}
@@ -249,19 +294,9 @@
 					</div>
 				</div>
 			</div>
-		{:else }
-			<div>Notes will be not synchronized.</div>
-			<br>
 		{/if}
 
-		<br>
-		<ResetTasksControl
-			{isWorking}
-			{resetTasksText}
-			{plugin}
-			{setIsWorking}
-		/>
-
-
+		<br />
+		<ResetTasksControl {isWorking} {resetTasksText} {plugin} {setIsWorking} />
 	</div>
 </div>

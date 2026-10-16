@@ -16,12 +16,17 @@
 		{ key: 'full', component: FullVaultSyncSection }
 	];
 
-	let openSection: string = 'defaults';
+	let openSection: string = 'gtd';
 
 	function handleToggle(sectionKey: string) {
 		openSection = openSection === sectionKey ? '' : sectionKey;
 	}
 </script>
+
+<p class="setting-item-description" style="margin-bottom: 1em;">
+	List allow-list, push scope, project scheme, and tag → list routing live under <strong>GTD and projects</strong>.
+	Legacy single-list filters are under <strong>Extra filters (advanced)</strong> when you use synced lists.
+</p>
 
 {#each sections as sec}
 	<svelte:component

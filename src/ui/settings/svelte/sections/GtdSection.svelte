@@ -31,6 +31,8 @@
 	let newTasksFile = '';
 	let projectTemplatePath = '';
 	let tagListText = '';
+	let syncTag = '';
+	let syncTagDebounce: ReturnType<typeof setTimeout> | undefined;
 
 	/** Prefer module settings (post–loadSettings) when the Svelte store is still on defaults. */
 	$: syncedLists =
@@ -77,6 +79,7 @@
 		newTasksFile = s.newTasksFile ?? '';
 		projectTemplatePath = s.projectTemplatePath ?? '';
 		tagListText = tagListToText(s.tagListMappings);
+		syncTag = s.SyncTag ?? '';
 		if (($settingsStore.syncedLists?.length ?? 0) === 0 && (s.syncedLists?.length ?? 0) > 0) {
 			refreshSettingsStore();
 		}
@@ -153,6 +156,14 @@
 	const saveNewTasksFile = () => save({ newTasksFile: newTasksFile.trim() });
 	const saveProjectTemplate = () => save({ projectTemplatePath: projectTemplatePath.trim() });
 	const saveTagList = () => save({ tagListMappings: parseTagListText(tagListText) });
+
+	function handleSyncTagInput(value: string) {
+		syncTag = value;
+		if (syncTagDebounce) clearTimeout(syncTagDebounce);
+		syncTagDebounce = setTimeout(() => {
+			void save({ SyncTag: value.trim() });
+		}, 600);
+	}
 
 	async function toggleScheme(e: Event) {
 		await save({ projectSchemeEnabled: (e.target as HTMLInputElement).checked });
@@ -281,6 +292,25 @@
 			{#if unknownEntries.length}
 				<div class="setting-item-description">Not found in TickTick: {unknownEntries.join(', ')}</div>
 			{/if}
+		</div>
+	</div>
+
+	<div class="setting-item">
+		<div class="setting-item-info">
+			<div class="setting-item-name">Sync tag (pull filter)</div>
+			<div class="setting-item-description">
+				Optional. Only tasks with this TickTick tag are pulled from allow-listed lists (no <code>#</code>).
+				Pilot example: <code>tts-test</code>. Leave empty to pull all tasks in the ticked lists (subject to
+				extra filters below).
+			</div>
+		</div>
+		<div class="setting-item-control">
+			<input
+				type="text"
+				value={syncTag}
+				placeholder="e.g. tts-test"
+				on:input={(e) => handleSyncTagInput((e.target as HTMLInputElement).value)}
+			/>
 		</div>
 	</div>
 

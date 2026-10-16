@@ -25,7 +25,7 @@
 		manual: 'Maintenance',
 		debug: 'Debug Options',
 		tasks: 'Task Settings',
-		notes: 'Notes',
+		notes: 'Task & note format',
 	};
 </script>
 <div class="ticktick-settings">

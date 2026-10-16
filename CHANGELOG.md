@@ -1,5 +1,19 @@
 # Changelog
 
+### Iteration 2026-10-16 07:58 UTC
+
+- Context: Settings UI duplicated GTD/project controls under Notes and legacy Limit sync conflicted with synced lists.
+- Target: Phase A — single canonical GTD surface, clearer tab names, advanced filters only when needed.
+- Actions log:
+  - Removed `projectSchemeEnabled` and `tagListMappings` from Notes; hid legacy project mapping when scheme on; renamed tab to **Task & note format** with cross-link to GTD.
+  - Added **Sync tag** to `GtdSection`; Limit section renamed **Extra filters (advanced)** when lists are ticked; disabled legacy single-list dropdown.
+  - Sync Control opens **GTD and projects** by default; intro blurb at top.
+- Validation: `npm test` — 492 passed; `npm run build` OK.
+- Problems: No changes.
+- To Be Done: BRAT **2.0.24**; reload plugin; confirm Notes tab no longer shows scheme/tag→list.
+- Version **2.0.24**.
+- References: `CHANGELOG.md`, `GtdSection.svelte`, `NotesSettings.svelte`, `LimitSyncSection.svelte`, `SettingsTabs.svelte`
+
 ### Iteration 2026-10-16 07:38 UTC
 
 - Context: After every BRAT upgrade, GTD settings (lists, mappings) disappeared in UI and often in `data.json`.
