@@ -15,7 +15,7 @@ import { type Editor, type MarkdownFileInfo, MarkdownView, Notice, Plugin, TFold
 
 //settings
 import { getSettings, mergeDeviceLists, updateSettings } from './settings';
-import { mergeSettingsWithDefaults } from '@/settingsMerge';
+import { hydrateSettingsFromDisk, mergeSettingsWithDefaults, preserveGtdFromDisk } from '@/settingsMerge';
 
 import { TickTickService } from '@/services';
 //TickTick api
@@ -370,7 +370,25 @@ export default class TickTickSync extends Plugin {
 		// a hand edit of data.json is waiting for the running sync to end: don't overwrite it now
 		if (this.pendingExternal && this.syncRunning) { log.info('Settings save deferred: external data.json change pending'); return; }
 		try {
-			const inMemorySettings = getSettings();
+			let onDiskData: Record<string, unknown> | null = null;
+			try {
+				onDiskData = await this.loadData() as Record<string, unknown> | null;
+			} catch (e) {
+				log.warn('Could not read on-disk settings before save', e);
+			}
+
+			// Login / forced save can run before loadSettings finishes; never write DEFAULT_SETTINGS over data.json.
+			if (!this.settingsReady && force && onDiskData) {
+				updateSettings(hydrateSettingsFromDisk(getSettings(), onDiskData), { persist: false });
+			}
+
+			let inMemorySettings = getSettings();
+			const preserved = preserveGtdFromDisk(inMemorySettings, onDiskData);
+			if (JSON.stringify(preserved) !== JSON.stringify(inMemorySettings)) {
+				updateSettings(preserved, { persist: false });
+				inMemorySettings = getSettings();
+			}
+
 			// Verify that the setting exists and is not empty
 			if (inMemorySettings && Object.keys(inMemorySettings).length > 0) {
 				const settingsToSave = { ...inMemorySettings };
@@ -384,7 +402,6 @@ export default class TickTickSync extends Plugin {
 				// another device via Obsidian Sync. Merge devices so that entries
 				// added by other instances are not lost.
 				try {
-					const onDiskData = await this.loadData() as Record<string, unknown> | null;
 					if (onDiskData?.devices && Array.isArray(onDiskData.devices)) {
 						const merged = mergeDeviceLists(
 							onDiskData.devices as DeviceInfo[],
@@ -732,7 +749,7 @@ export default class TickTickSync extends Plugin {
 
 
 		try {
-			updateSettings({vaultName: this.app.vault.getName()});
+			updateSettings({ vaultName: this.app.vault.getName() }, { persist: false });
 			await this.initializePlugin();
 		} catch (error) {
 			log.error('API Initialization Failed.( ' + String(error) + ')');

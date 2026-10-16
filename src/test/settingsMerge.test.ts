@@ -30,6 +30,16 @@ describe('mergeSettingsWithDefaults', () => {
 		expect(merged.token).toBe('t');
 	});
 
+	it('does not drop non-empty GTD arrays when merging defaults', () => {
+		const merged = mergeSettingsWithDefaults({
+			token: 't',
+			syncedLists: ['TTS-Inbox'],
+			tagListMappings: [{ tag: 'type/next', list: 'TTS-nextAction' }],
+		});
+		expect(merged.syncedLists).toEqual(['TTS-Inbox']);
+		expect(merged.tagListMappings).toHaveLength(1);
+	});
+
 	it('migrates legacy SyncProject into syncedLists when absent', () => {
 		const merged = mergeSettingsWithDefaults({ SyncProject: 'Work' });
 		expect(merged.syncedLists).toEqual(['Work']);

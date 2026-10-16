@@ -20,6 +20,8 @@
 	let listsLoading = false;
 	let reloadAgain = false;
 	let mounted = false;
+	/** True after plugin loadSettings finished and fields were filled from the store (blocks empty UI saves). */
+	let gtdHydrated = false;
 	let tasksFolder = '';
 	let scopeText = '';
 	let projectsFolder = '';
@@ -70,13 +72,21 @@
 	}
 
 	onMount(() => {
-		loadFields();
 		mounted = true; // triggers the first refreshLists() when logged in
+		if (plugin.settingsReady) {
+			loadFields();
+			gtdHydrated = true;
+		}
 		if (!$settingsStore.token) void refreshLists();
 	});
 
+	$: if (mounted && plugin.settingsReady && !gtdHydrated) {
+		loadFields();
+		gtdHydrated = true;
+	}
+
 	async function save(patch: Record<string, unknown>) {
-		if (!mounted) return; // never write before the inputs reflect the store
+		if (!mounted || !gtdHydrated || !plugin.settingsReady) return;
 		settingsStore.update(s => ({ ...s, ...patch }));
 		await plugin.saveSettings();
 	}
@@ -111,21 +121,61 @@
 		new Notice('Safe GTD defaults applied: no auto sync, no links in titles, no ticktick tag pushed.');
 	}
 
+	const GTD_EXPORT_KEYS = [
+		'TickTickTasksFilePath',
+		'syncedLists',
+		'syncScopeFolders',
+		'projectsFolder',
+		'projectsListName',
+		'projectSchemeEnabled',
+		'tagListMappings',
+		'newTasksFile',
+		'projectTemplatePath',
+		'SyncTag',
+		'projectsListId',
+		'defaultProjectId',
+		'defaultProjectName',
+		'abyssTasksFormat',
+	] as const;
+
+	function gtdExportPayload(s: typeof $settingsStore) {
+		const cfg: Record<string, unknown> = {};
+		for (const k of GTD_EXPORT_KEYS) cfg[k] = s[k];
+		return cfg;
+	}
+
 	async function copyConfig() {
-		const s = $settingsStore;
-		const cfg = {
-			TickTickTasksFilePath: s.TickTickTasksFilePath,
-			syncedLists: s.syncedLists,
-			syncScopeFolders: s.syncScopeFolders,
-			projectsFolder: s.projectsFolder,
-			projectsListName: s.projectsListName,
-			projectSchemeEnabled: s.projectSchemeEnabled,
-			tagListMappings: s.tagListMappings,
-			newTasksFile: s.newTasksFile,
-			projectTemplatePath: s.projectTemplatePath,
-		};
-		await navigator.clipboard.writeText(JSON.stringify(cfg, null, 2));
+		await navigator.clipboard.writeText(JSON.stringify(gtdExportPayload($settingsStore), null, 2));
 		new Notice('GTD settings copied as JSON.');
+	}
+
+	async function importConfig() {
+		let raw: string;
+		try {
+			raw = await navigator.clipboard.readText();
+		} catch {
+			new Notice('Could not read clipboard.');
+			return;
+		}
+		let parsed: Record<string, unknown>;
+		try {
+			parsed = JSON.parse(raw) as Record<string, unknown>;
+		} catch {
+			new Notice('Clipboard is not valid JSON.');
+			return;
+		}
+		const patch: Record<string, unknown> = {};
+		for (const k of GTD_EXPORT_KEYS) {
+			if (k in parsed) patch[k] = parsed[k];
+		}
+		if (!Object.keys(patch).length) {
+			new Notice('No GTD keys found in JSON.');
+			return;
+		}
+		loadFields();
+		await save(patch);
+		loadFields();
+		new Notice('GTD settings imported from clipboard JSON.');
 	}
 </script>
 
@@ -284,6 +334,7 @@
 		<div class="setting-item-control">
 			<button on:click={applySafeDefaults}>Apply safe defaults</button>
 			<button on:click={copyConfig}>Copy GTD settings (JSON)</button>
+			<button on:click={importConfig}>Import GTD from clipboard</button>
 		</div>
 	</div>
 </CollapsibleSection>

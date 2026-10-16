@@ -1,5 +1,20 @@
 # Changelog
 
+### Iteration 2026-10-16 07:00 UTC
+
+- Context: After BRAT upgrade to **2.0.19** + TickTick login on `Thinkpad-tts-test`, GTD tab showed empty lists/mappings; vault `data.json` on disk was also empty (not UI-only).
+- Target: Durable fix so login/early `saveSettings(true)` cannot overwrite GTD keys; restore test-vault preset; release **2.0.20**.
+- Actions log:
+  - Root cause: race — `saveSettings(true)` on login (or `settingsStore.set` before `loadSettings` completes) wrote in-memory `DEFAULT_SETTINGS` over `data.json`; `loadSettings` then persisted the already-wiped file.
+  - `preserveGtdFromDisk` / `hydrateSettingsFromDisk` in `settingsMerge.ts`; `saveSettings` hydrates from disk on forced pre-load saves and merges GTD arrays from disk/snapshot before every write.
+  - `GtdSection`: `gtdHydrated` gate — no persist until `plugin.settingsReady`; import GTD JSON from clipboard; token/projectsVersion only reload list checkboxes.
+  - Vitest: `settingsPreserveGtd.test.ts`; merged `00 Inbox/TTS-data-preset.json` into test vault `data.json` (session fields kept); `dist/` → test vault.
+  - Version **2.0.20**.
+- Validation: `npm test --run` — 490 passed; `npm run build` OK; vault merge script → six `syncedLists`, `SyncTag=tts-test`, scheme on.
+- Problems: Prior wipe already committed to disk until preset merge (`resolved` for test vault).
+- To Be Done: Owner reload plugin **2.0.20** in Obsidian; confirm GTD tab; re-run pilot step 2 if needed.
+- References: `CHANGELOG.md`, `src/settingsMerge.ts`, `src/main.ts`, `src/ui/settings/svelte/sections/GtdSection.svelte`, test vault `TTS-data-preset.json`
+
 ### Iteration 2026-10-16 06:52 UTC
 
 - Context: Phase B pilot **FAIL** on scoped pull — `SyncTag=tts-test` did not bound project scheme; 16 legacy `10 Projects/` notes touched via live **Projects** list id.

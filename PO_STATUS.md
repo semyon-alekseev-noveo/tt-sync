@@ -102,11 +102,13 @@ Full analysis: `GTD_SYNC_RESEARCH.md` (hypotheses A/B, recommended R, test plans
 
 **MVP behaviour:** GTD sync, login/settings fixes, auto-login, re-enable persistence, settings tab — see prior reviews in `CHANGELOG.md`. Settings: **Community plugins → TickTickSync (Abyss fork) → gear**. Preset: `00 Inbox/TTS-data-preset.json`.
 
+**GTD settings wipe (2026-10-16):** Fixed in **2.0.20** — login no longer saves empty GTD defaults when `loadSettings` is still running; use **Import GTD from clipboard** (or re-merge preset) if `data.json` was already wiped. Test vault preset re-merged same day.
+
 **Pilot sync checklist**
 
 | Step | Status | Owner action |
 |------|--------|----------------|
-| 1 | **Ready** — preset + six `TTS-*` lists; deploy plugin **2.0.18** (`dist/` → test vault) | GTD settings → confirm lists; `projectsListName=TTS-Projects` (name wins over stale `projectsListId`) |
+| 1 | **Ready** — preset + six `TTS-*` lists; deploy plugin **2.0.20** (`dist/` → test vault) | GTD settings → confirm lists; `projectsListName=TTS-Projects` (name wins over stale `projectsListId`) |
 | 2 | **Retest (2.0.18)** — Phase B core passed on 2.0.17 but **FAIL** scoped pull (16 legacy project notes + wrong list id); fix in 2.0.18 | **Synchronize** → only `#tts-test` parent creates/updates; other `10 Projects/` notes untouched; `TTS-Projects.md` stub under `30 Tasks/TickTick/` |
 | 3 | Pending user | New `system/project` in `10 Projects/` → **Synchronize** → parent in `TTS-Projects` |
 | 4 | Pending user | Inline in `30 Tasks/`: `#ticktick` `#type/next` `#tts-test` → **Synchronize** → `30 Tasks/TickTick/TTS-nextAction.md` + TT list |
