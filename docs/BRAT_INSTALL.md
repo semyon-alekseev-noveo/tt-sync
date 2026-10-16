@@ -4,27 +4,53 @@ The community plugin id is `tickticksync`. This fork uses **`tickticksync-abyss`
 
 ## Requirements
 
-- [BRAT](https://github.com/TfTHacker/obsidian42-brat) (`obsidian42-brat`) enabled in the vault.
-- GitHub repo with branch **`abyss-mapping`** pushed (or your chosen BRAT branch).
+- [BRAT](https://github.com/TfTHacker/obsidian42-brat) (`obsidian42-brat`) **v1.1.0 or newer** enabled in the vault.
+- GitHub repo [semyon-alekseev-noveo/tt-sync](https://github.com/semyon-alekseev-noveo/tt-sync) with at least one **GitHub Release** that includes `main.js`, `manifest.json`, and `styles.css` as release assets (published by the [Release Obsidian plugin](https://github.com/semyon-alekseev-noveo/tt-sync/actions/workflows/release.yml) workflow).
+
+BRAT does **not** compile the plugin from source. Since BRAT v1.1.0 it installs from **release assets**, not from files on a git branch. Branch **`abyss-mapping`** is where development happens; CI builds and tags produce the releases BRAT consumes.
 
 ## BRAT settings
 
 | Field | Value |
 |--------|--------|
 | Repository | `https://github.com/semyon-alekseev-noveo/tt-sync` |
-| Branch | `abyss-mapping` |
-| Plugin id | `tickticksync-abyss` (from `manifest.json`; BRAT reads it after install) |
+| Track | **Latest** release (default), or a **frozen** release tag in BRAT’s edit dialog |
+| Plugin id | `tickticksync-abyss` (from the release `manifest.json`; BRAT reads it after install) |
 
-In BRAT: **Add a beta plugin** → paste the repository URL → confirm branch if prompted → enable **TickTickSync (Abyss fork)** under **Community plugins**.
+In BRAT: **Add a beta plugin** → paste the repository URL → leave version on **latest** (or pick a frozen tag) → enable **TickTickSync (Abyss fork)** under **Community plugins**.
+
+If BRAT reports **no releases**, publish the first release (see below), then use **Check for updates** or re-add the plugin.
 
 ## Obsidian steps (new install)
 
 1. **Disable** the official **TickTickSync** (`tickticksync`) if it is installed from the community catalog.
 2. Optional but recommended: remove `.obsidian/plugins/tickticksync/` after you migrate settings (below).
 3. Open **Settings → Community plugins → BRAT** → **Add Beta plugin** → `https://github.com/semyon-alekseev-noveo/tt-sync`.
-4. Set tracking to branch **`abyss-mapping`** (BRAT plugin settings or “Switch version” for this plugin).
+4. Confirm a **release** exists on GitHub (not only the `abyss-mapping` branch). Use **latest** unless you need a frozen tag.
 5. **Enable** **TickTickSync (Abyss fork)** (`tickticksync-abyss`).
 6. Reload Obsidian if BRAT does not pull files immediately.
+
+## First GitHub release (maintainers)
+
+The release workflow builds `dist/` and uploads Obsidian plugin files to a GitHub Release.
+
+**Option A — manual workflow (no local tag):**
+
+1. Open [Actions → Release Obsidian plugin](https://github.com/semyon-alekseev-noveo/tt-sync/actions/workflows/release.yml).
+2. **Run workflow** on branch `abyss-mapping`.
+3. Leave **version** empty to use `manifest.json` (e.g. `2.0.15`), or set an explicit tag.
+4. Keep **pre-release** checked for beta builds.
+
+**Option B — git tag:**
+
+```bash
+git tag 2.0.15   # or v2.0.15 — must match manifest version semantics
+git push tt-sync 2.0.15
+```
+
+Tag push runs the same workflow and creates the release automatically (`prerelease` is false for tag pushes).
+
+After the first release, BRAT users only need **Add beta plugin** + **Check for updates**.
 
 BRAT installs into:
 

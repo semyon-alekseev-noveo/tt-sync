@@ -1,5 +1,18 @@
 # Changelog
 
+### Iteration 2026-10-16 06:22 UTC
+
+- Context: BRAT v1.1+ installs from GitHub release assets; `tt-sync` had no releases and no CI on `abyss-mapping`.
+- Target: GitHub Actions CI + release workflow; BRAT install docs aligned with release-based installs.
+- Actions log:
+  - Added `.github/workflows/ci.yml` (push/PR to `abyss-mapping`: `npm ci`, test, build).
+  - Reworked `.github/workflows/release.yml` for `tickticksync-abyss`, tag `v*` / semver, `workflow_dispatch`, release assets.
+  - Updated `docs/BRAT_INSTALL.md` (releases vs branch, first-release steps).
+- Validation: `npm test` 57 files / 481 passed; `npm run build` OK locally.
+- Problems: No GitHub release until workflow runs on `tt-sync` (`open`).
+- To Be Done: Run release workflow or push version tag; BRAT add beta plugin after first release.
+- References: `CHANGELOG.md`, `docs/BRAT_INSTALL.md`, `.github/workflows/ci.yml`, `.github/workflows/release.yml`
+
 ### Iteration 2026-10-16 06:05 UTC
 
 - Context: Community plugin id `tickticksync` would be overwritten by catalog updates; Abyss fork needs a distinct id for BRAT installs.
