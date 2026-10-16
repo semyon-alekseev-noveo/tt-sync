@@ -47,6 +47,49 @@ export function stripProjectParentDuplicateLines(
 	});
 }
 
+/**
+ * Hoist all synced child task lines into `## Active Zone` (flat), drop parent-id duplicate lines.
+ * Fixes P6 + tasks parked under Metadata / wrong list nesting after legacy sync or reset.
+ */
+export function repairProjectNoteTasks(
+	lines: string[],
+	parentTaskId: string,
+	isTaskLine: (line: string) => boolean,
+	lineTaskId: (line: string) => string | null,
+): string[] {
+	if (!parentTaskId) return lines;
+	const seen = new Set<string>();
+	const childLines: string[] = [];
+	const body: string[] = [];
+	for (const line of lines) {
+		if (!isTaskLine(line)) {
+			body.push(line);
+			continue;
+		}
+		const id = lineTaskId(line);
+		if (!id) {
+			body.push(line);
+			continue;
+		}
+		if (id === parentTaskId) continue;
+		if (seen.has(id)) continue;
+		seen.add(id);
+		childLines.push(line.replace(/^\t+/, ''));
+	}
+	if (!childLines.length) {
+		return stripProjectParentDuplicateLines(lines, parentTaskId, isTaskLine, lineTaskId);
+	}
+	let out = body;
+	if (activeZoneInsertLine(out) < 0) {
+		while (out.length && out[out.length - 1].trim() === '') out.pop();
+		out = [...out, '', `## ${ACTIVE_ZONE}`, ''];
+	}
+	const ins = activeZoneInsertLine(out);
+	out = [...out];
+	out.splice(ins, 0, ...childLines);
+	return out;
+}
+
 /** `"[[10 Projects/Foo|Foo]]"` / `[[Foo]]` / `Foo` -> `10 Projects/Foo` / `Foo`. */
 export function linkTarget(v: unknown): string | undefined {
 	const s = Array.isArray(v) ? v[0] : v;

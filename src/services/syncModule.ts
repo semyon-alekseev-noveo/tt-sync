@@ -19,7 +19,7 @@ import { NewFileMap, type ITaskItemRecord } from '@/services/NewFileMap';
 import log from '@/utils/logger';
 import { db } from "@/db/dexie";
 import { getAllProjects } from '@/db/projects';
-import { resolveSyncedListIds } from '@/syncScope';
+import { isPathInPushScope, normalizeSyncTag, resolveSyncedListIds, taskMatchesSyncLimit, type TaskSyncLimitOptions } from '@/syncScope';
 
 export class SyncMan {
 	private readonly app: App;
@@ -424,42 +424,66 @@ export class SyncMan {
 		if (!(file instanceof TFile)) {
 			return false;
 		}
+		if (!isPathInPushScope(file_path)) {
+			return false;
+		}
+		const lists = await getAllProjects();
+		const pushLimit: TaskSyncLimitOptions = {
+			syncTag: normalizeSyncTag(getSettings().SyncTag),
+			syncProject: getSettings().SyncProject?.trim() || undefined,
+			andOr: getSettings().tagAndOr,
+			allowedListIds: resolveSyncedListIds(getSettings().syncedLists ?? [], lists),
+		};
 		const fileMap = new NewFileMap(this.app, this.plugin, file);
 		await fileMap.init();
 
 		const lines = fileMap.getFileLines().split('\n');
+		const removeAt: number[] = [];
 		for (let line = 0; line < lines.length; line++) {
 			const lineText = lines[line];
-			if (this.plugin.taskParser?.hasTickTickId(lineText) && this.plugin.taskParser?.hasTickTickTag(lineText)) {
-				const taskId = this.plugin.taskParser.getTickTickId(lineText);
-				const savedTask = await this.plugin.taskRepository.loadTaskById(taskId ?? '');
-				if (taskId && savedTask) {
-					savedTask.modifiedTime = this.plugin.dateMan?.formatDateToISO(new Date()) ?? '';
-					const taskRecord = fileMap.getTaskRecord(taskId)
-					//NB: lineNumber = 0 is only safe because we KNOW we have a task record.
-					const lineTask = await this.plugin.taskParser?.convertLineToTask(lineText, 0, fileMap.getFilePath(), fileMap, taskRecord);
-					const merged = { ...savedTask, ...lineTask };
-					Object.assign(lineTask, merged);
-					// Reminders have no other in-line source here: carry them over
-					// from the last-known state so a force update can't wipe them.
-					this.plugin.taskParser?.preserveReminders(lineTask, savedTask);
-					if (getSettings().stopInjectingTickTickTag && getSettings().stripTickTickTagOnReset) {
-						// User asked to strip legacy "ticktick" tags on reset
-						// (see TaskParser.stripTickTickTag).
-						this.plugin.taskParser?.stripTickTickTag(lineTask);
-					} else {
-						// Preserve a genuine TT-side "ticktick" tag (see TaskParser.preserveTickTickTag)
-						this.plugin.taskParser?.preserveTickTickTag(lineTask, savedTask);
-					}
-					const updatedTask = <ITask>await this.plugin.tickTickRestAPI?.updateTask(lineTask);
-					//let's go ahead and do the file while we're at it.
-					const updatedLineText = await this.plugin.taskParser.convertTaskToLine(updatedTask, this.plugin.taskParser.getNumTabs(lineText))
-					fileMap.updateTask(updatedTask, updatedLineText )
-					await this.plugin.taskRepository.upsertTask(updatedTask, undefined, Date.now());
-				}
+			if (!this.plugin.taskParser?.hasTickTickId(lineText) || !this.plugin.taskParser?.hasTickTickTag(lineText)) {
+				continue;
 			}
+			const taskId = this.plugin.taskParser.getTickTickId(lineText);
+			if (!taskId) continue;
+			const path = fileMap.getFilePath();
+			if (this.plugin.projectScheme?.lineDuplicatesProjectParent?.(path, taskId)) {
+				removeAt.push(line);
+				continue;
+			}
+			const savedTask = await this.plugin.taskRepository.loadTaskById(taskId);
+			if (!savedTask) continue;
+			if (this.plugin.projectScheme?.isParentTask?.(savedTask)) {
+				removeAt.push(line);
+				continue;
+			}
+			if (pushLimit.allowedListIds?.size && !taskMatchesSyncLimit(savedTask, pushLimit)) {
+				continue;
+			}
+			savedTask.modifiedTime = this.plugin.dateMan?.formatDateToISO(new Date()) ?? '';
+			const taskRecord = fileMap.getTaskRecord(taskId);
+			const lineTask = await this.plugin.taskParser?.convertLineToTask(lineText, 0, path, fileMap, taskRecord);
+			if (!lineTask || lineTask.deleted) {
+				removeAt.push(line);
+				continue;
+			}
+			const merged = { ...savedTask, ...lineTask };
+			Object.assign(lineTask, merged);
+			this.plugin.taskParser?.preserveReminders(lineTask, savedTask);
+			if (getSettings().stopInjectingTickTickTag && getSettings().stripTickTickTagOnReset) {
+				this.plugin.taskParser?.stripTickTickTag(lineTask);
+			} else {
+				this.plugin.taskParser?.preserveTickTickTag(lineTask, savedTask);
+			}
+			const updatedTask = <ITask>await this.plugin.tickTickRestAPI?.updateTask(lineTask);
+			const updatedLineText = await this.plugin.taskParser.convertTaskToLine(updatedTask, this.plugin.taskParser.getNumTabs(lineText));
+			fileMap.updateTask(updatedTask, updatedLineText);
+			await this.plugin.taskRepository.upsertTask(updatedTask, undefined, Date.now());
 		}
-		const fileLines = fileMap.getFileLines()
+		for (const idx of removeAt.sort((a, b) => b - a)) {
+			fileMap.removeLineAt(idx);
+		}
+		const fileLines = fileMap.getFileLines();
 		if (file instanceof TFile) {
 			await this.app.vault.modify(file, fileLines);
 		}

@@ -1,5 +1,19 @@
 # Changelog
 
+### Iteration 2026-10-16 15:51 UTC
+
+- Context: Reset tasks hollowed project parent lines and pushed live Projects; owner asked to fix reset/repair.
+- Target: Safe reset path, vault repair, pilot-only push for out-of-list tasks.
+- Actions log:
+  - `repairProjectNoteTasks` hoists synced children into Active Zone; drops parent-id lines.
+  - `forceUpdates` skips/removes scheme parents, duplicate parent lines, out-of-`syncedLists` tasks.
+  - Reset runs `repairAllProjectNotes` first; modification push respects same limits.
+  - Repaired test vault `10 Projects/*.md` via repair helper.
+- Validation: `npm test -- --run` → 494 passed; sample note `оборудовать рабочее место.md` Active Zone only.
+- Problems: TickTick live **Projects** may still need manual check after prior reset (`open`).
+- To Be Done: Reload Obsidian 2.0.26; normal sync (not reset) on test vault.
+- References: `CHANGELOG.md`, `src/projectScheme.ts`, `src/services/syncModule.ts`
+
 ### Iteration 2026-10-16 15:36 UTC
 
 - Context: Owner reported P6 on pilot project note (duplicate parent checkbox; subtasks under Metadata); continue Step 4–5 hardening.

@@ -321,6 +321,12 @@ export class NewFileMap {
 		this.rebuildEntries();
 	}
 
+	removeLineAt(line: number) {
+		if (line < 0 || line >= this.fileLines.length) return;
+		this.fileLines.splice(line, 1);
+		this.rebuildEntries();
+	}
+
 	replaceLines(line: number, count: number, newText: string) {
 		const newLines = newText.split('\n');
 		this.fileLines.splice(line, count, ...newLines);

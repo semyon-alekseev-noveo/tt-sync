@@ -30,7 +30,8 @@ import type { LocalTask } from '@/db/schema';
 import { NewFileMap, type ITaskItemRecord, type ITaskRecord } from '@/services/NewFileMap';
 import { FolderSyncService } from '@/services/FolderSyncService';
 import { getSettings } from '@/settings';
-import { isPathInPushScope } from '@/syncScope';
+import { getAllProjects } from '@/db/projects';
+import { isPathInPushScope, normalizeSyncTag, resolveSyncedListIds, taskMatchesSyncLimit, type TaskSyncLimitOptions } from '@/syncScope';
 import log from '@/utils/logger';
 import ObjectID from 'bson-objectid';
 import { normalizeRepeatFlag } from '@/utils/RecurrenceConverter';
@@ -234,7 +235,8 @@ export class TaskModificationDetector {
 		lineText: string,
 		lineNumber: number | undefined,
 		fileMap: NewFileMap,
-		pendingDeletions?: PendingTickTickDeletion[]
+		pendingDeletions?: PendingTickTickDeletion[],
+		pushLimit?: TaskSyncLimitOptions,
 	): Promise<boolean> {
 		// Outside syncScopeFolders: no update, no completion, no deletion push.
 		if (!isPathInPushScope(filepath)) {
@@ -276,6 +278,10 @@ export class TaskModificationDetector {
 
 		// Get saved task from database
 		const savedTask = await this.plugin.taskRepository.loadTaskById(taskId);
+		if (savedTask) {
+			if (this.plugin.projectScheme?.isParentTask(savedTask)) return false;
+			if (pushLimit?.allowedListIds?.size && !taskMatchesSyncLimit(savedTask, pushLimit)) return false;
+		}
 		if (!savedTask) {
 			// Task not in local DB — check TickTick API before deleting.
 			// Handles the race where a file syncs to this device via external
@@ -369,6 +375,14 @@ export class TaskModificationDetector {
 		const fileMap = new NewFileMap(this.app, this.plugin, file);
 		await fileMap.init();
 
+		const lists = await getAllProjects();
+		const pushLimit: TaskSyncLimitOptions = {
+			syncTag: normalizeSyncTag(getSettings().SyncTag),
+			syncProject: getSettings().SyncProject?.trim() || undefined,
+			andOr: getSettings().tagAndOr,
+			allowedListIds: resolveSyncedListIds(getSettings().syncedLists ?? [], lists),
+		};
+
 		const lines: string[] = fileMap.getFileLines().split('\n');
 		const fenced = fencedLines(lines);
 
@@ -377,7 +391,7 @@ export class TaskModificationDetector {
 			if (fenced.has(i)) continue; // code-block examples are not tasks
 			if (this.plugin.taskParser?.isMarkdownTask(line)) {
 				try {
-					await this.checkLineForModifications(filepath, line, i, fileMap, pendingDeletions);
+					await this.checkLineForModifications(filepath, line, i, fileMap, pendingDeletions, pushLimit);
 				} catch (error) {
 					log.error('Error checking task modification:', error);
 				}

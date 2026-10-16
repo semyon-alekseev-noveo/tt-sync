@@ -8,7 +8,7 @@ import { isListAllowed, normalizeSyncTag, resolveProjectsList, resolveSyncedList
 import log from '@/utils/logger';
 import {
 	isProjectNote, isSchemeParentTask, isProjectParentDuplicateLine, linkTarget, isDoneStatus, planProjects, renderProjectNote, renderProjectTemplate, sanitizeTitle, pickProjectNote, planTitle,
-	STATUS_ACTIVE, STATUS_DONE, stripProjectParentDuplicateLines, type NoteSide, type ParentSide, type Snap, stripFileLinks,
+	STATUS_ACTIVE, STATUS_DONE, repairProjectNoteTasks, type NoteSide, type ParentSide, type Snap, stripFileLinks,
 } from '@/projectScheme';
 
 export class ProjectSchemeService {
@@ -217,19 +217,27 @@ export class ProjectSchemeService {
 			if (snap[p.id] && titles.has(p.id)) snap[p.id].title = titles.get(p.id);
 		}
 		for (const n of notes) {
-			if (n.id) await this.stripDuplicateParentLine(n.path, n.id);
+			if (n.id) await this.repairNote(n.path, n.id);
 		}
 		updateSettings({ projectSnapshot: snap });
 		await this.plugin.saveSettings();
 	}
 
-	private async stripDuplicateParentLine(path: string, parentId: string) {
+	/** Vault repair: Active Zone layout + no parent-id lines (safe before reset / on scheme run). */
+	async repairAllProjectNotes(): Promise<void> {
+		if (!this.enabled()) return;
+		for (const n of this.projectNotes()) {
+			if (n.id) await this.repairNote(n.path, n.id);
+		}
+	}
+
+	private async repairNote(path: string, parentId: string) {
 		const f = this.app.vault.getAbstractFileByPath(path);
 		if (!(f instanceof TFile)) return;
 		const text = await this.app.vault.read(f);
 		const lines = text.split('\n');
 		const tp = this.plugin.taskParser;
-		const next = stripProjectParentDuplicateLines(
+		const next = repairProjectNoteTasks(
 			lines,
 			parentId,
 			l => tp.isMarkdownTask(l),
@@ -237,7 +245,7 @@ export class ProjectSchemeService {
 		);
 		const out = next.join('\n');
 		if (out !== text) {
-			log.info(`ProjectScheme: removed duplicate parent checkbox from ${path}`);
+			log.info(`ProjectScheme: repaired project task layout in ${path}`);
 			await this.app.vault.modify(f, out);
 		}
 	}

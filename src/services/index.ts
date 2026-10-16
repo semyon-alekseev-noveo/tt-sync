@@ -999,6 +999,14 @@ export class TickTickService {
 			}
 		}
 
+		if (bForceUpdate && this.plugin.projectScheme?.enabled()) {
+			try {
+				await this.plugin.projectScheme.repairAllProjectNotes();
+			} catch (e) {
+				log.error('Project note repair before reset failed', e);
+			}
+		}
+
 		//Now do the task checking.
 		await doWithLock(LOCK_TASKS, async () => {
 			// Phase 1: Process new tasks and modifications for all files first.
