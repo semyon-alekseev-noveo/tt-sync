@@ -75,7 +75,7 @@ export class TickTickService {
 	backup() {
 		const today = shouldBackupToday(getSettings().lastBackupDate, new Date());
 		if (!today) return;
-		updateSettings({ lastBackupDate: today });
+		updateSettings({ lastBackupDate: today }, { persist: false });
 		void this.plugin.saveSettings();
 		void this.tickTickSync?.backupTickTickAllResources();
 	}
@@ -105,10 +105,10 @@ export class TickTickService {
 			const defaultProjectName = getSettings().defaultProjectName;
 			if (!defaultProjectId || defaultProjectId == '' || (defaultProjectName == "Inbox" && (defaultProjectId != result.inboxId))) {
 				//no default project id or blank default project id or (default project is inbox, but the ID is different.
-				updateSettings({defaultProjectId: result.inboxId});
+				updateSettings({ defaultProjectId: result.inboxId }, { persist: false });
 			}
 			//reset the checkpoint so next time they get ALL the tasks.
-			updateSettings({checkPoint: 0});
+			updateSettings({ checkPoint: 0 }, { persist: false });
 			await this.plugin.saveSettings();
 			return result;
 		} catch (error) {
@@ -221,7 +221,11 @@ export class TickTickService {
 						const healed = healTagListMappings(getSettings().tagListMappings, projects);
 						const pl = resolveProjectsList(projects, getSettings().projectsListName, getSettings().projectsListId);
 						const plUpd = pl && (pl.id !== getSettings().projectsListId || pl.name !== getSettings().projectsListName) ? { projectsListId: pl.id, projectsListName: pl.name } : {};
-						if (healed || Object.keys(plUpd).length) { updateSettings({ ...(healed ? { tagListMappings: healed } : {}), ...plUpd }); await this.plugin.saveSettings(); log.info('List mapping refreshed (rename-safe)'); }
+						if (healed || Object.keys(plUpd).length) {
+							updateSettings({ ...(healed ? { tagListMappings: healed } : {}), ...plUpd }, { persist: false });
+							await this.plugin.saveSettings();
+							log.info('List mapping refreshed (rename-safe)');
+						}
 					}
 					// A list deleted in TickTick takes its tasks with it but they are not reported as deleted:
 					// treat tasks of vanished lists as deleted (guarded against a partial/failed project fetch).

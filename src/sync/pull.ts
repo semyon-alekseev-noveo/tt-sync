@@ -120,7 +120,7 @@ export async function pullFromTickTick(
 		});
 	}
 	// Persist checkpoint to data.json so it survives Dexie DB resets
-	updateSettings({ checkPoint: ticktickRestApi.checkpoint });
+	updateSettings({ checkPoint: ticktickRestApi.checkpoint }, { persist: false });
 	await ticktickRestApi.plugin.saveSettings();
 	logSyncEvent(meta.deviceId, "pull:complete", { applied });
 

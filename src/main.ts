@@ -16,6 +16,7 @@ import { type Editor, type MarkdownFileInfo, MarkdownView, Notice, Plugin, TFold
 //settings
 import { getSettings, mergeDeviceLists, updateSettings } from './settings';
 import {
+	buildPersistedSettings,
 	hydrateSettingsFromDisk,
 	mergeSettingsWithDefaults,
 	preserveGtdFromDisk,
@@ -295,7 +296,7 @@ export default class TickTickSync extends Plugin {
 			log.debug('settings migration check', prev?.projectsFolder, '->', cur.projectsFolder);
 			if (prev && JSON.stringify(prev) === JSON.stringify(cur)) return;
 			if (prev) await this.migrateSettingsChange(prev, cur).catch(e => log.error('Settings migration failed', e));
-			updateSettings({ migrationSnapshot: cur } as never);
+			updateSettings({ migrationSnapshot: cur } as never, { persist: false });
 			await this.saveSettings();
 		} finally { this.migrating = false; }
 		if (this.migrationAgain) await this.checkSettingsMigration();
@@ -312,7 +313,11 @@ export default class TickTickSync extends Plugin {
 		if (!this.pendingExternal) return;
 		this.pendingExternal = false;
 		const data = await this.loadData() as Record<string, unknown> | null;
-		if (data) { updateSettings(Object.assign({}, getSettings(), data)); await this.checkSettingsMigration(); }
+		if (data) {
+			updateSettings(hydrateSettingsFromDisk(getSettings(), data), { persist: false });
+			refreshSettingsStore();
+			await this.checkSettingsMigration();
+		}
 	}
 
 	/** Tag/status/list mapping renamed or projects folder changed: carry existing notes over. */
@@ -366,10 +371,18 @@ export default class TickTickSync extends Plugin {
 			const merged = mergeSettingsWithDefaults(data ?? {});
 			updateSettings(merged, { persist: false });
 			this.settingsReady = true;
-			// Do not save on every enable — that rewrites data.json from memory and races with initDB.
+			// Bump version on disk only — never rewrite all of data.json from memory on upgrade/enable.
 			const versionAfter = merged.version;
 			if (migrationOk && versionAfter !== versionBefore) {
-				await this.saveSettings();
+				try {
+					const disk = (await this.loadData()) as Record<string, unknown> | null;
+					if (disk) {
+						disk.version = versionAfter;
+						await this.saveData(disk);
+					}
+				} catch (e) {
+					log.warn('Failed to persist settings version on disk', e);
+				}
 			}
 		} catch (error) {
 			log.error('Failed to load data:( ' + String(error) + ')');
@@ -419,30 +432,25 @@ export default class TickTickSync extends Plugin {
 
 			// Verify that the setting exists and is not empty
 			if (inMemorySettings && Object.keys(inMemorySettings).length > 0) {
-				const settingsToSave = { ...inMemorySettings };
-				// Large data is now in Dexie only
-				const saveData = settingsToSave as Record<string, unknown>;
-				delete saveData.fileMetadata;
-				delete saveData.TickTickTasksData;
-				delete saveData.__migratedDBData;
+				const saveData = buildPersistedSettings(inMemorySettings, onDiskData);
 
 				// Defensive merge: on-disk data.json may have been updated by
 				// another device via Obsidian Sync. Merge devices so that entries
 				// added by other instances are not lost.
 				try {
 					if (onDiskData?.devices && Array.isArray(onDiskData.devices)) {
-						const merged = mergeDeviceLists(
+						const mergedDevices = mergeDeviceLists(
 							onDiskData.devices as DeviceInfo[],
-							settingsToSave.devices || []
+							(inMemorySettings.devices || []) as DeviceInfo[],
 						);
-						settingsToSave.devices = merged;
-						getSettings().devices = merged;
+						saveData.devices = mergedDevices;
+						getSettings().devices = mergedDevices;
 					}
 				} catch (e) {
 					log.warn('Could not read on-disk settings for device merge', e);
 				}
 
-				await this.saveData(settingsToSave);
+				await this.saveData(saveData);
 				await this.checkSettingsMigration();
 			} else {
 				log.warn('Settings are empty or invalid, not saving to avoid data loss.');

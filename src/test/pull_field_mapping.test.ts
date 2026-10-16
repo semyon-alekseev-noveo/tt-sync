@@ -145,7 +145,7 @@ describe('pullFromTickTick field mapping and echo detection', () => {
 		});
 
 		// Should also persist to data.json
-		expect(updateSettings).toHaveBeenCalledWith({ checkPoint: 9999999 });
+		expect(updateSettings).toHaveBeenCalledWith({ checkPoint: 9999999 }, { persist: false });
 		expect(mockSaveSettings).toHaveBeenCalled();
 	});
 
@@ -163,7 +163,7 @@ describe('pullFromTickTick field mapping and echo detection', () => {
 		});
 
 		// Should also persist to data.json
-		expect(updateSettings).toHaveBeenCalledWith({ checkPoint: 8888888 });
+		expect(updateSettings).toHaveBeenCalledWith({ checkPoint: 8888888 }, { persist: false });
 		expect(mockSaveSettings).toHaveBeenCalled();
 	});
 });

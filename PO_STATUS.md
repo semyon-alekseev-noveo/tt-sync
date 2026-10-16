@@ -4,7 +4,7 @@
 **Audience:** Product owner / decision maker  
 **Repo:** `tickticksync` branch `abyss-mapping`  
 **Test vault:** `/home/sam/obsidian/Thinkpad-tts-test` (copy only; live vault untouched)  
-**Install:** BRAT → `https://github.com/semyon-alekseev-noveo/tt-sync` track **latest release** (**2.0.22**+); plugin id **`tickticksync-abyss`** — `docs/BRAT_INSTALL.md`. Disable/enable wipe: fixed in **2.0.22** (`ensureSettingsLoaded` + gated saves). Preset: `00 Inbox/TTS-data-preset.json`.
+**Install:** BRAT → `https://github.com/semyon-alekseev-noveo/tt-sync` track **latest release** (**2.0.23**+); plugin id **`tickticksync-abyss`** — `docs/BRAT_INSTALL.md`. GTD wipe on upgrade: **2.0.23** (`buildPersistedSettings`, no store auto-save). Preset: `00 Inbox/TTS-data-preset.json`.
 
 ---
 

@@ -191,10 +191,11 @@ export const updateSettings = (
 ): ITickTickSyncSettings => {
 	settings = { ...settings, ...newSettings } as const;
 	if (settingsStore) {
-		if (opts?.persist === false) {
-			settingsStore.update(() => ({ ...settings }));
-		} else {
+		// Default: sync Svelte store only; disk writes go through plugin.saveSettings().
+		if (opts?.persist === true) {
 			settingsStore.set(settings);
+		} else {
+			settingsStore.update(() => ({ ...settings }));
 		}
 	}
 	return getSettings();

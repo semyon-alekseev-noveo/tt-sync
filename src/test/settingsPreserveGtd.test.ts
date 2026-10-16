@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { DEFAULT_SETTINGS, type ITickTickSyncSettings } from '@/settings';
 import {
+	buildPersistedSettings,
 	hydrateSettingsFromDisk,
 	preserveGtdFromDisk,
 	wouldWipeGtdFromDisk,
@@ -46,6 +47,24 @@ describe('wouldWipeGtdFromDisk', () => {
 		expect(wouldWipeGtdFromDisk(memory, { syncedLists: ['A'] })).toBe(true);
 		expect(wouldWipeGtdFromDisk(memory, { tagListMappings: [{ tag: 'x', list: 'y' }] })).toBe(true);
 		expect(wouldWipeGtdFromDisk({ ...memory, syncedLists: ['A'] }, { syncedLists: ['A'] })).toBe(false);
+	});
+});
+
+describe('buildPersistedSettings', () => {
+	it('keeps GTD from disk when memory still has plugin defaults (upgrade race)', () => {
+		const memory = { ...DEFAULT_SETTINGS } as ITickTickSyncSettings;
+		const disk = {
+			version: '2.0.21',
+			syncedLists: ['TTS-Inbox'],
+			tagListMappings: [{ tag: 'type/next', list: 'TTS-nextAction' }],
+			SyncTag: 'tts-test',
+			token: 'keep-me',
+		};
+		const out = buildPersistedSettings(memory, disk);
+		expect(out.syncedLists).toEqual(disk.syncedLists);
+		expect(out.tagListMappings).toEqual(disk.tagListMappings);
+		expect(out.SyncTag).toBe('tts-test');
+		expect(out.token).toBe('keep-me');
 	});
 });
 

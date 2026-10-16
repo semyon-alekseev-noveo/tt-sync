@@ -40,12 +40,7 @@ export function settingsLoad(plugin: TickTickSync) {
 		set: (value: ITickTickSyncSettings) => {
 			svelteSet(value);
 			syncAll(value);
-			// Never persist while plugin is still loading defaults (disable/enable race with initDB).
-			if (currentPlugin?.settingsReady) {
-				currentPlugin.saveSettings()?.catch((e) => {
-					console.error('settingsStore.set: saveSettings failed', e);
-				});
-			}
+			// Persistence only via plugin.saveSettings() (disk-first merge). Auto-save here caused GTD wipes on upgrade.
 		},
 	};
 }

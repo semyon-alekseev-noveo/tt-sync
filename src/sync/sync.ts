@@ -34,8 +34,9 @@ log.debug("[TickTickSync] pulled", pulled);
 		const merged = mergeDeviceLists(dbDevices, settingsDevices);
 		if (merged.length !== settingsDevices.length ||
 			merged.some((d, i) => d.deviceId !== settingsDevices[i]?.deviceId)) {
-			updateSettings({ devices: merged });
+			updateSettings({ devices: merged }, { persist: false });
 			await db.meta.update("sync", { devices: merged });
+			await ticktickRestApi.plugin.saveSettings();
 			log.debug("[TickTickSync] reconciled device list", merged);
 		}
 

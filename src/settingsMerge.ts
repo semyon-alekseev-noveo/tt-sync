@@ -127,3 +127,26 @@ export function hydrateSettingsFromDisk(
 	const merged = mergeSettingsWithDefaults(disk);
 	return overlayLoginSession(merged, memory);
 }
+
+const PERSIST_OMIT_KEYS = ['fileMetadata', 'TickTickTasksData', '__migratedDBData'] as const;
+
+/**
+ * Build the object written to data.json: start from on-disk keys (survives partial in-memory state on upgrade),
+ * overlay GTD-safe memory, drop legacy blobs.
+ */
+export function buildPersistedSettings(
+	memory: ITickTickSyncSettings,
+	disk: Record<string, unknown> | null | undefined,
+): Record<string, unknown> {
+	const safeMemory = preserveGtdFromDisk(memory, disk);
+	const out: Record<string, unknown> = { ...(disk ?? {}) };
+	for (const [key, value] of Object.entries(safeMemory)) {
+		if (value !== undefined) {
+			out[key] = value;
+		}
+	}
+	for (const key of PERSIST_OMIT_KEYS) {
+		delete out[key];
+	}
+	return out;
+}

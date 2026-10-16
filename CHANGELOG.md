@@ -1,5 +1,20 @@
 # Changelog
 
+### Iteration 2026-10-16 07:38 UTC
+
+- Context: After every BRAT upgrade, GTD settings (lists, mappings) disappeared in UI and often in `data.json`.
+- Target: Upgrades must not rewrite GTD from in-memory defaults; checkpoint/login saves must not trigger stray full-file writes.
+- Actions log:
+  - `buildPersistedSettings`: merge disk + GTD-safe memory on every `saveSettings`.
+  - Version bump on load patches only `data.json` `version`, no full `saveSettings`.
+  - Removed `settingsStore.set` auto-save; `updateSettings` defaults to store-only (`persist: true` opt-in).
+  - Startup/sync paths use `updateSettings(..., { persist: false })` + explicit `saveSettings`.
+  - Version **2.0.23**.
+- Validation: `npm test` — 492 passed.
+- Problems: Vaults already wiped need one-time preset merge (`TTS-data-preset.json`) (`open`).
+- To Be Done: Release **2.0.23**; BRAT update; disable/enable + upgrade smoke test.
+- References: `CHANGELOG.md`, `src/settingsMerge.ts`, `src/main.ts`, `src/ui/settings/settingsstore.ts`
+
 ### Iteration 2026-10-16 07:25 UTC
 
 - Context: Disabling and re-enabling the plugin cleared GTD keys in `data.json` (`syncedLists`, mappings) even when disk had a full preset.
