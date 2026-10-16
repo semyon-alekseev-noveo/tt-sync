@@ -1,5 +1,19 @@
 # Changelog
 
+### Iteration 2026-10-16 07:12 UTC
+
+- Context: On **2.0.20**, Thinkpad test vault `data.json` had six `syncedLists` and four `tagListMappings` on disk but GTD UI showed empty checkboxes and tag textarea (API list fetch empty + Svelte store still on defaults).
+- Target: Show disk-backed GTD config in UI before any save; block writes that would wipe on-disk GTD; release **2.0.21**.
+- Actions log:
+  - `GtdSection`: `loadFields()` from `getSettings()` on mount; `checkboxLists` merges API projects with saved `syncedLists`; status line for loaded count vs preset hint; `wouldWipeGtdFromDisk` guard on UI save; `refreshSettingsStore` when store lags module settings.
+  - `wouldWipeGtdFromDisk` in `settingsMerge.ts`; `saveSettings` blocks persist and re-hydrates when wipe detected.
+  - Vitest extended; merged `TTS-data-preset.json` into test-vault `data.json` (session fields kept); `dist/` → `tickticksync-abyss`.
+  - Version **2.0.21**.
+- Validation: `npm test --run` — 491 passed; `npm run build` OK; vault merge → six lists, four mappings.
+- Problems: Empty checkbox UI when TickTick login fails is mitigated by showing saved list names (`mitigated`).
+- To Be Done: Owner reload plugin in Obsidian; open GTD section and confirm status + mappings.
+- References: `CHANGELOG.md`, `src/ui/settings/svelte/sections/GtdSection.svelte`, `src/settingsMerge.ts`, `src/main.ts`
+
 ### Iteration 2026-10-16 07:00 UTC
 
 - Context: After BRAT upgrade to **2.0.19** + TickTick login on `Thinkpad-tts-test`, GTD tab showed empty lists/mappings; vault `data.json` on disk was also empty (not UI-only).

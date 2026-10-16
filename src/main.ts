@@ -15,7 +15,12 @@ import { type Editor, type MarkdownFileInfo, MarkdownView, Notice, Plugin, TFold
 
 //settings
 import { getSettings, mergeDeviceLists, updateSettings } from './settings';
-import { hydrateSettingsFromDisk, mergeSettingsWithDefaults, preserveGtdFromDisk } from '@/settingsMerge';
+import {
+	hydrateSettingsFromDisk,
+	mergeSettingsWithDefaults,
+	preserveGtdFromDisk,
+	wouldWipeGtdFromDisk,
+} from '@/settingsMerge';
 
 import { TickTickService } from '@/services';
 //TickTick api
@@ -387,6 +392,16 @@ export default class TickTickSync extends Plugin {
 			if (JSON.stringify(preserved) !== JSON.stringify(inMemorySettings)) {
 				updateSettings(preserved, { persist: false });
 				inMemorySettings = getSettings();
+			}
+
+			if (wouldWipeGtdFromDisk(inMemorySettings, onDiskData)) {
+				log.error(
+					'Blocked saveSettings: in-memory GTD config is empty but data.json still has syncedLists/tagListMappings',
+				);
+				const healed = preserveGtdFromDisk(inMemorySettings, onDiskData);
+				updateSettings(healed, { persist: false });
+				refreshSettingsStore();
+				return;
 			}
 
 			// Verify that the setting exists and is not empty

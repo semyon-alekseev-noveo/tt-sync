@@ -2,7 +2,9 @@
 	import CollapsibleSection from '@/ui/settings/svelte/sections/CollapsibleSection.svelte';
 	import { createEventDispatcher, onMount } from 'svelte';
 	import { Notice } from 'obsidian';
-	import { settingsStore } from '@/ui/settings/settingsstore';
+	import { refreshSettingsStore, settingsStore } from '@/ui/settings/settingsstore';
+	import { getSettings } from '@/settings';
+	import { wouldWipeGtdFromDisk } from '@/settingsMerge';
 	import { isListAllowed, lineListToText, parseLineList } from '@/syncScope';
 	import { projectsVersion } from '@/projectsVersion';
 	import { parseTagListText, tagListToText } from '@/listMapping';
@@ -30,8 +32,14 @@
 	let projectTemplatePath = '';
 	let tagListText = '';
 
-	$: syncedLists = $settingsStore.syncedLists ?? [];
-	$: schemeEnabled = $settingsStore.projectSchemeEnabled ?? false;
+	/** Prefer module settings (post–loadSettings) when the Svelte store is still on defaults. */
+	$: syncedLists =
+		($settingsStore.syncedLists?.length ?? 0) > 0
+			? $settingsStore.syncedLists
+			: (getSettings().syncedLists ?? []);
+	$: schemeEnabled = $settingsStore.projectSchemeEnabled ?? getSettings().projectSchemeEnabled ?? false;
+	$: settingsListCount = syncedLists.length;
+	$: checkboxLists = buildCheckboxLists(lists, syncedLists);
 	// entries that match no known list (typo / renamed list): shown so they can be fixed in data.json
 	$: unknownEntries = lists.length ? syncedLists.filter(e => !lists.some(l => isListAllowed([e], l))) : [];
 	// the checkbox list is built from the TickTick project cache, which is filled by a login: reload when the token changes
@@ -40,10 +48,28 @@
 	// plugin start / login finished filling the list cache
 	$: if (mounted && $projectsVersion) void refreshLists();
 
-	/** Fill the text inputs from the store. Done synchronously first, so a failing list fetch can never leave
-	 *  empty inputs that a later edit would write back over the saved settings. */
+	function buildCheckboxLists(
+		apiLists: Array<{ id: string; name: string }>,
+		synced: string[],
+	): Array<{ id: string; name: string }> {
+		const out = new Map<string, { id: string; name: string }>();
+		for (const l of apiLists) out.set(l.name.toLowerCase(), l);
+		for (const entry of synced) {
+			if (apiLists.some(l => isListAllowed([entry], l))) continue;
+			const byId = apiLists.find(l => l.id === entry);
+			if (byId) {
+				out.set(byId.name.toLowerCase(), byId);
+				continue;
+			}
+			const key = String(entry).toLowerCase();
+			if (!out.has(key)) out.set(key, { id: '', name: String(entry) });
+		}
+		return [...out.values()].sort((a, b) => a.name.localeCompare(b.name));
+	}
+
+	/** Fill inputs from disk-backed getSettings() first (store may lag behind loadSettings). */
 	function loadFields() {
-		const s = $settingsStore;
+		const s = getSettings();
 		tasksFolder = s.TickTickTasksFilePath ?? '/';
 		scopeText = lineListToText(s.syncScopeFolders);
 		projectsFolder = s.projectsFolder ?? '';
@@ -51,6 +77,9 @@
 		newTasksFile = s.newTasksFile ?? '';
 		projectTemplatePath = s.projectTemplatePath ?? '';
 		tagListText = tagListToText(s.tagListMappings);
+		if (($settingsStore.syncedLists?.length ?? 0) === 0 && (s.syncedLists?.length ?? 0) > 0) {
+			refreshSettingsStore();
+		}
 	}
 
 	async function refreshLists() {
@@ -72,9 +101,11 @@
 	}
 
 	onMount(() => {
+		loadFields();
 		mounted = true; // triggers the first refreshLists() when logged in
 		if (plugin.settingsReady) {
-			loadFields();
+			gtdHydrated = true;
+		} else if ((getSettings().syncedLists?.length ?? 0) > 0 || (getSettings().tagListMappings?.length ?? 0) > 0) {
 			gtdHydrated = true;
 		}
 		if (!$settingsStore.token) void refreshLists();
@@ -85,8 +116,26 @@
 		gtdHydrated = true;
 	}
 
+	$: if (mounted && gtdHydrated && !tagListText.trim() && (getSettings().tagListMappings?.length ?? 0) > 0) {
+		loadFields();
+	}
+
 	async function save(patch: Record<string, unknown>) {
 		if (!mounted || !gtdHydrated || !plugin.settingsReady) return;
+		const preview = { ...getSettings(), ...patch };
+		let onDisk: Record<string, unknown> | null = null;
+		try {
+			onDisk = (await plugin.loadData()) as Record<string, unknown> | null;
+		} catch {
+			/* loadData failed — saveSettings will re-read */
+		}
+		if (wouldWipeGtdFromDisk(preview, onDisk)) {
+			console.error('TickTickSync: blocked GTD UI save that would wipe data.json', patch);
+			new Notice('GTD save blocked — settings on disk were kept. Reload the plugin, then use Import GTD if needed.');
+			loadFields();
+			refreshSettingsStore();
+			return;
+		}
 		settingsStore.update(s => ({ ...s, ...patch }));
 		await plugin.saveSettings();
 	}
@@ -200,7 +249,18 @@
 			</div>
 		</div>
 		<div class="setting-item-control" style="flex-direction: column; align-items: flex-start;">
-			{#each lists as list}
+			<div class="setting-item-description" style="margin-bottom: 0.5em;">
+				{#if settingsListCount > 0}
+					Loaded {settingsListCount} list{settingsListCount === 1 ? '' : 's'} from settings
+					{#if !lists.length && listsError}
+						(TickTick API unavailable — names below are from saved config).
+					{/if}
+				{:else}
+					No lists on disk — use <strong>Import GTD from clipboard</strong> or merge
+					<code>00 Inbox/TTS-data-preset.json</code> into plugin data while Obsidian is closed.
+				{/if}
+			</div>
+			{#each checkboxLists as list}
 				<label style="display:block">
 					<input
 						type="checkbox"

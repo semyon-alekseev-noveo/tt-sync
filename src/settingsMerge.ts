@@ -80,6 +80,31 @@ export function preserveGtdFromDisk(
 	return out;
 }
 
+/** True if memory would persist empty GTD arrays while data.json (or migrationSnapshot) still has entries. */
+export function wouldWipeGtdFromDisk(
+	memory: ITickTickSyncSettings,
+	disk: Record<string, unknown> | null | undefined,
+): boolean {
+	if (!disk) return false;
+	for (const key of ['syncedLists', 'tagListMappings'] as const) {
+		const m = memory[key];
+		const d = disk[key];
+		if (Array.isArray(m) && m.length === 0 && Array.isArray(d) && d.length > 0) {
+			return true;
+		}
+	}
+	const snap = disk.migrationSnapshot as Record<string, unknown> | undefined;
+	if (!snap) return false;
+	for (const key of ['syncedLists', 'tagListMappings'] as const) {
+		const m = memory[key];
+		const s = snap[key];
+		if (Array.isArray(m) && m.length === 0 && Array.isArray(s) && s.length > 0) {
+			return true;
+		}
+	}
+	return false;
+}
+
 export function overlayLoginSession(
 	base: ITickTickSyncSettings,
 	overlay: Partial<ITickTickSyncSettings>,

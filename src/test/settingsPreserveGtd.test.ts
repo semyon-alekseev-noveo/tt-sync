@@ -3,6 +3,7 @@ import { DEFAULT_SETTINGS, type ITickTickSyncSettings } from '@/settings';
 import {
 	hydrateSettingsFromDisk,
 	preserveGtdFromDisk,
+	wouldWipeGtdFromDisk,
 } from '@/settingsMerge';
 
 describe('preserveGtdFromDisk', () => {
@@ -36,6 +37,15 @@ describe('preserveGtdFromDisk', () => {
 		const out = preserveGtdFromDisk(memory, disk);
 		expect(out.syncedLists).toEqual(['A']);
 		expect(out.tagListMappings).toEqual([{ tag: 'type/next', list: 'B' }]);
+	});
+});
+
+describe('wouldWipeGtdFromDisk', () => {
+	it('detects empty memory vs populated disk', () => {
+		const memory = { ...DEFAULT_SETTINGS } as ITickTickSyncSettings;
+		expect(wouldWipeGtdFromDisk(memory, { syncedLists: ['A'] })).toBe(true);
+		expect(wouldWipeGtdFromDisk(memory, { tagListMappings: [{ tag: 'x', list: 'y' }] })).toBe(true);
+		expect(wouldWipeGtdFromDisk({ ...memory, syncedLists: ['A'] }, { syncedLists: ['A'] })).toBe(false);
 	});
 });
 
