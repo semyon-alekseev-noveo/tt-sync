@@ -23,7 +23,9 @@ Open plugin settings from **Settings → Community plugins → Installed** (the 
 
 If BRAT reports **no releases**, publish the first release (see below), then use **Check for updates** or re-add the plugin.
 
-Use release **2.0.16** or newer so the settings tab registers on plugin enable (not only after Obsidian layout / Sync).
+Use release **2.0.17** or newer so the settings tab registers synchronously on plugin enable.
+
+On Obsidian **1.13+**, plugin options also appear in the **left settings sidebar** (scroll below **Community plugins** → **TickTickSync**). If the Installed-list gear is missing, use command palette **Open TickTickSync settings** or that sidebar entry.
 
 ## Obsidian steps (new install)
 

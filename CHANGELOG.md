@@ -1,5 +1,19 @@
 # Changelog
 
+### Iteration 2026-10-16 06:45 UTC
+
+- Context: Thinkpad-tts-test Obsidian 1.13.7 — plugin 2.0.16 enabled but no gear on Installed row; vault `main.js` matched release build.
+- Target: Settings tab registers on enable; fallback command; release 2.0.17.
+- Actions log:
+  - Root cause: 2.0.16 still `await loadSettings()` before `addSettingTab` — slow or stuck `loadData`/`saveSettings` blocked tab registration for the gear and sidebar entry.
+  - `addSettingTab` runs synchronously at start of `onload`; `loadSettings` moved to `completeSettingsLoad()`; `refreshSettingsStore()` after async load.
+  - Command `tickticksync-abyss:open-settings`; ribbon + notice when tab registration throws; docs for 1.13 left-sidebar entry.
+  - Version 2.0.17.
+- Validation: `npm test -- --run`; `npm run build`; copied `dist/` to test vault.
+- Problems: No changes.
+- To Be Done: Push `abyss-mapping`, tag `2.0.17`, reload plugin in Obsidian and confirm gear + sidebar entry.
+- References: `CHANGELOG.md`, `src/main.ts`, `docs/BRAT_INSTALL.md`
+
 ### Iteration 2026-10-16 06:30 UTC
 
 - Context: BRAT install 2.0.15 on Thinkpad-tts-test — no settings gear on **Settings → Community plugins → Installed** row.

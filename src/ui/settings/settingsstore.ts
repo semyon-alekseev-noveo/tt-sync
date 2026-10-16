@@ -46,3 +46,10 @@ export function settingsLoad(plugin: TickTickSync) {
 		},
 	};
 }
+
+/** Re-sync Svelte store after async loadSettings (tab may register before load finishes). */
+export function refreshSettingsStore(): void {
+	if (settingsStore) {
+		settingsStore.update(() => ({ ...settings }));
+	}
+}

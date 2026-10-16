@@ -36,6 +36,7 @@ import { RecoverDeletedTasksModal } from './modals/RecoverDeletedTasksModal';
 import { isOlder } from './utils/version';
 import { NOTABLE_CHANGES } from './notable-changes';
 import { TickTickSyncSettingTab } from './ui/settings';
+import { refreshSettingsStore } from '@/ui/settings/settingsstore';
 import { MarkdownProcessor } from '@/query/MarkdownProcessor';
 import store from '@/store';
 import { DateMan } from '@/dateMan';
@@ -102,9 +103,9 @@ export default class TickTickSync extends Plugin {
 	/** False until loadSettings finishes; blocks premature saves during enable. */
 	settingsReady = false;
 
-	async onload() {
-		// Settings gear is tied to addSettingTab; register before layout/sync deferral.
-		await this.registerSettingsTab();
+	onload() {
+		// addSettingTab must run synchronously in onload; awaiting loadSettings first left no gear if loadData hung.
+		this.registerSettingsTab();
 		this.app.workspace.onLayoutReady(async () => {
 			await this.waitForObsidianSync();
 			try {
@@ -116,21 +117,57 @@ export default class TickTickSync extends Plugin {
 		});
 	}
 
-	/** Load settings and register the tab even when migration or loadData fails. */
-	private async registerSettingsTab(): Promise<void> {
+	/** Register settings tab synchronously; load data.json afterward. */
+	private registerSettingsTab(): void {
+		try {
+			this.addSettingTab(new TickTickSyncSettingTab(this.app, this));
+		} catch (error) {
+			log.error('TickTickSync: failed to register settings tab', error);
+			const detail = error instanceof Error ? error.message : String(error);
+			new Notice(`TickTickSync: settings tab failed (${detail}). Command: Open TickTickSync settings.`);
+			this.addRibbonIcon('alert-triangle', 'TickTickSync settings failed to register', () => {
+				new Notice(`TickTickSync settings tab error: ${detail}`);
+			});
+		}
+		this.registerOpenSettingsCommand();
+		void this.completeSettingsLoad();
+	}
+
+	private async completeSettingsLoad(): Promise<void> {
 		try {
 			const isSettingsLoaded = await this.loadSettings();
-			this.addSettingTab(new TickTickSyncSettingTab(this.app, this));
+			refreshSettingsStore();
 			if (!isSettingsLoaded) {
 				new Notice('TickTickSync: settings had load errors; open plugin settings to review.');
 			}
 		} catch (error) {
-			log.error('TickTickSync: failed to register settings tab', error);
+			log.error('TickTickSync: failed to load settings', error);
 			updateSettings(mergeSettingsWithDefaults({ version: this.manifest.version }), { persist: false });
 			this.settingsReady = true;
-			this.addSettingTab(new TickTickSyncSettingTab(this.app, this));
+			refreshSettingsStore();
 			new Notice('TickTickSync: settings failed to load; using defaults — open plugin settings to review.');
 		}
+	}
+
+	/** Opens this plugin's settings (gear fallback when UI does not show it). */
+	openPluginSettings(): void {
+		const setting = (this.app as typeof this.app & {
+			setting?: { open: () => void; openTabById: (id: string) => void };
+		}).setting;
+		if (setting?.openTabById) {
+			setting.open();
+			setting.openTabById(this.manifest.id);
+			return;
+		}
+		new Notice('Open Settings → scroll the left sidebar below Community plugins → TickTickSync.');
+	}
+
+	private registerOpenSettingsCommand(): void {
+		this.addCommand({
+			id: 'open-settings',
+			name: 'Open TickTickSync settings',
+			callback: () => this.openPluginSettings(),
+		});
 	}
 
 	/**
