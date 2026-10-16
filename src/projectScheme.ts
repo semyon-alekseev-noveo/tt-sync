@@ -38,6 +38,12 @@ export function pickProjectNote(target: string, projectPaths: string[]): string 
 	return hits.length === 1 ? hits[0] : undefined;
 }
 
+/** Root task of the Projects list: it is a project, whether or not it carries the `project` tag. */
+export function isListRoot(t: { projectId?: string; parentId?: string | null }, listId: string): boolean {
+	if (!listId || t.projectId !== listId) return false;
+	return !t.parentId;
+}
+
 /** A task line whose title is empty after stripping tags/markers must not be sent to TickTick. */
 export const isBlankTitle = (title: string | undefined | null) => !stripFileLinks(title ?? '').replace(/#[^\s#]+/g, '').trim();
 
@@ -76,6 +82,7 @@ export function renderProjectNote(o: { title: string; ticktickId: string; note?:
 		'tags:',
 		'  - system/moc',
 		'  - system/project',
+		'  - ticktick',
 		`ticktick_id: ${o.ticktickId}`,
 		'---',
 		`# ${o.title}`,
@@ -93,6 +100,91 @@ export function renderProjectNote(o: { title: string; ticktickId: string; note?:
 		'> Source:: TickTick',
 		'',
 	].join('\n');
+}
+
+/** Minimal Templater date format (YYYY MM DD HH mm ss) for `tp.date.now("...")`. */
+function fmtDate(fmt: string, d: Date): string {
+	return fmt.replace(/YYYY|MM|DD|HH|mm|ss/g, t => ({
+		YYYY: String(d.getFullYear()), MM: pad(d.getMonth() + 1), DD: pad(d.getDate()),
+		HH: pad(d.getHours()), mm: pad(d.getMinutes()), ss: pad(d.getSeconds()),
+	}[t] as string));
+}
+
+/**
+ * Render a user project-note template without Templater: `<%* ... %>` code blocks (prompts, ifs)
+ * are dropped, `<% expr %>` is filled for title / id / dates / status and left empty otherwise,
+ * `{{title}}` / `{{ticktick_id}}` are substituted. The result is then forced to be a valid project
+ * note (tags system/project + ticktick, ticktick_id, status, `## Active Zone`).
+ */
+export function renderProjectTemplate(tpl: string, o: { title: string; ticktickId: string; note?: string; done?: boolean; now: Date }): string {
+	const status = o.done ? STATUS_DONE : STATUS_ACTIVE;
+	let t = tpl.replace(/\r\n/g, '\n');
+	// conditional blocks: condition unknown without Templater -> skip the whole block
+	t = t.replace(/<%\*\s*if\b[^%]*?\{\s*-?%>[\s\S]*?<%\*\s*\}\s*-?%>/g, '');
+	// remaining code blocks (prompts, assignments); `-%>` also eats the following newline
+	t = t.replace(/<%\*[\s\S]*?(-%>\n?|%>)/g, '');
+	t = t.replace(/<%[-_]?\s*([\s\S]*?)\s*[-_]?%>/g, (_m, expr: string) => {
+		const e = expr.trim();
+		const d = e.match(/tp\.(?:date\.now|file\.creation_date)\(\s*["']([^"']*)["']/);
+		if (d) return fmtDate(d[1], o.now);
+		if (/tp\.date\.now\(\s*\)|tp\.file\.creation_date\(\s*\)/.test(e)) return fmtDate('YYYY-MM-DD', o.now);
+		if (/^tp\.file\.title$|^newTitle$|^title$/.test(e)) return o.title;
+		if (e === 'id') return noteId(o.now);
+		if (e === 'status') return status;
+		return '';
+	});
+	t = t.replace(/\{\{\s*title\s*\}\}/g, o.title).replace(/\{\{\s*ticktick_id\s*\}\}/g, o.ticktickId);
+	return ensureProjectNote(t, o);
+}
+
+/** Make sure `text` is a project note: frontmatter keys/tags, `## Active Zone`, TickTick note in Overview. */
+export function ensureProjectNote(text: string, o: { title: string; ticktickId: string; note?: string; done?: boolean; now: Date }): string {
+	let lines = text.replace(/^\s+/, '').split('\n');
+	let end = -1;
+	if (lines[0]?.trim() === '---') end = lines.findIndex((l, i) => i > 0 && l.trim() === '---');
+	if (end < 0) { lines = ['---', '---', ...lines]; end = 1; }
+	// stripped template blocks leave blank lines / empty `[[]]` links behind
+	const fm = lines.slice(1, end).filter(l => l.trim()).map(l => l.replace(/:\s*\[\[\]\]\s*$/, ': []'));
+	const keyAt = (k: string) => fm.findIndex(l => new RegExp(`^${k}\\s*:`).test(l));
+	// ticktick_id
+	const idAt = keyAt('ticktick_id');
+	if (idAt >= 0) fm[idAt] = `ticktick_id: ${o.ticktickId}`; else fm.push(`ticktick_id: ${o.ticktickId}`);
+	// status
+	const stAt = keyAt('status');
+	const stVal = stAt >= 0 ? fm[stAt].replace(/^status\s*:/, '').trim() : '';
+	if (stAt < 0) fm.push(`status: ${o.done ? STATUS_DONE : STATUS_ACTIVE}`);
+	else if (!stVal || (o.done && !isDoneStatus(stVal))) fm[stAt] = `status: ${o.done ? STATUS_DONE : STATUS_ACTIVE}`;
+	// tags
+	const need = [PROJECT_NOTE_TAG, 'ticktick'];
+	const tgAt = keyAt('tags');
+	if (tgAt < 0) {
+		fm.push('tags:', ...need.map(x => `  - ${x}`));
+	} else {
+		const inline = fm[tgAt].replace(/^tags\s*:/, '').trim();
+		if (inline) {
+			const cur = inline.replace(/^\[|\]$/g, '').split(',').map(x => x.trim().replace(/^#/, '')).filter(Boolean);
+			fm.splice(tgAt, 1, 'tags:', ...[...cur, ...need.filter(x => !cur.includes(x))].map(x => `  - ${x}`));
+		} else {
+			let last = tgAt;
+			const cur: string[] = [];
+			for (let i = tgAt + 1; i < fm.length && (/^\s*-\s/.test(fm[i]) || fm[i].trim() === ''); i++) {
+				if (/^\s*-\s/.test(fm[i])) { last = i; cur.push(fm[i].replace(/^\s*-\s*/, '').trim().replace(/^#/, '')); }
+			}
+			fm.splice(last + 1, 0, ...need.filter(x => !cur.includes(x)).map(x => `  - ${x}`));
+		}
+	}
+	let body = lines.slice(end + 1);
+	if (!body.some(l => l.trim())) body = [`# ${o.title}`, ''];
+	const note = (o.note ?? '').trim();
+	if (note) {
+		const ov = body.findIndex(l => /^#{1,6}\s+overview\s*$/i.test(l.trim()));
+		if (ov >= 0) body.splice(ov + 1, 0, note);
+	}
+	if (activeZoneInsertLine(body) < 0) {
+		while (body.length && body[body.length - 1].trim() === '') body.pop();
+		body.push('', `## ${ACTIVE_ZONE}`, '');
+	}
+	return ['---', ...fm, '---', ...body].join('\n');
 }
 
 /** Line index at which to insert a new task inside `## Active Zone` (end of section). -1 if no section. */

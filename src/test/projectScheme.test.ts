@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { isProjectNote, linkTarget, isDoneStatus, planProjects, renderProjectNote, activeZoneInsertLine, sanitizeTitle, fmTags } from '@/projectScheme';
+import { isProjectNote, isListRoot, linkTarget, isDoneStatus, planProjects, renderProjectNote, renderProjectTemplate, activeZoneInsertLine, sanitizeTitle, fmTags } from '@/projectScheme';
 
 describe('project scheme helpers', () => {
 	it('detects project notes by tag + folder', () => {
@@ -22,6 +22,7 @@ describe('project scheme helpers', () => {
 		expect(t).toContain('id: "202610141005"');
 		expect(t).toContain('status: 🟢 In Progress');
 		expect(t).toContain('  - system/project');
+		expect(t).toContain('  - ticktick');
 		expect(t).toContain('ticktick_id: abc');
 		expect(t).toMatch(/## Overview\nhello\n/);
 		for (const h of ['## Основные разделы', '## Active Zone', '## Источники и связанные заметки', '> [!info] Metadata']) expect(t).toContain(h);
@@ -31,6 +32,13 @@ describe('project scheme helpers', () => {
 		expect(activeZoneInsertLine(L)).toBe(3);
 		expect(activeZoneInsertLine(['## Active Zone', ''])).toBe(1);
 		expect(activeZoneInsertLine(['# none'])).toBe(-1);
+	});
+	it('treats every root task in the Projects list as a project', () => {
+		expect(isListRoot({ projectId: 'P', parentId: '' }, 'P')).toBe(true);
+		expect(isListRoot({ projectId: 'P', parentId: null }, 'P')).toBe(true);
+		expect(isListRoot({ projectId: 'P', parentId: 'parent' }, 'P')).toBe(false);
+		expect(isListRoot({ projectId: 'other', parentId: '' }, 'P')).toBe(false);
+		expect(isListRoot({ projectId: 'P' }, '')).toBe(false);
 	});
 	it('plans create/status actions', () => {
 		const acts = planProjects(
@@ -45,3 +53,90 @@ describe('project scheme helpers', () => {
 		]);
 	});
 });
+
+describe('project note from user template (no Templater)', () => {
+	const MOC = [
+		'<%*',
+		'let newTitle = await tp.system.prompt("Enter MOC title");',
+		'let chosenMocKind = await tp.system.suggester(["a"], ["a"]);',
+		'let id = tp.date.now("YYYYMMDDHHmm");',
+		'let status = "🟢 In Progress";',
+		'-%>',
+		'---',
+		'id: <% id %>',
+		'created: <% tp.file.creation_date("YYYY-MM-DD") %>',
+		'status: <% status %>',
+		'areas: [[<% chosenArea %>]]',
+		'tags:',
+		'  - system/moc',
+		'<%* if (chosenTopic) { %>  - topic/<% chosenTopic.toLowerCase() %><%* } %>',
+		'<%* if (chosenMocKind === "project MOC") { %>  - system/project<%* } %>',
+		'---',
+		'',
+		'> Тип: <% chosenMocKind %>',
+		'',
+		'## Overview',
+		'',
+		'- Цель',
+		'<%* if (chosenMocKind === "project MOC") { %>',
+		'- Временные рамки',
+		'<%* } %>',
+		'',
+		'## Основные разделы',
+	].join('\n');
+	const o = { title: 'My Project', ticktickId: 'tt123', note: 'from TickTick', now: new Date(2026, 9, 14, 10, 5) };
+
+	it('strips Templater blocks and prompts, fills id/date/status', () => {
+		const out = renderProjectTemplate(MOC, o);
+		expect(out.startsWith('---\n')).toBe(true);
+		expect(out).not.toContain('<%');
+		expect(out).not.toContain('tp.');
+		expect(out).toContain('id: 202610141005');
+		expect(out).toContain('created: 2026-10-14');
+		expect(out).toContain('status: 🟢 In Progress');
+		expect(out).not.toContain('Временные рамки'); // conditional block skipped
+	});
+
+	it('forces a valid project note: tags, ticktick_id, Active Zone, TickTick note in Overview', () => {
+		const out = renderProjectTemplate(MOC, o);
+		expect(fmTags(fmOf(out))).toEqual(expect.arrayContaining(['system/moc', 'system/project', 'ticktick']));
+		expect(out).toMatch(/^ticktick_id: tt123$/m);
+		expect(out).toMatch(/## Overview\nfrom TickTick\n/);
+		expect(out).toContain('## Active Zone');
+		expect(activeZoneInsertLine(out.split('\n'))).toBeGreaterThan(0);
+	});
+
+	it('fills {{title}} / {{ticktick_id}} and repairs a template without frontmatter', () => {
+		const out = renderProjectTemplate('# {{title}}\n\nref {{ticktick_id}}\n', o);
+		expect(out).toContain('# My Project');
+		expect(out).toContain('ref tt123');
+		expect(out.startsWith('---\n')).toBe(true);
+		expect(out).toMatch(/^ticktick_id: tt123$/m);
+		expect(out).toContain('  - system/project');
+	});
+
+	it('marks a done project done, keeps an existing status otherwise', () => {
+		expect(renderProjectTemplate('---\nstatus: Later\n---\n# x', { ...o, done: true })).toContain('status: ✅ Done');
+		expect(renderProjectTemplate('---\nstatus: Later\n---\n# x', o)).toContain('status: Later');
+		expect(renderProjectTemplate('---\ntags: [a, b]\n---\n# x', o)).toMatch(/tags:\n {2}- a\n {2}- b\n {2}- system\/project\n {2}- ticktick/);
+	});
+
+	it('an empty template still yields a project note', () => {
+		const out = renderProjectTemplate('', o);
+		expect(isProjectNote('10 Projects/x.md', fmOf(out), '10 Projects')).toBe(true);
+		expect(out).toContain('# My Project');
+	});
+});
+
+/** tiny frontmatter reader for assertions: `key:` lists / scalars only */
+function fmOf(text: string): Record<string, unknown> {
+	const m = text.match(/^---\n([\s\S]*?)\n---/);
+	const out: Record<string, unknown> = {};
+	let key = '';
+	for (const l of (m?.[1] ?? '').split('\n')) {
+		const item = l.match(/^\s+-\s+(.*)$/);
+		if (item && key) (out[key] as string[]).push(item[1].trim());
+		else { const kv = l.match(/^([\w-]+):\s*(.*)$/); if (kv) { key = kv[1]; out[key] = kv[2] ? kv[2] : []; } }
+	}
+	return out;
+}

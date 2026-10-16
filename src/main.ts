@@ -4,12 +4,18 @@ import { RedoCommands } from '@/redo/commands';
 import { tagRenames, renameTagsInText, folderOf } from '@/settingsMigration';
 const snap = (x: { tagListMappings?: unknown; statusMappings?: unknown; tagMappings?: unknown; projectsFolder?: string }) => JSON.parse(JSON.stringify({ tagListMappings: x.tagListMappings ?? [], statusMappings: x.statusMappings ?? [], tagMappings: x.tagMappings ?? [], projectsFolder: x.projectsFolder })) as Parameters<typeof tagRenames>[0];
 import { ProjectSchemeService } from '@/services/ProjectSchemeService';
+import { isPathInPushScope } from '@/syncScope';
+import { ensureSession } from '@/autoLogin';
+import { loginPatch } from '@/loginSettings';
+import { bumpProjectsVersion } from '@/projectsVersion';
+import { getTick } from '@/api/tick_singleton_factory';
 import '@/static/styles.css';
 
 import { type Editor, type MarkdownFileInfo, MarkdownView, Notice, Plugin, TFolder } from 'obsidian';
 
 //settings
-import { DEFAULT_SETTINGS, getSettings, mergeDeviceLists, updateSettings } from './settings';
+import { getSettings, mergeDeviceLists, updateSettings } from './settings';
+import { mergeSettingsWithDefaults } from '@/settingsMerge';
 
 import { TickTickService } from '@/services';
 //TickTick api
@@ -93,6 +99,8 @@ export default class TickTickSync extends Plugin {
 	statusBar?: HTMLElement;
 	private syncIntervalId?: number;
 	private markdownProcessor?: MarkdownProcessor;
+	/** False until loadSettings finishes; blocks premature saves during enable. */
+	settingsReady = false;
 
 	async onload() {
 		this.app.workspace.onLayoutReady(async () => {
@@ -262,31 +270,42 @@ export default class TickTickSync extends Plugin {
 	}
 
 	async loadSettings() {
+		this.settingsReady = false;
+		let migrationOk = true;
 		try {
 			let data = await this.loadData() as Record<string, unknown> | null;
 			if (!data) {
 				data = { version: this.manifest.version };
-				await this.saveData(data);
 			}
 			try {
 				data = await this.migrateData(data);
 			} catch (error) {
+				migrationOk = false;
 				log.error('Failed to migrate data:', error);
-				return false; // Returning false indicates that the setting loading failed
 			}
 			if (data?.TickTickTasksData) {
 				// Old data migration is handled by initDB
 			}
-			const settings = Object.assign({}, DEFAULT_SETTINGS, data);
-			updateSettings(settings);
+			const merged = mergeSettingsWithDefaults(data ?? {});
+			updateSettings(merged, { persist: false });
+			this.settingsReady = true;
+			if (migrationOk) {
+				await this.saveSettings();
+			}
 		} catch (error) {
 			log.error('Failed to load data:( ' + String(error) + ')');
-			return false; // Returning false indicates that the setting loading failed
+			updateSettings(mergeSettingsWithDefaults({ version: this.manifest.version }), { persist: false });
+			this.settingsReady = true;
+			return false;
 		}
-		return true; // Returning true indicates that the settings are loaded successfully
+		return migrationOk;
 	}
 
-	async saveSettings() {
+	async saveSettings(force = false) {
+		if (!this.settingsReady && !force) {
+			log.debug('Settings save skipped: load not finished');
+			return;
+		}
 		// a hand edit of data.json is waiting for the running sync to end: don't overwrite it now
 		if (this.pendingExternal && this.syncRunning) { log.info('Settings save deferred: external data.json change pending'); return; }
 		try {
@@ -329,9 +348,37 @@ export default class TickTickSync extends Plugin {
 	}
 
 	// return true of false
+	/** Login at plugin start with data.json `username`/`password`; only when there is no token or it was rejected. */
+	private async ensureLoggedIn(): Promise<boolean> {
+		const s = getSettings();
+		const res = await ensureSession({
+			token: s.token,
+			credentials: { username: s.username, password: s.password },
+			validateToken: async () => {
+				const api = getTick({ baseUrl: getSettings().baseURL, token: getSettings().token ?? '', checkPoint: getSettings().checkPoint });
+				return !!(await api.getUserStatus());
+			},
+			login: async () => this.service.login(s.baseURL, s.username as string, s.password as string),
+		});
+		if (!res.ok) {
+			if (res.reason === 'no-credentials') new Notice(`Please login from settings (or set username and password there).`);
+			else new Notice(`TickTickSync: automatic login failed, check username and password in settings.`);
+			return false;
+		}
+		if (res.loggedIn && res.info) {
+			updateSettings(loginPatch(res.info)); // keeps all GTD settings; also refreshes the settings UI store
+			const api = getTick({ baseUrl: getSettings().baseURL, token: res.info.token ?? '', checkPoint: 0 });
+			if (this.tickTickRestAPI && this.tickTickRestAPI.api) this.tickTickRestAPI.api = api;
+			this.service.api = api;
+			await this.saveSettings();
+			log.info('Logged in automatically with stored credentials.');
+		}
+		return true;
+	}
+
+	// return true of false
 	async initializePlugin(): Promise<boolean> {
-		if (!getSettings().token) {
-			new Notice(`Please login from settings.`);
+		if (!(await this.ensureLoggedIn())) {
 			return false;
 		}
 
@@ -364,6 +411,7 @@ export default class TickTickSync extends Plugin {
 			new Notice(`TickTickSync plugin initialization failed, please check userid and password in settings.`);
 			return false;
 		}
+		bumpProjectsVersion(); // list cache is filled: GTD settings reload the checkbox lists by themselves
 
 		this.initializeModuleClass();
 		//Create a backup folder to back up TickTick data
@@ -444,6 +492,9 @@ export default class TickTickSync extends Plugin {
 		if (!target.classList.contains('task-list-item-checkbox')) {
 			return;
 		}
+
+		// Checkbox in a file outside syncScopeFolders: do not touch TickTick.
+		if (!isPathInPushScope(this.app.workspace.getActiveFile()?.path)) return;
 
 		if (editor) {
 			const mouse = (editor as unknown as { posAtMouse(evt: MouseEvent): { line: number; ch: number } }).posAtMouse(evt);
@@ -605,10 +656,12 @@ export default class TickTickSync extends Plugin {
 	}
 
 	private async pluginLoad() {
-		// This adds a settings tab so the user can configure various aspects of the plugin
-		this.addSettingTab(new TickTickSyncSettingTab(this.app, this));
-
 		const isSettingsLoaded = await this.loadSettings();
+		// Settings tab mounts Svelte UI; only after data.json is merged into memory.
+		this.addSettingTab(new TickTickSyncSettingTab(this.app, this));
+		if (!isSettingsLoaded) {
+			new Notice('TickTickSync: settings had load errors; open plugin settings to review.');
+		}
 		if (!this.redo) {
 			// write-ahead redo log (.tickticksync/journal), see src/redo
 			this.redo = new RedoLog(makeAdapter(this.app));
@@ -617,10 +670,6 @@ export default class TickTickSync extends Plugin {
 			this.redoCommands = new RedoCommands(this, this.redo);
 			this.redoCommands.register();
 			void this.redo.prune(getSettings().redoLogRetentionDays ?? 30).catch(e => log.warn('redo log prune failed', e));
-		}
-		if (!isSettingsLoaded) {
-			new Notice('Settings failed to load. Please reload the TickTickSync plugin.');
-			return;
 		}
 		log.setLevel(getSettings().logLevel as 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'silent')
 		log.info(`loading plugin "${this.manifest.name}" v${this.manifest.version}`);
@@ -815,7 +864,8 @@ export default class TickTickSync extends Plugin {
 		if ((!data.version) || (isOlder(data.version as string, this.manifest.version))) {
 			log.debug('Updating version number to ', this.manifest.version);
 			data.version = this.manifest.version;
-			await this.saveSettings();
+			// No saveSettings() here: in-memory settings are still DEFAULT_SETTINGS at this point and would
+			// overwrite data.json (syncedLists, tagListMappings, token...). loadSettings() saves the merged data.
 		}
 
 		return data;

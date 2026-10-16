@@ -4,9 +4,10 @@ import type TickTickSync from '@/main';
 import type { ITask } from '@/api/types/Task';
 import { getSettings, updateSettings } from '@/settings';
 import { getAllProjects } from '@/db/projects';
+import { isListAllowed } from '@/syncScope';
 import log from '@/utils/logger';
 import {
-	isProjectNote, linkTarget, isDoneStatus, planProjects, renderProjectNote, sanitizeTitle, pickProjectNote, planTitle,
+	isProjectNote, isListRoot, linkTarget, isDoneStatus, planProjects, renderProjectNote, renderProjectTemplate, sanitizeTitle, pickProjectNote, planTitle,
 	STATUS_ACTIVE, STATUS_DONE, type NoteSide, type ParentSide, type Snap, stripFileLinks,
 } from '@/projectScheme';
 
@@ -14,6 +15,8 @@ export class ProjectSchemeService {
 	/** parent task id -> project note path */
 	private parents = new Map<string, string>();
 	listId = '';
+	/** Projects list is not in syncedLists: the scheme does nothing (no pull, no push). */
+	private blocked = false;
 
 	constructor(private app: App, private plugin: TickTickSync) {}
 
@@ -27,7 +30,7 @@ export class ProjectSchemeService {
 	isParentTask(t: ITask): boolean {
 		if (!this.enabled()) return false;
 		if (this.parents.has(t.id)) return true;
-		return t.projectId === this.listId && (t.tags ?? []).map(x => x.toLowerCase()).includes(this.tags()[0]) && !t.parentId;
+		return isListRoot(t, this.listId);
 	}
 
 	private fm(path: string): Record<string, unknown> | undefined {
@@ -37,7 +40,7 @@ export class ProjectSchemeService {
 
 	/** Project of a file: the note itself, or the note its `project:` frontmatter links to. */
 	resolveForFile(path: string): { parentId: string; listId: string } | undefined {
-		if (!this.enabled() || !this.listId) return undefined;
+		if (!this.enabled() || !this.listId || this.blocked) return undefined;
 		let fm = this.fm(path);
 		let projPath = path;
 		if (!fm || !isProjectNote(path, fm, this.folder())) {
@@ -57,6 +60,23 @@ export class ProjectSchemeService {
 		return id ? { parentId: id, listId: this.listId } : undefined;
 	}
 
+	/** One source tag on a project note: `ticktick` if the plugin created it, else `obsidian`. */
+	private async stampSourceTags(notes: NoteSide[]) {
+		for (const n of notes) {
+			const f = this.app.vault.getAbstractFileByPath(n.path);
+			if (!(f instanceof TFile)) continue;
+			const fm = this.fm(n.path);
+			const tags = Array.isArray(fm?.tags) ? (fm!.tags as unknown[]).map(String) : [];
+			if (tags.includes('ticktick') || tags.includes('obsidian')) continue;
+			const body = await this.app.vault.read(f);
+			const source = body.includes('Source:: TickTick') ? 'ticktick' : 'obsidian';
+			await this.app.fileManager.processFrontMatter(f, front => {
+				const cur = Array.isArray(front.tags) ? front.tags.map(String) : [];
+				if (!cur.includes('ticktick') && !cur.includes('obsidian')) front.tags = [...cur, source];
+			});
+		}
+	}
+
 	private projectNotes(): NoteSide[] {
 		return this.app.vault.getMarkdownFiles()
 			.filter(f => isProjectNote(f.path, this.fm(f.path), this.folder()))
@@ -66,14 +86,31 @@ export class ProjectSchemeService {
 			});
 	}
 
+	/** New project note text: user template (projectTemplatePath) if readable, else the built-in one. */
+	private async renderNote(o: Parameters<typeof renderProjectNote>[0]): Promise<string> {
+		const tp = getSettings().projectTemplatePath?.trim().replace(/^\/+/, '');
+		if (tp) {
+			try {
+				const f = this.app.vault.getAbstractFileByPath(tp);
+				if (f instanceof TFile) return renderProjectTemplate(await this.app.vault.read(f), o);
+				log.warn(`ProjectScheme: template not found: ${tp}; using built-in template`);
+			} catch (e) { log.warn('ProjectScheme: template failed; using built-in template', e); }
+		}
+		return renderProjectNote(o);
+	}
+
 	/** Run before upstream processes `updated` (TickTick tasks changed since checkpoint). */
 	async run(updated: ITask[]): Promise<void> {
 		if (!this.enabled()) return;
 		const lists = await getAllProjects();
 		this.listId = (getSettings().projectsListId && lists.find(p => p.id === getSettings().projectsListId)?.id) || lists.find(p => p.name.toLowerCase() === (getSettings().projectsListName || 'Projects').toLowerCase())?.id || '';
 		if (!this.listId) { log.warn('ProjectScheme: list not found'); return; }
+		const pl = lists.find(p => p.id === this.listId);
+		this.blocked = !pl || !isListAllowed(getSettings().syncedLists, pl);
+		if (this.blocked) { log.warn(`ProjectScheme: list "${pl?.name}" is not in syncedLists; project sync skipped`); return; }
 		const api = this.plugin.tickTickRestAPI;
 		const notes = this.projectNotes();
+		await this.stampSourceTags(notes);
 		this.parents = new Map(notes.filter(n => n.id).map(n => [n.id as string, n.path]));
 		const parents: ParentSide[] = [];
 		const titles = new Map<string, string>();
@@ -117,7 +154,11 @@ export class ProjectSchemeService {
 					} as unknown as ITask);
 					if (!created) continue;
 					const f = this.app.vault.getAbstractFileByPath(a.note.path);
-					if (f instanceof TFile) await this.app.fileManager.processFrontMatter(f, fm => { fm.ticktick_id = created.id; });
+					if (f instanceof TFile) await this.app.fileManager.processFrontMatter(f, fm => {
+						fm.ticktick_id = created.id;
+						const tags = Array.isArray(fm.tags) ? fm.tags.map(String) : [];
+						if (!tags.includes('obsidian') && !tags.includes('ticktick')) fm.tags = [...tags, 'obsidian'];
+					});
 					if (a.note.done) await api?.CloseTask(created.id, this.listId);
 					this.parents.set(created.id, a.note.path);
 					snap[created.id] = { noteDone: a.note.done, ttDone: a.note.done };
@@ -136,7 +177,7 @@ export class ProjectSchemeService {
 					}
 					if (!this.app.vault.getAbstractFileByPath(this.folder())) await this.app.vault.createFolder(this.folder());
 					if (!this.app.vault.getAbstractFileByPath(path))
-						await this.app.vault.create(path, renderProjectNote({ title, ticktickId: a.parent.id, note: a.parent.content, done: a.parent.done, now: new Date() }));
+						await this.app.vault.create(path, await this.renderNote({ title, ticktickId: a.parent.id, note: a.parent.content, done: a.parent.done, now: new Date() }));
 					this.parents.set(a.parent.id, path);
 					snap[a.parent.id] = { noteDone: a.parent.done, ttDone: a.parent.done };
 				} else if (a.type === 'setParentDone') {

@@ -31,6 +31,8 @@ See the [Changelog](https://thesamim.github.io/TickTickSync/changelog/) for the 
 
 See [Getting Started](https://thesamim.github.io/TickTickSync/getting-started/) for installation and setup instructions.
 
+**Abyss fork (this branch):** install via BRAT with plugin id `tickticksync-abyss` so community updates do not overwrite the build. See [docs/BRAT_INSTALL.md](docs/BRAT_INSTALL.md).
+
 ## Known Issues
 
 The plugin only works with the [Tasks emoji formats](https://publish.obsidian.md/tasks/Reference/Task+Formats/About+Task+Formats). 

@@ -25,7 +25,7 @@ describe('project subtasks', () => {
 		tagListMappings: [{ tag: 'type/next', list: 'nextAction' }] });
 	it('task in project note: parent + Projects list, type tag kept as tag', async () => {
 		const t = await mk({ parentId: 'PARENT', listId: 'pr' }, undefined).convertLineToTask(LINE, 0, 'p.md', fm as never, null);
-		expect([t.parentId, t.projectId, t.tags]).toEqual(['PARENT', 'pr', ['type-next']]);
+		expect([t.parentId, t.projectId, t.tags]).toEqual(['PARENT', 'pr', ['type-next', 'obsidian']]);
 	});
 	it('line moved to a non-project file keeps its project parent', async () => {
 		const t = await mk(undefined, { parentId: 'PARENT', projectId: 'pr' }).convertLineToTask(LINE, 0, 'inbox.md', fm as never, null);

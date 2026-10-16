@@ -7,14 +7,16 @@ let currentPlugin: TickTickSync | null = null;
 
 export let settingsStore: Writable<ITickTickSyncSettings>;
 
-// Call from plugin setup (done in settingsLoad)
+// Call from plugin setup (after loadSettings, when opening the settings tab)
 export function settingsLoad(plugin: TickTickSync) {
+	currentPlugin = plugin;
+
 	if (settingsStore) {
+		settingsStore.update(() => ({ ...settings }));
 		return;
 	}
-	currentPlugin = plugin; // Set the plugin ref for later store updates
 
-	const { subscribe, set: svelteSet, update: svelteUpdate } = writable(settings);
+	const { subscribe, set: svelteSet, update: svelteUpdate } = writable({ ...settings });
 
 	// Helper to update settings/module/plugin objects
 	function syncAll(newSettings: ITickTickSyncSettings) {

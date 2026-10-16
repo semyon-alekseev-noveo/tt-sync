@@ -13,6 +13,8 @@ import type { ITask } from '@/api/types/Task';
 import type { LocalTask } from '@/db/schema';
 import { db } from "@/db/dexie";
 import { getSettings } from '@/settings';
+import { getAllProjects } from '@/db/projects';
+import { isListAllowed, resolveSyncedListIds, unmatchedEntries } from '@/syncScope';
 import { TaskDeletionModal } from '@/modals/TaskDeletionModal';
 import { FolderSyncService } from '@/services/FolderSyncService';
 import log from '@/utils/logger';
@@ -34,6 +36,17 @@ export class VaultSyncCoordinator {
 	 */
 	async syncVaultWithDatabase(): Promise<void> {
 		const tasks = await db.tasks.toArray();
+		// GTD scope: only tasks of allow-listed lists are written to the vault. Empty = nothing.
+		const syncedEntries = getSettings().syncedLists ?? [];
+		const allLists = await getAllProjects();
+		const allowedListIds = resolveSyncedListIds(syncedEntries, allLists);
+		if (!syncedEntries.length) {
+			log.warn('syncedLists is empty: nothing is pulled from TickTick.');
+			new Notice('TickTickSync: no lists are selected for sync, so nothing was pulled. Choose lists in the GTD settings.', 8000);
+		} else {
+			const unknown = unmatchedEntries(syncedEntries, allLists);
+			if (unknown.length) log.warn('syncedLists entries match no TickTick list:', unknown);
+		}
 		const scheme = this.plugin.projectScheme;
 		if (scheme?.enabled()) await scheme.run(tasks.filter(lt => !lt.deleted).map(lt => lt.task));
 		let syncTag = getSettings().SyncTag?.toLowerCase();
@@ -57,23 +70,24 @@ export class VaultSyncCoordinator {
 			const task = lt.task;
 			// Project parents are represented by project notes, never by task lines.
 			if (scheme?.isParentTask(task)) continue;
-			const matchesFilter = this.matchesFilter(task, syncTag, syncProject, andOr);
+			const matchesFilter = this.matchesFilter(task, syncTag, syncProject, andOr, allowedListIds);
 
 			let targetFile: string | undefined;
 
 			if (matchesFilter && !lt.deleted) {
-				// If the task already lives in a vault file, keep it there.
-				// This preserves user-intended placement (e.g. via project-override tags)
-				// even when the task's ticktick projectId maps to a different file.
-				if (lt.file) {
+				// Project children belong in the parent note's Active Zone, even if an
+				// earlier sync wrote them into the flat list file.
+				const schemeNote = task.parentId ? scheme?.noteForParent(task.parentId) : undefined;
+				if (schemeNote) {
+					targetFile = schemeNote;
+				} else if (lt.file) {
 					const existingFile = this.app.vault.getAbstractFileByPath(lt.file);
 					if (existingFile instanceof TFile) {
 						targetFile = lt.file;
 					}
 				}
 				if (!targetFile) {
-					targetFile = scheme?.noteForParent(task.parentId)
-						?? await this.determineTargetFile(task, projectIdToFilepathCache);
+					targetFile = await this.determineTargetFile(task, projectIdToFilepathCache);
 				}
 			} else {
 				targetFile = lt.file;
@@ -282,7 +296,9 @@ export class VaultSyncCoordinator {
 	/**
 	 * Check if a task matches the sync filter (tag/project)
 	 */
-	private matchesFilter(task: ITask, syncTag?: string, syncProject?: string, andOr?: number): boolean {
+	private matchesFilter(task: ITask, syncTag?: string, syncProject?: string, andOr?: number, allowedListIds?: Set<string>): boolean {
+		// Allow-list of lists is a gate; SyncTag/SyncProject below only narrow it further.
+		if (allowedListIds && !allowedListIds.has(task.projectId)) return false;
 		if (!syncTag && !syncProject) return true;
 
 		const hasTag = syncTag ? (task.tags?.some(t => t.toLowerCase() === syncTag) ?? false) : false;
@@ -406,7 +422,15 @@ export class VaultSyncCoordinator {
 	private async ensureProjectFilesExist(): Promise<void> {
 		if (getSettings().newTasksFile?.trim()) return; // single-file mode: no per-list files
 		const allFileRecords = await db.files.toArray();
-		const managedFiles = allFileRecords.filter(f => f.defaultProjectId);
+		// Only allow-listed lists get (re-created) files; the Projects list lives in project notes.
+		const s = getSettings();
+		const lists = await getAllProjects();
+		const managedFiles = allFileRecords.filter(f => {
+			if (!f.defaultProjectId) return false;
+			const list = lists.find(l => l.id === f.defaultProjectId);
+			if (!list || !isListAllowed(s.syncedLists, list)) return false;
+			return !(s.projectSchemeEnabled && s.projectsListName && list.name.toLowerCase() === s.projectsListName.toLowerCase());
+		});
 
 		for (const fileRecord of managedFiles) {
 			const file = this.app.vault.getAbstractFileByPath(fileRecord.path);

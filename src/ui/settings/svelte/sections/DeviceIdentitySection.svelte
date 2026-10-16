@@ -20,7 +20,8 @@
 			if (onDiskData?.devices && Array.isArray(onDiskData.devices)) {
 				const merged = mergeDeviceLists(onDiskData.devices, getSettings().devices);
 				if (JSON.stringify(merged) !== JSON.stringify(getSettings().devices)) {
-					updateSettings({ devices: merged });
+					updateSettings({ devices: merged }, { persist: false });
+					await plugin.saveSettings();
 				}
 				devices = merged;
 			}

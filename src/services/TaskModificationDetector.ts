@@ -30,6 +30,7 @@ import type { LocalTask } from '@/db/schema';
 import { NewFileMap, type ITaskItemRecord, type ITaskRecord } from '@/services/NewFileMap';
 import { FolderSyncService } from '@/services/FolderSyncService';
 import { getSettings } from '@/settings';
+import { isPathInPushScope } from '@/syncScope';
 import log from '@/utils/logger';
 import ObjectID from 'bson-objectid';
 import { normalizeRepeatFlag } from '@/utils/RecurrenceConverter';
@@ -99,6 +100,11 @@ export class TaskModificationDetector {
 		fileMap: NewFileMap
 	): Promise<void> {
 		if (!lineTxt || lineTxt.length == 0) {
+			return;
+		}
+
+		// Outside syncScopeFolders: never push (GTD scope guard).
+		if (!isPathInPushScope(fileMap.getFilePath())) {
 			return;
 		}
 
@@ -199,6 +205,7 @@ export class TaskModificationDetector {
 		await this.plugin.fileMetadataService?.getFileMetadata(file_path);
 
 		if (!(file instanceof TFile)) { return false; }
+		if (!isPathInPushScope(file_path)) { return false; } // outside syncScopeFolders
 		const fileMap = new NewFileMap(this.app, this.plugin, file);
 		await fileMap.init();
 
@@ -229,6 +236,10 @@ export class TaskModificationDetector {
 		fileMap: NewFileMap,
 		pendingDeletions?: PendingTickTickDeletion[]
 	): Promise<boolean> {
+		// Outside syncScopeFolders: no update, no completion, no deletion push.
+		if (!isPathInPushScope(filepath)) {
+			return false;
+		}
 		// Only process full tasks here.  taskParser.isTaskItem handles item
 		// identification; note-level content is skipped entirely.
 		if (!this.plugin.taskParser?.hasTickTickId(lineText) ||
@@ -341,7 +352,7 @@ export class TaskModificationDetector {
 	 * Check entire file for modifications
 	 */
 	async checkFileForModifications(filepath: string | null, pendingDeletions?: PendingTickTickDeletion[]): Promise<void> {
-		if (!filepath) {
+		if (!filepath || !isPathInPushScope(filepath)) {
 			return;
 		}
 

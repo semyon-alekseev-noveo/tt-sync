@@ -42,9 +42,8 @@
 	<div class="setting-item">
 		<div class="setting-item-info">
 			<div class="setting-item-name">Automatic sync interval time</div>
-			<div class="setting-item-description">Please specify the desired interval time, with seconds as the default
-				unit. 0 for manual sync. The default setting is 300 seconds, which corresponds to syncing once every 5
-				minutes. You can customize it, but it cannot be lower than 20 seconds.
+			<div class="setting-item-description">Seconds between automatic syncs. 0 means no automatic sync
+				(default). Use Sync now when you want a sync. A repeating interval cannot be lower than 20 seconds.
 			</div>
 		</div>
 		<div class="setting-item-control">

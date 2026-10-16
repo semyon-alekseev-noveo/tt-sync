@@ -95,6 +95,9 @@ export const REGEX = {
 	//hopefully tighter find.
 	get TickTick_TAG() { return new RegExp(`^[\\s]*[-] \\[.\\] [\\s\\S]*${keywords.TickTick_TAG}(?![\\w/-])[\\s\\S]*$`, 'i'); },
 
+	// Source tag of a line born in the vault. Only counts as "synced" together with a ticktick_id.
+	OBSIDIAN_SOURCE: /^[\s]*[-] \[.\] [\s\S]*#obsidian(?![\w/-])[\s\S]*$/i,
+
 	TickTick_ID: /\[ticktick_id::\s*[\d\S]+\]/,
 	TickTick_ID_NUM: /\[ticktick_id::\s*(.*?)\s*\]/,
 	TickTick_ID_DV_NUM: /ticktick_id(.*?)%/,
@@ -178,10 +181,13 @@ export class TaskParser {
 
 
 		//add Tags
+		const fromObsidian = !!task.parentId && this.plugin?.projectScheme?.isParentId?.(task.parentId)
+			&& (lineTags ?? []).some(t => t.toLowerCase() === 'obsidian');
 		if (lineTags) {
 			resultLine = this.addTagsToLine(resultLine, lineTags);
 		}
-		resultLine = this.addTickTickTag(resultLine);
+		// Project children show one source tag: #obsidian (born in the vault) or #ticktick (pulled).
+		if (!fromObsidian) resultLine = this.addTickTickTag(resultLine);
 
 		if (getSettings().taskLinksInObsidian === 'taskLink') {
 			resultLine = this.addTickTickLink(resultLine, task.id, task.projectId);
@@ -673,6 +679,9 @@ export class TaskParser {
 		}
 		if (projectOf) {
 			parentId = projectOf.parentId; // project task = subtask of the project parent
+			// No source tag yet: the line was written in Obsidian.
+			const hasSource = tags.some(t => t === 'obsidian' || t === 'ticktick' || t === markerName());
+			if (!hasSource) tags = [...tags, 'obsidian'];
 		} else if (getSettings().tagListMappings?.length) {
 			tags = tags.filter((_, i) => !isListTag(rawTags[i], getSettings().tagListMappings));
 		}
@@ -870,7 +879,9 @@ export class TaskParser {
 			// log.debug("hasTickTickTag", `${text}
 			// ${REGEX.TickTick_TAG}
 			// ${REGEX.TickTick_TAG.test(text)}`);
-			return REGEX.TickTick_TAG.test(text);
+			if (REGEX.TickTick_TAG.test(text)) return true;
+			// Vault-born lines carry #obsidian once they have an id (source tag): still synced.
+			return this.hasTickTickId(text) && REGEX.OBSIDIAN_SOURCE.test(text);
 		} else {
 			return false;
 		}

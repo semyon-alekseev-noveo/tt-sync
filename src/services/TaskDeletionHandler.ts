@@ -17,6 +17,7 @@ import type { ITask } from '@/api/types/Task';
 import { FileTaskQueries } from '@/repositories/FileTaskQueries';
 import { TaskDeletionModal } from '@/modals/TaskDeletionModal';
 import { getSettings } from '@/settings';
+import { isPathInPushScope } from '@/syncScope';
 import log from '@/utils/logger';
 
 export class TaskDeletionHandler {
@@ -59,6 +60,11 @@ export class TaskDeletionHandler {
 			}
 			filepath = file.path;
 			currentFileValue = view?.data || '';
+		}
+
+		// Outside syncScopeFolders: a removed line must not delete the TickTick task.
+		if (!isPathInPushScope(filepath)) {
+			return;
 		}
 
 		// Check if file has tasks

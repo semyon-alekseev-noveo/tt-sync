@@ -3,11 +3,12 @@ import type TickTickSync from '@/main';
 import type { IProject } from '@/api/types/Project';
 import type { FolderSyncService } from '@/services/FolderSyncService';
 import { FoundDuplicateListsModal } from '@/modals/FoundDuplicateListsModal';
-import { getDefaultFolder, getSettings } from '@/settings';
+import { getDefaultFolder, getSettings, updateSettings } from '@/settings';
 import log from '@/utils/logger';
 import { db } from '@/db/dexie';
 import { getAllProjects } from '@/db/projects';
 import { upsertFile, getAllFiles } from '@/db/files';
+import { healSyncedLists, isListAllowed, unmatchedEntries } from '@/syncScope';
 
 export class ProjectSyncService {
 	app: App;
@@ -46,7 +47,25 @@ export class ProjectSyncService {
 				return false;
 			}
 
+			// GTD scope: only allow-listed lists get a file entry / vault stub. Empty list = none.
+			// A list renamed in TickTick keeps its entry (old name -> new name).
+			const healed = healSyncedLists(getSettings().syncedLists, await getAllProjects(), projects);
+			if (healed) {
+				updateSettings({ syncedLists: healed });
+				await this.plugin.saveSettings();
+				log.info('syncedLists refreshed for renamed list(s)', healed);
+			}
+			const entries = getSettings().syncedLists ?? [];
+			if (!entries.length) {
+				log.warn('syncedLists is empty: no list files are created and nothing is pulled.');
+			}
+			const unknown = unmatchedEntries(entries, projects);
+			if (unknown.length) log.warn('syncedLists entries match no TickTick list:', unknown);
 			for (const project of projects) {
+				if (!this.isListSynced(project)) {
+					log.debug(`List not in syncedLists, no file: ${project.name}`);
+					continue;
+				}
 				await this.checkProjectRename(project.id, project.name, project)
 			}
 
@@ -61,7 +80,16 @@ export class ProjectSyncService {
 		return false;
 	}
 
+	/** Allow-listed (syncedLists) and not the project-scheme list (its tasks live in project notes). */
+	private isListSynced(list: { id: string; name: string }): boolean {
+		const s = getSettings();
+		if (!isListAllowed(s.syncedLists, list)) return false;
+		if (s.projectSchemeEnabled && s.projectsListName && list.name.toLowerCase() === s.projectsListName.toLowerCase()) return false;
+		return true;
+	}
+
 	async checkProjectRename(ttProjectId: string, ttProjectName: string, ttProject?: IProject): Promise<void> {
+		if (!this.isListSynced({ id: ttProjectId, name: ttProjectName })) return;
 		const fileMetadatas = await this.plugin.fileMetadataService.getAllFileMetadata();
 		if (!fileMetadatas) return;
 		const projects = await getAllProjects();

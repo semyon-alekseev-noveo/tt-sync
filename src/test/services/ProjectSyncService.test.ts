@@ -50,14 +50,19 @@ vi.mock('@/db/files', () => ({
 	deleteFile: vi.fn(),
 }));
 
+const testSettings = vi.hoisted(() => ({
+	inboxID: 'inbox-1',
+	inboxName: 'Inbox',
+	keepProjectFolders: false,
+	syncedLists: ['Work', 'Home', 'Inbox'] as string[],
+	projectSchemeEnabled: false,
+	projectsListName: 'Projects',
+}));
+
 vi.mock('@/settings', () => ({
-	getSettings: vi.fn(() => ({
-		inboxID: 'inbox-1',
-		inboxName: 'Inbox',
-		keepProjectFolders: false,
-	})),
+	getSettings: vi.fn(() => testSettings),
 	getDefaultFolder: vi.fn(() => ''),
-	updateSettings: vi.fn(),
+	updateSettings: vi.fn((patch: Record<string, unknown>) => { Object.assign(testSettings, patch); }),
 }));
 
 vi.mock('@/modals/FoundDuplicateListsModal', () => ({
@@ -77,6 +82,8 @@ function makePlugin() {
 	const updateFilePath = vi.fn(async () => {});
 	return {
 		plugin: {
+			manifest: { name: 'TickTickSync', version: 'test' },
+			saveSettings: vi.fn(async () => {}),
 			fileMetadataService: {
 				getAllFileMetadata: vi.fn(async () => ({})),
 				getFilepathForProjectId: vi.fn(async (id: string) => {
@@ -97,6 +104,47 @@ describe('ProjectSyncService.saveProjectsToCache', () => {
 		projectsTable.clear();
 		filesTable.clear();
 		upsertFile.mockClear();
+		testSettings.syncedLists = ['Work', 'Home', 'Inbox'];
+		testSettings.projectSchemeEnabled = false;
+	});
+
+	it('creates no file entry or stub for lists outside syncedLists (G1)', async () => {
+		testSettings.syncedLists = ['Work'];
+		const create = vi.fn(async () => {});
+		const { plugin } = makePlugin();
+		const svc = new ProjectSyncService({ vault: { getAbstractFileByPath: () => null, create, createFolder: vi.fn() } } as never, plugin as never);
+		await svc.saveProjectsToCache([...remoteProjects(), { id: 'proj-c', name: 'KB' } as IProject]);
+		expect(upsertFile.mock.calls.map(c => c[0])).toEqual(['Work.md']);
+		expect(create).toHaveBeenCalledTimes(1);
+		// the list cache still knows every list (needed for tag/list mapping)
+		expect(projectsTable.size).toBe(4);
+	});
+
+	it('empty syncedLists creates nothing at all', async () => {
+		testSettings.syncedLists = [];
+		const create = vi.fn(async () => {});
+		const { plugin } = makePlugin();
+		const svc = new ProjectSyncService({ vault: { getAbstractFileByPath: () => null, create, createFolder: vi.fn() } } as never, plugin as never);
+		await svc.saveProjectsToCache(remoteProjects());
+		expect(upsertFile).not.toHaveBeenCalled();
+		expect(create).not.toHaveBeenCalled();
+	});
+
+	it('matches syncedLists by id as well as by name, ignoring case', async () => {
+		testSettings.syncedLists = ['proj-b', 'WORK'];
+		const { plugin } = makePlugin();
+		const svc = new ProjectSyncService({} as never, plugin as never);
+		await svc.saveProjectsToCache(remoteProjects());
+		expect(upsertFile.mock.calls.map(c => c[0]).sort()).toEqual(['Home.md', 'Work.md']);
+	});
+
+	it('does not give the project-scheme list a list file', async () => {
+		testSettings.syncedLists = ['Work', 'Projects'];
+		testSettings.projectSchemeEnabled = true;
+		const { plugin } = makePlugin();
+		const svc = new ProjectSyncService({} as never, plugin as never);
+		await svc.saveProjectsToCache([...remoteProjects(), { id: 'proj-p', name: 'Projects' } as IProject]);
+		expect(upsertFile.mock.calls.map(c => c[0])).toEqual(['Work.md']);
 	});
 
 	it('maps every project to a file on the very first sync', async () => {
@@ -150,8 +198,22 @@ describe('ProjectSyncService.saveProjectsToCache', () => {
 		projectsTable.set('proj-a', { id: 'proj-a', project: { id: 'proj-a', name: 'Work' } as IProject });
 		filesTable.set('Work.md', { path: 'Work.md', defaultProjectId: 'proj-a' });
 
+		testSettings.syncedLists = ['Work Stuff'];
 		await svc.checkProjectRename('proj-a', 'Work Stuff');
 
+		expect(updateFilePath).toHaveBeenCalledWith('Work.md', 'Work Stuff.md');
+	});
+
+	it('keeps a renamed list in syncedLists (entry follows the rename)', async () => {
+		const { plugin, updateFilePath } = makePlugin();
+		const svc = new ProjectSyncService({ vault: { getAbstractFileByPath: () => null } } as never, plugin as never);
+		projectsTable.set('proj-a', { id: 'proj-a', project: { id: 'proj-a', name: 'Work' } as IProject });
+		filesTable.set('Work.md', { path: 'Work.md', defaultProjectId: 'proj-a' });
+		testSettings.syncedLists = ['Work'];
+
+		await svc.saveProjectsToCache([{ id: 'proj-a', name: 'Work Stuff' } as IProject]);
+
+		expect(testSettings.syncedLists).toEqual(['Work Stuff']);
 		expect(updateFilePath).toHaveBeenCalledWith('Work.md', 'Work Stuff.md');
 	});
 

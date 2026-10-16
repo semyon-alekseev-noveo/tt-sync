@@ -7,8 +7,8 @@ import {viteStaticCopy} from "vite-plugin-static-copy";
 import {configDefaults, defineConfig} from "vitest/config";
 import {pathToFileURL} from "node:url";
 
-const DEV_PATH = path.join("..", "test-vault", ".obsidian", "plugins", "tickticksync");
-// const DEV_PATH = path.join("G:\\My Drive\\SyncFolder\\Obsidian\\", "test-vault-syncthing", ".obsidian", "plugins", "tickticksync");
+const DEV_PATH = path.join("..", "test-vault", ".obsidian", "plugins", "tickticksync-abyss");
+// const DEV_PATH = path.join("G:\\My Drive\\SyncFolder\\Obsidian\\", "test-vault-syncthing", ".obsidian", "plugins", "tickticksync-abyss");
 function getOutDir(prod: boolean): string | undefined {
 	if (!prod)
 		return DEV_PATH;

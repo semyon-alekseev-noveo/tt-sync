@@ -2,6 +2,7 @@
 	import DeviceIdentitySection from './DeviceIdentitySection.svelte';
 	import DefaultsSection from './DefaultsSection.svelte';
 	import LimitSyncSection from './LimitSyncSection.svelte';
+	import GtdSection from './GtdSection.svelte';
 	import AutoSyncIntervalSection from './AutoSyncIntervalSection.svelte';
 	import FullVaultSyncSection from './FullVaultSyncSection.svelte';
 	export let plugin;
@@ -9,6 +10,7 @@
 	const sections = [
 		{ key: 'identity', component: DeviceIdentitySection },
 		{ key: 'defaults', component: DefaultsSection },
+		{ key: 'gtd', component: GtdSection },
 		{ key: 'limit', component: LimitSyncSection },
 		{ key: 'auto', component: AutoSyncIntervalSection },
 		{ key: 'full', component: FullVaultSyncSection }

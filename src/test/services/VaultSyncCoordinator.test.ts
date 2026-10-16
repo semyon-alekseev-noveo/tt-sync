@@ -2,6 +2,8 @@ import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 import { VaultSyncCoordinator } from '@/services/VaultSyncCoordinator';
 import type { LocalTask } from '@/db/schema';
 import type { ITask } from '@/api/types/Task';
+import { db } from '@/db/dexie';
+import { getSettings } from '@/settings';
 
 // Mock Obsidian dependencies
 vi.mock('obsidian', () => ({
@@ -28,6 +30,8 @@ vi.mock('@/db/dexie', () => ({
 		meta: {
 			update: vi.fn(),
 		},
+		files: { toArray: vi.fn() },
+		projects: { toArray: vi.fn() },
 		transaction: vi.fn((_mode: string, _table: string, callback: () => void) => callback()),
 	},
 }));
@@ -195,6 +199,63 @@ describe('VaultSyncCoordinator', () => {
 		it('should return false with OR filter when neither matches', () => {
 			const task = { id: 't1', projectId: 'p2', tags: ['personal'] } as ITask;
 			expect(fn(task, 'work', 'p1', 0)).toBe(false);
+		});
+	});
+
+	describe('syncedLists gate (GTD scope)', () => {
+		let fn: (...args: unknown[]) => boolean;
+		beforeEach(() => {
+			fn = (coordinator as unknown as { matchesFilter(...args: unknown[]): boolean }).matchesFilter.bind(coordinator);
+		});
+
+		it('rejects tasks of lists outside the allow-list', () => {
+			const task = { id: 't1', projectId: 'p2', tags: [] } as ITask;
+			expect(fn(task, undefined, undefined, 0, new Set(['p1']))).toBe(false);
+		});
+
+		it('accepts tasks of allow-listed lists', () => {
+			const task = { id: 't1', projectId: 'p1', tags: [] } as ITask;
+			expect(fn(task, undefined, undefined, 0, new Set(['p1']))).toBe(true);
+		});
+
+		it('empty allow-list pulls nothing (not everything)', () => {
+			const task = { id: 't1', projectId: 'p1', tags: [] } as ITask;
+			expect(fn(task, undefined, undefined, 0, new Set())).toBe(false);
+		});
+
+		it('SyncTag still narrows inside an allowed list', () => {
+			const allowed = new Set(['p1']);
+			expect(fn({ id: 'a', projectId: 'p1', tags: ['work'] } as ITask, 'work', undefined, 0, allowed)).toBe(true);
+			expect(fn({ id: 'b', projectId: 'p1', tags: ['home'] } as ITask, 'work', undefined, 0, allowed)).toBe(false);
+		});
+	});
+
+	describe('ensureProjectFilesExist (no stub files for non-synced lists)', () => {
+		const run = async (syncedLists: string[]) => {
+			const create = vi.fn(async () => undefined);
+			(getSettings as Mock).mockReturnValue({ syncedLists, projectSchemeEnabled: false, newTasksFile: '' });
+			(db.files.toArray as Mock).mockResolvedValue([
+				{ path: 'Tasks/Inbox.md', defaultProjectId: 'inbox-1' },
+				{ path: 'Tasks/KB.md', defaultProjectId: 'kb' },
+				{ path: 'Tasks/Loose.md' },
+			]);
+			(db.projects.toArray as Mock).mockResolvedValue([
+				{ id: 'inbox-1', project: { id: 'inbox-1', name: 'Inbox' } },
+				{ id: 'kb', project: { id: 'kb', name: 'KB' } },
+			]);
+			const c = new VaultSyncCoordinator({
+				vault: { getAbstractFileByPath: () => null, create, createFolder: vi.fn() },
+			} as unknown as never, { manifest: { name: 'TTS', version: 't' } } as unknown as never, undefined);
+			await (c as unknown as { ensureProjectFilesExist(): Promise<void> }).ensureProjectFilesExist();
+			return create.mock.calls.map(c => (c as unknown[])[0]);
+		};
+
+		it('re-creates only files of allow-listed lists', async () => {
+			expect(await run(['Inbox'])).toEqual(['Tasks/Inbox.md']);
+		});
+
+		it('creates nothing when syncedLists is empty', async () => {
+			expect(await run([])).toEqual([]);
 		});
 	});
 

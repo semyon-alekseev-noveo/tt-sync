@@ -6,6 +6,7 @@
 	import { getSettings, updateSettings } from '@/settings';
 	import log from 'loglevel';
 	import { getTick } from '@/api/tick_singleton_factory';
+	import { applyLogin, loginPatch } from '@/loginSettings';
 
 	export let plugin: TickTickSync;
 
@@ -25,8 +26,9 @@
 		if (oldInboxId &&  oldInboxId.length > 0 && oldInboxId != info.inboxId) {
 			new Notice('You are logged in with a different user ID.');
 		}
-		settingsStore.update(s => ({ ...s, token: info.token, inboxID: info.inboxId, checkPoint: 0 }));
-		updateSettings({ token: info.token, inboxID: info.inboxId, inboxName: 'Inbox', checkPoint: 0 });
+		// login changes only token/inbox/checkpoint; every other setting (GTD lists, mappings) is kept
+		settingsStore.update(s => applyLogin(s, info));
+		updateSettings(loginPatch(info));
 		loggedIn = !!$settingsStore.token;
 
 		const api = getTick({ baseUrl: $settingsStore.baseURL, token: info.token, checkPoint: 0 });
@@ -103,7 +105,17 @@
 		}
 	}
 
+	// username/password are kept in data.json (keys username, password) so the plugin logs in by itself at start
+	async function saveCredentials() {
+		const patch = { username: (userLogin ?? '').trim(), password: userPassword ?? '' };
+		settingsStore.update(s => ({ ...s, ...patch }));
+		updateSettings(patch);
+		await plugin.saveSettings();
+	}
+
 	onMount(async () => {
+		userLogin = $settingsStore.username ?? '';
+		userPassword = $settingsStore.password ?? '';
 		loggedIn = !!$settingsStore.token;
 		baseURL = $settingsStore.baseURL;
 		desktoApp = Platform.isDesktopApp;
@@ -115,7 +127,7 @@
 	<div class="login-status-banner">
 		{loggedIn ? 'You are logged in. You can re-login here.' : 'Please login here.'}
 		<div class="login-status-banner-actions">
-			<br>Regardless of login option, TickTickSync will not save your User ID or your Password anywhere.<br>
+			<br>Username and password entered under Regular Login are stored in plain text in this plugin's data.json so TickTickSync can log in by itself when Obsidian starts. Leave them empty to log in manually (nothing is stored then).<br>
 		</div>
 		{#if desktoApp}
 			<div class="login-status-banner-actions">
@@ -184,7 +196,7 @@
 				<div class="setting-item-description">Your {providerString} account username</div>
 			</div>
 			<div class="setting-item-control">
-				<input type="text" placeholder="Username" bind:value={userLogin} />
+				<input type="text" placeholder="Username" bind:value={userLogin} on:change={saveCredentials} />
 			</div>
 		</div>
 
@@ -194,7 +206,7 @@
 				<div class="setting-item-description">Your { providerString } account password</div>
 			</div>
 			<div class="setting-item-control">
-				<input type="password" placeholder="Password" bind:value={userPassword} />
+				<input type="password" placeholder="Password" bind:value={userPassword} on:change={saveCredentials} />
 			</div>
 		</div>
 

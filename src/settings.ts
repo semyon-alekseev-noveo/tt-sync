@@ -11,6 +11,10 @@ export interface ITickTickSyncSettings {
 
 	baseURL: string;
 	token?: string;
+	// Optional stored credentials (plaintext in data.json, opt-in): when set, the plugin logs in at start
+	// if there is no token or the token was rejected. Never required: login from settings still works.
+	username?: string;
+	password?: string;
 	version?: string;
 
 	automaticSynchronizationInterval: number;
@@ -18,6 +22,13 @@ export interface ITickTickSyncSettings {
 	tagAndOr: number; // 1 == And ; 2 == Or
 	SyncProject: string;
 	SyncTag: string;
+	// GTD scope: TickTick lists (name or id) that are pulled into the vault and get list files.
+	// Empty = pull nothing (safe default, NOT "everything"). Replaces the single SyncProject
+	// (migrated on load when this key is absent); SyncTag/SyncProject still narrow it further.
+	syncedLists: string[];
+	// Vault folders (prefix match, e.g. "00 Inbox/") that may push to TickTick. Empty = no folder
+	// restriction. The tasks folder, the projects folder and newTasksFile are always in scope.
+	syncScopeFolders: string[];
 	defaultProjectId: string;
 	defaultProjectName: string;
 	TickTickTasksFilePath: string;
@@ -47,6 +58,9 @@ export interface ITickTickSyncSettings {
 	projectsFolder: string;
 	projectsListName: string;
 	projectTaskTags: string[];
+	// Optional vault path of a project note template, used when a project note is created from
+	// TickTick. Templater blocks/prompts are skipped; title and id are filled. Empty = built-in template.
+	projectTemplatePath: string;
 	/** Abyss: flat TickTick tag name -> original Obsidian tag path (foo-bar -> foo/bar). */
 	tagPathMap?: Record<string, string>;
 	projectSnapshot: Record<string, { noteDone: boolean; ttDone: boolean; title?: string }>;
@@ -89,7 +103,7 @@ export interface ITickTickSyncSettings {
 
 export const DEFAULT_SETTINGS: ITickTickSyncSettings = {
 	baseURL: 'ticktick.com',
-	automaticSynchronizationInterval: 300, //default sync interval 300s
+	automaticSynchronizationInterval: 0, // 0 = no automatic sync; user starts a sync from settings or the command
 	enableFullVaultSync: false,
 	tagAndOr: 1,
 	debugMode: false,
@@ -99,6 +113,8 @@ export const DEFAULT_SETTINGS: ITickTickSyncSettings = {
 	deletedTaskRetentionDays: 7,
 	SyncProject: '',
 	SyncTag: '',
+	syncedLists: [], // safe default: nothing is pulled until lists are chosen
+	syncScopeFolders: [],
 	defaultProjectId: '',
 	defaultProjectName: 'Inbox',
 	TickTickTasksFilePath: '/',
@@ -121,11 +137,13 @@ export const DEFAULT_SETTINGS: ITickTickSyncSettings = {
 	projectsFolder: '10 Projects',
 	projectsListName: 'Projects',
 	projectTaskTags: ['project', 'obsidian'],
+	projectTemplatePath: '',
 	projectSnapshot: {},
-	fileLinksInTickTick: 'taskLink',
+	// Fork defaults: no obsidian:// links in TickTick titles, no "ticktick" tag pushed to TickTick.
+	fileLinksInTickTick: 'noLink',
 	taskLinksInObsidian: 'taskLink',
 	bkupFolder: '/',
-	stopInjectingTickTickTag: false,
+	stopInjectingTickTickTag: true,
 	stripTickTickTagOnReset: false,
 
 	inboxID: '',
@@ -165,9 +183,20 @@ export const setSettings = (value: ITickTickSyncSettings) => {
 	settings = value;
 };
 
-export const updateSettings = (newSettings: Partial<ITickTickSyncSettings>): ITickTickSyncSettings => {
+export type UpdateSettingsOptions = { persist?: boolean };
+
+export const updateSettings = (
+	newSettings: Partial<ITickTickSyncSettings>,
+	opts?: UpdateSettingsOptions,
+): ITickTickSyncSettings => {
 	settings = { ...settings, ...newSettings } as const;
-	settingsStore.set(settings);
+	if (settingsStore) {
+		if (opts?.persist === false) {
+			settingsStore.update(() => ({ ...settings }));
+		} else {
+			settingsStore.set(settings);
+		}
+	}
 	return getSettings();
 };
 

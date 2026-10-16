@@ -18,6 +18,8 @@ import { getSettings } from '@/settings';
 import { NewFileMap, type ITaskItemRecord } from '@/services/NewFileMap';
 import log from '@/utils/logger';
 import { db } from "@/db/dexie";
+import { getAllProjects } from '@/db/projects';
+import { resolveSyncedListIds } from '@/syncScope';
 
 export class SyncMan {
 	private readonly app: App;
@@ -127,6 +129,12 @@ export class SyncMan {
 					});
 				}
 			}
+
+			// GTD scope: only allow-listed lists are pulled; empty syncedLists = nothing.
+			const syncedEntries = getSettings().syncedLists ?? [];
+			if (!syncedEntries.length) log.warn('syncedLists is empty: nothing is pulled from TickTick.');
+			const allowedListIds = resolveSyncedListIds(syncedEntries, await getAllProjects());
+			tasksFromTickTic = tasksFromTickTic.filter(task => allowedListIds.has(task.projectId));
 
 			// this.dumpArray('== remote:', tasksFromTickTic);
 			let tasksInCache = await this.plugin.taskRepository?.loadAllTasks();
