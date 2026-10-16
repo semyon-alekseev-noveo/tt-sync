@@ -1,5 +1,21 @@
 # Changelog
 
+### Iteration 2026-10-16 15:55 UTC
+
+- Context: Owner asked to execute Abyss-first Step 4 (lines stay put; scope push without mandatory `#ticktick`).
+- Target: `abyssTasksFormat` + configured `syncScopeFolders` track/push in-place; pull prefers vault `presentAt`; no file move on TT list change.
+- Actions log:
+  - `syncScope.ts` — `scopePushWithoutMarker()`, `hasConfiguredPushScope()`.
+  - `taskParser.ts` — `isLineTrackedForSync`, `#obsidian` on push when `stopInjectingTickTickTag`; no `#ticktick` injection in convert.
+  - Wired tracking into `TaskModificationDetector`, `syncModule.forceUpdates`, `index` checkDB, `TaskOperationsService`, `NewFileMap`.
+  - `VaultSyncCoordinator` — pull target: vault location wins over list-file/DB.
+  - `fileOperation.ts` — skip markdown relocate on list tag change when `abyssTasksFormat`.
+  - Tests: `src/test/step4ScopeSync.test.ts`, extended `taskParser.sourceTag.test.ts`.
+- Validation: `npm test -- --run` → 498 passed; `npm run build` ok.
+- Problems: Phase D pilot spot-check in Obsidian still owner verify (`open`).
+- To Be Done: Deploy build to test vault; normal Sync on `TTS-PILOT-tag-routing`; Step 5 settings copy + P6 regression doc.
+- References: `CHANGELOG.md`, `ABYSS_FIRST_PLAN.md` Step 4, `src/taskParser.ts`, `src/syncScope.ts`
+
 ### Iteration 2026-10-16 15:51 UTC
 
 - Context: Reset tasks hollowed project parent lines and pushed live Projects; owner asked to fix reset/repair.

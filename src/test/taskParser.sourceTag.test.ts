@@ -4,6 +4,7 @@
  */
 import { describe, expect, it } from 'vitest';
 import { TaskParser } from '@/taskParser';
+import { getSettings } from '@/settings';
 
 const parser = new TaskParser({} as unknown, {} as unknown);
 const ID = 'abcdefabcdefabcdefabcdef';
@@ -22,6 +23,16 @@ describe('TaskParser.hasTickTickTag', () => {
 
 	it('does not treat #obsidian without an id as synced (new vault lines need the marker)', () => {
 		expect(parser.hasTickTickTag('- [ ] a #obsidian')).toBe(false);
+	});
+
+	it('isLineTrackedForSync accepts id-only lines in scope when abyssTasksFormat', () => {
+		Object.assign((getSettings() as unknown as Record<string, unknown>), {
+			abyssTasksFormat: true,
+			syncScopeFolders: ['30 Tasks/'],
+		});
+		expect(parser.isLineTrackedForSync(`- [ ] a ${idTag}`, '30 Tasks/x.md')).toBe(true);
+		Object.assign((getSettings() as unknown as Record<string, unknown>), { abyssTasksFormat: false });
+		expect(parser.isLineTrackedForSync(`- [ ] a ${idTag}`, '30 Tasks/x.md')).toBe(false);
 	});
 
 	it('ignores lookalike tags and non-task lines', () => {

@@ -597,8 +597,8 @@ export class TickTickService {
 				// Skip tasks without #ticktick tag
 				if (!dbTaskIds.includes(taskId) && physicalTaskIds.includes(taskId)) {
 					const taskLine = fileMap.getTaskRecord(taskId).task;
-					if (!this.plugin.taskParser?.hasTickTickTag(taskLine)) {
-						log.debug(`[checkDB] SKIP task ${taskId} — no #ticktick tag on line: "${taskLine}"`);
+					if (!this.plugin.taskParser?.isLineTrackedForSync(taskLine, filepath)) {
+						log.debug(`[checkDB] SKIP task ${taskId} — line not tracked for sync: "${taskLine}"`);
 						continue;
 					}
 				}

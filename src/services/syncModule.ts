@@ -441,7 +441,7 @@ export class SyncMan {
 		const removeAt: number[] = [];
 		for (let line = 0; line < lines.length; line++) {
 			const lineText = lines[line];
-			if (!this.plugin.taskParser?.hasTickTickId(lineText) || !this.plugin.taskParser?.hasTickTickTag(lineText)) {
+			if (!this.plugin.taskParser?.isLineTrackedForSync(lineText, fileMap.getFilePath())) {
 				continue;
 			}
 			const taskId = this.plugin.taskParser.getTickTickId(lineText);

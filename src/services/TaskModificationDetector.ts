@@ -109,8 +109,9 @@ export class TaskModificationDetector {
 			return;
 		}
 
-		// Check if it's a new task (has #ticktick tag but no ID yet)
-		if (!this.plugin.taskParser.hasTickTickId(lineTxt) && this.plugin.taskParser.hasTickTickTag(lineTxt)) {
+		// New task in push scope (marker optional when abyssTasksFormat / Step 4)
+		if (!this.plugin.taskParser.hasTickTickId(lineTxt)
+			&& this.plugin.taskParser.isLineTrackedForSync(lineTxt, fileMap.getFilePath())) {
 			if (isBlankTitle(this.plugin.taskParser.getTaskContentFromLineText(lineTxt.trimStart()))) {
 				log.warn('Skipping task with empty title:', lineTxt);
 				return;
@@ -249,8 +250,7 @@ export class TaskModificationDetector {
 			return false;
 		}
 
-		if (!this.plugin.taskParser?.hasTickTickId(lineText) ||
-			!this.plugin.taskParser?.hasTickTickTag(lineText)) {
+		if (!this.plugin.taskParser?.isLineTrackedForSync(lineText, filepath)) {
 			// Not a full task — check if it's a genuine task item.
 			if (lineNumber !== undefined) {
 				const fileLines = fileMap.getFileLines().split('\n');

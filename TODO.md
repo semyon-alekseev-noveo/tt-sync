@@ -39,7 +39,8 @@
 - [x] Step 2: Abyss `membershipQuery` → `10 Projects/`, вставка задач в `## Active Zone` (test vault 2026-10-16).
 - [x] Step 3: **Option B** — `taskIgnoreQuery: #ticktick`, untagged inbox (2026-10-16).
 - [ ] Step 3.2: UI verify — synced line with only `#ticktick` stays in Abyss Inbox after reload.
-- [ ] Step 4–5: код — строки не переезжают; единое определение проекта; P6.
+- [x] Step 4: scope push без `#ticktick`; строка не переезжает при смене списка; pull по id на месте (2026-10-16).
+- [ ] Step 5: единое определение проекта в UI; P6 regression doc.
 - [ ] Step 6–7: кейсы AF-* и пилот на `Thinkpad-tts-test`.
 
 ## GTD-синк (архив / `GTD_SYNC_RESEARCH.md` + `GTD_SYNC_CASES.md`)

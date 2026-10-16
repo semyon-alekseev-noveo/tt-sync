@@ -230,6 +230,18 @@ Today `TTS-data-preset.json` includes **`00 Inbox/`** in `syncScopeFolders`. Opt
 
 **Tests:** Adjust or add vitest: push from arbitrary path → no file move; pull updates line by id.
 
+**Implemented (2026-10-16, uncommitted on `abyss-mapping`):**
+
+| Item | Location |
+|------|----------|
+| Scope push without `#ticktick` | `scopePushWithoutMarker()` = `abyssTasksFormat` **and** non-empty `syncScopeFolders`; `TaskParser.isLineTrackedForSync` |
+| No list-file mirror on tag/list change | `fileOperation.ts` (same gate as `newTasksFile` relocate skip) |
+| Pull in place | `VaultSyncCoordinator` — `presentAt` in vault beats list stub path |
+| Push limits unchanged | Still `syncScopeFolders` + `syncedLists`; `#obsidian` written when `stopInjectingTickTickTag` |
+| Vitest | `src/test/step4ScopeSync.test.ts` |
+
+**Owner verify:** Reload plugin build → Phase D in `TTS-PILOT-RUN.md` (line stays in source note; TT list from GTD tags).
+
 ---
 
 ## Step 5 — One project definition (engineering + settings)

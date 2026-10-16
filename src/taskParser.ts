@@ -15,6 +15,8 @@ import type { TagService } from '@/services/TagService';
 import { tasksTextToRRule, rruleToTasksText } from '@/utils/RecurrenceConverter';
 import { normalizeTrigger, parseReminderText, secondsToShorthand, triggerToSeconds } from '@/utils/ReminderConverter';
 import log from '@/utils/logger';
+import { isBlankTitle } from '@/projectScheme';
+import { isPathInPushScope, scopePushWithoutMarker } from '@/syncScope';
 
 const prioritySymbols = {
 	Highest: '🔺', High: '⏫', Medium: '🔼', Low: '🔽', Lowest: '⏬', None: ''
@@ -187,7 +189,13 @@ export class TaskParser {
 			resultLine = this.addTagsToLine(resultLine, lineTags);
 		}
 		// Project children show one source tag: #obsidian (born in the vault) or #ticktick (pulled).
-		if (!fromObsidian) resultLine = this.addTickTickTag(resultLine);
+		if (!fromObsidian) {
+			if (getSettings().stopInjectingTickTickTag && scopePushWithoutMarker()) {
+				if (!/\s#obsidian(?![\w/-])/i.test(resultLine)) resultLine += ' #obsidian';
+			} else {
+				resultLine = this.addTickTickTag(resultLine);
+			}
+		}
 
 		if (getSettings().taskLinksInObsidian === 'taskLink') {
 			resultLine = this.addTickTickLink(resultLine, task.id, task.projectId);
@@ -747,6 +755,11 @@ export class TaskParser {
 			log.error('Converting line to Object, could not find project Id: ', title);
 		}
 
+		if (!projectOf && scopePushWithoutMarker() && isPathInPushScope(filepath) && !isBlankTitle(title)) {
+			const hasSource = tags.some(t => t === 'obsidian' || t === 'ticktick' || t === markerName());
+			if (!hasSource) tags = [...tags, 'obsidian'];
+		}
+
 		const isCompleted = this.isTaskCheckboxChecked(textWithoutIndentation);
 
 		const priority = this.getTaskPriority(textWithoutIndentation);
@@ -912,6 +925,15 @@ export class TaskParser {
 		} else {
 			return false;
 		}
+	}
+
+	/** Push/pull gate for a markdown task line (Step 4: scope + id, not only #ticktick). */
+	isLineTrackedForSync(text: string, filepath?: string | null): boolean {
+		if (!this.isMarkdownTask(text) || isDetached(text)) return false;
+		if (this.hasTickTickTag(text)) return true;
+		if (!scopePushWithoutMarker() || !filepath || !isPathInPushScope(filepath)) return false;
+		if (this.hasTickTickId(text)) return true;
+		return !isBlankTitle(this.getTaskContentFromLineText(text.trimStart()));
 	}
 
 	hasTickTickId(text: string) {

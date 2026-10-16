@@ -17,7 +17,7 @@
 
 - **Direction (2026-10-16):** **Abyss-first** — tasks stay where Abyss puts them; TickTick mirrors tags/lists and project parents. See `ABYSS_FIRST_PLAN.md` (topology R / CASE-T4 parked).
 - **Still valid:** TT **Projects** ↔ project notes under `10 Projects/`; safety: `syncedLists`, `syncScopeFolders`, manual sync.
-- **Next execution order:** Steps 1–3 **B chosen** (PO 2026-10-16; `TTS-abyss-preset.json` on test vault) → verify Inbox UI → Steps 4–5 (code) → AF-* pilot (`ABYSS_FIRST_PLAN.md` §6–7).
+- **Next execution order:** Steps 1–3 **B** done → Step **4 code done** (scope in-place sync; see `CHANGELOG.md` 15:55 UTC) → deploy + Phase D verify → Step 5 → AF-* pilot (`ABYSS_FIRST_PLAN.md` §6–7).
 
 ## Validation
 
@@ -37,10 +37,9 @@
 
 ## To Be Done
 
-1. Vault: Step 3.2 — confirm Abyss Inbox with `taskIgnoreQuery` (reload Obsidian on test vault).
-2. Vault: Step 2 **done** on `Thinkpad-tts-test` (see `ABYSS_FIRST_PLAN.md` Step 2 table).
-3. Engineering: Steps 4–5 — no line relocate; P6 fix; optional AF-* doc.
-4. Pilot: Step 7 — AF-* on `Thinkpad-tts-test` before live vault.
+1. Deploy latest `dist/` to test vault; Phase D + Step 3.2 Inbox spot-check (no **Reset**).
+2. Engineering: Step 5 — settings copy; P6 regression doc (P6 fix shipped 2.0.25).
+3. Pilot: Step 7 — AF-* on `Thinkpad-tts-test` before live vault.
 
 ## References
 

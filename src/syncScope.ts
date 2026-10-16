@@ -141,3 +141,13 @@ export function isPathInPushScope(path: string | undefined | null): boolean {
 	if (!path) return true;
 	return pushScopeAllows(path, getSettings().syncScopeFolders, implicitScopeFolders());
 }
+
+/** Non-empty `syncScopeFolders` — Step 4 applies only when push scope is explicit (pilot). */
+export function hasConfiguredPushScope(): boolean {
+	return (getSettings().syncScopeFolders ?? []).some(f => !!f?.trim());
+}
+
+/** Abyss-first (Step 4): tasks in push scope sync without #ticktick on every line. */
+export function scopePushWithoutMarker(): boolean {
+	return !!getSettings().abyssTasksFormat && hasConfiguredPushScope();
+}

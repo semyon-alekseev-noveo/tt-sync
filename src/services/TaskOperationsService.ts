@@ -135,8 +135,7 @@ export class TaskOperationsService {
 				const lineText = lines[lineNumber];
 
 				// Only process lines that have a TickTick ID and tag
-				if (this.plugin.taskParser?.hasTickTickId(lineText) &&
-				    this.plugin.taskParser?.hasTickTickTag(lineText)) {
+				if (this.plugin.taskParser?.isLineTrackedForSync(lineText, filepath)) {
 
 					const taskId = this.plugin.taskParser.getTickTickId(lineText) ?? '';
 					const savedTask = await this.plugin.taskRepository.loadTaskById(taskId);

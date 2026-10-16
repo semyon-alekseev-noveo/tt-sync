@@ -70,8 +70,12 @@ export class VaultSyncCoordinator {
 			const matchesFilter = this.matchesFilter(task, syncTag, syncProject, andOr, allowedListIds);
 
 			let targetFile: string | undefined;
+			const actualFile = !lt.deleted ? presentAt.get(task.id) : undefined;
 
-			if (matchesFilter && !lt.deleted) {
+			// Step 4: line already in vault wins over list-file / DB path (Abyss-first in place).
+			if (actualFile) {
+				targetFile = actualFile;
+			} else if (matchesFilter && !lt.deleted) {
 				// Project children belong in the parent note's Active Zone, even if an
 				// earlier sync wrote them into the flat list file.
 				const schemeNote = task.parentId ? scheme?.noteForParent(task.parentId) : undefined;
@@ -90,8 +94,6 @@ export class VaultSyncCoordinator {
 				targetFile = lt.file;
 			}
 
-			// The line already lives in another note than the DB says: follow the vault, fix the DB.
-			const actualFile = !lt.deleted ? presentAt.get(task.id) : undefined;
 			if (actualFile && actualFile !== lt.file && actualFile !== targetFile) {
 				dbUpdates.push({ localId: lt.localId, changes: { file: actualFile, lastVaultSync: Date.now() } });
 				targetFile = actualFile;

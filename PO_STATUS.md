@@ -117,7 +117,7 @@ Full analysis: `GTD_SYNC_RESEARCH.md` (hypotheses A/B, recommended R, test plans
 | 1 | **Ready** — preset + six `TTS-*` lists; deploy plugin **2.0.20** (`dist/` → test vault) | GTD settings → confirm lists; `projectsListName=TTS-Projects` (name wins over stale `projectsListId`) |
 | 2 | **Retest (2.0.18)** — Phase B core passed on 2.0.17 but **FAIL** scoped pull (16 legacy project notes + wrong list id); fix in 2.0.18 | **Synchronize** → only `#tts-test` parent creates/updates; other `10 Projects/` notes untouched; `TTS-Projects.md` stub under `30 Tasks/TickTick/` |
 | 3 | **Pass (2026-10-16)** — `TTS-PILOT- Phase C test` → TT parent `6ad1dc711befa8582aceadd7` in **TTS-Projects**, clean title | Optional: add `tts-test` tag on TT parent (note had YAML tag) |
-| 4 | **Partial (legacy R)** — TT list OK; line in source note — **acceptable under Abyss-first** (`ABYSS_FIRST_PLAN.md`); CASE-T4 **parked** | Step 4: confirm no relocate policy in code/docs |
+| 4 | **Code done (2026-10-16)** — scope sync without `#ticktick`; no file move on list change; pull by id in place; CASE-T4 **parked** | Deploy `dist/` → reload → Phase D (`TTS-PILOT-tag-routing.md`) |
 | 5 | **Pass (spot)** — empty `syncedLists` sync added no journal pulls | Formal UI test still useful |
 
 **Phase B validation (2026-10-16, subagent):** pilot parent + MOC note — pass; five list stubs — pass; missing `TTS-Projects.md` — fixed in 2.0.18; 16 unrelated project notes updated — **fail** (fixed in 2.0.18 via scheme scope + `resolveProjectsList`).

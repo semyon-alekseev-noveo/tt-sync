@@ -306,8 +306,9 @@ export class NewFileMap {
 			const isTwoSpaceChecklist = /^\s{2}- \[([xX ])]/.test(line);
 			const hasItemId = !!this.plugin.taskParser?.getLineItemId(line);
 			const hasTickId = this.plugin.taskParser?.hasTickTickId(line);
+			const tracked = this.plugin.taskParser?.isLineTrackedForSync(line, this.file.path);
 			const hasTag = this.plugin.taskParser?.hasTickTickTag(line);
-			if (!hasTickId && !hasTag && !hasItemId && !isTwoSpaceChecklist) {
+			if (!hasTickId && !hasTag && !hasItemId && !isTwoSpaceChecklist && !tracked) {
 				lines[i] = this.plugin.taskParser?.addTickTickTag(line);
 				modified = true;
 			}
