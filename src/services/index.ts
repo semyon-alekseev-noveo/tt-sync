@@ -26,6 +26,7 @@ import { getAllProjects, getProjectById, upsertProjects } from '@/db/projects';
 import { loadTasksFromCache, markTaskDeleted } from "@/db/tasks";
 import { getAllFiles, getFile, upsertFile } from "@/db/files";
 import type { IProject } from '@/api/types/Project';
+import { resolveProjectsList } from '@/syncScope';
 
 const LOCK_TASKS = 'LOCK_TASKS';
 
@@ -218,7 +219,7 @@ export class TickTickService {
 					await syncTickTickWithDexie(this.plugin.tickTickRestAPI, fullSync);
 					if (projects?.length) {
 						const healed = healTagListMappings(getSettings().tagListMappings, projects);
-						const pl = getSettings().projectsListId ? projects.find(p => p.id === getSettings().projectsListId) : projects.find(p => p.name.toLowerCase() === (getSettings().projectsListName || 'Projects').toLowerCase());
+						const pl = resolveProjectsList(projects, getSettings().projectsListName, getSettings().projectsListId);
 						const plUpd = pl && (pl.id !== getSettings().projectsListId || pl.name !== getSettings().projectsListName) ? { projectsListId: pl.id, projectsListName: pl.name } : {};
 						if (healed || Object.keys(plUpd).length) { updateSettings({ ...(healed ? { tagListMappings: healed } : {}), ...plUpd }); await this.plugin.saveSettings(); log.info('List mapping refreshed (rename-safe)'); }
 					}

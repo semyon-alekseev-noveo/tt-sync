@@ -1,4 +1,5 @@
 // Pilot project scheme (pure helpers).
+import { type TaskSyncLimitOptions, taskMatchesSyncLimit } from '@/syncScope';
 // Obsidian project = note with frontmatter tag `system/project` (default folder `10 Projects/`),
 // frontmatter `ticktick_id` = id of its TickTick parent task (list `Projects`, tags project+obsidian).
 // Project tasks = inline tasks in the project note + in notes whose frontmatter `project:` links to it.
@@ -42,6 +43,30 @@ export function pickProjectNote(target: string, projectPaths: string[]): string 
 export function isListRoot(t: { projectId?: string; parentId?: string | null }, listId: string): boolean {
 	if (!listId || t.projectId !== listId) return false;
 	return !t.parentId;
+}
+
+/** Root parent in the scheme Projects list that passes syncedLists + SyncTag/SyncProject limits. */
+export function isSchemeParentTask(
+	t: { projectId?: string; parentId?: string | null; tags?: string[] | null },
+	listId: string,
+	limit: TaskSyncLimitOptions,
+): boolean {
+	return isListRoot(t, listId) && taskMatchesSyncLimit(t, limit);
+}
+
+const PLACEHOLDER_ACTIVE_ZONE = /^- \[[ xX]\] \d+\s*$/;
+
+/** Drop template filler checkboxes (`- [ ] 1` …) under ## Active Zone. */
+export function stripActiveZonePlaceholders(lines: string[], heading = ACTIVE_ZONE): string[] {
+	const h = lines.findIndex(l => /^#{1,6}\s/.test(l) && l.replace(/^#+\s*/, '').trim().toLowerCase() === heading.toLowerCase());
+	if (h < 0) return lines;
+	let end = lines.length;
+	for (let i = h + 1; i < lines.length; i++) if (/^#{1,6}\s/.test(lines[i])) { end = i; break; }
+	return [
+		...lines.slice(0, h + 1),
+		...lines.slice(h + 1, end).filter(l => !PLACEHOLDER_ACTIVE_ZONE.test(l.trim())),
+		...lines.slice(end),
+	];
 }
 
 /** A task line whose title is empty after stripping tags/markers must not be sent to TickTick. */
@@ -184,6 +209,7 @@ export function ensureProjectNote(text: string, o: { title: string; ticktickId: 
 		while (body.length && body[body.length - 1].trim() === '') body.pop();
 		body.push('', `## ${ACTIVE_ZONE}`, '');
 	}
+	body = stripActiveZonePlaceholders(body);
 	return ['---', ...fm, '---', ...body].join('\n');
 }
 

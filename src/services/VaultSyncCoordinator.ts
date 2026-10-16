@@ -14,7 +14,7 @@ import type { LocalTask } from '@/db/schema';
 import { db } from "@/db/dexie";
 import { getSettings } from '@/settings';
 import { getAllProjects } from '@/db/projects';
-import { isListAllowed, resolveSyncedListIds, unmatchedEntries } from '@/syncScope';
+import { isListAllowed, normalizeSyncTag, resolveSyncedListIds, taskMatchesSyncLimit, unmatchedEntries } from '@/syncScope';
 import { TaskDeletionModal } from '@/modals/TaskDeletionModal';
 import { FolderSyncService } from '@/services/FolderSyncService';
 import log from '@/utils/logger';
@@ -49,10 +49,7 @@ export class VaultSyncCoordinator {
 		}
 		const scheme = this.plugin.projectScheme;
 		if (scheme?.enabled()) await scheme.run(tasks.filter(lt => !lt.deleted).map(lt => lt.task));
-		let syncTag = getSettings().SyncTag?.toLowerCase();
-		if (syncTag && syncTag.includes('/')) {
-			syncTag = syncTag.replace(/\//g, '-');
-		}
+		const syncTag = normalizeSyncTag(getSettings().SyncTag);
 		const syncProject = getSettings().SyncProject;
 		const andOr = getSettings().tagAndOr;
 
@@ -297,17 +294,7 @@ export class VaultSyncCoordinator {
 	 * Check if a task matches the sync filter (tag/project)
 	 */
 	private matchesFilter(task: ITask, syncTag?: string, syncProject?: string, andOr?: number, allowedListIds?: Set<string>): boolean {
-		// Allow-list of lists is a gate; SyncTag/SyncProject below only narrow it further.
-		if (allowedListIds && !allowedListIds.has(task.projectId)) return false;
-		if (!syncTag && !syncProject) return true;
-
-		const hasTag = syncTag ? (task.tags?.some(t => t.toLowerCase() === syncTag) ?? false) : false;
-		const hasProject = syncProject ? task.projectId === syncProject : false;
-
-		if (syncTag && syncProject) {
-			return andOr === 1 ? (hasTag && hasProject) : (hasTag || hasProject);
-		}
-		return hasTag || hasProject;
+		return taskMatchesSyncLimit(task, { syncTag, syncProject, andOr, allowedListIds });
 	}
 
 	/**
@@ -428,8 +415,7 @@ export class VaultSyncCoordinator {
 		const managedFiles = allFileRecords.filter(f => {
 			if (!f.defaultProjectId) return false;
 			const list = lists.find(l => l.id === f.defaultProjectId);
-			if (!list || !isListAllowed(s.syncedLists, list)) return false;
-			return !(s.projectSchemeEnabled && s.projectsListName && list.name.toLowerCase() === s.projectsListName.toLowerCase());
+			return !!(list && isListAllowed(s.syncedLists, list));
 		});
 
 		for (const fileRecord of managedFiles) {

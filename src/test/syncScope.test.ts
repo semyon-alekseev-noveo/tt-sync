@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
-	healSyncedLists, isListAllowed, isPathInFolders, lineListToText, migrateSyncedLists, parseLineList,
-	pushScopeAllows, resolveSyncedListIds, unmatchedEntries,
+	healSyncedLists, isListAllowed, isPathInFolders, lineListToText, migrateSyncedLists, normalizeSyncTag, parseLineList,
+	pushScopeAllows, resolveProjectsList, resolveSyncedListIds, taskMatchesSyncLimit, unmatchedEntries,
 } from '@/syncScope';
 
 const lists = [
@@ -49,6 +49,28 @@ describe('syncedLists allow-list', () => {
 	it('parses one entry per line', () => {
 		expect(parseLineList(' a \n\nb\na\n')).toEqual(['a', 'b']);
 		expect(lineListToText(['a', 'b'])).toBe('a\nb');
+	});
+
+	it('normalizes SyncTag like pull sync', () => {
+		expect(normalizeSyncTag('TTS-Test')).toBe('tts-test');
+		expect(normalizeSyncTag('type/next')).toBe('type-next');
+		expect(normalizeSyncTag('')).toBeUndefined();
+	});
+
+	it('taskMatchesSyncLimit gates by list then tag/project', () => {
+		const allowed = new Set(['p1']);
+		expect(taskMatchesSyncLimit({ projectId: 'p2', tags: [] }, { allowedListIds: allowed })).toBe(false);
+		expect(taskMatchesSyncLimit({ projectId: 'p1', tags: ['tts-test'] }, { allowedListIds: allowed, syncTag: 'tts-test' })).toBe(true);
+		expect(taskMatchesSyncLimit({ projectId: 'p1', tags: ['other'] }, { allowedListIds: allowed, syncTag: 'tts-test' })).toBe(false);
+	});
+
+	it('resolveProjectsList prefers name over stale id', () => {
+		const all = [
+			{ id: 'live-projects', name: 'Projects' },
+			{ id: 'tts-p', name: 'TTS-Projects' },
+		];
+		expect(resolveProjectsList(all, 'TTS-Projects', 'live-projects')?.id).toBe('tts-p');
+		expect(resolveProjectsList(all, 'Projects', 'tts-p')?.id).toBe('live-projects');
 	});
 });
 

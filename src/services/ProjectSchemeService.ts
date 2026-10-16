@@ -4,10 +4,10 @@ import type TickTickSync from '@/main';
 import type { ITask } from '@/api/types/Task';
 import { getSettings, updateSettings } from '@/settings';
 import { getAllProjects } from '@/db/projects';
-import { isListAllowed } from '@/syncScope';
+import { isListAllowed, normalizeSyncTag, resolveProjectsList, resolveSyncedListIds, type TaskSyncLimitOptions, taskMatchesSyncLimit } from '@/syncScope';
 import log from '@/utils/logger';
 import {
-	isProjectNote, isListRoot, linkTarget, isDoneStatus, planProjects, renderProjectNote, renderProjectTemplate, sanitizeTitle, pickProjectNote, planTitle,
+	isProjectNote, isSchemeParentTask, linkTarget, isDoneStatus, planProjects, renderProjectNote, renderProjectTemplate, sanitizeTitle, pickProjectNote, planTitle,
 	STATUS_ACTIVE, STATUS_DONE, type NoteSide, type ParentSide, type Snap, stripFileLinks,
 } from '@/projectScheme';
 
@@ -17,6 +17,7 @@ export class ProjectSchemeService {
 	listId = '';
 	/** Projects list is not in syncedLists: the scheme does nothing (no pull, no push). */
 	private blocked = false;
+	private parentLimit: TaskSyncLimitOptions = {};
 
 	constructor(private app: App, private plugin: TickTickSync) {}
 
@@ -28,9 +29,9 @@ export class ProjectSchemeService {
 	noteForParent(id: string | undefined | null): string | undefined { return id ? this.parents.get(id) : undefined; }
 	/** A TickTick task that represents a project (never written as a line). */
 	isParentTask(t: ITask): boolean {
-		if (!this.enabled()) return false;
+		if (!this.enabled() || this.blocked || !this.listId) return false;
 		if (this.parents.has(t.id)) return true;
-		return isListRoot(t, this.listId);
+		return isSchemeParentTask(t, this.listId, this.parentLimit);
 	}
 
 	private fm(path: string): Record<string, unknown> | undefined {
@@ -103,20 +104,33 @@ export class ProjectSchemeService {
 	async run(updated: ITask[]): Promise<void> {
 		if (!this.enabled()) return;
 		const lists = await getAllProjects();
-		this.listId = (getSettings().projectsListId && lists.find(p => p.id === getSettings().projectsListId)?.id) || lists.find(p => p.name.toLowerCase() === (getSettings().projectsListName || 'Projects').toLowerCase())?.id || '';
+		const pl = resolveProjectsList(lists, getSettings().projectsListName, getSettings().projectsListId);
+		this.listId = pl?.id ?? '';
 		if (!this.listId) { log.warn('ProjectScheme: list not found'); return; }
-		const pl = lists.find(p => p.id === this.listId);
 		this.blocked = !pl || !isListAllowed(getSettings().syncedLists, pl);
 		if (this.blocked) { log.warn(`ProjectScheme: list "${pl?.name}" is not in syncedLists; project sync skipped`); return; }
+		const syncedEntries = getSettings().syncedLists ?? [];
+		this.parentLimit = {
+			syncTag: normalizeSyncTag(getSettings().SyncTag),
+			syncProject: getSettings().SyncProject?.trim() || undefined,
+			andOr: getSettings().tagAndOr,
+			allowedListIds: resolveSyncedListIds(syncedEntries, lists),
+		};
 		const api = this.plugin.tickTickRestAPI;
-		const notes = this.projectNotes();
-		await this.stampSourceTags(notes);
-		this.parents = new Map(notes.filter(n => n.id).map(n => [n.id as string, n.path]));
+		const allNotes = this.projectNotes();
+		this.parents = new Map();
+		const notes: NoteSide[] = [];
 		const parents: ParentSide[] = [];
 		const titles = new Map<string, string>();
-		for (const n of notes) {
-			if (!n.id) continue;
+		for (const n of allNotes) {
+			if (!n.id) { notes.push(n); continue; }
 			const t = await api?.getTaskById(n.id, this.listId);
+			if (!t || t.projectId !== this.listId || !isSchemeParentTask(t, this.listId, this.parentLimit)) {
+				log.debug(`ProjectScheme: skip linked note ${n.path} (parent missing or out of sync scope)`);
+				continue;
+			}
+			notes.push(n);
+			this.parents.set(t.id, n.path);
 			if (t && stripFileLinks(t.title) !== t.title) {
 				// repair titles polluted by a file link (parent once tracked as an inbox line)
 				t.title = stripFileLinks(t.title);
@@ -141,9 +155,10 @@ export class ProjectSchemeService {
 			}
 		}
 		for (const t of updated) {
-			if (!this.parents.has(t.id) && this.isParentTask(t) && !parents.some(p => p.id === t.id))
+			if (!this.parents.has(t.id) && isSchemeParentTask(t, this.listId, this.parentLimit) && !parents.some(p => p.id === t.id))
 				parents.push({ id: t.id, title: t.title, done: (t.status ?? 0) > 0, content: t.content || t.desc });
 		}
+		await this.stampSourceTags(notes);
 		const snap: Record<string, Snap> = { ...(getSettings().projectSnapshot ?? {}) };
 		for (const a of planProjects(notes, parents, snap)) {
 			try {

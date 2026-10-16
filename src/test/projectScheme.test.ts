@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { isProjectNote, isListRoot, linkTarget, isDoneStatus, planProjects, renderProjectNote, renderProjectTemplate, activeZoneInsertLine, sanitizeTitle, fmTags } from '@/projectScheme';
+import { isProjectNote, isListRoot, isSchemeParentTask, linkTarget, isDoneStatus, planProjects, renderProjectNote, renderProjectTemplate, activeZoneInsertLine, sanitizeTitle, stripActiveZonePlaceholders, fmTags } from '@/projectScheme';
 
 describe('project scheme helpers', () => {
 	it('detects project notes by tag + folder', () => {
@@ -39,6 +39,23 @@ describe('project scheme helpers', () => {
 		expect(isListRoot({ projectId: 'P', parentId: 'parent' }, 'P')).toBe(false);
 		expect(isListRoot({ projectId: 'other', parentId: '' }, 'P')).toBe(false);
 		expect(isListRoot({ projectId: 'P' }, '')).toBe(false);
+	});
+
+	it('scheme parent requires list root + sync limits', () => {
+		const limit = { allowedListIds: new Set(['P']), syncTag: 'tts-test' };
+		const root = { projectId: 'P', parentId: '', tags: ['tts-test'] };
+		expect(isSchemeParentTask(root, 'P', limit)).toBe(true);
+		expect(isSchemeParentTask({ ...root, tags: ['work'] }, 'P', limit)).toBe(false);
+		expect(isSchemeParentTask({ ...root, projectId: 'other' }, 'P', limit)).toBe(false);
+	});
+
+	it('strips placeholder Active Zone checkboxes from templates', () => {
+		const lines = ['## Active Zone', '- [ ] 1', '- [ ] 2', '- [ ] a real task', '## Next'];
+		expect(stripActiveZonePlaceholders(lines)).toEqual(['## Active Zone', '- [ ] a real task', '## Next']);
+		const out = renderProjectTemplate('---\ntags:\n  - system/project\n---\n## Active Zone\n- [ ] 1\n- [ ] 2\n', {
+			title: 'P', ticktickId: 'x', now: new Date(2026, 0, 1),
+		});
+		expect(out).not.toMatch(/- \[ \] 1/);
 	});
 	it('plans create/status actions', () => {
 		const acts = planProjects(

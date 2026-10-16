@@ -1,5 +1,35 @@
 # Changelog
 
+### Iteration 2026-10-16 06:52 UTC
+
+- Context: Phase B pilot **FAIL** on scoped pull — `SyncTag=tts-test` did not bound project scheme; 16 legacy `10 Projects/` notes touched via live **Projects** list id.
+- Target: Scheme parents only from allow-listed `projectsListName` + `syncedLists` + SyncTag; no re-bind of out-of-scope notes; MOC placeholder cleanup; `TTS-Projects.md` stub; release **2.0.18**.
+- Actions log: Added `taskMatchesSyncLimit`, `resolveProjectsList`, `isSchemeParentTask`; tightened `ProjectSchemeService.run`; shared filter in `VaultSyncCoordinator`; scheme Projects list gets list stub; `stripActiveZonePlaceholders` in template render; Vitest; version bump.
+- Validation: `npm test --run` — 486 passed.
+- Problems: Prior pilot note touch-ups in vault not auto-reverted (`open`, manual if needed).
+- To Be Done: Re-run Phase B on **2.0.18**; Phases C–E per `TTS-PILOT-RUN.md`.
+- References: `CHANGELOG.md`, `src/syncScope.ts`, `src/projectScheme.ts`, `src/services/ProjectSchemeService.ts`
+
+### Iteration 2026-10-16 06:55 UTC
+
+- Context: Owner ran Phase B pilot sync (`sync-mvalv6fr-1-ezhs`) on `Thinkpad-tts-test`; agent verified vault + TickTick MCP.
+- Target: Confirm checklist step 2 (TT parent → project note + per-list stubs) without widening scope to live lists.
+- Actions log: Read pilot note, `data.json` (secrets redacted), journal `2026-10-16.jsonl`; TickTick MCP `get_task_by_id`, `get_project_with_undone_tasks`, `filter_tasks` tag `tts-test`.
+- Validation:
+  - Plugin preset: six `syncedLists`, `SyncTag=tts-test`, scheme + `tagListMappings` match `TTS-data-preset.json` — pass.
+  - TT task `6ad1c7878f0841315e89a10c`: title `TTS-PILOT: Dishwasher project`, tags `tts-test`/`project`/`obsidian`, no `obsidian://` in title — pass.
+  - `TTS-Projects` undone: only pilot parent — pass.
+  - Obsidian: `10 Projects/TTS-PILOT- Dishwasher project.md` created with `ticktick_id`, `system/project`, `## Active Zone`, MOC body — pass.
+  - List stubs: five files under `30 Tasks/TickTick/` (no `TTS-Projects.md`); pilot sync created no new vault-root list files (root `Inbox.md` mtime predates sync) — partial.
+  - Same sync updated 16 existing `10 Projects/*.md` notes tied to live list `69569c948f087c3908f43b93` (added `#ticktick` / metadata) — fail scoped pull.
+  - Phases C–E (Obs→TT project, `#type/next` inline, empty `syncedLists`) — not run (no file evidence).
+- Problems:
+  - `SyncTag` did not limit project-scheme refresh of vault notes already mapped to live **Projects** (`open`).
+  - MOC template left placeholder Active Zone checkboxes `1`/`2`/`3` in pilot note; TT `childIds` null (`open`, risk on next Obs→TT).
+  - Missing per-list stub for `TTS-Projects` (`open`).
+- To Be Done: Fix scope (project scheme + tag filter); strip template placeholders or skip empty template tasks; run Phases C–D; optional cleanup of 16 note touch-ups.
+- References: `CHANGELOG.md`, `PO_STATUS.md`, test vault `00 Inbox/TTS-PILOT-RUN.md`, `.tickticksync/journal/2026-10-16.jsonl`
+
 ### Iteration 2026-10-16 06:50 UTC
 
 - Context: Owner confirmed settings UI on plugin 2.0.17; pilot soak on `Thinkpad-tts-test` next.

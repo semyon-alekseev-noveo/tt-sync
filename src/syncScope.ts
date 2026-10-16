@@ -18,6 +18,52 @@ export function parseLineList(text: string): string[] {
 }
 export const lineListToText = (list: string[] | undefined) => (list ?? []).join('\n');
 
+/** Lowercase SyncTag with `/` → `-`, matching pull sync (`syncModule` / vault coordinator). */
+export function normalizeSyncTag(raw?: string | null): string | undefined {
+	const t = (raw ?? '').trim();
+	if (!t) return undefined;
+	let syncTag = t.toLowerCase();
+	if (syncTag.includes('/')) syncTag = syncTag.replace(/\//g, '-');
+	return syncTag;
+}
+
+export interface TaskSyncLimitOptions {
+	syncTag?: string;
+	syncProject?: string;
+	andOr?: number;
+	allowedListIds?: Set<string>;
+}
+
+/** Same gate as vault pull: allow-listed list, then optional SyncTag / SyncProject. */
+export function taskMatchesSyncLimit(
+	task: { projectId?: string; tags?: string[] | null },
+	opts: TaskSyncLimitOptions,
+): boolean {
+	const { syncTag, syncProject, andOr, allowedListIds } = opts;
+	if (allowedListIds && !allowedListIds.has(task.projectId ?? '')) return false;
+	if (!syncTag && !syncProject) return true;
+	const tags = task.tags ?? [];
+	const hasTag = syncTag ? tags.some(t => t.toLowerCase() === syncTag) : false;
+	const hasProject = syncProject ? task.projectId === syncProject : false;
+	if (syncTag && syncProject) {
+		return andOr === 1 ? (hasTag && hasProject) : (hasTag || hasProject);
+	}
+	return hasTag || hasProject;
+}
+
+/** Project-scheme list: name wins over a stale `projectsListId` (e.g. live Projects vs TTS-Projects). */
+export function resolveProjectsList(
+	lists: ListRef[],
+	projectsListName: string | undefined,
+	projectsListId?: string,
+): ListRef | undefined {
+	const name = (projectsListName || 'Projects').toLowerCase();
+	const byName = lists.find(l => l.name.toLowerCase() === name);
+	if (byName) return byName;
+	if (projectsListId) return lists.find(l => l.id === projectsListId);
+	return undefined;
+}
+
 /** Is this list (by id or case-insensitive name) in the allow-list? */
 export function isListAllowed(entries: string[] | undefined, list: ListRef): boolean {
 	return (entries ?? []).some(e => {

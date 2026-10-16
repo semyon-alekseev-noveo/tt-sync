@@ -138,13 +138,13 @@ describe('ProjectSyncService.saveProjectsToCache', () => {
 		expect(upsertFile.mock.calls.map(c => c[0]).sort()).toEqual(['Home.md', 'Work.md']);
 	});
 
-	it('does not give the project-scheme list a list file', async () => {
+	it('creates a list stub for the scheme Projects list when allow-listed', async () => {
 		testSettings.syncedLists = ['Work', 'Projects'];
 		testSettings.projectSchemeEnabled = true;
 		const { plugin } = makePlugin();
 		const svc = new ProjectSyncService({} as never, plugin as never);
 		await svc.saveProjectsToCache([...remoteProjects(), { id: 'proj-p', name: 'Projects' } as IProject]);
-		expect(upsertFile.mock.calls.map(c => c[0])).toEqual(['Work.md']);
+		expect(upsertFile.mock.calls.map(c => c[0]).sort()).toEqual(['Projects.md', 'Work.md']);
 	});
 
 	it('maps every project to a file on the very first sync', async () => {

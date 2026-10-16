@@ -80,12 +80,9 @@ export class ProjectSyncService {
 		return false;
 	}
 
-	/** Allow-listed (syncedLists) and not the project-scheme list (its tasks live in project notes). */
+	/** Allow-listed (syncedLists), including the scheme Projects list (empty list stub). */
 	private isListSynced(list: { id: string; name: string }): boolean {
-		const s = getSettings();
-		if (!isListAllowed(s.syncedLists, list)) return false;
-		if (s.projectSchemeEnabled && s.projectsListName && list.name.toLowerCase() === s.projectsListName.toLowerCase()) return false;
-		return true;
+		return isListAllowed(getSettings().syncedLists, list);
 	}
 
 	async checkProjectRename(ttProjectId: string, ttProjectName: string, ttProject?: IProject): Promise<void> {

@@ -106,11 +106,13 @@ Full analysis: `GTD_SYNC_RESEARCH.md` (hypotheses A/B, recommended R, test plans
 
 | Step | Status | Owner action |
 |------|--------|----------------|
-| 1 | **Ready** — `data.json` matches `TTS-data-preset.json`; plugin **2.0.17** in vault; settings UI confirmed on 2.0.17 | Open vault → **GTD and projects** → confirm six `TTS-*` lists ticked |
-| 2 | **Ready** — TT parent `TTS-PILOT: Dishwasher project` (`6ad1c7878f0841315e89a10c`, `#tts-test`) in `TTS-Projects` | Command palette → **`TickTickSync: Synchronize`** → note under `10 Projects/` (MOC template) |
+| 1 | **Ready** — preset + six `TTS-*` lists; deploy plugin **2.0.18** (`dist/` → test vault) | GTD settings → confirm lists; `projectsListName=TTS-Projects` (name wins over stale `projectsListId`) |
+| 2 | **Retest (2.0.18)** — Phase B core passed on 2.0.17 but **FAIL** scoped pull (16 legacy project notes + wrong list id); fix in 2.0.18 | **Synchronize** → only `#tts-test` parent creates/updates; other `10 Projects/` notes untouched; `TTS-Projects.md` stub under `30 Tasks/TickTick/` |
 | 3 | Pending user | New `system/project` in `10 Projects/` → **Synchronize** → parent in `TTS-Projects` |
 | 4 | Pending user | Inline in `30 Tasks/`: `#ticktick` `#type/next` `#tts-test` → **Synchronize** → `30 Tasks/TickTick/TTS-nextAction.md` + TT list |
 | 5 | Pending user | Untick all lists → **Synchronize** → notice, no pull |
+
+**Phase B validation (2026-10-16, subagent):** pilot parent + MOC note — pass; five list stubs — pass; missing `TTS-Projects.md` — fixed in 2.0.18; 16 unrelated project notes updated — **fail** (fixed in 2.0.18 via scheme scope + `resolveProjectsList`).
 
 Runbook: test vault `00 Inbox/TTS-PILOT-RUN.md`.
 
