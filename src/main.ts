@@ -444,7 +444,7 @@ export default class TickTickSync extends Plugin {
 			return false;
 		}
 		if (res.loggedIn && res.info) {
-			updateSettings(loginPatch(res.info)); // keeps all GTD settings; also refreshes the settings UI store
+			updateSettings(loginPatch(res.info), { persist: false }); // login fields only; saveSettings merges GTD from disk
 			const api = getTick({ baseUrl: getSettings().baseURL, token: res.info.token ?? '', checkPoint: 0 });
 			if (this.tickTickRestAPI && this.tickTickRestAPI.api) this.tickTickRestAPI.api = api;
 			this.service.api = api;

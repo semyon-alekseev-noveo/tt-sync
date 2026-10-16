@@ -24,7 +24,9 @@
 	let onTickTickDeletion: 'ask' | 'cancel' = 'ask';
 	let autoCleanupDatabase = false;
 	let projectSchemeEnabled = false;
+	let notesHydrated = false;
 	async function saveAbyss() {
+		if (!notesHydrated || !plugin.settingsReady) return;
 		settingsStore.update(s => ({ ...s, abyssTasksFormat, abyssIndent, scheduledAsStartDate, tagMappings: parseTagMappingText(tagMappingText),
 			statusMappings: parseStatusMappingText(statusMappingText), projectMappings: parseProjectMappingText(projectMappingText), tagListMappings: parseTagListText(tagListText), onTickTickDeletion, autoCleanupDatabase, projectSchemeEnabled }));
 		await plugin.saveSettings();
@@ -64,7 +66,23 @@
 			customDelimiter = $settingsStore.noteDelimiter;
 		}
 		updatePreview();
+		notesHydrated = true;
 	});
+
+	$: if (!notesHydrated && plugin.settingsReady) {
+		syncNotes = $settingsStore.syncNotes;
+		abyssTasksFormat = $settingsStore.abyssTasksFormat ?? false;
+		abyssIndent = $settingsStore.abyssIndent ?? 'tab';
+		scheduledAsStartDate = $settingsStore.scheduledAsStartDate ?? false;
+		tagMappingText = tagMappingToText($settingsStore.tagMappings);
+		statusMappingText = statusMappingToText($settingsStore.statusMappings);
+		projectMappingText = projectMappingToText($settingsStore.projectMappings);
+		tagListText = tagListToText($settingsStore.tagListMappings);
+		onTickTickDeletion = $settingsStore.onTickTickDeletion ?? 'ask';
+		autoCleanupDatabase = $settingsStore.autoCleanupDatabase ?? false;
+		projectSchemeEnabled = $settingsStore.projectSchemeEnabled ?? false;
+		notesHydrated = true;
+	}
 
 
 	// Handle when option is changed

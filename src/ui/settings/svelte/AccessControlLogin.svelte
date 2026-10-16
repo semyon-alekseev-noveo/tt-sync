@@ -6,7 +6,7 @@
 	import { getSettings, updateSettings } from '@/settings';
 	import log from 'loglevel';
 	import { getTick } from '@/api/tick_singleton_factory';
-	import { applyLogin, loginPatch } from '@/loginSettings';
+	import { loginPatch } from '@/loginSettings';
 
 	export let plugin: TickTickSync;
 
@@ -27,8 +27,7 @@
 			new Notice('You are logged in with a different user ID.');
 		}
 		// login changes only token/inbox/checkpoint; every other setting (GTD lists, mappings) is kept
-		settingsStore.update(s => applyLogin(s, info));
-		updateSettings(loginPatch(info));
+		updateSettings(loginPatch(info), { persist: false });
 		loggedIn = !!$settingsStore.token;
 
 		const api = getTick({ baseUrl: $settingsStore.baseURL, token: info.token, checkPoint: 0 });

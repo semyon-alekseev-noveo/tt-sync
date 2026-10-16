@@ -8,6 +8,7 @@
   - Root cause: race — `saveSettings(true)` on login (or `settingsStore.set` before `loadSettings` completes) wrote in-memory `DEFAULT_SETTINGS` over `data.json`; `loadSettings` then persisted the already-wiped file.
   - `preserveGtdFromDisk` / `hydrateSettingsFromDisk` in `settingsMerge.ts`; `saveSettings` hydrates from disk on forced pre-load saves and merges GTD arrays from disk/snapshot before every write.
   - `GtdSection`: `gtdHydrated` gate — no persist until `plugin.settingsReady`; import GTD JSON from clipboard; token/projectsVersion only reload list checkboxes.
+  - Login paths use `updateSettings(loginPatch, { persist: false })` so `settingsStore.set` cannot auto-save before GTD hydrate; `NotesSettings` same hydration gate.
   - Vitest: `settingsPreserveGtd.test.ts`; merged `00 Inbox/TTS-data-preset.json` into test vault `data.json` (session fields kept); `dist/` → test vault.
   - Version **2.0.20**.
 - Validation: `npm test --run` — 490 passed; `npm run build` OK; vault merge script → six `syncedLists`, `SyncTag=tts-test`, scheme on.
