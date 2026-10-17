@@ -658,7 +658,7 @@ export class FileOperation {
 		const reason: string = 'task not found in local cache.';
 		const myModal = new TaskDeletionModal(this.app, items, reason, (result) => {
 		});
-		return await myModal.showModal();
+		return (await myModal.showModal()).confirmed;
 	}
 
 

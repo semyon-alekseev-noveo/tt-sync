@@ -15,7 +15,7 @@ import { NewFileMap } from '@/services/NewFileMap';
 import log from '@/utils/logger';
 import { FoundDuplicateTasksModal } from '@/modals/FoundDuplicateTasksModal';
 import { CleanupDatabaseModal } from '@/modals/CleanupDatabaseModal';
-import { TaskDeletionModal, type DeletionItem } from '@/modals/TaskDeletionModal';
+import { TaskDeletionModal, clearPendingDeletions, type DeletionItem } from '@/modals/TaskDeletionModal';
 import { OrphanTaskModal, type OrphanItem } from '@/modals/OrphanTaskModal';
 import type { PendingTickTickDeletion } from '@/services/TaskModificationDetector';
 import type { ITask } from '@/api/types/Task';
@@ -809,9 +809,9 @@ export class TickTickService {
 				filePath: t.filepath
 			}));
 			const modal = new TaskDeletionModal(this.plugin.app, items, 'they are deleted in TickTick or marked as deleted in the database.', (result) => { });
-			const confirmed = await modal.showModal();
-			log.debug(`[checkDB] User confirmed deletion: ${confirmed}`);
-			if (confirmed) {
+			const prompt = await modal.showModal();
+			log.debug(`[checkDB] User confirmed deletion: ${prompt.confirmed}`);
+			if (prompt.confirmed) {
 				await doWithLock(LOCK_TASKS, async () => {
 					const byFile: Record<string, Set<string>> = {};
 					for (const t of tasksToDelete) {
@@ -1045,8 +1045,8 @@ export class TickTickService {
 					filePath: d.filepath
 				}));
 				const modal = new TaskDeletionModal(this.plugin.app, items, 'task(s) not found on TickTick', () => { });
-				const confirmed = await modal.showModal();
-				if (confirmed) {
+				const prompt = await modal.showModal();
+				if (prompt.confirmed) {
 					for (const d of pendingTickTickDeletions) {
 						try {
 							log.info(`Deleting task ${d.lineTask.id} from ${d.filepath}`);
@@ -1063,12 +1063,11 @@ export class TickTickService {
 			// Phase 2: Process deletions for all files.
 			// Moved tasks already have updated file paths, so they won't be
 			// detected as deleted from their old file.
-			for (const fileKey in newFilesToSync) {
-				try {
-					await this.plugin.taskDeletionHandler.checkFileForDeletedTasks(fileKey);
-				} catch (error) {
-					log.error('An error occurred in deletedTaskCheck:', error);
-				}
+			clearPendingDeletions();
+			try {
+				await this.plugin.taskDeletionHandler.processSyncRemovedTasks(Object.keys(newFilesToSync));
+			} catch (error) {
+				log.error('An error occurred in deletedTaskCheck:', error);
 			}
 		});
 	}

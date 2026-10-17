@@ -498,7 +498,7 @@ export class SyncMan {
 		});
 		const bConfirmation = await myModal.showModal();
 
-		return bConfirmation;
+		return bConfirmation.confirmed;
 	}
 
 	async handleTaskItem(lineText: string, fileMap: NewFileMap, lineNumber: number | undefined) {

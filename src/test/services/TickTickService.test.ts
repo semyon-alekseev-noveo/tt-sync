@@ -106,9 +106,14 @@ vi.mock('@/modals/TaskDeletionModal', () => ({
 			lastDeletionModalReason = reason;
 		}
 		async showModal() {
-			return taskDeletionModalShowModal();
+			const v = await taskDeletionModalShowModal();
+			if (v && typeof v === 'object' && 'confirmed' in v) {
+				return v;
+			}
+			return { confirmed: Boolean(v) };
 		}
 	},
+	clearPendingDeletions: vi.fn(),
 }));
 
 describe('TickTickService', () => {
@@ -134,6 +139,7 @@ describe('TickTickService', () => {
 			},
 			taskDeletionHandler: {
 				checkFileForDeletedTasks: vi.fn().mockResolvedValue(undefined),
+				processSyncRemovedTasks: vi.fn().mockResolvedValue(undefined),
 			},
 			reorganizeFilesToFolders: vi.fn(),
 			fileTaskQueries: {
@@ -170,13 +176,13 @@ describe('TickTickService', () => {
 			await service.syncFiles(false);
 
 			const modDetector = (mockPlugin as { taskModificationDetector: { checkFileForModifications: Mock; checkFileForNewTasks: Mock } }).taskModificationDetector;
-			const deletionHandler = (mockPlugin as { taskDeletionHandler: { checkFileForDeletedTasks: Mock } }).taskDeletionHandler;
+			const deletionHandler = (mockPlugin as { taskDeletionHandler: { processSyncRemovedTasks: Mock } }).taskDeletionHandler;
 
 			// Verify modifications ran
 			expect(modDetector.checkFileForModifications).toHaveBeenCalledTimes(1);
 			expect(modDetector.checkFileForModifications.mock.calls[0][0]).toBe('Projects/ProjectA.md');
-			// Verify deletions ran
-			expect(deletionHandler.checkFileForDeletedTasks).toHaveBeenCalledWith('Projects/ProjectA.md');
+			// Verify deletions ran (one vault-wide pass)
+			expect(deletionHandler.processSyncRemovedTasks).toHaveBeenCalledWith(['Projects/ProjectA.md']);
 		});
 
 		it('should run modifications on all files before deletions on any file', async () => {
@@ -196,17 +202,16 @@ describe('TickTickService', () => {
 			(mockPlugin as { taskModificationDetector: { checkFileForModifications: Mock } }).taskModificationDetector.checkFileForModifications = vi.fn((fileKey: string) => {
 				callOrder.push(`mod:${fileKey}`);
 			});
-			(mockPlugin as { taskDeletionHandler: { checkFileForDeletedTasks: Mock } }).taskDeletionHandler.checkFileForDeletedTasks = vi.fn((fileKey: string) => {
-				callOrder.push(`del:${fileKey}`);
+			(mockPlugin as { taskDeletionHandler: { processSyncRemovedTasks: Mock } }).taskDeletionHandler.processSyncRemovedTasks = vi.fn(() => {
+				callOrder.push('del:vault-wide');
 			});
 
 			await service.syncFiles(false);
 
 			// All modifications should come before any deletion
 			const modCalls = callOrder.filter(c => c.startsWith('mod:'));
-			const delCalls = callOrder.filter(c => c.startsWith('del:'));
+			const firstDelIndex = callOrder.indexOf('del:vault-wide');
 			const lastModIndex = callOrder.lastIndexOf(modCalls[modCalls.length - 1]);
-			const firstDelIndex = callOrder.indexOf(delCalls[0]);
 
 			expect(lastModIndex).toBeLessThan(firstDelIndex);
 		});
@@ -220,7 +225,7 @@ describe('TickTickService', () => {
 
 			await service.syncFiles(false);
 
-			expect((mockPlugin as { taskDeletionHandler: { checkFileForDeletedTasks: Mock } }).taskDeletionHandler.checkFileForDeletedTasks).not.toHaveBeenCalled();
+			expect((mockPlugin as { taskDeletionHandler: { processSyncRemovedTasks: Mock } }).taskDeletionHandler.processSyncRemovedTasks).toHaveBeenCalledWith([]);
 		});
 
 		it('should not skip deletions when modifications fail', async () => {
@@ -239,7 +244,7 @@ describe('TickTickService', () => {
 			// Should not throw, and deletions should still run
 			await expect(service.syncFiles(false)).resolves.not.toThrow();
 
-			expect((mockPlugin as { taskDeletionHandler: { checkFileForDeletedTasks: Mock } }).taskDeletionHandler.checkFileForDeletedTasks).toHaveBeenCalledWith('Projects/ProjectA.md');
+			expect((mockPlugin as { taskDeletionHandler: { processSyncRemovedTasks: Mock } }).taskDeletionHandler.processSyncRemovedTasks).toHaveBeenCalledWith(['Projects/ProjectA.md']);
 		});
 
 		it('should present cleanup modal and delete metadata for files missing from vault when confirmed', async () => {
@@ -386,7 +391,7 @@ describe('TickTickService', () => {
 		});
 
 		it('should still run Phase 2 deletions when the user declines aggregated deletions', async () => {
-			const deletionHandler = (mockPlugin as { taskDeletionHandler: { checkFileForDeletedTasks: Mock } }).taskDeletionHandler;
+			const deletionHandler = (mockPlugin as { taskDeletionHandler: { processSyncRemovedTasks: Mock } }).taskDeletionHandler;
 			(mockPlugin as { taskModificationDetector: { checkFileForModifications: Mock } }).taskModificationDetector.checkFileForModifications = vi.fn((fileKey: string, pending: unknown) => {
 				collectDeletion(fileKey, pending);
 			});
@@ -394,8 +399,7 @@ describe('TickTickService', () => {
 
 			await service.syncFiles(false);
 
-			expect(deletionHandler.checkFileForDeletedTasks).toHaveBeenCalledWith('Projects/ProjectA.md');
-			expect(deletionHandler.checkFileForDeletedTasks).toHaveBeenCalledWith('Projects/ProjectB.md');
+			expect(deletionHandler.processSyncRemovedTasks).toHaveBeenCalledWith(['Projects/ProjectA.md', 'Projects/ProjectB.md']);
 		});
 	});
 

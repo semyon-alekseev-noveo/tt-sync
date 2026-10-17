@@ -357,13 +357,13 @@ export class VaultSyncCoordinator {
 			'tasks deleted from TickTick',
 			() => {}
 		);
-		const confirmed = await modal.showModal();
+		const prompt = await modal.showModal();
 
-		if (!confirmed) {
+		if (!prompt.confirmed && !prompt.suppressedPending) {
 			new Notice('Tasks will not be deleted from vault.', 5000);
 		}
 
-		return confirmed;
+		return prompt.confirmed;
 	}
 
 	/**

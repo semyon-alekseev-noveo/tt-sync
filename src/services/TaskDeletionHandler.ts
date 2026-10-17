@@ -15,9 +15,10 @@ import { App, MarkdownView, Notice, TFile, TFolder } from 'obsidian';
 import type TickTickSync from '@/main';
 import type { ITask } from '@/api/types/Task';
 import { FileTaskQueries } from '@/repositories/FileTaskQueries';
-import { TaskDeletionModal } from '@/modals/TaskDeletionModal';
+import { TaskDeletionModal, type DeletionPromptResult } from '@/modals/TaskDeletionModal';
 import { getSettings } from '@/settings';
 import { isPathInPushScope } from '@/syncScope';
+import { db } from '@/db/dexie';
 import log from '@/utils/logger';
 
 export class TaskDeletionHandler {
@@ -85,16 +86,91 @@ export class TaskDeletionHandler {
 		// Remove frontmatter from content
 		const contentWithoutFrontmatter = currentFileValue.replace(/^---[\s\S]*?---\n/, '');
 
-		// Find tasks that are missing from the file
 		const deletedTaskIds = await this.findMissingTaskIds(contentWithoutFrontmatter, filepath);
-
-		// Delete the missing tasks
 		if (deletedTaskIds.length > 0) {
 			await this.deleteTasksByIds(deletedTaskIds);
 		}
-
-		// Check for deleted task items (sub-tasks)
 		await this.checkForDeletedTaskItems(filepath, contentWithoutFrontmatter);
+	}
+
+	/**
+	 * Collect task ids that were removed from a file (sync phase 2, aggregated confirm).
+	 */
+	async collectMissingTaskIdsForFile(file_path: string): Promise<string[]> {
+		const file = this.app.vault.getAbstractFileByPath(file_path);
+		if (!file || !(file instanceof TFile) || !isPathInPushScope(file_path)) {
+			return [];
+		}
+		if (!(await this.fileTaskQueries.fileHasTasks(file_path))) {
+			return [];
+		}
+		const currentFileValue = await this.plugin.fileOperation.readFileContent(file);
+		if (!currentFileValue) {
+			return [];
+		}
+		const contentWithoutFrontmatter = currentFileValue.replace(/^---[\s\S]*?---\n/, '');
+		return await this.findMissingTaskIds(contentWithoutFrontmatter, file_path);
+	}
+
+	/**
+	 * Local DB tasks with no ticktick_id line anywhere in the vault (orphans after line removal).
+	 */
+	async collectTaskIdsAbsentFromVault(): Promise<string[]> {
+		const localTasks = await db.tasks.toArray();
+		const candidates = localTasks.filter(
+			lt => !lt.deleted && lt.taskId && !this.plugin.projectScheme?.isParentTask(lt.task)
+		);
+		if (!candidates.length) {
+			return [];
+		}
+		const present = await idsPresentInVault(this.app, candidates.map(lt => lt.taskId));
+		return candidates
+			.filter(lt => {
+				if (present.has(lt.taskId)) {
+					return false;
+				}
+				if (lt.file && isPathInPushScope(lt.file)) {
+					return true;
+				}
+				return (lt.task?.tags ?? []).includes('obsidian');
+			})
+			.map(lt => lt.taskId);
+	}
+
+	/**
+	 * After phase 1: one deletion dialog for all removed/orphan tasks, then per-file checklist item cleanup.
+	 */
+	async processSyncRemovedTasks(filePaths: string[]): Promise<void> {
+		const taskIds = new Set<string>();
+		for (const filePath of filePaths) {
+			for (const id of await this.collectMissingTaskIdsForFile(filePath)) {
+				taskIds.add(id);
+			}
+		}
+		for (const id of await this.collectTaskIdsAbsentFromVault()) {
+			taskIds.add(id);
+		}
+		if (taskIds.size > 0) {
+			await this.deleteTasksByIds(
+				[...taskIds],
+				'Their task lines were removed from Obsidian (or are no longer in the vault)'
+			);
+		}
+		for (const filePath of filePaths) {
+			const file = this.app.vault.getAbstractFileByPath(filePath);
+			if (!(file instanceof TFile) || !isPathInPushScope(filePath)) {
+				continue;
+			}
+			if (!(await this.fileTaskQueries.fileHasTasks(filePath))) {
+				continue;
+			}
+			const content = await this.plugin.fileOperation.readFileContent(file);
+			if (!content) {
+				continue;
+			}
+			const body = content.replace(/^---[\s\S]*?---\n/, '');
+			await this.checkForDeletedTaskItems(filePath, body);
+		}
 	}
 
 	/**
@@ -232,7 +308,7 @@ export class TaskDeletionHandler {
 	/**
 	 * Delete tasks by their IDs with user confirmation
 	 */
-	async deleteTasksByIds(taskIds: string[]): Promise<string[]> {
+	async deleteTasksByIds(taskIds: string[], reason = 'The tasks were removed from the file'): Promise<string[]> {
 		if (taskIds.length === 0) {
 			return [];
 		}
@@ -241,9 +317,14 @@ export class TaskDeletionHandler {
 		taskIds = await this.filterStillReferenced(taskIds.filter(id => !this.plugin.projectScheme?.isParentId(id)));
 		if (taskIds.length === 0) return [];
 		// Get confirmation from user
-		const confirmed = await this.confirmDeletion(taskIds, 'The tasks were removed from the file');
-		if (!confirmed) {
-			new Notice('Tasks will not be deleted. Please rectify the issue before the next sync.', 5000);
+		const prompt = await this.confirmDeletion(taskIds, reason);
+		if (!prompt.confirmed) {
+			if (!prompt.suppressedPending) {
+				const msg = prompt.timedOut
+					? 'TickTickSync: TickTick tasks were not deleted (dialog timed out). Run sync again and choose Confirm Deletion.'
+					: 'TickTickSync: TickTick tasks were not deleted. Choose Confirm Deletion on the dialog, restore the task lines in Obsidian, or delete the tasks in TickTick manually.';
+				new Notice(msg, 8000);
+			}
 			return [];
 		}
 
@@ -256,10 +337,7 @@ export class TaskDeletionHandler {
 
 				// Delete from TickTick
 				if (projectId) {
-					const response = await this.plugin.tickTickRestAPI?.deleteTask(taskId, projectId);
-					if (response) {
-						new Notice(`Task ${taskId} deleted`);
-					}
+					await this.plugin.tickTickRestAPI?.deleteTask(taskId, projectId);
 				}
 
 				// Mark as deleted in database (tombstone pattern)
@@ -274,6 +352,7 @@ export class TaskDeletionHandler {
 		if (deletedTaskIds.length > 0) {
 			await this.plugin.saveSettings();
 			log.debug(`Deleted ${deletedTaskIds.length} tasks`);
+			new Notice(`TickTickSync: deleted ${deletedTaskIds.length} task(s) on TickTick.`, 6000);
 		}
 
 		return deletedTaskIds;
@@ -282,7 +361,7 @@ export class TaskDeletionHandler {
 	/**
 	 * Confirm deletion with user via modal
 	 */
-	private async confirmDeletion(taskIds: string[], reason: string): Promise<boolean> {
+	private async confirmDeletion(taskIds: string[], reason: string): Promise<DeletionPromptResult> {
 		const items = await this.fileTaskQueries.getDeletionItems(taskIds);
 
 		const modal = new TaskDeletionModal(

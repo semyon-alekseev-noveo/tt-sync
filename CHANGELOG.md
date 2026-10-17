@@ -1,5 +1,25 @@
 # Changelog
 
+### Iteration 2026-10-17 11:45 UTC
+
+- Context: Obs→TT delete UX failed bulk cleanup; Step/1/2/3 still on TTS-Projects while lines remain in pilot notes.
+- Target: One confirm per sync for all removed/orphan tasks; longer modal timeout; orphan scan; clearer notices (2.0.28).
+- Actions log: `processSyncRemovedTasks`, `collectTaskIdsAbsentFromVault`, scaled `deletionPromptTimeoutMs`; phase 2 calls vault-wide pass once.
+- Validation: `npm test -- --run` → 498 passed; `npm run build` ok.
+- Problems: Tasks still in vault (e.g. pilot Active Zone `- [ ] 1/2/3`) stay on TT until lines removed (`open`).
+- To Be Done: Install 2.0.28 in test vault; remove template lines from project notes if unwanted on TT.
+- References: `CHANGELOG.md`, `src/services/TaskDeletionHandler.ts`, `src/modals/TaskDeletionModal.ts`
+
+### Iteration 2026-10-17 11:01 UTC
+
+- Context: Pilot vault Step 1/2/3 cleanup; owner saw repeated “Tasks will not be deleted… rectify” with no delete dialog on later syncs.
+- Target: Clear UX for Obs→TT delete prompts; each manual sync should re-offer deletion after timeout/cancel.
+- Actions log: `TaskDeletionModal` returns `DeletionPromptResult`; `clearPendingDeletions()` at sync Phase 2; clearer notices in `TaskDeletionHandler`.
+- Validation: `npm test -- --run src/test/modalTimeout.test.ts src/test/services/deletionGuard.test.ts` → 3 passed.
+- Problems: Leftover TT orphans still need Confirm on dialog or manual TT delete until build deployed (`open`).
+- To Be Done: Build 2.0.28; reload plugin in test vault; sync with Confirm Deletion on each prompt.
+- References: `CHANGELOG.md`, `src/modals/TaskDeletionModal.ts`, `src/services/TaskDeletionHandler.ts`
+
 ### Iteration 2026-10-16 15:55 UTC
 
 - Context: Owner asked to execute Abyss-first Step 4 (lines stay put; scope push without mandatory `#ticktick`).

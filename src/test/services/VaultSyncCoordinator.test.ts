@@ -48,7 +48,7 @@ vi.mock('@/settings', () => ({
 
 vi.mock('@/modals/TaskDeletionModal', () => ({
 	TaskDeletionModal: vi.fn(function () {
-		return { showModal: vi.fn().mockResolvedValue(true) };
+		return { showModal: vi.fn().mockResolvedValue({ confirmed: true }) };
 	}),
 }));
 
