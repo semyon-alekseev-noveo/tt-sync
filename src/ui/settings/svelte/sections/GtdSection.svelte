@@ -31,6 +31,7 @@
 	let newTasksFile = '';
 	let projectTemplatePath = '';
 	let tagListText = '';
+	let gtdStageVia: 'list' | 'tag' = 'list';
 	let syncTag = '';
 	let syncTagDebounce: ReturnType<typeof setTimeout> | undefined;
 
@@ -79,6 +80,7 @@
 		newTasksFile = s.newTasksFile ?? '';
 		projectTemplatePath = s.projectTemplatePath ?? '';
 		tagListText = tagListToText(s.tagListMappings);
+		gtdStageVia = s.gtdStageVia === 'tag' ? 'tag' : 'list';
 		syncTag = s.SyncTag ?? '';
 		if (($settingsStore.syncedLists?.length ?? 0) === 0 && (s.syncedLists?.length ?? 0) > 0) {
 			refreshSettingsStore();
@@ -156,6 +158,7 @@
 	const saveNewTasksFile = () => save({ newTasksFile: newTasksFile.trim() });
 	const saveProjectTemplate = () => save({ projectTemplatePath: projectTemplatePath.trim() });
 	const saveTagList = () => save({ tagListMappings: parseTagListText(tagListText) });
+	const saveStageVia = () => save({ gtdStageVia });
 
 	function handleSyncTagInput(value: string) {
 		syncTag = value;
@@ -189,6 +192,7 @@
 		'projectsListName',
 		'projectSchemeEnabled',
 		'tagListMappings',
+		'gtdStageVia',
 		'newTasksFile',
 		'projectTemplatePath',
 		'SyncTag',
@@ -389,14 +393,21 @@
 
 	<div class="setting-item">
 		<div class="setting-item-info">
-			<div class="setting-item-name">Tag → list mapping</div>
+			<div class="setting-item-name">GTD stage mapping</div>
 			<div class="setting-item-description">
-				One per line: <code>type/next = nextAction</code>. The tag decides the TickTick list; moving the task
-				in TickTick rewrites the tag.
+				{#if gtdStageVia === 'tag'}
+					One per line: <code>type/next = type/next</code>. The Obsidian tag is a TickTick tag. A TickTick filter on that tag is the view. Changing the tag on either side rewrites the other. The task stays on its list.
+				{:else}
+					One per line: <code>type/next = nextAction</code>. The Obsidian tag selects the TickTick list and is not sent as a tag. Moving the task to another mapped list rewrites the tag.
+				{/if}
 			</div>
 		</div>
 		<div class="setting-item-control">
-			<textarea rows="4" bind:value={tagListText} on:change={saveTagList} placeholder="type/next = nextAction"></textarea>
+			<select bind:value={gtdStageVia} on:change={saveStageVia}>
+				<option value="list">Tag → list</option>
+				<option value="tag">Tag → tag</option>
+			</select>
+			<textarea rows="4" bind:value={tagListText} on:change={saveTagList} placeholder={gtdStageVia === 'tag' ? 'type/next = type/next' : 'type/next = nextAction'}></textarea>
 		</div>
 	</div>
 

@@ -50,4 +50,22 @@ describe('tag -> list mapping', () => {
 		expect(kb).not.toMatch(/#type\//);
 		Object.assign(S, { abyssTasksFormat: false, tagListMappings: [] });
 	});
+
+	it('tag mode: stage stays a TickTick tag and rewrites both ways', async () => {
+		const S = (getSettings as unknown as () => Record<string, unknown>)();
+		Object.assign(S, { noteDelimiter: '', fileLinksInTickTick: 'noLink', stopInjectingTickTickTag: true,
+			abyssTasksFormat: true, gtdStageVia: 'tag', tagMappings: [], tagListMappings: MAP, syncNotes: false });
+		const id = 'abcdefabcdefabcdefabcdef';
+		const line = `- [ ] Позвонить #type/next #context/work %%[ticktick_id:: ${id}]%%`;
+		const parser = mkParser('inbox1');
+		const fm = { getTaskItems: () => [], getTaskRecord: () => ({ task: line, parentId: '', taskLines: [] }) };
+		const task = await parser.convertLineToTask(line, 0, 'p.md', fm as never, null);
+		expect(task.projectId).toBe('inbox1');
+		expect(task.tags).toContain('nextaction');
+		expect(task.tags).not.toContain('type-next');
+		const back = await parser.convertTaskToLine({ ...task, tags: ['waitingfor', 'context-work'], items: [] }, 0);
+		expect(back).toMatch(/#type\/waiting/);
+		expect(back).not.toMatch(/type\/next/);
+		Object.assign(S, { abyssTasksFormat: false, gtdStageVia: 'list', tagListMappings: [] });
+	});
 });

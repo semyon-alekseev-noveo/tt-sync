@@ -38,6 +38,26 @@ export function tagForList(projectId: string, map: ITagListMapping[] | undefined
 	return map?.find(e => e.listId === projectId || listId(e.list, projects) === projectId)?.tag.replace(/^#/, '');
 }
 
+const flat = (s: string) => n(s).replace(/\//g, '-');
+
+/** Tag mode: Obsidian stage tag → TickTick tag (right-hand side, `/` flattened). */
+export function tickTickTagForStage(obsTag: string, map: ITagListMapping[] | undefined): string | undefined {
+	const m = map?.find(e => n(e.tag) === n(obsTag));
+	return m ? flat(m.list) : undefined;
+}
+
+/** Tag mode: TickTick stage tag → Obsidian tag (left-hand side). */
+export function obsidianTagForStageTag(ttTag: string, map: ITagListMapping[] | undefined): string | undefined {
+	const want = flat(ttTag);
+	return map?.find(e => flat(e.list) === want)?.tag.replace(/^#/, '');
+}
+
+/** Either side of a GTD stage row (Obsidian tag or TickTick tag/list name). */
+export function isStageToken(tag: string | undefined, map: ITagListMapping[] | undefined): boolean {
+	if (!tag) return false;
+	return isListTag(tag, map) || !!obsidianTagForStageTag(tag, map);
+}
+
 export function parseTagListText(text: string): ITagListMapping[] {
 	return text.split('\n').map(l => l.split('=')).filter(p => p.length === 2 && p[0].trim() && p[1].trim())
 		.map(([a, b]) => ({ tag: a.trim().replace(/^#/, ''), list: b.trim() }));

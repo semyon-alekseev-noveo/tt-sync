@@ -17,13 +17,13 @@
 
 - **Direction (2026-10-16):** **Abyss-first** — tasks stay where Abyss puts them; TickTick mirrors tags/lists and project parents. See `ABYSS_FIRST_PLAN.md` (topology R / CASE-T4 parked).
 - **Still valid:** TT **Projects** ↔ project notes under `10 Projects/`; safety: `syncedLists`, `syncScopeFolders`, manual sync.
-- **Next execution order:** Steps 1–3 **B** done → Step **4 code done** (scope in-place sync; see `CHANGELOG.md` 15:55 UTC) → deploy + Phase D verify → Step 5 → AF-* pilot (`ABYSS_FIRST_PLAN.md` §6–7).
+- **Next execution order:** `ABYSS_FIRST_PLAN.md` §6 — (A) linked lines sync both ways without `tts-test`, (B) stop writing `#obsidian` so Abyss Inbox stays TTS-Inbox, then tag views, project notes, AF-* pilot.
 
 ## Validation
 
 - Build: `npm run build` in repo root; CI on `abyss-mapping` via `.github/workflows/ci.yml`.
-- Unit tests: `npm test -- --run` (500 tests at 2.0.29).
-- Manual pilot: **`SMOKE_TESTS.md`** — prove Obs→TT deletion (`CASE-DEL-*` in `GTD_SYNC_CASES.md` §8); plugin ≥ 2.0.29 on `Thinkpad-tts-test`.
+- Unit tests: `npm test -- --run` (at 2.0.30).
+- Manual pilot: **`SMOKE_TESTS.md`** — prove Obs→TT deletion (`CASE-DEL-*` in `GTD_SYNC_CASES.md` §8); plugin ≥ 2.0.30 on `Thinkpad-tts-test`.
 - BRAT installs: GitHub Release assets from `.github/workflows/release.yml` (see `docs/BRAT_INSTALL.md`).
 - TT cleanup verified 2026-10-16 via MCP (no `ticktick` tag left on polluted set).
 

@@ -1,5 +1,45 @@
 # Changelog
 
+### Iteration 2026-10-18 14:15 UTC
+
+- Context: GTD stages can be TickTick lists or TickTick tags used by filter views. Moves must work both ways.
+- Target: Setting `gtdStageVia` = `list` (default) or `tag`, same mapping table.
+- Actions log: Helpers in `listMapping.ts`; push and pull in `taskParser.ts`; select in GTD settings.
+- Validation: `npx vitest run src/test/listMapping.test.ts src/test/projectParentKeep.test.ts` → 6 passed.
+- Problems: Filter views are created in the TickTick app, not by the plugin (`open` as a manual step). Shipped in **2.0.30**.
+- To Be Done: Install 2.0.30; choose Tag → list or Tag → tag and sync one `#type/next` line.
+- References: `src/listMapping.ts`, `src/taskParser.ts`, `ABYSS_FIRST_PLAN.md`, `CHANGELOG.md`
+
+### Iteration 2026-10-18 12:20 UTC
+
+- Context: Pull of new TickTick tasks should be list OR `tts-test`, not both. Birth tags stay. Date views share the due date.
+- Target: `tickTickTaskEntersVault` uses OR; plan §6 matches that, and C/D/E are checked.
+- Actions log: OR gate in `src/syncScope.ts` and the Obsidian update check; rewrote `ABYSS_FIRST_PLAN.md` §6.A–E.
+- Validation: `npx vitest run` on syncScope, listMapping, projectParentKeep, projectSchemePushContext → 22 passed. TickTick: test 3 and test 4 are subtasks on TTS-Projects; no TTS task due 2026-10-18 through 2026-10-25.
+- Problems: Installed plugin is still 2.0.29, so the OR gate is not live (`open`).
+- To Be Done: Release when asked; add `📅` on a pilot line and confirm TickTick Today.
+- References: `src/syncScope.ts`, `ABYSS_FIRST_PLAN.md`, `CHANGELOG.md`
+
+### Iteration 2026-10-18 12:10 UTC
+
+- Context: Abyss 2.1.2 inbox is untagged top-level lines; `#obsidian` ejects them while they remain on TTS-Inbox.
+- Target: A written order for the next alignment, after the tag and view rules were checked in the plugin.
+- Actions log: Added `ABYSS_FIRST_PLAN.md` §6; pointed `PROJECT_STATE.md` Target at that order.
+- Validation: Read Abyss `main.js` inbox rule (`depth===0 && tags.length===0`) and test-vault `data.json`.
+- Problems: No code change in this iteration (`open` work remains §6.A–B).
+- To Be Done: Release the linked-line pull; drop the `tts-test` gate on later edits of linked lines; stop writing `#obsidian` on the checkbox.
+- References: `ABYSS_FIRST_PLAN.md`, `PROJECT_STATE.md`, `CHANGELOG.md`
+
+### Iteration 2026-10-18 11:50 UTC
+
+- Context: Completing test 2 on TTS-Inbox left the Active Zone line unchecked. The task only has the tag `obsidian`.
+- Target: A line that already has `ticktick_id` follows TickTick completion on sync. New unlinked tasks still require SyncTag.
+- Actions log: `allowVaultUpdate` used by `VaultSyncCoordinator` so linked tasks on an allow-listed list are written back.
+- Validation: `npx vitest run src/test/syncScope.test.ts src/test/services/VaultSyncCoordinator.test.ts` → 39 passed.
+- Problems: Installed 2.0.29 still skips these updates (`open` until the next release).
+- To Be Done: Release and sync again; the test 2 line should become checked.
+- References: `src/syncScope.ts`, `src/services/VaultSyncCoordinator.ts`, `CHANGELOG.md`
+
 ### Iteration 2026-10-18 09:40 UTC
 
 - Context: Active Zone lines on a project note sometimes landed on TTS-Inbox; a later line became a subtask on TTS-Projects.

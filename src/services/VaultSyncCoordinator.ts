@@ -14,7 +14,7 @@ import type { LocalTask } from '@/db/schema';
 import { db } from "@/db/dexie";
 import { getSettings } from '@/settings';
 import { getAllProjects } from '@/db/projects';
-import { isListAllowed, normalizeSyncTag, resolveSyncedListIds, taskMatchesSyncLimit, unmatchedEntries } from '@/syncScope';
+import { allowVaultUpdate, isListAllowed, normalizeSyncTag, resolveSyncedListIds, taskMatchesSyncLimit, unmatchedEntries } from '@/syncScope';
 import { TaskDeletionModal } from '@/modals/TaskDeletionModal';
 import { FolderSyncService } from '@/services/FolderSyncService';
 import log from '@/utils/logger';
@@ -67,10 +67,13 @@ export class VaultSyncCoordinator {
 			const task = lt.task;
 			// Project parents are represented by project notes, never by task lines.
 			if (scheme?.isParentTask(task)) continue;
-			const matchesFilter = this.matchesFilter(task, syncTag, syncProject, andOr, allowedListIds);
-
 			let targetFile: string | undefined;
 			const actualFile = !lt.deleted ? presentAt.get(task.id) : undefined;
+			const linkedInVault = !!(actualFile || lt.file);
+			// Linked lines follow TickTick even without SyncTag. New tasks still need the tag.
+			const matchesFilter = allowVaultUpdate(task, linkedInVault, {
+				syncTag, syncProject, andOr, allowedListIds,
+			});
 
 			// Step 4: line already in vault wins over list-file / DB path (Abyss-first in place).
 			if (actualFile) {

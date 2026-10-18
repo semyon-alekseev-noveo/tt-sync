@@ -14,6 +14,7 @@ const GTD_SCALAR_KEYS: (keyof ITickTickSyncSettings)[] = [
 	'projectsListId',
 	'defaultProjectId',
 	'defaultProjectName',
+	'gtdStageVia',
 ];
 
 /** Session / login fields that may be updated before loadSettings finishes. */

@@ -330,6 +330,67 @@ Today `TTS-data-preset.json` includes **`00 Inbox/`** in `syncScopeFolders`. Opt
 
 ---
 
+## 6. Further alignment (2026-10-18)
+
+What we now know about Abyss 2.1.2 on `Thinkpad-tts-test`:
+
+- **Inbox** = a top-level checkbox with **no tags**. `#obsidian`, `#tts-test`, and `#type/next` all remove it from that view.
+- **`taskIgnoreQuery: #ticktick`** hides matching tasks from **every** Abyss view. It does not make a tagged line count as untagged.
+- **Projects** = notes under `10 Projects/`. Actions live in `## Active Zone`.
+- **Today / Upcoming** are date filters, not TickTick lists.
+- A tag view (`#type/next`, …) is the Abyss side of a TickTick list. The map is `tagListMappings`. Untagged capture is the Abyss side of **TTS-Inbox**. A project note is the Abyss side of one parent on **TTS-Projects**.
+
+`tts-test` is only a pilot fence for tasks that are not already linked. It is not an Abyss view.
+
+### Order
+
+**A. TickTick → Obsidian is OR**
+
+A task comes into the vault if **either** is true:
+
+1. It is on an allow-listed list (`TTS-Inbox`, `TTS-nextAction`, …), or
+2. It carries `tts-test`.
+
+It does not need both. A task with neither stays out. Same rule for a new task and for a later change (completion, title). Coded in `tickTickTaskEntersVault`. Not in the installed 2.0.29.
+
+**B. Birth tag stays**
+
+`#obsidian` means the task was born in the vault. `#ticktick` means it was born in TickTick. That is separate from the GTD list. Do not remove it.
+
+The clash: Abyss Inbox only shows a top-level line with **no** tags, so `#obsidian` takes a captured task out of that view while the task is still on TTS-Inbox. Putting `#obsidian` in `taskIgnoreQuery` would hide the task from every Abyss view, so that is not the fix. Inbox alignment is still open.
+
+**C. GTD stage mapping — two options**
+
+The same table, setting `gtdStageVia`:
+
+| Option | Line | TickTick | Both ways |
+|--------|------|----------|-----------|
+| **Tag → list** (default, current pilot) | `#type/next` | Task moves to list nextAction. The tag is not stored on the task. | Move the task to another mapped list → the line’s tag changes. Change the tag → the task moves. |
+| **Tag → tag** | `#type/next = type/next` | Task stays on its list. TickTick gets the tag. A **filter** in TickTick (tag is that value) is the view. The plugin does not create the filter. | Change the tag in TickTick → the line’s tag changes. Change the tag on the line → the TickTick tag changes. Other stage tags on that task are dropped so only one stage remains. |
+
+Checked: list mode and tag mode unit tests pass. Live `TTS-*` lists exist. A filter view still has to be created in the TickTick app.
+
+**D. Project note = TTS-Projects parent** — checked on the account
+
+`test 3` and `test 4` are subtasks of **TTS-PILOT- Phase C test** on **TTS-Projects**. `test 2` is still on **TTS-Inbox** (created before the project list was known). `First action from Obs QA` is a subtask of **TTS-QA- Obs-origin project**.
+
+**E. Dates**
+
+The date on the line (`📅` due, `⏳` start) is what TickTick stores. Built-in views read that date:
+
+| View | What it includes |
+|------|------------------|
+| Abyss **Today** | Due or scheduled today. Overdue is separate. |
+| TickTick **Today** | Due today, and TickTick also shows overdue here. |
+| TickTick **Next 7 days** | Due from today through the next 7 days. |
+| Abyss **Upcoming** | Any date after today. Not capped at 7 days. |
+
+No new list. A dated task shows in both apps from the same date. On 2026-10-18 the six `TTS-*` lists had **no** undone tasks with a due date in that 7-day window, so both date views are empty for the pilot until a line has `📅` or `⏳`.
+
+**F. Then the pilot gate**
+
+Run AF-1 … AF-8 on `Thinkpad-tts-test`. Live `Thinkpad` stays closed until those pass (Step 8).
+
 ## 5. References
 
 - `ABYSS_FIRST_PLAN.md` (this file)  

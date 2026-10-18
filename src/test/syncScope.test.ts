@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
-	healSyncedLists, isListAllowed, isPathInFolders, lineListToText, migrateSyncedLists, normalizeSyncTag, parseLineList,
+	allowVaultUpdate, healSyncedLists, isListAllowed, isPathInFolders, lineListToText, migrateSyncedLists, normalizeSyncTag, parseLineList, tickTickTaskEntersVault,
 	pushScopeAllows, resolveProjectsList, resolveSyncedListIds, taskMatchesSyncLimit, unmatchedEntries,
 } from '@/syncScope';
 
@@ -55,6 +55,16 @@ describe('syncedLists allow-list', () => {
 		expect(normalizeSyncTag('TTS-Test')).toBe('tts-test');
 		expect(normalizeSyncTag('type/next')).toBe('type-next');
 		expect(normalizeSyncTag('')).toBeUndefined();
+	});
+
+	it('TickTick → vault is list OR sync tag', () => {
+		const allowed = new Set(['inbox']);
+		const opts = { allowedListIds: allowed, syncTag: 'tts-test' };
+		const onList = { id: 't2', projectId: 'inbox', tags: ['obsidian'] };
+		expect(tickTickTaskEntersVault(onList, opts)).toBe(true);
+		expect(allowVaultUpdate(onList, false, opts)).toBe(true);
+		expect(tickTickTaskEntersVault({ projectId: 'live', tags: ['tts-test'] }, opts)).toBe(true);
+		expect(tickTickTaskEntersVault({ projectId: 'live', tags: ['obsidian'] }, opts)).toBe(false);
 	});
 
 	it('taskMatchesSyncLimit gates by list then tag/project', () => {

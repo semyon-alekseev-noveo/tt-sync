@@ -44,6 +44,8 @@ export interface ITickTickSyncSettings {
 	statusMappings: { char: string; tag: string }[];
 	projectMappings: { path: string; project: string }[];
 	tagListMappings: { tag: string; list: string; listId?: string }[];
+	/** GTD stage: Obsidian tag selects a TickTick list, or a TickTick tag for a filter view. */
+	gtdStageVia: 'list' | 'tag';
 	projectsListId?: string;
 	syncMarkerTag: string;
 	// If set: every TickTick list maps to this one file for NEW tasks; lists are
@@ -128,6 +130,7 @@ export const DEFAULT_SETTINGS: ITickTickSyncSettings = {
 	statusMappings: [{ char: '/', tag: 'status/in-progress' }, { char: '-', tag: 'status/cancelled' }],
 	projectMappings: [],
 	tagListMappings: [],
+	gtdStageVia: 'list',
 	syncMarkerTag: 'ticktick',
 	newTasksFile: '',
 	onTickTickDeletion: 'ask',

@@ -1,7 +1,7 @@
 import { isDetached } from '@/detach';
 import { abyssLinesToNote, noteToAbyssLines, childIndent } from '@/abyssFormat';
 import { mapObsidianTag, mapTickTickTag } from '@/tagMapping';
-import { isListTag, listForTags, tagForList, type ITagListMapping } from '@/listMapping';
+import { isListTag, isStageToken, listForTags, obsidianTagForStageTag, tagForList, tickTickTagForStage, type ITagListMapping } from '@/listMapping';
 import { checkboxChar, restoreStatus, tagForStatusChar, isStatusTag, type IStatusMapping } from '@/statusMapping';
 const warnedConflicts = new Set<string>();
 import { type App, type MetadataCache, Notice } from 'obsidian';
@@ -174,10 +174,16 @@ export class TaskParser {
 		}
 		const listMapP = getSettings().tagListMappings;
 		if (listMapP?.length && !this.plugin?.projectScheme?.isParentId?.(task.parentId)) {
-			const projects = await getAllProjects();
-			const lt = tagForList(task.projectId, listMapP, projects);
-			lineTags = (lineTags ?? []).filter(t => !isListTag(t, listMapP));
-			if (lt) lineTags = [...lineTags, lt];
+			if ((getSettings().gtdStageVia ?? 'list') === 'tag') {
+				const stage = (lineTags ?? []).map(t => obsidianTagForStageTag(t, listMapP)).find((t): t is string => !!t);
+				lineTags = (lineTags ?? []).filter(t => !isStageToken(t, listMapP));
+				if (stage) lineTags = [...lineTags, stage];
+			} else {
+				const projects = await getAllProjects();
+				const lt = tagForList(task.projectId, listMapP, projects);
+				lineTags = (lineTags ?? []).filter(t => !isListTag(t, listMapP));
+				if (lt) lineTags = [...lineTags, lt];
+			}
 		}
 		resultLine += `- [${checkChar}] ${task.title}`;
 
@@ -722,6 +728,11 @@ export class TaskParser {
 			// No source tag yet: the line was written in Obsidian.
 			const hasSource = tags.some(t => t === 'obsidian' || t === 'ticktick' || t === markerName());
 			if (!hasSource) tags = [...tags, 'obsidian'];
+		} else if (getSettings().tagListMappings?.length && (getSettings().gtdStageVia ?? 'list') === 'tag') {
+			const stageRaw = rawTags.find(t => isListTag(t, getSettings().tagListMappings));
+			const tt = stageRaw ? tickTickTagForStage(stageRaw, getSettings().tagListMappings) : undefined;
+			tags = tags.filter((t, i) => !isStageToken(rawTags[i], getSettings().tagListMappings) && !isStageToken(t, getSettings().tagListMappings));
+			if (tt) tags = [...tags.filter(x => x !== tt), tt];
 		} else if (getSettings().tagListMappings?.length) {
 			tags = tags.filter((_, i) => !isListTag(rawTags[i], getSettings().tagListMappings));
 		}
@@ -735,7 +746,7 @@ export class TaskParser {
 			if (projectOf) projectId = projectOf.listId;
 			// Explicit tag -> list table wins over file default and name-matching.
 			const listMap = getSettings().tagListMappings;
-			const mappedList = (!projectOf && listMap?.length) ? listForTags(rawTags, listMap, await getAllProjects()) : undefined;
+			const mappedList = (!projectOf && (getSettings().gtdStageVia ?? 'list') !== 'tag' && listMap?.length) ? listForTags(rawTags, listMap, await getAllProjects()) : undefined;
 			if (mappedList) {
 				projectId = mappedList;
 			} else

@@ -51,6 +51,37 @@ export function taskMatchesSyncLimit(
 	return hasTag || hasProject;
 }
 
+/**
+ * TickTick → Obsidian, two ways (OR, not AND):
+ * the task sits on an allow-listed list, or it carries SyncTag.
+ * Either one is enough. A task with neither stays out.
+ */
+export function tickTickTaskEntersVault(
+	task: { projectId?: string; tags?: string[] | null },
+	opts: TaskSyncLimitOptions,
+): boolean {
+	const ids = opts.allowedListIds;
+	const onList = !!ids && ids.has(task.projectId ?? '');
+	const tag = opts.syncTag?.toLowerCase();
+	const hasTag = !!tag && (task.tags ?? []).some(t => t.toLowerCase() === tag);
+	if (ids && tag) return onList || hasTag;
+	if (ids) return onList;
+	if (tag) return hasTag;
+	return !ids;
+}
+
+/**
+ * Vault write from TickTick. Linked and new tasks use the same OR gate.
+ * `linkedInVault` is kept so callers can show why a line was considered.
+ */
+export function allowVaultUpdate(
+	task: { id?: string; projectId?: string; tags?: string[] | null },
+	_linkedInVault: boolean,
+	opts: TaskSyncLimitOptions,
+): boolean {
+	return tickTickTaskEntersVault(task, opts);
+}
+
 /** Project-scheme list: name wins over a stale `projectsListId` (e.g. live Projects vs TTS-Projects). */
 export function resolveProjectsList(
 	lists: ListRef[],

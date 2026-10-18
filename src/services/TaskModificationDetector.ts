@@ -31,7 +31,7 @@ import { NewFileMap, type ITaskItemRecord, type ITaskRecord } from '@/services/N
 import { FolderSyncService } from '@/services/FolderSyncService';
 import { getSettings } from '@/settings';
 import { getAllProjects } from '@/db/projects';
-import { isPathInPushScope, normalizeSyncTag, resolveSyncedListIds, taskMatchesSyncLimit, type TaskSyncLimitOptions } from '@/syncScope';
+import { isPathInPushScope, normalizeSyncTag, resolveSyncedListIds, tickTickTaskEntersVault, type TaskSyncLimitOptions } from '@/syncScope';
 import log from '@/utils/logger';
 import ObjectID from 'bson-objectid';
 import { normalizeRepeatFlag } from '@/utils/RecurrenceConverter';
@@ -283,7 +283,7 @@ export class TaskModificationDetector {
 		const savedTask = await this.plugin.taskRepository.loadTaskById(taskId);
 		if (savedTask) {
 			if (this.plugin.projectScheme?.isParentTask(savedTask)) return false;
-			if (pushLimit?.allowedListIds?.size && !taskMatchesSyncLimit(savedTask, pushLimit)) return false;
+			if (pushLimit?.allowedListIds?.size && !tickTickTaskEntersVault(savedTask, pushLimit)) return false;
 		}
 		if (!savedTask) {
 			// Task not in local DB — check TickTick API before deleting.
