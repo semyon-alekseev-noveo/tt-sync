@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-18 14:45 UTC
+
+- Context: Template bullets `- [[]]` under related-articles sections were read as checkboxes.
+- Target: A wiki-link placeholder is not a task. Real checkboxes `[ ]`, `[x]`, `[/]` still are.
+- Actions log: Tightened `checkboxRegex` in `src/taskParser.ts` so the status character cannot be `[` or `]`.
+- Validation: `npx vitest run src/test/foolCases.test.ts` → 3 passed.
+- Problems: Abyss Tasks uses the same loose pattern and still lists these lines (`open`, not our plugin). Shipped in **2.0.31**.
+- To Be Done: Install 2.0.31. Abyss will keep showing these lines until its own matcher changes.
+- References: `src/taskParser.ts`, `CHANGELOG.md`
+
 ### Iteration 2026-10-18 14:15 UTC
 
 - Context: GTD stages can be TickTick lists or TickTick tags used by filter views. Moves must work both ways.

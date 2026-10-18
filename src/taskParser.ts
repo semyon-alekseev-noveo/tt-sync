@@ -77,8 +77,9 @@ const indentationRegex = /^([\s\t>]*)/;
 // Matches - * and + list markers, or numbered list markers (eg 1.)
 const listMarkerRegex = /([-*+]|[0-9]+\.)/;
 
-// Matches a checkbox and saves the status character inside
-const checkboxRegex = /\[(.)\]/u;
+// A checkbox is `[`, one status character, `]`. The status character is not
+// `[` or `]`, so a placeholder bullet `- [[]]` is a wiki link, not a task.
+const checkboxRegex = /\[([^\[\]\n])\]/u;
 
 // Matches the rest of the task after the checkbox.
 const afterCheckboxRegex = / *(.*)/u;

@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { pickProjectNote, isBlankTitle } from '@/projectScheme';
+import { TaskParser } from '@/taskParser';
 
 describe('fool cases', () => {
 	it('project link shadowed by same-named note resolves to project note', () => {
@@ -14,5 +15,12 @@ describe('fool cases', () => {
 		expect(isBlankTitle(' [fool/F1.md](obsidian://open?vault=x&file=fool%2FF1.md)')).toBe(true);
 		expect(isBlankTitle('Learn C# basics')).toBe(false);
 		expect(isBlankTitle('🚀')).toBe(false);
+	});
+	it('an empty wiki-link bullet is not a checkbox', () => {
+		const p = new TaskParser({} as never, {} as never);
+		expect(p.isMarkdownTask('- [[]]')).toBe(false);
+		expect(p.isMarkdownTask('- [ ] call')).toBe(true);
+		expect(p.isMarkdownTask('- [x] call')).toBe(true);
+		expect(p.isMarkdownTask('- [/] call')).toBe(true);
 	});
 });
