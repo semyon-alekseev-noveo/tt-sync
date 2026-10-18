@@ -22,6 +22,26 @@ export class ProjectSchemeService {
 	constructor(private app: App, private plugin: TickTickSync) {}
 
 	enabled(): boolean { return !!getSettings().projectSchemeEnabled; }
+
+	/**
+	 * Hydrate projects-list id and parent map from settings + note frontmatter.
+	 * `run()` does this only on a full TickTick pull. File-save pushes call
+	 * `resolveForFile` earlier; without this they see an empty `listId` and
+	 * create Active Zone lines on the inbox list.
+	 */
+	async ensurePushContext(): Promise<void> {
+		if (!this.enabled()) return;
+		const lists = await getAllProjects();
+		const pl = resolveProjectsList(lists, getSettings().projectsListName, getSettings().projectsListId);
+		this.listId = pl?.id ?? '';
+		this.blocked = !pl || !isListAllowed(getSettings().syncedLists, pl);
+		if (this.blocked || !this.listId) return;
+		const next = new Map<string, string>();
+		for (const n of this.projectNotes()) {
+			if (n.id) next.set(n.id, n.path);
+		}
+		this.parents = next;
+	}
 	private folder() { return (getSettings().projectsFolder ?? '10 Projects').replace(/^\/+|\/+$/g, ''); }
 	private tags() { return getSettings().projectTaskTags?.length ? getSettings().projectTaskTags : ['project', 'obsidian']; }
 

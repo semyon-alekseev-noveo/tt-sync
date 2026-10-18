@@ -1,5 +1,25 @@
 # Changelog
 
+### Iteration 2026-10-18 09:40 UTC
+
+- Context: Active Zone lines on a project note sometimes landed on TTS-Inbox; a later line became a subtask on TTS-Projects.
+- Target: File-save push uses the same project parent and list as a full sync; a later parent attach also moves the list.
+- Actions log: `ProjectSchemeService.ensurePushContext` before new-task and modification scans; `moveTaskProject` before `parentMove` when the list id changes; skip non-string tags in `addTagsToLine`.
+- Validation: `npx vitest run` → 500 passed (2 new cases in `projectSchemePushContext.test.ts`).
+- Problems: Shipped in **2.0.29** (`resolved` once BRAT installs that release).
+- To Be Done: Install 2.0.29 on `Thinkpad-tts-test`; re-add an Active Zone line and confirm it appears under the project on TTS-Projects.
+- References: `src/services/ProjectSchemeService.ts`, `src/services/TaskModificationDetector.ts`, `src/taskParser.ts`, `CHANGELOG.md`
+
+### Iteration 2026-10-17 12:05 UTC
+
+- Context: Need repeatable pilot proof that Obsidian line removal deletes on TickTick after 2.0.28.
+- Target: Smoke checklist and formal `CASE-DEL-*` scenarios.
+- Actions log: Added `SMOKE_TESTS.md`; `GTD_SYNC_CASES.md` §8 deletion cases; updated `PROJECT_STATE.md` validation pointers.
+- Validation: Doc-only; execute on `Thinkpad-tts-test` with plugin 2.0.28.
+- Problems: DEL-* status **open** until tester fills result log (`open`).
+- To Be Done: Run DEL-1 through DEL-5; mark pass/fail in `SMOKE_TESTS.md`.
+- References: `SMOKE_TESTS.md`, `GTD_SYNC_CASES.md`, `CHANGELOG.md`
+
 ### Iteration 2026-10-17 11:45 UTC
 
 - Context: Obs→TT delete UX failed bulk cleanup; Step/1/2/3 still on TTS-Projects while lines remain in pilot notes.

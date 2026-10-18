@@ -22,9 +22,10 @@
 ## Validation
 
 - Build: `npm run build` in repo root; CI on `abyss-mapping` via `.github/workflows/ci.yml`.
+- Unit tests: `npm test -- --run` (500 tests at 2.0.29).
+- Manual pilot: **`SMOKE_TESTS.md`** — prove Obs→TT deletion (`CASE-DEL-*` in `GTD_SYNC_CASES.md` §8); plugin ≥ 2.0.29 on `Thinkpad-tts-test`.
 - BRAT installs: GitHub Release assets from `.github/workflows/release.yml` (see `docs/BRAT_INSTALL.md`).
 - TT cleanup verified 2026-10-16 via MCP (no `ticktick` tag left on polluted set).
-- Next soak: Projects-only / limited Sync Tag — see `PO_STATUS.md` §4.
 
 ## Problems
 
@@ -39,10 +40,11 @@
 
 1. Deploy latest `dist/` to test vault; Phase D + Step 3.2 Inbox spot-check (no **Reset**).
 2. Engineering: Step 5 — settings copy; P6 regression doc (P6 fix shipped 2.0.25).
-3. Pilot: Step 7 — AF-* on `Thinkpad-tts-test` before live vault.
+3. Pilot: Run **`SMOKE_TESTS.md`** deletion suite (DEL-1–DEL-5); then AF-* on `Thinkpad-tts-test` before live vault.
 
 ## References
 
+- `SMOKE_TESTS.md`
 - `ABYSS_FIRST_PLAN.md`
 - `GTD_SYNC_CASES.md`
 - `GTD_SYNC_RESEARCH.md`

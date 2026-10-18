@@ -407,7 +407,7 @@ export class TaskParser {
 		// tag's leading segment is an existing parent (hierarchy) or a literal
 		// flat tag. Doing it once per line avoids N metadataCache lookups.
 		const vaultTags = this.getVaultTags();
-		tags.forEach((tag: string) => {
+		tags.filter((tag): tag is string => typeof tag === 'string' && tag.length > 0).forEach((tag: string) => {
 			//TickTick tag, if present, will be added at the end.
 			if (!tag.match(regEx)) {
 				let display: string;
@@ -703,6 +703,11 @@ export class TaskParser {
 			tags = rawTags.map((raw, i) => mappedTags[i] ?? raw.toLowerCase().replace(/[/\s]+/g, '-').replace(/-+/g, '-'));
 		}
 
+		// File-save, editor-line, and full Synchronize all come through here.
+		// Hydrate the projects list before routing, because only a full pull used to set it.
+		if (!hasParent && this.plugin.projectScheme?.enabled?.() && !this.plugin.projectScheme.listId) {
+			await this.plugin.projectScheme.ensurePushContext?.();
+		}
 		let projectOf = hasParent ? undefined : this.plugin.projectScheme?.resolveForFile?.(filepath);
 		if (!hasParent && !projectOf && TickTick_id && this.plugin.projectScheme?.enabled?.()) {
 			// A project subtask stays in its project wherever its line lives (file location

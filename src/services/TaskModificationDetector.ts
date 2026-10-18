@@ -84,6 +84,7 @@ export class TaskModificationDetector {
 
 		const fileMap = new NewFileMap(this.app, this.plugin, (view as MarkdownView).file!);
 		await fileMap.init(fileContent);
+		await this.plugin.projectScheme?.ensurePushContext?.();
 		await this.addNewTask(linetxt, line, editor, cursor, fileMap);
 
 		const afterLength: number | undefined = fileContent?.length;
@@ -208,6 +209,7 @@ export class TaskModificationDetector {
 
 		if (!(file instanceof TFile)) { return false; }
 		if (!isPathInPushScope(file_path)) { return false; } // outside syncScopeFolders
+		await this.plugin.projectScheme?.ensurePushContext?.();
 		const fileMap = new NewFileMap(this.app, this.plugin, file);
 		await fileMap.init();
 
@@ -243,6 +245,7 @@ export class TaskModificationDetector {
 		if (!isPathInPushScope(filepath)) {
 			return false;
 		}
+		await this.plugin.projectScheme?.ensurePushContext?.();
 		// Only process full tasks here.  taskParser.isTaskItem handles item
 		// identification; note-level content is skipped entirely.
 		const taskIdEarly = this.plugin.taskParser.getTickTickId(lineText) ?? '';
@@ -371,6 +374,8 @@ export class TaskModificationDetector {
 		if (!(file instanceof TFile)) {
 			return;
 		}
+
+		await this.plugin.projectScheme?.ensurePushContext?.();
 
 		const fileMap = new NewFileMap(this.app, this.plugin, file);
 		await fileMap.init();
@@ -511,8 +516,11 @@ export class TaskModificationDetector {
 			}
 		}
 
-		// Handle parent change
+		// Handle parent change (project-scheme children must land on the projects list, not inbox)
 		if (modifications.parentIdModified) {
+			if (lineTask.projectId && savedTask.projectId && lineTask.projectId !== savedTask.projectId) {
+				await this.plugin.tickTickRestAPI?.moveTaskProject(lineTask, savedTask.projectId, lineTask.projectId);
+			}
 			await this.handleParentChange(lineTask, savedTask, taskId);
 			modified = true;
 		}

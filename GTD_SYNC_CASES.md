@@ -98,6 +98,12 @@ Unless a case says otherwise, preconditions assume plugin `data.json` merged fro
 | CASE-N3 | No `obsidian://` in TickTick titles | Negative |
 | CASE-N4 | No forced `ticktick` tag on TickTick | Negative |
 | CASE-M1 | Recover from first unlimited sync (test vault) | Migration |
+| CASE-DEL-1 | Single line removed → one confirm → TT delete | Deletion (Obs→TT) |
+| CASE-DEL-2 | Many files → one deletion modal (≥ 2.0.28) | Deletion (Obs→TT) |
+| CASE-DEL-3 | Cancel on dialog → TT unchanged | Deletion (Obs→TT) |
+| CASE-DEL-4 | Active Zone child removed → TT subtask deleted | Deletion (Obs→TT) |
+| CASE-DEL-5 | Journal + second sync stable after delete | Deletion (Obs→TT) |
+| CASE-DEL-N1 | Out of scope: line removed, no TT delete | Deletion (Obs→TT) |
 
 ---
 
@@ -462,7 +468,76 @@ These cases define **daily GTD**: tasks live in **list files** under `30 Tasks/T
 
 ---
 
-## 8. Migration and cleanup
+## 8. Obsidian → TickTick deletion (smoke)
+
+**Story:** I remove a synced checkbox line (or template subtask) from the vault. After sync, the plugin asks once; if I confirm, the task disappears on TickTick and stays gone.
+
+**Requires plugin ≥ 2.0.28** for aggregated confirm (`processSyncRemovedTasks`). Quick checklist: `SMOKE_TESTS.md`.
+
+### CASE-DEL-1 — Single line removed, one confirm, TT delete
+
+| | |
+|--|--|
+| **Given** | Task line in scope with `%%[ticktick_id:: …]%%` and pilot tag `#tts-test`; id recorded |
+| **When** | Delete the **whole line** in Obsidian; run **Synchronize**; click **Confirm Deletion** on the dialog within the timeout |
+| **Then (Obsidian)** | Line stays deleted; no ghost re-insert on next sync |
+| **Then (TickTick)** | Task absent from its list (e.g. **TTS-Inbox**) |
+| **Then (journal)** | `dir":"obs->tt"`, `op":"delete"`, same `taskId` |
+| **Status** | **Open** — run on test vault after 2.0.28 |
+
+### CASE-DEL-2 — Many files, one modal (2.0.28+)
+
+| | |
+|--|--|
+| **Given** | Two or more scoped notes each missing at least one previously synced id (different files) |
+| **When** | One **Synchronize** |
+| **Then** | **One** “Task Deletion Confirmation” listing tasks from **multiple** file paths (not a chain of per-file modals) |
+| **When** | **Confirm Deletion** |
+| **Then** | All listed ids deleted on TT; one summary notice (`deleted N task(s)`) |
+| **Status** | **Open** |
+
+### CASE-DEL-3 — Cancel leaves TickTick unchanged
+
+| | |
+|--|--|
+| **Given** | Same as DEL-1 with a **new** probe task |
+| **When** | Remove line; sync; click **Cancel** (or close without confirm) |
+| **Then** | Task **still** on TickTick; journal has **no** `obs->tt` delete for that id |
+| **Then** | Next sync offers the dialog again (no permanent silent skip) |
+| **Status** | **Open** |
+
+### CASE-DEL-4 — Project Active Zone child removed
+
+| | |
+|--|--|
+| **Given** | Child checkbox under `## Active Zone` in `10 Projects/<pilot>.md` synced to **TTS-Projects** (subtask or child task with id) |
+| **When** | Remove child line only; sync; **Confirm Deletion** |
+| **Then** | Child gone on **TTS-Projects**; parent project task remains |
+| **Notes** | Template titles `1` / `2` / `3` behave like any other line — if the line remains in the note, TT **should** keep the task |
+| **Status** | **Open** |
+
+### CASE-DEL-5 — Journal and local DB align
+
+| | |
+|--|--|
+| **Given** | DEL-1 or DEL-4 completed with confirm |
+| **When** | Run **Synchronize** again with no vault edits |
+| **Then** | No second delete dialog for the same ids; no new TT tasks for removed lines |
+| **Status** | **Open** |
+
+### CASE-DEL-N1 — Out of scope: line removed, no TT delete
+
+| | |
+|--|--|
+| **Given** | Synced line in a path **outside** `syncScopeFolders` (if any test note exists) |
+| **When** | Remove line; sync |
+| **Then** | No Obs→TT delete prompt for that task; TT task unchanged |
+| **Maps to** | Same intent as CASE-N1 (push scope) |
+| **Status** | **Open** (skip if no fixture) |
+
+---
+
+## 9. Migration and cleanup
 
 ### CASE-M1 — Recover from first unlimited sync (test vault)
 
@@ -478,7 +553,7 @@ These cases define **daily GTD**: tasks live in **list files** under `30 Tasks/T
 
 ---
 
-## 9. Pilot execution matrix (2026-10-16)
+## 10. Pilot execution matrix (2026-10-16)
 
 | Case | Result | Next action |
 |------|--------|-------------|
@@ -498,7 +573,7 @@ These cases define **daily GTD**: tasks live in **list files** under `30 Tasks/T
 
 ---
 
-## 10. Planned engineering sequence (from cases)
+## 11. Planned engineering sequence (from cases)
 
 1. **CASE-T4** — mirror/move obs-created lines into `30 Tasks/TickTick/<List>.md`; tests tied to CASE-T2.
 2. **CASE-P6** — stop writing parent as checkbox in project notes.
@@ -506,13 +581,14 @@ These cases define **daily GTD**: tasks live in **list files** under `30 Tasks/T
 4. **CASE-M1** — script or doc for test-vault root stub cleanup.
 5. **Production naming** — duplicate preset with real list names; re-run full matrix on `Thinkpad` only after all **Must** cases pass.
 
-**Must pass before live vault:** S2, S3, S4, P1, P2, P5, T2+**T4**, L2, N1–N4 (exercised), M1 (acceptable clutter documented).
+**Must pass before live vault:** S2, S3, S4, P1, P2, P5, T2+**T4**, L2, N1–N4 (exercised), M1 (acceptable clutter documented), **DEL-1–DEL-5** (see `SMOKE_TESTS.md`).
 
 ---
 
-## 11. References
+## 12. References
 
 - `GTD_SYNC_CASES.md` (this file)
+- `SMOKE_TESTS.md`
 - `GTD_SYNC_RESEARCH.md`
 - `PO_STATUS.md`
 - `CHANGELOG.md`

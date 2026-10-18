@@ -138,6 +138,7 @@ export class TickTickRestAPI {
 
 			// Merge local-only fields onto the task TickTick returned.
 			const merged = { ...taskToAdd, ...newTask };
+			if (!merged.tags?.length && taskToAdd.tags?.length) merged.tags = taskToAdd.tags;
 			this.plugin.dateMan?.addDateHolderToTask(merged, undefined);
 			return merged;
 		} catch (error) {
