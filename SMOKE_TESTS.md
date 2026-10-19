@@ -15,7 +15,7 @@ Operator preset: `00 Inbox/TTS-data-preset.json`, runbook `00 Inbox/TTS-PILOT-RU
 |--------|----------|
 | Vault | `/home/sam/obsidian/Thinkpad-tts-test` only |
 | Plugin | `tickticksync-abyss` **≥ 2.0.41** for `note/` / `proj/` context tags; **≥ 2.0.40** Abyss `- >` descriptions; **≥ 2.0.36** rename TT→Obs; **≥ 2.0.28** deletion |
-| Commands | Palette: **Synchronize** + **Synchronize (full pull from TickTick)**; ribbon **sync** icon — all register on enable (**≥ 2.0.44**) |
+| Commands | Palette: **Synchronize** only; ribbon **sync** icon (register on enable, **≥ 2.0.45**). Full TT pull runs on plugin load, not a separate palette command. |
 | Login | Access Control shows valid session |
 | GTD settings | `syncedLists` = six `TTS-*`; `syncScopeFolders` = `00 Inbox/`, `10 Projects/`, `30 Tasks/` |
 | Sync mode | Manual (`automaticSynchronizationInterval`: 0) |
@@ -76,7 +76,7 @@ Preset: `syncNotes: true`, `abyssTasksFormat: true`. See `ABYSS_NOTES_ALIGNMENT.
 | ID | What you prove | How |
 |----|----------------|-----|
 | NOTE-1 | Obs `- >` description line pushes to TT `content` / `desc` | Edit under a synced checkbox in vault → **Synchronize** → MCP `get_task_by_id` |
-| NOTE-2 | TT body edit pulls back under `- >` even when `modifiedTime` is stale | Change `content` in TT → **Synchronize (full pull from TickTick)** → vault child line |
+| NOTE-2 | TT body edit pulls back under `- >` even when `modifiedTime` is stale | Change `content` in TT → **Synchronize** (or reload Obsidian for startup full pull) → vault child line |
 | NOTE-3 | Abyss comment (`- stamp:`) still lands in TT `content` as `Comments:` block until Phase 1 API | Enter in Abyss comment field (must flush to `.md`) → sync → MCP |
 | NOTE-N1 | `40 KB/` lines do not push until folder is in `syncScopeFolders` | `logicSmoke.test.ts` LOGIC-3; live skip or add folder |
 

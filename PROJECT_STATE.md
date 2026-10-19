@@ -23,7 +23,7 @@
 
 - Build: `npm run build` in repo root; CI on `abyss-mapping` via `.github/workflows/ci.yml`.
 - Unit tests: `npx vitest run` (536 tests at **2.0.42**); NOTE/CTX smokes in `SMOKE_TESTS.md` (SYNC-12, `contextTags.test.ts`); descriptions sync Obs↔TT; comments still in `content` until Phase 1.
-- Manual pilot: **`SMOKE_TESTS.md`**. Palette: **Synchronize** (delta) + **Synchronize (full pull from TickTick)** (**2.0.42**). Context tags **2.0.41** (`syncNoteContextTags`); live `proj/` on children after re-sync.
+- Manual pilot: **`SMOKE_TESTS.md`**. Palette: **Synchronize** only; full TT pull on plugin load. Context tags **2.0.41** (`syncNoteContextTags`).
 - BRAT installs: GitHub Release assets from `.github/workflows/release.yml` (see `docs/BRAT_INSTALL.md`).
 - TT cleanup verified 2026-10-16 via MCP (no `ticktick` tag left on polluted set).
 

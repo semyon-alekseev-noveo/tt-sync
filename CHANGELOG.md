@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-19 12:50 UTC
+
+- Context: PO wants one palette sync command; full pull duplicated startup behavior.
+- Target: **2.0.45** — remove **Synchronize (full pull from TickTick)**; keep **Synchronize** + ribbon.
+- Actions log: Dropped `tts-sync-full` from `registerSyncUi()`; updated `SMOKE_TESTS.md`, `PROJECT_STATE.md`.
+- Validation: `npm run build` ok.
+- Problems: Manual full pull only via reload Obsidian (startup still uses `synchronization(true)`).
+- To Be Done: Optional setting for manual full pull if needed later.
+- References: `src/main.ts`, `CHANGELOG.md`
+
 ### Iteration 2026-10-19 12:42 UTC
 
 - Context: User saw renamed palette entries; ribbon sync icon missing while startup sync blocked `pluginLoad`.

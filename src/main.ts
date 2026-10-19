@@ -169,16 +169,6 @@ export default class TickTickSync extends Plugin {
 			},
 		});
 
-		this.addCommand({
-			id: 'tts-sync-full',
-			name: 'Synchronize (full pull from TickTick)',
-			callback: async () => {
-				await this.ensureSettingsLoaded();
-				await this.scheduledSynchronization(true, 'manual');
-				new Notice('Full sync completed.');
-			},
-		});
-
 		this.addRibbonIcon('sync', 'TickTickSync', async () => {
 			await this.ensureSettingsLoaded();
 			await this.synchronizeNow();
