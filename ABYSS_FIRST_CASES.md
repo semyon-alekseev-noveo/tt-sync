@@ -2,7 +2,7 @@
 
 Canonical case catalog for this fork. Analysts add or update a case here before a code change. Testers record results in the log at the bottom. An empty result means **not run**.
 
-Plan: `ABYSS_FIRST_PLAN.md` Steps 6–8. Process: `DEV_FLOW.md`. Status: `PO_STATUS.md`. Older CASE-* write-ups in `GTD_SYNC_CASES.md` are archive.
+Plan: `ABYSS_FIRST_PLAN.md` Steps 6–8. Process: `DEV_FLOW.md`. Status: `PO_STATUS.md`. Per-PR manual cases: `TEST_PLAN.md`. Older CASE-* write-ups in `GTD_SYNC_CASES.md` are archive.
 
 Vaults: `<pilot-vault>` only until the live gate below is filled by someone who watched Obsidian. `<live-vault>` stays closed. Manual sync. No tokens, passwords, or personal paths in this repo. If a `tp_` token was pasted in chat, revoke it in TickTick; this plugin logs in with the web session, not that token.
 

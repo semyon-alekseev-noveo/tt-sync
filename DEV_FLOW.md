@@ -10,7 +10,7 @@ Release in the tree when this was written: **2.0.47**. The owner merges. Agents 
 |------|------|-----------|
 | **Analyst** | Before code: add or update one case in the canonical catalog. The case has a stable ID, preconditions, and expected behavior on both sides (vault line and TickTick). | Case ID + expected behavior. No implementation. |
 | **Developer** | Write a failing test named by that ID, then the fix. Update docs that the code changed, in the same branch. | Branch + PR into `abyss-mapping`. Tests green locally. |
-| **Tester** | Run the regression gate and the smoke cases the change can affect. Record pass/fail with the command output or the vault observation. Do not mark a live-vault case passed without having run it. | Results in the case log (or the PR). Open bugs go back to the analyst as new IDs. |
+| **Tester** | Run the regression gate and the smoke cases the change can affect. Record pass/fail with the command output or the vault observation. Do not mark a live-vault case passed without having run it. Reject a PR that changes behavior and does not update [`TEST_PLAN.md`](TEST_PLAN.md) in that same PR. | Results in the case log (or the PR). Open bugs go back to the analyst as new IDs. |
 
 A person may play more than one role. The order does not change: case, failing test, fix, regression, recorded result.
 
@@ -28,6 +28,7 @@ A change is ready to code when all of these are true:
 - The new test failed before the fix and passes after it.
 - The regression gate below passed.
 - Docs that describe the changed behavior were updated in the same PR.
+- If behavior changed, [`TEST_PLAN.md`](TEST_PLAN.md) gained a section in this PR (steps, expected result, pilot status). A reviewer or a tester agent rejects the PR when that section is missing.
 - The PR targets `abyss-mapping`. The owner merges.
 - The report says what was run and what was not run. A case that was not executed is **not run**, never “pass”.
 
@@ -58,6 +59,7 @@ Update canonical docs in the same PR as the code. Do not leave a second, older d
 | `PO_STATUS.md` | Product snapshot: target, open problems, what is next |
 | `ABYSS_FIRST_PLAN.md` | Product plan. Phases are **Steps 1–8** in that file |
 | `ABYSS_FIRST_CASES.md` | Acceptance cases and the results log |
+| `TEST_PLAN.md` | Per-PR manual test plan. Every behavior change is recorded here |
 | `PROJECT_STATE.md` | Short engineering snapshot (not a second changelog) |
 | `CHANGELOG.md` | Append-only history of what landed |
 | `SMOKE_TESTS.md` | How to run manual checks. The live-vault gate is the one in `ABYSS_FIRST_CASES.md` |
@@ -85,6 +87,12 @@ Phase names: use **Step 1–8** from `ABYSS_FIRST_PLAN.md`. Do not start a new �
 - No secrets, tokens, passwords, or personal absolute paths in the repo. Write `<pilot-vault>` and `<live-vault>`.
 - The plugin session is not a TickTick Open API `tp_…` token. If a `tp_…` token was pasted into chat or a doc, revoke it in TickTick. Do not commit it.
 - Live-vault steps that need the owner’s Obsidian (deletion modals, real login) are run by a person or a local agent on that machine. A cloud agent must not invent those results.
+
+## Test plan
+
+Every PR that changes behavior updates [`TEST_PLAN.md`](TEST_PLAN.md) in that same PR. The section lists each behavior change as a manual case: steps, expected result, and pilot status (`not run` until someone runs it). Include the old behavior that must still work.
+
+Reviewers and tester agents reject a PR that changes behavior and does not update the test plan, or whose test-plan section does not cover the diff. A docs-only or test-only PR with no behavior change does not need a new section.
 
 ## Reporting results
 

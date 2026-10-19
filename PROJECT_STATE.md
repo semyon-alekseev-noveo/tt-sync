@@ -52,6 +52,7 @@ Canonical:
 - `PO_STATUS.md`
 - `ABYSS_FIRST_PLAN.md` — Steps 1–8
 - `ABYSS_FIRST_CASES.md`
+- `TEST_PLAN.md` — manual cases for each behavior-changing PR
 - `PROJECT_STATE.md`
 - `CHANGELOG.md`
 - `SMOKE_TESTS.md`

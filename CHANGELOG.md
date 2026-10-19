@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-19 16:55 UTC
+
+- Context: Owner rule — every behavior change is recorded in the test plan, in the same PR.
+- Target: `TEST_PLAN.md` for PR #1; the rule in `DEV_FLOW.md`, `AGENTS.md`, `.cursor/rules/dev-flow.mdc`.
+- Actions log: Manual cases for the open-note debounce, child comment/description push, fail-closed pull, load notice, comment fingerprints, comment-map cleanup, and the regressions those must not break. Pilot status is **not run**.
+- Validation: docs only; `npx vitest run` and `npm run build` re-run on this commit.
+- Problems: None in code. Startup sync still runs auto-cleanup after a failed pull; manual and scheduled sync skip it. The test plan says so.
+- To Be Done: A person or a local agent runs the TP1-* rows on `<pilot-vault>`.
+- References: `TEST_PLAN.md`, `DEV_FLOW.md`
+
 ### Iteration 2026-10-19 15:30 UTC
 
 - Context: Owner asked for one development flow and the P1/P2 reliability fixes before another live soak. Version stays **2.0.47** until the owner releases.
