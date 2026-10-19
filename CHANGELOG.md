@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-19 04:56 UTC
+
+- Context: Pull wrote `#obsidian` on TickTick-born lines when `stopInjectingTickTickTag` was on; that tag should mean vault birth only.
+- Target: On pull, `#obsidian` only when TickTick still carries the `obsidian` tag; otherwise `#ticktick`.
+- Actions log: Fixed `convertTaskToLine` source-tag branch; extended `taskParser.sourceTag.test.ts`; noted SYNC-L6 in `SMOKE_TESTS.md`.
+- Validation: `npx vitest run src/test/taskParser.sourceTag.test.ts src/test/syncSmoke.test.ts` → pass; `npm run build` → ok.
+- Problems: Shipped in **2.0.35**.
+- To Be Done: BRAT → 2.0.35; reload plugin; re-sync TT-born lines to rewrite `#obsidian` → `#ticktick` where appropriate.
+- References: `src/taskParser.ts`, `src/test/taskParser.sourceTag.test.ts`, `SMOKE_TESTS.md`, `CHANGELOG.md`
+
 ### Iteration 2026-10-19 03:45 UTC
 
 - Context: A pause while typing pushed half-finished lines such as `%%`.

@@ -29,7 +29,7 @@ Operator preset: `00 Inbox/TTS-data-preset.json`, runbook `00 Inbox/TTS-PILOT-RU
 Automated rows run with:
 
 ```bash
-npx vitest run src/test/logicSmoke.test.ts src/test/listMapping.test.ts src/test/projectParentKeep.test.ts src/test/foolCases.test.ts
+npx vitest run src/test/logicSmoke.test.ts src/test/listMapping.test.ts src/test/projectParentKeep.test.ts src/test/foolCases.test.ts src/test/syncScope.test.ts src/test/syncSmoke.test.ts
 ```
 
 | ID | What you prove | How |
@@ -45,18 +45,36 @@ npx vitest run src/test/logicSmoke.test.ts src/test/listMapping.test.ts src/test
 | LOGIC-9 | Live: **test 3** and **test 4** are subtasks of Phase C on TTS-Projects | TickTick `get_task_by_id` |
 | LOGIC-10 | `#inbox` is removed when the task is not on the inbox list | `foolCases.test.ts` |
 | LOGIC-11 | A line that is only `%%`, or has an unclosed `%%`, is not pushed. A normal title is | `foolCases.test.ts` |
-| LOGIC-12 | A new line is pushed when the cursor leaves it, not while you are still typing | `lineNumberCheck` → `lineSettledCheck` |
+| LOGIC-12 | A new line is pushed when the cursor leaves it, not while you are still typing | `syncSmoke.test.ts` SYNC-9; live: `lineNumberCheck` → `lineSettledCheck` |
 
-Not in this automated run (needs Obsidian):
+---
+
+## Bidirectional sync smoke (automated)
+
+| ID | What you prove | How |
+|----|----------------|-----|
+| SYNC-1 | A task born on **TTS-Inbox** is written to `00 Inbox/abyss-active.md` (or Abyss `taskFilePath`) | `syncSmoke.test.ts` |
+| SYNC-2 | A task born on another pilot list uses that list’s mirror `.md` | `syncSmoke.test.ts` |
+| SYNC-3 | Pull: allow-listed list **or** `tts-test` tag | `syncSmoke.test.ts` |
+| SYNC-4 | After list move, stale `#inbox` is dropped on the TickTick task | `syncSmoke.test.ts` |
+| SYNC-5 | Tag/list move is detected when local `projectId` already matches remote | `syncSmoke.test.ts` |
+| SYNC-6 | Obs `#type/next` → **TTS-nextAction**; stage tag not duplicated on TT | `syncSmoke.test.ts` |
+| SYNC-7 | TT move to **TTS-nextAction** rewrites the line to `#type/next` and drops `#inbox` | `syncSmoke.test.ts` |
+| SYNC-8 | `#inbox` with file default **TTS-Inbox** does not route to the live **Inbox** list | `syncSmoke.test.ts` (LOGIC-A) |
+| SYNC-9 | `%%` / unclosed capture fragments are not pushed | `syncSmoke.test.ts` |
+| SYNC-10 | Pilot `tagListMappings` rows resolve both ways | `syncSmoke.test.ts` |
+| SYNC-11 | Abyss `taskFilePath` is read; fallback `00 Inbox/abyss-active.md` | `syncSmoke.test.ts` |
+
+Not in this automated run (needs Obsidian + TickTick UI):
 
 | ID | What you prove |
 |----|----------------|
-| LOGIC-A | A line with `#inbox` and no `inbox = TTS-Inbox` row stays on the file default **TTS-Inbox**. It must not land on the real list named Inbox. **≥ 2.0.32** |
-| LOGIC-B | Add `#type/next` to a task that is already on TTS-Inbox. Sync moves it to **TTS-nextAction** and drops that tag from the TickTick task. **≥ 2.0.32** |
-| LOGIC-C | A checkbox with no stage tag still syncs to TTS-Inbox. A rename and complete in TickTick come back onto the line. |
-| LOGIC-D | TickTick → Obsidian: complete + rename on TTS-Inbox updates the checkbox. |
-| LOGIC-E | A task created in **TTS-Inbox** appears in `00 Inbox/abyss-active.md` with `#inbox`. |
-| LOGIC-F | Move that task to **TTS-nextAction**. Sync. The `inbox` tag is gone on the task and on the line. |
+| SYNC-L1 | LOGIC-B live: add `#type/next` on a synced TTS-Inbox line → sync → task on **TTS-nextAction** |
+| SYNC-L2 | LOGIC-C: untagged checkbox still syncs to TTS-Inbox; TT rename/complete updates the line |
+| SYNC-L3 | LOGIC-D: complete + rename on TTS-Inbox updates the vault line |
+| SYNC-L4 | LOGIC-E live: create task in **TTS-Inbox** in TickTick → appears in `abyss-active.md` with `#inbox` |
+| SYNC-L5 | LOGIC-F live: move that task to **TTS-nextAction** → `#inbox` gone on TT and on the line |
+| SYNC-L6 | Live MCP smokes: create TT tasks **without** `obsidian` in `tags` (source tag comes from pull logic) |
 
 ---
 
@@ -89,18 +107,19 @@ Not in this automated run (needs Obsidian):
 | Topic | Where |
 |--------|--------|
 | TickTick → Obsidian delete | `onTickTickDeletion` / vault detach — separate cases later |
-| Pull / list files / tag routing | `CASE-T*`, `CASE-L*` in `GTD_SYNC_CASES.md` |
+| Full `CASE-T*` / `CASE-L*` matrix | `GTD_SYNC_CASES.md` (SYNC-* covers core pull/push/tag routing) |
 | Live **Projects** list pollution | Pilot uses **TTS-Projects** only |
 
 ---
 
 ## Result log (fill per run)
 
-| Date (UTC) | Plugin | Tester | LOGIC-1…12 | DEL-1 | DEL-2 | DEL-3 | DEL-4 | DEL-5 | DEL-N1 | Notes |
-|------------|--------|--------|-----------|-------|-------|-------|-------|-------|--------|-------|
-| 2026-10-18 | 2.0.31 | agent | 1–9 pass. C pass. A landed on the real Inbox. B move not applied | | Pass | | | | | `#inbox` matched the real Inbox. Those tasks were deleted. |
-| 2026-10-19 | 2.0.32 | agent | 1–9 pass. A32 pass. B2 moved after reload | | Pass | | | | | LOGIC-B2 `6ad4df19…` is on TTS-nextAction (`6ad1abfe…fe46`) after reload. Tags on the task: `obsidian` only. |
-| 2026-10-19 | working tree | agent | 1–12 pass (18 tests). E and F not run live | | | | | | | LOGIC-10 drops `inbox` off a non-inbox list. LOGIC-11 skips `%%`. LOGIC-12 debounce is 5s. |
+| Date (UTC) | Plugin | Tester | LOGIC / SYNC auto | DEL-1 | DEL-2 | DEL-3 | DEL-4 | DEL-5 | DEL-N1 | Notes |
+|------------|--------|--------|-------------------|-------|-------|-------|-------|-------|--------|-------|
+| 2026-10-18 | 2.0.31 | agent | LOGIC 1–9 pass. C pass. A landed on the real Inbox. B move not applied | | Pass | | | | | `#inbox` matched the real Inbox. Those tasks were deleted. |
+| 2026-10-19 | 2.0.32 | agent | LOGIC 1–9 pass. A32 pass. B2 moved after reload | | Pass | | | | | LOGIC-B2 `6ad4df19…` is on TTS-nextAction (`6ad1abfe…fe46`) after reload. Tags on the task: `obsidian` only. |
+| 2026-10-19 | 2.0.34 | agent | LOGIC 1–12 + SYNC 1–11 pass (vitest). **SYNC-L4/L5 pass live** | | | | | | | `6ad5a083…`: TT TTS-Inbox → `abyss-active.md` + `#inbox`; move to TTS-nextAction → TT tags `obsidian` only, line `#type/next` (no `#inbox`). |
+| 2026-10-19 | 2.0.34→35 | agent + user sync | **SYNC-L2** push pass (`6ad5a152…`); TT rename+complete pass. **SYNC-L3** pull create pass (`6ad5a158…`). Pull rename/complete: user ran sync; verify lines `[x]` + new titles | | | | | | | Source-tag fix in 2.0.35: TT-born pull → `#ticktick`, not `#obsidian`. |
 
 ---
 

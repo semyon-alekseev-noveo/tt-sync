@@ -1,11 +1,11 @@
 {
 	"id": "tickticksync-abyss",
 	"name": "TickTickSync (Abyss fork)",
-	"version": "2.0.28",
 	"minAppVersion": "1.12.7",
 	"description": "Sync tasks and notes bidirectionally with TickTick.",
 	"author": "thesamim",
 	"authorUrl": "https://github.com/thesamim",
 	"isDesktopOnly": false,
-	"fundingUrl": "https://ko-fi.com/thesamim"
+	"fundingUrl": "https://ko-fi.com/thesamim",
+	"version": "2.0.35"
 }

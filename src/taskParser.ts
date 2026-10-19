@@ -208,7 +208,12 @@ export class TaskParser {
 		// Project children show one source tag: #obsidian (born in the vault) or #ticktick (pulled).
 		if (!fromObsidian) {
 			if (getSettings().stopInjectingTickTickTag && scopePushWithoutMarker()) {
-				if (!/\s#obsidian(?![\w/-])/i.test(resultLine)) resultLine += ' #obsidian';
+				const vaultBorn = (task.tags ?? []).some(t => t.toLowerCase() === 'obsidian');
+				if (vaultBorn) {
+					if (!/\s#obsidian(?![\w/-])/i.test(resultLine)) resultLine += ' #obsidian';
+				} else if (!REGEX.TickTick_TAG.test(resultLine)) {
+					resultLine = this.addTickTickTag(resultLine);
+				}
 			} else {
 				resultLine = this.addTickTickTag(resultLine);
 			}

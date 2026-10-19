@@ -2,13 +2,53 @@
  * R1 / AC-9 / test A6: a line is "synced" when it carries the marker (#ticktick),
  * or the vault-born source tag #obsidian together with a ticktick_id.
  */
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { TaskParser } from '@/taskParser';
 import { getSettings } from '@/settings';
+import type { ITask } from '@/api/types/Task';
+
+vi.mock('@/db/projects', () => ({ getAllProjects: vi.fn().mockResolvedValue([]) }));
+vi.mock('@/utils/logger', () => ({ default: { debug: vi.fn(), warn: vi.fn(), error: vi.fn(), info: vi.fn() } }));
 
 const parser = new TaskParser({} as unknown, {} as unknown);
+parser.plugin = {
+	taskParser: parser,
+	dateMan: {
+		parseDates: () => ({}),
+		stripDatesFromLine: (s: string) => s,
+		addDatesToLine: (s: string) => s,
+		formatDateToISO: () => '',
+	},
+	app: { vault: { getName: () => 'V' } },
+} as unknown as typeof parser.plugin;
+
 const ID = 'abcdefabcdefabcdefabcdef';
 const idTag = `%%[ticktick_id:: ${ID}]%%`;
+
+function abyssPullSettings() {
+	Object.assign((getSettings() as unknown as Record<string, unknown>), {
+		noteDelimiter: '',
+		fileLinksInTickTick: 'noLink',
+		stopInjectingTickTickTag: true,
+		abyssTasksFormat: true,
+		syncScopeFolders: ['00 Inbox/'],
+		tagListMappings: [],
+		gtdStageVia: 'list',
+		defaultProjectId: 'inbox-p',
+	});
+}
+
+function makeTask(tags: string[]): ITask {
+	return {
+		id: ID,
+		projectId: 'inbox-p',
+		title: 'probe',
+		status: 0,
+		tags,
+		priority: 0,
+		items: [],
+	} as ITask;
+}
 
 describe('TaskParser.hasTickTickTag', () => {
 	it('accepts the #ticktick marker, with or without an id', () => {
@@ -40,5 +80,21 @@ describe('TaskParser.hasTickTickTag', () => {
 		expect(parser.hasTickTickTag(`- [ ] a #obsidian/x ${idTag}`)).toBe(false);
 		expect(parser.hasTickTickTag(`- [ ] a ${idTag}`)).toBe(false);
 		expect(parser.hasTickTickTag(`plain #obsidian ${idTag}`)).toBe(false);
+	});
+
+	it('convertTaskToLine: TickTick-born task gets #ticktick on pull (abyss scope)', async () => {
+		abyssPullSettings();
+		const line = await parser.convertTaskToLine(makeTask([]), 0);
+		expect(line).toMatch(/#ticktick/i);
+		expect(line).not.toMatch(/#obsidian(?![\w/-])/i);
+		Object.assign((getSettings() as unknown as Record<string, unknown>), { abyssTasksFormat: false, syncScopeFolders: [] });
+	});
+
+	it('convertTaskToLine: vault-born task (obsidian on TT) keeps #obsidian', async () => {
+		abyssPullSettings();
+		const line = await parser.convertTaskToLine(makeTask(['obsidian']), 0);
+		expect(line).toMatch(/#obsidian/i);
+		expect(line).not.toMatch(/#ticktick/i);
+		Object.assign((getSettings() as unknown as Record<string, unknown>), { abyssTasksFormat: false, syncScopeFolders: [] });
 	});
 });
