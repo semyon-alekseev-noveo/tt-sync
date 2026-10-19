@@ -525,8 +525,9 @@ export class FileOperation {
 			let bLinePersisted = true;
 
 			if (useAbyssCommentsApi() && task.id && task.projectId) {
-				const comments = await this.plugin.tickTickRestAPI?.getTaskComments(task.projectId, task.id) ?? [];
-				Object.defineProperty(task, '_apiComments', { value: comments, enumerable: false, configurable: true });
+				const already = (task as ITask & { _apiComments?: ITaskComment[] })._apiComments;
+				const comments = already ?? await this.plugin.tickTickRestAPI?.getTaskComments(task.projectId, task.id) ?? [];
+				if (!already) Object.defineProperty(task, '_apiComments', { value: comments, enumerable: false, configurable: true });
 				task.content = stripLegacyCommentsBlock(task.content ?? '');
 				task.desc = stripLegacyCommentsBlock(task.desc ?? '');
 			}

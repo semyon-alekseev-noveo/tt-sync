@@ -14,6 +14,14 @@ vi.mock('@/db/dexie', () => ({
 			update: vi.fn(),
 			count: vi.fn(),
 		},
+		taskCommentMaps: {
+			where: vi.fn(() => ({
+				equals: vi.fn(() => ({
+					delete: vi.fn().mockResolvedValue(0),
+					toArray: vi.fn().mockResolvedValue([]),
+				})),
+			})),
+		},
 	},
 }));
 

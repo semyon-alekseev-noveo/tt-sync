@@ -24,6 +24,10 @@ vi.mock('../db/dexie', () => ({
 	},
 }));
 
+vi.mock('@/db/taskCommentMaps', () => ({
+	deleteCommentMapsForTask: vi.fn().mockResolvedValue(undefined),
+}));
+
 vi.mock('../sync/journal', () => ({
 	logSyncEvent: vi.fn(),
 }));

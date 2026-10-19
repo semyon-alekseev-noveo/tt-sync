@@ -81,6 +81,8 @@ export function extractAbyssCommentThreads(taskLines: string[]): AbyssCommentThr
 	for (let i = 0; i < taskLines.length; i++) {
 		const k = kinds[i];
 		if (k === 'comment') {
+			// Each sibling bullet is its own thread. Continuations stay attached below.
+			if (current.length) flush();
 			current.push(taskLines[i]);
 		} else if (k === 'cont' && current.length > 0) {
 			current.push(taskLines[i]);

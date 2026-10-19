@@ -17,6 +17,14 @@ import {
 import { getSettings } from '@/settings';
 import log from '@/utils/logger';
 
+/** True when the vault's comment threads and the TickTick Comments list are not the same set. */
+export function apiCommentsDifferFromVault(taskLines: string[] | undefined, remote: { title?: string }[]): boolean {
+	const local = extractAbyssCommentThreads(taskLines ?? []).map(t => t.fingerprint).sort();
+	const api = remote.map(c => commentFingerprint(c.title ?? '')).filter(fp => fp.length > 0).sort();
+	if (local.length !== api.length) return true;
+	return local.some((fp, i) => fp !== api[i]);
+}
+
 export function useAbyssCommentsApi(): boolean {
 	const s = getSettings();
 	return !!(s.syncNotes && s.abyssTasksFormat && s.syncAbyssCommentsViaApi);

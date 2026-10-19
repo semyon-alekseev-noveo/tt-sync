@@ -4,6 +4,7 @@ import { logSyncEvent } from "./journal";
 import type { TickTickRestAPI } from '@/services/TicktickRestAPI';
 import type { LocalTask, SyncMeta } from "@/db/schema";
 import { updateSettings } from '@/settings';
+import { deleteCommentMapsForTask } from '@/db/taskCommentMaps';
 import log from '@/utils/logger';
 
 /** Resolve a task identifier that may appear as `id` or `taskId`. */
@@ -103,6 +104,7 @@ export async function pullFromTickTick(
 				local.updatedAt = Date.now();
 				toUpdateDeletion.push(local);
 				applied++;
+				await deleteCommentMapsForTask(local.taskId);
 			}
 		}
 

@@ -4,6 +4,7 @@
  */
 
 import { db } from "@/db/dexie";
+import { deleteCommentMapsForTask } from '@/db/taskCommentMaps';
 import type { ITask } from "@/api/types/Task";
 import type { LocalTask } from "@/db/schema";
 import { getCurrentDeviceInfo } from "@/db/device";
@@ -164,6 +165,7 @@ export class TaskRepository {
 					deleted: true,
 					updatedAt: Date.now()
 				});
+				await deleteCommentMapsForTask(taskId);
 			}
 		} catch (error) {
 			log.error(`Error deleting task ${taskId}:`, error);
@@ -190,6 +192,7 @@ export class TaskRepository {
 					await db.tasks.update(update.localId, update.changes);
 				}
 			});
+			for (const id of taskIds) await deleteCommentMapsForTask(id);
 		} catch (error) {
 			log.error("Error deleting multiple tasks:", error);
 			throw error;
@@ -328,6 +331,7 @@ export class TaskRepository {
 		try {
 			const localIds = taskIds.map(id => `tt:${id}`);
 			await db.tasks.where("localId").anyOf(localIds).delete();
+			for (const id of taskIds) await deleteCommentMapsForTask(id);
 			log.info(`Hard-deleted ${taskIds.length} task records`);
 		} catch (error) {
 			log.error("Error hard-deleting tasks:", error);
@@ -368,6 +372,7 @@ export class TaskRepository {
 
 			const ids = oldDeleted.map(t => t.localId);
 			await db.tasks.where("localId").anyOf(ids).delete();
+			for (const row of oldDeleted) await deleteCommentMapsForTask(row.taskId);
 			log.info(`Purged ${oldDeleted.length} old deleted task records`);
 			return oldDeleted.length;
 		} catch (error) {

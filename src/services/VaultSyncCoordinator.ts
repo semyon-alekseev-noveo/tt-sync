@@ -21,6 +21,7 @@ import { TaskDeletionModal } from '@/modals/TaskDeletionModal';
 import { FolderSyncService } from '@/services/FolderSyncService';
 import log from '@/utils/logger';
 import { NewFileMap } from '@/services/NewFileMap';
+import { apiCommentsDifferFromVault, useAbyssCommentsApi } from '@/abyssCommentSync';
 
 export class VaultSyncCoordinator {
 	private app: App;
@@ -124,16 +125,14 @@ export class VaultSyncCoordinator {
 				}
 			} else if (matchesFilter) {
 				let actionNeeded = this.determineActionNeeded(lt, targetFile);
-				if (actionNeeded.action === 'none' && targetFile && await this.vaultLineBehindTask(task, targetFile)) {
-					actionNeeded = { action: 'update' };
-					try {
-						const fresh = await this.plugin.tickTickRestAPI?.getTaskById(task.id, task.projectId);
-						if (fresh) {
-							task = await this.dropStaleStageTags(fresh);
-							lt.task = task;
-						}
-					} catch (e) {
-						log.warn('Could not refresh task before vault rewrite', task.id, e);
+				if (actionNeeded.action === 'none' && targetFile) {
+					// vaultLineBehindTask already loaded a fresh task when it needed one.
+					// Do not call getTaskById again here.
+					const behind = await this.vaultLineBehindTask(task, targetFile);
+					if (behind.behind) {
+						actionNeeded = { action: 'update' };
+						task = await this.dropStaleStageTags(behind.task);
+						lt.task = task;
 					}
 				}
 				const realFile = presentAt.get(task.id);
@@ -308,43 +307,69 @@ export class VaultSyncCoordinator {
 	/**
 	 * Determine what action is needed for a task
 	 */
-	/** Vault line differs from TickTick (delta pull can miss title/body edits without `modifiedTime` bump). */
-	private async vaultLineBehindTask(task: ITask, filePath: string): Promise<boolean> {
+	/** Vault line differs from TickTick (delta pull can miss title/body/comment edits without `modifiedTime` bump). */
+	private async vaultLineBehindTask(task: ITask, filePath: string): Promise<{ behind: boolean; task: ITask }> {
+		const same = { behind: false, task };
 		const file = this.app.vault.getAbstractFileByPath(filePath);
-		if (!(file instanceof TFile)) return false;
+		if (!(file instanceof TFile)) return same;
 		const parser = this.plugin.taskParser;
-		if (!parser) return false;
-		let remote = task;
-		try {
-			const fresh = await this.plugin.tickTickRestAPI?.getTaskById(task.id, task.projectId);
-			if (fresh) remote = fresh;
-		} catch (e) {
-			log.debug('vault refresh lookup failed', task.id, e);
-		}
+		if (!parser) return same;
 		let text: string;
 		try {
 			text = await this.app.vault.read(file);
 		} catch {
-			return false;
+			return same;
 		}
 		const fileMap = new NewFileMap(this.app, this.plugin, file);
 		await fileMap.init(text);
 		const lineIdx = fileMap.getTaskIndex(task.id);
-		if (lineIdx < 0) return false;
+		if (lineIdx < 0) return same;
 		const taskRec = fileMap.getTaskRecord(task.id);
 		const lineTask = await parser.convertLineToTask(
 			taskRec.task, lineIdx, filePath, fileMap, taskRec,
 		);
-		if (!lineTask) return false;
-		if (parser.isTitleChanged(lineTask, remote)
-			|| parser.isStatusChanged(lineTask as unknown as Record<string, unknown>, remote as unknown as Record<string, unknown>)) {
-			return true;
+		if (!lineTask) return same;
+
+		const fieldsDiffer = (remote: ITask) => {
+			if (parser.isTitleChanged(lineTask, remote)
+				|| parser.isStatusChanged(lineTask as unknown as Record<string, unknown>, remote as unknown as Record<string, unknown>)) {
+				return true;
+			}
+			if (getSettings().syncNotes) {
+				if (parser.areNotesChanged(lineTask.content ?? '', remote.content ?? '')) return true;
+				if (parser.areNotesChanged(lineTask.desc ?? '', remote.desc ?? '')) return true;
+			}
+			return false;
+		};
+
+		// The task argument is the copy we already pulled. Ask the network only when that copy
+		// still matches the vault, to catch a TickTick edit that did not bump modifiedTime.
+		let remote = task;
+		let behind = fieldsDiffer(task);
+		if (!behind) {
+			try {
+				const fresh = await this.plugin.tickTickRestAPI?.getTaskById(task.id, task.projectId);
+				if (fresh) {
+					remote = fresh;
+					behind = fieldsDiffer(fresh);
+				}
+			} catch (e) {
+				log.debug('vault refresh lookup failed', task.id, e);
+			}
 		}
-		if (getSettings().syncNotes) {
-			if (parser.areNotesChanged(lineTask.content ?? '', remote.content ?? '')) return true;
-			if (parser.areNotesChanged(lineTask.desc ?? '', remote.desc ?? '')) return true;
+
+		if (!behind && useAbyssCommentsApi() && remote.projectId) {
+			try {
+				const comments = await this.plugin.tickTickRestAPI?.getTaskComments(remote.projectId, remote.id) ?? [];
+				if (apiCommentsDifferFromVault(taskRec.taskLines, comments)) {
+					behind = true;
+					Object.defineProperty(remote, '_apiComments', { value: comments, enumerable: false, configurable: true });
+				}
+			} catch (e) {
+				log.debug('vault comment lookup failed', task.id, e);
+			}
 		}
-		return false;
+		return { behind, task: remote };
 	}
 
 	private determineActionNeeded(

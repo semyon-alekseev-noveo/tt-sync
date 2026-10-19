@@ -1,4 +1,5 @@
 import { db } from "./dexie";
+import { deleteCommentMapsForTask } from './taskCommentMaps';
 import type { ITask } from '@/api/types/Task';
 import type { LocalTask } from '@/db/schema';
 import log from '@/utils/logger';
@@ -55,6 +56,7 @@ export async function markTaskDeleted(taskId: string) {
 			deleted: true,
 			updatedAt: Date.now()
 		});
+		await deleteCommentMapsForTask(taskId);
 	}
 }
 

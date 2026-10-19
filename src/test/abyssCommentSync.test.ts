@@ -28,12 +28,28 @@ describe('abyssCommentSync', () => {
 		expect(threads[0].body).toBe('2026-10-19 18:00: vault comment');
 	});
 
+	it('BUG-PULL-COMMENT-STALE: sibling comment bullets are separate threads', () => {
+		const lines = [
+			'\t- 2026-10-19 20:00: alpha',
+			'\t  more',
+			'\t- beta',
+		];
+		const threads = extractAbyssCommentThreads(lines);
+		expect(threads.map(t => t.body)).toEqual(['2026-10-19 20:00: alpha\nmore', 'beta']);
+		expect(threads.map(t => t.fingerprint)).toEqual(['2026-10-19 20:00: alpha more', 'beta']);
+	});
+
 	it('formats API comment as Abyss line', () => {
+		const createdTime = '2026-10-19T18:05:00+07:00';
 		const lines = formatApiCommentAsAbyssLines(
-			{ id: 'c1', title: 'hello\nworld', createdTime: '2026-10-19T18:05:00+07:00' },
+			{ id: 'c1', title: 'hello\nworld', createdTime },
 			'\t',
 		);
-		expect(lines[0]).toContain('2026-10-19 18:05: hello');
+		// Stamp is local wall-clock of createdTime (CI is UTC; the owner machine may not be).
+		const d = new Date(createdTime);
+		const pad = (n: number) => String(n).padStart(2, '0');
+		const stamp = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+		expect(lines[0]).toContain(`${stamp}: hello`);
 		expect(lines[1]).toBe('\t  world');
 	});
 
