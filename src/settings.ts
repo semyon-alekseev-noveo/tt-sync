@@ -18,6 +18,8 @@ export interface ITickTickSyncSettings {
 	version?: string;
 
 	automaticSynchronizationInterval: number;
+	/** When false (default), scheduled interval sync runs without the full-sync progress modal. */
+	showSyncProgressOnScheduledSync: boolean;
 	enableFullVaultSync: boolean;
 	tagAndOr: number; // 1 == And ; 2 == Or
 	SyncProject: string;
@@ -106,6 +108,7 @@ export interface ITickTickSyncSettings {
 export const DEFAULT_SETTINGS: ITickTickSyncSettings = {
 	baseURL: 'ticktick.com',
 	automaticSynchronizationInterval: 0, // 0 = no automatic sync; user starts a sync from settings or the command
+	showSyncProgressOnScheduledSync: false,
 	enableFullVaultSync: false,
 	tagAndOr: 1,
 	debugMode: false,

@@ -14,7 +14,7 @@ Operator preset: `00 Inbox/TTS-data-preset.json`, runbook `00 Inbox/TTS-PILOT-RU
 | Check | Expected |
 |--------|----------|
 | Vault | `/home/sam/obsidian/Thinkpad-tts-test` only |
-| Plugin | `tickticksync-abyss` **≥ 2.0.34** for the logic rows; **≥ 2.0.28** for deletion |
+| Plugin | `tickticksync-abyss` **≥ 2.0.36** for rename TT→Obs in `abyss-active.md`; **≥ 2.0.35** source tag; **≥ 2.0.28** deletion |
 | Login | Access Control shows valid session |
 | GTD settings | `syncedLists` = six `TTS-*`; `syncScopeFolders` = `00 Inbox/`, `10 Projects/`, `30 Tasks/` |
 | Sync mode | Manual (`automaticSynchronizationInterval`: 0) |
@@ -78,6 +78,23 @@ Not in this automated run (needs Obsidian + TickTick UI):
 
 ---
 
+## Rename matrix (2.0.36+)
+
+| ID | Direction | Setup | Pass when |
+|----|-----------|--------|-----------|
+| R1 | TT → Obs | Task on **TTS-Inbox** → sync → rename title in TickTick → sync | Checkbox text in `00 Inbox/abyss-active.md` matches TT; no journal `obs→tt` that reverts the title |
+| R2 | TT → Obs | Same as R1 with **delta** rename (often unchanged `modifiedTime` on TT) | Same as R1 (regression for 2.0.36) |
+| R3 | Obs → TT | Line in `abyss-active.md` → sync → rename in vault → sync | TT title matches vault |
+| R4 | Obs → TT | Rename + complete in vault | TT title + status |
+| R5 | TT → Obs | Complete in TT, then rename in TT | Vault `[x]` and title |
+| R6 | Obs → TT | Complete in vault, then rename | Both sides |
+| R7 | TT → Obs | Child in `10 Projects/*` Active Zone | Line in project note updates |
+| R8 | Obs → TT | Rename child in project note | TT subtask title updates |
+
+**Agent automation:** vitest + TickTick MCP + `obsidian://…tts-sync` can cover R1/R2 **only if** vault `Thinkpad-tts-test` is open and plugin loaded (URI alone is not enough when Obsidian is idle). **Deletion rows (DEL-*) need a human** — see below.
+
+---
+
 ## Deletion smoke matrix (must pass)
 
 | ID | What you prove | Must |
@@ -88,6 +105,25 @@ Not in this automated run (needs Obsidian + TickTick UI):
 | [CASE-DEL-4](GTD_SYNC_CASES.md#case-del-4--project-active-zone-child-removed) | Remove child under `## Active Zone` in `10 Projects/*.md` → confirm → child gone on **TTS-Projects** | **Yes** |
 | [CASE-DEL-5](GTD_SYNC_CASES.md#case-del-5--journal-and-local-db-align) | After confirm: journal delete + task not recreated on next sync | **Yes** |
 | [CASE-DEL-N1](GTD_SYNC_CASES.md#case-del-n1--out-of-scope-line-removed-no-tt-delete) | Line removed **outside** `syncScopeFolders` → no TT delete prompt / TT unchanged | **Yes** |
+
+---
+
+## Further testing plan (after 2.0.36)
+
+| Phase | Scope | Owner | Est. |
+|-------|--------|-------|------|
+| **A — automated** | `npx vitest run` (full repo) + logic/SYNC vitest bundle in § Logic smoke | agent / CI | 10 min |
+| **B — live sync (no modal)** | SYNC-L4/L5, R1/R2/R3, R7/R8: MCP or TT app + **Sync** in Obsidian; check `abyss-active.md`, project notes, journal | user or agent *with vault open* | 20 min |
+| **C — deletion UX** | CASE-DEL-1…5, DEL-N1: requires **Confirm** on `TaskDeletionModal` | **user only** | 30 min |
+| **D — pilot soak** | AF-* duplication cases, DEL-5 second sync, live vault readiness per `PO_STATUS.md` | user | 1–2 h |
+
+**Phase A (2026-10-19):** `npx vitest run` → **527 passed**. Logic/SYNC bundle → **51 passed**.
+
+**Phase B:** User **R1/R2 pass** (2.0.36). Agent run 2026-10-19 with vault open: SYNC-L4 pull **pass** (`agent-phase-b-pull` → `abyss-active.md`); TT rename → **pass** (`agent-phase-b-renamed`); **R7 pass** (`test 3` → `test-3-phase-b-tt` in project note, reverted after). **R3 skip (agent):** editing `.md` on disk does not trigger Obsidian push — rename a line **in the editor**, then Sync. Phase C **skipped** per plan.
+
+**Phase C:** Skipped. Agent **cannot** click Obsidian modals (deletion confirm). Unanswered prompt times out → no TT delete.
+
+**Sync UX (2.0.37+):** Full **Synchronize** shows a modal with steps. Inline pushes (line edit, checkbox, subtask) show **⟳ …** in the status bar. **Scheduled** interval sync is silent by default; enable *Show progress during scheduled sync* under automatic sync settings.
 
 ---
 
@@ -120,6 +156,8 @@ Not in this automated run (needs Obsidian + TickTick UI):
 | 2026-10-19 | 2.0.32 | agent | LOGIC 1–9 pass. A32 pass. B2 moved after reload | | Pass | | | | | LOGIC-B2 `6ad4df19…` is on TTS-nextAction (`6ad1abfe…fe46`) after reload. Tags on the task: `obsidian` only. |
 | 2026-10-19 | 2.0.34 | agent | LOGIC 1–12 + SYNC 1–11 pass (vitest). **SYNC-L4/L5 pass live** | | | | | | | `6ad5a083…`: TT TTS-Inbox → `abyss-active.md` + `#inbox`; move to TTS-nextAction → TT tags `obsidian` only, line `#type/next` (no `#inbox`). |
 | 2026-10-19 | 2.0.34→35 | agent + user sync | **SYNC-L2** push pass (`6ad5a152…`); TT rename+complete pass. **SYNC-L3** pull create pass (`6ad5a158…`). Pull rename/complete: user ran sync; verify lines `[x]` + new titles | | | | | | | Source-tag fix in 2.0.35: TT-born pull → `#ticktick`, not `#obsidian`. |
+| 2026-10-19 | 2.0.36 | user | **R1/R2 pass** (TTS-Inbox → rename in TT → `abyss-active.md` matches) | | | | | | | |
+| 2026-10-19 | 2.0.36→37 | agent + vault open | Phase B: pull+TT rename **pass**; **R7 pass**; R3 N/A (disk edit). Progress modal in **2.0.37** | skip C | | | | | | Probes cleaned from `abyss-active.md` |
 
 ---
 

@@ -8,6 +8,7 @@
 	export let plugin;
 
 	let automaticSynchronizationInterval: number = getSettings().automaticSynchronizationInterval;
+	let showSyncProgressOnScheduledSync: boolean = getSettings().showSyncProgressOnScheduledSync;
 	$: automaticSynchronizationIntervalString = automaticSynchronizationInterval.toString();
 	let debounceTimeout: ReturnType<typeof setTimeout>;
 	const dispatch = createEventDispatcher();
@@ -58,6 +59,22 @@
 						const target = e.target as HTMLInputElement;
 						await handleAutomaticSynchronizationIntervalChange(target.value);
 						}, 900);
+				}}
+			/>
+		</div>
+	</div>
+	<div class="setting-item">
+		<div class="setting-item-info">
+			<div class="setting-item-name">Show progress during scheduled sync</div>
+			<div class="setting-item-description">When off (default), automatic interval sync runs silently. Manual Sync and inline task updates still show progress.</div>
+		</div>
+		<div class="setting-item-control">
+			<input
+				type="checkbox"
+				bind:checked={showSyncProgressOnScheduledSync}
+				on:change={async () => {
+					updateSettings({ showSyncProgressOnScheduledSync });
+					await plugin.saveSettings();
 				}}
 			/>
 		</div>

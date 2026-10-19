@@ -1,5 +1,35 @@
 # Changelog
 
+### Iteration 2026-10-19 07:08 UTC
+
+- Context: Progress UI should cover inline TickTick updates; scheduled full sync should be optional noise.
+- Target: **2.0.38** — `SyncActivityIndicator` (modal + status bar); setting `showSyncProgressOnScheduledSync` (default off).
+- Actions log: Wired inline indicator on line push, checkbox, subtask, check database; full sync respects trigger `manual` / `scheduled` / `startup`.
+- Validation: `npx vitest run src/test/syncActivityIndicator.test.ts` → 3 passed; `npm run build` → ok.
+- Problems: open until release.
+- To Be Done: Release **2.0.38**; reload plugin on pilot vault.
+- References: `src/services/SyncActivityIndicator.ts`, `AutoSyncIntervalSection.svelte`, `CHANGELOG.md`
+
+### Iteration 2026-10-19 06:58 UTC
+
+- Context: Phase B live smokes with vault open; operator wanted visible sync activity during long runs.
+- Target: Ship **2.0.37** progress modal; log Phase B results; skip Phase C.
+- Actions log: `SyncProgressModal` + steps in `synchronizationInner`; Phase B agent pass (pull, TT→Obs rename, R7); R3 not automated (disk edit ≠ editor push).
+- Validation: `npx vitest run` → pass; live `agent-phase-b-*` + `test-3-phase-b-tt` on pilot vault.
+- Problems: Shipped in **2.0.37** (reload plugin to see modal). R3/R8 still need in-editor edits by user.
+- To Be Done: Release **2.0.37**; user R3 in Obsidian editor; optional R5/R6.
+- References: `src/modals/SyncProgressModal.ts`, `src/services/index.ts`, `SMOKE_TESTS.md`, `CHANGELOG.md`
+
+### Iteration 2026-10-19 06:52 UTC
+
+- Context: Close rename investigation; document what agents can automate vs deletion modals in Obsidian.
+- Target: `SMOKE_TESTS.md` rename matrix R1–R8, phased plan A–D, result log; align `PROJECT_STATE` / `PO_STATUS` with **2.0.36** pilot status.
+- Actions log: User **R1/R2 pass** on 2.0.36; agent `npx vitest run` → 527 pass, smoke bundle 51 pass; MCP live pull skipped when vault inactive.
+- Validation: `npx vitest run` → 527 passed (2026-10-19).
+- Problems: CASE-DEL-* still need human **Confirm** on `TaskDeletionModal` (agent cannot click UI).
+- To Be Done: Phase B R3/R7/R8; Phase C deletion suite; Phase D AF-* soak.
+- References: `SMOKE_TESTS.md`, `TaskDeletionModal.ts`, `CHANGELOG.md`
+
 ### Iteration 2026-10-19 05:36 UTC
 
 - Context: Delta pull skipped title-only TT renames when `modifiedTime` stayed unchanged; `pushLocalEditsFirst` then overwrote TT from stale `abyss-active` lines (see sync journal `obs->tt` on `6ad5ab55…`).
@@ -7,7 +37,7 @@
 - Actions log: `skipPushWhenTickTickRenamedVaultLine` in `TaskModificationDetector`; `vaultLineBehindTask` + fresh `getTaskById` in `VaultSyncCoordinator`; cleaned pilot probes in TT and vault (`AF-dup-*`, regression task, LOGIC-A32, FOOL-TT).
 - Validation: `npx vitest run` → 527 passed; `npm run build` → ok; `main.js` copied to Thinkpad-tts-test plugin folder.
 - Problems: Shipped in **2.0.36**.
-- To Be Done: BRAT → 2.0.36; reload plugin; re-run R1/R2 rename smokes on pilot vault.
+- To Be Done: No changes (R1/R2 verified by user on 2.0.36).
 - References: `src/services/TaskModificationDetector.ts`, `src/services/VaultSyncCoordinator.ts`, `CHANGELOG.md`
 
 ### Iteration 2026-10-19 05:32 UTC

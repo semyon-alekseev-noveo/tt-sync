@@ -23,7 +23,7 @@
 
 - Build: `npm run build` in repo root; CI on `abyss-mapping` via `.github/workflows/ci.yml`.
 - Unit tests: `npx vitest run` (527 tests at **2.0.36**).
-- Manual pilot: **`SMOKE_TESTS.md`**. Plugin **2.0.36** on `Thinkpad-tts-test` (reload plugin after copying `main.js`). R1/R2 TT→Obs rename in `abyss-active.md` pending re-smoke.
+- Manual pilot: **`SMOKE_TESTS.md`**. **2.0.37** adds sync progress modal; Phase B agent: pull + TT rename + R7 pass; user **R3/R8** (in-editor rename) and Phase D remain.
 - BRAT installs: GitHub Release assets from `.github/workflows/release.yml` (see `docs/BRAT_INSTALL.md`).
 - TT cleanup verified 2026-10-16 via MCP (no `ticktick` tag left on polluted set).
 
@@ -38,9 +38,11 @@
 
 ## To Be Done
 
-1. Deploy latest `dist/` to test vault; Phase D + Step 3.2 Inbox spot-check (no **Reset**).
-2. Engineering: Step 5 — settings copy; P6 regression doc (P6 fix shipped 2.0.25).
-3. Pilot: Run **`SMOKE_TESTS.md`** deletion suite (DEL-1–DEL-5); then AF-* on `Thinkpad-tts-test` before live vault.
+1. **Phase B (remaining):** R3/R8 — rename in **Obsidian editor**, then Sync (not raw disk edit).
+2. **Phase C:** skipped for now.
+3. **Phase D:** AF-* + live vault gate per `PO_STATUS.md`.
+4. Release **2.0.37** (sync progress UI).
+4. Engineering backlog: settings copy (Step 5); P6 regression doc.
 
 ## References
 

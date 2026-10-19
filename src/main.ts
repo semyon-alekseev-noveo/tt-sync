@@ -73,10 +73,12 @@ import { TaskOperationsService } from '@/services/TaskOperationsService';
 import { FolderSyncService } from '@/services/FolderSyncService';
 import { FolderMigrationService } from '@/services/FolderMigrationService';
 import { TagService } from '@/services/TagService';
+import { SyncActivityIndicator } from '@/services/SyncActivityIndicator';
 
 export default class TickTickSync extends Plugin {
 
 	readonly service: TickTickService = new TickTickService(this);
+	readonly syncActivity = new SyncActivityIndicator(this);
 	readonly taskParser: TaskParser = new TaskParser(this.app, this);
 	readonly fileOperation: FileOperation = new FileOperation(this.app, this);
 	readonly fileMetadataService: FileMetadataService = new FileMetadataService();
@@ -256,7 +258,7 @@ export default class TickTickSync extends Plugin {
 			return;
 		}
 		this.syncIntervalId = this.registerInterval(
-			window.setInterval(() => { void this.scheduledSynchronization(); }, timeout)
+			window.setInterval(() => { void this.scheduledSynchronization(false, 'scheduled'); }, timeout)
 		);
 	}
 
@@ -540,7 +542,7 @@ export default class TickTickSync extends Plugin {
 			return false;
 		}
 		//And now load the DB and sync it.
-		await this.service.synchronization(true);
+		await this.service.synchronization(true, 'startup');
 
 		await this.autoCleanupDeletedTasks();
 
@@ -629,7 +631,9 @@ export default class TickTickSync extends Plugin {
 						if (markDownView?.file) {
 							const fileMap = new NewFileMap(this.app, this, markDownView.file);
 							await fileMap.init();
-							await this.service.tickTickSync.handleTaskItem(clickedText, fileMap, line);
+							await this.syncActivity.runInline('Updating subtask…', async () => {
+								await this.service.tickTickSync.handleTaskItem(clickedText, fileMap, line);
+							});
 						}
 					}
 				}
@@ -674,7 +678,7 @@ export default class TickTickSync extends Plugin {
 
 	}
 
-	async scheduledSynchronization(fullSync: boolean = false) {
+	async scheduledSynchronization(fullSync: boolean = false, trigger: 'manual' | 'scheduled' | 'startup' = 'manual') {
 		if (!this.checkModuleClass()) {
 			return;
 		}
@@ -682,7 +686,7 @@ export default class TickTickSync extends Plugin {
 		await this.waitForObsidianSync();
 
 		try {
-			await this.service.synchronization(fullSync);
+			await this.service.synchronization(fullSync, trigger);
 			await this.autoCleanupDeletedTasks();
 		} catch (error) {
 			log.error('An error occurred: ', error);

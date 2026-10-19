@@ -19,6 +19,47 @@
 }
 
 
+.tts-sync-progress-modal .modal-content {
+	padding-bottom: 1.25rem;
+}
+
+.tts-sync-progress {
+	display: flex;
+	align-items: flex-start;
+	gap: 0.75rem;
+}
+
+.tts-sync-progress-spinner {
+	width: 1.25rem;
+	height: 1.25rem;
+	margin-top: 0.15rem;
+	border: 2px solid var(--background-modifier-border);
+	border-top-color: var(--interactive-accent);
+	border-radius: 50%;
+	flex-shrink: 0;
+	animation: tts-sync-spin 0.85s linear infinite;
+}
+
+@keyframes tts-sync-spin {
+	to { transform: rotate(360deg); }
+}
+
+.tts-sync-progress-step {
+	margin: 0;
+	font-weight: var(--font-medium);
+}
+
+.tts-sync-progress-detail {
+	margin: 0.35rem 0 0;
+	font-size: var(--font-ui-smaller);
+	opacity: 0.75;
+}
+
+.tts-sync-status.is-active {
+	color: var(--interactive-accent);
+	font-weight: var(--font-medium);
+}
+
 .ts_button {
 	margin-top: 1rem;
 	cursor: pointer;

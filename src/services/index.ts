@@ -17,6 +17,7 @@ import { FoundDuplicateTasksModal } from '@/modals/FoundDuplicateTasksModal';
 import { CleanupDatabaseModal } from '@/modals/CleanupDatabaseModal';
 import { TaskDeletionModal, clearPendingDeletions, type DeletionItem } from '@/modals/TaskDeletionModal';
 import { OrphanTaskModal, type OrphanItem } from '@/modals/OrphanTaskModal';
+import type { SyncTrigger } from '@/services/SyncActivityIndicator';
 import type { PendingTickTickDeletion } from '@/services/TaskModificationDetector';
 import type { ITask } from '@/api/types/Task';
 import { getTick } from '@/api/tick_singleton_factory'
@@ -165,24 +166,31 @@ export class TickTickService {
 		}
 	}
 
-	async synchronization(fullSync: boolean = false) {
-		if (this.plugin.redo) return this.plugin.redo.session('sync', () => this.synchronizationInner(fullSync));
-		return this.synchronizationInner(fullSync);
+	async synchronization(fullSync: boolean = false, trigger: SyncTrigger = 'manual') {
+		if (this.plugin.redo) {
+			return this.plugin.redo.session('sync', () => this.synchronizationInner(fullSync, trigger));
+		}
+		return this.synchronizationInner(fullSync, trigger);
 	}
 
-	async synchronizationInner(fullSync: boolean = false) {
+	async synchronizationInner(fullSync: boolean = false, trigger: SyncTrigger = 'manual') {
 		const startTime = performance.now();
+		const ui = this.plugin.syncActivity;
+		ui.beginFull(trigger);
+		let syncOk = true;
 		try {
 
 			log.debug(`TickTick scheduled synchronization task started at ${new Date().toLocaleString()}`);
 			// NEW: Use TaskCache
 			this.plugin.syncRunning = true;
+			ui.setFullStep('Preparing…');
 			await this.plugin.applyExternalSettings();
 			await this.plugin.checkSettingsMigration();
 			await this.plugin.taskCache?.fill();
 
 			await doWithLock(LOCK_TASKS, async () => {
 				if (this.plugin.tickTickRestAPI) {
+					ui.setFullStep('Loading TickTick projects…');
 					const projects = await this.saveProjectsToCache();
 					if (projects) {
 						//check to see if we need to move any project files
@@ -200,6 +208,7 @@ export class TickTickService {
 						const lastSyncDate = lastSync ? new Date(lastSync) : null;
 						if (lastSyncDate && mostRecentModifiedTimeDate > lastSyncDate) {
 							log.debug(`TT Folder move detected. Moving all project files to new location.`)
+							ui.setFullStep('Reorganizing project folders…');
 							await this.reorganizeFilesToFolders();
 
 						}
@@ -211,11 +220,14 @@ export class TickTickService {
 					}
 
 					// Ensure all vault files are registered in Files metadata
+					ui.setFullStep('Scanning vault files…');
 					await this.ensureVaultFilesRegistered();
 					// Push vault edits made since the last sync BEFORE pulling, otherwise the pull
 					// re-renders the line from TickTick and the local edit is lost (seen on [x] lines
 					// edited outside the editor, where no editor-change check fires).
+					ui.setFullStep('Pushing vault changes to TickTick…');
 					await this.pushLocalEditsFirst();
+					ui.setFullStep(fullSync ? 'Full sync from TickTick…' : 'Pulling updates from TickTick…');
 					await syncTickTickWithDexie(this.plugin.tickTickRestAPI, fullSync);
 					if (projects?.length) {
 						const healed = healTagListMappings(getSettings().tagListMappings, projects);
@@ -241,14 +253,21 @@ export class TickTickService {
 						}
 					} catch (e) { log.warn('vanished-list check failed', e); }
 					//NEW: Use VaultSyncCoordinator
+					ui.setFullStep('Updating vault task lines…');
 					await this.plugin.vaultSyncCoordinator.syncVaultWithDatabase();
+					ui.setFullStep('Finalizing subtask order…');
 					try { await this.pullSubtaskOrder(this.locallyEdited); } catch (e) { log.warn('subtask order pull failed', e); }
 				}
 			});
+			ui.setFullStep('Syncing project notes…');
 			await this.syncFiles(false);
 		} catch (error) {
+			syncOk = false;
+			const msg = error instanceof Error ? error.message : String(error);
+			ui.setFullStep('Sync failed', msg);
 			log.error('Error on synchronization: ', error);
 		} finally {
+			ui.endFull(syncOk);
 			// NEW: Clear TaskCache
 			this.plugin.taskCache?.clear();
 			this.plugin.syncRunning = false;
@@ -438,48 +457,53 @@ export class TickTickService {
 	}
 
 	async fullTextNewTaskCheck(filepath: string) {
-		await doWithLock(LOCK_TASKS, async () => {
-			//NEW: Use TaskModificationDetector
-			await this.plugin.taskModificationDetector.checkFileForNewTasks(filepath);
+		await this.plugin.syncActivity.runInline('Pushing new tasks…', async () => {
+			await doWithLock(LOCK_TASKS, async () => {
+				await this.plugin.taskModificationDetector.checkFileForNewTasks(filepath);
+			});
 		});
 	}
 
 	async lineNewContentTaskCheck(editor: Editor, info: MarkdownView | MarkdownFileInfo) {
-		return await doWithLock(LOCK_TASKS, async () => {
-			//NEW: Use TaskModificationDetector
-			await this.plugin.taskModificationDetector.checkLineForNewTask(editor, info);
+		return await this.plugin.syncActivity.runInline('Creating task…', async () => {
+			return await doWithLock(LOCK_TASKS, async () => {
+				await this.plugin.taskModificationDetector.checkLineForNewTask(editor, info);
+			});
 		});
 	}
 
 	/** The caret left this line, so the line is finished enough to create or update. */
 	async lineSettledCheck(filepath: string, lastLineText: string, lastLine: number): Promise<boolean> {
-		return await doWithLock(LOCK_TASKS, async () => {
-			const file = this.plugin.app.vault.getAbstractFileByPath(filepath);
-			if (!(file instanceof TFile)) { return false; }
-			const fileMap = new NewFileMap(this.plugin.app, this.plugin, file);
-			await fileMap.init();
-			await this.plugin.projectScheme?.ensurePushContext?.();
-			const view = this.plugin.app.workspace.getActiveViewOfType(MarkdownView);
-			const editor = view?.editor ?? null;
-			await this.plugin.taskModificationDetector.addNewTask(
-				lastLineText,
-				lastLine,
-				editor,
-				editor ? { line: lastLine, ch: 0 } : null,
-				fileMap,
-			);
-			return await this.plugin.taskModificationDetector.checkLineForModifications(filepath, lastLineText, lastLine, fileMap);
+		return await this.plugin.syncActivity.runInline('Updating task…', async () => {
+			return await doWithLock(LOCK_TASKS, async () => {
+				const file = this.plugin.app.vault.getAbstractFileByPath(filepath);
+				if (!(file instanceof TFile)) { return false; }
+				const fileMap = new NewFileMap(this.plugin.app, this.plugin, file);
+				await fileMap.init();
+				await this.plugin.projectScheme?.ensurePushContext?.();
+				const view = this.plugin.app.workspace.getActiveViewOfType(MarkdownView);
+				const editor = view?.editor ?? null;
+				await this.plugin.taskModificationDetector.addNewTask(
+					lastLineText,
+					lastLine,
+					editor,
+					editor ? { line: lastLine, ch: 0 } : null,
+					fileMap,
+				);
+				return await this.plugin.taskModificationDetector.checkLineForModifications(filepath, lastLineText, lastLine, fileMap);
+			});
 		});
 	}
 
 	async lineModifiedTaskCheck(filepath: string, lastLineText: string, lastLine: number): Promise<boolean> {
-		return await doWithLock(LOCK_TASKS, async () => {
-			const file = this.plugin.app.vault.getAbstractFileByPath(filepath);
-			if (!(file instanceof TFile)) { return false; }
-			const fileMap = new NewFileMap(this.plugin.app, this.plugin, file);
-			await fileMap.init();
-			//NEW: Use TaskModificationDetector
-			return await this.plugin.taskModificationDetector.checkLineForModifications(filepath, lastLineText, lastLine, fileMap);
+		return await this.plugin.syncActivity.runInline('Updating task…', async () => {
+			return await doWithLock(LOCK_TASKS, async () => {
+				const file = this.plugin.app.vault.getAbstractFileByPath(filepath);
+				if (!(file instanceof TFile)) { return false; }
+				const fileMap = new NewFileMap(this.plugin.app, this.plugin, file);
+				await fileMap.init();
+				return await this.plugin.taskModificationDetector.checkLineForModifications(filepath, lastLineText, lastLine, fileMap);
+			});
 		});
 	}
 
@@ -489,6 +513,7 @@ export class TickTickService {
 	 */
 
 	async checkDataBase() {
+		return await this.plugin.syncActivity.runInline('Checking database…', async () => {
 		const vault = this.plugin.app.vault;
 		const markdownFiles = vault.getMarkdownFiles();
 		const allProjects = await this.getProjects();
@@ -857,6 +882,7 @@ export class TickTickService {
 		await this.plugin.saveSettings();
 		new Notice(`Database check completed.`);
 		log.debug('Done checking data.');
+		});
 	}
 
 	/*
@@ -871,13 +897,15 @@ export class TickTickService {
 	}
 
 	async closeTask(taskId: string) {
-		//NEW: Use TaskOperationsService
-		await this.plugin.taskOperationsService.closeTask(taskId);
+		await this.plugin.syncActivity.runInline('Completing task…', async () => {
+			await this.plugin.taskOperationsService.closeTask(taskId);
+		});
 	}
 
 	async openTask(taskId: string): Promise<void> {
-		//NEW: Use TaskOperationsService
-		await this.plugin.taskOperationsService.reopenTask(taskId);
+		await this.plugin.syncActivity.runInline('Reopening task…', async () => {
+			await this.plugin.taskOperationsService.reopenTask(taskId);
+		});
 	}
 
 	// private async syncTickTickToObsidian(): Promise<boolean> {
