@@ -31,9 +31,9 @@ export class SyncActivityIndicator {
 		this.notice.show('TickTick sync', step, detail);
 	}
 
-	endFull(ok: boolean): void {
+	endFull(ok: boolean, detail?: string): void {
 		if (!this.fullActive && !this.notice.isOpen()) return;
-		this.notice.show('TickTick sync', this.notice.elapsedLabel(ok));
+		this.notice.show('TickTick sync', this.notice.elapsedLabel(ok), detail);
 		this.fullActive = false;
 		const delay = ok ? 2500 : 4000;
 		if (this.inlineDepth === 0) {

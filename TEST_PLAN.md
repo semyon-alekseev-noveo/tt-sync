@@ -186,3 +186,64 @@ Release **2.0.48** (`8f4c524`, tag pushed 2026-10-20). Pilot plugin on `Thinkpad
 | TP1-R-SUBTASK | not run | |
 
 Pilot run **2026-10-20** (Obsidian CLI + `command id=tickticksync-abyss:tts-sync`, journal wait). Note: `plugin.syncRunning` stayed `true` in eval after a forced clear; use journal commits, not `syncRunning`, to detect completion.
+
+## PR — sync perf index and file cache
+
+Branch `cursor/sync-perf-index-cache-aa83` (rebased on `abyss-mapping` / **2.0.49**). PR #1 is merged. No version bump on this branch until owner tags. Every row below: **pilot status: not run**.
+
+What this PR must not change: which TickTick calls a sync makes, and which file wins for an id. `vaultLineBehindTask` still calls `getTaskById` and `getTaskComments` on the same conditions as before. The id scan is still the first markdown file in vault order whose text contains the id (`String.includes`), including text inside a fence. Empty ids are ignored.
+
+Preconditions unless a case says otherwise: logged in, `syncNotes` and `abyssTasksFormat` on, `syncAbyssCommentsViaApi` on, the note is inside `syncScopeFolders`, sync is manual, log level is info (the default).
+
+### TP-PERF-LOG — one structured summary per full sync
+
+1. Run **Synchronize** on the pilot vault.
+2. Open the plugin log (info or debug).
+
+Expected: one new line that starts with `[perf]` and then one JSON object. The object has `trigger` `manual`, `phaseMs` for the phases that ran (`prepare`, `projects`, `register`, `push`, `pull`, `vaultReconcile`, `subtasks`, `syncFiles`; `journal` inside pull when the journal wrote; `comments` inside vault reconcile when comments were fetched; `backup` when a backup ran), and `counts`: `httpByEndpoint` (with `getTaskById` and `getTaskComments` when those HTTP calls happened), `http429`, `filesRead`, `filesScanned`, `tasksChecked`, `vaultWrites`. A second Synchronize writes a second line.
+
+### TP-PERF-UI — the finished sync notice shows a short count line
+
+1. Run **Synchronize** so the progress notice is visible.
+2. Read the notice before it hides.
+
+Expected: the finished notice still says the sync completed or failed, and its detail line is `api N · probe N · read N · write N`. If TickTick returned HTTP 429, the line also ends with `· 429 N`.
+
+### TP-PERF-SAME — a quiet sync still probes and does not rewrite the line
+
+1. Pick a synced line whose title, status, and body already match TickTick.
+2. Do not edit the note. Run **Synchronize**.
+3. Compare the line and the TickTick task with what they were before the sync.
+
+Expected: the line text is unchanged. The `[perf]` counts include one `getTaskById` probe for that quiet task, and a comments fetch when the line still matches (`probe` at least 1). A task whose title already differs, and a deleted task, are not probed. This is the same probe as on PR #1.
+
+### TP-PERF-ACTIVE — the open-note push still pushes and logs its own summary
+
+1. Open an in-scope note. Edit a line that already has `ticktick_id`. Wait 5 seconds of quiet (TP1-DEBOUNCE).
+2. Read the plugin log.
+
+Expected: TickTick shows the edit, same as on PR #1. One `[perf]` line has `"trigger":"active-file"` and an `activeFile` phase. It is a separate line from a full Synchronize summary.
+
+### Regressions
+
+| ID | Steps | Expected |
+|----|--------|----------|
+| TP-PERF-R-PROBE | Quiet title match, as in TP1-QUIET-TITLE. | Still one `getTaskById` for that task. Comments are still fetched when the line matches. |
+| TP-PERF-R-FENCE | The same `ticktick_id` appears only inside a fenced code block in an earlier file, and as a real task in a later file. Synchronize. | The id is still treated as present in the earlier file. The later task is not treated as missing from the vault. |
+| TP-PERF-R-DUP | The same `ticktick_id` is in two notes. Synchronize. | The first markdown file in vault order is the one associated with that id, same as before. |
+| TP-PERF-R-MOVE | Move a synced task line from note A to note B (cut and paste), then Synchronize. | The task is found in B. The sync does not keep using A's old text. |
+| TP-PERF-R-SYNC-OK | With the network up, **Synchronize**. Then compare `checkPoint` with the value from before that sync. | Notice is `Sync completed.` A real task edit in the vault is on TickTick afterwards. The checkpoint may advance. A later TickTick edit still arrives on the next successful sync. |
+
+## Results
+
+| ID | Pilot status | Evidence |
+|----|----------------|----------|
+| TP-PERF-LOG | not run | |
+| TP-PERF-UI | not run | |
+| TP-PERF-SAME | not run | |
+| TP-PERF-ACTIVE | not run | |
+| TP-PERF-R-PROBE | not run | |
+| TP-PERF-R-FENCE | not run | |
+| TP-PERF-R-DUP | not run | |
+| TP-PERF-R-MOVE | not run | |
+| TP-PERF-R-SYNC-OK | not run | |

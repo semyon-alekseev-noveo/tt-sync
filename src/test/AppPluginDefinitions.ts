@@ -29,3 +29,8 @@ export class Modal {}
 export class Editor {}
 export class MarkdownView {}
 export type MarkdownFileInfo = unknown;
+
+/** Overridden per test. The default fails the request the way a missing network call does. */
+export async function requestUrl(): Promise<{ status: number; headers: Record<string, string>; json: unknown; text: string }> {
+	throw new Error('requestUrl is not stubbed in tests');
+}

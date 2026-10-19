@@ -6,6 +6,7 @@ import type { LocalTask, SyncMeta } from "@/db/schema";
 import { updateSettings } from '@/settings';
 import { deleteCommentMapsForTask } from '@/db/taskCommentMaps';
 import log from '@/utils/logger';
+import { addCount } from '@/sync/perf';
 
 /** Resolve a task identifier that may appear as `id` or `taskId`. */
 function resolveTaskId(task: { id?: string; taskId?: string }): string | undefined {
@@ -27,6 +28,7 @@ export async function pullFromTickTick(
 	const { update, delete: deletedIds } = await ticktickRestApi.getUpdatedTasks(
 		fullSync ? 0 : meta.lastDeltaSync
 	);
+	addCount('tasksDelta', update.length);
 
 	let applied = 0;
 

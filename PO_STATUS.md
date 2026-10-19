@@ -47,7 +47,7 @@
 | **BUG-TICKTICK-ID-LEAK** | P1 | mitigated on branch | Канонический `%%[ticktick_id:: <24hex>]%%`, strip loose fragment из title; тест `bugTicktickIdLeak.test.ts`. Почистить дубли в TT вручную. |
 | **GAP-COMMENT-EDIT** | P2 | open | Правка комментария = delete + add (новые ID, шум в ленте TT) |
 | **RISK-DUAL-STORE** | P2 | open | Две «истины»: Dexie `tasks` и `fileMetadata`/`syncFiles` → возможен дрейф |
-| **RISK-LARGE-VAULT** | P2 | open | Каждый sync сканирует все `.md` (`idsPresentInVault`, `ensureVaultFilesRegistered`) |
+| **RISK-LARGE-VAULT** | P2 | partial on this branch | `idsPresentInVault` — один проход и кэш id→path на время синка; текст файла и NewFileMap читаются один раз за прогон. N+1 `getTaskById` в `vaultLineBehindTask` не менялся. `ensureVaultFilesRegistered` по-прежнему обходит все `.md` |
 | **TECH-START-1** | P2 | open | Полный pull на старте блокирует инициализацию |
 | **TECH-API-1** | P1 | open (риск) | Неофициальный клиент `Tick`: изменения TT ломают sync, покрытие тестами минимальное |
 | **TECH-CIRC-1 / GOD-1/2** | P2 | open | Цикл `main` ↔ `services`; god-классы `TickTickService`, `TaskModificationDetector` |
@@ -60,11 +60,11 @@
 
 ## To Be Done
 
-1. Собрать плагин из ветки, повтор **NOTE-L3b** на пилоте (после sweep). Зафиксировать pass/fail.
-2. **BUG-ACTIVEZONE-COMMENT-SHUFFLE** — failing test + fix (`pullSubtaskOrder` / `mergeAbyssBlock`).
-3. Почистить `manual-test.md` и дубли задач в TT после BUG-TICKTICK-ID-LEAK.
-4. Закрыть gate: AF-5 в **Inbox** (не только project), DEL-3, CTX-D2 на грязных тегах.
-5. Открыто: GAP-COMMENT-EDIT, RISK-PULL-WINS-LOCAL, RISK-DUAL-STORE, RISK-LARGE-VAULT, TECH-START-1, TECH-CIRC-1.
+1. **PR #2** (`cursor/sync-perf-index-cache-aa83`): rebase на `abyss-mapping` → MR, merge владельцем; пилот TP-PERF-* (`TEST_PLAN.md`).
+2. **BUG-COMMENT-NO-PUSH** / NOTE-L3b на пилоте (**2.0.49** fail) — root-cause и fix после merge perf или параллельной ветки.
+3. **BUG-ACTIVEZONE-COMMENT-SHUFFLE** — failing test + fix (`pullSubtaskOrder` / `mergeAbyssBlock`).
+4. Gate: AF-5 в **Inbox**, DEL-3, CTX-D2 на грязных тегах.
+5. Открыто: GAP-COMMENT-EDIT, RISK-PULL-WINS-LOCAL, RISK-DUAL-STORE, RISK-LARGE-VAULT (частично в PR #2), TECH-START-1, TECH-CIRC-1.
 
 ## Аналитический мит 2026-10-19
 
