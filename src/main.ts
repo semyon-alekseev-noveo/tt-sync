@@ -111,6 +111,7 @@ export default class TickTickSync extends Plugin {
 	/** False until loadSettings finishes; blocks premature saves during enable. */
 	settingsReady = false;
 	private settingsLoadPromise: Promise<void> | null = null;
+	private syncPaletteCommandsRegistered = false;
 
 	onload() {
 		// addSettingTab must run synchronously in onload; awaiting loadSettings first left no gear if loadData hung.
@@ -148,7 +149,35 @@ export default class TickTickSync extends Plugin {
 			});
 		}
 		this.registerOpenSettingsCommand();
+		this.registerSyncPaletteCommands();
 		void this.ensureSettingsLoaded();
+	}
+
+	/** Sync commands must register in onload; deferring to pluginLoad hid them until startup sync finished. */
+	private registerSyncPaletteCommands(): void {
+		if (this.syncPaletteCommandsRegistered) {
+			return;
+		}
+		this.syncPaletteCommandsRegistered = true;
+
+		this.addCommand({
+			id: 'tts-sync',
+			name: 'TickTickSync: Synchronize',
+			callback: async () => {
+				await this.ensureSettingsLoaded();
+				await this.synchronizeNow();
+			},
+		});
+
+		this.addCommand({
+			id: 'tts-sync-full',
+			name: 'TickTickSync: Full synchronize from TickTick',
+			callback: async () => {
+				await this.ensureSettingsLoaded();
+				await this.scheduledSynchronization(true, 'manual');
+				new Notice('Full sync completed.');
+			},
+		});
 	}
 
 	private async completeSettingsLoad(): Promise<void> {
@@ -866,23 +895,6 @@ export default class TickTickSync extends Plugin {
 				new SetDefaultProjectForFileModal(this.app, this, filepath);
 			}
 		});
-		this.addCommand({
-			id: 'tts-sync',
-			name: 'Synchronize',
-			callback: async () => {
-				await this.synchronizeNow();
-			}
-		});
-
-		this.addCommand({
-			id: 'tts-sync-full',
-			name: 'Synchronize (full pull from TickTick)',
-			callback: async () => {
-				await this.scheduledSynchronization(true, 'manual');
-				new Notice('Full sync completed.');
-			},
-		});
-
 		this.addCommand({
 			id: 'tts-delete-permanent',
 			name: 'Permanently delete tasks',

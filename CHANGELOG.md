@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-19 12:28 UTC
+
+- Context: Palette had no sync commands while startup sync blocked deferred `pluginLoad`.
+- Target: **2.0.43** — register sync commands synchronously in `onload`.
+- Actions log: `registerSyncPaletteCommands()`; names **TickTickSync: Synchronize** / **Full synchronize from TickTick**.
+- Validation: `npx vitest run` → pass; `npm run build` → ok.
+- Problems: Startup sync still blocks other features until it finishes; commands now visible immediately.
+- To Be Done: BRAT **2.0.43**; search palette `TickTick` or `sync`.
+- References: `src/main.ts`, `CHANGELOG.md`
+
 ### Iteration 2026-10-19 12:15 UTC
 
 - Context: Docs and smokes for notes/context tags; palette lost one-shot full TickTick pull.

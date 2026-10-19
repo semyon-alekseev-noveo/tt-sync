@@ -15,7 +15,7 @@ Operator preset: `00 Inbox/TTS-data-preset.json`, runbook `00 Inbox/TTS-PILOT-RU
 |--------|----------|
 | Vault | `/home/sam/obsidian/Thinkpad-tts-test` only |
 | Plugin | `tickticksync-abyss` **≥ 2.0.41** for `note/` / `proj/` context tags; **≥ 2.0.40** Abyss `- >` descriptions; **≥ 2.0.36** rename TT→Obs; **≥ 2.0.28** deletion |
-| Commands | Palette: **Synchronize** (delta pull); **Synchronize (full pull from TickTick)** (`tts-sync-full`, plugin **≥ 2.0.42**) |
+| Commands | Palette: **TickTickSync: Synchronize** / **TickTickSync: Full synchronize from TickTick** (registered on enable, plugin **≥ 2.0.43**) |
 | Login | Access Control shows valid session |
 | GTD settings | `syncedLists` = six `TTS-*`; `syncScopeFolders` = `00 Inbox/`, `10 Projects/`, `30 Tasks/` |
 | Sync mode | Manual (`automaticSynchronizationInterval`: 0) |
