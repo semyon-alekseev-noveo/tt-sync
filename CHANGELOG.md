@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-19 03:45 UTC
+
+- Context: A pause while typing pushed half-finished lines such as `%%`.
+- Target: Push a line when the cursor leaves it. Keep checkbox clicks and manual Synchronize.
+- Actions log: Removed the editor-change timer. `lineNumberCheck` calls `lineSettledCheck`, which creates or updates the line that was left.
+- Validation: Typecheck not gated; `lineSettledCheck` is wired from the existing cursor-move path.
+- Problems: Shipped in **2.0.34**. A line is pushed when the cursor leaves it, or on Synchronize.
+- To Be Done: Install 2.0.34. Type a checkbox, pause, then press Enter. The task appears only after Enter.
+- References: `src/services/EventHandlerService.ts`, `src/main.ts`, `src/services/index.ts`, `CHANGELOG.md`
+
 ### Iteration 2026-10-19 03:40 UTC
 
 - Context: A new TTS-Inbox task was going to `30 Tasks/TickTick/TTS-Inbox.md`. That broke Abyss capture.

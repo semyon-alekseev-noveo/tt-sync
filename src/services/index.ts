@@ -8,7 +8,7 @@ import { Tick } from '@/api';
 import { getDefaultFolder, getSettings, updateSettings } from '@/settings';
 import { doWithLock } from '@/utils/locks';
 import { SyncMan } from '@/services/syncModule';
-import { Editor, type MarkdownFileInfo, type MarkdownView, Notice, TFile } from 'obsidian';
+import { Editor, type MarkdownFileInfo, MarkdownView, Notice, TFile } from 'obsidian';
 import { FileOperation } from '@/fileOperation';
 import { NewFileMap } from '@/services/NewFileMap';
 //Logging
@@ -448,6 +448,27 @@ export class TickTickService {
 		return await doWithLock(LOCK_TASKS, async () => {
 			//NEW: Use TaskModificationDetector
 			await this.plugin.taskModificationDetector.checkLineForNewTask(editor, info);
+		});
+	}
+
+	/** The caret left this line, so the line is finished enough to create or update. */
+	async lineSettledCheck(filepath: string, lastLineText: string, lastLine: number): Promise<boolean> {
+		return await doWithLock(LOCK_TASKS, async () => {
+			const file = this.plugin.app.vault.getAbstractFileByPath(filepath);
+			if (!(file instanceof TFile)) { return false; }
+			const fileMap = new NewFileMap(this.plugin.app, this.plugin, file);
+			await fileMap.init();
+			await this.plugin.projectScheme?.ensurePushContext?.();
+			const view = this.plugin.app.workspace.getActiveViewOfType(MarkdownView);
+			const editor = view?.editor ?? null;
+			await this.plugin.taskModificationDetector.addNewTask(
+				lastLineText,
+				lastLine,
+				editor,
+				editor ? { line: lastLine, ch: 0 } : null,
+				fileMap,
+			);
+			return await this.plugin.taskModificationDetector.checkLineForModifications(filepath, lastLineText, lastLine, fileMap);
 		});
 	}
 

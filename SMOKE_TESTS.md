@@ -14,7 +14,7 @@ Operator preset: `00 Inbox/TTS-data-preset.json`, runbook `00 Inbox/TTS-PILOT-RU
 | Check | Expected |
 |--------|----------|
 | Vault | `/home/sam/obsidian/Thinkpad-tts-test` only |
-| Plugin | `tickticksync-abyss` **≥ 2.0.33** for the logic rows; **≥ 2.0.28** for deletion |
+| Plugin | `tickticksync-abyss` **≥ 2.0.34** for the logic rows; **≥ 2.0.28** for deletion |
 | Login | Access Control shows valid session |
 | GTD settings | `syncedLists` = six `TTS-*`; `syncScopeFolders` = `00 Inbox/`, `10 Projects/`, `30 Tasks/` |
 | Sync mode | Manual (`automaticSynchronizationInterval`: 0) |
@@ -45,7 +45,7 @@ npx vitest run src/test/logicSmoke.test.ts src/test/listMapping.test.ts src/test
 | LOGIC-9 | Live: **test 3** and **test 4** are subtasks of Phase C on TTS-Projects | TickTick `get_task_by_id` |
 | LOGIC-10 | `#inbox` is removed when the task is not on the inbox list | `foolCases.test.ts` |
 | LOGIC-11 | A line that is only `%%`, or has an unclosed `%%`, is not pushed. A normal title is | `foolCases.test.ts` |
-| LOGIC-12 | Editor sync waits 5 seconds, not 1 | `EventHandlerService.ts` (`5000`) |
+| LOGIC-12 | A new line is pushed when the cursor leaves it, not while you are still typing | `lineNumberCheck` → `lineSettledCheck` |
 
 Not in this automated run (needs Obsidian):
 

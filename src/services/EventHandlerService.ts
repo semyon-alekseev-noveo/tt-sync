@@ -96,38 +96,8 @@ export class EventHandlerService {
 	 * Register editor change events
 	 */
 	private registerEditorChangeEvents(): void {
-		this.plugin.registerEvent(
-			this.app.workspace.on('editor-change', (editor: Editor, info: MarkdownView | MarkdownFileInfo) => {
-				if (this.processTimeout) {
-					window.clearTimeout(this.processTimeout);
-				}
-
-				this.processTimeout = window.setTimeout(() => {
-					void (async () => {
-						try {
-							if (!getSettings().token) {
-								return;
-							}
-
-							if (getSettings().enableFullVaultSync) {
-								return;
-							}
-
-							await this.plugin.lineNumberCheck();
-
-							if (!this.plugin.checkModuleClass()) {
-								return;
-							}
-
-							await this.plugin.service.lineNewContentTaskCheck(editor, info);
-							await this.plugin.saveSettings();
-						} catch (error) {
-							log.error('An error occurred while check new task in line: ', error);
-						}
-					})();
-				}, 5000);
-			})
-		);
+		// Creating a task while the caret is still on the line grabs half-typed text (`%%`).
+		// A new or edited line is pushed when the cursor leaves it (`lineNumberCheck`).
 	}
 
 	/**

@@ -592,7 +592,7 @@ export default class TickTickSync extends Plugin {
 			}
 			this.lastLines.set(fileName as string, line);
 
-			return await this.service.lineModifiedTaskCheck(filepath as string, lastLineText, lastLine as number);
+			return await this.service.lineSettledCheck(filepath as string, lastLineText, lastLine as number);
 		} else {
 			//log.debug('Line not changed');
 		}
