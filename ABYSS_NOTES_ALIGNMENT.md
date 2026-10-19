@@ -28,8 +28,8 @@ Rules (match Abyss `SubItemParser` behaviour, implemented in `abyssFormat.ts`):
 
 | Child line (deeper indent than checkbox) | Role |
 |------------------------------------------|------|
-| `- >` / `- > text` | **Description** → note body before `Comments:` |
-| `- text` (bullet, not checkbox) | **Comment** → after `Comments:` in TT `content` |
+| `- >` / `- > text` | **Description** → TickTick `content` |
+| `- text` (bullet, not checkbox) | **Comment**. With `syncAbyssCommentsViaApi` (default when Abyss format and notes sync are on) each sibling bullet is its own Comments API thread (`title` = body). The legacy `Comments:` block inside `content` is only the fallback when that setting is off |
 | Deeper non-checkbox under comment/desc | **Continuation** |
 | `- [ ]` with **24-char** `%%…%%` (not `ticktick_id`) | **Checklist item** → TT `items[]` |
 | `- [ ]` with `ticktick_id` | **Subtask** (separate TT task); preserved as `keep` in merge |
@@ -44,8 +44,8 @@ Canonical merge order on pull: **task line → descriptions → checklist items 
 | Abyss (vault) | TickTick field | Notes |
 |---------------|----------------|--------|
 | Checkbox title + inline tags/dates | `title`, `status`, `tags`, dates | `convertTaskToLine` / `convertLineToTask` |
-| `- > …` | `content` (before `Comments:`) | `abyssLinesToNote` / `noteToAbyssLines` |
-| `- …` comments | `content` after `Comments:\n` | Same string; round-trip in tests |
+| `- > …` | `content` | `abyssDescriptionToNote` when the Comments API is on; otherwise the description half of `abyssLinesToNote` |
+| `- …` comments | Comments API `title` when `syncAbyssCommentsViaApi` | Fingerprint is trimmed, lower-cased, whitespace collapsed. A changed comment is delete + add (GAP-COMMENT-EDIT). Hash of the parent line still uses `abyssLinesToNote` (description and comments together) |
 | Checklist lines | `items` + often `desc` vs `content` split | `getTaskPayLoad`: if items exist, note text may go to `description` |
 | Nested task line | Separate task with `parentId` | Project scheme + hierarchy; not the same as checklist item |
 
@@ -62,9 +62,9 @@ Canonical merge order on pull: **task line → descriptions → checklist items 
 
 | Direction | Path |
 |-----------|------|
-| Obs → TT | `convertLineToTask` → `taskRecord.taskLines` → `abyssLinesToNote` → `content` / `items` |
-| TT → Obs | `convertTaskToLine` + `addNotesToLine` → `noteToAbyssLines`; updates use `mergeAbyssBlock` + `__baseContent` so new local comments are not dropped |
-| Hash / change detect | Line hash includes note string from `getNoteString` |
+| Obs → TT | `convertLineToTask` writes the description into `content`. `syncAbyssCommentsToTickTick` pushes comment threads. A child comment or description line pushes the parent (`BUG-COMMENT-INLINE`) |
+| TT → Obs | `convertTaskToLine` writes the description. API comments are formatted as Abyss lines (`formatApiCommentAsAbyssLines`) and merged with `mergeAbyssBlock`. `vaultLineBehindTask` treats a TickTick-only comment as behind (`BUG-PULL-COMMENT-STALE`) |
+| Hash / change detect | `TaskModificationDetector` hashes `line + abyssLinesToNote(taskLines)` when the Comments API is on. `abyssDescriptionToNote` is not the hash |
 
 **Known limitations** (`ABYSS_MAPPING.md`):
 
@@ -81,12 +81,12 @@ Canonical merge order on pull: **task line → descriptions → checklist items 
 |----|--------|-----------|
 | N1 | Add `- >` under task in Obs → Sync | TT `content` contains description; subtasks unchanged |
 | N2 | Edit description in TT → Sync | `- >` lines updated; `mergeAbyssBlock` keeps alien children |
-| N3 | Abyss comment with date → Sync | `Comments:` section in TT `content` |
-| N4 | Comment in TT → Sync | `- YYYY-MM-DD …` bullets under task |
+| N3 | Abyss comment with date → Sync | A TickTick **comment** (Comments UI), not a `Comments:` block in `content`, when `syncAbyssCommentsViaApi` is on |
+| N4 | Comment in TT → Sync | `- YYYY-MM-DD HH:MM: …` bullet under the task |
 | N5 | Toggle checklist item in TT | Matching `- [ ]` / `[x]` line |
 | N6 | TT description change + new local comment not yet on TT | Both preserved after sync |
 
-**Automated today:** `notesSmoke.test.ts` (NOTE-A1–A5), `abyssFormat.test.ts`, `abyssStep3.test.ts`, `abyssConvertLine.test.ts`. **Live:** NOTE-L1–L5 in `SMOKE_TESTS.md`; **not** TickTick Comments UI until Phase 1 (`TT_ABYSS_ROADMAP.md`).
+**Automated today:** `notesSmoke.test.ts`, `abyssCommentSync.test.ts` (NOTE-C1), `vaultCommentBehind.test.ts`, `bugCommentInline.test.ts`. **Live:** NOTE-L3b in `SMOKE_TESTS.md` is not run from this repo. `TT_ABYSS_ROADMAP.md` is archive; the Comments API shipped in 2.0.46.
 
 ---
 

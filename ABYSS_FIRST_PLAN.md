@@ -1,7 +1,7 @@
 # Plan — align TickTick sync with Abyss Tasks logic
 
 **Date:** 2026-10-16  
-**Status:** P1–P6 **confirmed by owner** 2026-10-16; Steps 1–2 done. **Step 3 = Option B** (owner 2026-10-16).  
+**Status:** P1–P6 **confirmed by owner** 2026-10-16; Steps 1–2 done. **Step 3:** plugin uses `#inbox` as the inbox stage tag (see §3.1). Option B (2026-10-16) is an Abyss setting and does not match the plugin.  
 **Audience:** you (PO), implementers  
 **Replaces as north star:** topology **R** (“canonical line must live in `30 Tasks/TickTick/<List>.md`”) — **parked**, not deleted from history (`GTD_SYNC_RESEARCH.md`, `GTD_SYNC_CASES.md` CASE-T4).
 
@@ -206,11 +206,15 @@ Today `TTS-data-preset.json` includes **`00 Inbox/`** in `syncScopeFolders`. Opt
 
 **Done when:** You can explain in one sentence: “Synced tasks appear in Abyss view X.”
 
-### 3.1 Decision (fill in)
+### 3.1 Decision
 
-- **Chosen option:** **B** — untagged inbox + `taskIgnoreQuery: #ticktick` (owner 2026-10-16).
-- **Notes:** Keep `00 Inbox/` in `syncScopeFolders` (not C). Dual inbox: Abyss Inbox + TT **TTS-Inbox**; sync marker must not evict tasks from Abyss Inbox. Pilot: merge `00 Inbox/TTS-abyss-preset.json` into `abyss-tasks/data.json`; verify Inbox view after reload.
-- **One-liner:** Synced tasks appear in **Abyss Inbox** until GTD tags apply; `#ticktick` is invisible to Abyss tagging rules.
+**What this plugin does** (`tagsForCurrentList` in `src/listMapping.ts`, capture file in `syncScope.ts` / `VaultSyncCoordinator`): `#inbox` is the stage tag for the default inbox list. It stays while the task is on that list and is dropped when the task leaves. Birth tags `#obsidian` and `#ticktick` are written as well and do not choose the list. New TickTick inbox tasks are written into the Abyss capture note with `#inbox`. This plugin does not set Abyss `inbox.mode` or `taskIgnoreQuery`.
+
+**2026-10-16, superseded:** Option B — untagged Abyss Inbox plus `taskIgnoreQuery: #ticktick`. That is an Abyss Tasks setting. Section 6 (2026-10-18) found it does not work: untagged Inbox drops the line once `#obsidian` is written, and ignoring `#obsidian` would hide the task from every Abyss view.
+
+**Configure Abyss to match the plugin:** Inbox mode **With inbox tag** `#inbox` (Option A). Keep `00 Inbox/` in `syncScopeFolders` (not Option C).
+
+**Still open:** if the vault’s Abyss config is still untagged, the Inbox view looks empty after sync even though the task is on the inbox list. Check that view in Obsidian. Do not mark it passed from this repo.
 
 ---
 
@@ -285,7 +289,7 @@ Today `TTS-data-preset.json` includes **`00 Inbox/`** in `syncScopeFolders`. Opt
 
 ## Step 7 — Pilot soak (test vault)
 
-**Goal:** Prove Abyss-first on `Thinkpad-tts-test` before live vault.
+**Goal:** Prove Abyss-first on `<pilot-vault>` before the live vault.
 
 | Action | Detail |
 |--------|--------|
@@ -298,7 +302,7 @@ Today `TTS-data-preset.json` includes **`00 Inbox/`** in `syncScopeFolders`. Opt
 
 ---
 
-## Step 8 — Production gate (live `Thinkpad`)
+## Step 8 — Production gate (live `<live-vault>`)
 
 **Goal:** Same behavior, real list names.
 
@@ -362,7 +366,7 @@ It does not need both. A task with neither stays out. Same rule for a new task a
 
 `#obsidian` means the task was born in the vault. `#ticktick` means it was born in TickTick. That is separate from the GTD list. Do not remove it.
 
-The clash: Abyss Inbox only shows a top-level line with **no** tags, so `#obsidian` takes a captured task out of that view while the task is still on TTS-Inbox. Putting `#obsidian` in `taskIgnoreQuery` would hide the task from every Abyss view, so that is not the fix. Inbox alignment is still open.
+The clash: Abyss Inbox in untagged mode only shows a top-level line with **no** tags, so `#obsidian` takes a captured task out of that view while the task is still on TTS-Inbox. Putting `#obsidian` in `taskIgnoreQuery` would hide the task from every Abyss view, so that is not the fix. The plugin side is settled: `#inbox` is the stage tag (§3.1). The open part is the Abyss setting in the vault, not another plugin mode.
 
 **C. GTD stage mapping — two options**
 
@@ -394,7 +398,7 @@ No new list. A dated task shows in both apps from the same date. On 2026-10-18 t
 
 **F. Then the pilot gate**
 
-Run AF-1 … AF-8 on `Thinkpad-tts-test`. Live `Thinkpad` stays closed until those pass (Step 8).
+Run AF-1 … AF-8 on `<pilot-vault>`. `<live-vault>` stays closed until those pass (Step 8). The case list and the one combined live gate are in `ABYSS_FIRST_CASES.md`.
 
 ## 5. References
 

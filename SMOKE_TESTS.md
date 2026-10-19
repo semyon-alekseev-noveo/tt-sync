@@ -1,10 +1,10 @@
-# Smoke tests — pilot vault (`Thinkpad-tts-test`)
+# Smoke tests — pilot vault (`<pilot-vault>`)
 
-**Purpose:** Repeatable checks before touching live `Thinkpad`.  
+**Purpose:** Repeatable checks before touching the live vault `<live-vault>`.  
 **Logic (2026-10-18):** What counts as a task, which folders push, how a GTD tag maps, and which TickTick tasks come back. See `ABYSS_FIRST_PLAN.md` §6.  
 **Deletion (2026-10-17):** Obsidian line removed → TickTick task deleted after one confirm (**plugin ≥ 2.0.28**).
 
-Full case write-ups: `GTD_SYNC_CASES.md` §8 (`CASE-DEL-*`).  
+Full acceptance cases: `ABYSS_FIRST_CASES.md` (AF-*, one live gate). Deletion detail that predates that catalog is archive: `GTD_SYNC_CASES.md`.  
 Operator preset: `00 Inbox/TTS-data-preset.json`, runbook `00 Inbox/TTS-PILOT-RUN.md`.
 
 ---
@@ -13,7 +13,7 @@ Operator preset: `00 Inbox/TTS-data-preset.json`, runbook `00 Inbox/TTS-PILOT-RU
 
 | Check | Expected |
 |--------|----------|
-| Vault | `/home/sam/obsidian/Thinkpad-tts-test` only |
+| Vault | `<pilot-vault>` only |
 | Plugin | `tickticksync-abyss` **≥ 2.0.41** for `note/` / `proj/` context tags; **≥ 2.0.40** Abyss `- >` descriptions; **≥ 2.0.36** rename TT→Obs; **≥ 2.0.28** deletion |
 | Commands | Palette: **Synchronize** only; ribbon **sync** icon (register on enable, **≥ 2.0.45**). Full TT pull runs on plugin load, not a separate palette command. |
 | Login | Access Control shows valid session |
@@ -180,7 +180,7 @@ Not in this automated run (needs Obsidian + TickTick UI):
 | R7 | TT → Obs | Child in `10 Projects/*` Active Zone | Line in project note updates |
 | R8 | Obs → TT | Rename child in project note | TT subtask title updates |
 
-**Agent automation:** vitest + TickTick MCP + `obsidian://…tts-sync` can cover R1/R2 **only if** vault `Thinkpad-tts-test` is open and plugin loaded (URI alone is not enough when Obsidian is idle). **Deletion rows (DEL-*) need a human** — see below.
+**Agent automation:** vitest + TickTick MCP + `obsidian://…tts-sync` can cover R1/R2 **only if** `<pilot-vault>` is open and the plugin is loaded (URI alone is not enough when Obsidian is idle). **Deletion rows (DEL-*) need a human** — see below. A cloud agent must not record those rows as passed.
 
 ---
 

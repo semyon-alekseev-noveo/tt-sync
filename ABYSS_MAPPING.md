@@ -12,17 +12,19 @@
 ## Mapping
 | Abyss | TickTick | Status |
 |---|---|---|
-| `\t- > text` under task | note (`content`/`desc`) | **done** (step 1) |
-| `\t- text` (comment) | note, after line `Comments:` | **done**; parsed back to `- ` lines |
+| `\t- > text` under task | `content` (description only when Comments API is on) | **done** |
+| `\t- text` (comment) | TickTick Comments API (`syncAbyssCommentsViaApi`, default on with Abyss format). Legacy `Comments:` inside `content` only when that setting is off | **done** in 2.0.46; sibling bullets are separate threads |
 | indented `- [ ]` | checklist item / subtask (unchanged) | upstream |
 | custom status `[/]`,`[-]`… | tag `status/<name>`; restored to checkbox char on pull | **done** (`src/statusMapping.ts`; push in `convertLineToTask` rawTags, pull in `convertTaskToLine`; `REMOVE_CHECKBOX` widened to any char). Defaults `/`→status/in-progress, `-`→status/cancelled; TickTick task stays open (status 0); matched by full/hyphen/child-name spelling |
 | note in `projects/X.md` | list X | **done** (`src/projectMapping.ts`, hooks in `FileTaskQueries.getDefaultProjectIdForFilepath` / `getFilepathForProject`). Priority: per-file default > exact file entry > longest folder prefix (`projects/`) > global default. Reverse (TT→file) only exact entries |
 | `#type/next`, `#context/work` | setting `tagMappings` (`obsidian/tag = ticktick-tag`), both directions; unmapped → upstream hierarchy logic | **done** (`src/tagMapping.ts`, hooks in `convertLineToTask` tag resolve + `addTagsToLine`) |
 | ⏳ scheduled | setting `scheduledAsStartDate`: ⏳ → TickTick `startDate` when line has no 🛫; on pull `startDate` → ⏳ unless the previous local task had 🛫 | **done** (`convertLineToTask` actualStartDate, `DateMan.addDateHolderToTask`) |
 | priority, 📅/🛫/🔁/⏰ | as upstream | upstream |
-| conflicts | per-field merge: store last-synced snapshot per task, merge fields changed on one side only, LWW per field | TODO: syncModule.ts + snapshot in data.json |
+| conflicts | per-field merge on push (`mergeTask` in `TaskModificationDetector`) | **done** for the push path. A local LWW win can still leave the vault line stale (RISK-PULL-WINS-LOCAL, open) |
 
-Comments decision: sent to TickTick (under `Comments:`) rather than kept local, because pull rewrites the whole child block from the note — keeping them local would lose them on every TickTick-side edit. Cost: typing a line `Comments:` in a TickTick note splits it.
+**Comments (current):** with `syncAbyssCommentsViaApi`, comment bullets go to the Comments API. Descriptions stay in `content`. Pull compares API comment fingerprints in `vaultLineBehindTask`. Editing a comment is delete + recreate (GAP-COMMENT-EDIT). The paragraph below is the older `content` design and applies only when the setting is off.
+
+Comments decision (legacy, setting off): sent to TickTick under `Comments:` rather than kept local, because pull rewrites the whole child block from the note. Cost: typing a line `Comments:` in a TickTick note splits it.
 
 ## Step-1 implementation
 Setting `abyssTasksFormat` (default false → upstream behavior unchanged). `src/abyssFormat.ts` pure helpers; hooks in `NewFileMap.getTaskLinesByIdx`, `TaskParser.getNoteString`, `TaskParser.addNote`. Abyss child lines = exactly task tabs + 1 tab, non-checkbox, contiguous right after task line.

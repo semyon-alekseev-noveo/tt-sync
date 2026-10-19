@@ -3,7 +3,7 @@
 **Обновлено:** 2026-10-19  
 **Audience:** Product owner / decision maker  
 **Repo:** `tickticksync` branch `abyss-mapping`  
-**Test vault:** `/home/sam/obsidian/Thinkpad-tts-test` (copy only; live vault untouched)  
+**Test vault:** `<pilot-vault>` (copy only; live vault `<live-vault>` untouched)  
 **Install:** BRAT → `https://github.com/semyon-alekseev-noveo/tt-sync` track **latest release** (**2.0.47**, tag `2.0.47`); plugin id **`tickticksync-abyss`** — `docs/BRAT_INSTALL.md`. Preset: `00 Inbox/TTS-data-preset.json`.
 
 История изменений — только в `CHANGELOG.md`; здесь — снимок для PO.
@@ -13,20 +13,20 @@
 - Релиз **2.0.47** выпущен: исправлены BUG-COMMENT-1 (комментарии Abyss не уходили в TickTick Comments, если hash строки не менялся) и BUG-TAG-1 (дубли тегов `note/`, `proj/`). Тег и ветка `abyss-mapping` отправлены в `tt-sync`.
 - Abyss-first: задачи живут там, где их кладёт Abyss; TT зеркалит теги/списки и родителей-проекты (`ABYSS_FIRST_PLAN.md`, топология R / CASE-T4 отложена).
 - Комментарии Abyss → TickTick **Comments API** (`syncAbyssCommentsViaApi`, по умолчанию вкл.); описание остаётся в `content`.
-- Живой vault `Thinkpad` не трогаем; пилот — только `Thinkpad-tts-test`.
+- Живой vault не трогаем; пилот — только `<pilot-vault>`. Ручной синк. Токен `tp_…`, если он светился в чате, отозвать.
 - Аналитический мит 2026-10-19 (три аналитика) — см. раздел ниже.
 
 ## Target
 
 1. **Надёжный sync без тихих сбоев:** любая ошибка pull/push видна пользователю, чекпоинт не обманывает.
 2. **Abyss-комментарии и теги стабильны:** правка дочерней строки и TT-only изменения комментариев доезжают без ручных обходов.
-3. **Безопасный запуск на живом vault:** проход Phase D (AF-*) + soak NOTE-L3b на пилоте.
-4. **Поддерживаемость:** разорвать цикл `main` ↔ `services`, добавить интеграционный тест полного sync.
+3. **Безопасный запуск на живом vault:** Step 6 (кейсы AF-*) и Step 8, плюс soak NOTE-L3b на пилоте. Один живой прогон, не отдельный набор.
+4. **Поддерживаемость:** интеграционный тест `synchronizationInner` есть на этой ветке. Цикл `main` ↔ `services` ещё открыт.
 
 ## Validation
 
-- Автотесты: `npx vitest run` — **67 файлов, 550 тестов, все зелёные** (2.0.47); `npm run build` — ok.
-- Ручные smoke-сценарии: `SMOKE_TESTS.md` (NOTE-L3b, NOTE-C1, CTX-D1/D2 — живой прогон на пилоте ещё нужен).
+- Релиз **2.0.47:** `npx vitest run` — 67 файлов, 550 тестов. Эта ветка (ещё не релиз, версию не поднимали): **73 файла, 569 тестов**, `npm run build` — ok. В том числе `src/test/synchronizationInner.integration.test.ts`.
+- Ручные smoke-сценарии: `SMOKE_TESTS.md` и каталог `ABYSS_FIRST_CASES.md`. NOTE-L3b, CTX-D2 и живой AF-гейт на пилоте **не прогонялись** в этой ветке.
 - Детали и даты прогонов — в `CHANGELOG.md`.
 
 ## Problems
@@ -35,30 +35,32 @@
 |----|-----------|--------|------|
 | **BUG-COMMENT-1** | P1 | resolved в 2.0.47 | Комментарии не синкались при неизменном hash; нужен live-soak NOTE-L3b |
 | **BUG-TAG-1** | P2 | mitigated в 2.0.47 | Дубли `note/`/`proj/`; на «грязных» задачах нужен один re-sync (CTX-D2) |
-| **BUG-SYNC-SILENT-FAIL** | P1 | open | Ошибка `getUpdatedTasks` глотается (`src/api/index.ts`, `TicktickRestAPI.getUpdatedTasks`), pull продолжается с пустой дельтой, UI всегда пишет «Sync completed» (`main.ts` `synchronizeNow`). Чекпоинт при этом **не** сдвигается (проверено), т.е. потери данных нет, но сбой тихий |
-| **BUG-COMMENT-INLINE** (GAP) | P1 | open | Правка только дочерней строки-комментария не вызывает push (`checkLineForModifications`); помогает только палитра **Synchronize** |
-| **RISK-OPEN-FILE-EDIT** | P1 | open | `vault.modify` пропускает активный файл; push зависит от «ухода курсора» или полного Synchronize |
-| **BUG-PULL-COMMENT-STALE** (GAP) | P2 | open | `vaultLineBehindTask` не сравнивает API-комментарии → TT-only комментарий может не попасть в vault |
+| **BUG-SYNC-SILENT-FAIL** | P1 | fixed on this branch | `getUpdatedTasks` бросает `TickTickPullError`, `syncTickTickWithDexie` пробрасывает, `synchronizationInner` возвращает `{ok:false}`. Notice: «Sync failed: …». Чекпоинт не двигается. Не релиз |
+| **BUG-NOTICE-1** | P1 | fixed on this branch | Текст загрузки собирается в `formatPluginLoadedNotice` (`src/sync/result.ts`), без сломанного приоритета `+` / `?:` |
+| **BUG-COMMENT-INLINE** | P1 | fixed on this branch | Дочерняя comment/description строка вызывает `checkLineForModifications` родителя. Соседние comment-буллеты — отдельные треды (`extractAbyssCommentThreads`) |
+| **RISK-OPEN-FILE-EDIT** | P1 | mitigated on this branch | Активный файл по-прежнему не пушится на `vault.modify`. После 5 с тишины `editor-change` пушит строки с `ticktick_id`, кроме незакрытой строки захвата (`%%`). Новые чекбоксы без id не считаются удалениями |
+| **BUG-PULL-COMMENT-STALE** | P2 | fixed on this branch | `vaultLineBehindTask` сравнивает отпечатки Comments API. `getTaskById` только если заголовок/статус/content уже совпали; повторного вызова в цикле vault-sync нет. Комментарии кэшируются на задаче (`_apiComments`) |
 | **RISK-PULL-WINS-LOCAL** | P2 | open | При победе локальной версии в LWW строка в vault может остаться устаревшей |
-| **BUG-COMMENT-MAP-ORPHAN** | P2 | open | `deleteCommentMapsForTask` нигде не вызывается → «сироты» в Dexie `taskCommentMaps` |
+| **BUG-COMMENT-MAP-ORPHAN** | P2 | fixed on this branch | `deleteCommentMapsForTask` вызывается из `TaskRepository` (delete/hard delete/purge), `markTaskDeleted` и pull при удалённой на TT задаче |
 | **GAP-COMMENT-EDIT** | P2 | open | Правка комментария = delete + add (новые ID, шум в ленте TT) |
 | **RISK-DUAL-STORE** | P2 | open | Две «истины»: Dexie `tasks` и `fileMetadata`/`syncFiles` → возможен дрейф |
 | **RISK-LARGE-VAULT** | P2 | open | Каждый sync сканирует все `.md` (`idsPresentInVault`, `ensureVaultFilesRegistered`) |
 | **TECH-START-1** | P2 | open | Полный pull на старте блокирует инициализацию |
 | **TECH-API-1** | P1 | open (риск) | Неофициальный клиент `Tick`: изменения TT ломают sync, покрытие тестами минимальное |
 | **TECH-CIRC-1 / GOD-1/2** | P2 | open | Цикл `main` ↔ `services`; god-классы `TickTickService`, `TaskModificationDetector` |
-| **BUG-NOTICE-1** | P3 | open | `main.ts` ~573: приоритет тернарного оператора → уведомление при загрузке всегда «Skipping backup.» |
-| **DOC-STALE-1** | P3 | open | `PROJECT_STATE.md`, `ABYSS_MAPPING.md`, `SMOKE_TESTS.md` частично описывают Phase 1 как «не сделано» |
+| **DOC-STALE-1** | P3 | mitigated on this branch | Канон: `DEV_FLOW.md`, `PO_STATUS.md`, `ABYSS_FIRST_PLAN.md`. `GTD_SYNC_*`, `TT_ABYSS_ROADMAP.md`, `SYNC_PROJECTS_AND_SUBTASKS.md` — архив. Comments API описан в `ABYSS_NOTES_ALIGNMENT.md` |
 | Прежние | — | open | Токен `tp_…` из чата — отозвать; `data.json` тест-vault дрейфует от §2 — не синкать вслепую |
+
+## Redo journal
+
+Каждый синк пишет журнал `<vault>/.tickticksync/journal/YYYY-MM-DD.jsonl` до изменения (`src/redo/log.ts`). Откат: палитра **Undo last sync (preview first)** и **Preview undo of last sync (dry run only)** (`planUndo` в `src/redo/rollback.ts`, команды в `src/redo/commands.ts`). Откат сам пишется в журнал. Выключить плагин: Settings → Community plugins → TickTickSync. На живом vault этот откат не прогонялся.
 
 ## To Be Done
 
-1. **P1:** Fail-closed pull — возвращать ошибку из `getUpdatedTasks`, показывать в UI реальный итог sync (закрывает BUG-SYNC-SILENT-FAIL, BUG-NOTICE-1).
-2. **P1:** Push родителя при правке дочерней строки comment/desc (BUG-COMMENT-INLINE) + debounce-push активного файла (RISK-OPEN-FILE-EDIT).
-3. **P2:** `vaultLineBehindTask` учитывает API-комментарии; чистка `taskCommentMaps` при удалении задачи.
-4. **P2:** Интеграционный тест `synchronizationInner` (fake API + fake-indexedDB), тесты pull→vault для комментариев и миграции `Comments:`.
-5. **P2:** Live-soak 2.0.47 на пилоте (NOTE-L3b, CTX-D2), затем Phase D / AF-* перед живым vault.
-6. **P3:** Синхронизировать документы (DOC-STALE-1); затем рефакторинг (разрыв цикла `main`↔`services`, разбиение `TickTickService`), опция отключения full-pull на старте.
+1. Пилот человеком или локальным агентом в Obsidian: NOTE-L3b, CTX-D2, один гейт AF + DEL + NOTE-L3b (`ABYSS_FIRST_CASES.md`). Результаты не выдумывать.
+2. Отозвать токен `tp_…`, если он ещё действует.
+3. Abyss Inbox: в плагине `#inbox` — тег стадии списка по умолчанию. Режим Abyss «untagged» после `#obsidian` задачу из Inbox убирает. Это настройка Abyss, не этот плагин. Проверить вид Inbox на пилоте.
+4. Открыто в коде: GAP-COMMENT-EDIT (правка комментария = delete + add), RISK-PULL-WINS-LOCAL, RISK-DUAL-STORE, RISK-LARGE-VAULT, TECH-START-1, TECH-CIRC-1.
 
 ## Аналитический мит 2026-10-19
 
@@ -89,7 +91,13 @@
 3. Нет интеграционных тестов поверх моков → регрессии 2.0.46/2.0.47 нашли вручную.
 4. Большие связанные модули и неофициальный API повышают цену изменений.
 
-**Консенсус:** сначала надёжность и видимость sync (пп. 1–3 плана), затем live-soak, и только потом рефакторинг. На живой vault не выходить до Phase D.
+**Консенсус:** сначала надёжность и видимость sync, затем live-soak, и только потом рефакторинг. На живой vault не выходить до Step 8.
+
+**Проверка после мита (эта ветка, код, не номера строк из отчёта):**
+- Тихий pull и notice закрыты тестами `BUG-SYNC-SILENT-FAIL` / `BUG-NOTICE-1`.
+- Утверждение «прод хеширует через `abyssDescriptionToNote`, а тест через `abyssLinesToNote`» **не подтвердилось**. Оба пути хеша в `TaskModificationDetector` используют `abyssLinesToNote`. `abyssDescriptionToNote` — только тело `content` на push.
+- Соседние comment-буллеты склеивались в один тред. Теперь каждый буллет — свой тред.
+- Интеграционный тест `synchronizationInner` есть. Живые кейсы по-прежнему не прогнаны.
 
 ---
 

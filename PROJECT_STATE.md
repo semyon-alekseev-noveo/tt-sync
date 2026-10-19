@@ -11,18 +11,19 @@
 
 - Obsidian plugin fork of [thesamim/TickTickSync](https://github.com/thesamim/TickTickSync); development repo [semyon-alekseev-noveo/tt-sync](https://github.com/semyon-alekseev-noveo/tt-sync) branch `abyss-mapping` (BRAT install; plugin id `tickticksync-abyss`).
 - Auth: unofficial web session (cookie / password), **not** TickTick Open API `tp_…` tokens; Cursor MCP uses separate OAuth at `mcp.ticktick.com`.
-- Live vault: `/home/sam/obsidian/Thinkpad`. Test copy: `/home/sam/obsidian/Thinkpad-tts-test`.
+- Live vault: `<live-vault>`. Test copy: `<pilot-vault>`.
 
 ## Target
 
 - **Direction (2026-10-16):** **Abyss-first** — tasks stay where Abyss puts them; TickTick mirrors tags/lists and project parents. See `ABYSS_FIRST_PLAN.md` (topology R / CASE-T4 parked).
 - **Still valid:** TT **Projects** ↔ project notes under `10 Projects/`; safety: `syncedLists`, `syncScopeFolders`, manual sync.
-- **Next execution order:** Logic in `ABYSS_FIRST_PLAN.md` §6 and `SMOKE_TESTS.md` § Logic. Abyss Inbox tag `#inbox` is the view fix; sync still pushes every non-empty checkbox in the three folders. Birth tag `#obsidian` stays.
+- **Next execution order:** Steps 1–8 in `ABYSS_FIRST_PLAN.md`. Abyss Inbox in the plugin is the stage tag `#inbox` (§3.1). Untagged Abyss Inbox is still an open vault setting. Birth tag `#obsidian` stays.
+- **Redo:** journal `<vault>/.tickticksync/journal/`; palette undo previews then applies `planUndo`. Not soaked on the live vault.
 
 ## Validation
 
 - Build: `npm run build` in repo root; CI on `abyss-mapping` via `.github/workflows/ci.yml`.
-- Unit tests: `npx vitest run` (550 at **2.0.47**); Abyss comments → TickTick **Comments API** when `syncAbyssCommentsViaApi` (default on); descriptions stay in `content`.
+- Unit tests: `npx vitest run` (550 at **2.0.47**; this unreleased branch 569, including `synchronizationInner.integration.test.ts`). Abyss comments → TickTick **Comments API** when `syncAbyssCommentsViaApi` (default on); descriptions stay in `content`.
 - Manual pilot: **`SMOKE_TESTS.md`**. Palette: **Synchronize** only; full TT pull on plugin load. Context tags **2.0.41** (`syncNoteContextTags`).
 - BRAT installs: GitHub Release assets from `.github/workflows/release.yml` (see `docs/BRAT_INSTALL.md`).
 - TT cleanup verified 2026-10-16 via MCP (no `ticktick` tag left on polluted set).
@@ -38,25 +39,26 @@
 
 ## To Be Done
 
-0. **Reliability (analyst meet 2026-10-19, see `PO_STATUS.md`):** fail-closed pull + honest sync notice (BUG-SYNC-SILENT-FAIL); push on child comment-line edit (BUG-COMMENT-INLINE); `vaultLineBehindTask` + comments; cleanup `taskCommentMaps`; integration test for `synchronizationInner`.
-1. **Phase 1 (comments):** shipped 2.0.46–2.0.47 (Comments API); remaining: live soak NOTE-L3b, legacy `Comments:` migration.
-2. **Phase 2 (task↔note):** PO pick L1–L5; fix Abyss `membershipQuery` → `10 Projects/`.
-3. **Phase 3 (subtasks):** Matrix S1–S6 after Phase 1 — `SYNC_PROJECTS_AND_SUBTASKS.md` + `TT_ABYSS_ROADMAP.md`.
-4. **Projects:** CASE-P2–P4, P6, subtask order (unchanged).
-5. **Phase D:** AF-* + live vault gate per `PO_STATUS.md`.
+1. Human or local Obsidian: NOTE-L3b, CTX-D2, one live gate AF + DEL + NOTE-L3b (`ABYSS_FIRST_CASES.md`). This cloud agent did not run them.
+2. Revoke the exposed `tp_…` token if it is still valid.
+3. Confirm Abyss Inbox is **With inbox tag** `#inbox` on the pilot. Untagged mode is still open.
+4. Still open in code: GAP-COMMENT-EDIT, RISK-PULL-WINS-LOCAL, RISK-DUAL-STORE, RISK-LARGE-VAULT, TECH-START-1, `main` ↔ `services` cycle.
 
 ## References
 
-- `DEV_FLOW.md` — process for analyst, developer, and tester (read this before changing sync)
-- `TT_ABYSS_ROADMAP.md`
-- `SMOKE_TESTS.md`
-- `ABYSS_FIRST_PLAN.md`
-- `ABYSS_NOTES_ALIGNMENT.md`
-- `SYNC_PROJECTS_AND_SUBTASKS.md`
-- `GTD_SYNC_CASES.md`
-- `GTD_SYNC_RESEARCH.md`
-- `CHANGELOG.md`
+Canonical:
+
+- `DEV_FLOW.md` — process for analyst, developer, and tester
 - `PO_STATUS.md`
-- `TODO.md`
+- `ABYSS_FIRST_PLAN.md` — Steps 1–8
+- `ABYSS_FIRST_CASES.md`
+- `PROJECT_STATE.md`
+- `CHANGELOG.md`
+- `SMOKE_TESTS.md`
+- `ABYSS_NOTES_ALIGNMENT.md`
 - `ABYSS_MAPPING.md`
-- `/home/sam/obsidian/Thinkpad-tts-test/00 Inbox/TTS-SETUP.md`
+- `TODO.md`
+
+Archive (not requirements): `GTD_SYNC_CASES.md`, `GTD_SYNC_RESEARCH.md`, `TT_ABYSS_ROADMAP.md`, `SYNC_PROJECTS_AND_SUBTASKS.md`.
+
+Pilot notes live in the vault, not in this repo: `<pilot-vault>/00 Inbox/TTS-SETUP.md`.

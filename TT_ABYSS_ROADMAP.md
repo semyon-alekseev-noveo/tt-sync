@@ -1,3 +1,5 @@
+> **Archive.** Not a source of requirements. Phase 1 (Comments API) shipped in 2.0.46; the current description is `ABYSS_NOTES_ALIGNMENT.md`. New work uses Steps 1–8 in `ABYSS_FIRST_PLAN.md`, not Phase 1–3. Canonical: `DEV_FLOW.md`, `PO_STATUS.md`.
+
 # Roadmap: TickTick comments, task↔note, subtasks
 
 **Date:** 2026-10-19  

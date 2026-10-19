@@ -1,3 +1,5 @@
+> **Archive.** Not a source of requirements. Canonical: `DEV_FLOW.md`, `PO_STATUS.md`, `ABYSS_FIRST_PLAN.md`. If this file disagrees with those, they win.
+
 # Sync: projects, Active Zone children, and subtasks
 
 **Date:** 2026-10-19  

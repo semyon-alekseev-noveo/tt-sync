@@ -1,6 +1,8 @@
+> **Archive.** Not a source of requirements. Canonical: `DEV_FLOW.md`, `PO_STATUS.md`, `ABYSS_FIRST_PLAN.md`. If this file disagrees with those, they win.
+
 # GTD sync research — TickTickSync (Abyss fork) ⇄ Obsidian
 
-**Date:** 2026-10-16 · **Branch:** `abyss-mapping` · **Test vault:** `/home/sam/obsidian/Thinkpad-tts-test` (copy; live vault untouched)
+**Date:** 2026-10-16 · **Branch:** `abyss-mapping` · **Test vault:** `<pilot-vault>` (copy; live vault untouched)
 **Team:** Analyst 1 (plugin internals) · Analyst 2 (Obsidian / Abyss Tasks / GTD) · Product Owner (stories, ACs, priorities)
 **Status:** research + pilot (2026-10-16). For step-by-step **real cases** (preconditions, expected vault + TickTick, pass/fail), use **`GTD_SYNC_CASES.md`**. This file stays the code-path and gap analysis.
 
@@ -84,7 +86,7 @@
 
 | Layer | Definition | Where |
 |---|---|---|
-| **This vault (user's)** | A **project MOC note**: frontmatter `tags: [system/moc, system/project]`, `kind: system`, `status: 🟢 In Progress`, `areas`, `topic`; sections `## Overview`, `## Основные разделы`, `## Active Zone`, `## Источники и связанные заметки`, `> [!note] Metadata`. Lives in `10 Projects/`. Created by Templater `60 templates/MOC.md` (kind chosen by prompt; `system/project` tag only for "project MOC"). | `/home/sam/obsidian/Thinkpad-tts-test/60 templates/MOC.md`; example `10 Projects/Подключение посудомойки.md` |
+| **This vault (user's)** | A **project MOC note**: frontmatter `tags: [system/moc, system/project]`, `kind: system`, `status: 🟢 In Progress`, `areas`, `topic`; sections `## Overview`, `## Основные разделы`, `## Active Zone`, `## Источники и связанные заметки`, `> [!note] Metadata`. Lives in `10 Projects/`. Created by Templater `60 templates/MOC.md` (kind chosen by prompt; `system/project` tag only for "project MOC"). | `<pilot-vault>/60 templates/MOC.md`; example `10 Projects/Подключение посудомойки.md` |
 | **Abyss Tasks plugin (generic)** | A **note matching `projects.membershipQuery`** (syntax: `folder/`, `#tag`, `key=value`, `and/or/not`). Default `"projects/"`, `createFolder: "projects"`, `statusProperty: "status"`, statuses inbox/todo/wip/done, new tasks go under section `# Tasks` (`taskInsertionMode: "section"`). | `.obsidian/plugins/abyss-tasks/data.json` → `projects.*` (v2.1.2) |
 | **TickTickSync fork** | Note with frontmatter tag `system/project` **and** path under `projectsFolder` (default `10 Projects`); identity = frontmatter `ticktick_id`; tasks go to `## Active Zone`. | `src/projectScheme.ts` `isProjectNote`, `ACTIVE_ZONE`, `renderProjectNote` |
 

@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-19 15:30 UTC
+
+- Context: Owner asked for one development flow and the P1/P2 reliability fixes before another live soak. Version stays **2.0.47** until the owner releases.
+- Target: `DEV_FLOW.md`; fail-closed pull; honest notice; parent push on a child comment line; debounced open-file push; API comments in `vaultLineBehindTask`; comment-map cleanup; `synchronizationInner` integration test; docs aligned to the code.
+- Actions log: Branch `cursor/dev-flow-reliability-816a`. No tag. No merge.
+- Validation: `npx vitest run` → 73 files, 569 passed; `npm run build` → ok. Live vault and pilot Obsidian were **not** run.
+- Problems: GAP-COMMENT-EDIT, untagged Abyss Inbox, `tp_…` revoke, NOTE-L3b / AF gate still open. Stamp test in `abyssCommentSync.test.ts` now expects the local wall-clock of `createdTime` so UTC CI matches a +07 machine.
+- To Be Done: Owner merges. Human or local agent runs the one live gate on `<pilot-vault>`.
+- References: `DEV_FLOW.md`, `PO_STATUS.md`, `ABYSS_FIRST_CASES.md`, `src/test/synchronizationInner.integration.test.ts`
+
 ### Iteration 2026-10-19 14:10 UTC
 
 - Context: Release **2.0.47** shipped; three read-only analysts reviewed Abyss tasks, plugin architecture, sync stability.
@@ -671,7 +681,7 @@
   - Root cause: `pluginLoad` returned before `addSettingTab` when `loadSettings` returned false (migration or `loadData` failure).
   - Always call `addSettingTab` after `loadSettings`; continue initialization with a notice on partial load.
   - `loadSettings`: migration errors keep in-memory merge without auto-save; total failure falls back to defaults and sets `settingsReady`.
-  - Copied `dist/` to `/home/sam/obsidian/Thinkpad-tts-test/.obsidian/plugins/tickticksync/`.
+  - Copied `dist/` to `<pilot-vault>/.obsidian/plugins/tickticksync/`.
 - Validation: `npm test -- --run` 57 files / 481 passed; `npm run build` OK.
 - Problems: Test vault `manifest.json` still lists `author: thesamim` (fork); community browser may show upstream X-isfor-Adam if BRAT points elsewhere (`open`).
 - To Be Done: Reload plugin in Obsidian; open settings via gear on plugin row in Settings → Community plugins.
@@ -707,7 +717,7 @@
 - Validation: `npm test -- --run` 56 files / 478 passed (new `autoLogin.test.ts`); `npm run build` OK; `tsc --noEmit` clean; `cmp dist/main.js` = vault copy.
 - Problems: test-vault `data.json` has no `username`/`password` yet, so auto-login only re-logs in once they are added (`open`); Obsidian was running during edit, a running plugin can overwrite `data.json` (`open`, reload plugin).
 - To Be Done: Add `username`/`password` (settings or data.json), reload plugin, check lists appear in GTD section; then pilot checklist in `PO_STATUS.md`.
-- References: `CHANGELOG.md`, `src/autoLogin.ts`, `src/main.ts`, `src/projectsVersion.ts`, `src/ui/settings/svelte/AccessControlLogin.svelte`, `/home/sam/obsidian/Thinkpad-tts-test/.obsidian/plugins/tickticksync/data.json`
+- References: `CHANGELOG.md`, `src/autoLogin.ts`, `src/main.ts`, `src/projectsVersion.ts`, `src/ui/settings/svelte/AccessControlLogin.svelte`, `<pilot-vault>/.obsidian/plugins/tickticksync/data.json`
 
 ### Iteration 2026-10-16 05:25 UTC
 
@@ -762,7 +772,7 @@
 - Validation: Read back test-vault `data.json` keys; no `npm test` (no code changes).
 - Problems: Stub files for all lists still land under `30 Tasks/TickTick/` on sync until G1 fix (`open`).
 - To Be Done: Owner confirms `GTD_SYNC_RESEARCH.md` §9; implement MVP items in `TODO.md` GTD section.
-- References: `CHANGELOG.md`, `GTD_SYNC_RESEARCH.md`, `PO_STATUS.md`, `/home/sam/obsidian/Thinkpad-tts-test/.obsidian/plugins/tickticksync/data.json`
+- References: `CHANGELOG.md`, `GTD_SYNC_RESEARCH.md`, `PO_STATUS.md`, `<pilot-vault>/.obsidian/plugins/tickticksync/data.json`
 
 ### Iteration 2026-10-16 05:35 UTC
 
@@ -772,7 +782,7 @@
 - Validation: TickTick MCP returned ids for all seven lists.
 - Problems: `tagListMappings` still target production list names until soak remapped (`open`).
 - To Be Done: Implement G1 + `syncedLists`; remap pilot to `TTS-*`; `projectTemplatePath` for MOC template.
-- References: `CHANGELOG.md`, `PO_STATUS.md`, `GTD_SYNC_RESEARCH.md`, `/home/sam/obsidian/Thinkpad-tts-test/00 Inbox/TTS-PILOT.md`
+- References: `CHANGELOG.md`, `PO_STATUS.md`, `GTD_SYNC_RESEARCH.md`, `<pilot-vault>/00 Inbox/TTS-PILOT.md`
 
 ### Iteration 2026-10-16 04:45 UTC
 
@@ -856,7 +866,7 @@
   - TickTick titles/tags polluted by bidirectional link injection (`open` for cleanup).
   - Abyss note lines on A not present in TT `content`/`desc` (`open`).
 - To Be Done: Set SyncTag / raise interval; decide cleanup of TT title links + `ticktick` tags; optional re-sync notes.
-- References: `CHANGELOG.md`, `/home/sam/obsidian/Thinkpad-tts-test/.obsidian/plugins/tickticksync/data.json`
+- References: `CHANGELOG.md`, `<pilot-vault>/.obsidian/plugins/tickticksync/data.json`
 
 ### Iteration 2026-10-15 11:12 UTC
 
@@ -868,7 +878,7 @@
   - Sync limits wiped: `SyncTag`/`SyncProject` empty, Abyss off, interval 300s → full list pull into test vault (`open` for settings UX).
   - Root notes `Inbox.md`, `Projects.md`, etc. + empty numbered stubs created in test vault only (`mitigated` by copy isolation).
 - To Be Done: Re-apply SyncTag `tts-test` + raise interval in UI before next sync; disable plugin or pause sync; decide cleanup of pulled list files in copy.
-- References: `CHANGELOG.md`, `/home/sam/obsidian/Thinkpad-tts-test/00 Inbox/TTS-Test.md`
+- References: `CHANGELOG.md`, `<pilot-vault>/00 Inbox/TTS-Test.md`
 
 ### Iteration 2026-10-15 11:03 UTC
 
@@ -876,7 +886,7 @@
 - Target: Safe test vault with rebuilt plugin and limited-sync defaults (no full account pull).
 - Actions log:
   - Rebuilt `abyss-mapping` (`npm ci` + `npm run build`).
-  - Copied vault `/home/sam/obsidian/Thinkpad` → `/home/sam/obsidian/Thinkpad-tts-test`.
+  - Copied vault `<live-vault>` → `<pilot-vault>`.
   - Installed plugin into copy; enabled in community-plugins; registered vault in Obsidian.
   - Wrote limited-sync `data.json` (SyncTag `tts-test`, Abyss on, 24h interval) + `00 Inbox/TTS-Test.md` / `TTS-SETUP.md`.
 - Validation: `npm run build` → dist `main.js`/`styles.css` OK; plugin files present under test vault plugins dir.
@@ -886,4 +896,4 @@
   - User: revoke/rotate exposed API token.
   - User: open Thinkpad-tts-test → plugin login → tag 2–3 TT tasks `tts-test` → Sync Now.
   - Observe first sync; only then widen Sync Project/Tag.
-- References: `CHANGELOG.md`, `TODO.md`, `ABYSS_MAPPING.md`, `/home/sam/obsidian/Thinkpad-tts-test/00 Inbox/TTS-SETUP.md`
+- References: `CHANGELOG.md`, `TODO.md`, `ABYSS_MAPPING.md`, `<pilot-vault>/00 Inbox/TTS-SETUP.md`
