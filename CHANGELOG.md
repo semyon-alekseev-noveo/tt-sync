@@ -1,5 +1,25 @@
 # Changelog
 
+### Iteration 2026-10-19 09:28 UTC
+
+- Context: Pilot smokes — Abyss description on **тест-синк** did not reach TickTick; TT body on **task-13-43-vault-r3** did not refresh Obsidian when `modifiedTime` was stale.
+- Target: **2.0.40** — Obs→TT push and TT→Obs pull for single-line Abyss notes (`- >`).
+- Actions log: Line-hash includes note text when `syncNotes` and `taskLines.length > 0` (was `> 1`); `vaultLineBehindTask` parses full Abyss block and compares `content`/`desc` to live TT.
+- Validation: `npx vitest run` → 530 passed; root cause matched journal pushes with `"content":""` while vault had `- >` children.
+- Problems: Comments (`- stamp:`) still need soak; Abyss UI must flush child lines to `.md` before sync.
+- To Be Done: Reload **2.0.40** on pilot vault; re-sync **тест-синк** and a TT-only body edit.
+- References: `src/services/TaskModificationDetector.ts`, `src/services/VaultSyncCoordinator.ts`, `ABYSS_NOTES_ALIGNMENT.md`, `CHANGELOG.md`
+
+### Iteration 2026-10-19 07:25 UTC
+
+- Context: Save Abyss↔TT notes analysis; refocus pilot on project scheme and subtask sync.
+- Target: Durable docs for notes alignment and for projects / Active Zone / subtask order.
+- Actions log: Added `ABYSS_NOTES_ALIGNMENT.md`, `SYNC_PROJECTS_AND_SUBTASKS.md`; linked from `GTD_SYNC_CASES.md` and `PROJECT_STATE.md`.
+- Validation: No code change.
+- Problems: CASE-P3/P4/P6 and subtask-order live smokes still open.
+- To Be Done: Execute §5 in `SYNC_PROJECTS_AND_SUBTASKS.md` on `Thinkpad-tts-test`.
+- References: `ABYSS_NOTES_ALIGNMENT.md`, `SYNC_PROJECTS_AND_SUBTASKS.md`, `CHANGELOG.md`
+
 ### Iteration 2026-10-19 07:18 UTC
 
 - Context: Full-sync progress modal blocked the vault; user wanted the same top-right toast style as other plugin Notices.

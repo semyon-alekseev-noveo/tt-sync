@@ -317,9 +317,9 @@ export class TaskModificationDetector {
 			return false;
 		}
 
-		// Calculate hash for change detection
+		// Calculate hash for change detection (Abyss often has exactly one `- >` child line)
 		let taskNotes = '';
-		if (taskRecord.taskLines && taskRecord.taskLines.length > 1) {
+		if (getSettings().syncNotes && taskRecord.taskLines && taskRecord.taskLines.length > 0) {
 			taskNotes = this.plugin.taskParser.getNoteString(taskRecord, taskId);
 		}
 		const newHash = await this.plugin.taskParser?.getLineHash(lineText + taskNotes);

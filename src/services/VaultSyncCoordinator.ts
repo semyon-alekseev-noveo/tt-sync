@@ -20,6 +20,7 @@ import { allowVaultUpdate, fileForNewTickTickTask, isListAllowed, normalizeSyncT
 import { TaskDeletionModal } from '@/modals/TaskDeletionModal';
 import { FolderSyncService } from '@/services/FolderSyncService';
 import log from '@/utils/logger';
+import { NewFileMap } from '@/services/NewFileMap';
 
 export class VaultSyncCoordinator {
 	private app: App;
@@ -307,7 +308,7 @@ export class VaultSyncCoordinator {
 	/**
 	 * Determine what action is needed for a task
 	 */
-	/** Vault checkbox text/status differs from TickTick (delta pull can miss title-only edits). */
+	/** Vault line differs from TickTick (delta pull can miss title/body edits without `modifiedTime` bump). */
 	private async vaultLineBehindTask(task: ITask, filePath: string): Promise<boolean> {
 		const file = this.app.vault.getAbstractFileByPath(filePath);
 		if (!(file instanceof TFile)) return false;
@@ -326,15 +327,22 @@ export class VaultSyncCoordinator {
 		} catch {
 			return false;
 		}
-		for (const line of text.split('\n')) {
-			if (parser.getTickTickId(line) !== task.id) continue;
-			const lineTask = await parser.convertLineToTask(line, 0, filePath, {
-				getTaskItems: () => [],
-				getTaskRecord: () => ({ task: line, parentId: '', taskLines: [] }),
-			} as never, null);
-			if (!lineTask) return false;
-			return parser.isTitleChanged(lineTask, remote)
-				|| parser.isStatusChanged(lineTask as unknown as Record<string, unknown>, remote as unknown as Record<string, unknown>);
+		const fileMap = new NewFileMap(this.app, this.plugin, file);
+		await fileMap.init(text);
+		const lineIdx = fileMap.getTaskIndex(task.id);
+		if (lineIdx < 0) return false;
+		const taskRec = fileMap.getTaskRecord(task.id);
+		const lineTask = await parser.convertLineToTask(
+			taskRec.task, lineIdx, filePath, fileMap, taskRec,
+		);
+		if (!lineTask) return false;
+		if (parser.isTitleChanged(lineTask, remote)
+			|| parser.isStatusChanged(lineTask as unknown as Record<string, unknown>, remote as unknown as Record<string, unknown>)) {
+			return true;
+		}
+		if (getSettings().syncNotes) {
+			if (parser.areNotesChanged(lineTask.content ?? '', remote.content ?? '')) return true;
+			if (parser.areNotesChanged(lineTask.desc ?? '', remote.desc ?? '')) return true;
 		}
 		return false;
 	}
