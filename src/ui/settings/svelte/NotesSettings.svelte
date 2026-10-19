@@ -15,6 +15,7 @@
 	let syncNotes: boolean = false;
 	let abyssTasksFormat: boolean = false;
 	let abyssIndent: 'tab' | 'spaces' = 'tab';
+	let syncNoteContextTags: boolean = true;
 	let scheduledAsStartDate: boolean = false;
 	let tagMappingText = '';
 	let statusMappingText = '';
@@ -31,6 +32,7 @@
 			...s,
 			abyssTasksFormat,
 			abyssIndent,
+			syncNoteContextTags,
 			scheduledAsStartDate,
 			tagMappings: parseTagMappingText(tagMappingText),
 			statusMappings: parseStatusMappingText(statusMappingText),
@@ -58,6 +60,7 @@
 		syncNotes = $settingsStore.syncNotes;
 		abyssTasksFormat = $settingsStore.abyssTasksFormat ?? false;
 		abyssIndent = $settingsStore.abyssIndent ?? 'tab';
+		syncNoteContextTags = $settingsStore.syncNoteContextTags ?? true;
 		scheduledAsStartDate = $settingsStore.scheduledAsStartDate ?? false;
 		tagMappingText = tagMappingToText($settingsStore.tagMappings);
 		statusMappingText = statusMappingToText($settingsStore.statusMappings);
@@ -79,6 +82,7 @@
 		syncNotes = $settingsStore.syncNotes;
 		abyssTasksFormat = $settingsStore.abyssTasksFormat ?? false;
 		abyssIndent = $settingsStore.abyssIndent ?? 'tab';
+		syncNoteContextTags = $settingsStore.syncNoteContextTags ?? true;
 		scheduledAsStartDate = $settingsStore.scheduledAsStartDate ?? false;
 		tagMappingText = tagMappingToText($settingsStore.tagMappings);
 		statusMappingText = statusMappingToText($settingsStore.statusMappings);
@@ -202,6 +206,19 @@
 		</div>
 
 		{#if abyssTasksFormat}
+			<div class="setting-item">
+				<div class="setting-item-info">
+					<div class="setting-item-name">Note / project context tags</div>
+					<div class="setting-item-description">
+						Push <code>note/&lt;file&gt;</code> and <code>proj/&lt;moc&gt;</code> to TickTick for filter views (like Abyss source note). Not written on the Obsidian line.
+					</div>
+				</div>
+				<div class="setting-item-control">
+					<label class="checkbox-container" class:is-enabled={syncNoteContextTags}>
+						<input type="checkbox" bind:checked={syncNoteContextTags} on:change={saveFormat} />
+					</label>
+				</div>
+			</div>
 			<div class="setting-item">
 				<div class="setting-item-info">
 					<div class="setting-item-name">Abyss child indent</div>

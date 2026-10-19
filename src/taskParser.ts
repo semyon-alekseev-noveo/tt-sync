@@ -17,6 +17,7 @@ import { normalizeTrigger, parseReminderText, secondsToShorthand, triggerToSecon
 import log from '@/utils/logger';
 import { isBlankTitle, isUnfinishedCapture } from '@/projectScheme';
 import { isPathInPushScope, scopePushWithoutMarker } from '@/syncScope';
+import { appendContextTags, stripInjectedContextTags } from '@/contextTags';
 
 const prioritySymbols = {
 	Highest: '🔺', High: '⏫', Medium: '🔼', Low: '🔽', Lowest: '⏬', None: ''
@@ -167,7 +168,7 @@ export class TaskParser {
 		task.title = this.stripOBSUrl(task.title);
 
 		let checkChar = task.status > 0 ? 'x' : ' ';
-		let lineTags = task.tags;
+		let lineTags = stripInjectedContextTags(task.tags);
 		if (getSettings().abyssTasksFormat) {
 			const r = restoreStatus(task.status, task.tags, getSettings().statusMappings);
 			checkChar = r.char;
@@ -797,6 +798,15 @@ export class TaskParser {
 		if (!projectOf && scopePushWithoutMarker() && isPathInPushScope(filepath) && !isBlankTitle(title)) {
 			const hasSource = tags.some(t => t === 'obsidian' || t === 'ticktick' || t === markerName());
 			if (!hasSource) tags = [...tags, 'obsidian'];
+		}
+
+		if (getSettings().syncNoteContextTags && getSettings().abyssTasksFormat && filepath) {
+			const schemePid = projectOf?.parentId
+				?? (parentId && this.plugin.projectScheme?.isParentId?.(parentId) ? parentId : undefined);
+			const projectNotePath = schemePid
+				? this.plugin.projectScheme?.noteForParent?.(schemePid)
+				: undefined;
+			tags = appendContextTags(tags, { filePath: filepath, projectNotePath });
 		}
 
 		const isCompleted = this.isTaskCheckboxChecked(textWithoutIndentation);

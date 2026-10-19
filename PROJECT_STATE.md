@@ -22,7 +22,7 @@
 ## Validation
 
 - Build: `npm run build` in repo root; CI on `abyss-mapping` via `.github/workflows/ci.yml`.
-- Unit tests: `npx vitest run` (527 tests at **2.0.36**).
+- Unit tests: `npx vitest run` (530+ tests at **2.0.40**); descriptions sync Obs↔TT; comments still in `content` until Phase 1.
 - Manual pilot: **`SMOKE_TESTS.md`**. **2.0.37** adds sync progress modal; Phase B agent: pull + TT rename + R7 pass; user **R3/R8** (in-editor rename) and Phase D remain.
 - BRAT installs: GitHub Release assets from `.github/workflows/release.yml` (see `docs/BRAT_INSTALL.md`).
 - TT cleanup verified 2026-10-16 via MCP (no `ticktick` tag left on polluted set).
@@ -38,16 +38,19 @@
 
 ## To Be Done
 
-1. **Phase B (remaining):** R3/R8 — rename in **Obsidian editor**, then Sync (not raw disk edit).
-2. **Phase C:** skipped for now.
-3. **Phase D:** AF-* + live vault gate per `PO_STATUS.md`.
-4. Release **2.0.37** (sync progress UI).
-4. Engineering backlog: settings copy (Step 5); P6 regression doc.
+1. **Phase 1 (comments):** Abyss `- stamp:` → TickTick **Comments API** (not `content`); see `TT_ABYSS_ROADMAP.md`.
+2. **Phase 2 (task↔note):** PO pick L1–L5; fix Abyss `membershipQuery` → `10 Projects/`.
+3. **Phase 3 (subtasks):** Matrix S1–S6 after Phase 1 — `SYNC_PROJECTS_AND_SUBTASKS.md` + `TT_ABYSS_ROADMAP.md`.
+4. **Projects:** CASE-P2–P4, P6, subtask order (unchanged).
+5. **Phase D:** AF-* + live vault gate per `PO_STATUS.md`.
 
 ## References
 
+- `TT_ABYSS_ROADMAP.md`
 - `SMOKE_TESTS.md`
 - `ABYSS_FIRST_PLAN.md`
+- `ABYSS_NOTES_ALIGNMENT.md`
+- `SYNC_PROJECTS_AND_SUBTASKS.md`
 - `GTD_SYNC_CASES.md`
 - `GTD_SYNC_RESEARCH.md`
 - `CHANGELOG.md`

@@ -23,7 +23,7 @@ describe('convertLineToTask with Abyss settings', () => {
 		const fileMap = { getTaskItems: () => [], getTaskRecord: () => ({ task: line, parentId: '',
 			taskLines: ['\t- > описание', '\t- 2026-10-14 09:00: коммент'] }) } as unknown;
 		const task = await parser.convertLineToTask(line, 0, 'p.md', fileMap as never, null);
-		expect(task.tags).toEqual(['next']);
+		expect(task.tags).toEqual(['next', 'note/p']);
 		expect(task.startDate?.slice(0, 10)).toBe(task.dateHolder?.scheduled_date?.isoDate?.slice(0, 10));
 		expect(task.startDate).not.toBe(task.dueDate);
 		expect(task.content).toBe('описание\n\nComments:\n2026-10-14 09:00: коммент');

@@ -1,5 +1,35 @@
 # Changelog
 
+### Iteration 2026-10-19 12:02 UTC
+
+- Context: PO asked for TickTick filter tags mirroring Abyss grouping by source note (and project MOC), not only `parentId`.
+- Target: **2.0.41** — push `note/<slug>` / `proj/<slug>` on sync; strip on pull.
+- Actions log: `src/contextTags.ts`; hook in `convertLineToTask` / `convertTaskToLine`; setting `syncNoteContextTags` (Abyss format); UI in `NotesSettings.svelte`; preset `TTS-data-preset.json`.
+- Validation: `npx vitest run` → 535 passed; `npm run build` → ok.
+- Problems: `40 KB/` still outside default `syncScopeFolders` — add folder to push log tasks.
+- To Be Done: Phase 1 TT Comments API; re-sync lines to attach tags in TickTick.
+- References: `TT_ABYSS_ROADMAP.md`, `CHANGELOG.md`
+
+### Iteration 2026-10-19 11:45 UTC
+
+- Context: PO confirmed L1+L3; TT tasks lack project/note context vs Abyss grouping.
+- Target: Document Abyss UI grouping vs TT `parentId`/lists; propose C1–C6 in roadmap.
+- Actions log: Expanded `TT_ABYSS_ROADMAP.md` Phase 2b; verified `test 3` has `parentId` on TTS-Projects.
+- Validation: MCP `get_task_by_id` for Active Zone child shows parent link; inbox tasks do not.
+- Problems: Empty `project:` on task notes breaks `resolveForFile` (`open` in vault).
+- To Be Done: Implement C2 `projectContextTag`; Phase 1 comments API.
+- References: `TT_ABYSS_ROADMAP.md`, `CHANGELOG.md`
+
+### Iteration 2026-10-19 11:30 UTC
+
+- Context: Pilot confirmed Abyss comments need Enter to persist; descriptions sync in 2.0.40; user wants TT Comments UI, task↔note model, subtask smokes.
+- Target: Three-phase roadmap (API comments, Abyss note topology, subtask matrix).
+- Actions log: Added `TT_ABYSS_ROADMAP.md`; verified TickTick `add_comment`/`get_comment`/`delete_comment` via MCP; updated `PROJECT_STATE.md` backlog.
+- Validation: MCP probe comment on `6ad5c3c3…` created and deleted; `get_task_by_id` still has description-only `content`.
+- Problems: No `update_comment` in MCP — edit sync may be delete+recreate (`open`).
+- To Be Done: Implement Phase 1 (`syncAbyssCommentsViaApi`); PO sign-off Phase 2 (L1+L3 recommended).
+- References: `TT_ABYSS_ROADMAP.md`, `ABYSS_NOTES_ALIGNMENT.md`, `CHANGELOG.md`
+
 ### Iteration 2026-10-19 09:28 UTC
 
 - Context: Pilot smokes — Abyss description on **тест-синк** did not reach TickTick; TT body on **task-13-43-vault-r3** did not refresh Obsidian when `modifiedTime` was stale.

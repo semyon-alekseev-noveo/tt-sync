@@ -40,6 +40,8 @@ export interface ITickTickSyncSettings {
 	// Abyss Tasks format: notes as `- > ` lines, comments as `- ` lines
 	abyssTasksFormat: boolean;
 	abyssIndent: 'tab' | 'spaces';
+	/** Push `note/<file-slug>` and `proj/<moc-slug>` tags for TickTick filter views; stripped on pull. */
+	syncNoteContextTags: boolean;
 	// ⏳ scheduled <-> TickTick startDate (when no 🛫)
 	scheduledAsStartDate: boolean;
 	tagMappings: { obsidian: string; ticktick: string }[];
@@ -128,6 +130,7 @@ export const DEFAULT_SETTINGS: ITickTickSyncSettings = {
 	noteDelimiter: '-------------------------------------------------------------',
 	abyssTasksFormat: false,
 	abyssIndent: 'tab',
+	syncNoteContextTags: true,
 	scheduledAsStartDate: false,
 	tagMappings: [],
 	statusMappings: [{ char: '/', tag: 'status/in-progress' }, { char: '-', tag: 'status/cancelled' }],
