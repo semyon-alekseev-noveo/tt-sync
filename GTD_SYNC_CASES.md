@@ -577,18 +577,21 @@ These cases define **daily GTD**: tasks live in **list files** under `30 Tasks/T
 
 ## 10. Abyss notes & comments (`CASE-AN*`)
 
-Maps to `ABYSS_NOTES_ALIGNMENT.md` §4 and `SMOKE_TESTS.md` § Abyss notes. **Native TickTick Comments API is not in scope** until `TT_ABYSS_ROADMAP.md` Phase 1.
+Maps to `ABYSS_NOTES_ALIGNMENT.md` §4 and `SMOKE_TESTS.md` § Abyss notes. **2.0.46+** uses TickTick Comments API when `syncAbyssCommentsViaApi` is on (Phase 1).
 
 | ID | Scenario | Pass when |
 |----|----------|-----------|
 | CASE-AN1 | Obs `- >` → Sync | TT `content`/`desc` has description |
 | CASE-AN2 | TT body edit → Sync | Vault `- >` lines updated |
-| CASE-AN3 | Abyss comment in `.md` → Sync | TT `content` has `Comments:\n…` |
+| CASE-AN3 | Abyss comment in `.md` → Sync | **2.0.46+:** TT Comments API (`get_comment`); legacy: `content` has `Comments:\n…` |
 | CASE-AN4 | TT `Comments:` block → Sync | Vault `- YYYY-MM-DD …` bullets |
 | CASE-AN5 | Checklist item toggle on TT | Matching `- [ ]` / `[x]` under task |
 | CASE-AN6 | TT desc change + new local comment | Both preserved after sync |
+| CASE-AN7 | Comment in `.md`, title unchanged (**2.0.47** BUG-COMMENT-1) | TT Comments panel shows text after Sync (NOTE-L3b) |
 
-Automated: `notesSmoke.test.ts` (NOTE-A*), `abyssFormat.test.ts`. Live: NOTE-L1–L5 in `SMOKE_TESTS.md`.
+**2.0.47 regressions:** duplicate `note/` / `proj/` tags (BUG-TAG-1) — `CTX-D1` / `CTX-D2` in `SMOKE_TESTS.md`.
+
+Automated: `notesSmoke.test.ts` (NOTE-A*), `abyssCommentSync.test.ts` (NOTE-C*), `taskModificationCommentSmoke.test.ts`, `contextTags.test.ts`. Live: NOTE-L1–L5, NOTE-L3b in `SMOKE_TESTS.md`.
 
 ---
 

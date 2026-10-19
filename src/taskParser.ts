@@ -19,7 +19,7 @@ import { normalizeTrigger, parseReminderText, secondsToShorthand, triggerToSecon
 import log from '@/utils/logger';
 import { isBlankTitle, isUnfinishedCapture } from '@/projectScheme';
 import { isPathInPushScope, scopePushWithoutMarker } from '@/syncScope';
-import { appendContextTags, stripInjectedContextTags } from '@/contextTags';
+import { appendContextTags, dedupeTags, isVaultContextTagMirror, stripInjectedContextTags } from '@/contextTags';
 
 const prioritySymbols = {
 	Highest: '🔺', High: '⏫', Medium: '🔼', Low: '🔽', Lowest: '⏬', None: ''
@@ -475,7 +475,10 @@ export class TaskParser {
 						display = display.replace(/-/g, '/');
 					}
 				}
-				resultLine = resultLine + ' #' + display;
+				const hash = `#${display}`;
+				if (!new RegExp(`${hash.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?![\\w/-])`, 'i').test(resultLine)) {
+					resultLine = resultLine + ' ' + hash;
+				}
 			}
 		});
 		return resultLine;
@@ -643,6 +646,12 @@ export class TaskParser {
 			rawTags.push(...kept);
 			const stTag = tagForStatusChar(checkboxChar(textWithoutIndentation), smap);
 			if (stTag) rawTags.push(stTag);
+		}
+
+		if (getSettings().abyssTasksFormat && getSettings().syncNoteContextTags) {
+			const kept = rawTags.filter(t => !isVaultContextTagMirror(t));
+			rawTags.length = 0;
+			rawTags.push(...kept);
 		}
 
 		// Resolve tags: handle hierarchy and create unknown tags in TickTick
@@ -819,6 +828,7 @@ export class TaskParser {
 				: undefined;
 			tags = appendContextTags(tags, { filePath: filepath, projectNotePath });
 		}
+		tags = dedupeTags(tags);
 
 		const isCompleted = this.isTaskCheckboxChecked(textWithoutIndentation);
 

@@ -30,7 +30,7 @@ Operator preset: `00 Inbox/TTS-data-preset.json`, runbook `00 Inbox/TTS-PILOT-RU
 Automated rows run with:
 
 ```bash
-npx vitest run src/test/logicSmoke.test.ts src/test/listMapping.test.ts src/test/projectParentKeep.test.ts src/test/foolCases.test.ts src/test/syncScope.test.ts src/test/contextTags.test.ts src/test/syncSmoke.test.ts src/test/notesSmoke.test.ts src/test/abyssFormat.test.ts src/test/abyssConvertLine.test.ts
+npx vitest run src/test/logicSmoke.test.ts src/test/listMapping.test.ts src/test/projectParentKeep.test.ts src/test/foolCases.test.ts src/test/syncScope.test.ts src/test/contextTags.test.ts src/test/syncSmoke.test.ts src/test/notesSmoke.test.ts src/test/abyssFormat.test.ts src/test/abyssConvertLine.test.ts src/test/abyssCommentSync.test.ts src/test/taskModificationCommentSmoke.test.ts
 ```
 
 | ID | What you prove | How |
@@ -123,6 +123,14 @@ Use throwaway task `#tts-test` in `00 Inbox/abyss-active.md` (or Abyss capture f
 
 **If NOTE-L3 fails but NOTE-A* pass:** almost always Abyss did not persist the comment to the file, or you are looking at TickTick **Comments** UI instead of the task **description/body** field.
 
+### Regression — comments (2.0.47+, BUG-COMMENT-1)
+
+| ID | Symptom | Pass when | Auto |
+|----|---------|-----------|------|
+| NOTE-L3b | Comment line in `.md`, title unchanged → **Synchronize** | TickTick **Comments** panel shows text (not only description) | `abyssCommentSync.test.ts` NOTE-C1 |
+| NOTE-C1 | `extractAbyssCommentThreads` finds vault comment lines | Threads non-empty for `- stamp:` child | `abyssCommentSync.test.ts` |
+| NOTE-C2 | Comment threads present, checkbox hash unchanged | `syncAbyssCommentsToTickTick` still invoked | `taskModificationCommentSmoke.test.ts` |
+
 ---
 
 ## Context tag smoke (2.0.41+)
@@ -136,6 +144,15 @@ Setting: **Sync note context tags** (`syncNoteContextTags`, requires Abyss forma
 | CTX-3 | Pull does not inject `note/` or `proj/` into checkbox text | TT task with both tags → sync → line has no `#note/` in vault |
 | CTX-A | Slug + strip helpers | `contextTags.test.ts` |
 | CTX-A2 | Parser push path | `syncSmoke.test.ts` SYNC-12 |
+
+### Regression — duplicate tags (2.0.47+, BUG-TAG-1)
+
+| ID | Symptom | Pass when | Auto |
+|----|---------|-----------|------|
+| CTX-D1 | `#note/…` or `#note-…` on checkbox **and** injected `note/…` on push | TT shows **one** `note/…` tag per slug after sync | `contextTags.test.ts` CTX-D1 |
+| CTX-D2 | Same slug mirrored on line and in tag array | Single hashtag on pull line; no double append on push | `contextTags.test.ts` CTX-D2, `taskParser.test.ts` |
+
+**Cause (fixed 2.0.47):** vault mirror tags + `appendContextTags` doubled; flat `note-foo` from abyss tag flattening + slash `note/foo` from API.
 
 Not in this automated run (needs Obsidian + TickTick UI):
 
@@ -189,7 +206,7 @@ Not in this automated run (needs Obsidian + TickTick UI):
 | **C — deletion UX** | CASE-DEL-1…5, DEL-N1: requires **Confirm** on `TaskDeletionModal` | **user only** | 30 min |
 | **D — pilot soak** | AF-* duplication cases, DEL-5 second sync, live vault readiness per `PO_STATUS.md` | user | 1–2 h |
 
-**Phase A (2026-10-19):** `npx vitest run` → **536 passed** (incl. SYNC-12, `contextTags`). Logic/SYNC bundle incl. `contextTags` → **58+ passed**.
+**Phase A (2026-10-19):** `npx vitest run` → **550 passed** (incl. NOTE-C1/C2, CTX-D1/D2, SYNC-12). Logic/SYNC bundle incl. `abyssCommentSync` + `taskModificationCommentSmoke` → **62+ passed**.
 
 **Phase B:** User **R1/R2 pass** (2.0.36). Agent run 2026-10-19 with vault open: SYNC-L4 pull **pass** (`agent-phase-b-pull` → `abyss-active.md`); TT rename → **pass** (`agent-phase-b-renamed`); **R7 pass** (`test 3` → `test-3-phase-b-tt` in project note, reverted after). **R3 skip (agent):** editing `.md` on disk does not trigger Obsidian push — rename a line **in the editor**, then Sync. Phase C **skipped** per plan.
 

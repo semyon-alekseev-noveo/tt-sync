@@ -2,7 +2,7 @@
 
 **Date:** 2026-10-19  
 **Branch:** `abyss-mapping`  
-**Status:** Planning (post–2.0.40 description sync)
+**Status:** Phase 1 shipped in **2.0.46** (`syncAbyssCommentsViaApi`); Phases 2–3 planning
 
 Three workstreams requested after pilot smokes (description + embedded `Comments:` in `content`).
 
@@ -19,7 +19,7 @@ Three workstreams requested after pilot smokes (description + embedded `Comments
 
 TickTick also has a **separate Comments API** (activity feed in app UI): `get_comment` / `add_comment` / `delete_comment` (MCP verified; comment body field is `title`, max 1024 chars, ids like `6ad5ff0f…`).
 
-The plugin **does not call** comment endpoints yet (`TicktickRestAPI.ts` has no comment methods).
+**2.0.46+:** `TicktickRestAPI` / `Tick` call `project/…/task/…/comments` when `syncAbyssCommentsViaApi` is on.
 
 ### Target
 

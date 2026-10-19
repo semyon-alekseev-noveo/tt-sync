@@ -32,15 +32,32 @@ export function projectContextTagFromPath(projectNotePath: string): string | und
 }
 
 export function isInjectedContextTag(tag: string): boolean {
-	const t = tag.toLowerCase();
+	const t = tag.toLowerCase().replace(/^#/, '');
 	return t.startsWith(NOTE_CTX_PREFIX) || t.startsWith(PROJ_CTX_PREFIX);
+}
+
+/** Vault line tags that mirror injected TT context tags (`#note/foo` or flattened `#note-foo`). */
+export function isVaultContextTagMirror(raw: string): boolean {
+	const t = raw.toLowerCase().replace(/^#/, '');
+	if (isInjectedContextTag(t)) return true;
+	const flat = t.replace(/\//g, '-');
+	return flat.startsWith('note-') || flat.startsWith('proj-');
+}
+
+export function dedupeTags(tags: string[]): string[] {
+	const out: string[] = [];
+	for (const tag of tags) {
+		const low = tag.toLowerCase();
+		if (!out.some(x => x.toLowerCase() === low)) out.push(tag);
+	}
+	return out;
 }
 
 export function appendContextTags(
 	tags: string[],
 	opts: { filePath: string; projectNotePath?: string },
 ): string[] {
-	const out = [...tags];
+	const out = dedupeTags(stripInjectedContextTags(tags));
 	const add = (tag: string | undefined) => {
 		if (!tag) return;
 		const low = tag.toLowerCase();
@@ -58,5 +75,5 @@ export function appendContextTags(
 }
 
 export function stripInjectedContextTags(tags: string[] | undefined): string[] {
-	return (tags ?? []).filter(t => !isInjectedContextTag(t));
+	return (tags ?? []).filter(t => !isVaultContextTagMirror(t));
 }

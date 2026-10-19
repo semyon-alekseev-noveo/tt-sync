@@ -68,6 +68,11 @@ describe('addTagsToLine', () => {
 		expect(result).toBe('- [ ] task #work #home');
 	});
 
+	it('CTX-D2: does not duplicate hashtag already on line (BUG-TAG-1)', () => {
+		const line = '- [ ] task #note/foo';
+		expect(parser.addTagsToLine(line, ['note/foo'])).toBe(line);
+	});
+
 	it('keeps hyphens flat for non-hierarchical tags when no tagSvc', () => {
 		const result = parser.addTagsToLine('- [ ] task', ['ok-here-we-go']);
 		expect(result).toBe('- [ ] task #ok-here-we-go');

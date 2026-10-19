@@ -745,8 +745,19 @@ export class Tick {
 			const response = await this.makeRequest('Get Task Comments', url, 'GET', undefined);
 			if (!response) return [];
 			if (Array.isArray(response)) return response as ITaskComment[];
-			const wrapped = response as { comments?: ITaskComment[] };
-			return wrapped.comments ?? [];
+			const wrapped = response as {
+				comments?: ITaskComment[];
+				data?: ITaskComment[];
+				result?: ITaskComment[] | { comments?: ITaskComment[] };
+			};
+			if (wrapped.comments?.length) return wrapped.comments;
+			if (wrapped.data?.length) return wrapped.data;
+			const r = wrapped.result;
+			if (Array.isArray(r)) return r;
+			if (r && typeof r === 'object' && Array.isArray((r as { comments?: ITaskComment[] }).comments)) {
+				return (r as { comments: ITaskComment[] }).comments;
+			}
+			return [];
 		} catch (e) {
 			log.error('Get Task Comments failed: ', e);
 			this.setError('Get Task Comments', null, e);
@@ -757,11 +768,12 @@ export class Tick {
 	async addTaskComment(projectId: string, taskId: string, title: string): Promise<ITaskComment | null> {
 		try {
 			const url = `${this.apiUrl}/${taskComment(projectId, taskId)}`;
-			const body = { title: title.slice(0, 1024) };
+			const body = { title: title.slice(0, 1024), content: title.slice(0, 1024) };
 			const response = await this.makeRequest('Add Task Comment', url, 'POST', body);
 			if (!response) return null;
-			const raw = response as { ok?: boolean; result?: ITaskComment };
+			const raw = response as { ok?: boolean; result?: ITaskComment; id?: string; title?: string };
 			if (raw.ok && raw.result) return raw.result;
+			if (raw.id) return { id: raw.id, title: raw.title ?? title };
 			return response as ITaskComment;
 		} catch (e) {
 			log.error('Add Task Comment failed: ', e);

@@ -3,7 +3,9 @@ import { fencedLines } from '@/utils/vaultIdScan';
 import { mergeTask, conflictNote } from '@/merge3';
 import { isBlankTitle, isUnfinishedCapture, stripFileLinks } from '@/projectScheme';
 import { abyssLinesToNote, mergeAbyssBlock, stripLegacyCommentsBlock } from '@/abyssFormat';
+import { extractAbyssCommentThreads } from '@/abyssFormat';
 import { syncAbyssCommentsToTickTick, useAbyssCommentsApi } from '@/abyssCommentSync';
+import { appendContextTags, dedupeTags, stripInjectedContextTags } from '@/contextTags';
 /**
  * TaskModificationDetector - Detects task changes in markdown files
  * Extracts modification detection logic from SyncModule (lines ~158-756)
@@ -173,6 +175,19 @@ export class TaskModificationDetector {
 				await this.plugin.taskRepository.upsertTask(newTask, fileMap.getFilePath());
 				await this.plugin.saveSettings();
 
+				if (useAbyssCommentsApi() && taskRecord?.taskLines?.length) {
+					try {
+						await syncAbyssCommentsToTickTick(
+							this.plugin.tickTickRestAPI,
+							newTask.id,
+							newTask.projectId,
+							taskRecord.taskLines,
+						);
+					} catch (e) {
+						log.warn('Abyss comment API sync failed after create', newTask.id, e);
+					}
+				}
+
 			} catch (error) {
 				log.error('Error adding task:', error);
 				log.error(`The error occurred in file: ${fileMap.getFilePath()}`);
@@ -341,6 +356,22 @@ export class TaskModificationDetector {
 				);
 				if (lineTask && await this.skipPushWhenTickTickRenamedVaultLine(lineTask, savedTask, taskId, filepath!)) {
 					return false;
+				}
+				if (useAbyssCommentsApi() && taskRecord.taskLines?.length) {
+					const threads = extractAbyssCommentThreads(taskRecord.taskLines);
+					if (threads.length) {
+						try {
+							await syncAbyssCommentsToTickTick(
+								this.plugin.tickTickRestAPI,
+								taskId,
+								savedTask.projectId,
+								taskRecord.taskLines,
+								savedTask.content,
+							);
+						} catch (e) {
+							log.warn('Abyss comment API sync failed (hash unchanged)', taskId, e);
+						}
+					}
 				}
 				// Task hasn't changed, ensure sync timestamps are current
 				const localTask = await this.plugin.taskRepository.loadLocalTaskById(taskId);
@@ -619,6 +650,18 @@ export class TaskModificationDetector {
 				lineTask.content = stripLegacyCommentsBlock(lineTask.content ?? '');
 				lineTask.desc = stripLegacyCommentsBlock(lineTask.desc ?? '');
 			}
+			if (getSettings().syncNoteContextTags && getSettings().abyssTasksFormat) {
+				const schemePid = lineTask.parentId && this.plugin.projectScheme?.isParentId?.(lineTask.parentId)
+					? lineTask.parentId : undefined;
+				const projectNotePath = schemePid ? this.plugin.projectScheme?.noteForParent?.(schemePid) : undefined;
+				const base = (lineTask.tags ?? []).filter(t => {
+					const l = t.toLowerCase();
+					return !l.startsWith('note-') && !l.startsWith('proj-');
+				});
+				lineTask.tags = dedupeTags(
+					appendContextTags(stripInjectedContextTags(base), { filePath: filepath, projectNotePath }),
+				);
+			}
 			const updatedTask = await this.plugin.tickTickRestAPI?.updateTask(lineTask) as ITask;
 			updatedTask.dateHolder = saveDateHolder;
 			updatedTask.lineHash = newHash;
@@ -644,7 +687,7 @@ export class TaskModificationDetector {
 			await this.plugin.taskRepository.upsertTask(lineTask, undefined, Date.now());
 		}
 
-		if (useAbyssCommentsApi() && newHash !== savedTask.lineHash && taskRecord.taskLines?.length) {
+		if (useAbyssCommentsApi() && taskRecord.taskLines?.length) {
 			const projectId = lineTask.projectId || savedTask.projectId;
 			if (projectId) {
 				try {

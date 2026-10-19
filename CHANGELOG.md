@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-19 13:40 UTC
+
+- Context: Pilot — comments not in TT Comments UI; duplicate `note/`/`proj/` tags (BUG-COMMENT-1, BUG-TAG-1).
+- Target: **2.0.47** fixes + smoke IDs NOTE-L3b, NOTE-C1, CTX-D1/D2 in `SMOKE_TESTS.md`.
+- Actions log: Comment sync on hash-unchanged path; tag mirror strip/dedupe; automated NOTE-C1 / CTX-D1.
+- Validation: `npx vitest run` → 550 passed; `npm run build` → ok.
+- Problems: Live CTX-D2 on polluted tasks needs one re-sync after upgrade.
+- To Be Done: BRAT **2.0.47**; run NOTE-L3b on «юбка» task.
+- References: `SMOKE_TESTS.md`, `CHANGELOG.md`
+
 ### Iteration 2026-10-19 13:10 UTC
 
 - Context: PO needs Abyss comments in TickTick **Comments** UI, not embedded in task body.

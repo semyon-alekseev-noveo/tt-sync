@@ -1,10 +1,22 @@
 import { describe, expect, it, vi } from 'vitest';
+
+vi.mock('@/db/taskCommentMaps', () => ({
+	listCommentMapsForTask: vi.fn().mockResolvedValue([]),
+	upsertCommentMap: vi.fn().mockResolvedValue(undefined),
+	deleteCommentMap: vi.fn().mockResolvedValue(undefined),
+	commentMapId: (taskId: string, fp: string) => `${taskId}:${fp}`,
+}));
 import {
 	abyssDescriptionToNote,
 	extractAbyssCommentThreads,
 	stripLegacyCommentsBlock,
 } from '@/abyssFormat';
-import { formatApiCommentAsAbyssLines, migrateLegacyCommentsInContent } from '@/abyssCommentSync';
+import {
+	formatApiCommentAsAbyssLines,
+	migrateLegacyCommentsInContent,
+	syncAbyssCommentsToTickTick,
+} from '@/abyssCommentSync';
+import type { TickTickRestAPI } from '@/services/TicktickRestAPI';
 import { getSettings } from '@/settings';
 
 describe('abyssCommentSync', () => {
@@ -37,5 +49,20 @@ describe('abyssCommentSync', () => {
 	it('syncAbyssCommentsViaApi defaults on in fork settings', () => {
 		const s = getSettings() as { syncAbyssCommentsViaApi?: boolean };
 		expect(s.syncAbyssCommentsViaApi).toBe(true);
+	});
+
+	it('NOTE-C1: pushes comment threads via API (BUG-COMMENT-1)', async () => {
+		const S = getSettings() as Record<string, unknown>;
+		Object.assign(S, { syncNotes: true, abyssTasksFormat: true, syncAbyssCommentsViaApi: true });
+		const add = vi.fn().mockResolvedValue({ id: 'cmt1', title: 'hi' });
+		const api = {
+			getTaskComments: vi.fn().mockResolvedValue([]),
+			addTaskComment: add,
+			deleteTaskComment: vi.fn().mockResolvedValue(true),
+		} as unknown as TickTickRestAPI;
+		const lines = ['\t- 2026-10-19 20:00: only comment changed'];
+		const ok = await syncAbyssCommentsToTickTick(api, 'task1', 'proj1', lines);
+		expect(ok).toBe(true);
+		expect(add).toHaveBeenCalledWith('proj1', 'task1', '2026-10-19 20:00: only comment changed');
 	});
 });
