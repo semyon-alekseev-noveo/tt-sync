@@ -1,10 +1,101 @@
 # Product owner brief — TickTickSync Abyss fork (project scheme)
 
-**Date:** 2026-10-16  
+**Обновлено:** 2026-10-19  
 **Audience:** Product owner / decision maker  
 **Repo:** `tickticksync` branch `abyss-mapping`  
 **Test vault:** `/home/sam/obsidian/Thinkpad-tts-test` (copy only; live vault untouched)  
-**Install:** BRAT → `https://github.com/semyon-alekseev-noveo/tt-sync` track **latest release** (**2.0.42** — full-pull command + smokes); plugin id **`tickticksync-abyss`** — `docs/BRAT_INSTALL.md`. Preset: `00 Inbox/TTS-data-preset.json`.
+**Install:** BRAT → `https://github.com/semyon-alekseev-noveo/tt-sync` track **latest release** (**2.0.47**, tag `2.0.47`); plugin id **`tickticksync-abyss`** — `docs/BRAT_INSTALL.md`. Preset: `00 Inbox/TTS-data-preset.json`.
+
+История изменений — только в `CHANGELOG.md`; здесь — снимок для PO.
+
+## Context
+
+- Релиз **2.0.47** выпущен: исправлены BUG-COMMENT-1 (комментарии Abyss не уходили в TickTick Comments, если hash строки не менялся) и BUG-TAG-1 (дубли тегов `note/`, `proj/`). Тег и ветка `abyss-mapping` отправлены в `tt-sync`.
+- Abyss-first: задачи живут там, где их кладёт Abyss; TT зеркалит теги/списки и родителей-проекты (`ABYSS_FIRST_PLAN.md`, топология R / CASE-T4 отложена).
+- Комментарии Abyss → TickTick **Comments API** (`syncAbyssCommentsViaApi`, по умолчанию вкл.); описание остаётся в `content`.
+- Живой vault `Thinkpad` не трогаем; пилот — только `Thinkpad-tts-test`.
+- Аналитический мит 2026-10-19 (три аналитика) — см. раздел ниже.
+
+## Target
+
+1. **Надёжный sync без тихих сбоев:** любая ошибка pull/push видна пользователю, чекпоинт не обманывает.
+2. **Abyss-комментарии и теги стабильны:** правка дочерней строки и TT-only изменения комментариев доезжают без ручных обходов.
+3. **Безопасный запуск на живом vault:** проход Phase D (AF-*) + soak NOTE-L3b на пилоте.
+4. **Поддерживаемость:** разорвать цикл `main` ↔ `services`, добавить интеграционный тест полного sync.
+
+## Validation
+
+- Автотесты: `npx vitest run` — **67 файлов, 550 тестов, все зелёные** (2.0.47); `npm run build` — ok.
+- Ручные smoke-сценарии: `SMOKE_TESTS.md` (NOTE-L3b, NOTE-C1, CTX-D1/D2 — живой прогон на пилоте ещё нужен).
+- Детали и даты прогонов — в `CHANGELOG.md`.
+
+## Problems
+
+| ID | Приоритет | Статус | Суть |
+|----|-----------|--------|------|
+| **BUG-COMMENT-1** | P1 | resolved в 2.0.47 | Комментарии не синкались при неизменном hash; нужен live-soak NOTE-L3b |
+| **BUG-TAG-1** | P2 | mitigated в 2.0.47 | Дубли `note/`/`proj/`; на «грязных» задачах нужен один re-sync (CTX-D2) |
+| **BUG-SYNC-SILENT-FAIL** | P1 | open | Ошибка `getUpdatedTasks` глотается (`src/api/index.ts`, `TicktickRestAPI.getUpdatedTasks`), pull продолжается с пустой дельтой, UI всегда пишет «Sync completed» (`main.ts` `synchronizeNow`). Чекпоинт при этом **не** сдвигается (проверено), т.е. потери данных нет, но сбой тихий |
+| **BUG-COMMENT-INLINE** (GAP) | P1 | open | Правка только дочерней строки-комментария не вызывает push (`checkLineForModifications`); помогает только палитра **Synchronize** |
+| **RISK-OPEN-FILE-EDIT** | P1 | open | `vault.modify` пропускает активный файл; push зависит от «ухода курсора» или полного Synchronize |
+| **BUG-PULL-COMMENT-STALE** (GAP) | P2 | open | `vaultLineBehindTask` не сравнивает API-комментарии → TT-only комментарий может не попасть в vault |
+| **RISK-PULL-WINS-LOCAL** | P2 | open | При победе локальной версии в LWW строка в vault может остаться устаревшей |
+| **BUG-COMMENT-MAP-ORPHAN** | P2 | open | `deleteCommentMapsForTask` нигде не вызывается → «сироты» в Dexie `taskCommentMaps` |
+| **GAP-COMMENT-EDIT** | P2 | open | Правка комментария = delete + add (новые ID, шум в ленте TT) |
+| **RISK-DUAL-STORE** | P2 | open | Две «истины»: Dexie `tasks` и `fileMetadata`/`syncFiles` → возможен дрейф |
+| **RISK-LARGE-VAULT** | P2 | open | Каждый sync сканирует все `.md` (`idsPresentInVault`, `ensureVaultFilesRegistered`) |
+| **TECH-START-1** | P2 | open | Полный pull на старте блокирует инициализацию |
+| **TECH-API-1** | P1 | open (риск) | Неофициальный клиент `Tick`: изменения TT ломают sync, покрытие тестами минимальное |
+| **TECH-CIRC-1 / GOD-1/2** | P2 | open | Цикл `main` ↔ `services`; god-классы `TickTickService`, `TaskModificationDetector` |
+| **BUG-NOTICE-1** | P3 | open | `main.ts` ~573: приоритет тернарного оператора → уведомление при загрузке всегда «Skipping backup.» |
+| **DOC-STALE-1** | P3 | open | `PROJECT_STATE.md`, `ABYSS_MAPPING.md`, `SMOKE_TESTS.md` частично описывают Phase 1 как «не сделано» |
+| Прежние | — | open | Токен `tp_…` из чата — отозвать; `data.json` тест-vault дрейфует от §2 — не синкать вслепую |
+
+## To Be Done
+
+1. **P1:** Fail-closed pull — возвращать ошибку из `getUpdatedTasks`, показывать в UI реальный итог sync (закрывает BUG-SYNC-SILENT-FAIL, BUG-NOTICE-1).
+2. **P1:** Push родителя при правке дочерней строки comment/desc (BUG-COMMENT-INLINE) + debounce-push активного файла (RISK-OPEN-FILE-EDIT).
+3. **P2:** `vaultLineBehindTask` учитывает API-комментарии; чистка `taskCommentMaps` при удалении задачи.
+4. **P2:** Интеграционный тест `synchronizationInner` (fake API + fake-indexedDB), тесты pull→vault для комментариев и миграции `Comments:`.
+5. **P2:** Live-soak 2.0.47 на пилоте (NOTE-L3b, CTX-D2), затем Phase D / AF-* перед живым vault.
+6. **P3:** Синхронизировать документы (DOC-STALE-1); затем рефакторинг (разрыв цикла `main`↔`services`, разбиение `TickTickService`), опция отключения full-pull на старте.
+
+## Аналитический мит 2026-10-19
+
+**Analyst A — Abyss-задачи**
+- Цепочка: строка Abyss → `convertLineToTask` → `TaskModificationDetector` (hash) → `syncAbyssCommentsToTickTick` → TT; обратно `fileOperation` → `convertTaskToLine`/`mergeAbyssBlock`.
+- Дыры: правка дочерней строки не пушится; pull не видит TT-only комментарии; delete+recreate при правке; сироты `taskCommentMaps`.
+- Тест `taskModificationCommentSmoke` считает hash через `abyssLinesToNote`, а прод использует `abyssDescriptionToNote` — тест может не ловить регрессию.
+- Доки отстают от кода (Phase 1 уже в 2.0.46–2.0.47).
+
+**Analyst B — архитектура плагина**
+- Слои: `main.ts` → `TickTickService` (god-class) → Dexie/репозитории → `VaultSyncCoordinator`/`fileOperation`; `Tick` — неофициальный API-клиент.
+- Связность: цикл `main` ↔ `services`, глобальные синглтоны (`getSettings`, `db`, `getTick`), дубль `FileOperation`.
+- Нет тестов: `EventHandlerService`, `FolderSyncService`, `main.ts` lifecycle, `Tick`, полный `synchronizationInner`.
+- BUG-NOTICE-1 подтверждён.
+
+**Analyst C — стабильность sync**
+- Жизненный цикл: startup full pull → `pushLocalEditsFirst` → pull в Dexie → `VaultSyncCoordinator` → `syncFiles`; конфликты по `modifiedTime`, 3-way merge на push.
+- Главный риск — тихие ошибки pull/UI; затем активный файл без push, LWW «локальный побеждает», O(vault×tasks) сканы, двойное хранилище.
+
+**Противоречия и их разрешение**
+- C назвал сбой pull P0 («чекпоинт сдвигается») — **проверкой по коду не подтверждено**: при ошибке чекпоинт остаётся прежним (потери данных нет). Понижено до P1 как «тихий сбой» → BUG-SYNC-SILENT-FAIL.
+- B: `SyncMan` — дублирующий движок; C: «не используется». Факт: `syncTickTickToObsidian` мёртв (вызов закомментирован), но `forceUpdates` живой (`services/index.ts`). Вывод: удалять только мёртвую часть.
+- A считает «рассинхрон комментариев» багом задач, C — частным случаем LWW/`vaultLineBehindTask`: **общая корневая причина** — pull-детектор «строка отстаёт от задачи» не учитывает комментарии, а push-триггеры завязаны на родительскую строку.
+
+**Общие корни**
+1. Отсутствие fail-closed и наблюдаемости sync (тихие catch, «Sync completed» безусловно).
+2. Триггеры push/pull завязаны на родительскую checkbox-строку и mtime, а не на полный состав блока (дети, комментарии, активный файл).
+3. Нет интеграционных тестов поверх моков → регрессии 2.0.46/2.0.47 нашли вручную.
+4. Большие связанные модули и неофициальный API повышают цену изменений.
+
+**Консенсус:** сначала надёжность и видимость sync (пп. 1–3 плана), затем live-soak, и только потом рефакторинг. На живой vault не выходить до Phase D.
+
+---
+
+## Приложение: история решений PO (2026-10-16)
+
+Ниже — прежний бриф без изменений по существу (контекст первого sync, решения по topology R / Abyss-first).
 
 ---
 
@@ -126,8 +217,10 @@ Runbook: test vault `00 Inbox/TTS-PILOT-RUN.md` (phases map to **CASE-*** in `GT
 
 **Still open:** reverse `projectMappings`; dual hub + per-list files; existing installs that relied on `SyncTag` only need `syncedLists` set.
 
-### References
+## References
 
+- `CHANGELOG.md` (история итераций, 2.0.47)  
+- `SMOKE_TESTS.md`, `TT_ABYSS_ROADMAP.md`  
 - `ABYSS_FIRST_PLAN.md` (current step-by-step alignment with Abyss)  
 - `GTD_SYNC_CASES.md` (legacy TickTick/topology-R case catalog)  
 - `GTD_SYNC_RESEARCH.md` (GTD research and recommendation)  

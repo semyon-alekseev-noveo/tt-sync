@@ -22,7 +22,7 @@
 ## Validation
 
 - Build: `npm run build` in repo root; CI on `abyss-mapping` via `.github/workflows/ci.yml`.
-- Unit tests: `npx vitest run` (545 at **2.0.46**); Abyss comments → TickTick **Comments API** when `syncAbyssCommentsViaApi` (default on); descriptions stay in `content`.
+- Unit tests: `npx vitest run` (550 at **2.0.47**); Abyss comments → TickTick **Comments API** when `syncAbyssCommentsViaApi` (default on); descriptions stay in `content`.
 - Manual pilot: **`SMOKE_TESTS.md`**. Palette: **Synchronize** only; full TT pull on plugin load. Context tags **2.0.41** (`syncNoteContextTags`).
 - BRAT installs: GitHub Release assets from `.github/workflows/release.yml` (see `docs/BRAT_INSTALL.md`).
 - TT cleanup verified 2026-10-16 via MCP (no `ticktick` tag left on polluted set).
@@ -38,7 +38,8 @@
 
 ## To Be Done
 
-1. **Phase 1 (comments):** Abyss `- stamp:` → TickTick **Comments API** (not `content`); see `TT_ABYSS_ROADMAP.md`.
+0. **Reliability (analyst meet 2026-10-19, see `PO_STATUS.md`):** fail-closed pull + honest sync notice (BUG-SYNC-SILENT-FAIL); push on child comment-line edit (BUG-COMMENT-INLINE); `vaultLineBehindTask` + comments; cleanup `taskCommentMaps`; integration test for `synchronizationInner`.
+1. **Phase 1 (comments):** shipped 2.0.46–2.0.47 (Comments API); remaining: live soak NOTE-L3b, legacy `Comments:` migration.
 2. **Phase 2 (task↔note):** PO pick L1–L5; fix Abyss `membershipQuery` → `10 Projects/`.
 3. **Phase 3 (subtasks):** Matrix S1–S6 after Phase 1 — `SYNC_PROJECTS_AND_SUBTASKS.md` + `TT_ABYSS_ROADMAP.md`.
 4. **Projects:** CASE-P2–P4, P6, subtask order (unchanged).
