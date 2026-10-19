@@ -123,7 +123,7 @@ Not in this automated run (needs Obsidian + TickTick UI):
 
 **Phase C:** Skipped. Agent **cannot** click Obsidian modals (deletion confirm). Unanswered prompt times out → no TT delete.
 
-**Sync UX (2.0.37+):** Full **Synchronize** shows a modal with steps. Inline pushes (line edit, checkbox, subtask) show **⟳ …** in the status bar. **Scheduled** interval sync is silent by default; enable *Show progress during scheduled sync* under automatic sync settings.
+**Sync UX (2.0.38+):** Full and inline sync show a **persistent Notice** (top-right, like other plugin toasts) with the current step. **Scheduled** interval sync is silent by default; enable *Show progress during scheduled sync* under automatic sync settings.
 
 ---
 

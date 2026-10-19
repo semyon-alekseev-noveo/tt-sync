@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-19 07:18 UTC
+
+- Context: Full-sync progress modal blocked the vault; user wanted the same top-right toast style as other plugin Notices.
+- Target: **2.0.39** — replace modal with persistent `Notice` for full and inline sync progress.
+- Actions log: `SyncProgressNotice`; removed `SyncProgressModal`; inline activity uses the same notice stack (not status bar).
+- Validation: `npm run build` → ok.
+- Problems: open until release.
+- To Be Done: Release **2.0.39**.
+- References: `src/modals/SyncProgressNotice.ts`, `src/services/SyncActivityIndicator.ts`, `CHANGELOG.md`
+
 ### Iteration 2026-10-19 07:08 UTC
 
 - Context: Progress UI should cover inline TickTick updates; scheduled full sync should be optional noise.

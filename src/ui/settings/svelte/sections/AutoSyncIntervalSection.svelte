@@ -66,7 +66,7 @@
 	<div class="setting-item">
 		<div class="setting-item-info">
 			<div class="setting-item-name">Show progress during scheduled sync</div>
-			<div class="setting-item-description">When off (default), automatic interval sync runs silently. Manual Sync and inline task updates still show progress.</div>
+			<div class="setting-item-description">When off (default), automatic interval sync runs silently. Manual Sync and inline updates still show a top-right progress notice.</div>
 		</div>
 		<div class="setting-item-control">
 			<input

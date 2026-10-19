@@ -1,5 +1,5 @@
 import type TickTickSync from '@/main';
-import { SyncProgressModal } from '@/modals/SyncProgressModal';
+import { SyncProgressNotice } from '@/modals/SyncProgressNotice';
 import { getSettings } from '@/settings';
 
 /** What started a full `synchronization()` run. */
@@ -11,53 +11,47 @@ export function shouldShowFullSyncProgress(trigger: SyncTrigger): boolean {
 }
 
 /**
- * UI for sync activity: modal for full Synchronize, status bar for inline TickTick API work.
+ * Sync activity UI: persistent Notice (top-right) for full Synchronize and inline TickTick API work.
  */
 export class SyncActivityIndicator {
-	private modal?: SyncProgressModal;
+	private readonly notice = new SyncProgressNotice();
+	private fullActive = false;
 	private inlineDepth = 0;
-	private statusEl?: HTMLElement;
 
-	constructor(private plugin: TickTickSync) {}
-
-	private ensureStatusEl(): HTMLElement {
-		if (!this.statusEl) {
-			this.statusEl = this.plugin.addStatusBarItem();
-			this.statusEl.addClass('tts-sync-status');
-		}
-		return this.statusEl;
-	}
+	constructor(_plugin: TickTickSync) {}
 
 	beginFull(trigger: SyncTrigger): void {
 		if (!shouldShowFullSyncProgress(trigger)) return;
-		this.modal = new SyncProgressModal(this.plugin.app);
-		this.modal.open();
+		this.fullActive = true;
+		this.notice.show('TickTick sync', 'Starting…');
 	}
 
 	setFullStep(step: string, detail?: string): void {
-		this.modal?.setStep(step, detail);
+		if (!this.fullActive && !this.notice.isOpen()) return;
+		this.notice.show('TickTick sync', step, detail);
 	}
 
 	endFull(ok: boolean): void {
-		if (!this.modal) return;
-		this.modal.finish(ok);
-		const m = this.modal;
-		this.modal = undefined;
-		window.setTimeout(() => m.close(), ok ? 400 : 1500);
+		if (!this.fullActive && !this.notice.isOpen()) return;
+		this.notice.show('TickTick sync', this.notice.elapsedLabel(ok));
+		this.fullActive = false;
+		const delay = ok ? 2500 : 4000;
+		if (this.inlineDepth === 0) {
+			window.setTimeout(() => this.notice.hide(), delay);
+		}
 	}
 
 	beginInline(label: string): void {
-		const el = this.ensureStatusEl();
 		this.inlineDepth++;
-		el.setText(`⟳ ${label}`);
-		el.toggleClass('is-active', true);
+		if (!this.fullActive) {
+			this.notice.show('TickTick', `⟳ ${label}`);
+		}
 	}
 
 	endInline(): void {
 		this.inlineDepth = Math.max(0, this.inlineDepth - 1);
-		if (this.inlineDepth === 0 && this.statusEl) {
-			this.statusEl.setText('');
-			this.statusEl.toggleClass('is-active', false);
+		if (this.inlineDepth === 0 && !this.fullActive) {
+			this.notice.hide();
 		}
 	}
 
