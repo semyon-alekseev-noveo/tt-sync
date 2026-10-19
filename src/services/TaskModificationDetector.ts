@@ -331,6 +331,12 @@ export class TaskModificationDetector {
 			const parentChanged = (taskRecord.parentId || '') !== (savedTask.parentId || '');
 
 			if (!moveCheck.moved && !parentChanged) {
+				const lineTask = await this.plugin.taskParser?.convertLineToTask(
+					lineText, lineNumber!, filepath!, fileMap, taskRecord,
+				);
+				if (lineTask && await this.skipPushWhenTickTickRenamedVaultLine(lineTask, savedTask, taskId, filepath!)) {
+					return false;
+				}
 				// Task hasn't changed, ensure sync timestamps are current
 				const localTask = await this.plugin.taskRepository.loadLocalTaskById(taskId);
 				if (localTask && (!localTask.lastVaultSync || localTask.lastVaultSync < localTask.updatedAt || !localTask.file)) {
@@ -445,6 +451,32 @@ export class TaskModificationDetector {
 	}
 
 	/**
+	 * Delta pull can miss title-only edits when TickTick leaves `modifiedTime` unchanged.
+	 * If the vault line still matches what we last stored but TickTick's live title differs, refresh Dexie and let vault sync rewrite the line — do not push the stale title.
+	 */
+	private async skipPushWhenTickTickRenamedVaultLine(
+		lineTask: ITask,
+		savedTask: ITask,
+		taskId: string,
+		filepath: string,
+	): Promise<boolean> {
+		const parser = this.plugin.taskParser;
+		if (!parser) return false;
+		const vaultLineEdited = parser.isTitleChanged(lineTask, savedTask);
+		if (vaultLineEdited) return false;
+		try {
+			const remote = await this.plugin.tickTickRestAPI?.getTaskById(taskId, savedTask.projectId);
+			if (!remote || !parser.isTitleChanged(lineTask, remote)) return false;
+			await this.plugin.taskRepository.upsertTask(remote, filepath);
+			log.info(`TickTick title ahead of vault for ${taskId}; deferring line rewrite to vault sync`);
+			return true;
+		} catch (e) {
+			log.debug('remote title reconcile failed', taskId, e);
+			return false;
+		}
+	}
+
+	/**
 	 * Detect all modifications between line task and saved task
 	 */
 	private detectModifications(lineTask: ITask, savedTask: ITask, taskRecord: ITaskRecord): TaskModifications {
@@ -548,6 +580,9 @@ export class TaskModificationDetector {
 
 		// Update task if any content changed
 		if (this.hasContentChanges(modifications)) {
+			if (await this.skipPushWhenTickTickRenamedVaultLine(lineTask, savedTask, taskId, filepath)) {
+				return false;
+			}
 			// Both sides edited since last sync? merge per field instead of blindly overwriting TickTick.
 			let mergedFromRemote = false;
 			try {

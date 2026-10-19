@@ -1,5 +1,25 @@
 # Changelog
 
+### Iteration 2026-10-19 05:36 UTC
+
+- Context: Delta pull skipped title-only TT renames when `modifiedTime` stayed unchanged; `pushLocalEditsFirst` then overwrote TT from stale `abyss-active` lines (see sync journal `obs->tt` on `6ad5ab55…`).
+- Target: **2.0.36** — never push a stale vault title when live TickTick is ahead; still rewrite vault when the checkbox lags.
+- Actions log: `skipPushWhenTickTickRenamedVaultLine` in `TaskModificationDetector`; `vaultLineBehindTask` + fresh `getTaskById` in `VaultSyncCoordinator`; cleaned pilot probes in TT and vault (`AF-dup-*`, regression task, LOGIC-A32, FOOL-TT).
+- Validation: `npx vitest run` → 527 passed; `npm run build` → ok; `main.js` copied to Thinkpad-tts-test plugin folder.
+- Problems: Shipped in **2.0.36**.
+- To Be Done: BRAT → 2.0.36; reload plugin; re-run R1/R2 rename smokes on pilot vault.
+- References: `src/services/TaskModificationDetector.ts`, `src/services/VaultSyncCoordinator.ts`, `CHANGELOG.md`
+
+### Iteration 2026-10-19 05:32 UTC
+
+- Context: TT rename on TTS-Inbox did not update `abyss-active.md`; inflated `updatedAt` after vault push made pull keep stale Dexie rows.
+- Target: Prefer TickTick `modifiedTime` in conflict resolution; refresh vault lines when checkbox text lags the DB task.
+- Actions log: `effectiveTaskRevision` in `conflicts.ts`; `vaultLineBehindTask` in `VaultSyncCoordinator`; `upsertTask` uses TT `modifiedTime`; removed bogus `modifiedTime` stamp in `forceUpdates`. Pilot vault/TT smoke probes removed.
+- Validation: `npx vitest run src/test/conflicts.test.ts` → pass.
+- Problems: mitigated in **2.0.36** (see iteration above).
+- To Be Done: No changes.
+- References: `src/sync/conflicts.ts`, `src/services/VaultSyncCoordinator.ts`, `CHANGELOG.md`
+
 ### Iteration 2026-10-19 04:56 UTC
 
 - Context: Pull wrote `#obsidian` on TickTick-born lines when `stopInjectingTickTickTag` was on; that tag should mean vault birth only.

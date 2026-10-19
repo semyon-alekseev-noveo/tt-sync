@@ -460,7 +460,6 @@ export class SyncMan {
 			if (pushLimit.allowedListIds?.size && !taskMatchesSyncLimit(savedTask, pushLimit)) {
 				continue;
 			}
-			savedTask.modifiedTime = this.plugin.dateMan?.formatDateToISO(new Date()) ?? '';
 			const taskRecord = fileMap.getTaskRecord(taskId);
 			const lineTask = await this.plugin.taskParser?.convertLineToTask(lineText, 0, path, fileMap, taskRecord);
 			if (!lineTask || lineTask.deleted) {

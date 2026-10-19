@@ -98,7 +98,8 @@ export class TaskRepository {
 	async upsertTask(task: ITask, filepath?: string, timestamp?: number): Promise<void> {
 		try {
 			const existingTask = await db.tasks.where("taskId").equals(task.id).first();
-			const now = timestamp || Date.now();
+			const fromTickTick = task.modifiedTime ? new Date(task.modifiedTime).getTime() : NaN;
+			const now = !Number.isNaN(fromTickTick) ? fromTickTick : (timestamp || Date.now());
 			const currentDeviceId = getCurrentDeviceInfo()?.deviceId;
 
 			if (existingTask) {

@@ -66,7 +66,7 @@ export class VaultSyncCoordinator {
 
 		// Categorize tasks by their target file and action needed
 		for (const lt of tasks) {
-			const task = lt.task;
+			let task = lt.task;
 			// Project parents are represented by project notes, never by task lines.
 			if (scheme?.isParentTask(task)) continue;
 			let targetFile: string | undefined;
@@ -122,7 +122,19 @@ export class VaultSyncCoordinator {
 					group.toDelete.push(task);
 				}
 			} else if (matchesFilter) {
-				const actionNeeded = this.determineActionNeeded(lt, targetFile);
+				let actionNeeded = this.determineActionNeeded(lt, targetFile);
+				if (actionNeeded.action === 'none' && targetFile && await this.vaultLineBehindTask(task, targetFile)) {
+					actionNeeded = { action: 'update' };
+					try {
+						const fresh = await this.plugin.tickTickRestAPI?.getTaskById(task.id, task.projectId);
+						if (fresh) {
+							task = await this.dropStaleStageTags(fresh);
+							lt.task = task;
+						}
+					} catch (e) {
+						log.warn('Could not refresh task before vault rewrite', task.id, e);
+					}
+				}
 				const realFile = presentAt.get(task.id);
 				if (actionNeeded.action === 'add' && realFile && realFile !== targetFile) {
 					// Line already exists in another note: adopt that location instead of writing a duplicate.
@@ -142,7 +154,7 @@ export class VaultSyncCoordinator {
 					group.toAdd.push(task);
 					dbUpdates.push({ localId: lt.localId, changes: { file: targetFile, lastVaultSync: Date.now() } });
 				} else if (actionNeeded.action === 'update') {
-					group.toUpdate.push(await this.dropStaleStageTags(task));
+					group.toUpdate.push(await this.dropStaleStageTags(lt.task));
 					dbUpdates.push({ localId: lt.localId, changes: { lastVaultSync: Date.now() } });
 				}
 			} else if (lt.file) {
@@ -295,6 +307,38 @@ export class VaultSyncCoordinator {
 	/**
 	 * Determine what action is needed for a task
 	 */
+	/** Vault checkbox text/status differs from TickTick (delta pull can miss title-only edits). */
+	private async vaultLineBehindTask(task: ITask, filePath: string): Promise<boolean> {
+		const file = this.app.vault.getAbstractFileByPath(filePath);
+		if (!(file instanceof TFile)) return false;
+		const parser = this.plugin.taskParser;
+		if (!parser) return false;
+		let remote = task;
+		try {
+			const fresh = await this.plugin.tickTickRestAPI?.getTaskById(task.id, task.projectId);
+			if (fresh) remote = fresh;
+		} catch (e) {
+			log.debug('vault refresh lookup failed', task.id, e);
+		}
+		let text: string;
+		try {
+			text = await this.app.vault.read(file);
+		} catch {
+			return false;
+		}
+		for (const line of text.split('\n')) {
+			if (parser.getTickTickId(line) !== task.id) continue;
+			const lineTask = await parser.convertLineToTask(line, 0, filePath, {
+				getTaskItems: () => [],
+				getTaskRecord: () => ({ task: line, parentId: '', taskLines: [] }),
+			} as never, null);
+			if (!lineTask) return false;
+			return parser.isTitleChanged(lineTask, remote)
+				|| parser.isStatusChanged(lineTask as unknown as Record<string, unknown>, remote as unknown as Record<string, unknown>);
+		}
+		return false;
+	}
+
 	private determineActionNeeded(
 		lt: LocalTask,
 		targetFile: string

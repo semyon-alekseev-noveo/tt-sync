@@ -22,8 +22,8 @@
 ## Validation
 
 - Build: `npm run build` in repo root; CI on `abyss-mapping` via `.github/workflows/ci.yml`.
-- Unit tests: `npm test -- --run` (at 2.0.34).
-- Manual pilot: **`SMOKE_TESTS.md`**. Plugin ≥ 2.0.34 on `Thinkpad-tts-test`. A line syncs when the cursor leaves it. A new TTS-Inbox task lands in `00 Inbox/abyss-active.md` with `#inbox`.
+- Unit tests: `npx vitest run` (527 tests at **2.0.36**).
+- Manual pilot: **`SMOKE_TESTS.md`**. Plugin **2.0.36** on `Thinkpad-tts-test` (reload plugin after copying `main.js`). R1/R2 TT→Obs rename in `abyss-active.md` pending re-smoke.
 - BRAT installs: GitHub Release assets from `.github/workflows/release.yml` (see `docs/BRAT_INSTALL.md`).
 - TT cleanup verified 2026-10-16 via MCP (no `ticktick` tag left on polluted set).
 
