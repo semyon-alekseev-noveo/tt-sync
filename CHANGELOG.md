@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-19 12:42 UTC
+
+- Context: User saw renamed palette entries; ribbon sync icon missing while startup sync blocked `pluginLoad`.
+- Target: **2.0.44** — restore **Synchronize** naming; register ribbon in `onload` with commands.
+- Actions log: `registerSyncUi()` adds ribbon + both commands; removed duplicate ribbon from `pluginLoad`.
+- Validation: `npx vitest run` → 536 passed; `npm run build` → ok.
+- Problems: No changes.
+- To Be Done: BRAT **2.0.44** + reload.
+- References: `src/main.ts`, `CHANGELOG.md`
+
 ### Iteration 2026-10-19 12:28 UTC
 
 - Context: Palette had no sync commands while startup sync blocked deferred `pluginLoad`.

@@ -1,6 +1,6 @@
 {
 	"name": "tickticksync-abyss",
-	"version": "2.0.43",
+	"version": "2.0.44",
 	"description": "Sync tasks and notes bidirectionally with TickTick.",
 	"main": "main.js",
 	"scripts": {

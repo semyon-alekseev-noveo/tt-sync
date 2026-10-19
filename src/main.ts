@@ -111,7 +111,7 @@ export default class TickTickSync extends Plugin {
 	/** False until loadSettings finishes; blocks premature saves during enable. */
 	settingsReady = false;
 	private settingsLoadPromise: Promise<void> | null = null;
-	private syncPaletteCommandsRegistered = false;
+	private syncUiRegistered = false;
 
 	onload() {
 		// addSettingTab must run synchronously in onload; awaiting loadSettings first left no gear if loadData hung.
@@ -149,20 +149,20 @@ export default class TickTickSync extends Plugin {
 			});
 		}
 		this.registerOpenSettingsCommand();
-		this.registerSyncPaletteCommands();
+		this.registerSyncUi();
 		void this.ensureSettingsLoaded();
 	}
 
-	/** Sync commands must register in onload; deferring to pluginLoad hid them until startup sync finished. */
-	private registerSyncPaletteCommands(): void {
-		if (this.syncPaletteCommandsRegistered) {
+	/** Sync UI must register in onload; deferring to pluginLoad hid palette + ribbon until startup sync finished. */
+	private registerSyncUi(): void {
+		if (this.syncUiRegistered) {
 			return;
 		}
-		this.syncPaletteCommandsRegistered = true;
+		this.syncUiRegistered = true;
 
 		this.addCommand({
 			id: 'tts-sync',
-			name: 'TickTickSync: Synchronize',
+			name: 'Synchronize',
 			callback: async () => {
 				await this.ensureSettingsLoaded();
 				await this.synchronizeNow();
@@ -171,12 +171,17 @@ export default class TickTickSync extends Plugin {
 
 		this.addCommand({
 			id: 'tts-sync-full',
-			name: 'TickTickSync: Full synchronize from TickTick',
+			name: 'Synchronize (full pull from TickTick)',
 			callback: async () => {
 				await this.ensureSettingsLoaded();
 				await this.scheduledSynchronization(true, 'manual');
 				new Notice('Full sync completed.');
 			},
+		});
+
+		this.addRibbonIcon('sync', 'TickTickSync', async () => {
+			await this.ensureSettingsLoaded();
+			await this.synchronizeNow();
 		});
 	}
 
@@ -828,11 +833,6 @@ export default class TickTickSync extends Plugin {
 		this.markdownProcessor = new MarkdownProcessor(this);
 		this.markdownProcessor.activate();
 
-
-		this.addRibbonIcon('sync', 'TickTickSync', async (evt: MouseEvent) => {
-			// Called when the user clicks the icon.
-			await this.synchronizeNow();
-		});
 
 		// //Used for testing adhoc code.
 		// this.addRibbonIcon('check', 'Tts test', async (evt: MouseEvent) => {
