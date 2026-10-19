@@ -22,8 +22,8 @@
 ## Validation
 
 - Build: `npm run build` in repo root; CI on `abyss-mapping` via `.github/workflows/ci.yml`.
-- Unit tests: `npx vitest run` (530+ tests at **2.0.40**); descriptions sync Obs↔TT; comments still in `content` until Phase 1.
-- Manual pilot: **`SMOKE_TESTS.md`**. **2.0.37** adds sync progress modal; Phase B agent: pull + TT rename + R7 pass; user **R3/R8** (in-editor rename) and Phase D remain.
+- Unit tests: `npx vitest run` (536 tests at **2.0.42**); NOTE/CTX smokes in `SMOKE_TESTS.md` (SYNC-12, `contextTags.test.ts`); descriptions sync Obs↔TT; comments still in `content` until Phase 1.
+- Manual pilot: **`SMOKE_TESTS.md`**. Palette: **Synchronize** (delta) + **Synchronize (full pull from TickTick)** (**2.0.42**). Context tags **2.0.41** (`syncNoteContextTags`); live `proj/` on children after re-sync.
 - BRAT installs: GitHub Release assets from `.github/workflows/release.yml` (see `docs/BRAT_INSTALL.md`).
 - TT cleanup verified 2026-10-16 via MCP (no `ticktick` tag left on polluted set).
 

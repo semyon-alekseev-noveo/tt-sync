@@ -33,7 +33,7 @@ describe('tag -> list mapping', () => {
 	it('push: tag beats file default, tag not sent; pull: list rewrites tag', async () => {
 		const S = (getSettings as unknown as () => Record<string, unknown>)();
 		Object.assign(S, { noteDelimiter: '', fileLinksInTickTick: 'noLink', stopInjectingTickTickTag: true,
-			abyssTasksFormat: true, tagMappings: [], tagListMappings: MAP, syncNotes: false });
+			abyssTasksFormat: true, syncNoteContextTags: false, tagMappings: [], tagListMappings: MAP, syncNotes: false });
 		const id = 'abcdefabcdefabcdefabcdef';
 		const line = `- [ ] Позвонить #type/next #context/work %%[ticktick_id:: ${id}]%%`;
 		const parser = mkParser('inbox1');
@@ -54,7 +54,7 @@ describe('tag -> list mapping', () => {
 	it('#inbox does not jump to a list named Inbox when the mapping table omits it', async () => {
 		const S = (getSettings as unknown as () => Record<string, unknown>)();
 		Object.assign(S, { noteDelimiter: '', fileLinksInTickTick: 'noLink', stopInjectingTickTickTag: true,
-			abyssTasksFormat: true, gtdStageVia: 'list', tagMappings: [], tagListMappings: MAP, syncNotes: false });
+			abyssTasksFormat: true, syncNoteContextTags: false, gtdStageVia: 'list', tagMappings: [], tagListMappings: MAP, syncNotes: false });
 		const projects = [...PROJECTS, { id: 'real-inbox', name: 'Inbox' }, { id: 'tts', name: 'TTS-Inbox' }];
 		const { getAllProjects } = await import('@/db/projects');
 		vi.mocked(getAllProjects).mockResolvedValue(projects as never);
@@ -71,7 +71,7 @@ describe('tag -> list mapping', () => {
 	it('tag mode: stage stays a TickTick tag and rewrites both ways', async () => {
 		const S = (getSettings as unknown as () => Record<string, unknown>)();
 		Object.assign(S, { noteDelimiter: '', fileLinksInTickTick: 'noLink', stopInjectingTickTickTag: true,
-			abyssTasksFormat: true, gtdStageVia: 'tag', tagMappings: [], tagListMappings: MAP, syncNotes: false });
+			abyssTasksFormat: true, syncNoteContextTags: false, gtdStageVia: 'tag', tagMappings: [], tagListMappings: MAP, syncNotes: false });
 		const id = 'abcdefabcdefabcdefabcdef';
 		const line = `- [ ] Позвонить #type/next #context/work %%[ticktick_id:: ${id}]%%`;
 		const parser = mkParser('inbox1');

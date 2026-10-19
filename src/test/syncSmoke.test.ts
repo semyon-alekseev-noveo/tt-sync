@@ -172,6 +172,47 @@ describe('bidirectional sync smoke (SYNC-*)', () => {
 		expect(tagForList('na', PILOT_MAP, PILOT_LISTS)).toBe('type/next');
 		expect(tagForList('in', PILOT_MAP, PILOT_LISTS)).toBe('inbox');
 	});
+
+	it('SYNC-12 Abyss context tags on push when syncNoteContextTags is on', async () => {
+		const S = (getSettings as unknown as () => Record<string, unknown>)();
+		Object.assign(S, {
+			noteDelimiter: '',
+			fileLinksInTickTick: 'noLink',
+			stopInjectingTickTickTag: true,
+			abyssTasksFormat: true,
+			syncNoteContextTags: true,
+			gtdStageVia: 'list',
+			tagMappings: [],
+			tagListMappings: PILOT_MAP,
+			syncNotes: false,
+		});
+		const id = 'abcdefabcdefabcdefabcdef';
+		const line = `- [ ] log task #tts-test %%[ticktick_id:: ${id}]%%`;
+		const parser = mkParser('in');
+		const parentId = '6ad1dc711befa8582aceadd7';
+		parser.plugin.projectScheme = {
+			isParentId: (pid: string) => pid === parentId,
+			noteForParent: (pid: string) =>
+				pid === parentId ? '10 Projects/TTS-PILOT- Phase C test.md' : undefined,
+		};
+		parser.plugin.taskRepository = {
+			loadTaskById: async () => ({ projectId: 'proj', title: 'parent' }),
+		};
+		const fm = {
+			getTaskItems: () => [],
+			getTaskRecord: () => ({ task: line, parentId, taskLines: [] }),
+		};
+		const task = await parser.convertLineToTask(
+			line,
+			0,
+			'40 KB/46 Logs/log-202601271650.md',
+			fm as never,
+			null,
+		);
+		expect(task.tags).toContain('note/log-202601271650');
+		expect(task.tags).toContain('proj/tts-pilot-phase-c-test');
+		Object.assign(S, { syncNoteContextTags: false, abyssTasksFormat: false, tagListMappings: [] });
+	});
 });
 
 describe('SYNC-11 Abyss capture path resolution', () => {

@@ -14,7 +14,8 @@ Operator preset: `00 Inbox/TTS-data-preset.json`, runbook `00 Inbox/TTS-PILOT-RU
 | Check | Expected |
 |--------|----------|
 | Vault | `/home/sam/obsidian/Thinkpad-tts-test` only |
-| Plugin | `tickticksync-abyss` **≥ 2.0.36** for rename TT→Obs in `abyss-active.md`; **≥ 2.0.35** source tag; **≥ 2.0.28** deletion |
+| Plugin | `tickticksync-abyss` **≥ 2.0.41** for `note/` / `proj/` context tags; **≥ 2.0.40** Abyss `- >` descriptions; **≥ 2.0.36** rename TT→Obs; **≥ 2.0.28** deletion |
+| Commands | Palette: **Synchronize** (delta pull); **Synchronize (full pull from TickTick)** (`tts-sync-full`, plugin **≥ 2.0.42**) |
 | Login | Access Control shows valid session |
 | GTD settings | `syncedLists` = six `TTS-*`; `syncScopeFolders` = `00 Inbox/`, `10 Projects/`, `30 Tasks/` |
 | Sync mode | Manual (`automaticSynchronizationInterval`: 0) |
@@ -29,7 +30,7 @@ Operator preset: `00 Inbox/TTS-data-preset.json`, runbook `00 Inbox/TTS-PILOT-RU
 Automated rows run with:
 
 ```bash
-npx vitest run src/test/logicSmoke.test.ts src/test/listMapping.test.ts src/test/projectParentKeep.test.ts src/test/foolCases.test.ts src/test/syncScope.test.ts src/test/syncSmoke.test.ts
+npx vitest run src/test/logicSmoke.test.ts src/test/listMapping.test.ts src/test/projectParentKeep.test.ts src/test/foolCases.test.ts src/test/syncScope.test.ts src/test/contextTags.test.ts src/test/syncSmoke.test.ts
 ```
 
 | ID | What you prove | How |
@@ -64,6 +65,34 @@ npx vitest run src/test/logicSmoke.test.ts src/test/listMapping.test.ts src/test
 | SYNC-9 | `%%` / unclosed capture fragments are not pushed | `syncSmoke.test.ts` |
 | SYNC-10 | Pilot `tagListMappings` rows resolve both ways | `syncSmoke.test.ts` |
 | SYNC-11 | Abyss `taskFilePath` is read; fallback `00 Inbox/abyss-active.md` | `syncSmoke.test.ts` |
+| SYNC-12 | Push adds `note/<slug>` and `proj/<slug>` when `syncNoteContextTags` + Abyss format | `syncSmoke.test.ts` |
+
+---
+
+## Abyss notes smoke (2.0.40+)
+
+Preset: `syncNotes: true`, `abyssTasksFormat: true`. See `ABYSS_NOTES_ALIGNMENT.md`.
+
+| ID | What you prove | How |
+|----|----------------|-----|
+| NOTE-1 | Obs `- >` description line pushes to TT `content` / `desc` | Edit under a synced checkbox in vault → **Synchronize** → MCP `get_task_by_id` |
+| NOTE-2 | TT body edit pulls back under `- >` even when `modifiedTime` is stale | Change `content` in TT → **Synchronize (full pull from TickTick)** → vault child line |
+| NOTE-3 | Abyss comment (`- stamp:`) still lands in TT `content` as `Comments:` block until Phase 1 API | Enter in Abyss comment field (must flush to `.md`) → sync → MCP |
+| NOTE-N1 | `40 KB/` lines do not push until folder is in `syncScopeFolders` | `logicSmoke.test.ts` LOGIC-3; live skip or add folder |
+
+---
+
+## Context tag smoke (2.0.41+)
+
+Setting: **Sync note context tags** (`syncNoteContextTags`, requires Abyss format). Strips `note/*` and `proj/*` on pull so they are not written into `.md`.
+
+| ID | What you prove | How |
+|----|----------------|-----|
+| CTX-1 | Task in a log note gets `note/<basename>` on TT | Push from `40 KB/…/log-….md` (in scope) → MCP tags |
+| CTX-2 | Active Zone child gets `proj/<moc-slug>` when parent MOC resolves | Child under `10 Projects/*.md` → MCP tags include `proj/…` |
+| CTX-3 | Pull does not inject `note/` or `proj/` into checkbox text | TT task with both tags → sync → line has no `#note/` in vault |
+| CTX-A | Slug + strip helpers | `contextTags.test.ts` |
+| CTX-A2 | Parser push path | `syncSmoke.test.ts` SYNC-12 |
 
 Not in this automated run (needs Obsidian + TickTick UI):
 
@@ -117,7 +146,7 @@ Not in this automated run (needs Obsidian + TickTick UI):
 | **C — deletion UX** | CASE-DEL-1…5, DEL-N1: requires **Confirm** on `TaskDeletionModal` | **user only** | 30 min |
 | **D — pilot soak** | AF-* duplication cases, DEL-5 second sync, live vault readiness per `PO_STATUS.md` | user | 1–2 h |
 
-**Phase A (2026-10-19):** `npx vitest run` → **527 passed**. Logic/SYNC bundle → **51 passed**.
+**Phase A (2026-10-19):** `npx vitest run` → **536 passed** (incl. SYNC-12, `contextTags`). Logic/SYNC bundle incl. `contextTags` → **58+ passed**.
 
 **Phase B:** User **R1/R2 pass** (2.0.36). Agent run 2026-10-19 with vault open: SYNC-L4 pull **pass** (`agent-phase-b-pull` → `abyss-active.md`); TT rename → **pass** (`agent-phase-b-renamed`); **R7 pass** (`test 3` → `test-3-phase-b-tt` in project note, reverted after). **R3 skip (agent):** editing `.md` on disk does not trigger Obsidian push — rename a line **in the editor**, then Sync. Phase C **skipped** per plan.
 
@@ -158,6 +187,7 @@ Not in this automated run (needs Obsidian + TickTick UI):
 | 2026-10-19 | 2.0.34→35 | agent + user sync | **SYNC-L2** push pass (`6ad5a152…`); TT rename+complete pass. **SYNC-L3** pull create pass (`6ad5a158…`). Pull rename/complete: user ran sync; verify lines `[x]` + new titles | | | | | | | Source-tag fix in 2.0.35: TT-born pull → `#ticktick`, not `#obsidian`. |
 | 2026-10-19 | 2.0.36 | user | **R1/R2 pass** (TTS-Inbox → rename in TT → `abyss-active.md` matches) | | | | | | | |
 | 2026-10-19 | 2.0.36→37 | agent + vault open | Phase B: pull+TT rename **pass**; **R7 pass**; R3 N/A (disk edit). Progress modal in **2.0.37** | skip C | | | | | | Probes cleaned from `abyss-active.md` |
+| 2026-10-19 | 2.0.42 | agent | CTX-A/A2 + SYNC-12 pass; NOTE/CTX live **pending** (vault reload). MCP `test 3`: `obsidian` only — re-sync after 2.0.41 for `proj/` tag | | | | | | | Palette **full pull** restored (`tts-sync-full`) |
 
 ---
 

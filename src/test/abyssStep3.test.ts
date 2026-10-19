@@ -72,7 +72,7 @@ describe('status mapping', () => {
 	it('round-trip through TaskParser', async () => {
 		const S = (getSettings as unknown as () => Record<string, unknown>)();
 		Object.assign(S, { noteDelimiter: '', fileLinksInTickTick: 'noLink', stopInjectingTickTickTag: true,
-			abyssTasksFormat: true, statusMappings: DEFAULT_STATUS_MAPPINGS, tagMappings: [], syncNotes: false });
+			abyssTasksFormat: true, syncNoteContextTags: false, statusMappings: DEFAULT_STATUS_MAPPINGS, tagMappings: [], syncNotes: false });
 		const id = 'abcdefabcdefabcdefabcdef';
 		const line = `- [-] Старый план #work %%[ticktick_id:: ${id}]%%`;
 		const parser = new TaskParser({} as unknown, {} as unknown);

@@ -16,6 +16,8 @@ This file is the **authoritative list of real-world scenarios** for Obsidian (Ab
 | `00 Inbox/TTS-PILOT-RUN.md` (test vault) | Operator steps for the **TTS-*** pilot |
 | `00 Inbox/TTS-data-preset.json` (test vault) | Minimal `data.json` keys for pilot |
 | `docs/BRAT_INSTALL.md` | Install and upgrade |
+| `ABYSS_NOTES_ALIGNMENT.md` | Abyss checkbox block ↔ TT `content` / comments / items |
+| `SYNC_PROJECTS_AND_SUBTASKS.md` | Project scheme + Active Zone + subtask order |
 
 **Acceptance criteria IDs** (`AC-n`) refer to `GTD_SYNC_RESEARCH.md` §1.2.
 

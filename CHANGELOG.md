@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-19 12:15 UTC
+
+- Context: Docs and smokes for notes/context tags; palette lost one-shot full TickTick pull.
+- Target: **2.0.42** — restore command; document NOTE-* / CTX-*; automated SYNC-12.
+- Actions log: `tts-sync-full` in `src/main.ts`; `SMOKE_TESTS.md` sections; `syncSmoke.test.ts` SYNC-12; version bump.
+- Validation: `npx vitest run` → 536 passed; `npm run build` → ok; MCP `test 3` still `obsidian` only until vault re-sync with **2.0.41+**.
+- Problems: Live CTX-1/2 need Obsidian push after **2.0.41+**; `40 KB/` out of default scope.
+- To Be Done: BRAT **2.0.42**; user re-sync Active Zone child for `proj/` tag; Phase 1 comments.
+- References: `SMOKE_TESTS.md`, `CHANGELOG.md`
+
 ### Iteration 2026-10-19 12:02 UTC
 
 - Context: PO asked for TickTick filter tags mirroring Abyss grouping by source note (and project MOC), not only `parentId`.

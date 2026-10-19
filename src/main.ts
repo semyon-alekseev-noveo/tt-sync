@@ -875,6 +875,15 @@ export default class TickTickSync extends Plugin {
 		});
 
 		this.addCommand({
+			id: 'tts-sync-full',
+			name: 'Synchronize (full pull from TickTick)',
+			callback: async () => {
+				await this.scheduledSynchronization(true, 'manual');
+				new Notice('Full sync completed.');
+			},
+		});
+
+		this.addCommand({
 			id: 'tts-delete-permanent',
 			name: 'Permanently delete tasks',
 			callback: async () => {
