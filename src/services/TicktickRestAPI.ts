@@ -4,6 +4,7 @@ import { type IBatch, Tick } from '@/api';
 import { App, Notice } from 'obsidian';
 import TickTickSync from '@/main';
 import type { IProject } from '@/api/types/Project';
+import type { ITaskComment } from '@/api/types/TaskComment';
 import { getSettings, updateSettings } from '@/settings';
 //logging
 import log from '@/utils/logger';
@@ -229,6 +230,36 @@ export class TickTickRestAPI {
 		}
 	}
 
+
+	async getTaskComments(projectId: string, taskId: string): Promise<ITaskComment[]> {
+		await this.initializeAPI();
+		try {
+			return (await this.api?.getTaskComments(projectId, taskId)) ?? [];
+		} catch (error) {
+			log.error('Error getting task comments:', error);
+			return [];
+		}
+	}
+
+	async addTaskComment(projectId: string, taskId: string, title: string): Promise<ITaskComment | null> {
+		await this.initializeAPI();
+		try {
+			return (await this.api?.addTaskComment(projectId, taskId, title)) ?? null;
+		} catch (error) {
+			log.error('Error adding task comment:', error);
+			return null;
+		}
+	}
+
+	async deleteTaskComment(projectId: string, taskId: string, commentId: string): Promise<boolean> {
+		await this.initializeAPI();
+		try {
+			return (await this.api?.deleteTaskComment(projectId, taskId, commentId)) ?? false;
+		} catch (error) {
+			log.error('Error deleting task comment:', error);
+			return false;
+		}
+	}
 
 	async modifyTaskStatus(taskId: string, projectId: string, taskStatus: number) {
 		await this.initializeAPI();

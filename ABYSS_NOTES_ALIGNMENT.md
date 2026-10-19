@@ -86,7 +86,7 @@ Canonical merge order on pull: **task line → descriptions → checklist items 
 | N5 | Toggle checklist item in TT | Matching `- [ ]` / `[x]` line |
 | N6 | TT description change + new local comment not yet on TT | Both preserved after sync |
 
-**Automated today:** `abyssFormat.test.ts`, `abyssStep3.test.ts`, `abyssConvertLine.test.ts`. **Live:** N1–N4 not in `SMOKE_TESTS.md` result log yet.
+**Automated today:** `notesSmoke.test.ts` (NOTE-A1–A5), `abyssFormat.test.ts`, `abyssStep3.test.ts`, `abyssConvertLine.test.ts`. **Live:** NOTE-L1–L5 in `SMOKE_TESTS.md`; **not** TickTick Comments UI until Phase 1 (`TT_ABYSS_ROADMAP.md`).
 
 ---
 

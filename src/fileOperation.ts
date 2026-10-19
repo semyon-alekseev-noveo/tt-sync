@@ -3,6 +3,9 @@ import { App, Notice, TFile, TFolder } from 'obsidian';
 import TickTickSync from '@/main';
 import type { ITask } from './api/types/Task';
 import { getSettings } from '@/settings';
+import { useAbyssCommentsApi } from '@/abyssCommentSync';
+import { stripLegacyCommentsBlock } from '@/abyssFormat';
+import type { ITaskComment } from '@/api/types/TaskComment';
 import { NewFileMap } from '@/services/NewFileMap';
 import log from '@/utils/logger';
 import type { DeletionItem } from './modals/TaskDeletionModal';
@@ -520,6 +523,13 @@ export class FileOperation {
 			//Did this task's line actually make it into the file? Only then may we
 			//record a vault sync for it.
 			let bLinePersisted = true;
+
+			if (useAbyssCommentsApi() && task.id && task.projectId) {
+				const comments = await this.plugin.tickTickRestAPI?.getTaskComments(task.projectId, task.id) ?? [];
+				Object.defineProperty(task, '_apiComments', { value: comments, enumerable: false, configurable: true });
+				task.content = stripLegacyCommentsBlock(task.content ?? '');
+				task.desc = stripLegacyCommentsBlock(task.desc ?? '');
+			}
 
 			lineText = await this.plugin.taskParser?.convertTaskToLine(task, numParentTabs);
 			//Tired of seeing duplicates because of Sync conflicts.

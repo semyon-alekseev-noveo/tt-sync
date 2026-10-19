@@ -2,7 +2,8 @@ import { nextOccurrence, rollRecurringLines } from '@/recurrence';
 import { fencedLines } from '@/utils/vaultIdScan';
 import { mergeTask, conflictNote } from '@/merge3';
 import { isBlankTitle, isUnfinishedCapture, stripFileLinks } from '@/projectScheme';
-import { mergeAbyssBlock } from '@/abyssFormat';
+import { abyssLinesToNote, mergeAbyssBlock, stripLegacyCommentsBlock } from '@/abyssFormat';
+import { syncAbyssCommentsToTickTick, useAbyssCommentsApi } from '@/abyssCommentSync';
 /**
  * TaskModificationDetector - Detects task changes in markdown files
  * Extracts modification detection logic from SyncModule (lines ~158-756)
@@ -320,7 +321,11 @@ export class TaskModificationDetector {
 		// Calculate hash for change detection (Abyss often has exactly one `- >` child line)
 		let taskNotes = '';
 		if (getSettings().syncNotes && taskRecord.taskLines && taskRecord.taskLines.length > 0) {
-			taskNotes = this.plugin.taskParser.getNoteString(taskRecord, taskId);
+			if (useAbyssCommentsApi()) {
+				taskNotes = abyssLinesToNote(taskRecord.taskLines);
+			} else {
+				taskNotes = this.plugin.taskParser.getNoteString(taskRecord, taskId);
+			}
 		}
 		const newHash = await this.plugin.taskParser?.getLineHash(lineText + taskNotes);
 
@@ -366,7 +371,7 @@ export class TaskModificationDetector {
 		// Detect what changed
 		const modifications = this.detectModifications(lineTask, savedTask, taskRecord);
 
-		return await this.applyModifications(lineTask, savedTask, modifications, filepath!, taskId, newHash ?? '');
+		return await this.applyModifications(lineTask, savedTask, modifications, filepath!, taskId, newHash ?? '', taskRecord);
 	}
 
 	/**
@@ -521,7 +526,8 @@ export class TaskModificationDetector {
 		modifications: TaskModifications,
 		filepath: string,
 		taskId: string,
-		newHash: string
+		newHash: string,
+		taskRecord: ITaskRecord,
 	): Promise<boolean> {
 		let modified = false;
 
@@ -609,6 +615,10 @@ export class TaskModificationDetector {
 			if (!lineTask.repeatFlag && savedTask.repeatFlag) {
 				lineTask.repeatFlag = savedTask.repeatFlag;
 			}
+			if (useAbyssCommentsApi()) {
+				lineTask.content = stripLegacyCommentsBlock(lineTask.content ?? '');
+				lineTask.desc = stripLegacyCommentsBlock(lineTask.desc ?? '');
+			}
 			const updatedTask = await this.plugin.tickTickRestAPI?.updateTask(lineTask) as ITask;
 			updatedTask.dateHolder = saveDateHolder;
 			updatedTask.lineHash = newHash;
@@ -632,6 +642,24 @@ export class TaskModificationDetector {
 		if (!modified && newHash !== savedTask.lineHash) {
 			lineTask.lineHash = newHash;
 			await this.plugin.taskRepository.upsertTask(lineTask, undefined, Date.now());
+		}
+
+		if (useAbyssCommentsApi() && newHash !== savedTask.lineHash && taskRecord.taskLines?.length) {
+			const projectId = lineTask.projectId || savedTask.projectId;
+			if (projectId) {
+				try {
+					const commentPushed = await syncAbyssCommentsToTickTick(
+						this.plugin.tickTickRestAPI,
+						taskId,
+						projectId,
+						taskRecord.taskLines,
+						savedTask.content,
+					);
+					if (commentPushed) modified = true;
+				} catch (e) {
+					log.warn('Abyss comment API sync failed', taskId, e);
+				}
+			}
 		}
 
 		return modified;

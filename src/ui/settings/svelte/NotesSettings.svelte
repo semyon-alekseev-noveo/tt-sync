@@ -16,6 +16,7 @@
 	let abyssTasksFormat: boolean = false;
 	let abyssIndent: 'tab' | 'spaces' = 'tab';
 	let syncNoteContextTags: boolean = true;
+	let syncAbyssCommentsViaApi: boolean = true;
 	let scheduledAsStartDate: boolean = false;
 	let tagMappingText = '';
 	let statusMappingText = '';
@@ -33,6 +34,7 @@
 			abyssTasksFormat,
 			abyssIndent,
 			syncNoteContextTags,
+			syncAbyssCommentsViaApi,
 			scheduledAsStartDate,
 			tagMappings: parseTagMappingText(tagMappingText),
 			statusMappings: parseStatusMappingText(statusMappingText),
@@ -61,6 +63,7 @@
 		abyssTasksFormat = $settingsStore.abyssTasksFormat ?? false;
 		abyssIndent = $settingsStore.abyssIndent ?? 'tab';
 		syncNoteContextTags = $settingsStore.syncNoteContextTags ?? true;
+		syncAbyssCommentsViaApi = $settingsStore.syncAbyssCommentsViaApi ?? true;
 		scheduledAsStartDate = $settingsStore.scheduledAsStartDate ?? false;
 		tagMappingText = tagMappingToText($settingsStore.tagMappings);
 		statusMappingText = statusMappingToText($settingsStore.statusMappings);
@@ -83,6 +86,7 @@
 		abyssTasksFormat = $settingsStore.abyssTasksFormat ?? false;
 		abyssIndent = $settingsStore.abyssIndent ?? 'tab';
 		syncNoteContextTags = $settingsStore.syncNoteContextTags ?? true;
+		syncAbyssCommentsViaApi = $settingsStore.syncAbyssCommentsViaApi ?? true;
 		scheduledAsStartDate = $settingsStore.scheduledAsStartDate ?? false;
 		tagMappingText = tagMappingToText($settingsStore.tagMappings);
 		statusMappingText = statusMappingToText($settingsStore.statusMappings);
@@ -216,6 +220,19 @@
 				<div class="setting-item-control">
 					<label class="checkbox-container" class:is-enabled={syncNoteContextTags}>
 						<input type="checkbox" bind:checked={syncNoteContextTags} on:change={saveFormat} />
+					</label>
+				</div>
+			</div>
+			<div class="setting-item">
+				<div class="setting-item-info">
+					<div class="setting-item-name">TickTick Comments API</div>
+					<div class="setting-item-description">
+						Sync Abyss comment lines to TickTick <strong>Comments</strong> (activity panel), not into task description <code>Comments:</code> text.
+					</div>
+				</div>
+				<div class="setting-item-control">
+					<label class="checkbox-container" class:is-enabled={syncAbyssCommentsViaApi}>
+						<input type="checkbox" bind:checked={syncAbyssCommentsViaApi} on:change={saveFormat} />
 					</label>
 				</div>
 			</div>

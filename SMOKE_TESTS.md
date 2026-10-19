@@ -30,7 +30,7 @@ Operator preset: `00 Inbox/TTS-data-preset.json`, runbook `00 Inbox/TTS-PILOT-RU
 Automated rows run with:
 
 ```bash
-npx vitest run src/test/logicSmoke.test.ts src/test/listMapping.test.ts src/test/projectParentKeep.test.ts src/test/foolCases.test.ts src/test/syncScope.test.ts src/test/contextTags.test.ts src/test/syncSmoke.test.ts
+npx vitest run src/test/logicSmoke.test.ts src/test/listMapping.test.ts src/test/projectParentKeep.test.ts src/test/foolCases.test.ts src/test/syncScope.test.ts src/test/contextTags.test.ts src/test/syncSmoke.test.ts src/test/notesSmoke.test.ts src/test/abyssFormat.test.ts src/test/abyssConvertLine.test.ts
 ```
 
 | ID | What you prove | How |
@@ -69,16 +69,59 @@ npx vitest run src/test/logicSmoke.test.ts src/test/listMapping.test.ts src/test
 
 ---
 
-## Abyss notes smoke (2.0.40+)
+## Recent UX (2.0.43–2.0.45)
 
-Preset: `syncNotes: true`, `abyssTasksFormat: true`. See `ABYSS_NOTES_ALIGNMENT.md`.
+| ID | What you prove | Pass when |
+|----|----------------|-----------|
+| UX-1 | Palette | **Synchronize** only (no second full-pull command) |
+| UX-2 | Ribbon | Left **sync** icon visible right after enable / reload |
+| UX-3 | Both entry points | Ribbon + palette run the same delta sync |
+
+---
+
+## Abyss notes & comments (2.0.40+)
+
+Preset: `syncNotes: true`, `abyssTasksFormat: true`. Spec: `ABYSS_NOTES_ALIGNMENT.md`, roadmap Phase 1 in `TT_ABYSS_ROADMAP.md`.
+
+### What is **not** implemented (common confusion)
+
+| You expect | Reality today | Smoke result |
+|------------|---------------|--------------|
+| Comment in TickTick **Comments** tab | With **TickTick Comments API** on (`syncAbyssCommentsViaApi`, **≥ 2.0.46**) | **PASS** via `get_comment` / TT UI; off → legacy `content` block |
+| Comment typed in Abyss UI without **Enter** | Line never written to `.md` | **FAIL** — no push (check raw note on disk) |
+| `syncNotes: false` in plugin settings | Note/comment push/pull disabled | **FAIL** — enable *Sync notes* |
+
+### Automated (must pass)
 
 | ID | What you prove | How |
 |----|----------------|-----|
-| NOTE-1 | Obs `- >` description line pushes to TT `content` / `desc` | Edit under a synced checkbox in vault → **Synchronize** → MCP `get_task_by_id` |
-| NOTE-2 | TT body edit pulls back under `- >` even when `modifiedTime` is stale | Change `content` in TT → **Synchronize** (or reload Obsidian for startup full pull) → vault child line |
-| NOTE-3 | Abyss comment (`- stamp:`) still lands in TT `content` as `Comments:` block until Phase 1 API | Enter in Abyss comment field (must flush to `.md`) → sync → MCP |
-| NOTE-N1 | `40 KB/` lines do not push until folder is in `syncScopeFolders` | `logicSmoke.test.ts` LOGIC-3; live skip or add folder |
+| NOTE-A1 | Comment → `Comments:` in `content` | `notesSmoke.test.ts` |
+| NOTE-A2 | `content` → `- stamp:` lines | `notesSmoke.test.ts` |
+| NOTE-A3 | New local comment kept when TT lacks it | `notesSmoke.test.ts` |
+| NOTE-A4 | Parser push with `taskLines` | `notesSmoke.test.ts` |
+| NOTE-A5 | Parser pull writes comment under task | `notesSmoke.test.ts` |
+| NOTE-A0 | Description + comment round-trip | `abyssConvertLine.test.ts`, `abyssFormat.test.ts` |
+
+```bash
+npx vitest run src/test/notesSmoke.test.ts src/test/abyssFormat.test.ts src/test/abyssConvertLine.test.ts
+```
+
+### Live pilot (vault + MCP)
+
+Use throwaway task `#tts-test` in `00 Inbox/abyss-active.md` (or Abyss capture file).
+
+| ID | Action | Pass when | MCP / vault check |
+|----|--------|-----------|-------------------|
+| NOTE-L1 | Add `- >` description under synced line → blur line or **Synchronize** | TT `content` or `desc` contains text (not only title) | `get_task_by_id` |
+| NOTE-L2 | Edit description in TT app → **Synchronize** (or reload for full pull) | Vault shows updated `- >` line | Read `.md` in Obsidian |
+| NOTE-L3 | Add Abyss comment → **Enter** → **Synchronize** | **2.0.46+:** `get_comment` lists comment; `content` has **no** `Comments:` block | MCP `get_comment` + `get_task_by_id` |
+| NOTE-L4 | Paste `Comments:\n…` into TT task body → sync | Matching `- …` bullets under checkbox | Vault lines |
+| NOTE-L5 | TT description change + new local comment not on TT yet | Both present after sync | `mergeAbyssBlock` behaviour; journal `obs→tt` with `content` |
+| NOTE-N1 | `40 KB/` lines do not push until folder is in `syncScopeFolders` | `logicSmoke.test.ts` LOGIC-3 |
+
+**Journal evidence (push):** `.tickticksync/journal/…jsonl` entry `dir":"obs→tt"` with non-empty `content` when comments changed.
+
+**If NOTE-L3 fails but NOTE-A* pass:** almost always Abyss did not persist the comment to the file, or you are looking at TickTick **Comments** UI instead of the task **description/body** field.
 
 ---
 
@@ -188,6 +231,7 @@ Not in this automated run (needs Obsidian + TickTick UI):
 | 2026-10-19 | 2.0.36 | user | **R1/R2 pass** (TTS-Inbox → rename in TT → `abyss-active.md` matches) | | | | | | | |
 | 2026-10-19 | 2.0.36→37 | agent + vault open | Phase B: pull+TT rename **pass**; **R7 pass**; R3 N/A (disk edit). Progress modal in **2.0.37** | skip C | | | | | | Probes cleaned from `abyss-active.md` |
 | 2026-10-19 | 2.0.42 | agent | CTX-A/A2 + SYNC-12 pass; NOTE/CTX live **pending** (vault reload). MCP `test 3`: `obsidian` only — re-sync after 2.0.41 for `proj/` tag | | | | | | | Palette **full pull** restored (`tts-sync-full`) |
+| 2026-10-19 | 2.0.45 | agent | NOTE-A1–A5 + abyss bundle pass (541 tests full suite). Live NOTE-L3: **not run** — TT native Comments API still Phase 1 | | | | | | | User: comments “don’t work” → check `content` + Enter in Abyss |
 
 ---
 

@@ -19,6 +19,10 @@ const API_ENDPOINTS = {
 	projectMove: 'batch/taskProject',
 	parentMove: `batch/taskParent`,
 	userStatus: 'user/status',
+	taskComments: (projectId: string, taskId: string) => `project/${projectId}/task/${taskId}/comments`,
+	taskComment: (projectId: string, taskId: string) => `project/${projectId}/task/${taskId}/comment`,
+	taskCommentDelete: (projectId: string, taskId: string, commentId: string) =>
+		`project/${projectId}/task/${taskId}/comment/${commentId}`,
 };
 
 /*

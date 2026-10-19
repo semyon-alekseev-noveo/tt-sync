@@ -1,5 +1,7 @@
 import { isDetached } from '@/detach';
-import { abyssLinesToNote, noteToAbyssLines, childIndent } from '@/abyssFormat';
+import { abyssDescriptionToNote, abyssLinesToNote, noteToAbyssLines, childIndent } from '@/abyssFormat';
+import { formatApiCommentAsAbyssLines, useAbyssCommentsApi } from '@/abyssCommentSync';
+import type { ITaskComment } from '@/api/types/TaskComment';
 import { mapObsidianTag, mapTickTickTag } from '@/tagMapping';
 import { isListTag, isStageToken, listForTags, obsidianTagForStageTag, tagForList, tagsForCurrentList, tickTickTagForStage, type ITagListMapping } from '@/listMapping';
 import { checkboxChar, restoreStatus, tagForStatusChar, isStatusTag, type IStatusMapping } from '@/statusMapping';
@@ -256,6 +258,15 @@ export class TaskParser {
 				resultLine = await this.addNote(resultLine, task.content, numTabs, 'Note', task.id, task.projectId);
 			} else if (getSettings().taskLinksInObsidian === 'noteLink') {
 				resultLine = await this.addNote(resultLine, task.content, numTabs, 'Note', task.id, task.projectId);
+			}
+		}
+
+		if (useAbyssCommentsApi()) {
+			const apiComments = (task as ITask & { _apiComments?: ITaskComment[] })._apiComments;
+			if (apiComments?.length) {
+				const ind = childIndent(numTabs, getSettings().abyssIndent);
+				const extra = apiComments.flatMap(c => formatApiCommentAsAbyssLines(c, ind));
+				if (extra.length) resultLine = `${resultLine}\n${extra.join('\n')}`;
 			}
 		}
 
@@ -924,7 +935,9 @@ export class TaskParser {
 	getNoteString(taskRecord: ITaskRecord, id?: string) {
 		let textContent = '';
 		if (getSettings().abyssTasksFormat) {
-			return abyssLinesToNote(taskRecord.taskLines ?? []);
+			const lines = taskRecord.taskLines ?? [];
+			if (useAbyssCommentsApi()) return abyssDescriptionToNote(lines);
+			return abyssLinesToNote(lines);
 		}
 		if (taskRecord.taskLines) {
 			let descriptionStrings = [...taskRecord.taskLines];

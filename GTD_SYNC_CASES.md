@@ -575,6 +575,23 @@ These cases define **daily GTD**: tasks live in **list files** under `30 Tasks/T
 
 ---
 
+## 10. Abyss notes & comments (`CASE-AN*`)
+
+Maps to `ABYSS_NOTES_ALIGNMENT.md` §4 and `SMOKE_TESTS.md` § Abyss notes. **Native TickTick Comments API is not in scope** until `TT_ABYSS_ROADMAP.md` Phase 1.
+
+| ID | Scenario | Pass when |
+|----|----------|-----------|
+| CASE-AN1 | Obs `- >` → Sync | TT `content`/`desc` has description |
+| CASE-AN2 | TT body edit → Sync | Vault `- >` lines updated |
+| CASE-AN3 | Abyss comment in `.md` → Sync | TT `content` has `Comments:\n…` |
+| CASE-AN4 | TT `Comments:` block → Sync | Vault `- YYYY-MM-DD …` bullets |
+| CASE-AN5 | Checklist item toggle on TT | Matching `- [ ]` / `[x]` under task |
+| CASE-AN6 | TT desc change + new local comment | Both preserved after sync |
+
+Automated: `notesSmoke.test.ts` (NOTE-A*), `abyssFormat.test.ts`. Live: NOTE-L1–L5 in `SMOKE_TESTS.md`.
+
+---
+
 ## 11. Planned engineering sequence (from cases)
 
 1. **CASE-T4** — mirror/move obs-created lines into `30 Tasks/TickTick/<List>.md`; tests tied to CASE-T2.

@@ -42,6 +42,8 @@ export interface ITickTickSyncSettings {
 	abyssIndent: 'tab' | 'spaces';
 	/** Push `note/<file-slug>` and `proj/<moc-slug>` tags for TickTick filter views; stripped on pull. */
 	syncNoteContextTags: boolean;
+	/** Abyss `- stamp:` comments → TickTick Comments API (not `content` block). */
+	syncAbyssCommentsViaApi: boolean;
 	// ⏳ scheduled <-> TickTick startDate (when no 🛫)
 	scheduledAsStartDate: boolean;
 	tagMappings: { obsidian: string; ticktick: string }[];
@@ -131,6 +133,7 @@ export const DEFAULT_SETTINGS: ITickTickSyncSettings = {
 	abyssTasksFormat: false,
 	abyssIndent: 'tab',
 	syncNoteContextTags: true,
+	syncAbyssCommentsViaApi: true,
 	scheduledAsStartDate: false,
 	tagMappings: [],
 	statusMappings: [{ char: '/', tag: 'status/in-progress' }, { char: '-', tag: 'status/cancelled' }],

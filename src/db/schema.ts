@@ -63,6 +63,15 @@ export type JournalEntry = {
 	details?: unknown;
 };
 
+export type TaskCommentMap = {
+	id: string;
+	taskId: string;
+	projectId: string;
+	fingerprint: string;
+	ticktickCommentId: string;
+	body: string;
+};
+
 export type TaskFileMapping = {
 	id: string;            // `${localId}:${file}`
 	localId: string;

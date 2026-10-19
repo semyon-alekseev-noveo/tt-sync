@@ -11,7 +11,7 @@ const S = () => (getSettings as unknown as () => Record<string, unknown>)();
 describe('convertLineToTask with Abyss settings', () => {
 	it('maps tags via table, ⏳ → startDate, Abyss note lines → content', async () => {
 		Object.assign(S(), { noteDelimiter: '', fileLinksInTickTick: 'noLink', stopInjectingTickTickTag: true,
-			abyssTasksFormat: true, scheduledAsStartDate: true, syncNotes: true,
+			abyssTasksFormat: true, syncAbyssCommentsViaApi: false, scheduledAsStartDate: true, syncNotes: true,
 			tagMappings: [{ obsidian: 'type/next', ticktick: 'next' }] });
 		const id = 'abcdefabcdefabcdefabcdef';
 		const line = `- [ ] Отчёт #type/next ⏳ 2026-10-15 📅 2026-10-20 #ticktick %%[ticktick_id:: ${id}]%%`;

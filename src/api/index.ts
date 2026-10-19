@@ -5,6 +5,7 @@ import type { IProjectGroup } from './types/ProjectGroup';
 import type { IProject, ISections } from './types/Project';
 import type { ITask } from './types/Task';
 import type { ITag } from './types/Tag';
+import type { ITaskComment } from './types/TaskComment';
 import { API_ENDPOINTS } from './utils/get-api-endpoints';
 import log from '@/utils/logger';
 import { getSettings, updateSettings } from '@/settings';
@@ -28,7 +29,10 @@ const {
 	exportData,
 	projectMove,
 	parentMove,
-	userStatus
+	userStatus,
+	taskComments,
+	taskComment,
+	taskCommentDelete,
 } = API_ENDPOINTS;
 
 
@@ -732,6 +736,49 @@ export class Tick {
 			log.error('Project Move failed: ', e);
 			this.setError('Project Move', null, e);
 			return null;
+		}
+	}
+
+	async getTaskComments(projectId: string, taskId: string): Promise<ITaskComment[]> {
+		try {
+			const url = `${this.apiUrl}/${taskComments(projectId, taskId)}`;
+			const response = await this.makeRequest('Get Task Comments', url, 'GET', undefined);
+			if (!response) return [];
+			if (Array.isArray(response)) return response as ITaskComment[];
+			const wrapped = response as { comments?: ITaskComment[] };
+			return wrapped.comments ?? [];
+		} catch (e) {
+			log.error('Get Task Comments failed: ', e);
+			this.setError('Get Task Comments', null, e);
+			return [];
+		}
+	}
+
+	async addTaskComment(projectId: string, taskId: string, title: string): Promise<ITaskComment | null> {
+		try {
+			const url = `${this.apiUrl}/${taskComment(projectId, taskId)}`;
+			const body = { title: title.slice(0, 1024) };
+			const response = await this.makeRequest('Add Task Comment', url, 'POST', body);
+			if (!response) return null;
+			const raw = response as { ok?: boolean; result?: ITaskComment };
+			if (raw.ok && raw.result) return raw.result;
+			return response as ITaskComment;
+		} catch (e) {
+			log.error('Add Task Comment failed: ', e);
+			this.setError('Add Task Comment', null, e);
+			return null;
+		}
+	}
+
+	async deleteTaskComment(projectId: string, taskId: string, commentId: string): Promise<boolean> {
+		try {
+			const url = `${this.apiUrl}/${taskCommentDelete(projectId, taskId, commentId)}`;
+			const response = await this.makeRequest('Delete Task Comment', url, 'DELETE', undefined);
+			return response !== null;
+		} catch (e) {
+			log.error('Delete Task Comment failed: ', e);
+			this.setError('Delete Task Comment', null, e);
+			return false;
 		}
 	}
 

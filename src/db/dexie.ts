@@ -1,7 +1,7 @@
 import Dexie from "dexie";
 import type { Table } from "dexie";
 import type { LocalTask, SyncMeta, DBData, DeviceInfo } from "./schema";
-import type { TaskFileMapping, LocalProject, LocalProjectGroup, LocalFile, JournalEntry, LocalTag } from "./schema";
+import type { TaskFileMapping, TaskCommentMap, LocalProject, LocalProjectGroup, LocalFile, JournalEntry, LocalTag } from "./schema";
 
 import { defaultDBData } from "./schema";
 import { ensureSyncMeta } from "./meta";
@@ -57,6 +57,7 @@ class TickTickDB extends Dexie {
 	files!: Table<LocalFile, string>;
 	tags!: Table<LocalTag, string>;
 	journal!: Table<JournalEntry, number>;
+	taskCommentMaps!: Table<TaskCommentMap, string>;
 
 	constructor(vaultName: string) {
 		super(vaultName + "TickTickSync");
@@ -79,6 +80,18 @@ class TickTickDB extends Dexie {
 			files: "path",
 			tags: "name",
 			journal: "++id, timestamp, deviceId, action"
+		});
+
+		this.version(6).stores({
+			tasks: "localId, taskId, updatedAt, lastVaultSync, file, deleted",
+			meta: "key",
+			mappings: "id, taskId, file",
+			projects: "id",
+			projectGroups: "id",
+			files: "path",
+			tags: "name",
+			journal: "++id, timestamp, deviceId, action",
+			taskCommentMaps: "id, taskId, ticktickCommentId, fingerprint",
 		});
 	}
 }

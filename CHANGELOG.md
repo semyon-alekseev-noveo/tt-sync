@@ -1,5 +1,25 @@
 # Changelog
 
+### Iteration 2026-10-19 13:10 UTC
+
+- Context: PO needs Abyss comments in TickTick **Comments** UI, not embedded in task body.
+- Target: **2.0.46** — Phase 1 `syncAbyssCommentsViaApi` (default on with Abyss format).
+- Actions log: Tick API `get/add/delete` comment; `abyssCommentSync.ts`; Dexie `taskCommentMaps`; push in `TaskModificationDetector`; pull in `fileOperation` + `convertTaskToLine`; setting in `NotesSettings.svelte`.
+- Validation: `npx vitest run` → 545 passed; `npm run build` → ok.
+- Problems: Comment edit = delete+recreate; live NOTE-L3 on pilot vault still manual.
+- To Be Done: BRAT **2.0.46**; re-sync tasks with old `Comments:` in `content` to migrate.
+- References: `TT_ABYSS_ROADMAP.md` Phase 1, `SMOKE_TESTS.md`, `CHANGELOG.md`
+
+### Iteration 2026-10-19 12:52 UTC
+
+- Context: PO reported comment sync “not working”; need smokes for 2.0.40–2.0.45 behaviour.
+- Target: Document **content**-field comments vs TT Comments API; automate NOTE-A*; extend live matrix.
+- Actions log: `src/test/notesSmoke.test.ts`; `SMOKE_TESTS.md` (UX, COMMENT expectations, NOTE-L*); `GTD_SYNC_CASES.md` §10 CASE-AN*.
+- Validation: `npx vitest run src/test/notesSmoke.test.ts` → 5 passed; full suite 541 passed.
+- Problems: Native TT comment UI still **open** (Phase 1); live NOTE-L3 not executed in vault this iteration.
+- To Be Done: PO run NOTE-L3 on disk + MCP `content`; implement Phase 1 if Comments UI required.
+- References: `TT_ABYSS_ROADMAP.md`, `SMOKE_TESTS.md`, `CHANGELOG.md`
+
 ### Iteration 2026-10-19 12:50 UTC
 
 - Context: PO wants one palette sync command; full pull duplicated startup behavior.

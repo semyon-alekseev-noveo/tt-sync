@@ -39,6 +39,63 @@ export function abyssLinesToNote(lines: string[]): string {
 	return note;
 }
 
+/** Description text only (no `Comments:` block) for TickTick `content` when using Comments API. */
+export function abyssDescriptionToNote(lines: string[]): string {
+	const kinds = classifyChildren(lines);
+	const desc: string[] = [];
+	let last: ChildKind = 'keep';
+	lines.forEach((raw, i) => {
+		const k = kinds[i];
+		const t = raw.trim();
+		if (k === 'desc') desc.push(t === '- >' ? '' : t.slice(4));
+		else if (k === 'cont' && last === 'desc') desc[desc.length - 1] += '\n' + t;
+		if (k !== 'cont') last = k;
+	});
+	return desc.join('\n');
+}
+
+export function stripLegacyCommentsBlock(note: string): string {
+	if (!note) return '';
+	const idx = note.indexOf(COMMENTS_HEADER);
+	if (idx < 0) return note;
+	return note.slice(0, idx).replace(/\n+$/, '');
+}
+
+export type AbyssCommentThread = { fingerprint: string; body: string; lines: string[] };
+
+/** One Abyss comment thread (bullet + continuations) for API sync. */
+export function extractAbyssCommentThreads(taskLines: string[]): AbyssCommentThread[] {
+	const kinds = classifyChildren(taskLines);
+	const threads: AbyssCommentThread[] = [];
+	let current: string[] = [];
+	const flush = () => {
+		if (!current.length) return;
+		const body = current
+			.map(l => l.trim())
+			.map(l => (l.startsWith('- ') ? l.slice(2) : l))
+			.join('\n')
+			.replace(/^\s+/, '');
+		threads.push({ fingerprint: commentFingerprint(body), body, lines: [...current] });
+		current = [];
+	};
+	for (let i = 0; i < taskLines.length; i++) {
+		const k = kinds[i];
+		if (k === 'comment') {
+			current.push(taskLines[i]);
+		} else if (k === 'cont' && current.length > 0) {
+			current.push(taskLines[i]);
+		} else {
+			flush();
+		}
+	}
+	flush();
+	return threads;
+}
+
+export function commentFingerprint(body: string): string {
+	return body.trim().replace(/\s+/g, ' ').toLowerCase();
+}
+
 /** TickTick note text -> Abyss child lines. `ind` = full indent of child lines. */
 export function noteToAbyssLines(note: string, ind: string): string[] {
 	const lines = note.replace(/\r/g, '').split('\n');
