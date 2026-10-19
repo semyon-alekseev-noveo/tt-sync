@@ -22,8 +22,8 @@
 ## Validation
 
 - Build: `npm run build` in repo root; CI on `abyss-mapping` via `.github/workflows/ci.yml`.
-- Unit tests: `npm test -- --run` (at 2.0.32).
-- Manual pilot: **`SMOKE_TESTS.md`** — logic rows LOGIC-1–9 (automated) and LOGIC-A–C (Obsidian); deletion `CASE-DEL-*`. Plugin ≥ 2.0.32 on `Thinkpad-tts-test`.
+- Unit tests: `npm test -- --run` (at 2.0.33).
+- Manual pilot: **`SMOKE_TESTS.md`**. Plugin ≥ 2.0.33 on `Thinkpad-tts-test`. A new TTS-Inbox task lands in `00 Inbox/abyss-active.md` with `#inbox`.
 - BRAT installs: GitHub Release assets from `.github/workflows/release.yml` (see `docs/BRAT_INSTALL.md`).
 - TT cleanup verified 2026-10-16 via MCP (no `ticktick` tag left on polluted set).
 

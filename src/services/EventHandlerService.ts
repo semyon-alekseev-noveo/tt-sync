@@ -125,7 +125,7 @@ export class EventHandlerService {
 							log.error('An error occurred while check new task in line: ', error);
 						}
 					})();
-				}, 1000);
+				}, 5000);
 			})
 		);
 	}

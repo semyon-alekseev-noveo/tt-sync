@@ -1,7 +1,7 @@
 import { isDetached } from '@/detach';
 import { abyssLinesToNote, noteToAbyssLines, childIndent } from '@/abyssFormat';
 import { mapObsidianTag, mapTickTickTag } from '@/tagMapping';
-import { isListTag, isStageToken, listForTags, obsidianTagForStageTag, tagForList, tickTickTagForStage, type ITagListMapping } from '@/listMapping';
+import { isListTag, isStageToken, listForTags, obsidianTagForStageTag, tagForList, tagsForCurrentList, tickTickTagForStage, type ITagListMapping } from '@/listMapping';
 import { checkboxChar, restoreStatus, tagForStatusChar, isStatusTag, type IStatusMapping } from '@/statusMapping';
 const warnedConflicts = new Set<string>();
 import { type App, type MetadataCache, Notice } from 'obsidian';
@@ -15,7 +15,7 @@ import type { TagService } from '@/services/TagService';
 import { tasksTextToRRule, rruleToTasksText } from '@/utils/RecurrenceConverter';
 import { normalizeTrigger, parseReminderText, secondsToShorthand, triggerToSeconds } from '@/utils/ReminderConverter';
 import log from '@/utils/logger';
-import { isBlankTitle } from '@/projectScheme';
+import { isBlankTitle, isUnfinishedCapture } from '@/projectScheme';
 import { isPathInPushScope, scopePushWithoutMarker } from '@/syncScope';
 
 const prioritySymbols = {
@@ -182,9 +182,19 @@ export class TaskParser {
 			} else {
 				const projects = await getAllProjects();
 				const lt = tagForList(task.projectId, listMapP, projects);
-				lineTags = (lineTags ?? []).filter(t => !isListTag(t, listMapP));
-				if (lt) lineTags = [...lineTags, lt];
+				lineTags = tagsForCurrentList(lineTags, task.projectId, listMapP, {
+					defaultProjectId: getSettings().defaultProjectId,
+					via: 'list',
+				}).filter(t => !isListTag(t, listMapP));
+				if (lt && !lineTags.some(t => t.toLowerCase() === lt.toLowerCase())) lineTags = [...lineTags, lt];
 			}
+		}
+		if ((getSettings().gtdStageVia ?? 'list') !== 'tag'
+			&& getSettings().defaultProjectId
+			&& task.projectId === getSettings().defaultProjectId
+			&& !this.plugin?.projectScheme?.isParentId?.(task.parentId)
+			&& !(lineTags ?? []).some(t => t.toLowerCase() === 'inbox')) {
+			lineTags = [...(lineTags ?? []), 'inbox'];
 		}
 		resultLine += `- [${checkChar}] ${task.title}`;
 
@@ -765,6 +775,13 @@ export class TaskParser {
 					break;
 				}
 			}
+		}
+
+		if (projectId && (getSettings().gtdStageVia ?? 'list') === 'list') {
+			tags = tagsForCurrentList(tags, projectId, getSettings().tagListMappings, {
+				defaultProjectId: getSettings().defaultProjectId,
+				via: 'list',
+			});
 		}
 
 		const title = this.getTaskContentFromLineText(textWithoutIndentation);

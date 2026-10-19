@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
-	allowVaultUpdate, healSyncedLists, isListAllowed, isPathInFolders, lineListToText, migrateSyncedLists, normalizeSyncTag, parseLineList, tickTickTaskEntersVault,
+	allowVaultUpdate, fileForNewTickTickTask, healSyncedLists, isListAllowed, isPathInFolders, lineListToText, listMoveSource, migrateSyncedLists, normalizeSyncTag, parseLineList, tickTickTaskEntersVault,
 	pushScopeAllows, resolveProjectsList, resolveSyncedListIds, taskMatchesSyncLimit, unmatchedEntries,
 } from '@/syncScope';
 
@@ -55,6 +55,19 @@ describe('syncedLists allow-list', () => {
 		expect(normalizeSyncTag('TTS-Test')).toBe('tts-test');
 		expect(normalizeSyncTag('type/next')).toBe('type-next');
 		expect(normalizeSyncTag('')).toBeUndefined();
+	});
+
+	it('a new inbox task is written to the Abyss capture note', () => {
+		expect(fileForNewTickTickTask('in', 'in', '00 Inbox/abyss-active.md', '30 Tasks/TickTick/TTS-Inbox.md'))
+			.toBe('00 Inbox/abyss-active.md');
+		expect(fileForNewTickTickTask('na', 'in', '00 Inbox/abyss-active.md', '30 Tasks/TickTick/TTS-nextAction.md'))
+			.toBe('30 Tasks/TickTick/TTS-nextAction.md');
+	});
+
+	it('list move uses the remote project when the local copy already says the destination', () => {
+		expect(listMoveSource('inbox', 'next', 'next')).toBe('inbox');
+		expect(listMoveSource('next', 'inbox', 'next')).toBeUndefined();
+		expect(listMoveSource(undefined, 'inbox', 'next')).toBe('inbox');
 	});
 
 	it('TickTick → vault is list OR sync tag', () => {

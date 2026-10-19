@@ -1,7 +1,7 @@
 import { nextOccurrence, rollRecurringLines } from '@/recurrence';
 import { fencedLines } from '@/utils/vaultIdScan';
 import { mergeTask, conflictNote } from '@/merge3';
-import { isBlankTitle, stripFileLinks } from '@/projectScheme';
+import { isBlankTitle, isUnfinishedCapture, stripFileLinks } from '@/projectScheme';
 import { mergeAbyssBlock } from '@/abyssFormat';
 /**
  * TaskModificationDetector - Detects task changes in markdown files
@@ -31,7 +31,7 @@ import { NewFileMap, type ITaskItemRecord, type ITaskRecord } from '@/services/N
 import { FolderSyncService } from '@/services/FolderSyncService';
 import { getSettings } from '@/settings';
 import { getAllProjects } from '@/db/projects';
-import { isPathInPushScope, normalizeSyncTag, resolveSyncedListIds, tickTickTaskEntersVault, type TaskSyncLimitOptions } from '@/syncScope';
+import { isPathInPushScope, listMoveSource, normalizeSyncTag, resolveSyncedListIds, tickTickTaskEntersVault, type TaskSyncLimitOptions } from '@/syncScope';
 import log from '@/utils/logger';
 import ObjectID from 'bson-objectid';
 import { normalizeRepeatFlag } from '@/utils/RecurrenceConverter';
@@ -113,8 +113,9 @@ export class TaskModificationDetector {
 		// New task in push scope (marker optional when abyssTasksFormat / Step 4)
 		if (!this.plugin.taskParser.hasTickTickId(lineTxt)
 			&& this.plugin.taskParser.isLineTrackedForSync(lineTxt, fileMap.getFilePath())) {
-			if (isBlankTitle(this.plugin.taskParser.getTaskContentFromLineText(lineTxt.trimStart()))) {
-				log.warn('Skipping task with empty title:', lineTxt);
+			const captured = this.plugin.taskParser.getTaskContentFromLineText(lineTxt.trimStart());
+			if (isBlankTitle(captured) || isUnfinishedCapture(captured, lineTxt)) {
+				log.warn('Skipping unfinished task line:', lineTxt);
 				return;
 			}
 			try {
@@ -508,12 +509,26 @@ export class TaskModificationDetector {
 			await this.plugin.taskRepository.upsertTask(lineTask, filepath, Date.now());
 		}
 
-		// A GTD stage tag is removed from task.tags before compare, so tagsModified
-		// stays false while projectId still changes. Move on that list change.
-		if (!modifications.projectMoved
-			&& lineTask.projectId && savedTask.projectId && lineTask.projectId !== savedTask.projectId) {
-			await this.plugin.tickTickRestAPI?.moveTaskProject(lineTask, savedTask.projectId, lineTask.projectId);
-			modified = true;
+		// A GTD stage tag is stripped before the tag compare, and a failed move can
+		// leave the local projectId already equal to the destination. Ask TickTick
+		// where the task is, and move from there.
+		if (!modifications.projectMoved && lineTask.projectId) {
+			let remoteProject: string | undefined;
+			try {
+				const remote = await this.plugin.tickTickRestAPI?.getTaskById(taskId, undefined);
+				remoteProject = remote?.projectId;
+			} catch (e) { log.warn('list move lookup failed', e); }
+			const from = listMoveSource(remoteProject, savedTask.projectId, lineTask.projectId);
+			if (from) {
+				const moved = await this.plugin.tickTickRestAPI?.moveTaskProject(lineTask, from, lineTask.projectId);
+				if (moved) {
+					savedTask.projectId = lineTask.projectId;
+					modified = true;
+				} else {
+					log.error(`List move failed for ${taskId}: ${from} -> ${lineTask.projectId}`);
+					lineTask.projectId = from;
+				}
+			}
 		}
 
 		// Handle parent change (project-scheme children must land on the projects list, not inbox)

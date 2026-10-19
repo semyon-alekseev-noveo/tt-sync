@@ -718,6 +718,9 @@ export class Tick {
 			}];
 
 			const response = await this.makeRequest('Project Move', url, 'POST', projectMovePayload);
+			if (!response || (Array.isArray(response) && response.length === 0)) {
+				return null;
+			}
 			if (response) {
 				const r = response as { sortOrder: number };
 				this.inboxProperties.sortOrder = r.sortOrder - 1;

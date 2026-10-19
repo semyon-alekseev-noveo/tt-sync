@@ -484,18 +484,19 @@ export class TickTickRestAPI {
 		return result;
 	}
 
-	async moveTaskProject(task: ITask, fromProject: string, toProject: string) {
+	async moveTaskProject(task: ITask, fromProject: string, toProject: string): Promise<boolean> {
 		await this.initializeAPI();
 
-		let result = await this.api?.projectMove(task.id, fromProject, toProject);
+		const result = await this.api?.projectMove(task.id, fromProject, toProject);
 		if (!result) {
 			log.error('Project Moved Failed: ', this.api?.lastError);
+			return false;
 		}
 
-		//Near as I can tell, this is redundant, but TickTick does it. I think it may be a
-		// sortorder thing, Just do it.
+		// TickTick follows a project move with an update. Send the destination list.
+		task.projectId = toProject;
 		await this.api?.updateTask(task);
-
+		return true;
 	}
 
 	async moveTaskParent(taskId: string, oldParentId: string, newParentId: string, projectId: string) {

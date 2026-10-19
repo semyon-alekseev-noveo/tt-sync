@@ -1,5 +1,55 @@
 # Changelog
 
+### Iteration 2026-10-19 03:40 UTC
+
+- Context: A new TTS-Inbox task was going to `30 Tasks/TickTick/TTS-Inbox.md`. That broke Abyss capture.
+- Target: Inbox tasks born in TickTick land in the Abyss capture note with `#inbox`.
+- Actions log: `fileForNewTickTickTask` uses `abyss-tasks` `taskFilePath` (`00 Inbox/abyss-active.md`). The line gets `#inbox`.
+- Validation: `npx vitest run src/test/syncScope.test.ts src/test/projectParentKeep.test.ts` → 20 passed.
+- Problems: Shipped in **2.0.33**.
+- To Be Done: Install 2.0.33, create a task in TTS-Inbox, confirm the line in `abyss-active.md`.
+- References: `src/services/VaultSyncCoordinator.ts`, `src/taskParser.ts`, `CHANGELOG.md`
+
+### Iteration 2026-10-19 03:35 UTC
+
+- Context: Smoke list did not cover the inbox-tag drop, the unfinished `%%` line, or the 5s editor wait.
+- Target: Those rows run with the existing unit suite.
+- Actions log: Added LOGIC-10–12 and live LOGIC-E/F to `SMOKE_TESTS.md`. A project list keeps a stage tag that is not `inbox`.
+- Validation: `npx vitest run src/test/logicSmoke.test.ts src/test/listMapping.test.ts src/test/projectParentKeep.test.ts src/test/foolCases.test.ts` → 18 passed.
+- Problems: LOGIC-E and LOGIC-F need a reload and a task created in the TickTick app (`open`).
+- To Be Done: Reload, create a task in TTS-Inbox, move it to TTS-nextAction, confirm the line and the missing `inbox` tag.
+- References: `SMOKE_TESTS.md`, `CHANGELOG.md`
+
+### Iteration 2026-10-19 03:30 UTC
+
+- Context: `#inbox` stayed on a task after it left TTS-Inbox. A task created in TTS-Inbox had no file to land in. Editor sync fired after 1s and saved lines like `%%`.
+- Target: Drop `inbox` off a task that is not on the inbox list. Write a new allow-listed task into `30 Tasks/TickTick/<list>.md`. Wait 5s and skip an unfinished `%` line.
+- Actions log: `tagsForCurrentList` on pull and push; `dropStaleStageTags` updates TickTick; `determineTargetFile` registers a list file; editor debounce 5s; `isUnfinishedCapture`.
+- Validation: `npx vitest run src/test/foolCases.test.ts src/test/listMapping.test.ts src/test/services/VaultSyncCoordinator.test.ts` → 33 passed.
+- Problems: The task already titled `%%` stays until deleted (`open`). Needs a plugin reload.
+- To Be Done: Reload Obsidian. Create a task in TTS-Inbox and confirm a line in `30 Tasks/TickTick/TTS-Inbox.md`. Move a task off the inbox and confirm the `inbox` tag is gone.
+- References: `src/services/EventHandlerService.ts`, `src/services/VaultSyncCoordinator.ts`, `src/listMapping.ts`, `CHANGELOG.md`
+
+### Iteration 2026-10-19 02:30 UTC
+
+- Context: LOGIC-B2 title updated on TTS-Inbox while the local record already said TTS-nextAction, so no project move was sent.
+- Target: Move from the project TickTick actually reports, and do not keep a destination list locally when that move fails.
+- Actions log: `listMoveSource` in the modification path; `moveTaskProject` returns false when `projectMove` fails; empty project-move responses count as failure.
+- Validation: `npx vitest run src/test/syncScope.test.ts src/test/listMapping.test.ts` → 20 passed.
+- Problems: Live move confirmed after reload (`resolved`). LOGIC-B2 `6ad4df192f54922b67e55fa4` is on TTS-nextAction.
+- To Be Done: Add `inbox = TTS-Inbox` only if `#inbox` should be a mapped stage.
+- References: `src/syncScope.ts`, `src/services/TaskModificationDetector.ts`, `src/services/TicktickRestAPI.ts`, `CHANGELOG.md`
+
+### Iteration 2026-10-19 00:50 UTC
+
+- Context: Re-run the logic smokes on 2.0.32 in the open test vault.
+- Target: `#inbox` stays on TTS-Inbox. Adding `#type/next` moves the task to TTS-nextAction.
+- Actions log: Updated `SMOKE_TESTS.md` rows A–D. Ran the unit files. Created LOGIC-A32 and edited LOGIC-B2, then synchronized.
+- Validation: `npx vitest run` on logicSmoke, listMapping, projectParentKeep → 13 passed. LOGIC-A32 on TTS-Inbox. LOGIC-B2 title updated on TTS-Inbox; list did not change (`open`).
+- Problems: List move is still not applied on the live task (`open`).
+- To Be Done: Trace `moveTaskProject` for LOGIC-B2 `6ad4df192f54922b67e55fa4`.
+- References: `SMOKE_TESTS.md`, `CHANGELOG.md`
+
 ### Iteration 2026-10-18 15:10 UTC
 
 - Context: `#inbox` created tasks on the real Inbox list. Adding `#type/next` later did not move a task, because the stage tag is stripped before the tag-diff.

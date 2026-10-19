@@ -52,6 +52,29 @@ export function obsidianTagForStageTag(ttTag: string, map: ITagListMapping[] | u
 	return map?.find(e => flat(e.list) === want)?.tag.replace(/^#/, '');
 }
 
+/**
+ * Tags to keep on a task after it sits on `projectId`.
+ * In list mode, a stage tag for a different list is dropped. `#inbox` is dropped
+ * once the task is no longer on the default inbox list.
+ */
+export function tagsForCurrentList(
+	tags: string[] | undefined,
+	projectId: string,
+	map: ITagListMapping[] | undefined,
+	opts: { defaultProjectId?: string; via?: 'list' | 'tag' },
+): string[] {
+	const keep = map?.find(m => m.listId === projectId)?.tag;
+	return (tags ?? []).filter(t => {
+		if (t.toLowerCase() === 'inbox' && opts.defaultProjectId && projectId !== opts.defaultProjectId) return false;
+		if ((opts.via ?? 'list') === 'list' && map?.length && isStageToken(t, map)) {
+			// A list with no stage row (a project list) keeps the tag.
+			if (!keep) return true;
+			return n(t) === n(keep) || flat(t) === flat(keep);
+		}
+		return true;
+	});
+}
+
 /** Either side of a GTD stage row (Obsidian tag or TickTick tag/list name). */
 export function isStageToken(tag: string | undefined, map: ITagListMapping[] | undefined): boolean {
 	if (!tag) return false;

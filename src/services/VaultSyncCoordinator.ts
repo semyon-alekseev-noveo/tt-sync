@@ -14,7 +14,9 @@ import type { LocalTask } from '@/db/schema';
 import { db } from "@/db/dexie";
 import { getSettings } from '@/settings';
 import { getAllProjects } from '@/db/projects';
-import { allowVaultUpdate, isListAllowed, normalizeSyncTag, resolveSyncedListIds, taskMatchesSyncLimit, unmatchedEntries } from '@/syncScope';
+import { tagsForCurrentList } from '@/listMapping';
+import { upsertFile } from '@/db/files';
+import { allowVaultUpdate, fileForNewTickTickTask, isListAllowed, normalizeSyncTag, resolveSyncedListIds, taskMatchesSyncLimit, unmatchedEntries } from '@/syncScope';
 import { TaskDeletionModal } from '@/modals/TaskDeletionModal';
 import { FolderSyncService } from '@/services/FolderSyncService';
 import log from '@/utils/logger';
@@ -126,7 +128,7 @@ export class VaultSyncCoordinator {
 					// Line already exists in another note: adopt that location instead of writing a duplicate.
 					dbUpdates.push({ localId: lt.localId, changes: { file: realFile, lastVaultSync: Date.now() } });
 				} else if (actionNeeded.action === 'add') {
-					group.toAdd.push(task);
+					group.toAdd.push(await this.dropStaleStageTags(task));
 					dbUpdates.push({ localId: lt.localId, changes: { file: targetFile, lastVaultSync: Date.now() } });
 				} else if (actionNeeded.action === 'move') {
 					// Task moved to a different file (project change)
@@ -140,7 +142,7 @@ export class VaultSyncCoordinator {
 					group.toAdd.push(task);
 					dbUpdates.push({ localId: lt.localId, changes: { file: targetFile, lastVaultSync: Date.now() } });
 				} else if (actionNeeded.action === 'update') {
-					group.toUpdate.push(task);
+					group.toUpdate.push(await this.dropStaleStageTags(task));
 					dbUpdates.push({ localId: lt.localId, changes: { lastVaultSync: Date.now() } });
 				}
 			} else if (lt.file) {
@@ -208,6 +210,11 @@ export class VaultSyncCoordinator {
 				log.debug(`Found task ${task.id} in unassociated file: ${fileWithTask}`);
 				return fileWithTask;
 			}
+			const capture = fileForNewTickTickTask(task.projectId, defaultProjectId, await this.abyssCaptureFile(), undefined);
+			if (capture) {
+				cache.set(task.projectId, capture);
+				return capture;
+			}
 		}
 
 		if (cache.has(task.projectId)) {
@@ -236,6 +243,18 @@ export class VaultSyncCoordinator {
 			targetFile = await this.plugin.fileMetadataService.getFilepathForProjectId(task.projectId);
 			if (!targetFile) {
 				targetFile = await this.plugin.fileMetadataService.getFilepathForProjectId(defaultProjectId);
+			}
+		}
+
+		if (!targetFile && task.projectId !== defaultProjectId) {
+			const rec = await db.projects.get(task.projectId);
+			const name = rec?.project?.name;
+			const list = name ? { id: task.projectId, name } : undefined;
+			if (list && isListAllowed(getSettings().syncedLists, list)) {
+				const folder = (getSettings().TickTickTasksFilePath || 'TickTick').replace(/^\/+|\/+$/g, '');
+				const safe = name!.replace(/[\\/:*?"<>|]/g, ' ').trim();
+				targetFile = `${folder}/${safe}.md`;
+				await upsertFile(targetFile, task.projectId);
 			}
 		}
 
@@ -405,6 +424,36 @@ export class VaultSyncCoordinator {
 				await this.plugin.fileOperation?.synchronizeToVault(filePath, group.toAdd, false);
 			}
 		}
+	}
+
+	/** Abyss quick-capture note. Inbox tasks born in TickTick are written here with `#inbox`. */
+	private async abyssCaptureFile(): Promise<string | undefined> {
+		try {
+			const raw = await this.app.vault.adapter.read('.obsidian/plugins/abyss-tasks/data.json');
+			const path = (JSON.parse(raw) as { taskFilePath?: unknown }).taskFilePath;
+			if (typeof path === 'string' && path.trim()) return path.trim();
+		} catch (e) {
+			log.debug('No Abyss capture file', e);
+		}
+		return '00 Inbox/abyss-active.md';
+	}
+
+	/** Remove a stage tag that belongs to a different list, including `#inbox` after leaving the inbox list. */
+	private async dropStaleStageTags(task: ITask): Promise<ITask> {
+		const s = getSettings();
+		const nextTags = tagsForCurrentList(task.tags, task.projectId, s.tagListMappings, {
+			defaultProjectId: s.defaultProjectId,
+			via: s.gtdStageVia ?? 'list',
+		});
+		const same = nextTags.length === (task.tags?.length ?? 0) && nextTags.every((t, i) => t === task.tags?.[i]);
+		if (same) return task;
+		const next = { ...task, tags: nextTags };
+		try {
+			await this.plugin.tickTickRestAPI?.updateTask(next);
+		} catch (e) {
+			log.warn('Could not drop stale stage tag', task.id, e);
+		}
+		return next;
 	}
 
 	/**

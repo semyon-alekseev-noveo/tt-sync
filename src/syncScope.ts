@@ -52,6 +52,38 @@ export function taskMatchesSyncLimit(
 }
 
 /**
+ * A task created on the inbox list is written into the Abyss capture note.
+ * Other lists still use their own file when the capture note does not apply.
+ */
+export function fileForNewTickTickTask(
+	projectId: string | undefined,
+	defaultProjectId: string | undefined,
+	captureFile: string | undefined,
+	listFile: string | undefined,
+): string | undefined {
+	if (projectId && defaultProjectId && projectId === defaultProjectId && captureFile?.trim()) {
+		return captureFile.trim();
+	}
+	return listFile;
+}
+
+/**
+ * Where a task really lives, when the line wants another list.
+ * Prefer the remote project: the local copy can already say the destination
+ * after a move that never reached TickTick. Undefined means no move.
+ */
+export function listMoveSource(
+	remoteProjectId: string | undefined,
+	savedProjectId: string | undefined,
+	wantedProjectId: string | undefined,
+): string | undefined {
+	if (!wantedProjectId) return undefined;
+	const from = remoteProjectId || savedProjectId;
+	if (from && from !== wantedProjectId) return from;
+	return undefined;
+}
+
+/**
  * TickTick → Obsidian, two ways (OR, not AND):
  * the task sits on an allow-listed list, or it carries SyncTag.
  * Either one is enough. A task with neither stays out.

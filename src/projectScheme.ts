@@ -142,6 +142,15 @@ export function stripActiveZonePlaceholders(lines: string[], heading = ACTIVE_ZO
 /** A task line whose title is empty after stripping tags/markers must not be sent to TickTick. */
 export const isBlankTitle = (title: string | undefined | null) => !stripFileLinks(title ?? '').replace(/#[^\s#]+/g, '').trim();
 
+/** A line the user is still typing: bare `%` / `%%`, or an unclosed `%%` comment. */
+export function isUnfinishedCapture(title: string | undefined | null, rawLine?: string): boolean {
+	if (isBlankTitle(title)) return true;
+	const t = stripFileLinks(title ?? '').replace(/#[^\s#]+/g, '').trim();
+	if (/^%+$/.test(t)) return true;
+	const markers = rawLine ? (rawLine.match(/%%/g)?.length ?? 0) : 0;
+	return markers % 2 === 1;
+}
+
 export function isDoneStatus(s: unknown): boolean {
 	return typeof s === 'string' && /done|✅|заверш|выполн/i.test(s);
 }
