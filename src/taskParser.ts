@@ -751,9 +751,9 @@ export class TaskParser {
 			if (mappedList) {
 				projectId = mappedList;
 			} else
-			//Check if we need to add this to a specific project by tag.
-			// Use rawTags (pre-resolution) so underscores are preserved for matching
-			if (rawTags) {
+			// A tag that merely shares a list's name (e.g. #inbox → the real Inbox)
+			// must not override the file default once the mapping table is in use.
+			if (!listMap?.length && rawTags) {
 				for (const rawTag of rawTags) {
 					const labelName = rawTag.replace(/[/_]/g, ' ');
 

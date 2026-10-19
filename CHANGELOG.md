@@ -1,5 +1,25 @@
 # Changelog
 
+### Iteration 2026-10-18 15:10 UTC
+
+- Context: `#inbox` created tasks on the real Inbox list. Adding `#type/next` later did not move a task, because the stage tag is stripped before the tag-diff.
+- Target: Unmapped tags stay on the file's default list. A mapped stage still moves the TickTick list.
+- Actions log: Skip list-name matching when `tagListMappings` is set. Move the task when `projectId` changes even if the remaining tags match.
+- Validation: `npx vitest run src/test/listMapping.test.ts` → 4 passed.
+- Problems: Shipped in **2.0.32**.
+- To Be Done: Install 2.0.32 and re-sync a line whose tag changes from none to `#type/next`. Add `inbox = TTS-Inbox` if that tag should select the pilot inbox.
+- References: `src/taskParser.ts`, `src/services/TaskModificationDetector.ts`, `CHANGELOG.md`
+
+### Iteration 2026-10-18 14:55 UTC
+
+- Context: The settled task, folder, mapping, and pull rules were scattered across chat notes.
+- Target: One logic section, a smoke list, and a run of the rows that do not need the Obsidian UI.
+- Actions log: Updated `ABYSS_FIRST_PLAN.md` §6 and `SMOKE_TESTS.md`; added `src/test/logicSmoke.test.ts`.
+- Validation: `npx vitest run src/test/logicSmoke.test.ts src/test/listMapping.test.ts src/test/projectParentKeep.test.ts` → 12 passed. TickTick: test 3 `6ad4902e…` and test 4 `6ad4b062…` are children of Phase C on TTS-Projects.
+- Problems: LOGIC-A, LOGIC-B, and LOGIC-C need a click-through in Obsidian (`open`).
+- To Be Done: Run LOGIC-A–C in `Thinkpad-tts-test` after 2.0.31 is installed.
+- References: `SMOKE_TESTS.md`, `ABYSS_FIRST_PLAN.md`, `src/test/logicSmoke.test.ts`, `CHANGELOG.md`
+
 ### Iteration 2026-10-18 14:45 UTC
 
 - Context: Template bullets `- [[]]` under related-articles sections were read as checkboxes.

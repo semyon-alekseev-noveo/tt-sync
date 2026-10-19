@@ -508,12 +508,12 @@ export class TaskModificationDetector {
 			await this.plugin.taskRepository.upsertTask(lineTask, filepath, Date.now());
 		}
 
-		// Handle project change from tag modification
-		if (modifications.tagsModified && !modifications.projectMoved) {
-			if (lineTask.projectId && savedTask.projectId && lineTask.projectId !== savedTask.projectId) {
-				await this.plugin.tickTickRestAPI?.moveTaskProject(lineTask, savedTask.projectId, lineTask.projectId);
-				modified = true;
-			}
+		// A GTD stage tag is removed from task.tags before compare, so tagsModified
+		// stays false while projectId still changes. Move on that list change.
+		if (!modifications.projectMoved
+			&& lineTask.projectId && savedTask.projectId && lineTask.projectId !== savedTask.projectId) {
+			await this.plugin.tickTickRestAPI?.moveTaskProject(lineTask, savedTask.projectId, lineTask.projectId);
+			modified = true;
 		}
 
 		// Handle parent change (project-scheme children must land on the projects list, not inbox)

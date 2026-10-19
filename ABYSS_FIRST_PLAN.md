@@ -334,13 +334,18 @@ Today `TTS-data-preset.json` includes **`00 Inbox/`** in `syncScopeFolders`. Opt
 
 What we now know about Abyss 2.1.2 on `Thinkpad-tts-test`:
 
-- **Inbox** = a top-level checkbox with **no tags**. `#obsidian`, `#tts-test`, and `#type/next` all remove it from that view.
-- **`taskIgnoreQuery: #ticktick`** hides matching tasks from **every** Abyss view. It does not make a tagged line count as untagged.
-- **Projects** = notes under `10 Projects/`. Actions live in `## Active Zone`.
-- **Today / Upcoming** are date filters, not TickTick lists.
-- A tag view (`#type/next`, …) is the Abyss side of a TickTick list. The map is `tagListMappings`. Untagged capture is the Abyss side of **TTS-Inbox**. A project note is the Abyss side of one parent on **TTS-Projects**.
+Settled rules (plugin **2.0.31**, Abyss Tasks **2.1.2**):
 
-`tts-test` is only a pilot fence for tasks that are not already linked. It is not an Abyss view.
+- A task is a checkbox (`- [ ]`, `- [x]`, `- [/]`, `- [-]`). A bullet `- [[]]` is an empty wiki link, not a task (**2.0.31**). Abyss still treats that bullet as a task.
+- Every non-empty checkbox in `00 Inbox/`, `10 Projects/`, or `30 Tasks/` is pushed. A missing `#inbox` does not block the push. An empty checkbox is not pushed.
+- **Tag → list** (default): `#inbox` → TTS-Inbox, `#type/next` → TTS-nextAction, and the same for planned, waiting, someday. The stage tag is not stored on the TickTick task. Changing the tag moves the task. Moving the task rewrites the tag.
+- **Tag → tag** (`gtdStageVia`): the same table names TickTick tags. The task stays on its list. A TickTick filter is the view. The plugin does not create the filter.
+- No stage tag → the default list (TTS-Inbox).
+- TickTick → Obsidian: the task is on a `TTS-*` list **or** it has `tts-test`. Either one is enough.
+- `#obsidian` / `#ticktick` mark where the task was born. They do not choose the list.
+- Abyss Inbox, if set to **With inbox tag** `#inbox`, shows lines that have `#inbox`. Abyss writes that tag when the task is added from the Inbox view. A hand-typed line without `#inbox` still syncs and stays out of that Inbox view. Untagged Inbox mode still drops a line once `#obsidian` is written.
+- An Active Zone checkbox in a project note is a subtask of that note’s parent on TTS-Projects.
+- `📅` / `⏳` are the dates behind TickTick Today and Next 7 days, and behind Abyss Today and Upcoming. The windows are not the same length.
 
 ### Order
 
@@ -351,7 +356,7 @@ A task comes into the vault if **either** is true:
 1. It is on an allow-listed list (`TTS-Inbox`, `TTS-nextAction`, …), or
 2. It carries `tts-test`.
 
-It does not need both. A task with neither stays out. Same rule for a new task and for a later change (completion, title). Coded in `tickTickTaskEntersVault`. Not in the installed 2.0.29.
+It does not need both. A task with neither stays out. Same rule for a new task and for a later change (completion, title). Coded in `tickTickTaskEntersVault` (**2.0.30**).
 
 **B. Birth tag stays**
 

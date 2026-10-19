@@ -1,7 +1,8 @@
 # Smoke tests — pilot vault (`Thinkpad-tts-test`)
 
 **Purpose:** Repeatable checks before touching live `Thinkpad`.  
-**Primary goal (2026-10-17):** Prove **Obsidian line removed → TickTick task deleted** after you confirm once per sync (**plugin ≥ 2.0.28**).
+**Logic (2026-10-18):** What counts as a task, which folders push, how a GTD tag maps, and which TickTick tasks come back. See `ABYSS_FIRST_PLAN.md` §6.  
+**Deletion (2026-10-17):** Obsidian line removed → TickTick task deleted after one confirm (**plugin ≥ 2.0.28**).
 
 Full case write-ups: `GTD_SYNC_CASES.md` §8 (`CASE-DEL-*`).  
 Operator preset: `00 Inbox/TTS-data-preset.json`, runbook `00 Inbox/TTS-PILOT-RUN.md`.
@@ -13,13 +14,43 @@ Operator preset: `00 Inbox/TTS-data-preset.json`, runbook `00 Inbox/TTS-PILOT-RU
 | Check | Expected |
 |--------|----------|
 | Vault | `/home/sam/obsidian/Thinkpad-tts-test` only |
-| Plugin | `tickticksync-abyss` **≥ 2.0.28** (BRAT latest on `tt-sync`) |
+| Plugin | `tickticksync-abyss` **≥ 2.0.32** for the logic rows; **≥ 2.0.28** for deletion |
 | Login | Access Control shows valid session |
 | GTD settings | `syncedLists` = six `TTS-*`; `syncScopeFolders` = `00 Inbox/`, `10 Projects/`, `30 Tasks/` |
 | Sync mode | Manual (`automaticSynchronizationInterval`: 0) |
 | Evidence | `.tickticksync/journal/YYYY-MM-DD.jsonl`; note `ticktick_id` before delete |
 
 **Pass rule for deletion suite:** Every **Must** row below is **Pass** with evidence (journal `dir":"obs->tt"`, `op":"delete"`, matching `taskId`, or TT UI/MCP shows task gone).
+
+---
+
+## Logic smoke (must pass)
+
+Automated rows run with:
+
+```bash
+npx vitest run src/test/logicSmoke.test.ts src/test/listMapping.test.ts src/test/projectParentKeep.test.ts
+```
+
+| ID | What you prove | How |
+|----|----------------|-----|
+| LOGIC-1 | `- [[]]` is not a checkbox; `- [ ]` / `- [x]` / `- [/]` are | `logicSmoke.test.ts` |
+| LOGIC-2 | A checkbox with no words (tags only) is not pushed | `logicSmoke.test.ts` |
+| LOGIC-3 | Push only from `00 Inbox/`, `10 Projects/`, `30 Tasks/`. `40 KB/` does not push | `logicSmoke.test.ts` |
+| LOGIC-4 | TickTick → vault if the task is on an allow-listed list **or** has `tts-test` | `logicSmoke.test.ts` |
+| LOGIC-5 | `#inbox` → TTS-Inbox, `#type/next` → TTS-nextAction; the list writes the tag back | `logicSmoke.test.ts` |
+| LOGIC-6 | Tag mode: stage is a TickTick tag; the helper does not pick a list | `logicSmoke.test.ts` |
+| LOGIC-7 | Tag mode through the parser: line tag becomes a TickTick tag and the reverse rewrites the line; list mode moves the list and strips the stage tag | `listMapping.test.ts` |
+| LOGIC-8 | A line in a project note is a subtask on the projects list | `projectParentKeep.test.ts` |
+| LOGIC-9 | Live: **test 3** and **test 4** are subtasks of Phase C on TTS-Projects | TickTick `get_task_by_id` |
+
+Not in this automated run (needs Obsidian):
+
+| ID | What you prove |
+|----|----------------|
+| LOGIC-A | Add a task from the Abyss Inbox after **With inbox tag** `#inbox`. The new line contains `#inbox`. Sync still creates a TTS-Inbox task. |
+| LOGIC-B | Add `#type/next` and remove `#inbox`. Sync moves the task to TTS-nextAction. Move it back in TickTick. The line tag returns to `#inbox`. |
+| LOGIC-C | A hand-typed checkbox with no `#inbox` still syncs, and it is absent from the Abyss Inbox view. |
 
 ---
 
@@ -59,9 +90,9 @@ Operator preset: `00 Inbox/TTS-data-preset.json`, runbook `00 Inbox/TTS-PILOT-RU
 
 ## Result log (fill per run)
 
-| Date (UTC) | Plugin | Tester | DEL-1 | DEL-2 | DEL-3 | DEL-4 | DEL-5 | DEL-N1 | Notes |
-|------------|--------|--------|-------|-------|-------|-------|-------|--------|-------|
-| | 2.0.28 | | | | | | | | |
+| Date (UTC) | Plugin | Tester | LOGIC-1…9 | DEL-1 | DEL-2 | DEL-3 | DEL-4 | DEL-5 | DEL-N1 | Notes |
+|------------|--------|--------|-----------|-------|-------|-------|-------|-------|--------|-------|
+| 2026-10-18 | 2.0.31 | agent | 1–9 pass. C pass. A landed on the real Inbox. B move not applied | | Pass | | | | | Vault `Thinkpad-tts-test` was open. LOGIC-C `6ad4debd…` is on TTS-Inbox. `#inbox` matched the list named Inbox (`inbox130382745`); those two tasks were deleted. |
 
 ---
 

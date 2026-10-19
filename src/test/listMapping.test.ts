@@ -51,6 +51,23 @@ describe('tag -> list mapping', () => {
 		Object.assign(S, { abyssTasksFormat: false, tagListMappings: [] });
 	});
 
+	it('#inbox does not jump to a list named Inbox when the mapping table omits it', async () => {
+		const S = (getSettings as unknown as () => Record<string, unknown>)();
+		Object.assign(S, { noteDelimiter: '', fileLinksInTickTick: 'noLink', stopInjectingTickTickTag: true,
+			abyssTasksFormat: true, gtdStageVia: 'list', tagMappings: [], tagListMappings: MAP, syncNotes: false });
+		const projects = [...PROJECTS, { id: 'real-inbox', name: 'Inbox' }, { id: 'tts', name: 'TTS-Inbox' }];
+		const { getAllProjects } = await import('@/db/projects');
+		vi.mocked(getAllProjects).mockResolvedValue(projects as never);
+		const id = 'abcdefabcdefabcdefabcdef';
+		const line = `- [ ] capture #inbox %%[ticktick_id:: ${id}]%%`;
+		const parser = mkParser('tts');
+		const fm = { getTaskItems: () => [], getTaskRecord: () => ({ task: line, parentId: '', taskLines: [] }) };
+		const task = await parser.convertLineToTask(line, 0, 'p.md', fm as never, null);
+		expect(task.projectId).toBe('tts');
+		vi.mocked(getAllProjects).mockResolvedValue(PROJECTS as never);
+		Object.assign(S, { abyssTasksFormat: false, tagListMappings: [] });
+	});
+
 	it('tag mode: stage stays a TickTick tag and rewrites both ways', async () => {
 		const S = (getSettings as unknown as () => Record<string, unknown>)();
 		Object.assign(S, { noteDelimiter: '', fileLinksInTickTick: 'noLink', stopInjectingTickTickTag: true,
