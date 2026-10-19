@@ -62,6 +62,14 @@ interface UpdatePayload {
 	update: unknown[];
 }
 
+/** Pull could not read the TickTick delta. Callers must not treat this as an empty change set. */
+export class TickTickPullError extends Error {
+	constructor(message: string) {
+		super(message);
+		this.name = 'TickTickPullError';
+	}
+}
+
 export class Tick {
 	username: string | undefined;
 	password: string | undefined;
@@ -337,23 +345,28 @@ export class Tick {
 	}
 
 	async getUpdatedTasks(since: number): Promise<{ update: ITask[], delete: string[] }> {
-		try {
-			log.debug('Get updated tasks', 'Since', since > 0 ? new Date(since).toISOString() : 'from the beginning of time.');
-			const url = `${this.apiUrl}/${allTasksEndPoint}` + since;
-			const response = await this.makeRequest('Get All Resources', url, 'GET', undefined);
-			if (response) {
-				const r = response as { checkPoint: number; syncTaskBean: { update: ITask[]; delete: string[] } };
-				this._checkpoint = r.checkPoint;
-				return {
-					update: r.syncTaskBean.update,
-					delete: r.syncTaskBean.delete
-				};
-			}
-		} catch (e) {
-			log.error('Get Updated Tasks failed: ', e);
-			this.setError('Get All Resources', null, e);
+		log.debug('Get updated tasks', 'Since', since > 0 ? new Date(since).toISOString() : 'from the beginning of time.');
+		const url = `${this.apiUrl}/${allTasksEndPoint}` + since;
+		const response = await this.makeRequest('Get All Resources', url, 'GET', undefined);
+		if (!response) {
+			const err = new TickTickPullError('Get Updated Tasks failed: no response');
+			log.error(err.message);
+			this.setError('Get All Resources', null, err);
+			throw err;
 		}
-		return { update: [], delete: [] };
+		const r = response as { checkPoint?: number; syncTaskBean?: { update?: ITask[]; delete?: string[] } };
+		if (!r.syncTaskBean) {
+			const err = new TickTickPullError('Get Updated Tasks failed: malformed response');
+			log.error(err.message);
+			this.setError('Get All Resources', null, err);
+			throw err;
+		}
+		// Advance the checkpoint only after a readable delta. A failure leaves the previous value.
+		if (typeof r.checkPoint === 'number') this._checkpoint = r.checkPoint;
+		return {
+			update: r.syncTaskBean.update ?? [],
+			delete: r.syncTaskBean.delete ?? [],
+		};
 	}
 
 	// RESOURCES =================================================================

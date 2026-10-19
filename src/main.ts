@@ -15,6 +15,7 @@ import { type Editor, type MarkdownFileInfo, MarkdownView, Notice, Plugin, TFold
 
 //settings
 import { getSettings, mergeDeviceLists, updateSettings } from './settings';
+import { formatPluginLoadedNotice, formatSyncResultNotice, type SyncRunResult } from '@/sync/result';
 import {
 	buildPersistedSettings,
 	hydrateSettingsFromDisk,
@@ -566,11 +567,11 @@ export default class TickTickSync extends Plugin {
 			return false;
 		}
 		//And now load the DB and sync it.
-		await this.service.synchronization(true, 'startup');
-
+		const loadedSync = await this.service.synchronization(true, 'startup');
 		await this.autoCleanupDeletedTasks();
 
-		new Notice('TickTickSync loaded successfully.' + getSettings().skipBackup ? ' Skipping backup.' : 'TickTick data has been backed up.');
+		new Notice(formatPluginLoadedNotice(!!getSettings().skipBackup));
+		if (!loadedSync.ok) new Notice(formatSyncResultNotice(loadedSync));
 		return true;
 	}
 
@@ -702,20 +703,27 @@ export default class TickTickSync extends Plugin {
 
 	}
 
-	async scheduledSynchronization(fullSync: boolean = false, trigger: 'manual' | 'scheduled' | 'startup' = 'manual') {
+	async scheduledSynchronization(fullSync: boolean = false, trigger: 'manual' | 'scheduled' | 'startup' = 'manual'): Promise<SyncRunResult> {
 		if (!this.checkModuleClass()) {
-			return;
+			return { ok: false, error: 'TickTickSync is not ready.' };
 		}
 
 		await this.waitForObsidianSync();
 
+		let result: SyncRunResult;
 		try {
-			await this.service.synchronization(fullSync, trigger);
-			await this.autoCleanupDeletedTasks();
+			result = await this.service.synchronization(fullSync, trigger);
 		} catch (error) {
+			const message = error instanceof Error ? error.message : String(error);
 			log.error('An error occurred: ', error);
-			new Notice(`An error occurred: ${String(error)}`);
+			result = { ok: false, error: message };
 		}
+		if (result.ok) {
+			await this.autoCleanupDeletedTasks();
+		} else if (trigger !== 'manual') {
+			new Notice(formatSyncResultNotice(result));
+		}
+		return result;
 	}
 
 	async autoCleanupDeletedTasks() {
@@ -923,8 +931,8 @@ export default class TickTickSync extends Plugin {
 	}
 
 	private async synchronizeNow() {
-		await this.scheduledSynchronization();
-		new Notice(`Sync completed..`);
+		const result = await this.scheduledSynchronization();
+		new Notice(formatSyncResultNotice(result));
 	}
 
 	private registerEvents() {

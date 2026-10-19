@@ -24,6 +24,10 @@ vi.mock('../db/dexie', () => ({
 	},
 }));
 
+vi.mock('@/db/taskCommentMaps', () => ({
+	deleteCommentMapsForTask: vi.fn().mockResolvedValue(undefined),
+}));
+
 vi.mock('../sync/journal', () => ({
 	logSyncEvent: vi.fn(),
 }));
@@ -208,6 +212,17 @@ describe('pullFromTickTick', () => {
 		expect(db.tasks.bulkPut).toHaveBeenCalledWith([expect.objectContaining({
 			deleted: true
 		})]);
+	});
+
+	it('BUG-SYNC-SILENT-FAIL does not advance the checkpoint when getUpdatedTasks fails', async () => {
+		mockApi.getUpdatedTasks.mockRejectedValue(new Error('network down'));
+		mockApi.checkpoint = 999;
+		const { mockWhere } = makeMockWhere();
+		(db.tasks.where as any) = mockWhere;
+
+		await expect(pullFromTickTick(mockApi, mockMeta, false)).rejects.toThrow('network down');
+
+		expect(db.meta.update).not.toHaveBeenCalled();
 	});
 
 });

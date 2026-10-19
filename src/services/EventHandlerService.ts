@@ -6,12 +6,18 @@
 import { App, Editor, type MarkdownFileInfo, MarkdownView, TFolder } from 'obsidian';
 import type TickTickSync from '@/main';
 import { getSettings } from '@/settings';
+import { isPathInPushScope } from '@/syncScope';
+import { createActiveFilePushScheduler, planActiveFilePush } from '@/services/activeFilePush';
 import log from '@/utils/logger';
 
 export class EventHandlerService {
 	private app: App;
 	private plugin: TickTickSync;
 	private processTimeout?: number;
+	private activeFilePush = createActiveFilePushScheduler({
+		debounceMs: 5000,
+		push: (filepath) => { void this.flushActiveFilePush(filepath); },
+	});
 
 	constructor(app: App, plugin: TickTickSync) {
 		this.app = app;
@@ -97,7 +103,42 @@ export class EventHandlerService {
 	 */
 	private registerEditorChangeEvents(): void {
 		// Creating a task while the caret is still on the line grabs half-typed text (`%%`).
-		// A new or edited line is pushed when the cursor leaves it (`lineNumberCheck`).
+		// After the user pauses, push the open note except that unfinished line.
+		// vault 'modify' still ignores the active file so keystrokes do not push immediately.
+		this.plugin.registerEvent(
+			this.app.workspace.on('editor-change', (_editor, info) => {
+				const filepath = info?.file?.path;
+				if (!filepath || !getSettings().token) return;
+				this.activeFilePush.notify(filepath);
+			}),
+		);
+	}
+
+	private async flushActiveFilePush(filepath: string): Promise<void> {
+		const file = this.app.workspace.getActiveFile();
+		if (!file || file.path !== filepath) return;
+		const editor = this.app.workspace.activeEditor?.editor;
+		const caretLine = editor ? editor.getCursor().line : null;
+		const caretRaw = editor && caretLine != null ? editor.getLine(caretLine) : '';
+		const parser = this.plugin.taskParser;
+		const caretIsTask = !!(parser && caretRaw && parser.isMarkdownTask(caretRaw));
+		const caretTitle = caretIsTask ? (parser.getTaskContentFromLineText(caretRaw.trimStart()) ?? '') : '';
+		const plan = planActiveFilePush({
+			hasToken: !!getSettings().token,
+			syncRunning: !!this.plugin.syncRunning,
+			inScope: isPathInPushScope(filepath),
+			isMarkdown: this.plugin.fileOperation?.isMarkdownFile(file.name) ?? filepath.endsWith('.md'),
+			caretLine,
+			caretIsTask,
+			caretTitle,
+			caretRaw,
+		});
+		if (!plan.push) return;
+		try {
+			await this.plugin.service?.pushSettledActiveFile(filepath, plan.skipLines);
+		} catch (error) {
+			log.warn('Active file push failed', filepath, error);
+		}
 	}
 
 	/**
@@ -194,5 +235,6 @@ export class EventHandlerService {
 		if (this.processTimeout) {
 			window.clearTimeout(this.processTimeout);
 		}
+		this.activeFilePush.dispose();
 	}
 }

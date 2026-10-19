@@ -14,7 +14,7 @@ export async function syncTickTickWithDexie(ticktickRestApi: TickTickRestAPI, fu
 	try {
 		log.debug("[TickTickSync] sync started");
 		const meta = await db.meta.get("sync");
-		if (!meta) return;
+		if (!meta) throw new Error('Sync metadata is missing; refusing to treat pull as successful');
 log.debug("[TickTickSync] meta", meta);
 		logSyncEvent(meta.deviceId, "sync:start");
 
@@ -48,6 +48,7 @@ log.debug("[TickTickSync] pulled", pulled);
 		logSyncEvent("unknown", "sync:error", {
 			message: (err as Error).message
 		});
+		throw err;
 	} finally {
 		syncing = false;
 	}

@@ -22,12 +22,13 @@ import type { PendingTickTickDeletion } from '@/services/TaskModificationDetecto
 import type { ITask } from '@/api/types/Task';
 import { getTick } from '@/api/tick_singleton_factory'
 import { syncTickTickWithDexie } from '@/sync/sync';
+import type { SyncRunResult } from '@/sync/result';
 import { db, initDB } from "@/db/dexie";
 import { getAllProjects, getProjectById, upsertProjects } from '@/db/projects';
 import { loadTasksFromCache, markTaskDeleted } from "@/db/tasks";
 import { getAllFiles, getFile, upsertFile } from "@/db/files";
 import type { IProject } from '@/api/types/Project';
-import { resolveProjectsList } from '@/syncScope';
+import { isPathInPushScope, resolveProjectsList } from '@/syncScope';
 
 const LOCK_TASKS = 'LOCK_TASKS';
 
@@ -166,18 +167,37 @@ export class TickTickService {
 		}
 	}
 
-	async synchronization(fullSync: boolean = false, trigger: SyncTrigger = 'manual') {
+	async synchronization(fullSync: boolean = false, trigger: SyncTrigger = 'manual'): Promise<SyncRunResult> {
 		if (this.plugin.redo) {
 			return this.plugin.redo.session('sync', () => this.synchronizationInner(fullSync, trigger));
 		}
 		return this.synchronizationInner(fullSync, trigger);
 	}
 
-	async synchronizationInner(fullSync: boolean = false, trigger: SyncTrigger = 'manual') {
+	/** Push settled edits in an open note. Skips lines the caller marks (unfinished caret) and lines with no TickTick id. */
+	async pushSettledActiveFile(filepath: string, skipLines: number[] = []): Promise<void> {
+		if (!filepath || this.plugin.syncRunning || !isPathInPushScope(filepath)) return;
+		const run = async () => {
+			await doWithLock(LOCK_TASKS, async () => {
+				await this.plugin.taskModificationDetector.checkFileForModifications(filepath, undefined, {
+					skipLines: new Set(skipLines),
+					identifiedOnly: true,
+				});
+			});
+		};
+		if (this.plugin.syncActivity) {
+			await this.plugin.syncActivity.runInline('Updating open note…', run);
+		} else {
+			await run();
+		}
+	}
+
+	async synchronizationInner(fullSync: boolean = false, trigger: SyncTrigger = 'manual'): Promise<SyncRunResult> {
 		const startTime = performance.now();
 		const ui = this.plugin.syncActivity;
 		ui.beginFull(trigger);
 		let syncOk = true;
+		let errorMessage = '';
 		try {
 
 			log.debug(`TickTick scheduled synchronization task started at ${new Date().toLocaleString()}`);
@@ -263,8 +283,8 @@ export class TickTickService {
 			await this.syncFiles(false);
 		} catch (error) {
 			syncOk = false;
-			const msg = error instanceof Error ? error.message : String(error);
-			ui.setFullStep('Sync failed', msg);
+			errorMessage = error instanceof Error ? error.message : String(error);
+			ui.setFullStep('Sync failed', errorMessage);
 			log.error('Error on synchronization: ', error);
 		} finally {
 			ui.endFull(syncOk);
@@ -275,6 +295,7 @@ export class TickTickService {
 			const endTime = performance.now();
 			log.debug(`TickTick scheduled synchronization task completed at ${new Date().toLocaleString()}, took ${(endTime - startTime).toFixed(2)} ms`);
 		}
+		return syncOk ? { ok: true } : { ok: false, error: errorMessage || 'Sync failed' };
 	}
 
 	async ensureVaultFilesRegistered(): Promise<void> {

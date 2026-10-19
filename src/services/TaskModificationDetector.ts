@@ -2,7 +2,7 @@ import { nextOccurrence, rollRecurringLines } from '@/recurrence';
 import { fencedLines } from '@/utils/vaultIdScan';
 import { mergeTask, conflictNote } from '@/merge3';
 import { isBlankTitle, isUnfinishedCapture, stripFileLinks } from '@/projectScheme';
-import { abyssLinesToNote, mergeAbyssBlock, stripLegacyCommentsBlock } from '@/abyssFormat';
+import { abyssLinesToNote, isAbyssNoteLine, mergeAbyssBlock, stripLegacyCommentsBlock } from '@/abyssFormat';
 import { extractAbyssCommentThreads } from '@/abyssFormat';
 import { syncAbyssCommentsToTickTick, useAbyssCommentsApi } from '@/abyssCommentSync';
 import { appendContextTags, dedupeTags, stripInjectedContextTags } from '@/contextTags';
@@ -271,7 +271,8 @@ export class TaskModificationDetector {
 		}
 
 		if (!this.plugin.taskParser?.isLineTrackedForSync(lineText, filepath)) {
-			// Not a full task — check if it's a genuine task item.
+			// Not a full task — checkbox items update the parent item list.
+			// An Abyss comment or description line is not a checkbox; push the parent task instead.
 			if (lineNumber !== undefined) {
 				const fileLines = fileMap.getFileLines().split('\n');
 				for (let i = lineNumber - 1; i >= 0; i--) {
@@ -280,6 +281,11 @@ export class TaskModificationDetector {
 						const ancestorTabs = this.plugin.taskParser.getNumTabs(ancestorLine);
 						if (this.plugin.taskParser.isTaskItem(lineText, ancestorTabs)) {
 							return await this.checkTaskItemModification(lineText, fileMap, lineNumber);
+						}
+						if (isAbyssNoteLine(lineText, ancestorLine)) {
+							return await this.checkLineForModifications(
+								filepath, ancestorLine, i, fileMap, pendingDeletions, pushLimit,
+							);
 						}
 						break;
 					}
@@ -408,7 +414,11 @@ export class TaskModificationDetector {
 	/**
 	 * Check entire file for modifications
 	 */
-	async checkFileForModifications(filepath: string | null, pendingDeletions?: PendingTickTickDeletion[]): Promise<void> {
+	async checkFileForModifications(
+		filepath: string | null,
+		pendingDeletions?: PendingTickTickDeletion[],
+		options?: { skipLines?: ReadonlySet<number>; identifiedOnly?: boolean },
+	): Promise<void> {
 		if (!filepath || !isPathInPushScope(filepath)) {
 			return;
 		}
@@ -437,6 +447,9 @@ export class TaskModificationDetector {
 		for (let i = 0; i < lines.length; i++) {
 			const line = lines[i];
 			if (fenced.has(i)) continue; // code-block examples are not tasks
+			if (options?.skipLines?.has(i)) continue;
+			// Debounced push of the open note must not treat a half-typed new checkbox as a deletion.
+			if (options?.identifiedOnly && !this.plugin.taskParser?.hasTickTickId(line)) continue;
 			if (this.plugin.taskParser?.isMarkdownTask(line)) {
 				try {
 					await this.checkLineForModifications(filepath, line, i, fileMap, pendingDeletions, pushLimit);

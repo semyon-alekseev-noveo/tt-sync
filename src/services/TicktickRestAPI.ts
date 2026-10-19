@@ -1,6 +1,6 @@
 import type { ITask } from '@/api/types/Task';
 import type { ITag } from '@/api/types/Tag';
-import { type IBatch, Tick } from '@/api';
+import { type IBatch, Tick, TickTickPullError } from '@/api';
 import { App, Notice } from 'obsidian';
 import TickTickSync from '@/main';
 import type { IProject } from '@/api/types/Project';
@@ -437,20 +437,14 @@ export class TickTickRestAPI {
 	async getUpdatedTasks(since: number): Promise<{ update: ITask[], delete: string[] }> {
 		await this.initializeAPI();
 		if (!this.api) {
-			log.error('getAllResources No API.');
-			return { update: [], delete: [] };
+			throw new TickTickPullError('getUpdatedTasks: TickTick API is not available');
 		}
-		try {
-			const result = await this.api.getUpdatedTasks(since);
-			this._checkpoint = this.api.checkpoint;
-			if (result.update) {
-				result.update.forEach(t => this.plugin.dateMan?.addDateHolderToTask(t, undefined));
-			}
-			return result;
-		} catch (error) {
-			log.error('Error get updated tasks', error);
+		const result = await this.api.getUpdatedTasks(since);
+		this._checkpoint = this.api.checkpoint;
+		if (result.update) {
+			result.update.forEach(t => this.plugin.dateMan?.addDateHolderToTask(t, undefined));
 		}
-		return { update: [], delete: [] };
+		return result;
 	}
 
 
