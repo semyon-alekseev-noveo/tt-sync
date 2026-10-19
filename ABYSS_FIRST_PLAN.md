@@ -280,7 +280,7 @@ Today `TTS-data-preset.json` includes **`00 Inbox/`** in `syncScopeFolders`. Opt
 
 | Action | Detail |
 |--------|--------|
-| 6.1 | Add `ABYSS_FIRST_CASES.md` (or § in this file) when Step 1 done. |
+| 6.1 | `ABYSS_FIRST_CASES.md` is the catalog. The live gate in that file is not filled in until someone runs it in Obsidian. |
 | 6.2 | Map old CASE-* → AF-* for traceability (T4 → **cancelled**). |
 
 **Done when:** Pilot runbook references AF-* only.

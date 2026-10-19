@@ -7,7 +7,7 @@
 
 This document saves the analysis of how **Abyss Tasks** represents a task in a note versus what **TickTickSync** maps to TickTick fields. Use it to design smokes and PO rules before live vault.
 
-**Related:** `ABYSS_MAPPING.md` (step 3 merge), `GTD_SYNC_CASES.md` (CASE-P4, CASE-DEL-4), `GTD_SYNC_RESEARCH.md` (AC-9, R1).
+**Related:** `ABYSS_MAPPING.md`. `GTD_SYNC_CASES.md` and `GTD_SYNC_RESEARCH.md` are archive.
 
 ---
 
