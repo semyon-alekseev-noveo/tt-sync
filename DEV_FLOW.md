@@ -1,0 +1,91 @@
+# Development flow
+
+One process for analyst, developer, and tester work on this fork. The point is to stop a fix from shipping without a case, a failing test, and a regression run.
+
+Release in the tree when this was written: **2.0.47**. The owner merges. Agents do not push `abyss-mapping` or `master`, do not merge, and do not create tags or releases.
+
+## Roles
+
+| Role | Does | Hands off |
+|------|------|-----------|
+| **Analyst** | Before code: add or update one case in the canonical catalog. The case has a stable ID, preconditions, and expected behavior on both sides (vault line and TickTick). | Case ID + expected behavior. No implementation. |
+| **Developer** | Write a failing test named by that ID, then the fix. Update docs that the code changed, in the same branch. | Branch + PR into `abyss-mapping`. Tests green locally. |
+| **Tester** | Run the regression gate and the smoke cases the change can affect. Record pass/fail with the command output or the vault observation. Do not mark a live-vault case passed without having run it. | Results in the case log (or the PR). Open bugs go back to the analyst as new IDs. |
+
+A person may play more than one role. The order does not change: case, failing test, fix, regression, recorded result.
+
+## Definition of ready
+
+A change is ready to code when all of these are true:
+
+- There is a case ID in [`ABYSS_FIRST_CASES.md`](ABYSS_FIRST_CASES.md) (bug IDs such as `BUG-*` live in that catalog or in [`PO_STATUS.md`](PO_STATUS.md) and are copied into the test name).
+- Expected behavior is written as something a test or a person can check.
+- Scope says whether it touches sync, comments, deletion, or docs only.
+- It does not require the live vault. Pilot work stays on the pilot vault.
+
+## Definition of done
+
+- The new test failed before the fix and passes after it.
+- The regression gate below passed.
+- Docs that describe the changed behavior were updated in the same PR.
+- The PR targets `abyss-mapping`. The owner merges.
+- The report says what was run and what was not run. A case that was not executed is **not run**, never “pass”.
+
+## Regression gate
+
+Run from the repo root:
+
+```bash
+npx vitest run
+npm run build
+```
+
+The gate includes unit tests and the full-sync integration test `src/test/synchronizationInner.integration.test.ts` (fake TickTick API + `fake-indexeddb`). Both must pass. CI (`.github/workflows/ci.yml`) runs `npm test` and `npm run build` on pull requests into `abyss-mapping`.
+
+Rules:
+
+- Do not delete or weaken a test to make the suite green. If a test is wrong, replace it in the same PR and say why in the PR body.
+- Every bug fix adds a regression test whose name contains the bug ID (`BUG-SYNC-SILENT-FAIL`, `BUG-COMMENT-INLINE`, …).
+- A failure in the integration test blocks the PR the same way a unit failure does.
+
+## Canonical docs and archive
+
+Update canonical docs in the same PR as the code. Do not leave a second, older description of the same rule in a canonical file.
+
+| Canonical | What it is |
+|-----------|------------|
+| `DEV_FLOW.md` | This process |
+| `PO_STATUS.md` | Product snapshot: target, open problems, what is next |
+| `ABYSS_FIRST_PLAN.md` | Product plan. Phases are **Steps 1–8** in that file |
+| `ABYSS_FIRST_CASES.md` | Acceptance cases and the results log |
+| `PROJECT_STATE.md` | Short engineering snapshot (not a second changelog) |
+| `CHANGELOG.md` | Append-only history of what landed |
+| `SMOKE_TESTS.md` | How to run manual checks. The live-vault gate is the one in `ABYSS_FIRST_CASES.md` |
+
+Archive (historical, not a source of requirements): `GTD_SYNC_CASES.md`, `GTD_SYNC_RESEARCH.md`, `TT_ABYSS_ROADMAP.md`, `SYNC_PROJECTS_AND_SUBTASKS.md`. A banner at the top of each archive file points here. If archive text disagrees with a canonical file, the canonical file wins.
+
+Phase names: use **Step 1–8** from `ABYSS_FIRST_PLAN.md`. Do not start a new “Phase A–D” or “Phase 1–3” in new writing. Old names stay only inside archive files and changelog history.
+
+## Versioning and releases
+
+- `manifest.json` `version` is the plugin version. Do not bump it, tag it, or publish a GitHub release unless the owner asked for that release.
+- Record the change in `CHANGELOG.md` in the same PR (context, what changed, how it was verified, what is still open).
+- The owner tags and publishes. BRAT installs from that release (`docs/BRAT_INSTALL.md`).
+
+## Branches and pull requests
+
+- Work on a branch. Open a pull request into `abyss-mapping`.
+- Do not push to `abyss-mapping` or `master`. Do not merge. Do not create tags.
+- One PR may contain several commits (process, fix, docs). Stacked PRs are fine when a later change depends on an earlier one; each still targets the owner’s merge.
+
+## Safety
+
+- Sync runs against the **pilot vault** only (a copy). Never the live vault, until the owner says the live-vault gate passed.
+- Use the manual **Synchronize** command while testing. Do not turn on a short automatic interval against a vault you care about.
+- No secrets, tokens, passwords, or personal absolute paths in the repo. Write `<pilot-vault>` and `<live-vault>`.
+- The plugin session is not a TickTick Open API `tp_…` token. If a `tp_…` token was pasted into chat or a doc, revoke it in TickTick. Do not commit it.
+- Live-vault steps that need the owner’s Obsidian (deletion modals, real login) are run by a person or a local agent on that machine. A cloud agent must not invent those results.
+
+## Reporting results
+
+State the command and the outcome (`npx vitest run` → N passed). For a manual case, state who ran it, on which vault, and what was seen. If a step was skipped, say so. Do not copy a previous run forward as if it were new.

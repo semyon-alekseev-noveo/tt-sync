@@ -23,6 +23,8 @@ The plugin works best when the [Tasks](https://github.com/obsidian-tasks-group/o
 
 See the full documentation at [https://thesamim.github.io/TickTickSync/](https://thesamim.github.io/TickTickSync/).
 
+**This fork:** how analyst, developer, and tester work is in [DEV_FLOW.md](DEV_FLOW.md). Current product snapshot: [PO_STATUS.md](PO_STATUS.md), [PROJECT_STATE.md](PROJECT_STATE.md).
+
 ## Changelog
 
 See the [Changelog](https://thesamim.github.io/TickTickSync/changelog/) for the list of changes in each release.

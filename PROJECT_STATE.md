@@ -47,6 +47,7 @@
 
 ## References
 
+- `DEV_FLOW.md` — process for analyst, developer, and tester (read this before changing sync)
 - `TT_ABYSS_ROADMAP.md`
 - `SMOKE_TESTS.md`
 - `ABYSS_FIRST_PLAN.md`
