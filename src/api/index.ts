@@ -363,7 +363,10 @@ export class Tick {
 			this.setError('Get All Resources', null, err);
 			throw err;
 		}
-		const r = response as { checkPoint?: number; syncTaskBean?: { update?: ITask[]; delete?: string[] } };
+		const r = response as {
+			checkPoint?: number;
+			syncTaskBean?: { update?: ITask[]; add?: ITask[]; delete?: string[] };
+		};
 		if (!r.syncTaskBean) {
 			const err = new TickTickPullError('Get Updated Tasks failed: malformed response');
 			log.error(err.message);
@@ -372,8 +375,10 @@ export class Tick {
 		}
 		// Advance the checkpoint only after a readable delta. A failure leaves the previous value.
 		if (typeof r.checkPoint === 'number') this._checkpoint = r.checkPoint;
+		const update = r.syncTaskBean.update ?? [];
+		const add = r.syncTaskBean.add ?? [];
 		return {
-			update: r.syncTaskBean.update ?? [],
+			update: add.length ? [...update, ...add] : update,
 			delete: r.syncTaskBean.delete ?? [],
 		};
 	}

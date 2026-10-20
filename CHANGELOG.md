@@ -1,5 +1,35 @@
 # Changelog
 
+### Iteration 2026-10-20 06:10 UTC
+
+- Context: Owner shared delta API research (`tt-sync-ticktick-delta-api.md`); canonical copy and small code alignment.
+- Target: Preserve research in repo; stop dropping `syncTaskBean.add`; pilot plan for etag/comment policy.
+- Actions log: Added `docs/TICKTICK_DELTA_API.md`; `getUpdatedTasks` merges `add` into `update`; `getUpdatedTasks.deltaAdd.test.ts`; `TEST_PLAN.md` TP-DELTA-*; pointers in `PROJECT_STATE.md`, `PO_STATUS.md`, `ANALYST_REFERENCE_DIAGRAMS.md`.
+- Validation: `npx vitest run` → 80 files, **586 passed**; `npm run build` ok.
+- Problems: etag echo and idle zero-probe remain design-only until TP-DELTA-* pilot.
+- To Be Done: Run TP-DELTA-* on pilot; NOTE-L3b with BUG-COMMENT-NO-PUSH build.
+- References: `docs/TICKTICK_DELTA_API.md`, `DEV_FLOW.md`, `CHANGELOG.md`
+
+### Iteration 2026-10-20 06:00 UTC
+
+- Context: Owner approved fix path for **BUG-COMMENT-NO-PUSH** per `DEV_FLOW.md`.
+- Target: Pre-pull push must run when vault `mtime` > last push wall time even if TickTick checkpoint is newer.
+- Actions log: `SyncMeta.lastVaultPushWallMs`; `pushLocalEditsFirst` uses it instead of checkpoint; integration test `BUG-COMMENT-NO-PUSH`.
+- Validation: `npx vitest run` → **585 passed** (superseded by 06:10 run, 586 with delta test); `npm run build` ok in same session as 06:10.
+- Problems: NOTE-L3b live gate still **not run** on build with this fix.
+- To Be Done: Release or pilot copy; NOTE-L3b on `abyss-active.md`; merge via PR.
+- References: `DEV_FLOW.md`, `TEST_PLAN.md`, `CHANGELOG.md`
+
+### Iteration 2026-10-20 05:50 UTC
+
+- Context: Owner installed **2.0.50** on pilot; requested TP-PERF performance test.
+- Target: Run `TEST_PLAN.md` TP-PERF-* on **Thinkpad-tts-test**.
+- Actions log: Obsidian CLI sync with session hooks on `endFull` / `console.info`; quiet-task check on `abyss-active.md` `6ad5bb47…`. Updated `TEST_PLAN.md` perf Results.
+- Validation: TP-PERF-UI, TP-PERF-SAME, TP-PERF-R-SYNC-OK → pass; TP-PERF-LOG → partial (JSON line needs DevTools or single long-lived Obsidian session). `npx vitest run` perf tests → 10 passed; bench test → pass.
+- Problems: Each `obsidian eval` reloads app package and clears hooks; file append hook did not fire when CLI sync ran without a stable desktop session.
+- To Be Done: Sam — one manual `[perf]` JSON screenshot; TP-PERF-ACTIVE + R-FENCE/DUP/MOVE if needed.
+- References: `TEST_PLAN.md`, `CHANGELOG.md`
+
 ### Iteration 2026-10-20 05:15 UTC
 
 - Context: Owner merged PR #2 into `abyss-mapping` and requested release **2.0.50**.

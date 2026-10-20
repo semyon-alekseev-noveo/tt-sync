@@ -125,8 +125,9 @@ export class TickTickService {
 	async pushLocalEditsFirst() {
 		this.locallyEdited = new Set();
 		const meta = await db.meta.get("sync");
-		const last = Math.max(meta?.lastFullSync ?? 0, meta?.lastDeltaSync ?? 0);
-		if (!last) return;
+		// BUG-COMMENT-NO-PUSH: vault mtime must compare to last push time, not TickTick checkpoint
+		// (checkpoint often exceeds file mtime after pull, so comment-only edits were skipped).
+		const last = meta?.lastVaultPushWallMs ?? 0;
 		const files = await this.plugin.fileMetadataService?.getAllFileMetadata();
 		this.locallyEdited = new Set(editedSince(this.plugin.app, Object.keys(files ?? {}), last));
 		for (const path of editedSince(this.plugin.app, Object.keys(files ?? {}), last)) {
@@ -134,6 +135,7 @@ export class TickTickService {
 			catch (e) { log.warn('pre-pull push failed', path, e); }
 			try { await this.pushSubtaskOrder(path); } catch (e) { log.warn('subtask order push failed', path, e); }
 		}
+		await db.meta.update('sync', { lastVaultPushWallMs: Date.now() });
 	}
 
 	/** Obsidian -> TickTick: sibling line order under a parent becomes child sortOrder. */

@@ -43,7 +43,7 @@
 | **BUG-PULL-COMMENT-STALE** | P2 | fixed on this branch | `vaultLineBehindTask` сравнивает отпечатки Comments API. `getTaskById` только если заголовок/статус/content уже совпали; повторного вызова в цикле vault-sync нет. Комментарии кэшируются на задаче (`_apiComments`) |
 | **RISK-PULL-WINS-LOCAL** | P2 | open | При победе локальной версии в LWW строка в vault может остаться устаревшей |
 | **BUG-COMMENT-MAP-ORPHAN** | P2 | fixed on this branch | `deleteCommentMapsForTask` вызывается из `TaskRepository` (delete/hard delete/purge), `markTaskDeleted` и pull при удалённой на TT задаче |
-| **BUG-COMMENT-NO-PUSH** | P0 | mitigated on branch | `sweepAbyssCommentsInFile` после `checkFileForModifications`; тест `bugCommentNoPush.test.ts`. Повтор NOTE-L3b на пилоте после сборки. |
+| **BUG-COMMENT-NO-PUSH** | P0 | mitigated on branch | `pushLocalEditsFirst` → `lastVaultPushWallMs` (не checkpoint TT); sweep + `bugCommentNoPush.test.ts`, integration `BUG-COMMENT-NO-PUSH`. NOTE-L3b на пилоте после сборки. |
 | **BUG-ACTIVEZONE-COMMENT-SHUFFLE** | P1 | open | При sync в project note (Active Zone): сортировка соседних задач и перенос comment-буллета с одной задачи на другую. Кейс в `ABYSS_FIRST_CASES.md`. |
 | **BUG-TICKTICK-ID-LEAK** | P1 | mitigated on branch | Канонический `%%[ticktick_id:: <24hex>]%%`, strip loose fragment из title; тест `bugTicktickIdLeak.test.ts`. Почистить дубли в TT вручную. |
 | **GAP-COMMENT-EDIT** | P2 | open | Правка комментария = delete + add (новые ID, шум в ленте TT) |
@@ -61,10 +61,11 @@
 
 ## To Be Done
 
-1. Пилот **2.0.50**: TP-PERF-* (`TEST_PLAN.md`); затем NOTE-L3b / **BUG-COMMENT-NO-PUSH** (fail на **2.0.49**).
+1. Собрать/поставить плагин с fix **BUG-COMMENT-NO-PUSH**; NOTE-L3b на пилоте. TP-PERF-LOG вручную (`[perf]` JSON).
 2. **BUG-ACTIVEZONE-COMMENT-SHUFFLE** — failing test + fix (`pullSubtaskOrder` / `mergeAbyssBlock`).
 3. Gate: AF-5 в **Inbox**, DEL-3, CTX-D2 на грязных тегах.
-4. Открыто: GAP-COMMENT-EDIT, RISK-PULL-WINS-LOCAL, RISK-DUAL-STORE, RISK-LARGE-VAULT (частично в **2.0.50**), TECH-START-1, TECH-CIRC-1.
+4. Пилот **TP-DELTA-*** (`TEST_PLAN.md`, `docs/TICKTICK_DELTA_API.md` §3.5) → решение про **etag**-эхо и политику комментариев без N+1.
+5. Открыто: GAP-COMMENT-EDIT, RISK-PULL-WINS-LOCAL, RISK-DUAL-STORE, RISK-LARGE-VAULT (частично в **2.0.50**), TECH-START-1, TECH-CIRC-1. В delta теперь учитывается `syncTaskBean.add` (тест `getUpdatedTasks.deltaAdd.test.ts`).
 
 ## Аналитический мит 2026-10-19
 
