@@ -21,6 +21,7 @@ import { db } from "@/db/dexie";
 import { getAllProjects } from '@/db/projects';
 import { isPathInPushScope, normalizeSyncTag, resolveSyncedListIds, taskMatchesSyncLimit, type TaskSyncLimitOptions } from '@/syncScope';
 import { timePhase } from '@/sync/perf';
+import { commitVaultText, readNoteForWrite } from '@/services/vaultWrite';
 
 export class SyncMan {
 	private readonly app: App;
@@ -245,7 +246,9 @@ export class SyncMan {
 							await this.plugin.taskRepository.deleteTask(task.id);
 							const f = fp ? this.app.vault.getAbstractFileByPath(fp) : null;
 							if (f instanceof TFile) {
-								await this.app.vault.process(f, data => detachInContent(data, task.id, markerName()) ?? data);
+								const snapshot = await readNoteForWrite(this.app, f);
+								const next = detachInContent(snapshot, task.id, markerName());
+								if (next && next !== snapshot) await commitVaultText(this.app, f, snapshot, next);
 							}
 							bModifiedFileSystem = true;
 						} catch (error) {
@@ -439,8 +442,9 @@ export class SyncMan {
 			andOr: getSettings().tagAndOr,
 			allowedListIds: resolveSyncedListIds(getSettings().syncedLists ?? [], lists),
 		};
+		const snapshot = await readNoteForWrite(this.app, file);
 		const fileMap = new NewFileMap(this.app, this.plugin, file);
-		await fileMap.init();
+		await fileMap.init(snapshot);
 
 		const lines = fileMap.getFileLines().split('\n');
 		const removeAt: number[] = [];
@@ -487,9 +491,8 @@ export class SyncMan {
 		for (const idx of removeAt.sort((a, b) => b - a)) {
 			fileMap.removeLineAt(idx);
 		}
-		const fileLines = fileMap.getFileLines();
 		if (file instanceof TFile) {
-			await this.app.vault.modify(file, fileLines);
+			await commitVaultText(this.app, file, snapshot, fileMap.getFileLines());
 		}
 	}
 

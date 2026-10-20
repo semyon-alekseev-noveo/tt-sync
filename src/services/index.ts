@@ -1,4 +1,5 @@
 import { childBlocks, sortOrdersFromLines, reorderLinesBySortOrder } from '@/subtaskOrder';
+import { commitVaultText, readNoteForWrite } from '@/services/vaultWrite';
 import { editedSince } from '@/utils/editedSince';
 import { healTagListMappings } from '@/listMapping';
 import { idsPresentInVault, dedupeTaskIds } from '@/utils/vaultIdScan';
@@ -138,7 +139,6 @@ export class TickTickService {
 			catch (e) { log.warn('pre-pull push failed', path, e); }
 			try { await this.pushSubtaskOrder(path); } catch (e) { log.warn('subtask order push failed', path, e); }
 		}
-		await db.meta.update('sync', { lastVaultPushWallMs: Date.now() });
 	}
 
 	/** Obsidian -> TickTick: sibling line order under a parent becomes child sortOrder. */
@@ -166,11 +166,11 @@ export class TickTickService {
 			if (skip.has(path)) continue;
 			const f = this.plugin.app.vault.getAbstractFileByPath(path);
 			if (!(f instanceof TFile)) continue;
-			const text = await this.plugin.app.vault.read(f);
+			const text = await readNoteForWrite(this.plugin.app, f);
 			const lines = text.split('\n'); const so: Record<string, number | undefined> = {};
 			for (const [, blocks] of childBlocks(lines)) for (const b of blocks) so[b.id] = (await this.plugin.taskRepository.loadTaskById(b.id))?.sortOrder;
 			const out = reorderLinesBySortOrder(lines, so);
-			if (out) { await this.plugin.app.vault.process(f, d => d === text ? out.join('\n') : d); log.info(`Subtasks reordered from TickTick in ${path}`); }
+			if (out) { await commitVaultText(this.plugin.app, f, text, out.join('\n')); log.info(`Subtasks reordered from TickTick in ${path}`); }
 		}
 	}
 
@@ -332,6 +332,8 @@ export class TickTickService {
 				ui.setFullStep('Syncing project notes…');
 				await this.syncFiles(false);
 			});
+			// After every vault write in this run, so a file we just wrote is not a local edit next time.
+			await db.meta.update('sync', { lastVaultPushWallMs: Date.now() });
 		} catch (error) {
 			syncOk = false;
 			errorMessage = error instanceof Error ? error.message : String(error);
@@ -1017,7 +1019,8 @@ export class TickTickService {
 			for (const c of dedupeTaskIds(texts, id => owners.get(id))) {
 				const f = this.plugin.app.vault.getAbstractFileByPath(c.path);
 				if (f instanceof TFile) {
-					await this.plugin.app.vault.modify(f, c.text);
+					const original = texts.find(t => t.path === c.path)?.text;
+					if (original != null) await commitVaultText(this.plugin.app, f, original, c.text);
 					const msg = `TickTickSync: duplicated task line(s) in ${c.path} detached from ${c.ids.join(', ')} — they will sync as new tasks.`;
 					log.warn(msg); new Notice(msg, 8000);
 				}

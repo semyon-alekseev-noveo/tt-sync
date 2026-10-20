@@ -163,8 +163,57 @@ export function commentStamp(line: string): Date | undefined {
 	return m ? new Date(+m[1], +m[2] - 1, +m[3], +(m[4] ?? 0), +(m[5] ?? 0)) : undefined;
 }
 
-/** `base` = note text last synced with TickTick: a local comment absent from it is new (not deleted in TickTick), so keep it. */
-export function mergeAbyssBlock(newText: string, oldChild: string[], base?: string): string {
+/**
+ * Comment bodies TickTick already knew (`taskCommentMaps.body`) and the bodies it has now.
+ * A vault comment in `knownBodies` but not in `apiBodies` was deleted in TickTick.
+ * A vault comment with no map entry is new locally and is kept. This does not use `base`.
+ */
+export interface TickTickCommentSync {
+	knownBodies: readonly string[];
+	apiBodies: readonly string[];
+}
+
+/** Line indexes of vault comment threads deleted in TickTick since the previous sync. */
+function commentLinesDeletedInTickTick(oldChild: string[], generatedComments: string[], ticktick: TickTickCommentSync): Set<number> {
+	const known = new Set(ticktick.knownBodies.map(commentFingerprint).filter(fp => fp.length > 0));
+	const skip = new Set<number>();
+	if (!known.size) return skip;
+	const api = new Set(ticktick.apiBodies.map(commentFingerprint).filter(fp => fp.length > 0));
+	const generated = new Set(extractAbyssCommentThreads(generatedComments).map(t => t.fingerprint));
+	const kinds = classifyChildren(oldChild);
+	let buf: string[] = [];
+	let idx: number[] = [];
+	const flush = () => {
+		if (!buf.length) return;
+		const body = buf
+			.map(l => l.trim())
+			.map(l => (l.startsWith('- ') ? l.slice(2) : l))
+			.join('\n')
+			.replace(/^\s+/, '');
+		const fp = commentFingerprint(body);
+		if (known.has(fp) && !api.has(fp) && !generated.has(fp)) idx.forEach(i => skip.add(i));
+		buf = [];
+		idx = [];
+	};
+	for (let i = 0; i < oldChild.length; i++) {
+		const k = kinds[i];
+		if (k === 'comment') {
+			flush();
+			buf.push(oldChild[i]);
+			idx.push(i);
+		} else if (k === 'cont' && buf.length) {
+			buf.push(oldChild[i]);
+			idx.push(i);
+		} else {
+			flush();
+		}
+	}
+	flush();
+	return skip;
+}
+
+/** `base` = note text last synced with TickTick (legacy `Comments:` block only). Comments API deletions use `ticktick`, not `base`. */
+export function mergeAbyssBlock(newText: string, oldChild: string[], base?: string, ticktick?: TickTickCommentSync): string {
 	const [head, ...gen] = newText.split('\n');
 	const genKinds = classifyChildren(gen);
 	const pick = (k: ChildKind[]) => gen.filter((_, i) => k.includes(genKinds[i]));
@@ -175,21 +224,23 @@ export function mergeAbyssBlock(newText: string, oldChild: string[], base?: stri
 	gen.forEach((l, i) => {
 		if (genKinds[i] === 'comment' || (genKinds[i] === 'cont' && comments.length)) comments.push(l);
 	});
-	// Vault comments are the same entity as TickTick Comments. Keep a local thread the
-	// generated block does not already show, unless `base` is a note that already contained
-	// that body under `Comments:` and the new block dropped it (deleted in TickTick).
-	// A missing base, or a description-only base, must not wipe vault bullets.
+	// Keep a local thread the generated block does not already show.
+	// Comments API: drop a thread that taskCommentMaps knew and the current API list does not.
+	// Legacy notes: drop a thread whose body sat under `Comments:` in `base` and is gone from the new block.
+	// A missing base, an empty map, or a description-only base must not wipe vault bullets.
 	const have = new Set(comments.map(l => l.trim()));
+	const deletedInTickTick = ticktick ? commentLinesDeletedInTickTick(oldChild, comments, ticktick) : null;
 	const commentsIdx = base?.indexOf(COMMENTS_HEADER) ?? -1;
-	const syncedBodies = base !== undefined && commentsIdx >= 0 ? base.slice(commentsIdx + COMMENTS_HEADER.length) : '';
+	const syncedBodies = !ticktick && base !== undefined && commentsIdx >= 0 ? base.slice(commentsIdx + COMMENTS_HEADER.length) : '';
 	let carry = false;
 	oldChild.forEach((l, i) => {
 		if (oldKinds[i] === 'comment') {
 			const body = l.trim().slice(2);
 			const deletedInNote = syncedBodies.length > 0 && syncedBodies.includes(body);
-			carry = !have.has(l.trim()) && !deletedInNote;
+			const deletedOnServer = deletedInTickTick?.has(i) ?? false;
+			carry = !have.has(l.trim()) && !deletedInNote && !deletedOnServer;
 		} else if (oldKinds[i] !== 'cont') carry = false;
-		if (carry && (oldKinds[i] === 'comment' || oldKinds[i] === 'cont')) comments.push(l);
+		if (carry && (oldKinds[i] === 'comment' || oldKinds[i] === 'cont') && !deletedInTickTick?.has(i)) comments.push(l);
 	});
 	const tidy = (l: string) => l.replace(/[ \t]+$/, '').replace(/ {2,}%%/, ' %%');
 	return [head, ...[...descs, ...pick(['item']), ...kept, ...comments].map(tidy)].join('\n');

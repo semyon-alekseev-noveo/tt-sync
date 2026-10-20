@@ -133,4 +133,81 @@ describe('BUG-COMMENT-NO-PUSH', () => {
 		expect(call).toBeTruthy();
 		expect(call?.[3]).toEqual(taskLines);
 	});
+
+	it('TP-NO-SELF-REPUSH 5s push makes no comment API calls when no comment line changed', async () => {
+		const lineText = `- [ ] parent #tts-test %%[ticktick_id:: ${taskId}]%%`;
+		const taskLines = ['\t- commetn1'];
+		const fileContent = [lineText, ...taskLines, ''].join('\n');
+		const lineHash = await new TaskParser({} as never, {} as never).getLineHash(
+			lineText + abyssLinesToNote(taskLines),
+		);
+		const parser = new TaskParser({} as never, {} as never);
+		parser.plugin = {
+			taskParser: parser,
+			fileMetadataService: { getFilepathForTask: async () => filepath },
+			dateMan: {
+				parseDates: () => ({}),
+				stripDatesFromLine: (s: string) => s,
+				formatDateToISO: () => '2026-10-20T00:00:00.000+0000',
+				addDatesToLine: (s: string) => s,
+				areDatesChanged: () => false,
+				addDateHolderToTask: () => undefined,
+			},
+			app: { vault: { getName: () => 'V', getAbstractFileByPath: () => ({ path: filepath }) } },
+			projectScheme: {
+				ensurePushContext: vi.fn(),
+				isParentTask: () => false,
+				isParentId: () => false,
+				enabled: () => false,
+			},
+			taskRepository: {
+				loadTaskById: vi.fn().mockResolvedValue({
+					id: taskId,
+					title: 'parent',
+					projectId: 'in',
+					lineHash,
+					parentId: '',
+					content: '',
+					desc: '',
+					tags: [],
+					status: 0,
+					items: [],
+					priority: 0,
+				}),
+				loadLocalTaskById: vi.fn().mockResolvedValue({
+					task: { id: taskId },
+					lastVaultSync: 1,
+					updatedAt: 0,
+					file: filepath,
+				}),
+				upsertTask: vi.fn().mockResolvedValue(undefined),
+			},
+			tickTickRestAPI: { updateTask: vi.fn(), getTaskById: vi.fn(), getTaskComments: vi.fn() },
+			fileTaskQueries: { getDefaultProjectIdForFilepath: async () => 'in' },
+		} as unknown as typeof parser.plugin;
+
+		const plugin = {
+			taskParser: parser,
+			projectScheme: parser.plugin.projectScheme,
+			taskRepository: parser.plugin.taskRepository,
+			tickTickRestAPI: parser.plugin.tickTickRestAPI,
+			dateMan: parser.plugin.dateMan,
+			fileMetadataService: parser.plugin.fileMetadataService,
+			fileOperation: { readFileContent: async () => fileContent },
+			fileTaskQueries: parser.plugin.fileTaskQueries,
+			saveSettings: vi.fn(),
+		};
+		const tfile = mockTFile(filepath);
+		const app = {
+			metadataCache: { getFileCache: () => ({ listItems: [] }) },
+			vault: {
+				getAbstractFileByPath: () => tfile,
+				read: async () => fileContent,
+			},
+		};
+		const detector = new TaskModificationDetector(app as never, plugin as never);
+		await detector.checkFileForModifications(filepath, undefined, { identifiedOnly: true });
+		expect(syncMock).not.toHaveBeenCalled();
+		expect(parser.plugin.tickTickRestAPI.getTaskComments).not.toHaveBeenCalled();
+	});
 });

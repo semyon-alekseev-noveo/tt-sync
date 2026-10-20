@@ -6,6 +6,7 @@ import { getSettings, updateSettings } from '@/settings';
 import { getAllProjects } from '@/db/projects';
 import { isListAllowed, normalizeSyncTag, resolveProjectsList, resolveSyncedListIds, type TaskSyncLimitOptions, taskMatchesSyncLimit } from '@/syncScope';
 import log from '@/utils/logger';
+import { commitVaultText, readNoteForWrite } from '@/services/vaultWrite';
 import {
 	isProjectNote, isSchemeParentTask, isProjectParentDuplicateLine, linkTarget, isDoneStatus, planProjects, renderProjectNote, renderProjectTemplate, sanitizeTitle, pickProjectNote, planTitle,
 	STATUS_ACTIVE, STATUS_DONE, repairProjectNoteTasks, type NoteSide, type ParentSide, type Snap, stripFileLinks,
@@ -254,7 +255,7 @@ export class ProjectSchemeService {
 	private async repairNote(path: string, parentId: string) {
 		const f = this.app.vault.getAbstractFileByPath(path);
 		if (!(f instanceof TFile)) return;
-		const text = await this.app.vault.read(f);
+		const text = await readNoteForWrite(this.app, f);
 		const lines = text.split('\n');
 		const tp = this.plugin.taskParser;
 		const next = repairProjectNoteTasks(
@@ -266,7 +267,7 @@ export class ProjectSchemeService {
 		const out = next.join('\n');
 		if (out !== text) {
 			log.info(`ProjectScheme: repaired project task layout in ${path}`);
-			await this.app.vault.modify(f, out);
+			await commitVaultText(this.app, f, text, out);
 		}
 	}
 }

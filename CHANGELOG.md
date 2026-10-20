@@ -5,6 +5,36 @@
 - Mass-deletion / empty-side guard. A sync plans vault→TickTick and TickTick→vault task and comment deletions before applying any of them. More than 10 tasks and more than 20% of tracked tasks, or any deletion while one side looks empty, applies nothing destructive and leaves the checkpoint. Creates and updates still run. Manual sync can apply once, skip, or open a report under `.tickticksync/reports/`. Startup and scheduled sync only notify. Unreadable, conflict, sync-pending, and skipped files do not produce deletions. Startup waits for layout ready and Obsidian Sync idle, then 30 seconds by default. Settings: `massDeleteGuardEnabled` (default on), `massDeleteTaskThreshold` (10), `massDeletePercentThreshold` (20), `massDeletePreviewCount` (20), `startupSyncDelaySeconds` (30). Turning the guard off restores the previous deletion behavior. No version bump.
 - Validation: `npx vitest run` → 81 files, **601 passed**; `npm run build` ok. Pilot rows in `TEST_PLAN.md` are **not run**.
 
+### Iteration 2026-10-20 13:50 UTC
+
+- Context: Owner asked to record open-editor line patches in the redo journal.
+- Target: `commitVaultText` writes a journal entry before an `editor.transaction` and before a re-applied span, with the buffer from before and after. Undo restores that patch with the note open or closed. A patch that does not land is not committed.
+- Actions log: `setNoteJournal` from `instrumentVault`. `makeEnv.read` uses the open editor. Cases **TP-JOURNAL-EDITOR-PATCH** and **TP-UNDO-EDITOR-PATCH** in `TEST_PLAN.md` (not run on a vault).
+- Validation: `npx vitest run` → 84 files, **613 passed**; `npm run build` — this iteration. `noWholeNoteWrite.test.ts` still passes.
+- Problems: Pilot **TP-JOURNAL-EDITOR-PATCH** and **TP-UNDO-EDITOR-PATCH** are not run. If the file changes again after the re-applied span was journaled, that record stays uncommitted and the note is not written.
+- To Be Done: Pilot the two new rows.
+- References: `src/services/vaultWrite.ts`, `src/redo/obsidian.ts`, `src/test/journalEditorPatch.test.ts`, `TEST_PLAN.md`
+
+### Iteration 2026-10-20 11:40 UTC
+
+- Context: Owner extended the stale-editor hotfix. `completeTaskInTheFile` and `uncompleteTaskInTheFile` still wrote the whole note with `vault.modify`.
+- Target: Every note that may be open goes through `commitVaultText`. No version bump.
+- Actions log: Checkbox complete and uncomplete, tag and link stamps, recurring roll, detach, duplicate-id strip, subtask reorder, tag rename, project-note repair, folder merge, `forceUpdates`, and undo restore/remap use the helper. `TEST_PLAN.md` adds **TP-COMPLETE-DURING-TYPE** and **TP-UNCOMPLETE-DURING-TYPE** (not run). A source scan refuses `vault.modify`, `vault.process`, `adapter.write`, and `editor.setValue` outside the helper.
+- Validation: `npx vitest run` → 83 files, **607 passed**; `npm run build` — this iteration. Pilot rows stay **not run**.
+- Problems: Journal jsonl (`.tickticksync/journal`) and CSV backups are new files, not open notes. Pilot rows stay **not run**.
+- To Be Done: Pilot **TP-COMPLETE-DURING-TYPE** and **TP-UNCOMPLETE-DURING-TYPE**.
+- References: `TEST_PLAN.md`, `src/services/vaultWrite.ts`, `src/test/noWholeNoteWrite.test.ts`
+
+### Iteration 2026-10-20 11:10 UTC
+
+- Context: Open note editor was cleared or reverted while the file on disk stayed current (`BUG-STALE-EDITOR-WRITE`). A comment deleted in TickTick stayed in the note, so the stale write ran on every sync.
+- Target: No version bump. Network work finishes before the write snapshot. An open note is patched on matching task lines. A quiet second sync writes nothing.
+- Actions log: `commitVaultText` refuses a stale `vault.process` and uses `editor.transaction` on open files. `readFileContent` checks `activeEditor.file`. `mergeAbyssBlock` drops comments present in the previous `taskCommentMaps` and absent from the Comments API. The 5-second push skips the comment sweep. `lastVaultPushWallMs` is set after vault writes. Cases in `ABYSS_FIRST_CASES.md`. `TEST_PLAN.md` hotfix section, the missing **2.0.52** section, and **After §3.5** items 1–2 marked done in **2.0.53**.
+- Validation: `npx vitest run` → 81 files, **600 passed**; `npm run build` — this iteration. Pilot rows in the hotfix section are **not run**.
+- Problems: `TP-EDITOR-*`, `TP-COMMENT-TT-DELETE`, and `TP-NO-SELF-REPUSH` are not run on the pilot. `TP-DELTA-*` are still not run, while `skipPushWhenTickTickRenamedVaultLine` stays off.
+- To Be Done: Owner merges. Pilot the hotfix section. Do not tag from this branch.
+- References: `TEST_PLAN.md`, `PO_STATUS.md`, `ABYSS_FIRST_CASES.md`
+
 ### Iteration 2026-10-20 09:10 UTC
 
 - Context: Owner asked to release the idle-sync change.
