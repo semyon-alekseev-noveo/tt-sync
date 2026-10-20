@@ -17,6 +17,7 @@ import type TickTickSync from '@/main';
 import type { ITask } from '@/api/types/Task';
 import { FileTaskQueries } from '@/repositories/FileTaskQueries';
 import { getSettings } from '@/settings';
+import { syncRead } from '@/sync/fileRunCache';
 import log from '@/utils/logger';
 
 export class TaskOperationsService {
@@ -103,6 +104,7 @@ export class TaskOperationsService {
 						updatedTask.title = stripped;
 					}
 					await this.plugin.taskRepository.upsertTask(updatedTask, undefined, Date.now());
+					await this.plugin.taskRepository.markVaultInSync?.(updatedTask.id);
 				}
 			}
 
@@ -128,7 +130,7 @@ export class TaskOperationsService {
 				log.error(`${filepath} is not a valid file`);
 				return;
 			}
-			const content = await this.app.vault.read(abstractFile);
+			const content = await syncRead(this.app.vault, abstractFile);
 			const lines = content.split('\n');
 
 			for (let lineNumber = 0; lineNumber < lines.length; lineNumber++) {
@@ -167,6 +169,7 @@ export class TaskOperationsService {
 
 						// Update in database
 						await this.plugin.taskRepository.upsertTask(updatedTask, undefined, Date.now());
+						await this.plugin.taskRepository.markVaultInSync?.(updatedTask.id);
 					}
 				}
 			}
@@ -320,6 +323,7 @@ export class TaskOperationsService {
 
 			if (updatedTask) {
 				await this.plugin.taskRepository.upsertTask(updatedTask, undefined, Date.now());
+				await this.plugin.taskRepository.markVaultInSync?.(updatedTask.id);
 			}
 
 			log.debug(`Updated priority for task ${taskId} to ${priority}`);
@@ -348,6 +352,7 @@ export class TaskOperationsService {
 
 			if (updatedTask) {
 				await this.plugin.taskRepository.upsertTask(updatedTask, undefined, Date.now());
+				await this.plugin.taskRepository.markVaultInSync?.(updatedTask.id);
 			}
 
 			log.debug(`Added tags to task ${taskId}:`, tags);
@@ -375,6 +380,7 @@ export class TaskOperationsService {
 
 			if (updatedTask) {
 				await this.plugin.taskRepository.upsertTask(updatedTask, undefined, Date.now());
+				await this.plugin.taskRepository.markVaultInSync?.(updatedTask.id);
 			}
 
 			log.debug(`Removed tags from task ${taskId}:`, tags);

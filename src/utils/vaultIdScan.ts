@@ -1,4 +1,5 @@
 import type { App } from 'obsidian';
+import { syncCachedRead } from '@/sync/fileRunCache';
 import { noteFilesScanned } from '@/sync/perf';
 
 /**
@@ -12,7 +13,7 @@ export async function idsPresentInVault(app: App, ids: string[]): Promise<Map<st
 	const gen = vaultIdIndexGeneration();
 	if (!scan.done()) {
 		for (const f of app.vault.getMarkdownFiles()) {
-			const text = await app.vault.cachedRead(f);
+			const text = await syncCachedRead(app.vault, f);
 			noteFilesScanned(1);
 			if (scan.feed(f.path, text)) break;
 		}

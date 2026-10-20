@@ -31,6 +31,10 @@ function pairs(map: Map<string, string>): [string, string][] {
 function vaultFrom(files: { path: string; text: string }[], onRead?: (path: string, texts: Record<string, string>) => void) {
 	const texts: Record<string, string> = Object.fromEntries(files.map(f => [f.path, f.text]));
 	const order = files.map(f => f.path);
+	const listeners: Record<string, ((...args: unknown[]) => void)[]> = {};
+	const emit = (event: string, ...args: unknown[]) => {
+		for (const fn of listeners[event] ?? []) fn(...args);
+	};
 	const app = {
 		vault: {
 			getMarkdownFiles: () => order.map(path => ({ path })),
@@ -40,11 +44,13 @@ function vaultFrom(files: { path: string; text: string }[], onRead?: (path: stri
 				return text;
 			},
 			read: async (f: { path: string }) => texts[f.path] ?? '',
-			modify: async (f: { path: string }, data: string) => { texts[f.path] = data; },
-			process: async (f: { path: string }, fn: (data: string) => string) => { texts[f.path] = fn(texts[f.path] ?? ''); },
-			create: async (path: string, data: string) => { texts[path] = data; order.push(path); },
-			delete: async (f: { path: string }) => { delete texts[f.path]; },
-			rename: async (f: { path: string }, to: string) => { texts[to] = texts[f.path] ?? ''; delete texts[f.path]; },
+			modify: async (f: { path: string }, data: string) => { texts[f.path] = data; emit('modify', f); },
+			process: async (f: { path: string }, fn: (data: string) => string) => { texts[f.path] = fn(texts[f.path] ?? ''); emit('modify', f); },
+			create: async (path: string, data: string) => { texts[path] = data; order.push(path); emit('create', { path }); },
+			delete: async (f: { path: string }) => { delete texts[f.path]; emit('delete', f); },
+			rename: async (f: { path: string }, to: string) => { texts[to] = texts[f.path] ?? ''; delete texts[f.path]; emit('rename', { path: to }, f.path); },
+			on: (event: string, fn: (...args: unknown[]) => void) => { (listeners[event] ??= []).push(fn); },
+			off: (event: string, fn: (...args: unknown[]) => void) => { listeners[event] = (listeners[event] ?? []).filter(item => item !== fn); },
 		},
 	};
 	return { app, texts, order };

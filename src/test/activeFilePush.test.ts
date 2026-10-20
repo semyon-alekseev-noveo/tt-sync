@@ -18,19 +18,26 @@ describe('RISK-OPEN-FILE-EDIT', () => {
 	});
 
 	it('plans a push and skips only an unfinished caret line', () => {
-		expect(planActiveFilePush(ready)).toEqual({ push: true, skipLines: [] });
+		expect(planActiveFilePush(ready)).toEqual({ push: true, skipLines: [], retryAfterSync: false });
 		expect(planActiveFilePush({
 			...ready,
 			caretLine: 4,
 			caretTitle: '%%',
 			caretRaw: '- [ ] %%',
-		})).toEqual({ push: true, skipLines: [4] });
+		})).toEqual({ push: true, skipLines: [4], retryAfterSync: false });
 	});
 
 	it('does not push while sync is running or the file is out of scope', () => {
 		expect(planActiveFilePush({ ...ready, syncRunning: true }).push).toBe(false);
 		expect(planActiveFilePush({ ...ready, inScope: false }).push).toBe(false);
 		expect(planActiveFilePush({ ...ready, hasToken: false }).push).toBe(false);
+	});
+
+	it('TP-ACTIVE-PUSH-DURING-SYNC reschedules a push that comes due while sync is running', () => {
+		const during = planActiveFilePush({ ...ready, syncRunning: true }) as { push: boolean; retryAfterSync?: boolean };
+		expect(during.push).toBe(false);
+		expect(during.retryAfterSync).toBe(true);
+		expect((planActiveFilePush(ready) as { retryAfterSync?: boolean }).retryAfterSync).toBe(false);
 	});
 
 	it('debounces to a single push after the quiet period', () => {

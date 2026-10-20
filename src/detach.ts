@@ -1,4 +1,5 @@
 import { fencedLines } from '@/utils/vaultIdScan';
+import { syncCachedRead } from '@/sync/fileRunCache';
 // Detach a task line from TickTick sync after the task was deleted in TickTick.
 // Result: `[-]` (cancelled), no ticktick_id, no TickTick link, no sync-marker tag,
 // plus DETACH_MARK so the line is never tagged/pushed again (even in full-vault mode).
@@ -38,7 +39,7 @@ export async function enrichDeletionItems<T extends { filePath?: string; id?: st
 		if (!it.id || !it.filePath) continue;
 		const f = app.vault.getAbstractFileByPath(it.filePath);
 		if (!f || typeof f !== 'object' || !('extension' in (f as object))) continue;
-		const text = await app.vault.cachedRead(f as never);
+		const text = await syncCachedRead(app.vault as never, f as { path: string });
 		const line = text.split('\n').find(l => l.includes(`ticktick_id:: ${it.id}`));
 		if (line) it.line = line.trim();
 	}

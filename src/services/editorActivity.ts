@@ -18,3 +18,9 @@ export function typedWithin(path: string, withinMs = TYPING_DEFER_MS, now = Date
 	const at = lastTypedAt.get(path);
 	return at != null && now - at < withinMs;
 }
+
+/** Milliseconds since the last editor change, or null when this note has none. */
+export function typedAgoMs(path: string, now = Date.now()): number | null {
+	const at = lastTypedAt.get(path);
+	return at == null ? null : now - at;
+}

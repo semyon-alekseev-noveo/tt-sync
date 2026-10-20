@@ -11,8 +11,10 @@ export interface DeviceInfo {
 export type SyncMeta = {
 	lastFullSync: number;
 	lastDeltaSync: number;
-	/** Wall-clock ms when pre-pull vault push last finished; used for editedSince (not TickTick checkpoint). */
+	/** Wall-clock ms at the start of the pre-pull push. Plugin writes are excluded by `pluginWriteMtimes`, not by moving this to the end. */
 	lastVaultPushWallMs?: number;
+	/** path → mtime of a file this plugin wrote. A later user save is still a local edit. */
+	pluginWriteMtimes?: Record<string, number>;
 
 	deviceId: string;
 	deviceLabel?: string;

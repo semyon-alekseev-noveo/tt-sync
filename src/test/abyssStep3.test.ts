@@ -72,6 +72,26 @@ describe('Abyss child block anywhere', () => {
 		});
 		expect(kept).toContain('stay');
 	});
+	it('TP-ABYSS-LOCAL-CHILD-KEEP keeps an unpushed description and does not resurrect the edited comment', () => {
+		const id = 'abcdefabcdefabcdefabcdef';
+		const gen = [
+			`- [ ] T %%[ticktick_id:: ${id}]%%`,
+			'\t- > old desc',
+			'\t- 2026-10-20 12:00: comment C',
+		].join('\n');
+		const old = ['\t- > desc edited locally', '\t- 2026-10-20 12:00: comment C prime'];
+		const base = 'old desc\n\nComments:\n2026-10-20 12:00: comment C';
+		const hint = {
+			knownBodies: ['2026-10-20 12:00: comment C'],
+			apiBodies: ['2026-10-20 12:00: comment C'],
+		};
+		const out = mergeAbyssBlock(gen, old, base, hint);
+		expect(out).toContain('desc edited locally');
+		expect(out).toContain('comment C prime');
+		expect(out).not.toContain('old desc');
+		expect(out).not.toContain('comment C\n');
+		expect(out).not.toMatch(/comment C$/m);
+	});
 	it('BUG-COMMENT-NO-PUSH keeps vault comments when the generated block has none', () => {
 		const gen = '- [ ] gate-comment-249 #obsidian #inbox %%[ticktick_id:: 6ad6f43a0aa12c21f30de04a]%%\n\t- > gate-desc-249';
 		const old = ['\t- > gate-desc-249', '\t- 2026-10-20 13:18: gate-251-retest-b'];

@@ -154,6 +154,17 @@ export class TaskRepository {
 	}
 
 	/**
+	 * A vault-originated save that did not pass a filepath. `updatedAt` moved, so without this
+	 * the next reconcile treats the line as remote-newer and writes the Dexie copy over the editor.
+	 */
+	async markVaultInSync(taskId: string): Promise<void> {
+		if (!taskId) return;
+		const existing = await db.tasks.where('taskId').equals(taskId).first();
+		if (!existing) return;
+		await db.tasks.update(existing.localId, { lastVaultSync: existing.updatedAt });
+	}
+
+	/**
 	 * Delete a task by ID
 	 */
 	async deleteTask(taskId: string): Promise<void> {

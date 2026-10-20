@@ -7,8 +7,9 @@ import { App, Editor, type MarkdownFileInfo, MarkdownView, TFolder } from 'obsid
 import type TickTickSync from '@/main';
 import { getSettings } from '@/settings';
 import { isPathInPushScope } from '@/syncScope';
-import { createActiveFilePushScheduler, planActiveFilePush } from '@/services/activeFilePush';
+import { createActiveFilePushScheduler, deferActiveFilePush, planActiveFilePush, setActiveFilePushRelease } from '@/services/activeFilePush';
 import { noteEditorActivity } from '@/services/editorActivity';
+import { traceWrite } from '@/services/writeTrace';
 import log from '@/utils/logger';
 
 export class EventHandlerService {
@@ -23,6 +24,9 @@ export class EventHandlerService {
 	constructor(app: App, plugin: TickTickSync) {
 		this.app = app;
 		this.plugin = plugin;
+		setActiveFilePushRelease((paths) => {
+			for (const path of paths) void this.flushActiveFilePush(path);
+		});
 	}
 
 	/**
@@ -135,7 +139,13 @@ export class EventHandlerService {
 			caretTitle,
 			caretRaw,
 		});
+		if (plan.retryAfterSync) {
+			deferActiveFilePush(filepath);
+			traceWrite(this.app, 'flushActiveFilePush', filepath, 'defer', { reason: 'syncRunning' });
+			return;
+		}
 		if (!plan.push) return;
+		traceWrite(this.app, 'flushActiveFilePush', filepath, 'push', { reason: 'push', caretLine });
 		try {
 			await this.plugin.service?.pushSettledActiveFile(filepath, plan.skipLines);
 		} catch (error) {

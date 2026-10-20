@@ -549,3 +549,69 @@ These already have automated tests. Re-run them with the suite. Do not mark a li
 | TP-JOURNAL-EDITOR-PATCH | not run | Automated: `journalEditorPatch.test.ts`. No vault run. |
 | TP-UNDO-EDITOR-PATCH | not run | Automated: `journalEditorPatch.test.ts`. No vault run. |
 | Recurring roll, detach, duplicate strip, subtask reorder, tag/link/rename/repair/merge/force update/undo | not run | Automated guard: `noWholeNoteWrite.test.ts` (no direct whole-note write outside `commitVaultText`). |
+
+## Open note buffer must not roll back
+
+Branch `cursor/open-note-buffer-reset-65a5` into `abyss-mapping`. No version bump. Cases in `ABYSS_FIRST_CASES.md`: **TP-NO-CARET-REWRITE**, **TP-ACTIVE-PUSH-DURING-SYNC**, **TP-NO-STALE-VIEW-READ**, **TP-ABYSS-LOCAL-CHILD-KEEP**, **TP-TWO-LEAVES**. Problem row **BUG-OPEN-NOTE-BUFFER** in `PO_STATUS.md`.
+
+What changed: a successful vault→TickTick save sets `lastVaultSync`. A line whose hash differs from the stored `lineHash` is a local edit to push, not a vault line to overwrite. A span that contains the cursor or selection is not applied while that editor has focus, or while the note was typed in the last two seconds. One editor is patched per file. The 5-second push is rescheduled when a sync is running. `lastVaultPushWallMs` is taken before the deletion-guard prefetch; a file this plugin wrote is excluded by path and mtime, and only when that write moved the mtime. `app.vault.read` and `cachedRead` are not replaced. Plugin reads go through `syncRead` / `syncCachedRead`. A file open in an editor is not cached. `mergeAbyssBlock` keeps an unpushed local description or comment. The merge write-back inside the 5-second push does not run if the note changed after the push started.
+
+### Write trace
+
+Settings → **Write trace** (`debugWriteTrace`, default off). Reload the plugin after turning it on. Each write and each update decision is a `warn` line prefixed `[write-trace]` and one JSON line in `<vault>/.tickticksync/write-trace.jsonl`. Fields include path, api, trigger, phase, editor open/focused, whether the buffer matches disk (`adapter.read`), milliseconds since the last keystroke, cursor line, spans and whether they touch the cursor, the update reason, whether a file-run cache is active, and a short caller stack. With the setting on at load, a view reload whose text is not the disk text is logged too (`setViewData`, `bufferEqDisk: false`). `fileRunActive: true` on that line is the stale-view path. A transaction with `touchesCaret` and reason `behind` or `update` is the caret-overwrite path.
+
+Pilot vault only: **Thinkpad-tts-test**. Do not use the live vault. None of these rows were run on a vault.
+
+### TP-NO-CARET-REWRITE — typing on the line just pushed is kept
+
+1. Open a synced note. Edit a task line that already has `ticktick_id`. Wait for the 5-second push to finish.
+2. On that same line, type a second version. Wait 3 seconds (past the 2-second typing pause).
+3. Run **Synchronize**.
+
+Expected: the editor still shows the second version. The line under the cursor is not replaced with the copy that was just pushed.
+
+### TP-ACTIVE-PUSH-DURING-SYNC — a push that comes due during sync still runs
+
+1. Open a synced note and edit a task line. Start **Synchronize** before the 5-second push fires.
+2. Let the sync finish without editing again. Wait until the rescheduled push has had time to run.
+3. Save the note while a second **Synchronize** is running (after it has started pushing). Run **Synchronize** once more without editing.
+
+Expected: the first push is not dropped. The save made during the sync is pushed on the next sync. A note the plugin itself rewrote, and that you did not edit, is not pushed again.
+
+### TP-NO-STALE-VIEW-READ — Obsidian reads the disk, not the sync cache
+
+1. Turn on **Write trace** and reload the plugin. Open a synced note.
+2. Run **Synchronize** while the note is open. Watch `.tickticksync/write-trace.jsonl`.
+
+Expected: a view reload is not logged with `bufferEqDisk: false` while `fileRunActive` is true. The editor does not flash back to an older copy of the note when the file on disk is already current.
+
+### TP-ABYSS-LOCAL-CHILD-KEEP — an unpushed child line stays
+
+1. On a synced Abyss task, edit the description line and a comment line. Do not wait for the 5-second push.
+2. Run **Synchronize** once, soon enough that those child lines have not been pushed.
+
+Expected: the edited description and the edited comment stay. The previous comment text does not reappear next to the edit.
+
+### TP-TWO-LEAVES — one patch per file
+
+1. Open the same synced note in two leaves. Focus one. Run **Synchronize** so it changes a task line.
+
+Expected: the focused editor (or the first, if neither has focus) receives the patch once. The note is not patched a second time in the other leaf.
+
+### Regressions that must still hold
+
+| ID | What must still hold |
+|----|----------------------|
+| TP-IDLE-ZERO | A quiet sync does not probe each task. The shared plugin read is one per note; a closed detach reads that file from disk once more. `vault.read` itself is not cached. |
+| TP-NO-SELF-REPUSH | A file the plugin just wrote, with no later user save, is not a local edit on the next sync. |
+| TP-COMMENT-TT-DELETE | A comment deleted in TickTick still leaves the note. |
+| TP1-DEBOUNCE | The open note still pushes about 5 seconds after the last keystroke. |
+| NOTE-L3b | A child comment still reaches TickTick Comments. Live status stays the **2.0.51** fail until someone re-runs it. |
+
+| ID | Pilot status | Evidence |
+|----|----------------|----------|
+| TP-NO-CARET-REWRITE | not run | Automated: `synchronizationInner.integration.test.ts`. Vault Thinkpad-tts-test not run. |
+| TP-ACTIVE-PUSH-DURING-SYNC | not run | Automated: `activeFilePush.test.ts`, `synchronizationInner.integration.test.ts`. Vault not run. |
+| TP-NO-STALE-VIEW-READ | not run | Automated: `tpNoStaleViewRead.test.ts`. Vault not run. |
+| TP-ABYSS-LOCAL-CHILD-KEEP | not run | Automated: `abyssStep3.test.ts`. Vault not run. |
+| TP-TWO-LEAVES | not run | Automated: `tpTwoLeaves.test.ts`. Vault not run. |

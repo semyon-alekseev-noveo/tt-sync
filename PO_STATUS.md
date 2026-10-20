@@ -25,7 +25,7 @@
 
 ## Validation
 
-- Релиз **2.0.47:** `npx vitest run` — 67 файлов, 550 тестов. Эта ветка (hotfix **BUG-STALE-EDITOR-WRITE**, версию не поднимали): **84 файла, 613 тестов**, `npm run build` — ok. В том числе `src/test/synchronizationInner.integration.test.ts`. Пилот hotfix-кейсов — **not run** (`TEST_PLAN.md`).
+- Релиз **2.0.47:** `npx vitest run` — 67 файлов, 550 тестов. Эта ветка (открытая заметка не откатывается, версию не поднимали): **87 файлов, 631 тест**, `npm run build` — ok. В том числе `src/test/synchronizationInner.integration.test.ts`. Пилот — **not run** (`TEST_PLAN.md`, vault Thinkpad-tts-test).
 - Пилот **2.0.48** (2026-10-20): debounce/open-note — pass; NOTE-L3b / Comments API — **fail**; DEL-1 — pass. Детали в `TEST_PLAN.md`, `ABYSS_FIRST_CASES.md`, `CHANGELOG.md`.
 - Релиз **2.0.53** (2026-10-20): idle sync без `getTaskById` на тихую задачу; эхо по `etag`; `getTaskComments` только при расхождении `commentCount`. Vitest **589**. Пилот `TP-IDLE-ZERO` — not run.
 - **EMPTY-SIDE-GUARD** (этот PR, версию не поднимали): порог массового удаления и пустая сторона держат удаления и чекпоинт. Пилот `TP-EMPTY-SIDE-GUARD` и соседние строки в `TEST_PLAN.md` — **not run**.
@@ -49,6 +49,7 @@
 | **BUG-COMMENT-MAP-ORPHAN** | P2 | fixed on this branch | `deleteCommentMapsForTask` вызывается из `TaskRepository` (delete/hard delete/purge), `markTaskDeleted` и pull при удалённой на TT задаче |
 | **BUG-COMMENT-NO-PUSH** | P0 | fix on branch (pilot **2.0.51** fail) | Перерисовка строки больше не снимает vault-комментарии, которых нет в `Comments:` базе; перед записью файла они пушатся в Comments API. NOTE-L3b на пилоте ещё не перегнан. |
 | **BUG-STALE-EDITOR-WRITE** | P0 | fixed on this branch (pilot **not run**) | Открытая заметка переписывалась из снимка, снятого до Comments API. Нажатия за это окно пропадали из редактора, файл на диске оставался новее. Комментарий, удалённый в TickTick, оставался в заметке, поэтому перезапись шла на каждом sync. |
+| **BUG-OPEN-NOTE-BUFFER** | P0 | fixed on this branch (pilot **not run**) | На 2.0.54 буфер открытой заметки откатывался, файл на диске оставался новым. Пуш без `lastVaultSync`, строка под курсором как vault-behind, app-wide `vault.read`, merge детей из Dexie. Кейсы TP-NO-CARET-REWRITE, TP-ACTIVE-PUSH-DURING-SYNC, TP-NO-STALE-VIEW-READ, TP-ABYSS-LOCAL-CHILD-KEEP, TP-TWO-LEAVES. |
 | **BUG-ACTIVEZONE-COMMENT-SHUFFLE** | P1 | open | При sync в project note (Active Zone): сортировка соседних задач и перенос comment-буллета с одной задачи на другую. Кейс в `ABYSS_FIRST_CASES.md`. |
 | **BUG-TICKTICK-ID-LEAK** | P1 | mitigated on branch | Канонический `%%[ticktick_id:: <24hex>]%%`, strip loose fragment из title; тест `bugTicktickIdLeak.test.ts`. Почистить дубли в TT вручную. |
 | **GAP-COMMENT-EDIT** | P2 | open | Правка комментария = delete + add (новые ID, шум в ленте TT) |

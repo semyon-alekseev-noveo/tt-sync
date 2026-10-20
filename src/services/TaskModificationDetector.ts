@@ -32,6 +32,7 @@ import type { ITask } from '@/api/types/Task';
 import type { LocalTask } from '@/db/schema';
 import { NewFileMap, type ITaskItemRecord, type ITaskRecord } from '@/services/NewFileMap';
 import { commitVaultText, editorsForFile, readNoteForWrite } from '@/services/vaultWrite';
+import { syncCachedRead, syncRead } from '@/sync/fileRunCache';
 import { FolderSyncService } from '@/services/FolderSyncService';
 import { getSettings } from '@/settings';
 import { getAllProjects } from '@/db/projects';
@@ -205,7 +206,7 @@ export class TaskModificationDetector {
 		if (!want) return undefined;
 		const f = this.app.vault.getAbstractFileByPath(filepath);
 		if (!(f instanceof TFile)) return undefined;
-		const text = await this.app.vault.cachedRead(f);
+		const text = await syncCachedRead(this.app.vault, f);
 		const rows = await this.plugin.taskRepository.loadTasksForFile(filepath);
 		const hits = (rows ?? []).filter(t => t?.id && !text.includes(t.id)
 			&& stripFileLinks(t.title ?? '').trim().toLowerCase() === want);
@@ -258,7 +259,7 @@ export class TaskModificationDetector {
 		fileMap: NewFileMap,
 		pendingDeletions?: PendingTickTickDeletion[],
 		pushLimit?: TaskSyncLimitOptions,
-		options?: { identifiedOnly?: boolean },
+		options?: { identifiedOnly?: boolean; pushSnapshot?: string },
 	): Promise<boolean> {
 		// Outside syncScopeFolders: no update, no completion, no deletion push.
 		if (!isPathInPushScope(filepath)) {
@@ -411,7 +412,7 @@ export class TaskModificationDetector {
 		// Detect what changed
 		const modifications = this.detectModifications(lineTask, savedTask, taskRecord);
 
-		return await this.applyModifications(lineTask, savedTask, modifications, filepath!, taskId, newHash ?? '', taskRecord);
+		return await this.applyModifications(lineTask, savedTask, modifications, filepath!, taskId, newHash ?? '', taskRecord, options?.pushSnapshot);
 	}
 
 	/**
@@ -430,6 +431,14 @@ export class TaskModificationDetector {
 		if (!(file instanceof TFile)) {
 			return;
 		}
+
+		let pushSnapshot: string | undefined;
+		try {
+			pushSnapshot = await readNoteForWrite(this.app, file);
+		} catch (error) {
+			log.debug('push snapshot failed', filepath, error);
+		}
+		const lineOptions = { ...options, pushSnapshot };
 
 		await this.plugin.projectScheme?.ensurePushContext?.();
 
@@ -455,7 +464,7 @@ export class TaskModificationDetector {
 			if (options?.identifiedOnly && !this.plugin.taskParser?.hasTickTickId(line)) continue;
 			if (this.plugin.taskParser?.isMarkdownTask(line)) {
 				try {
-					await this.checkLineForModifications(filepath, line, i, fileMap, pendingDeletions, pushLimit, options);
+					await this.checkLineForModifications(filepath, line, i, fileMap, pendingDeletions, pushLimit, lineOptions);
 				} catch (error) {
 					log.error('Error checking task modification:', error);
 				}
@@ -602,6 +611,7 @@ export class TaskModificationDetector {
 		taskId: string,
 		newHash: string,
 		taskRecord: ITaskRecord,
+		pushSnapshot?: string,
 	): Promise<boolean> {
 		let modified = false;
 
@@ -711,6 +721,7 @@ export class TaskModificationDetector {
 
 			const targetPath: string | undefined = modifications.projectMoved ? filepath : undefined;
 			await this.plugin.taskRepository.upsertTask(updatedTask, targetPath, Date.now());
+			if (!targetPath) await this.plugin.taskRepository.markVaultInSync?.(updatedTask.id);
 			modified = true;
 			// show merged TickTick values / conflict note in the note right away
 			if (mergedFromRemote) {
@@ -718,7 +729,16 @@ export class TaskModificationDetector {
 				const fresh = { ...updatedTask, modifiedTime: '2000-01-01T00:00:00.000+0000', dateHolder: undefined } as unknown as ITask;
 				this.plugin.dateMan?.addDateHolderToTask(fresh, undefined);
 				await this.plugin.taskRepository.upsertTask(fresh, targetPath, Date.now());
-				try { await this.plugin.fileOperation?.synchronizeToVault(filepath, [fresh], true); } catch (e) { log.warn('merge write-back failed', e); }
+				const liveFile = this.app.vault.getAbstractFileByPath(filepath);
+				let live = pushSnapshot;
+				if (liveFile instanceof TFile) {
+					try { live = await readNoteForWrite(this.app, liveFile); } catch (error) { log.debug('merge live read failed', error); }
+				}
+				if (pushSnapshot != null && live !== pushSnapshot) {
+					log.info(`Skipping merge write-back of ${filepath}: the note changed after the push started`);
+				} else {
+					try { await this.plugin.fileOperation?.synchronizeToVault(filepath, [fresh], true); } catch (e) { log.warn('merge write-back failed', e); }
+				}
 			}
 
 			this.notifyUserOfChanges(taskId, modifications);
@@ -728,6 +748,7 @@ export class TaskModificationDetector {
 		if (!modified && newHash !== savedTask.lineHash) {
 			lineTask.lineHash = newHash;
 			await this.plugin.taskRepository.upsertTask(lineTask, undefined, Date.now());
+			await this.plugin.taskRepository.markVaultInSync?.(lineTask.id);
 		}
 
 		if (useAbyssCommentsApi() && taskRecord.taskLines?.length) {
@@ -980,7 +1001,7 @@ export class TaskModificationDetector {
 				if (file && lineNumber !== undefined) {
 					try {
 						const open = editorsForFile(this.app, file.path);
-						const fileContent = open[0] ? open[0].getValue() : await this.app.vault.read(file);
+						const fileContent = open[0] ? open[0].getValue() : await syncRead(this.app.vault, file);
 						const lines = fileContent.split('\n');
 						if (lines[lineNumber] !== lineText) {
 							log.info(`Deferring item id write in ${filepath}: the line changed`);
@@ -1005,6 +1026,7 @@ export class TaskModificationDetector {
 				const updatedTask = await this.plugin.tickTickRestAPI?.updateTask(parentTask);
 				if (updatedTask) {
 					await this.plugin.taskRepository.upsertTask(updatedTask, undefined, Date.now());
+					await this.plugin.taskRepository.markVaultInSync?.(updatedTask.id);
 				}
 			} catch (error) {
 				log.error('Error updating parent task:', error);
@@ -1041,19 +1063,21 @@ export class TaskModificationDetector {
 			}
 
 			if (editor && cursor) {
-				const from = { line: cursor.line, ch: 0 };
-				const endLine = cursor.line + noteLineCount;
+				const file = this.app.vault.getAbstractFileByPath(fileMap.getFilePath());
 				const planned = [lineTxt, ...(taskRec.taskLines ?? [])];
 				const stillThere = planned.every((text, i) => editor.getLine(cursor.line + i) === text);
 				if (!stillThere) {
 					log.info('Deferring new-task line write: the open line changed');
-				} else {
-					const to = noteLineCount > 0
-						? { line: endLine, ch: editor.getLine(endLine).length }
-						: { line: cursor.line, ch: lineTxt.length };
-					const change = { from, to, text: decoratedText };
-					if (typeof editor.transaction === 'function') editor.transaction({ changes: [change] });
-					else editor.replaceRange(decoratedText, from, to);
+				} else if (file instanceof TFile) {
+					const snapshot = typeof editor.getValue === 'function' ? editor.getValue() : fileMap.getFileLines();
+					const lines = snapshot.split('\n');
+					const start = cursor.line;
+					const next = [
+						...lines.slice(0, start),
+						...decoratedText.split('\n'),
+						...lines.slice(start + 1 + noteLineCount),
+					].join('\n');
+					await commitVaultText(this.app, file, snapshot, next);
 				}
 			} else if (line !== null) {
 				const file = this.app.vault.getAbstractFileByPath(fileMap.getFilePath());

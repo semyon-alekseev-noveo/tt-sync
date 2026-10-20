@@ -9,6 +9,7 @@ import type { ITaskComment } from '@/api/types/TaskComment';
 import { listCommentMapsForTask } from '@/db/taskCommentMaps';
 import { NewFileMap } from '@/services/NewFileMap';
 import { commitVaultText, readNoteForWrite } from '@/services/vaultWrite';
+import { syncCachedRead } from '@/sync/fileRunCache';
 import log from '@/utils/logger';
 import type { DeletionItem } from './modals/TaskDeletionModal';
 import { TaskDeletionModal } from './modals/TaskDeletionModal';
@@ -378,7 +379,7 @@ export class FileOperation {
 			if (!this.isMarkdownFile(file.path)) {
 				return;
 			}
-			const fileContent = await this.app.vault.cachedRead(file);
+			const fileContent = await syncCachedRead(this.app.vault, file);
 			if (fileContent.includes(taskId)) {
 				return file.path;
 			}

@@ -6,7 +6,7 @@
 import { describe, expect, it } from 'vitest';
 import { TFile } from 'obsidian';
 import { idsPresentInTexts, idsPresentInVault } from '@/utils/vaultIdScan';
-import { beginFileRun, syncFileMap } from '@/sync/fileRunCache';
+import { beginFileRun, syncFileMap, syncRead } from '@/sync/fileRunCache';
 import { TaskParser } from '@/taskParser';
 import { resetSyncPerfForTests, lastSyncPerf, startSyncPerf, finishSyncPerf } from '@/sync/perf';
 
@@ -123,7 +123,7 @@ describe('PERF-INDEX synthetic vault', () => {
 			await idsPresentInVault({ vault: cachedVault } as never, ids);
 			for (const task of taskAt) {
 				const file = byPath.get(task.path)!.file;
-				const text = await cachedVault.read(file);
+				const text = await syncRead(cachedVault, file);
 				const map = await syncFileMap(app as never, plugin as never, file, text);
 				map.getTaskIndex(task.id);
 			}

@@ -22,10 +22,13 @@ import { TaskDeletionModal } from '@/modals/TaskDeletionModal';
 import { FolderSyncService } from '@/services/FolderSyncService';
 import log from '@/utils/logger';
 import { commitVaultText, readNoteForWrite } from '@/services/vaultWrite';
-import { syncFileMap } from '@/sync/fileRunCache';
+import { traceWrite } from '@/services/writeTrace';
+import { deferActiveFilePush } from '@/services/activeFilePush';
+import { syncCachedRead, syncFileMap, syncRead } from '@/sync/fileRunCache';
 import { addCount } from '@/sync/perf';
+import { notePluginWrite } from '@/utils/editedSince';
 import { apiCommentsDifferFromVault, useAbyssCommentsApi } from '@/abyssCommentSync';
-import { extractAbyssCommentThreads } from '@/abyssFormat';
+import { abyssLinesToNote, extractAbyssCommentThreads } from '@/abyssFormat';
 
 export class VaultSyncCoordinator {
 	private app: App;
@@ -133,11 +136,22 @@ export class VaultSyncCoordinator {
 				let actionNeeded = this.determineActionNeeded(lt, targetFile);
 				if (actionNeeded.action === 'none' && targetFile) {
 					const behind = await this.vaultLineBehindTask(task, targetFile);
-					if (behind.behind) {
+					traceWrite(this.app, 'syncVaultWithDatabase', targetFile, 'decision', {
+						reason: behind.reason,
+						taskIds: [task.id],
+					});
+					if (behind.localEdit) {
+						deferActiveFilePush(targetFile);
+					} else if (behind.behind) {
 						actionNeeded = { action: 'update' };
 						task = await this.dropStaleStageTags(behind.task);
 						lt.task = task;
 					}
+				} else if (actionNeeded.action === 'update' && targetFile) {
+					traceWrite(this.app, 'syncVaultWithDatabase', targetFile, 'decision', {
+						reason: 'hasChanged',
+						taskIds: [task.id],
+					});
 				}
 				const realFile = presentAt.get(task.id);
 				if (actionNeeded.action === 'add' && realFile && realFile !== targetFile) {
@@ -293,7 +307,7 @@ export class VaultSyncCoordinator {
 			const file = this.app.vault.getAbstractFileByPath(fileRecord.path);
 			if (file instanceof TFile) {
 				try {
-					const content = await this.app.vault.cachedRead(file);
+					const content = await syncCachedRead(this.app.vault, file);
 					// Check if this file contains the task ID in TickTick metadata format
 					const pattern = new RegExp(`%%\\[ticktick_id::\\s*${taskId}\\]%%`, 'i');
 					if (pattern.test(content)) {
@@ -312,15 +326,15 @@ export class VaultSyncCoordinator {
 	 * Determine what action is needed for a task
 	 */
 	/** Vault line differs from the Dexie copy. Idle sync does not call getTaskById (docs/TICKTICK_DELTA_API.md §3.2). */
-	private async vaultLineBehindTask(task: ITask, filePath: string): Promise<{ behind: boolean; task: ITask }> {
-		const same = { behind: false, task };
+	private async vaultLineBehindTask(task: ITask, filePath: string): Promise<{ behind: boolean; task: ITask; localEdit: boolean; reason: string }> {
+		const same = { behind: false, task, localEdit: false, reason: 'in-sync' };
 		const file = this.app.vault.getAbstractFileByPath(filePath);
 		if (!(file instanceof TFile)) return same;
 		const parser = this.plugin.taskParser;
 		if (!parser) return same;
 		let text: string;
 		try {
-			text = await this.app.vault.read(file);
+			text = await readNoteForWrite(this.app, file);
 		} catch {
 			return same;
 		}
@@ -332,6 +346,18 @@ export class VaultSyncCoordinator {
 			taskRec.task, lineIdx, filePath, fileMap, taskRec,
 		);
 		if (!lineTask) return same;
+		if (task.lineHash) {
+			let taskNotes = '';
+			if (getSettings().syncNotes && taskRec.taskLines?.length) {
+				taskNotes = useAbyssCommentsApi()
+					? abyssLinesToNote(taskRec.taskLines)
+					: (parser.getNoteString(taskRec, task.id) ?? '');
+			}
+			const hash = await parser.getLineHash((taskRec.task ?? '') + taskNotes);
+			if (hash && hash !== task.lineHash) {
+				return { behind: false, task, localEdit: true, reason: 'local-edit' };
+			}
+		}
 
 		const fieldsDiffer = (remote: ITask) => {
 			if (parser.isTitleChanged(lineTask, remote)
@@ -347,6 +373,7 @@ export class VaultSyncCoordinator {
 
 		const remote = task;
 		let behind = fieldsDiffer(task);
+		let reason = behind ? 'behind' : 'in-sync';
 		const commentCount = (task as ITask & { commentCount?: number }).commentCount;
 		const vaultThreads = extractAbyssCommentThreads(taskRec.taskLines ?? []).length;
 		if (deletionConfirmMode() !== 'skip' && !behind && useAbyssCommentsApi() && remote.projectId && typeof commentCount === 'number' && commentCount !== vaultThreads) {
@@ -354,13 +381,14 @@ export class VaultSyncCoordinator {
 				const comments = await this.plugin.tickTickRestAPI?.getTaskComments(remote.projectId, remote.id) ?? [];
 				if (apiCommentsDifferFromVault(taskRec.taskLines, comments)) {
 					behind = true;
+					reason = 'behindComments';
 					Object.defineProperty(remote, '_apiComments', { value: comments, enumerable: false, configurable: true });
 				}
 			} catch (e) {
 				log.debug('vault comment lookup failed', task.id, e);
 			}
 		}
-		return { behind, task: remote };
+		return { behind, task: remote, localEdit: false, reason };
 	}
 
 	private determineActionNeeded(
@@ -428,7 +456,7 @@ export class VaultSyncCoordinator {
 				group.toDelete = group.toDelete.filter(t => !mine.includes(t));
 				const f = this.app.vault.getAbstractFileByPath(filePath);
 				// subtasks of a deleted parent go with it (TickTick UI does the same)
-				const content = f instanceof TFile ? await this.app.vault.read(f) : '';
+				const content = f instanceof TFile ? await syncRead(this.app.vault, f) : '';
 				const kidIds = new Set<string>();
 				for (const t of mine) {
 					const pid = (t.id || (t as { taskId?: string }).taskId) ?? '';
@@ -473,6 +501,17 @@ export class VaultSyncCoordinator {
 		return prompt.confirmed;
 	}
 
+	private fileMtime(filePath: string): number | undefined {
+		const file = this.app.vault.getAbstractFileByPath(filePath);
+		return file instanceof TFile && typeof file.stat?.mtime === 'number' ? file.stat.mtime : undefined;
+	}
+
+	/** Record mtime only when this write moved it. A user save during the sync keeps its own mtime. */
+	private noteOwnWrite(filePath: string, before: number | undefined): void {
+		const mtime = this.fileMtime(filePath);
+		if (typeof mtime === 'number' && mtime !== before) notePluginWrite(filePath, mtime);
+	}
+
 	/**
 	 * Process file groups - handle deletions, updates, and additions
 	 */
@@ -501,12 +540,16 @@ export class VaultSyncCoordinator {
 
 			// 2. Handle Updates
 			if (group.toUpdate.length > 0) {
+				const before = this.fileMtime(filePath);
 				await this.plugin.fileOperation?.synchronizeToVault(filePath, group.toUpdate, true);
+				this.noteOwnWrite(filePath, before);
 			}
 
 			// 3. Handle Additions
 			if (group.toAdd.length > 0) {
+				const before = this.fileMtime(filePath);
 				await this.plugin.fileOperation?.synchronizeToVault(filePath, group.toAdd, false);
+				this.noteOwnWrite(filePath, before);
 			}
 		}
 	}

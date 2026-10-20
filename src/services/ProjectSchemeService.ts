@@ -6,7 +6,9 @@ import { getSettings, updateSettings } from '@/settings';
 import { getAllProjects } from '@/db/projects';
 import { isListAllowed, normalizeSyncTag, resolveProjectsList, resolveSyncedListIds, type TaskSyncLimitOptions, taskMatchesSyncLimit } from '@/syncScope';
 import log from '@/utils/logger';
-import { commitVaultText, readNoteForWrite } from '@/services/vaultWrite';
+import { commitFrontMatter, commitVaultText, readNoteForWrite } from '@/services/vaultWrite';
+import { syncRead } from '@/sync/fileRunCache';
+import { traceWrite } from '@/services/writeTrace';
 import {
 	isProjectNote, isSchemeParentTask, isProjectParentDuplicateLine, linkTarget, isDoneStatus, planProjects, renderProjectNote, renderProjectTemplate, sanitizeTitle, pickProjectNote, planTitle,
 	STATUS_ACTIVE, STATUS_DONE, repairProjectNoteTasks, type NoteSide, type ParentSide, type Snap, stripFileLinks,
@@ -94,9 +96,9 @@ export class ProjectSchemeService {
 			const fm = this.fm(n.path);
 			const tags = Array.isArray(fm?.tags) ? (fm!.tags as unknown[]).map(String) : [];
 			if (tags.includes('ticktick') || tags.includes('obsidian')) continue;
-			const body = await this.app.vault.read(f);
+			const body = await syncRead(this.app.vault, f);
 			const source = body.includes('Source:: TickTick') ? 'ticktick' : 'obsidian';
-			await this.app.fileManager.processFrontMatter(f, front => {
+			await commitFrontMatter(this.app, f, front => {
 				const cur = Array.isArray(front.tags) ? front.tags.map(String) : [];
 				if (!cur.includes('ticktick') && !cur.includes('obsidian')) front.tags = [...cur, source];
 			});
@@ -118,7 +120,7 @@ export class ProjectSchemeService {
 		if (tp) {
 			try {
 				const f = this.app.vault.getAbstractFileByPath(tp);
-				if (f instanceof TFile) return renderProjectTemplate(await this.app.vault.read(f), o);
+				if (f instanceof TFile) return renderProjectTemplate(await syncRead(this.app.vault, f), o);
 				log.warn(`ProjectScheme: template not found: ${tp}; using built-in template`);
 			} catch (e) { log.warn('ProjectScheme: template failed; using built-in template', e); }
 		}
@@ -170,6 +172,7 @@ export class ProjectSchemeService {
 						const f = this.app.vault.getAbstractFileByPath(n.path);
 						const dest = `${n.path.slice(0, n.path.lastIndexOf('/') + 1)}${plan.title}.md`;
 						if (f instanceof TFile && !this.app.vault.getAbstractFileByPath(dest)) {
+							traceWrite(this.app, 'ProjectSchemeService', n.path, 'renameFile', { to: dest, reason: 'title' });
 							await this.app.fileManager.renameFile(f, dest);
 							n.path = dest; n.title = plan.title; this.parents.set(t.id, dest);
 						}
@@ -194,7 +197,7 @@ export class ProjectSchemeService {
 					} as unknown as ITask);
 					if (!created) continue;
 					const f = this.app.vault.getAbstractFileByPath(a.note.path);
-					if (f instanceof TFile) await this.app.fileManager.processFrontMatter(f, fm => {
+					if (f instanceof TFile) await commitFrontMatter(this.app, f, fm => {
 						fm.ticktick_id = created.id;
 						const tags = Array.isArray(fm.tags) ? fm.tags.map(String) : [];
 						if (!tags.includes('obsidian') && !tags.includes('ticktick')) fm.tags = [...tags, 'obsidian'];
@@ -210,7 +213,11 @@ export class ProjectSchemeService {
 					if (existing) {
 						if (!this.app.vault.getAbstractFileByPath(this.folder())) await this.app.vault.createFolder(this.folder());
 						let at = existing.path;
-						if (!this.app.vault.getAbstractFileByPath(path)) { await this.app.vault.rename(existing, path); at = path; }
+						if (!this.app.vault.getAbstractFileByPath(path)) {
+							traceWrite(this.app, 'ProjectSchemeService', existing.path, 'vault.rename', { to: path, reason: 'adopt' });
+							await this.app.vault.rename(existing, path);
+							at = path;
+						}
 						log.info(`ProjectScheme: adopted existing project note ${existing.path} -> ${at}`);
 						this.parents.set(a.parent.id, at);
 						continue;
@@ -225,7 +232,7 @@ export class ProjectSchemeService {
 					snap[a.id] = { noteDone: a.done, ttDone: a.done };
 				} else if (a.type === 'setNoteDone') {
 					const f = this.app.vault.getAbstractFileByPath(a.path);
-					if (f instanceof TFile) await this.app.fileManager.processFrontMatter(f, fm => { fm.status = a.done ? STATUS_DONE : STATUS_ACTIVE; });
+					if (f instanceof TFile) await commitFrontMatter(this.app, f, fm => { fm.status = a.done ? STATUS_DONE : STATUS_ACTIVE; });
 					const id = [...this.parents].find(([, p]) => p === a.path)?.[0];
 					if (id) snap[id] = { noteDone: a.done, ttDone: a.done };
 				}

@@ -86,6 +86,8 @@ export interface ITickTickSyncSettings {
 
 
 	debugMode: boolean;
+	/** Log every note write and update decision. Default off. Reload the plugin after turning it on. */
+	debugWriteTrace: boolean;
 	logLevel: string;
 	/** Hold a sync's deletions when they exceed the count and percent, or when one side looks empty. */
 	massDeleteGuardEnabled: boolean;
@@ -125,6 +127,7 @@ export const DEFAULT_SETTINGS: ITickTickSyncSettings = {
 	enableFullVaultSync: false,
 	tagAndOr: 1,
 	debugMode: false,
+	debugWriteTrace: false,
 	logLevel: 'info',
 	massDeleteGuardEnabled: true,
 	massDeleteTaskThreshold: 10,
