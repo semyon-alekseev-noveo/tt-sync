@@ -8,6 +8,7 @@ import type TickTickSync from '@/main';
 import { getSettings } from '@/settings';
 import { isPathInPushScope } from '@/syncScope';
 import { createActiveFilePushScheduler, planActiveFilePush } from '@/services/activeFilePush';
+import { noteEditorActivity } from '@/services/editorActivity';
 import log from '@/utils/logger';
 
 export class EventHandlerService {
@@ -109,6 +110,7 @@ export class EventHandlerService {
 			this.app.workspace.on('editor-change', (_editor, info) => {
 				const filepath = info?.file?.path;
 				if (!filepath || !getSettings().token) return;
+				noteEditorActivity(filepath);
 				this.activeFilePush.notify(filepath);
 			}),
 		);

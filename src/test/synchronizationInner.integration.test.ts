@@ -13,6 +13,8 @@ import { TaskRepository } from '@/repositories/TaskRepository';
 import { TaskParser } from '@/taskParser';
 import { DEFAULT_SETTINGS, getSettings, updateSettings } from '@/settings';
 import { upsertCommentMap, listCommentMapsForTask, commentMapId } from '@/db/taskCommentMaps';
+import { commentFingerprint } from '@/abyssFormat';
+import { FileOperation } from '@/fileOperation';
 import { lastSyncPerf } from '@/sync/perf';
 
 vi.mock('@/utils/logger', () => ({
@@ -434,4 +436,145 @@ describe('synchronizationInner integration', () => {
 		expect(perf?.counts.httpByEndpoint.getTaskById ?? 0).toBe(0);
 		expect(reads).toBe(1);
 	});
+
+	function vaultWriteCount(world: World): { count: () => number } {
+		let n = 0;
+		const vault = (world.service.plugin as { app: { vault: { process: (...a: unknown[]) => Promise<unknown>; modify: (...a: unknown[]) => Promise<unknown> } } }).app.vault;
+		const process = vault.process.bind(vault);
+		const modify = vault.modify.bind(vault);
+		vault.process = async (...args: unknown[]) => { n++; return process(...args); };
+		vault.modify = async (...args: unknown[]) => { n++; return modify(...args); };
+		return { count: () => n };
+	}
+
+	it('TP-IDLE-ZERO a quiet sync performs zero vault writes', async () => {
+		const world = await makeWorld();
+		const id = 'aaaaaaaaaaaaaaaaaaaaaaaa';
+		putFile(world, 'notes/quiet.md', `- [ ] same title %%[ticktick_id:: ${id}]%%\n`, 0);
+		world.metadata['notes/quiet.md'] = { TickTickTasks: [{ taskId: id }], defaultProjectId: 'proj-1' };
+		await db.tasks.put({
+			localId: `tt:${id}`,
+			taskId: id,
+			task: {
+				id, projectId: 'proj-1', title: 'same title', content: '', desc: '', status: 0,
+				modifiedTime: '2026-10-18T00:00:00.000+0000', tags: [], commentCount: 0,
+			} as never,
+			updatedAt: 1000,
+			lastVaultSync: 5000,
+			file: 'notes/quiet.md',
+			source: 'ticktick',
+			deleted: false,
+		});
+		const writes = vaultWriteCount(world);
+		const result = await world.service.synchronizationInner(false, 'manual');
+		expect(result.ok).toBe(true);
+		expect(world.writes).toEqual([]);
+		expect(writes.count()).toBe(0);
+		expect(world.api.getTaskById).not.toHaveBeenCalled();
+		expect(world.api.getTaskComments).not.toHaveBeenCalled();
+	});
+
+	it('TP-NO-SELF-REPUSH does not rescan a file the plugin just wrote', async () => {
+		const world = await makeWorld();
+		putFile(world, 'notes/wrote.md', `- [ ] vault title %%[ticktick_id:: ${TASK}]%%\n`, 5_000);
+		world.metadata['notes/wrote.md'] = { TickTickTasks: [{ taskId: TASK }], defaultProjectId: 'proj-1' };
+		await db.tasks.put({
+			localId: `tt:${TASK}`,
+			taskId: TASK,
+			task: {
+				id: TASK, projectId: 'proj-1', title: 'ticktick title', content: '', desc: '', status: 0,
+				modifiedTime: '2026-10-18T00:00:00.000+0000', tags: [],
+			} as never,
+			updatedAt: 1000,
+			lastVaultSync: 5000,
+			file: 'notes/wrote.md',
+			source: 'ticktick',
+			deleted: false,
+		});
+		const plugin = world.service.plugin as {
+			fileOperation: { synchronizeToVault: (...args: unknown[]) => Promise<unknown> };
+			taskModificationDetector: { checkFileForModifications: ReturnType<typeof vi.fn> };
+		};
+		plugin.fileOperation.synchronizeToVault = vi.fn(async (path: unknown, tasks: unknown, updating: unknown) => {
+			world.writes.push({ path: String(path), tasks: tasks as { id?: string }[], updating: Boolean(updating) });
+			const row = world.files.get(String(path));
+			if (row) row.file.stat.mtime = Date.now();
+			return true;
+		});
+		const first = await world.service.synchronizationInner(false, 'manual');
+		expect(first.ok).toBe(true);
+		expect(world.writes.some(w => w.path === 'notes/wrote.md')).toBe(true);
+		plugin.taskModificationDetector.checkFileForModifications.mockClear();
+		const second = await world.service.synchronizationInner(false, 'manual');
+		expect(second.ok).toBe(true);
+		// pushLocalEditsFirst calls with the path only. syncFiles still walks registered notes.
+		const pushCalls = plugin.taskModificationDetector.checkFileForModifications.mock.calls
+			.filter((call: unknown[]) => call.length === 1);
+		expect(pushCalls).toEqual([]);
+	});
+
+	it('TP-COMMENT-TT-DELETE removes a TickTick-deleted comment and the next sync writes nothing', async () => {
+		const world = await makeWorld();
+		const plugin = world.service.plugin as {
+			app: unknown;
+			lastLines?: Map<string, number>;
+			fileOperation: unknown;
+			fileTaskQueries: { filepathHasDefaultProjectID?: () => Promise<boolean> };
+		};
+		plugin.lastLines = new Map();
+		plugin.fileTaskQueries.filepathHasDefaultProjectID = async () => true;
+		const tagged = plugin as { tagService?: Record<string, unknown> };
+		tagged.tagService = {
+			...(tagged.tagService ?? {}),
+			resolveHierarchicalLabel: () => null,
+			getLabel: (name: string) => name,
+			getParent: () => null,
+			isKnownTag: () => true,
+			resolveToName: (raw: string) => raw,
+			addTag: async () => undefined,
+		};
+		plugin.fileOperation = new FileOperation(plugin.app as never, plugin as never);
+		const body = '2026-10-20 12:00: deleted-in-ticktick';
+		const text = `- [ ] same title %%[ticktick_id:: ${TASK}]%%\n\t- ${body}\n`;
+		putFile(world, 'notes/a.md', text, 0);
+		world.metadata['notes/a.md'] = { TickTickTasks: [{ taskId: TASK }], defaultProjectId: 'proj-1' };
+		await upsertCommentMap({
+			id: commentMapId(TASK, commentFingerprint(body)),
+			taskId: TASK,
+			projectId: 'proj-1',
+			fingerprint: commentFingerprint(body),
+			ticktickCommentId: 'c-old',
+			body,
+		});
+		await db.tasks.put({
+			localId: `tt:${TASK}`,
+			taskId: TASK,
+			task: {
+				id: TASK, projectId: 'proj-1', title: 'same title', content: '', desc: '', status: 0,
+				modifiedTime: '2026-10-18T00:00:00.000+0000', tags: [], commentCount: 0,
+			} as never,
+			updatedAt: 1000,
+			lastVaultSync: 5000,
+			file: 'notes/a.md',
+			source: 'ticktick',
+			deleted: false,
+		});
+		world.api.getTaskComments.mockResolvedValue([]);
+		const writes = vaultWriteCount(world);
+		const first = await world.service.synchronizationInner(false, 'manual');
+		expect(first.ok).toBe(true);
+		const after = world.files.get('notes/a.md')?.text ?? '';
+		if (after.includes('deleted-in-ticktick')) {
+			const log = (await import('@/utils/logger')).default as { error: { mock: { calls: unknown[] } } };
+			throw new Error(`writes=${writes.count()} err=${JSON.stringify(log.error.mock.calls).slice(0, 2500)}`);
+		}
+		expect(after).not.toContain('deleted-in-ticktick');
+		expect(writes.count()).toBeGreaterThan(0);
+		const afterFirst = writes.count();
+		world.api.getTaskComments.mockClear();
+		const second = await world.service.synchronizationInner(false, 'manual');
+		expect(second.ok).toBe(true);
+		expect(writes.count()).toBe(afterFirst);
+		expect(world.api.getTaskComments).not.toHaveBeenCalled();
+	}, 20_000);
 });

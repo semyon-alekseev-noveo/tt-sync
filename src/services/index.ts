@@ -135,7 +135,6 @@ export class TickTickService {
 			catch (e) { log.warn('pre-pull push failed', path, e); }
 			try { await this.pushSubtaskOrder(path); } catch (e) { log.warn('subtask order push failed', path, e); }
 		}
-		await db.meta.update('sync', { lastVaultPushWallMs: Date.now() });
 	}
 
 	/** Obsidian -> TickTick: sibling line order under a parent becomes child sortOrder. */
@@ -319,6 +318,8 @@ export class TickTickService {
 				ui.setFullStep('Syncing project notes…');
 				await this.syncFiles(false);
 			});
+			// After every vault write in this run, so a file we just wrote is not a local edit next time.
+			await db.meta.update('sync', { lastVaultPushWallMs: Date.now() });
 		} catch (error) {
 			syncOk = false;
 			errorMessage = error instanceof Error ? error.message : String(error);

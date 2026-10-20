@@ -31,6 +31,7 @@ import type TickTickSync from '@/main';
 import type { ITask } from '@/api/types/Task';
 import type { LocalTask } from '@/db/schema';
 import { NewFileMap, type ITaskItemRecord, type ITaskRecord } from '@/services/NewFileMap';
+import { commitVaultText, editorsForFile } from '@/services/vaultWrite';
 import { FolderSyncService } from '@/services/FolderSyncService';
 import { getSettings } from '@/settings';
 import { getAllProjects } from '@/db/projects';
@@ -257,6 +258,7 @@ export class TaskModificationDetector {
 		fileMap: NewFileMap,
 		pendingDeletions?: PendingTickTickDeletion[],
 		pushLimit?: TaskSyncLimitOptions,
+		options?: { identifiedOnly?: boolean },
 	): Promise<boolean> {
 		// Outside syncScopeFolders: no update, no completion, no deletion push.
 		if (!isPathInPushScope(filepath)) {
@@ -284,7 +286,7 @@ export class TaskModificationDetector {
 						}
 						if (isAbyssNoteLine(lineText, ancestorLine)) {
 							return await this.checkLineForModifications(
-								filepath, ancestorLine, i, fileMap, pendingDeletions, pushLimit,
+								filepath, ancestorLine, i, fileMap, pendingDeletions, pushLimit, options,
 							);
 						}
 						break;
@@ -363,7 +365,8 @@ export class TaskModificationDetector {
 				if (lineTask && await this.skipPushWhenTickTickRenamedVaultLine(lineTask, savedTask, taskId, filepath!)) {
 					return false;
 				}
-				if (useAbyssCommentsApi() && taskRecord.taskLines?.length) {
+				// The 5s open-note push (identifiedOnly) calls the Comments API only when a comment line changed the hash.
+				if (useAbyssCommentsApi() && taskRecord.taskLines?.length && !options?.identifiedOnly) {
 					const threads = extractAbyssCommentThreads(taskRecord.taskLines);
 					if (threads.length) {
 						try {
@@ -452,13 +455,17 @@ export class TaskModificationDetector {
 			if (options?.identifiedOnly && !this.plugin.taskParser?.hasTickTickId(line)) continue;
 			if (this.plugin.taskParser?.isMarkdownTask(line)) {
 				try {
-					await this.checkLineForModifications(filepath, line, i, fileMap, pendingDeletions, pushLimit);
+					await this.checkLineForModifications(filepath, line, i, fileMap, pendingDeletions, pushLimit, options);
 				} catch (error) {
 					log.error('Error checking task modification:', error);
 				}
 			}
 		}
-		await this.sweepAbyssCommentsInFile(filepath, fileMap, pushLimit);
+		// The debounced open-note push must not sweep every task. A changed comment line
+		// already reaches the Comments API through that line's hash.
+		if (!options?.identifiedOnly) {
+			await this.sweepAbyssCommentsInFile(filepath, fileMap, pushLimit);
+		}
 	}
 
 	/** BUG-COMMENT-NO-PUSH: push Comments API for every synced task in the file, not only lines that triggered hash diff. */
@@ -972,11 +979,16 @@ export class TaskModificationDetector {
 
 				if (file && lineNumber !== undefined) {
 					try {
-						const fileContent = await this.app.vault.read(file);
+						const open = editorsForFile(this.app, file.path);
+						const fileContent = open[0] ? open[0].getValue() : await this.app.vault.read(file);
 						const lines = fileContent.split('\n');
-						const updatedItemContent = `${lineText} %%${OidHexString}%%`;
-						lines[lineNumber] = updatedItemContent;
-						await this.app.vault.modify(file, lines.join('\n'));
+						if (lines[lineNumber] !== lineText) {
+							log.info(`Deferring item id write in ${filepath}: the line changed`);
+						} else {
+							const updated = lines.slice();
+							updated[lineNumber] = `${lineText} %%${OidHexString}%%`;
+							await commitVaultText(this.app, file, fileContent, updated.join('\n'));
+						}
 					} catch (error) {
 						log.error(`Error updating item in file ${filepath}:`, error);
 					}
@@ -1031,15 +1043,24 @@ export class TaskModificationDetector {
 			if (editor && cursor) {
 				const from = { line: cursor.line, ch: 0 };
 				const endLine = cursor.line + noteLineCount;
-				const to = noteLineCount > 0
-					? { line: endLine, ch: editor.getLine(endLine).length }
-					: { line: cursor.line, ch: lineTxt.length };
-				editor.replaceRange(decoratedText, from, to);
+				const planned = [lineTxt, ...(taskRec.taskLines ?? [])];
+				const stillThere = planned.every((text, i) => editor.getLine(cursor.line + i) === text);
+				if (!stillThere) {
+					log.info('Deferring new-task line write: the open line changed');
+				} else {
+					const to = noteLineCount > 0
+						? { line: endLine, ch: editor.getLine(endLine).length }
+						: { line: cursor.line, ch: lineTxt.length };
+					const change = { from, to, text: decoratedText };
+					if (typeof editor.transaction === 'function') editor.transaction({ changes: [change] });
+					else editor.replaceRange(decoratedText, from, to);
+				}
 			} else if (line !== null) {
-				fileMap.replaceLines(line, 1 + noteLineCount, decoratedText);
 				const file = this.app.vault.getAbstractFileByPath(fileMap.getFilePath());
 				if (file instanceof TFile) {
-					await this.app.vault.modify(file, fileMap.getFileLines());
+					const snapshot = fileMap.getFileLines();
+					fileMap.replaceLines(line, 1 + noteLineCount, decoratedText);
+					await commitVaultText(this.app, file, snapshot, fileMap.getFileLines());
 				}
 			}
 		} catch (error) {

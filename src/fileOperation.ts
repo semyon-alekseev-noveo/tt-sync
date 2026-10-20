@@ -4,9 +4,11 @@ import TickTickSync from '@/main';
 import type { ITask } from './api/types/Task';
 import { getSettings } from '@/settings';
 import { syncAbyssCommentsToTickTick, useAbyssCommentsApi } from '@/abyssCommentSync';
-import { stripLegacyCommentsBlock } from '@/abyssFormat';
+import { stripLegacyCommentsBlock, type TickTickCommentSync } from '@/abyssFormat';
 import type { ITaskComment } from '@/api/types/TaskComment';
+import { listCommentMapsForTask } from '@/db/taskCommentMaps';
 import { NewFileMap } from '@/services/NewFileMap';
+import { commitVaultText } from '@/services/vaultWrite';
 import log from '@/utils/logger';
 import type { DeletionItem } from './modals/TaskDeletionModal';
 import { TaskDeletionModal } from './modals/TaskDeletionModal';
@@ -27,16 +29,13 @@ export class FileOperation {
 
 
 	/**
-	 * Read file content, preferring the editor buffer when the file is active.
-	 * This prevents sync from reading stale filesystem data after editor changes.
+	 * Read file content from the editor only when that editor is showing this file.
+	 * A hover or popout leaf can be the active editor for a different path; its buffer is not this file.
 	 */
 	async readFileContent(file: TFile): Promise<string> {
-		const activeFile = this.app.workspace.getActiveFile();
-		if (activeFile?.path === file.path) {
-			const editor = this.app.workspace.activeEditor?.editor;
-			if (editor) {
-				return editor.getValue();
-			}
+		const active = this.app.workspace.activeEditor;
+		if (active?.editor && active.file?.path === file.path) {
+			return active.editor.getValue();
 		}
 		return await this.app.vault.read(file);
 	}
@@ -346,15 +345,20 @@ export class FileOperation {
 		log.info(`Deleting ${tasks.length} tasks from file: `, filePath.path);
 
 		const fileMap: NewFileMap = new NewFileMap(this.app, this.plugin, filePath);
-		await fileMap.init();
+		const snapshot = await this.readFileContent(filePath);
+		await fileMap.init(snapshot);
 
 		const oldContent = fileMap.getFileLines();
 		const deletedIds = fileMap.deleteTasks(tasks.map(t => (t.id ?? '')));
 		const newContent = fileMap.getFileLines();
 
 		if (oldContent !== newContent) {
-			await this.app.vault.modify(filePath, newContent);
-			log.info(`File ${filePath.path} modified with deletions.`);
+			const committed = await commitVaultText(this.app, filePath, oldContent, newContent);
+			if (committed.status === 'deferred') {
+				log.info(`Deletion write deferred for ${filePath.path}`);
+			} else {
+				log.info(`File ${filePath.path} modified with deletions.`);
+			}
 		} else {
 			log.warn(`No changes made to file ${filePath.path} during deletion attempt. Could not find tasks in file.`);
 		}
@@ -476,16 +480,21 @@ export class FileOperation {
 
 	private async syncTasks(file: TFile, tasks: ITask[], bUpdating: boolean): Promise<boolean> {
 		try {
-			const newData = await this.persistToFile(tasks, file, bUpdating);
-			const currentData = await this.readFileContent(file);
-			if (newData === currentData) {
+			// Network first. The write snapshot is taken after these calls return.
+			await this.preparePersistNetwork(tasks, file);
+			const snapshot = await this.readFileContent(file);
+			const built = await this.persistToFile(tasks, file, bUpdating, snapshot);
+			if (built.text === snapshot) {
 				log.debug(`No changes to write for ${file.path}, skipping write`);
+				await built.afterWrite();
 				return true;
 			}
-			await this.app.vault.process(file, (data) => {
-				data = newData;
-				return data;
-			});
+			const committed = await commitVaultText(this.app, file, snapshot, built.text);
+			if (committed.status === 'deferred' || committed.skipped > 0) {
+				log.info(`Vault write deferred for ${file.path}`, committed);
+				return true;
+			}
+			await built.afterWrite();
 			return true;
 		} catch (error) {
 			log.error(`Could not ${bUpdating ? 'update' : 'add'} Tasks to file ${file.path} \n Error: ${String(error)}`);
@@ -493,15 +502,55 @@ export class FileOperation {
 		}
 	}
 
-	private async persistToFile(tasks: ITask[], file: TFile, bUpdating: boolean): Promise<string> {
+	/** Comments API for every task in the group, before the note is read for writing. */
+	private async preparePersistNetwork(tasks: ITask[], file: TFile): Promise<void> {
+		if (!useAbyssCommentsApi() || !this.plugin.tickTickRestAPI) return;
+		const prep = new NewFileMap(this.app, this.plugin, file);
+		await prep.init();
+		for (const task of tasks) {
+			if (!task.id || !task.projectId) continue;
+			const rec = prep.getTaskRecord(task.id);
+			if (rec?.taskLines?.length) {
+				try {
+					await syncAbyssCommentsToTickTick(
+						this.plugin.tickTickRestAPI,
+						task.id,
+						task.projectId,
+						rec.taskLines,
+						task.content,
+					);
+				} catch (e) {
+					log.warn('Abyss comment push before vault write failed', task.id, e);
+				}
+			}
+			const comments = await this.plugin.tickTickRestAPI.getTaskComments(task.projectId, task.id) ?? [];
+			Object.defineProperty(task, '_apiComments', { value: comments, enumerable: false, configurable: true });
+			const maps = await listCommentMapsForTask(task.id);
+			const hint: TickTickCommentSync = {
+				knownBodies: maps.map(m => m.body),
+				apiBodies: comments.map(c => c.title ?? ''),
+			};
+			Object.defineProperty(task, '__ticktickComments', { value: hint, enumerable: false, configurable: true });
+			task.content = stripLegacyCommentsBlock(task.content ?? '');
+			task.desc = stripLegacyCommentsBlock(task.desc ?? '');
+		}
+	}
+
+	private async persistToFile(
+		tasks: ITask[],
+		file: TFile,
+		bUpdating: boolean,
+		snapshot: string,
+	): Promise<{ text: string; afterWrite: () => Promise<void> }> {
 		// Go through the tasks.
 		// For every task
 		// 	if it has a parent, add it after the parent.
 		//  else add at the the insertion point in lines.
 		log.debug('Processing File: ', file.path);
 		const fileMap = new NewFileMap(this.app, this.plugin, file);
-		await fileMap.init();
+		await fileMap.init(snapshot);
 		let bTaskMove: boolean = false;
+		const after: Array<() => Promise<void>> = [];
 
 
 		// log.debug('================');
@@ -523,27 +572,6 @@ export class FileOperation {
 			//Did this task's line actually make it into the file? Only then may we
 			//record a vault sync for it.
 			let bLinePersisted = true;
-
-			if (useAbyssCommentsApi() && task.id && task.projectId) {
-				const rec = fileMap.getTaskRecord(task.id);
-				if (rec?.taskLines?.length && this.plugin.tickTickRestAPI) {
-					try {
-						await syncAbyssCommentsToTickTick(
-							this.plugin.tickTickRestAPI,
-							task.id,
-							task.projectId,
-							rec.taskLines,
-							task.content,
-						);
-					} catch (e) {
-						log.warn('Abyss comment push before vault write failed', task.id, e);
-					}
-				}
-				const comments = await this.plugin.tickTickRestAPI?.getTaskComments(task.projectId, task.id) ?? [];
-				Object.defineProperty(task, '_apiComments', { value: comments, enumerable: false, configurable: true });
-				task.content = stripLegacyCommentsBlock(task.content ?? '');
-				task.desc = stripLegacyCommentsBlock(task.desc ?? '');
-			}
 
 			lineText = await this.plugin.taskParser?.convertTaskToLine(task, numParentTabs);
 			//Tired of seeing duplicates because of Sync conflicts.
@@ -631,27 +659,39 @@ export class FileOperation {
 				task.tags = [...(task.tags || []), markerName()];
 			}
 
+			const persisted = bLinePersisted;
+			const hash = lineHash;
+			const pathForTask = filePath;
+			const moved = bTaskMove;
 			if (!bUpdating) {
-				//we're updating the task to get the right OBS URL in there.
-				let addedTask = (await this.plugin.tickTickRestAPI?.updateTask(task))!;
-				addedTask.lineHash = lineHash;
-				await this.plugin.taskRepository.upsertTask(addedTask, file.path, Date.now());
-			} else {
-				if (!bTaskMove) {
-					task.lineHash = lineHash;
-					await this.recordVaultSync(task, file, bLinePersisted);
-				} else {
-					task.lineHash = lineHash;
+				after.push(async () => {
+					// OBS URL is pushed after the note write, so the HTTP call is not inside the write window.
 					let addedTask = (await this.plugin.tickTickRestAPI?.updateTask(task))!;
-					await this.plugin.taskRepository.upsertTask(addedTask, filePath, Date.now());
-				}
-
+					addedTask.lineHash = hash;
+					await this.plugin.taskRepository.upsertTask(addedTask, file.path, Date.now());
+				});
+			} else if (!moved) {
+				after.push(async () => {
+					task.lineHash = hash;
+					await this.recordVaultSync(task, file, persisted);
+				});
+			} else {
+				after.push(async () => {
+					task.lineHash = hash;
+					let addedTask = (await this.plugin.tickTickRestAPI?.updateTask(task))!;
+					await this.plugin.taskRepository.upsertTask(addedTask, pathForTask, Date.now());
+				});
 			}
 		}
 
 		const resultLines = fileMap.getFileLines();
 		this.plugin.lastLines.set(file.path, resultLines.length);
-		return resultLines;
+		return {
+			text: resultLines,
+			afterWrite: async () => {
+				for (const job of after) await job();
+			},
+		};
 	}
 
 	/**
@@ -711,14 +751,12 @@ export class FileOperation {
 
 		const destFileMap = new NewFileMap(this.app, this.plugin, tFilePathForProject);
 		await destFileMap.init();
+		const destSnapshot = destFileMap.getFileLines();
 		//insert into the new file.
 		log.debug('Adding Task: ', newTask.id, newTask.title, ' to new file: ', destFileMap.getFilePath());
 		destFileMap.addTask(newTask, lineText);
 		const newData = destFileMap.getFileLines();
-		await this.app.vault.process(tFilePathForProject, (data) => {
-			data = newData;
-			return data;
-		});
+		await commitVaultText(this.app, tFilePathForProject, destSnapshot, newData);
 
 		//task is updated to cache in the caller....!
 

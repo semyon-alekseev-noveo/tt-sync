@@ -269,6 +269,30 @@ Automated: `bugCommentNoPush.test.ts`, `synchronizationInner.integration.test.ts
 |----|----------------|----------|
 | TP-BUG-COMMENT-NO-PUSH | fail | **2.0.51** Thinkpad-tts-test: `00 Inbox/abyss-active.md` `6ad6f43a…`; journal `sync-mvgaaegu` / `sync-mvg8smb7` **tt→obs** removed `gate-251-l3b-agent` / `gate-251-retest-b`; TickTick Comments empty (MCP). Plugin version via eval `2.0.51`. |
 
+## Release 2.0.52 — vault comments survive a line rewrite
+
+Tag **2.0.52** (`b974d85`) shipped on `abyss-mapping` without this section. The build keeps a vault comment that is not inside a synced `Comments:` block when the task line is rewritten, and `persistToFile` pushes those comments to the Comments API before the write. It does not remove a comment that was deleted in TickTick; that case is **TP-COMMENT-TT-DELETE** in the hotfix section below.
+
+Preconditions: `syncAbyssCommentsViaApi` on, in-scope note, task already has `ticktick_id`. Install **2.0.52** (or a later build that still contains this keep-and-push behavior).
+
+### TP-252-KEEP-ON-REWRITE — a title change in TickTick leaves the vault comment in place
+
+1. On a synced task, add a child comment bullet. Run **Synchronize** once.
+2. Change only the task title in TickTick. Run **Synchronize** again.
+
+Expected: the comment bullet is still under the task. The title matches TickTick.
+
+### TP-252-PUSH-BEFORE-REWRITE — the same bullet reaches TickTick Comments
+
+Same steps as **TP-BUG-COMMENT-NO-PUSH** / **NOTE-L3b**, on a **2.0.52** build: child comment, title unchanged, one **Synchronize**.
+
+Expected: the text is in the TickTick Comments panel, and the bullet is still in the note.
+
+| ID | Pilot status | Evidence |
+|----|----------------|----------|
+| TP-252-KEEP-ON-REWRITE | not run | |
+| TP-252-PUSH-BEFORE-REWRITE | not run | NOTE-L3b was not re-run on **2.0.52**. The **2.0.51** fail above is not a 2.0.52 result. |
+
 ## Delta API pilot (`docs/TICKTICK_DELTA_API.md` §3.5)
 
 Run **before** replacing `modifiedTime` echo suppression with `etag` or dropping per-task `getTaskById` on idle sync. Needs a logged-in session (MCP or local `batch/check` capture). Record raw `update[]` fields (`modifiedTime`, `etag`, `commentCount`) in the Results table.
@@ -324,11 +348,80 @@ Expected: `getTaskById` is 0 and `getTaskComments` is 0 when no task's `commentC
 
 ## After §3.5 (`docs/TICKTICK_DELTA_API.md` §3.2)
 
-Do not start this until the four `TP-DELTA-*` rows above have evidence. `syncTaskBean.add` is already merged in `getUpdatedTasks`.
+Items 1 and 2 shipped in **2.0.53** from the §3.2 defaults, before the §3.5 pilot. Treating them as future work is outdated. The four `TP-DELTA-*` rows above are still **not run**, and `skipPushWhenTickTickRenamedVaultLine` is already off in **2.0.53** without that evidence. Items 3–5 are not started. `syncTaskBean.add` is already merged in `getUpdatedTasks`.
 
-1. **Echo.** In `pull.ts` a delta row is skipped only when `rt.etag === local.task.etag`. `skipPushWhenTickTickRenamedVaultLine` no longer calls `getTaskById`. Still open: persist `id2etag` from `batch/task` without the follow-up `getTaskById` inside `TicktickRestAPI.updateTask`.
-2. **Idle vault.** `vaultLineBehindTask` compares the line to Dexie. `getTaskComments` runs only when `commentCount` is a number and differs from the vault thread count. A manual Repair command that calls `getTaskById` is not added yet.
-3. **Comments.** If §3.5 shows a new `etag` or `commentCount` (or the task in `update[]`), fetch comments only for those tasks plus vault lines that changed. If a TickTick-only comment touches none of those, daily reconcile is the only pull (up to 24 h) — confirm that delay before coding it.
-4. **Closed and trash.** If complete/delete already appear in `update[]` / `delete[]`, leave `project/all/closed` and trash pagination to the daily job. If they do not, those calls stay on every sync.
-5. **Daily job.** Once a day, not on startup: closed window, trash, comment backfill from step 3, and one `batch/check/0` title/content/status compare instead of `getTaskById` per task.
-6. **Tests.** `TP-IDLE-ZERO` (`getTaskById = 0`, `getTaskComments = 0`), `TP1-QUIET-TITLE-ETAG`, `TP-ECHO-ETAG`, `TP-COMMENT-COUNT`, `TP-DAILY-RECONCILE`. All **not run** until that code exists.
+1. **Echo. Done in 2.0.53.** `pull.ts` skips a delta row only when `rt.etag === local.task.etag`. `skipPushWhenTickTickRenamedVaultLine` no longer calls `getTaskById`. Still open: persist `id2etag` from `batch/task` without the follow-up `getTaskById` inside `TicktickRestAPI.updateTask`.
+2. **Idle vault. Done in 2.0.53.** `vaultLineBehindTask` compares the line to Dexie. `getTaskComments` runs only when `commentCount` is a number and differs from the vault thread count. A manual Repair command that calls `getTaskById` is not added. Pilot **TP-IDLE-ZERO** stays **not run** in the table above.
+3. **Comments. Not started.** A TickTick-only comment that changes neither `etag`, `commentCount`, nor `update[]` is not left to a daily reconcile. Confirm that delay on the §3.5 pilot before coding it.
+4. **Closed and trash. Not started.** `project/all/closed` and trash pagination are not a daily job.
+5. **Daily job. Not started.** Closed window, trash, comment backfill, and one `batch/check/0` compare are not implemented.
+6. **Tests.** `TP-IDLE-ZERO` and `TP-ECHO-ETAG` exist and pass in vitest. Their pilot status is **not run**. `TP1-QUIET-TITLE-ETAG`, `TP-COMMENT-COUNT`, and `TP-DAILY-RECONCILE` are not implemented.
+
+## Hotfix — open note must not be rewritten from a stale snapshot
+
+Branch `cursor/stale-editor-write-5809` into `abyss-mapping`. No version bump. Case **BUG-STALE-EDITOR-WRITE** in `ABYSS_FIRST_CASES.md` and `PO_STATUS.md`.
+
+What changed: Comments API work finishes before the note is read for writing. A closed file is written only when it still matches that read; otherwise the same line spans are applied once to the fresh text. An open file is patched with `editor.transaction` / `replaceRange` on the task lines that still match. Typing in the last two seconds defers the write. `readFileContent` uses the editor only when `activeEditor.file` is the target file. A comment deleted in TickTick is removed using `taskCommentMaps` from the previous sync. The 5-second open-note push does not sweep comments. `lastVaultPushWallMs` is set after the vault writes.
+
+Pilot vault only. None of these rows were run on a vault.
+
+### TP-EDITOR-TYPE-DURING-SYNC — typing during Synchronize stays in the editor
+
+1. Open a synced note. Start **Synchronize**.
+2. While it runs, type a new sentence on a line that is not the task line being updated, and keep typing for a couple of seconds.
+
+Expected: the sentence is still in the editor when the sync finishes. The task line is updated, or a notice says the open note will update when typing pauses. The journal `after` text for that file contains the sentence. The buffer is not cleared.
+
+### TP-EDITOR-TYPE-DURING-PUSH — typing during the 5-second push stays in the editor
+
+1. Open a synced note and edit a task line that already has `ticktick_id`.
+2. Wait for the 5-second push. During that push, type on another line.
+
+Expected: same as **TP-EDITOR-TYPE-DURING-SYNC**. The push does not call the Comments API unless a comment line changed.
+
+### TP-EDITOR-OTHER-LEAF — another leaf's buffer is not written into this note
+
+1. Leave note A open. Focus a hover editor or another leaf on note B.
+2. Run **Synchronize** so it rewrites A.
+
+Expected: A does not gain B's text. An empty buffer is never saved into A.
+
+### TP-COMMENT-TT-DELETE — a comment deleted in TickTick leaves the note
+
+1. On a synced task, confirm a comment exists both in the note and in TickTick Comments.
+2. Delete that comment in TickTick. Run **Synchronize**.
+3. Run **Synchronize** again without editing the note.
+
+Expected: after the first sync the comment bullet is gone. The second sync does not rewrite the note (`tt→obs` count 0 for that file) and does not call `getTaskComments` for that task.
+
+### TP-NO-SELF-REPUSH — a file the plugin just wrote is not a local edit
+
+1. Run **Synchronize** so it rewrites a note. Do not edit that note.
+2. Run **Synchronize** again.
+
+Expected: the note is not scanned by the pre-pull local push. The comment sweep does not run for it.
+
+### TP-STALE-FILE-WRITE — unit
+
+Automated in `src/test/staleFileWrite.test.ts`. The file or the editor changes between the snapshot and the write. The write must not replace that newer text with text built from the snapshot. Also covers the other-leaf read and the two-second typing defer.
+
+### Regressions
+
+These already have automated tests. Re-run them with the suite. Do not mark a live row from an earlier section as passed because this suite passed.
+
+| ID | What must still hold |
+|----|----------------------|
+| TP-IDLE-ZERO | A quiet sync performs no vault write and does not probe each task. |
+| TP-BUG-COMMENT-NO-PUSH | A vault comment with no previous map entry is still kept and pushed. |
+| BUG-PULL-COMMENT-STALE | A TickTick comment the note lacks is still written into the note. |
+| TP1-DEBOUNCE | The open note still pushes about 5 seconds after the last keystroke. |
+| NOTE-L3b | A child comment still reaches TickTick Comments. Live status stays the **2.0.51** fail until someone re-runs it. |
+
+| ID | Pilot status | Evidence |
+|----|----------------|----------|
+| TP-EDITOR-TYPE-DURING-SYNC | not run | |
+| TP-EDITOR-TYPE-DURING-PUSH | not run | |
+| TP-EDITOR-OTHER-LEAF | not run | |
+| TP-COMMENT-TT-DELETE | not run | Automated: `abyssStep3.test.ts`, `synchronizationInner.integration.test.ts`. |
+| TP-NO-SELF-REPUSH | not run | Automated: `bugCommentNoPush.test.ts`, `synchronizationInner.integration.test.ts`. |
+| TP-STALE-FILE-WRITE | not run | Automated only: `staleFileWrite.test.ts`. No vault run. |

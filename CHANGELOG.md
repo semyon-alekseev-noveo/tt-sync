@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-20 11:10 UTC
+
+- Context: Open note editor was cleared or reverted while the file on disk stayed current (`BUG-STALE-EDITOR-WRITE`). A comment deleted in TickTick stayed in the note, so the stale write ran on every sync.
+- Target: No version bump. Network work finishes before the write snapshot. An open note is patched on matching task lines. A quiet second sync writes nothing.
+- Actions log: `commitVaultText` refuses a stale `vault.process` and uses `editor.transaction` on open files. `readFileContent` checks `activeEditor.file`. `mergeAbyssBlock` drops comments present in the previous `taskCommentMaps` and absent from the Comments API. The 5-second push skips the comment sweep. `lastVaultPushWallMs` is set after vault writes. Cases in `ABYSS_FIRST_CASES.md`. `TEST_PLAN.md` hotfix section, the missing **2.0.52** section, and **After §3.5** items 1–2 marked done in **2.0.53**.
+- Validation: `npx vitest run` → 81 files, **600 passed**; `npm run build` — this iteration. Pilot rows in the hotfix section are **not run**.
+- Problems: `TP-EDITOR-*`, `TP-COMMENT-TT-DELETE`, and `TP-NO-SELF-REPUSH` are not run on the pilot. `TP-DELTA-*` are still not run, while `skipPushWhenTickTickRenamedVaultLine` stays off.
+- To Be Done: Owner merges. Pilot the hotfix section. Do not tag from this branch.
+- References: `TEST_PLAN.md`, `PO_STATUS.md`, `ABYSS_FIRST_CASES.md`
+
 ### Iteration 2026-10-20 09:10 UTC
 
 - Context: Owner asked to release the idle-sync change.

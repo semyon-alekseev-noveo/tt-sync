@@ -33,7 +33,13 @@ Preconditions for every AF row: plugin `tickticksync-abyss`, manual sync, `fileL
 | PERF-INDEX | `idsPresentInVault` matches a per-file `String.includes` scan: first markdown file in vault order, empty ids ignored, text inside a fence counts, a duplicate id stays with the first file. A file written during the run is not answered from an older index. |
 | PERF-CACHE | In one sync, a file's text and its parsed task map are read once. A plugin write of that file drops both before the next read. |
 | PERF-COUNTERS | One sync records phase times and counters (HTTP by endpoint, 429, files read, files scanned, tasks checked, vault writes) and logs one `[perf]` line. |
-| TP-IDLE-ZERO | A quiet sync does not call `getTaskById`. `getTaskComments` runs only when `commentCount` differs from the vault comment threads. |
+| TP-IDLE-ZERO | A quiet sync does not call `getTaskById`. `getTaskComments` runs only when `commentCount` differs from the vault comment threads. A quiet sync also performs no vault write. |
+| TP-STALE-FILE-WRITE | A vault write planned from an earlier snapshot must not replace text that appeared in the file or the editor after that snapshot. An open note is patched on the task lines only, and only where those lines still match. Typing in the last two seconds defers the write. |
+| TP-EDITOR-OTHER-LEAF | The editor buffer is used only when that editor's file is the file being read. Another leaf's buffer is never written into the target note. |
+| TP-EDITOR-TYPE-DURING-SYNC | Typing in an open note during Synchronize stays in the editor. The task line updates, or the write waits until typing pauses. |
+| TP-EDITOR-TYPE-DURING-PUSH | Same as TP-EDITOR-TYPE-DURING-SYNC for the 5-second open-note push. |
+| TP-COMMENT-TT-DELETE | A comment removed in TickTick is removed from the note on the next sync, using the previous `taskCommentMaps` entry. The following sync does not write that note. |
+| TP-NO-SELF-REPUSH | A file the plugin just wrote is not treated as a local edit on the next sync. The 5-second open-note push does not call the Comments API when no comment line changed. |
 
 Unit tests cover parts of AF-1, AF-5, AF-8, comments, a failed pull, and PERF-INDEX / PERF-CACHE / PERF-COUNTERS. They do not replace the live gate.
 

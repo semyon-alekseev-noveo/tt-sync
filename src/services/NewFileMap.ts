@@ -1,7 +1,7 @@
 import { fencedLines } from '@/utils/vaultIdScan';
 import { activeZoneInsertLine } from '@/projectScheme';
 import { isDetached } from '@/detach';
-import { abyssRegionEnd, mergeAbyssBlock } from '@/abyssFormat';
+import { abyssRegionEnd, mergeAbyssBlock, type TickTickCommentSync } from '@/abyssFormat';
 import { App, type ListItemCache, TFile } from 'obsidian';
 import type { ITask } from '@/api/types/Task';
 import type TickTickSync from '@/main';
@@ -132,7 +132,13 @@ export class NewFileMap {
 
 		const linesToReplaceCount = oldContentEndLine - oldLineIdx + 1;
 		if (getSettings().abyssTasksFormat) {
-			taskLine = mergeAbyssBlock(taskLine, this.fileLines.slice(oldLineIdx + 1, oldContentEndLine + 1), (task as { __baseContent?: string }).__baseContent);
+			const hint = task as { __baseContent?: string; __ticktickComments?: TickTickCommentSync };
+			taskLine = mergeAbyssBlock(
+				taskLine,
+				this.fileLines.slice(oldLineIdx + 1, oldContentEndLine + 1),
+				hint.__baseContent,
+				hint.__ticktickComments,
+			);
 		}
 		const arTaskLines = taskLine.split('\n');
 		this.fileLines.splice(oldLineIdx, linesToReplaceCount, ...arTaskLines);
