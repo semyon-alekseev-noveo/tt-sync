@@ -153,9 +153,12 @@ Pilot status for each: **not run**.
 
 ## Results
 
+Release **2.0.48** (`8f4c524`, tag pushed 2026-10-20). Pilot plugin on `Thinkpad-tts-test` updated from `dist/` (manifest **2.0.48**). BRAT frozen version set to **2.0.48**. GitHub Actions **Release Obsidian plugin** publishes the zip when the tag workflow finishes.
+
 | ID | Pilot status | Evidence |
 |----|----------------|----------|
-| TP1-DEBOUNCE | not run | |
+| AUTO-GATE | pass (CI) | `npx vitest run` on **2.0.48** → 73 files, 569 passed. Targeted: `activeFilePush.test.ts`, `synchronizationInner.integration.test.ts`, `abyssCommentSync.test.ts`, `notesSmoke.test.ts` → 20 passed. |
+| TP1-DEBOUNCE | not run | Obsidian not running; CLI disabled (Settings → General → Advanced). |
 | TP1-ID-ONLY | not run | |
 | TP1-CARET-UNFINISHED | not run | |
 | TP1-DURING-SYNC | not run | |

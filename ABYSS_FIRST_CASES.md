@@ -58,10 +58,10 @@ Pass only with evidence: the note path, the `ticktick_id`, and either the journa
 
 | Date (UTC) | Vault | Build | Runner | Item | Result | Evidence |
 |------------|-------|-------|--------|------|--------|----------|
-| | `<pilot-vault>` | | | AF-5 | not run | |
-| | `<pilot-vault>` | | | NOTE-L3b | not run | |
-| | `<pilot-vault>` | | | DEL-1 | not run | |
-| | `<pilot-vault>` | | | DEL-3 | not run | |
+| 2026-10-20 | Thinkpad-tts-test | 2.0.48 | agent (no Obsidian) | AF-5 | not run | Release + vitest gate only; enable Obsidian CLI or run UI manually. |
+| 2026-10-20 | Thinkpad-tts-test | 2.0.48 | agent (no Obsidian) | NOTE-L3b | not run | MCP baseline: task `6ad5bb47…` has TT comments `comment-20-30`, `comment-20-31`; vault has four bullets — re-sync after gate session. |
+| 2026-10-20 | Thinkpad-tts-test | 2.0.48 | agent (no Obsidian) | DEL-1 | not run | |
+| 2026-10-20 | Thinkpad-tts-test | 2.0.48 | agent (no Obsidian) | DEL-3 | not run | |
 | | `<live-vault>` | | | Step 8 | not run | Blocked until the four rows above are pass. |
 
 This branch did not run the gate. Leave the result column as **not run** until you do.
