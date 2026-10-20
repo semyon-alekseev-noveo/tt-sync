@@ -8,7 +8,7 @@ Pilot means `<pilot-vault>`, manual **Synchronize**, plugin id `tickticksync-aby
 
 ## PR #1 — fail-closed sync, open-note push, comments
 
-Branch `cursor/dev-flow-reliability-816a`. Build under test is still **2.0.47** plus this branch (no version bump). Every row below: **pilot status: not run**.
+Branch `abyss-mapping` (PR #1 merged). Release build under test: **2.0.48** (tag on `tt-sync`). Manual rows below stay **not run** until executed on `<pilot-vault>` with that build installed.
 
 Preconditions unless a case says otherwise: logged in, `syncNotes` and `abyssTasksFormat` on, `syncAbyssCommentsViaApi` on, the note is inside `syncScopeFolders`, sync is manual.
 

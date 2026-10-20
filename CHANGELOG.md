@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-20 02:40 UTC
+
+- Context: Owner requested release **2.0.48** then pilot tests per `TEST_PLAN.md` / `ABYSS_FIRST_CASES.md`.
+- Target: Tag **2.0.48** on merged PR #1 (`fail-closed` pull, debounced open-file push, child-comment push, integration test); run automated gate and deploy build to pilot vault.
+- Actions log: Bumped `package.json`, `manifest.json`, `versions.json` to **2.0.48**; `npx vitest run` and `npm run build` on `8f58d9a` + version commit; push tag `2.0.48` to `tt-sync` (GitHub Actions release zip). Copied `dist/*` into `<pilot-vault>/.obsidian/plugins/tickticksync-abyss/`. Stash `pre-PR1-merge WIP` not merged (conflicts); comment-hash sweep deferred.
+- Validation: `npx vitest run` → 73 files, **569 passed**; `npm run build` → ok. Manual TP1-* / AF gate: **not run** — Obsidian was not running on the test host (`pgrep` empty); pilot plugin files updated to **2.0.48** for the next Obsidian session.
+- Problems: Manual rows remain **not run** until owner opens pilot Obsidian and executes steps (or BRAT pull after release assets publish).
+- To Be Done: Run live gate AF-5 → NOTE-L3b → DEL-1 → DEL-3; fill `TEST_PLAN.md` Results; set BRAT frozen version to **2.0.48** after release zip is live.
+- References: `TEST_PLAN.md`, `ABYSS_FIRST_CASES.md`, `DEV_FLOW.md`, `CHANGELOG.md`
+
 ### Iteration 2026-10-20 02:25 UTC
 
 - Context: Owner approved merge of cloud PR #1 (`cursor/dev-flow-reliability-816a`) into `abyss-mapping`.
