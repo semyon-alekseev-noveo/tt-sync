@@ -31,7 +31,7 @@ import type TickTickSync from '@/main';
 import type { ITask } from '@/api/types/Task';
 import type { LocalTask } from '@/db/schema';
 import { NewFileMap, type ITaskItemRecord, type ITaskRecord } from '@/services/NewFileMap';
-import { commitVaultText, editorsForFile } from '@/services/vaultWrite';
+import { commitVaultText, editorsForFile, readNoteForWrite } from '@/services/vaultWrite';
 import { FolderSyncService } from '@/services/FolderSyncService';
 import { getSettings } from '@/settings';
 import { getAllProjects } from '@/db/projects';
@@ -871,15 +871,15 @@ export class TaskModificationDetector {
 		const saved = await api?.updateTask(upd) as ITask;
 		const f = this.app.vault.getAbstractFileByPath(filepath);
 		if (f instanceof TFile) {
-			await this.app.vault.process(f, data => {
-				const lines = data.split('\n');
-				const fl = fencedLines(lines);
-				const i = lines.findIndex((l, j) => !fl.has(j) && l.includes(`ticktick_id:: ${lineTask.id}`));
-				if (i < 0) return data;
+			const snapshot = await readNoteForWrite(this.app, f);
+			const lines = snapshot.split('\n');
+			const fl = fencedLines(lines);
+			const i = lines.findIndex((l, j) => !fl.has(j) && l.includes(`ticktick_id:: ${lineTask.id}`));
+			if (i >= 0) {
 				const [open, done] = rollRecurringLines(lines[i], base, next, remote.timeZone);
 				lines.splice(i, 1, open, done);
-				return lines.join('\n');
-			});
+				await commitVaultText(this.app, f, snapshot, lines.join('\n'));
+			}
 		}
 		if (saved) { this.plugin.dateMan?.addDateHolderToTask(saved, undefined); await this.plugin.taskRepository.upsertTask(saved, filepath, Date.now()); }
 		new Notice(`Recurring task rolled to ${next.slice(0, 10)}`);

@@ -40,6 +40,8 @@ Preconditions for every AF row: plugin `tickticksync-abyss`, manual sync, `fileL
 | TP-EDITOR-TYPE-DURING-PUSH | Same as TP-EDITOR-TYPE-DURING-SYNC for the 5-second open-note push. |
 | TP-COMMENT-TT-DELETE | A comment removed in TickTick is removed from the note on the next sync, using the previous `taskCommentMaps` entry. The following sync does not write that note. |
 | TP-NO-SELF-REPUSH | A file the plugin just wrote is not treated as a local edit on the next sync. The 5-second open-note push does not call the Comments API when no comment line changed. |
+| TP-COMPLETE-DURING-TYPE | Completing a task checks that task line only. Text typed on another line stays. If that task line changed after the read, it is left alone. Typing in the last two seconds defers the check. |
+| TP-UNCOMPLETE-DURING-TYPE | Reopening a task clears that task line only, with the same rules as TP-COMPLETE-DURING-TYPE. |
 
 Unit tests cover parts of AF-1, AF-5, AF-8, comments, a failed pull, and PERF-INDEX / PERF-CACHE / PERF-COUNTERS. They do not replace the live gate.
 

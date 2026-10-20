@@ -8,7 +8,7 @@ import { stripLegacyCommentsBlock, type TickTickCommentSync } from '@/abyssForma
 import type { ITaskComment } from '@/api/types/TaskComment';
 import { listCommentMapsForTask } from '@/db/taskCommentMaps';
 import { NewFileMap } from '@/services/NewFileMap';
-import { commitVaultText } from '@/services/vaultWrite';
+import { commitVaultText, readNoteForWrite } from '@/services/vaultWrite';
 import log from '@/utils/logger';
 import type { DeletionItem } from './modals/TaskDeletionModal';
 import { TaskDeletionModal } from './modals/TaskDeletionModal';
@@ -33,83 +33,46 @@ export class FileOperation {
 	 * A hover or popout leaf can be the active editor for a different path; its buffer is not this file.
 	 */
 	async readFileContent(file: TFile): Promise<string> {
-		const active = this.app.workspace.activeEditor;
-		if (active?.editor && active.file?.path === file.path) {
-			return active.editor.getValue();
-		}
-		return await this.app.vault.read(file);
+		return readNoteForWrite(this.app, file);
 	}
 
-
-	//Complete a task and mark it as completed
-	async completeTaskInTheFile(taskId: string) {
-		// Get the task file path
+	/** Flip one task checkbox through commitVaultText. Never vault.modify of the whole note. */
+	private async setTaskCheckbox(taskId: string, done: boolean): Promise<void> {
 		const filepath = await this.plugin.fileMetadataService?.getFilepathForTask(taskId);
 		if (!filepath) return;
-
-		// Get the file object and update the content
 		const file = this.app.vault.getAbstractFileByPath(filepath);
 		if (!(file instanceof TFile)) return;
-		const content = await this.app.vault.read(file);
-
-		const lines = content.split('\n');
+		const snapshot = await this.readFileContent(file);
+		const lines = snapshot.split('\n');
 		let modified = false;
-
 		for (let i = 0; i < lines.length; i++) {
 			const line = lines[i];
 			if (line.includes(taskId) && this.plugin.taskParser?.hasTickTickTag(line)) {
-				lines[i] = line.replace('[ ]', '[x]');
+				lines[i] = done ? line.replace('[ ]', '[x]') : line.replace(/- \[([xX])]/g, '- [ ]');
 				modified = true;
 				break;
 			}
 		}
+		if (!modified) return;
+		await commitVaultText(this.app, file, snapshot, lines.join('\n'));
+	}
 
-		if (modified) {
-			const newContent = lines.join('\n');
-			await this.app.vault.modify(file, newContent);
-			// log.trace("Modified: ", file?.path, new Date().toISOString());
-		}
+	//Complete a task and mark it as completed
+	async completeTaskInTheFile(taskId: string) {
+		await this.setTaskCheckbox(taskId, true);
 	}
 
 	// uncheck completed tasks,
 	async uncompleteTaskInTheFile(taskId: string) {
-		// Get the task file path
-		const filepath = await this.plugin.fileMetadataService?.getFilepathForTask(taskId);
-		if (!filepath) return;
-
-		// Get the file object and update the content
-		const file = this.app.vault.getAbstractFileByPath(filepath);
-		if (!(file instanceof TFile)) return;
-		const content = await this.app.vault.read(file);
-
-		const lines = content.split('\n');
-		let modified = false;
-
-		for (let i = 0; i < lines.length; i++) {
-			const line = lines[i];
-			if (line.includes(taskId) && this.plugin.taskParser?.hasTickTickTag(line)) {
-				lines[i] = line.replace(/- \[([xX])]/g, '- [ ]');
-				modified = true;
-				break;
-			}
-		}
-
-		if (modified) {
-			const newContent = lines.join('\n');
-			await this.app.vault.modify(file, newContent);
-			// log.error("Modified: ", file?.path, new Date().toISOString());
-		}
+		await this.setTaskCheckbox(taskId, false);
 	}
 
 	//add #TickTick at the end of task line, if full vault sync enabled
 	async addTickTickTagToFile(fileMap: NewFileMap) {
-
-
+		const snapshot = fileMap.getFileLines();
 		if (fileMap.markAllTasks()) {
-			const newContent = fileMap.getFileLines();
-			await this.app.vault.modify(fileMap.file, newContent);
+			await commitVaultText(this.app, fileMap.file, snapshot, fileMap.getFileLines());
 			new Notice('New tasks will be added to ticktick on next sync.');
-			// log.error("Modified: ", file?.path, new Date().toISOString());
 		}
 	}
 
@@ -119,9 +82,9 @@ export class FileOperation {
 		// Get the file object and update the content
 		const file = this.app.vault.getAbstractFileByPath(filepath);
 		if (!(file instanceof TFile)) return;
-		const content = await this.app.vault.read(file);
+		const snapshot = await this.readFileContent(file);
 
-		const lines = content.split('\n');
+		const lines = snapshot.split('\n');
 		let modified = false;
 
 		for (let i = 0; i < lines.length; i++) {
@@ -140,11 +103,7 @@ export class FileOperation {
 		}
 
 		if (modified) {
-			const newContent = lines.join('\n');
-			await this.app.vault.modify(file, newContent);
-			// log.error("Modified: ", file?.path, new Date().toISOString());
-
-
+			await commitVaultText(this.app, file, snapshot, lines.join('\n'));
 		}
 	}
 

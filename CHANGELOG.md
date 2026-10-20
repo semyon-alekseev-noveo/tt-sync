@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-20 11:40 UTC
+
+- Context: Owner extended the stale-editor hotfix. `completeTaskInTheFile` and `uncompleteTaskInTheFile` still wrote the whole note with `vault.modify`.
+- Target: Every note that may be open goes through `commitVaultText`. No version bump.
+- Actions log: Checkbox complete and uncomplete, tag and link stamps, recurring roll, detach, duplicate-id strip, subtask reorder, tag rename, project-note repair, folder merge, `forceUpdates`, and undo restore/remap use the helper. `TEST_PLAN.md` adds **TP-COMPLETE-DURING-TYPE** and **TP-UNCOMPLETE-DURING-TYPE** (not run). A source scan refuses `vault.modify`, `vault.process`, `adapter.write`, and `editor.setValue` outside the helper.
+- Validation: `npx vitest run` → 83 files, **607 passed**; `npm run build` — this iteration. Pilot rows stay **not run**.
+- Problems: An open-note line patch does not pass through `instrumentVault`, so the redo journal does not record that editor transaction. Closed-file writes still do. Journal jsonl (`.tickticksync/journal`) and CSV backups are new files, not open notes.
+- To Be Done: Pilot **TP-COMPLETE-DURING-TYPE** and **TP-UNCOMPLETE-DURING-TYPE**.
+- References: `TEST_PLAN.md`, `src/services/vaultWrite.ts`, `src/test/noWholeNoteWrite.test.ts`
+
 ### Iteration 2026-10-20 11:10 UTC
 
 - Context: Open note editor was cleared or reverted while the file on disk stayed current (`BUG-STALE-EDITOR-WRITE`). A comment deleted in TickTick stayed in the note, so the stale write ran on every sync.

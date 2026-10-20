@@ -12,6 +12,7 @@ import { getTick } from '@/api/tick_singleton_factory';
 import '@/static/styles.css';
 
 import { type Editor, type MarkdownFileInfo, MarkdownView, Notice, Plugin, TFolder } from 'obsidian';
+import { commitVaultText, readNoteForWrite } from '@/services/vaultWrite';
 
 //settings
 import { getSettings, mergeDeviceLists, updateSettings } from './settings';
@@ -353,7 +354,11 @@ export default class TickTickSync extends Plugin {
 		if (Object.keys(renames).length) {
 			let n = 0;
 			for (const f of this.app.vault.getMarkdownFiles()) {
-				await this.app.vault.process(f, d => { const o = renameTagsInText(d, renames); if (o !== d) n++; return o; });
+				const snapshot = await readNoteForWrite(this.app, f);
+				const next = renameTagsInText(snapshot, renames);
+				if (next === snapshot) continue;
+				n++;
+				await commitVaultText(this.app, f, snapshot, next);
 			}
 			log.info('Tag mapping change migrated', renames, n, 'file(s)');
 			new Notice(`TickTickSync: renamed ${Object.entries(renames).map(([a, b]) => `#${a} → #${b}`).join(', ')} in ${n} note(s)`);

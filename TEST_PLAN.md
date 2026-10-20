@@ -405,6 +405,29 @@ Expected: the note is not scanned by the pre-pull local push. The comment sweep 
 
 Automated in `src/test/staleFileWrite.test.ts`. The file or the editor changes between the snapshot and the write. The write must not replace that newer text with text built from the snapshot. Also covers the other-leaf read and the two-second typing defer.
 
+### TP-COMPLETE-DURING-TYPE — checking a task does not wipe the open note
+
+1. Open a synced note. Start completing a task from TickTick (or a command that checks the line) while you type on another line.
+2. Keep typing for a couple of seconds, including into the task line itself.
+
+Expected: text on the other line stays. The checkbox flips only if that task line still matches. If you are still typing, the check waits. The buffer is not replaced.
+
+### TP-UNCOMPLETE-DURING-TYPE — reopening a task does not wipe the open note
+
+Same as **TP-COMPLETE-DURING-TYPE**, but the task is reopened and the box returns to `[ ]`.
+
+### Other note writes on the same path
+
+These also go through `commitVaultText`. Each one is **not run** on a vault.
+
+| Site | What to watch |
+|------|----------------|
+| Recurring roll (`TaskModificationDetector.rollRecurring`) | The next-date line is inserted. Other lines typed during the roll stay. |
+| Detach on TickTick delete (`VaultSyncCoordinator`, `syncModule`) | Only the deleted task line becomes `[-]`. |
+| Duplicate id strip (`syncFiles`) | The copy loses its id. An open editor is patched on that line only. |
+| Subtask reorder (`pullSubtaskOrder`) | Sibling lines move. A line the user changed is left. |
+| Full-vault tag, TickTick link, tag rename, project-note repair, folder merge, `forceUpdates`, undo restore and id remap | The planned line change lands. Text typed on another line stays. Typing in the last two seconds defers the write. |
+
 ### Regressions
 
 These already have automated tests. Re-run them with the suite. Do not mark a live row from an earlier section as passed because this suite passed.
@@ -425,3 +448,6 @@ These already have automated tests. Re-run them with the suite. Do not mark a li
 | TP-COMMENT-TT-DELETE | not run | Automated: `abyssStep3.test.ts`, `synchronizationInner.integration.test.ts`. |
 | TP-NO-SELF-REPUSH | not run | Automated: `bugCommentNoPush.test.ts`, `synchronizationInner.integration.test.ts`. |
 | TP-STALE-FILE-WRITE | not run | Automated only: `staleFileWrite.test.ts`. No vault run. |
+| TP-COMPLETE-DURING-TYPE | not run | Automated: `completeDuringType.test.ts`. No vault run. |
+| TP-UNCOMPLETE-DURING-TYPE | not run | Automated: `completeDuringType.test.ts`. No vault run. |
+| Recurring roll, detach, duplicate strip, subtask reorder, tag/link/rename/repair/merge/force update/undo | not run | Automated guard: `noWholeNoteWrite.test.ts` (no direct whole-note write outside `commitVaultText`). |

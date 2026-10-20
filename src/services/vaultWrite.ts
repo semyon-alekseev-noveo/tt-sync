@@ -110,6 +110,18 @@ function editorOf(view: unknown, path: string): Editor | null {
 	return v.editor;
 }
 
+/**
+ * Editor buffer only when that editor is showing `file`. Otherwise the file on disk.
+ * A hover or popout leaf can be the active editor for a different path.
+ */
+export async function readNoteForWrite(app: App, file: TFile): Promise<string> {
+	const active = app.workspace?.activeEditor;
+	if (active?.editor && active.file?.path === file.path) {
+		return active.editor.getValue();
+	}
+	return await app.vault.read(file);
+}
+
 /** Editors that currently show `path`, including a hover or popout leaf. */
 export function editorsForFile(app: App, path: string): Editor[] {
 	const found: Editor[] = [];
