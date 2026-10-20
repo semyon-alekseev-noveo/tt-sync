@@ -1,5 +1,25 @@
 # Changelog
 
+### Iteration 2026-10-20 09:10 UTC
+
+- Context: Owner asked to release the idle-sync change.
+- Target: Tag **2.0.53**.
+- Actions log: Bumped `package.json`, `manifest.json`, `versions.json` to **2.0.53**; `PO_STATUS.md` install baseline.
+- Validation: `npx vitest run` → **589 passed**; `npm run build` ok.
+- Problems: `TP-IDLE-ZERO` and `TP-DELTA-*` not run on the pilot. Daily reconcile, closed, and trash are not in this tag.
+- To Be Done: BRAT **2.0.53**; read one `[perf]` line on a quiet Synchronize.
+- References: `TEST_PLAN.md`, `PO_STATUS.md`, `CHANGELOG.md`
+
+### Iteration 2026-10-20 09:05 UTC
+
+- Context: Owner asked to implement `docs/TICKTICK_DELTA_API.md` §3. §3.5 is still not run; defaults from §3.2 are in code.
+- Target: Idle sync does not call `getTaskById` per quiet task. Echo uses `etag`.
+- Actions log: `pull.ts` skips a row only when etags match. `vaultLineBehindTask` reads Dexie; `getTaskComments` only if `commentCount` ≠ vault threads. `skipPushWhenTickTickRenamedVaultLine` no longer fetches the task. Tests `TP-IDLE-ZERO`, `TP-ECHO-ETAG`.
+- Validation: `npx vitest run` → **589 passed**; `npm run build` ok.
+- Problems: Closed/trash endpoints and the daily job are not implemented. `updateTask` still refetches the task after a push. §3.5 rows stay **not run**.
+- To Be Done: Run `TP-DELTA-*`, then daily reconcile if the pilot requires it.
+- References: `docs/TICKTICK_DELTA_API.md`, `TEST_PLAN.md`, `CHANGELOG.md`
+
 ### Iteration 2026-10-20 08:40 UTC
 
 - Context: Owner asked to release the comment round-trip fix after the **2.0.51** pilot fail.

@@ -40,7 +40,7 @@
 
 ## To Be Done
 
-1. Human or local Obsidian: NOTE-L3b, CTX-D2, one live gate AF + DEL + NOTE-L3b (`ABYSS_FIRST_CASES.md`). This cloud agent did not run them.
+1. Fast sync is `docs/TICKTICK_DELTA_API.md` §3: one `batch/check`, no per-task `getTaskById` / `getTaskComments`, echo via `etag`. PR #2 kept the probe. **2.0.52** startup still did 455 probes and 229 comment fetches. Pilot §3.5 first.
 2. Revoke the exposed `tp_…` token if it is still valid.
 3. Confirm Abyss Inbox is **With inbox tag** `#inbox` on the pilot. Untagged mode is still open.
 4. Still open in code: GAP-COMMENT-EDIT, RISK-PULL-WINS-LOCAL, RISK-DUAL-STORE, RISK-LARGE-VAULT (id index and per-run file cache landed; the `getTaskById` probe and `ensureVaultFilesRegistered` full scan remain), TECH-START-1, `main` ↔ `services` cycle.

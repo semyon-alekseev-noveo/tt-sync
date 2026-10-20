@@ -30,7 +30,7 @@ describe('BUG-PULL-COMMENT-STALE', () => {
 		expect(apiCommentsDifferFromVault(lines, [{ title: '2026-10-19 20:00: alpha' }])).toBe(true);
 	});
 
-	it('treats a TickTick-only comment as behind and skips a second getTaskById when the cache already differs', async () => {
+	it('TP-IDLE-ZERO does not fetch a task or its comments when the Dexie copy matches the line', async () => {
 		updateSettings({
 			syncNotes: true,
 			abyssTasksFormat: true,
@@ -77,14 +77,20 @@ describe('BUG-PULL-COMMENT-STALE', () => {
 		}).vaultLineBehindTask.bind(coordinator);
 
 		const matched = await behind({
-			id: taskId, projectId: 'proj-1', title: 'same title', content: '', desc: '', status: 0,
+			id: taskId, projectId: 'proj-1', title: 'same title', content: '', desc: '', status: 0, commentCount: 0,
 		}, file.path);
-		expect(matched.behind).toBe(true);
-		expect(getTaskById).toHaveBeenCalledTimes(1);
-		expect(getTaskComments).toHaveBeenCalledTimes(1);
-		expect(matched.task._apiComments).toEqual([{ id: 'c1', title: 'from ticktick' }]);
+		expect(matched.behind).toBe(false);
+		expect(getTaskById).not.toHaveBeenCalled();
+		expect(getTaskComments).not.toHaveBeenCalled();
 
-		getTaskById.mockClear();
+		const counted = await behind({
+			id: taskId, projectId: 'proj-1', title: 'same title', content: '', desc: '', status: 0, commentCount: 1,
+		}, file.path);
+		expect(counted.behind).toBe(true);
+		expect(getTaskById).not.toHaveBeenCalled();
+		expect(getTaskComments).toHaveBeenCalledTimes(1);
+		expect(counted.task._apiComments).toEqual([{ id: 'c1', title: 'from ticktick' }]);
+
 		const already = await behind({
 			id: taskId, projectId: 'proj-1', title: 'renamed on ticktick', content: '', desc: '', status: 0,
 		}, file.path);

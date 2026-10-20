@@ -43,6 +43,8 @@ export interface ITask {
 	progress: number;
 	modifiedTime: string;
 	etag?: string;
+	/** TickTick V2 comment counter. Idle sync fetches comments only when this differs from the vault thread count. */
+	commentCount?: number;
 	deleted: number;
 	createdTime?: string;
 	creator?: string;

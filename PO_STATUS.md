@@ -4,7 +4,7 @@
 **Audience:** Product owner / decision maker  
 **Repo:** `tickticksync` branch `abyss-mapping`  
 **Test vault:** `<pilot-vault>` (copy only; live vault `<live-vault>` untouched)  
-**Install:** BRAT → `https://github.com/semyon-alekseev-noveo/tt-sync` track **latest release** (**2.0.52**, tag `2.0.52`); plugin id **`tickticksync-abyss`** — `docs/BRAT_INSTALL.md`. Preset: `00 Inbox/TTS-data-preset.json`.
+**Install:** BRAT → `https://github.com/semyon-alekseev-noveo/tt-sync` track **latest release** (**2.0.53**, tag `2.0.53`); plugin id **`tickticksync-abyss`** — `docs/BRAT_INSTALL.md`. Preset: `00 Inbox/TTS-data-preset.json`.
 
 История изменений — только в `CHANGELOG.md`; здесь — снимок для PO.
 
@@ -27,7 +27,8 @@
 
 - Релиз **2.0.47:** `npx vitest run` — 67 файлов, 550 тестов. Эта ветка (ещё не релиз, версию не поднимали): **73 файла, 569 тестов**, `npm run build` — ok. В том числе `src/test/synchronizationInner.integration.test.ts`.
 - Пилот **2.0.48** (2026-10-20): debounce/open-note — pass; NOTE-L3b / Comments API — **fail**; DEL-1 — pass. Детали в `TEST_PLAN.md`, `ABYSS_FIRST_CASES.md`, `CHANGELOG.md`.
-- Релиз **2.0.52** (2026-10-20): vault-комментарий сохраняется при перерисовке строки и пушится в Comments API до записи файла; vitest **587**. Пилот NOTE-L3b на **2.0.52** — not run.
+- Релиз **2.0.53** (2026-10-20): idle sync без `getTaskById` на тихую задачу; эхо по `etag`; `getTaskComments` только при расхождении `commentCount`. Vitest **589**. Пилот `TP-IDLE-ZERO` — not run.
+- Релиз **2.0.52** (2026-10-20): vault-комментарий сохраняется при перерисовке строки; пилот NOTE-L3b — not run.
 - Релиз **2.0.51** (2026-10-20): PR #3 — `lastVaultPushWallMs`, delta `add`; пилот NOTE-L3b — **fail**.
 - Релиз **2.0.50** (2026-10-20): PR #2 — id index, file-run cache, `[perf]`; 584 tests. Пилот TP-PERF-* частично (`TEST_PLAN.md`).
 - Детали и даты прогонов — в `CHANGELOG.md`.
@@ -63,10 +64,10 @@
 
 ## To Be Done
 
-1. **BUG-COMMENT-NO-PUSH** — повторный анализ: pre-pull + sweep не доводят до Comments API на пилоте (**2.0.51** fail); см. журнал `2026-10-20.jsonl` `sync-mvgaaegu`. TP-PERF-LOG вручную (`[perf]` JSON).
-2. **BUG-ACTIVEZONE-COMMENT-SHUFFLE** — failing test + fix (`pullSubtaskOrder` / `mergeAbyssBlock`).
-3. Gate: AF-5 в **Inbox**, DEL-3, CTX-D2 на грязных тегах.
-4. Пилот **TP-DELTA-*** (`TEST_PLAN.md`, `docs/TICKTICK_DELTA_API.md` §3.5) → решение про **etag**-эхо и политику комментариев без N+1.
+1. Пилот **2.0.53** `TP-IDLE-ZERO` и **TP-DELTA-*** (`docs/TICKTICK_DELTA_API.md` §3.5). В **2.0.53** тихий синк не вызывает `getTaskById`; суточная сверка, closed и trash ещё не сделаны.
+2. **BUG-COMMENT-NO-PUSH** — на **2.0.52** буллеты `task-13-43-vault-r3` в vault остались, в TT Comments пусто, прежние TT-комментарии стёрты (карта fingerprint → delete). Не блокирует пункт 1.
+3. **BUG-ACTIVEZONE-COMMENT-SHUFFLE** — failing test + fix (`pullSubtaskOrder` / `mergeAbyssBlock`).
+4. Gate: AF-5 в **Inbox**, DEL-3, CTX-D2 на грязных тегах.
 5. Открыто: GAP-COMMENT-EDIT, RISK-PULL-WINS-LOCAL, RISK-DUAL-STORE, RISK-LARGE-VAULT (частично в **2.0.50**), TECH-START-1, TECH-CIRC-1. В delta теперь учитывается `syncTaskBean.add` (тест `getUpdatedTasks.deltaAdd.test.ts`).
 
 ## Аналитический мит 2026-10-19

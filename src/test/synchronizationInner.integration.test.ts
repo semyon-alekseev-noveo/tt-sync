@@ -314,7 +314,7 @@ describe('synchronizationInner integration', () => {
 			taskId: TASK,
 			task: {
 				id: TASK, projectId: 'proj-1', title: 'same title', content: '', desc: '', status: 0,
-				modifiedTime: '2026-10-18T00:00:00.000+0000', tags: [],
+				modifiedTime: '2026-10-18T00:00:00.000+0000', tags: [], commentCount: 1,
 			} as never,
 			updatedAt: 1000,
 			lastVaultSync: 5000,
@@ -388,7 +388,7 @@ describe('synchronizationInner integration', () => {
 		expect(pushed).toBeGreaterThan(0);
 	});
 
-	it('PERF-COUNTERS records the idle-sync getTaskById baseline', async () => {
+	it('TP-IDLE-ZERO idle sync does not probe each quiet task', async () => {
 		const world = await makeWorld();
 		let reads = 0;
 		const vault = (world.service.plugin as { app: { vault: { read: (f: { path: string }) => Promise<string> } } }).app.vault;
@@ -417,15 +417,13 @@ describe('synchronizationInner integration', () => {
 		await quiet('eeeeeeeeeeeeeeeeeeeeeeee', 'gone', true);
 		const result = await world.service.synchronizationInner(false, 'manual');
 		expect(result.ok).toBe(true);
-		// Baseline for the next PR. The probe is unchanged: one getTaskById per quiet task
-		// whose vault line still matches the pulled copy. A title that already differs, and
-		// a deleted task, are not probed.
-		expect(world.api.getTaskById.mock.calls.length).toBe(3);
+		expect(world.api.getTaskById.mock.calls.length).toBe(0);
+		expect(world.api.getTaskComments.mock.calls.length).toBe(0);
 		const perf = lastSyncPerf();
 		expect(perf?.ok).toBe(true);
 		expect(perf?.trigger).toBe('manual');
-		expect(perf?.counts.tasksProbedById).toBe(3);
-		expect(perf?.counts.commentsFetched).toBe(3);
+		expect(perf?.counts.tasksProbedById).toBe(0);
+		expect(perf?.counts.commentsFetched).toBe(0);
 		expect(perf?.counts.tasksTotal).toBe(5);
 		expect(perf?.counts.tasksChecked).toBe(5);
 		expect(perf?.counts.tasksDelta).toBe(0);

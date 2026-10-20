@@ -309,6 +309,26 @@ Expected: closed task may appear as `update` with `status` 2 or -1; deleted id i
 | TP-DELTA-COMMENT | not run | |
 | TP-DELTA-CLOSE-DELETE | not run | |
 
-## Delta sync roadmap (after pilot)
+## TP-IDLE-ZERO — quiet sync does not probe each task
 
-Planned cases when `etag` echo and idle zero-probe land (`docs/TICKTICK_DELTA_API.md` §3.3): **TP1-QUIET-TITLE-ETAG**, **TP-ECHO-ETAG**, **TP-COMMENT-COUNT**, **TP-IDLE-ZERO**, **TP-DAILY-RECONCILE**. All **not run** until implemented and piloted.
+Implemented from `docs/TICKTICK_DELTA_API.md` §3.2 before the §3.5 pilot, on the document's default: echo by `etag`, vault compare against Dexie, comments fetched only when `commentCount` differs from the vault thread count.
+
+1. Install a build that contains this change. Do not edit the vault. Run **Synchronize**.
+2. Read the `[perf]` line.
+
+Expected: `getTaskById` is 0 and `getTaskComments` is 0 when no task's `commentCount` differs from its vault threads. A task whose Dexie title already differs is still rewritten from Dexie, without `getTaskById`.
+
+| ID | Pilot status | Evidence |
+|----|----------------|----------|
+| TP-IDLE-ZERO | not run | Automated: `synchronizationInner.integration.test.ts` `TP-IDLE-ZERO`. |
+
+## After §3.5 (`docs/TICKTICK_DELTA_API.md` §3.2)
+
+Do not start this until the four `TP-DELTA-*` rows above have evidence. `syncTaskBean.add` is already merged in `getUpdatedTasks`.
+
+1. **Echo.** In `pull.ts` a delta row is skipped only when `rt.etag === local.task.etag`. `skipPushWhenTickTickRenamedVaultLine` no longer calls `getTaskById`. Still open: persist `id2etag` from `batch/task` without the follow-up `getTaskById` inside `TicktickRestAPI.updateTask`.
+2. **Idle vault.** `vaultLineBehindTask` compares the line to Dexie. `getTaskComments` runs only when `commentCount` is a number and differs from the vault thread count. A manual Repair command that calls `getTaskById` is not added yet.
+3. **Comments.** If §3.5 shows a new `etag` or `commentCount` (or the task in `update[]`), fetch comments only for those tasks plus vault lines that changed. If a TickTick-only comment touches none of those, daily reconcile is the only pull (up to 24 h) — confirm that delay before coding it.
+4. **Closed and trash.** If complete/delete already appear in `update[]` / `delete[]`, leave `project/all/closed` and trash pagination to the daily job. If they do not, those calls stay on every sync.
+5. **Daily job.** Once a day, not on startup: closed window, trash, comment backfill from step 3, and one `batch/check/0` title/content/status compare instead of `getTaskById` per task.
+6. **Tests.** `TP-IDLE-ZERO` (`getTaskById = 0`, `getTaskComments = 0`), `TP1-QUIET-TITLE-ETAG`, `TP-ECHO-ETAG`, `TP-COMMENT-COUNT`, `TP-DAILY-RECONCILE`. All **not run** until that code exists.

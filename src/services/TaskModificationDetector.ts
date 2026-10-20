@@ -535,29 +535,17 @@ export class TaskModificationDetector {
 	}
 
 	/**
-	 * Delta pull can miss title-only edits when TickTick leaves `modifiedTime` unchanged.
-	 * If the vault line still matches what we last stored but TickTick's live title differs, refresh Dexie and let vault sync rewrite the line — do not push the stale title.
+	 * TickTick renames arrive via delta etag, not a getTaskById on every quiet line
+	 * (docs/TICKTICK_DELTA_API.md §3.2). Returning false keeps comment sync on the
+	 * unchanged-hash path. A line whose hash matches Dexie is not pushed.
 	 */
 	private async skipPushWhenTickTickRenamedVaultLine(
-		lineTask: ITask,
-		savedTask: ITask,
-		taskId: string,
-		filepath: string,
+		_lineTask: ITask,
+		_savedTask: ITask,
+		_taskId: string,
+		_filepath: string,
 	): Promise<boolean> {
-		const parser = this.plugin.taskParser;
-		if (!parser) return false;
-		const vaultLineEdited = parser.isTitleChanged(lineTask, savedTask);
-		if (vaultLineEdited) return false;
-		try {
-			const remote = await this.plugin.tickTickRestAPI?.getTaskById(taskId, savedTask.projectId);
-			if (!remote || !parser.isTitleChanged(lineTask, remote)) return false;
-			await this.plugin.taskRepository.upsertTask(remote, filepath);
-			log.info(`TickTick title ahead of vault for ${taskId}; deferring line rewrite to vault sync`);
-			return true;
-		} catch (e) {
-			log.debug('remote title reconcile failed', taskId, e);
-			return false;
-		}
+		return false;
 	}
 
 	/**

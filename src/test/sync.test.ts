@@ -140,6 +140,50 @@ describe('pullFromTickTick', () => {
 		})]);
 	});
 
+	it('TP-ECHO-ETAG skips a delta row when the stored etag matches', async () => {
+		const remoteTask = {
+			id: 'remote-task-id',
+			etag: 'same',
+			modifiedTime: '2026-10-18T00:00:00.000+0000',
+			deleted: 0,
+		};
+		mockApi.getUpdatedTasks.mockResolvedValue({ update: [remoteTask], delete: [] });
+		const { mockWhere, anyOfToArray } = makeMockWhere();
+		anyOfToArray.mockResolvedValue([{
+			localId: 'tt:remote-task-id',
+			taskId: 'remote-task-id',
+			task: { id: 'remote-task-id', etag: 'same', modifiedTime: remoteTask.modifiedTime },
+			lastModifiedByDeviceId: 'test-device',
+		}]);
+		(db.tasks.where as any) = mockWhere;
+		await pullFromTickTick(mockApi, mockMeta, false);
+		expect(db.tasks.bulkPut).not.toHaveBeenCalled();
+	});
+
+	it('TP-ECHO-ETAG applies a delta row when etag changed and modifiedTime did not', async () => {
+		const remoteTask = {
+			id: 'remote-task-id',
+			etag: 'new',
+			title: 'renamed via api',
+			modifiedTime: '2026-10-18T00:00:00.000+0000',
+			deleted: 0,
+		};
+		mockApi.getUpdatedTasks.mockResolvedValue({ update: [remoteTask], delete: [] });
+		const { mockWhere, anyOfToArray } = makeMockWhere();
+		anyOfToArray.mockResolvedValue([{
+			localId: 'tt:remote-task-id',
+			taskId: 'remote-task-id',
+			task: { id: 'remote-task-id', etag: 'old', title: 'old', modifiedTime: remoteTask.modifiedTime },
+			lastModifiedByDeviceId: 'test-device',
+		}]);
+		(db.tasks.where as any) = mockWhere;
+		await pullFromTickTick(mockApi, mockMeta, false);
+		expect(db.tasks.bulkPut).toHaveBeenCalled();
+		const rows = (db.tasks.bulkPut as any).mock.calls[0][0];
+		expect(rows[0].task.etag).toBe('new');
+		expect(rows[0].task.title).toBe('renamed via api');
+	});
+
 	it('should skip invalid updates', async () => {
 		mockApi.getUpdatedTasks.mockResolvedValue({ update: [{ id: undefined, taskId: undefined } as any], delete: [] });
 

@@ -102,12 +102,13 @@ describe('pullFromTickTick field mapping and echo detection', () => {
 		})]);
 	});
 
-	it('should ignore echoes (when remote task was originally sent by us)', async () => {
+	it('TP-ECHO-ETAG ignores a delta row with the same etag', async () => {
 		const now = new Date();
 		const modifiedTimeString = now.toISOString();
 
 		const remoteTask = {
 			id: 'remote-task-id',
+			etag: 'echo',
 			modifiedTime: modifiedTimeString,
 			deleted: 0,
 		};
@@ -120,7 +121,7 @@ describe('pullFromTickTick field mapping and echo detection', () => {
 			taskId: 'remote-task-id',
 			updatedAt: now.getTime(),
 			lastModifiedByDeviceId: 'test-device',
-			task: { modifiedTime: modifiedTimeString },
+			task: { etag: 'echo', modifiedTime: modifiedTimeString },
 		};
 
 		const anyOfToArray = vi.fn().mockResolvedValue([localTask]);

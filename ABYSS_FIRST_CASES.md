@@ -32,7 +32,8 @@ Preconditions for every AF row: plugin `tickticksync-abyss`, manual sync, `fileL
 | DEL-3 | Same as DEL-1, then Cancel. The TickTick task remains. The notice does not say the sync succeeded at deleting it. |
 | PERF-INDEX | `idsPresentInVault` matches a per-file `String.includes` scan: first markdown file in vault order, empty ids ignored, text inside a fence counts, a duplicate id stays with the first file. A file written during the run is not answered from an older index. |
 | PERF-CACHE | In one sync, a file's text and its parsed task map are read once. A plugin write of that file drops both before the next read. |
-| PERF-COUNTERS | One sync records phase times and counters (HTTP by endpoint, 429, files read, files scanned, tasks checked, vault writes) and logs one `[perf]` line. A quiet sync still calls `getTaskById` once per matching task. |
+| PERF-COUNTERS | One sync records phase times and counters (HTTP by endpoint, 429, files read, files scanned, tasks checked, vault writes) and logs one `[perf]` line. |
+| TP-IDLE-ZERO | A quiet sync does not call `getTaskById`. `getTaskComments` runs only when `commentCount` differs from the vault comment threads. |
 
 Unit tests cover parts of AF-1, AF-5, AF-8, comments, a failed pull, and PERF-INDEX / PERF-CACHE / PERF-COUNTERS. They do not replace the live gate.
 

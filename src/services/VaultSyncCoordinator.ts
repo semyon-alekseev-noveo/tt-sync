@@ -23,6 +23,7 @@ import log from '@/utils/logger';
 import { syncFileMap } from '@/sync/fileRunCache';
 import { addCount } from '@/sync/perf';
 import { apiCommentsDifferFromVault, useAbyssCommentsApi } from '@/abyssCommentSync';
+import { extractAbyssCommentThreads } from '@/abyssFormat';
 
 export class VaultSyncCoordinator {
 	private app: App;
@@ -129,8 +130,6 @@ export class VaultSyncCoordinator {
 			} else if (matchesFilter) {
 				let actionNeeded = this.determineActionNeeded(lt, targetFile);
 				if (actionNeeded.action === 'none' && targetFile) {
-					// vaultLineBehindTask already loaded a fresh task when it needed one.
-					// Do not call getTaskById again here.
 					const behind = await this.vaultLineBehindTask(task, targetFile);
 					if (behind.behind) {
 						actionNeeded = { action: 'update' };
@@ -310,7 +309,7 @@ export class VaultSyncCoordinator {
 	/**
 	 * Determine what action is needed for a task
 	 */
-	/** Vault line differs from TickTick (delta pull can miss title/body/comment edits without `modifiedTime` bump). */
+	/** Vault line differs from the Dexie copy. Idle sync does not call getTaskById (docs/TICKTICK_DELTA_API.md §3.2). */
 	private async vaultLineBehindTask(task: ITask, filePath: string): Promise<{ behind: boolean; task: ITask }> {
 		const same = { behind: false, task };
 		const file = this.app.vault.getAbstractFileByPath(filePath);
@@ -344,23 +343,11 @@ export class VaultSyncCoordinator {
 			return false;
 		};
 
-		// The task argument is the copy we already pulled. Ask the network only when that copy
-		// still matches the vault, to catch a TickTick edit that did not bump modifiedTime.
-		let remote = task;
+		const remote = task;
 		let behind = fieldsDiffer(task);
-		if (!behind) {
-			try {
-				const fresh = await this.plugin.tickTickRestAPI?.getTaskById(task.id, task.projectId);
-				if (fresh) {
-					remote = fresh;
-					behind = fieldsDiffer(fresh);
-				}
-			} catch (e) {
-				log.debug('vault refresh lookup failed', task.id, e);
-			}
-		}
-
-		if (!behind && useAbyssCommentsApi() && remote.projectId) {
+		const commentCount = (task as ITask & { commentCount?: number }).commentCount;
+		const vaultThreads = extractAbyssCommentThreads(taskRec.taskLines ?? []).length;
+		if (!behind && useAbyssCommentsApi() && remote.projectId && typeof commentCount === 'number' && commentCount !== vaultThreads) {
 			try {
 				const comments = await this.plugin.tickTickRestAPI?.getTaskComments(remote.projectId, remote.id) ?? [];
 				if (apiCommentsDifferFromVault(taskRec.taskLines, comments)) {
