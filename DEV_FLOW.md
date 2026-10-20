@@ -53,6 +53,8 @@ Rules:
 
 Update canonical docs in the same PR as the code. Do not leave a second, older description of the same rule in a canonical file.
 
+Before changing sync, comments, or push/pull triggers, read [`docs/ANALYST_REFERENCE_DIAGRAMS.md`](docs/ANALYST_REFERENCE_DIAGRAMS.md) (mermaid boundaries from the 2026-10-19 analyst meet).
+
 | Canonical | What it is |
 |-----------|------------|
 | `DEV_FLOW.md` | This process |

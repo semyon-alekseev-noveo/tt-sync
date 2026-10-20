@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-20 02:25 UTC
+
+- Context: Owner approved merge of cloud PR #1 (`cursor/dev-flow-reliability-816a`) into `abyss-mapping`.
+- Target: Land dev flow docs, fail-closed sync, integration test, and analyst reference diagrams without reverting PR #1 PO statuses.
+- Actions log: Fast-forward merge to `0a9b805`; added `docs/ANALYST_REFERENCE_DIAGRAMS.md`; linked from `PO_STATUS.md` and `DEV_FLOW.md`. Local pre-merge WIP remains in git stash `pre-PR1-merge WIP` (not applied).
+- Validation: `npx vitest run` → 73 files, 569 passed; `npm run build` → ok.
+- Problems: Version still **2.0.47** in `manifest.json` until owner tags next release; stash may contain comment-hash sweep to replay in a follow-up branch.
+- To Be Done: Push `abyss-mapping`; pilot TP1-* and AF gate (`TEST_PLAN.md`, `ABYSS_FIRST_CASES.md`); optionally cherry-pick stash comment fixes.
+- References: `DEV_FLOW.md`, `docs/ANALYST_REFERENCE_DIAGRAMS.md`, `CHANGELOG.md`
+
 ### Iteration 2026-10-19 16:55 UTC
 
 - Context: Owner rule — every behavior change is recorded in the test plan, in the same PR.

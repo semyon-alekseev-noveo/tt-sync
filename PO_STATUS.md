@@ -99,6 +99,8 @@
 - Соседние comment-буллеты склеивались в один тред. Теперь каждый буллет — свой тред.
 - Интеграционный тест `synchronizationInner` есть. Живые кейсы по-прежнему не прогнаны.
 
+**Опорные mermaid-схемы при багфиксе (слои, цикл sync, Abyss comments, матрица безопасного diff):** [`docs/ANALYST_REFERENCE_DIAGRAMS.md`](docs/ANALYST_REFERENCE_DIAGRAMS.md). Процесс analyst → test → fix: [`DEV_FLOW.md`](DEV_FLOW.md).
+
 ---
 
 ## Приложение: история решений PO (2026-10-16)
