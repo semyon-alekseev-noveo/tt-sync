@@ -52,6 +52,25 @@ When enabled, the plugin automatically adds `#ticktick` to **all** tasks in your
 !!! warning
     Full vault sync includes all task items (sub-tasks). Use with caution.
 
+## Deletion guard
+
+On by default. Before a sync applies deletions it counts:
+
+- tasks missing from the vault that would be deleted in TickTick
+- tasks deleted in TickTick that would be marked `[-]` or detached in the vault
+- comments deleted in either direction
+
+The sync applies none of those, and does not move the checkpoint, when either of these is true:
+
+- planned task deletions are more than 10 **and** more than 20% of tracked tasks (both defaults, both settings)
+- any deletion is planned while the vault scan found 0 tracked tasks and the local database has some, or while a full TickTick snapshot is empty and the local database has tasks
+
+Creates and updates still run. Manual sync asks you to apply once, skip deletions this run, or open a report at `.tickticksync/reports/deletions-<timestamp>.md`. Startup and scheduled sync only notify. A file that could not be read, a conflict copy, a sync-pending file, or a skipped file does not count as deleted. The first sync with an empty local database does not delete.
+
+Startup waits until the workspace layout is ready and Obsidian Sync is idle, then 30 seconds (setting). Use 0 to skip that wait.
+
+Turn **Hold mass deletions** off to restore the previous deletion behavior. A single deletion under the threshold still uses the existing confirm dialog.
+
 ## When Sync Happens
 
 TickTickSync syncs on two different triggers, and they don't behave the same way:

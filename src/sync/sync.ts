@@ -1,5 +1,5 @@
 import { db } from "@/db/dexie";
-import { pullFromTickTick } from "./pull";
+import { pullFromTickTick, type PullApplyOptions } from "./pull";
 import { logSyncEvent } from "./journal";
 import type { TickTickRestAPI } from '@/services/TicktickRestAPI';
 import { getSettings, updateSettings, mergeDeviceLists } from '@/settings';
@@ -7,7 +7,7 @@ import log from '@/utils/logger';
 
 let syncing = false;
 
-export async function syncTickTickWithDexie(ticktickRestApi: TickTickRestAPI, fullSync: boolean = false) {
+export async function syncTickTickWithDexie(ticktickRestApi: TickTickRestAPI, fullSync: boolean = false, pull?: PullApplyOptions) {
 	if (syncing) return;
 	syncing = true;
 
@@ -21,7 +21,8 @@ log.debug("[TickTickSync] meta", meta);
 		const pulled = await pullFromTickTick(
 			ticktickRestApi,
 			meta,
-			fullSync
+			fullSync,
+			pull,
 		);
 log.debug("[TickTickSync] pulled", pulled);
 

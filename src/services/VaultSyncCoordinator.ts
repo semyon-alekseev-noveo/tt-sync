@@ -13,6 +13,7 @@ import type { ITask } from '@/api/types/Task';
 import type { LocalTask } from '@/db/schema';
 import { db } from "@/db/dexie";
 import { getSettings } from '@/settings';
+import { deletionConfirmMode } from '@/sync/massDeleteGuard';
 import { getAllProjects } from '@/db/projects';
 import { tagsForCurrentList } from '@/listMapping';
 import { upsertFile } from '@/db/files';
@@ -348,7 +349,7 @@ export class VaultSyncCoordinator {
 		let behind = fieldsDiffer(task);
 		const commentCount = (task as ITask & { commentCount?: number }).commentCount;
 		const vaultThreads = extractAbyssCommentThreads(taskRec.taskLines ?? []).length;
-		if (!behind && useAbyssCommentsApi() && remote.projectId && typeof commentCount === 'number' && commentCount !== vaultThreads) {
+		if (deletionConfirmMode() !== 'skip' && !behind && useAbyssCommentsApi() && remote.projectId && typeof commentCount === 'number' && commentCount !== vaultThreads) {
 			try {
 				const comments = await this.plugin.tickTickRestAPI?.getTaskComments(remote.projectId, remote.id) ?? [];
 				if (apiCommentsDifferFromVault(taskRec.taskLines, comments)) {
@@ -409,6 +410,15 @@ export class VaultSyncCoordinator {
 			return true;
 		}
 
+		if (deletionConfirmMode() === 'skip') {
+			const held = new Set(tasksToConfirmDeletionIds);
+			for (const group of fileGroups.values()) {
+				group.toDelete = group.toDelete.filter(task => !held.has((task.id || (task as { taskId?: string }).taskId) ?? ''));
+			}
+			log.info(`TickTickSync: mass-delete guard skipped ${held.size} vault deletion(s)`);
+			return true;
+		}
+
 		if (getSettings().onTickTickDeletion === 'cancel') {
 			// No modal: detach these lines ([-], no id) and drop them from the delete lists.
 			const ids = new Set(tasksToConfirmDeletionIds);
@@ -440,6 +450,10 @@ export class VaultSyncCoordinator {
 					}
 				}
 			}
+			return true;
+		}
+
+		if (deletionConfirmMode() === 'force') {
 			return true;
 		}
 
