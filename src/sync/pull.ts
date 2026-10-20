@@ -3,10 +3,22 @@ import { resolveTaskConflict } from "./conflicts";
 import { logSyncEvent } from "./journal";
 import type { TickTickRestAPI } from '@/services/TicktickRestAPI';
 import type { LocalTask, SyncMeta } from "@/db/schema";
+import type { ITask } from '@/api/types/Task';
 import { updateSettings } from '@/settings';
 import { deleteCommentMapsForTask } from '@/db/taskCommentMaps';
+import { deletionIdOf } from '@/sync/massDeleteGuard';
 import log from '@/utils/logger';
 import { addCount } from '@/sync/perf';
+
+export interface PullApplyOptions {
+	/** Default true. False leaves remote delete[] unapplied. */
+	applyDeletions?: boolean;
+	/** Default true. False leaves the checkpoint and meta where they were. */
+	advanceCheckpoint?: boolean;
+	/** Delta already fetched for the deletion guard. Skips a second getUpdatedTasks. */
+	prefetched?: { update: ITask[]; delete: Array<string | { id?: string; taskId?: string }> };
+	restoreCheckpoint?: number;
+}
 
 /** Resolve a task identifier that may appear as `id` or `taskId`. */
 function resolveTaskId(task: { id?: string; taskId?: string }): string | undefined {
@@ -15,17 +27,19 @@ function resolveTaskId(task: { id?: string; taskId?: string }): string | undefin
 
 /** Resolve a deletion entry that may be a string or an object with `id`/`taskId`. */
 function resolveDeletionItem(item: string | { id?: string; taskId?: string }): string | null {
-	if (!item) return null;
-	return typeof item === 'string' ? item : item.taskId || item.id || null;
+	return deletionIdOf(item);
 }
 
 export async function pullFromTickTick(
 	ticktickRestApi: TickTickRestAPI,
 	meta: SyncMeta,
-	fullSync = true
+	fullSync = true,
+	options?: PullApplyOptions,
 ) {
+	const applyDeletions = options?.applyDeletions !== false;
+	const advanceCheckpoint = options?.advanceCheckpoint !== false;
 
-	const { update, delete: deletedIds } = await ticktickRestApi.getUpdatedTasks(
+	const { update, delete: deletedIds } = options?.prefetched ?? await ticktickRestApi.getUpdatedTasks(
 		fullSync ? 0 : meta.lastDeltaSync
 	);
 	addCount('tasksDelta', update.length);
@@ -97,7 +111,7 @@ export async function pullFromTickTick(
 	// 2️⃣ Handle deletions
 	const deletionIds = deletedIds.map(taskIdOrObj => resolveDeletionItem(taskIdOrObj as string | { id?: string; taskId?: string })).filter((id): id is string => !!id && typeof id === 'string');
 
-	if (deletionIds.length > 0) {
+	if (applyDeletions && deletionIds.length > 0) {
 		const localToDelete = await db.tasks.where("taskId").anyOf(deletionIds).toArray();
 		const toUpdateDeletion: LocalTask[] = [];
 
@@ -115,18 +129,23 @@ export async function pullFromTickTick(
 			await db.tasks.bulkPut(toUpdateDeletion);
 		}
 	}
-	if (fullSync) {
-		await db.meta.update("sync", {
-			lastFullSync: ticktickRestApi.checkpoint
-		});
-	} else {
-		await db.meta.update("sync", {
-			lastDeltaSync: ticktickRestApi.checkpoint
-		});
+	if (!advanceCheckpoint && typeof options?.restoreCheckpoint === 'number') {
+		ticktickRestApi.checkpoint = options.restoreCheckpoint;
 	}
-	// Persist checkpoint to data.json so it survives Dexie DB resets
-	updateSettings({ checkPoint: ticktickRestApi.checkpoint }, { persist: false });
-	await ticktickRestApi.plugin.saveSettings();
+	if (advanceCheckpoint) {
+		if (fullSync) {
+			await db.meta.update("sync", {
+				lastFullSync: ticktickRestApi.checkpoint
+			});
+		} else {
+			await db.meta.update("sync", {
+				lastDeltaSync: ticktickRestApi.checkpoint
+			});
+		}
+		// Persist checkpoint to data.json so it survives Dexie DB resets
+		updateSettings({ checkPoint: ticktickRestApi.checkpoint }, { persist: false });
+		await ticktickRestApi.plugin.saveSettings();
+	}
 	logSyncEvent(meta.deviceId, "pull:complete", { applied });
 
 	return applied;

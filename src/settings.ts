@@ -87,6 +87,15 @@ export interface ITickTickSyncSettings {
 
 	debugMode: boolean;
 	logLevel: string;
+	/** Hold a sync's deletions when they exceed the count and percent, or when one side looks empty. */
+	massDeleteGuardEnabled: boolean;
+	/** Block when planned task deletions are more than this count AND more than the percent. */
+	massDeleteTaskThreshold: number;
+	massDeletePercentThreshold: number;
+	/** How many planned deletions the guard dialog lists. The report lists all of them. */
+	massDeletePreviewCount: number;
+	/** Seconds after layout-ready and Obsidian Sync idle before the first sync. 0 skips the wait. */
+	startupSyncDelaySeconds: number;
 	journalRetentionDays: number;
 	redoLogRetentionDays: number;
 	deletedTaskRetentionDays: number;
@@ -117,6 +126,11 @@ export const DEFAULT_SETTINGS: ITickTickSyncSettings = {
 	tagAndOr: 1,
 	debugMode: false,
 	logLevel: 'info',
+	massDeleteGuardEnabled: true,
+	massDeleteTaskThreshold: 10,
+	massDeletePercentThreshold: 20,
+	massDeletePreviewCount: 20,
+	startupSyncDelaySeconds: 30,
 	journalRetentionDays: 3,
 	redoLogRetentionDays: 30,
 	deletedTaskRetentionDays: 7,

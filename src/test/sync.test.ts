@@ -258,6 +258,66 @@ describe('pullFromTickTick', () => {
 		})]);
 	});
 
+	it('EMPTY-SIDE-GUARD blocks deletions, still applies updates, and does not advance the checkpoint', async () => {
+		mockApi.checkpoint = 500;
+		mockApi.getUpdatedTasks.mockResolvedValue({
+			update: [{ id: 'keep-id', modifiedTime: new Date().toISOString(), title: 'updated', deleted: 0 }],
+			delete: ['gone-id'],
+		});
+		const keep = { localId: 'tt:keep-id', taskId: 'keep-id', deleted: false, task: { id: 'keep-id', title: 'old' } };
+		const gone = { localId: 'tt:gone-id', taskId: 'gone-id', deleted: false, task: { id: 'gone-id', title: 'gone' } };
+		const { mockWhere, anyOf } = makeMockWhere();
+		anyOf.mockImplementation((ids: string[]) => ({
+			toArray: async () => {
+				if (ids.includes('gone-id') && !ids.includes('keep-id')) return [gone];
+				if (ids.includes('keep-id')) return [keep];
+				return [];
+			},
+		}));
+		(db.tasks.where as any) = mockWhere;
+
+		await pullFromTickTick(mockApi, mockMeta, false, {
+			applyDeletions: false,
+			advanceCheckpoint: false,
+			restoreCheckpoint: 111,
+		});
+
+		const rows = (db.tasks.bulkPut as any).mock.calls.flatMap((call: unknown[][]) => call[0] as { taskId?: string; deleted?: boolean; task?: { title?: string } }[]);
+		expect(rows.some(row => row.taskId === 'keep-id' && row.task?.title === 'updated')).toBe(true);
+		expect(rows.some(row => row.deleted === true)).toBe(false);
+		expect(db.meta.update).not.toHaveBeenCalled();
+		expect(mockApi.checkpoint).toBe(111);
+	});
+
+	it('EMPTY-SIDE-GUARD apply once applies the planned deletions', async () => {
+		mockApi.checkpoint = 100;
+		mockApi.getUpdatedTasks.mockImplementation(async () => {
+			mockApi.checkpoint = 700;
+			return {
+				update: [{ id: 'keep-id', modifiedTime: new Date().toISOString(), title: 'updated', deleted: 0 }],
+				delete: ['gone-id'],
+			};
+		});
+		const keep = { localId: 'tt:keep-id', taskId: 'keep-id', deleted: false, task: { id: 'keep-id', title: 'old' } };
+		const gone = { localId: 'tt:gone-id', taskId: 'gone-id', deleted: false, task: { id: 'gone-id', title: 'gone' } };
+		const { mockWhere, anyOf } = makeMockWhere();
+		anyOf.mockImplementation((ids: string[]) => ({
+			toArray: async () => {
+				if (ids.includes('gone-id') && !ids.includes('keep-id')) return [gone];
+				if (ids.includes('keep-id')) return [keep];
+				return [];
+			},
+		}));
+		(db.tasks.where as any) = mockWhere;
+
+		await pullFromTickTick(mockApi, mockMeta, false, { applyDeletions: true, advanceCheckpoint: true });
+
+		const rows = (db.tasks.bulkPut as any).mock.calls.flatMap((call: unknown[][]) => call[0] as { taskId?: string; deleted?: boolean }[]);
+		expect(rows.some(row => row.taskId === 'keep-id')).toBe(true);
+		expect(rows.some(row => row.taskId === 'gone-id' && row.deleted === true)).toBe(true);
+		expect(db.meta.update).toHaveBeenCalledWith('sync', { lastDeltaSync: 700 });
+	});
+
 	it('BUG-SYNC-SILENT-FAIL does not advance the checkpoint when getUpdatedTasks fails', async () => {
 		mockApi.getUpdatedTasks.mockRejectedValue(new Error('network down'));
 		mockApi.checkpoint = 999;

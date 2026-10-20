@@ -28,6 +28,7 @@
 - Релиз **2.0.47:** `npx vitest run` — 67 файлов, 550 тестов. Эта ветка (ещё не релиз, версию не поднимали): **73 файла, 569 тестов**, `npm run build` — ok. В том числе `src/test/synchronizationInner.integration.test.ts`.
 - Пилот **2.0.48** (2026-10-20): debounce/open-note — pass; NOTE-L3b / Comments API — **fail**; DEL-1 — pass. Детали в `TEST_PLAN.md`, `ABYSS_FIRST_CASES.md`, `CHANGELOG.md`.
 - Релиз **2.0.53** (2026-10-20): idle sync без `getTaskById` на тихую задачу; эхо по `etag`; `getTaskComments` только при расхождении `commentCount`. Vitest **589**. Пилот `TP-IDLE-ZERO` — not run.
+- **EMPTY-SIDE-GUARD** (этот PR, версию не поднимали): порог массового удаления и пустая сторона держат удаления и чекпоинт. Пилот `TP-EMPTY-SIDE-GUARD` и соседние строки в `TEST_PLAN.md` — **not run**.
 - Релиз **2.0.52** (2026-10-20): vault-комментарий сохраняется при перерисовке строки; пилот NOTE-L3b — not run.
 - Релиз **2.0.51** (2026-10-20): PR #3 — `lastVaultPushWallMs`, delta `add`; пилот NOTE-L3b — **fail**.
 - Релиз **2.0.50** (2026-10-20): PR #2 — id index, file-run cache, `[perf]`; 584 tests. Пилот TP-PERF-* частично (`TEST_PLAN.md`).

@@ -22,6 +22,8 @@ import type { PendingTickTickDeletion } from '@/services/TaskModificationDetecto
 import type { ITask } from '@/api/types/Task';
 import { getTick } from '@/api/tick_singleton_factory'
 import { syncTickTickWithDexie } from '@/sync/sync';
+import { prepareDeletionGuard, type GuardedPull } from '@/sync/deletionGuardRun';
+import { clearGuardRun, deletionConfirmMode } from '@/sync/massDeleteGuard';
 import type { SyncRunResult } from '@/sync/result';
 import { db, initDB } from "@/db/dexie";
 import { getAllProjects, getProjectById, upsertProjects } from '@/db/projects';
@@ -122,6 +124,7 @@ export class TickTickService {
 	}
 
 	private locallyEdited = new Set<string>();
+	private guardedPull: GuardedPull | undefined;
 	async pushLocalEditsFirst() {
 		this.locallyEdited = new Set();
 		const meta = await db.meta.get("sync");
@@ -222,6 +225,8 @@ export class TickTickService {
 		let endApi = () => undefined;
 		let syncOk = true;
 		let errorMessage = '';
+		clearGuardRun();
+		this.guardedPull = undefined;
 		try {
 			endFiles = beginFileRun(this.plugin.app.vault);
 			endApi = observeSyncApi(this.plugin.tickTickRestAPI);
@@ -270,6 +275,11 @@ export class TickTickService {
 						ui.setFullStep('Scanning vault files…');
 						await this.ensureVaultFilesRegistered();
 					});
+					// Plan deletions in both directions before any of them are applied.
+					await timePhase('deletionGuard', async () => {
+						ui.setFullStep('Checking deletions…');
+						this.guardedPull = await prepareDeletionGuard(this.plugin, tickApi, trigger, fullSync, projects);
+					});
 					// Push vault edits made since the last sync BEFORE pulling, otherwise the pull
 					// re-renders the line from TickTick and the local edit is lost (seen on [x] lines
 					// edited outside the editor, where no editor-change check fires).
@@ -279,7 +289,7 @@ export class TickTickService {
 					});
 					await timePhase('pull', async () => {
 						ui.setFullStep(fullSync ? 'Full sync from TickTick…' : 'Pulling updates from TickTick…');
-						await syncTickTickWithDexie(tickApi, fullSync);
+						await syncTickTickWithDexie(tickApi, fullSync, this.guardedPull);
 						if (projects?.length) {
 							const healed = healTagListMappings(getSettings().tagListMappings, projects);
 							const pl = resolveProjectsList(projects, getSettings().projectsListName, getSettings().projectsListId);
@@ -297,7 +307,10 @@ export class TickTickService {
 							if (projects && live.size > 0) {
 								const all = (await db.tasks.toArray()).filter(lt => !lt.deleted && lt.task?.projectId);
 								const gone = all.filter(lt => !lt.task.projectId.startsWith('inbox') && !live.has(lt.task.projectId));
-								if (gone.length && gone.length <= Math.max(5, all.length / 2)) {
+								const mode = deletionConfirmMode();
+								if (mode === 'skip') {
+									if (gone.length) log.warn(`Mass-delete guard held ${gone.length} task(s) from missing TickTick lists`);
+								} else if (gone.length && (mode === 'force' || gone.length <= Math.max(5, all.length / 2))) {
 									for (const lt of gone) await markTaskDeleted(lt.task.id);
 									log.warn(`${gone.length} task(s) belonged to deleted TickTick lists; detaching`, gone.map(g => g.task.id));
 								} else if (gone.length) log.error(`Refusing to detach ${gone.length} tasks of missing lists (looks like a partial fetch)`);
@@ -325,6 +338,8 @@ export class TickTickService {
 			ui.setFullStep('Sync failed', errorMessage);
 			log.error('Error on synchronization: ', error);
 		} finally {
+			clearGuardRun();
+			this.guardedPull = undefined;
 			endApi();
 			endFiles();
 			const report = finishSyncPerf(perfRun, syncOk);

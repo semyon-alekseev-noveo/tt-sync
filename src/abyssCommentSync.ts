@@ -15,6 +15,7 @@ import {
 	upsertCommentMap,
 } from '@/db/taskCommentMaps';
 import { getSettings } from '@/settings';
+import { deletionConfirmMode } from '@/sync/massDeleteGuard';
 import log from '@/utils/logger';
 
 /** True when the vault's comment threads and the TickTick Comments list are not the same set. */
@@ -121,6 +122,7 @@ export async function syncAbyssCommentsToTickTick(
 			continue;
 		}
 		if (existing.body !== thread.body) {
+			if (deletionConfirmMode() === 'skip') continue;
 			await api.deleteTaskComment(projectId, taskId, existing.ticktickCommentId);
 			const created = await api.addTaskComment(projectId, taskId, thread.body);
 			if (created?.id) {
@@ -141,6 +143,7 @@ export async function syncAbyssCommentsToTickTick(
 	const localFps = new Set(threads.map(t => t.fingerprint));
 	for (const m of maps) {
 		if (!localFps.has(m.fingerprint)) {
+			if (deletionConfirmMode() === 'skip') continue;
 			if (remoteIds.has(m.ticktickCommentId)) {
 				await api.deleteTaskComment(projectId, taskId, m.ticktickCommentId);
 			}

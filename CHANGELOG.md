@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- Mass-deletion / empty-side guard. A sync plans vault→TickTick and TickTick→vault task and comment deletions before applying any of them. More than 10 tasks and more than 20% of tracked tasks, or any deletion while one side looks empty, applies nothing destructive and leaves the checkpoint. Creates and updates still run. Manual sync can apply once, skip, or open a report under `.tickticksync/reports/`. Startup and scheduled sync only notify. Unreadable, conflict, sync-pending, and skipped files do not produce deletions. Startup waits for layout ready and Obsidian Sync idle, then 30 seconds by default. Settings: `massDeleteGuardEnabled` (default on), `massDeleteTaskThreshold` (10), `massDeletePercentThreshold` (20), `massDeletePreviewCount` (20), `startupSyncDelaySeconds` (30). Turning the guard off restores the previous deletion behavior. No version bump.
+- Validation: `npx vitest run` → 81 files, **601 passed**; `npm run build` ok. Pilot rows in `TEST_PLAN.md` are **not run**.
+
 ### Iteration 2026-10-20 09:10 UTC
 
 - Context: Owner asked to release the idle-sync change.

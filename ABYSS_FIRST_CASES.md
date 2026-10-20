@@ -34,6 +34,7 @@ Preconditions for every AF row: plugin `tickticksync-abyss`, manual sync, `fileL
 | PERF-CACHE | In one sync, a file's text and its parsed task map are read once. A plugin write of that file drops both before the next read. |
 | PERF-COUNTERS | One sync records phase times and counters (HTTP by endpoint, 429, files read, files scanned, tasks checked, vault writes) and logs one `[perf]` line. |
 | TP-IDLE-ZERO | A quiet sync does not call `getTaskById`. `getTaskComments` runs only when `commentCount` differs from the vault comment threads. |
+| EMPTY-SIDE-GUARD | A sync that would delete more than 10 tracked tasks and more than 20% of them, or any deletion while the vault scan found 0 tracked tasks and Dexie has some, or while a TickTick full snapshot is empty and Dexie has tasks, applies no deletions and does not move `checkPoint`. Creates and updates still apply. Manual sync asks Apply once, Skip deletions this run, or Open report. Startup and scheduled sync only notify. A file that failed to read, is a conflict copy, is sync-pending, or was skipped does not produce deletions. An incomplete vault index does not produce deletions. The first sync with an empty Dexie deletes nothing. Startup waits until the layout is ready and Obsidian Sync is idle, then the configured delay (default 30 seconds). |
 
 Unit tests cover parts of AF-1, AF-5, AF-8, comments, a failed pull, and PERF-INDEX / PERF-CACHE / PERF-COUNTERS. They do not replace the live gate.
 

@@ -5,6 +5,7 @@
 	import GtdSection from './GtdSection.svelte';
 	import AutoSyncIntervalSection from './AutoSyncIntervalSection.svelte';
 	import FullVaultSyncSection from './FullVaultSyncSection.svelte';
+	import MassDeleteGuardSection from './MassDeleteGuardSection.svelte';
 	export let plugin;
 
 	const sections = [
@@ -13,6 +14,7 @@
 		{ key: 'gtd', component: GtdSection },
 		{ key: 'limit', component: LimitSyncSection },
 		{ key: 'auto', component: AutoSyncIntervalSection },
+		{ key: 'guard', component: MassDeleteGuardSection },
 		{ key: 'full', component: FullVaultSyncSection }
 	];
 

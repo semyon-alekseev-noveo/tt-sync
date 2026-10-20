@@ -1,4 +1,5 @@
 import { idsPresentInVault } from '@/utils/vaultIdScan';
+import { scanVaultForDeletionGuard } from '@/sync/vaultDeletionScan';
 import { stripFileLinks } from '@/projectScheme';
 /**
  * TaskDeletionHandler - Handles task deletion detection and execution
@@ -19,6 +20,7 @@ import { TaskDeletionModal, type DeletionPromptResult } from '@/modals/TaskDelet
 import { getSettings } from '@/settings';
 import { isPathInPushScope } from '@/syncScope';
 import { db } from '@/db/dexie';
+import { classifyFileRead, deletionConfirmMode, obsidianSyncFileState } from '@/sync/massDeleteGuard';
 import log from '@/utils/logger';
 
 export class TaskDeletionHandler {
@@ -74,10 +76,17 @@ export class TaskDeletionHandler {
 			return;
 		}
 
-		if (!currentFileValue) {
-			//Never infer deletions from a file we could not read: every task the DB
-			//places in it would be treated as deleted and removed from TickTick.
-			const message = `TickTickSync: could not read ${filepath}. Skipping the deleted-task check for it, so no tasks will be removed from TickTick.`;
+		const trust = classifyFileRead({
+			path: filepath,
+			readOk: typeof currentFileValue === 'string',
+			syncState: obsidianSyncFileState(this.app, file),
+		});
+		if (!currentFileValue || trust !== 'ok') {
+			// Never infer deletions from a file we could not read, or one that is
+			// conflicted, sync-pending, or skipped: every task the DB places in it
+			// would be treated as deleted and removed from TickTick.
+			const why = !currentFileValue ? 'unreadable' : trust;
+			const message = `TickTickSync: could not read ${filepath} (${why}). Skipping the deleted-task check for it, so no tasks will be removed from TickTick.`;
 			log.error(message);
 			new Notice(message, 5000);
 			return;
@@ -104,8 +113,22 @@ export class TaskDeletionHandler {
 		if (!(await this.fileTaskQueries.fileHasTasks(file_path))) {
 			return [];
 		}
-		const currentFileValue = await this.plugin.fileOperation.readFileContent(file);
-		if (!currentFileValue) {
+		let currentFileValue = '';
+		let readOk = true;
+		try {
+			const read = await this.plugin.fileOperation.readFileContent(file);
+			if (typeof read !== 'string') readOk = false;
+			else currentFileValue = read;
+		} catch (error) {
+			readOk = false;
+			log.warn(`TickTickSync: not inferring deletions from ${file_path}`, error);
+		}
+		const trust = classifyFileRead({
+			path: file_path,
+			readOk,
+			syncState: obsidianSyncFileState(this.app, file),
+		});
+		if (!readOk || !currentFileValue || trust !== 'ok') {
 			return [];
 		}
 		const contentWithoutFrontmatter = currentFileValue.replace(/^---[\s\S]*?---\n/, '');
@@ -123,10 +146,17 @@ export class TaskDeletionHandler {
 		if (!candidates.length) {
 			return [];
 		}
-		const present = await idsPresentInVault(this.app, candidates.map(lt => lt.taskId));
+		const scan = await scanVaultForDeletionGuard(this.app);
+		if (scan.incomplete) {
+			log.warn('TickTickSync: vault index incomplete; not inferring deletions from missing task lines');
+			return [];
+		}
 		return candidates
 			.filter(lt => {
-				if (present.has(lt.taskId)) {
+				if (scan.presentIds.has(lt.taskId)) {
+					return false;
+				}
+				if (lt.file && scan.untrustedFiles.has(lt.file)) {
 					return false;
 				}
 				if (lt.file && isPathInPushScope(lt.file)) {
@@ -141,6 +171,11 @@ export class TaskDeletionHandler {
 	 * After phase 1: one deletion dialog for all removed/orphan tasks, then per-file checklist item cleanup.
 	 */
 	async processSyncRemovedTasks(filePaths: string[]): Promise<void> {
+		const mode = deletionConfirmMode();
+		if (mode === 'skip') {
+			log.info('TickTickSync: mass-delete guard skipped vault→TickTick deletions for this run');
+			return;
+		}
 		const taskIds = new Set<string>();
 		for (const filePath of filePaths) {
 			for (const id of await this.collectMissingTaskIdsForFile(filePath)) {
@@ -153,7 +188,8 @@ export class TaskDeletionHandler {
 		if (taskIds.size > 0) {
 			await this.deleteTasksByIds(
 				[...taskIds],
-				'Their task lines were removed from Obsidian (or are no longer in the vault)'
+				'Their task lines were removed from Obsidian (or are no longer in the vault)',
+				mode === 'force' ? { skipConfirm: true } : undefined,
 			);
 		}
 		for (const filePath of filePaths) {
@@ -201,7 +237,9 @@ export class TaskDeletionHandler {
 				// First check if task exists in another file in the vault
 				const foundInAnotherFile = await this.findTaskInVault(taskId, filePath);
 
-				if (foundInAnotherFile) {
+				if (foundInAnotherFile === 'inconclusive') {
+					log.warn(`TickTickSync: not inferring deletion of ${taskId}; a file could not be read or is in conflict/sync-pending`);
+				} else if (foundInAnotherFile) {
 					log.trace(`Task ${taskId} moved from ${filePath} to ${foundInAnotherFile}`);
 				} else {
 					// Task not found anywhere in vault - it's actually deleted
@@ -219,9 +257,10 @@ export class TaskDeletionHandler {
 	 * Search for a task ID in all vault files (except the specified excluded file)
 	 * Returns the file path if found, undefined otherwise
 	 */
-	private async findTaskInVault(taskId: string, excludeFilePath: string): Promise<string | undefined> {
+	private async findTaskInVault(taskId: string, excludeFilePath: string): Promise<string | undefined | 'inconclusive'> {
 		const allMarkdownFiles = this.app.vault.getMarkdownFiles();
 		const taskIdPattern = new RegExp(`%%\\[ticktick_id::\\s*${taskId}\\]%%`, 'i');
+		let inconclusive = false;
 
 		for (const file of allMarkdownFiles) {
 			// Skip the file we're checking deletions from
@@ -229,6 +268,15 @@ export class TaskDeletionHandler {
 				continue;
 			}
 
+			const trust = classifyFileRead({
+				path: file.path,
+				readOk: true,
+				syncState: obsidianSyncFileState(this.app, file),
+			});
+			if (trust !== 'ok') {
+				inconclusive = true;
+				continue;
+			}
 			try {
 				const content = await this.app.vault.cachedRead(file);
 				if (taskIdPattern.test(content)) {
@@ -236,10 +284,11 @@ export class TaskDeletionHandler {
 				}
 			} catch (error) {
 				log.warn(`Error reading file ${file.path} while searching for task ${taskId}:`, error);
+				inconclusive = true;
 			}
 		}
 
-		return undefined;
+		return inconclusive ? 'inconclusive' : undefined;
 	}
 
 	/**
@@ -308,7 +357,7 @@ export class TaskDeletionHandler {
 	/**
 	 * Delete tasks by their IDs with user confirmation
 	 */
-	async deleteTasksByIds(taskIds: string[], reason = 'The tasks were removed from the file'): Promise<string[]> {
+	async deleteTasksByIds(taskIds: string[], reason = 'The tasks were removed from the file', opts?: { skipConfirm?: boolean }): Promise<string[]> {
 		if (taskIds.length === 0) {
 			return [];
 		}
@@ -316,7 +365,12 @@ export class TaskDeletionHandler {
 		// Never delete project parents; skip ids that still exist in some note (file recreated / task moved).
 		taskIds = await this.filterStillReferenced(taskIds.filter(id => !this.plugin.projectScheme?.isParentId(id)));
 		if (taskIds.length === 0) return [];
-		// Get confirmation from user
+		if (deletionConfirmMode() === 'skip') {
+			log.info('TickTickSync: mass-delete guard skipped TickTick deletions for this run');
+			return [];
+		}
+		// Get confirmation from user. Apply-once already confirmed in the guard dialog.
+		if (!opts?.skipConfirm && deletionConfirmMode() !== 'force') {
 		const prompt = await this.confirmDeletion(taskIds, reason);
 		if (!prompt.confirmed) {
 			if (!prompt.suppressedPending) {
@@ -326,6 +380,7 @@ export class TaskDeletionHandler {
 				new Notice(msg, 8000);
 			}
 			return [];
+		}
 		}
 
 		const deletedTaskIds: string[] = [];
@@ -416,7 +471,9 @@ export class TaskDeletionHandler {
 
 		const taskIds = await this.fileTaskQueries.getTaskIdsInFile(filepath);
 		if (taskIds.length > 0) {
-			await this.deleteTasksByIds(taskIds);
+			const mode = deletionConfirmMode();
+			if (mode === 'skip') return;
+			await this.deleteTasksByIds(taskIds, 'The tasks were removed from the file', mode === 'force' ? { skipConfirm: true } : undefined);
 		}
 
 		// Clean up file metadata

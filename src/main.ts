@@ -16,6 +16,7 @@ import { type Editor, type MarkdownFileInfo, MarkdownView, Notice, Plugin, TFold
 //settings
 import { getSettings, mergeDeviceLists, updateSettings } from './settings';
 import { formatPluginLoadedNotice, formatSyncResultNotice, type SyncRunResult } from '@/sync/result';
+import { waitForStartupSync } from '@/sync/startupDelay';
 import {
 	buildPersistedSettings,
 	hydrateSettingsFromDisk,
@@ -566,7 +567,15 @@ export default class TickTickSync extends Plugin {
 			new Notice(`Error creating user data folder`);
 			return false;
 		}
-		//And now load the DB and sync it.
+		// Layout is ready (onload waits for it). Wait again for Obsidian Sync, then the startup delay.
+		await waitForStartupSync({
+			ensureLayoutReady: async () => {
+				if (this.app.workspace.layoutReady) return;
+				await new Promise<void>(resolve => { this.app.workspace.onLayoutReady(() => resolve()); });
+			},
+			waitForObsidianSync: () => this.waitForObsidianSync(),
+			delaySeconds: getSettings().startupSyncDelaySeconds,
+		});
 		const loadedSync = await this.service.synchronization(true, 'startup');
 		await this.autoCleanupDeletedTasks();
 

@@ -332,3 +332,85 @@ Do not start this until the four `TP-DELTA-*` rows above have evidence. `syncTas
 4. **Closed and trash.** If complete/delete already appear in `update[]` / `delete[]`, leave `project/all/closed` and trash pagination to the daily job. If they do not, those calls stay on every sync.
 5. **Daily job.** Once a day, not on startup: closed window, trash, comment backfill from step 3, and one `batch/check/0` title/content/status compare instead of `getTaskById` per task.
 6. **Tests.** `TP-IDLE-ZERO` (`getTaskById = 0`, `getTaskComments = 0`), `TP1-QUIET-TITLE-ETAG`, `TP-ECHO-ETAG`, `TP-COMMENT-COUNT`, `TP-DAILY-RECONCILE`. All **not run** until that code exists.
+
+## PR — mass-deletion / empty-side guard
+
+Branch `cursor/mass-delete-guard-761a`. No version bump. Build from this branch.
+
+Settings (defaults): `massDeleteGuardEnabled` on, `massDeleteTaskThreshold` 10, `massDeletePercentThreshold` 20, `massDeletePreviewCount` 20, `startupSyncDelaySeconds` 30. Both the count and the percent must be exceeded. Tracked tasks are non-deleted rows in the local database. The report is a new file `.tickticksync/reports/deletions-<timestamp>.md`. The decision is a redo journal record with `field` `mass-delete-guard`.
+
+Preconditions unless a case says otherwise: logged in, guard on, manual **Synchronize**, plugin id `tickticksync-abyss`, pilot vault only.
+
+### TP-EMPTY-SIDE-GUARD — an empty vault or an empty TickTick snapshot deletes nothing
+
+1. Sync a handful of tasks so Dexie has them.
+2. Make the vault scan see no tracked tasks without deleting the notes by hand in a way the plugin can trust: quit Obsidian, move the in-scope notes out of the vault folder, and open the vault again. Or point `syncScopeFolders` at an empty folder only if that folder is the whole scan the plugin uses. Do not use `<live-vault>`.
+3. Run **Synchronize**.
+
+Expected: a notice that deletions were held (`empty-vault`). No TickTick task is deleted. `checkPoint` is unchanged. A new file `.tickticksync/reports/deletions-<timestamp>.md` lists the held deletions. The journal has a `mass-delete-guard` record with choice `skip` or `open-report` if you opened the report, not an applied delete. Creates and title updates that are not deletions still apply.
+
+4. Restore the notes. Separately, if you can obtain a full TickTick snapshot that contains no tasks while Dexie still has tasks (do not do this against an account you care about), **Synchronize** once.
+
+Expected: the same hold, reason `empty-ticktick`. No vault line is marked `[-]` or detached because of that snapshot.
+
+### TP-MASS-DELETE-THRESHOLD — count and percent together
+
+1. With the defaults (more than 10 and more than 20%), delete 11 lines that are more than 20% of the tracked tasks. **Synchronize**.
+
+Expected: the guard dialog lists the counts and the first 20 items (or the preview setting). Choices are **Apply once**, **Skip deletions this run**, and **Open report**. Choosing skip deletes nothing and does not move `checkPoint`. Non-deletion edits in the same run still reach TickTick.
+
+2. Delete 11 lines that are 20% or less of tracked tasks. **Synchronize** and confirm the usual deletion dialog.
+
+Expected: the mass-delete guard does not hold them. The existing confirm dialog still appears.
+
+### TP-MASS-DELETE-APPLY-ONCE — one confirmed run
+
+1. Produce a held plan (TP-EMPTY-SIDE-GUARD or TP-MASS-DELETE-THRESHOLD).
+2. Choose **Apply once**.
+
+Expected: those deletions run this time. `checkPoint` may advance. The journal choice is `apply-once`. The next sync does not treat that click as a permanent off switch: another over-threshold plan is held again.
+
+### TP-UNREADABLE-FILE-NO-DELETE — a bad read is not a deletion
+
+1. Sync one task. Make its note unreadable, a `(Conflicted copy …)` file, or a Syncthing `.sync-conflict-` file, or leave Obsidian Sync still downloading it.
+2. **Synchronize**.
+
+Expected: that file's tasks are not offered for deletion in TickTick. A notice names the file when the read failed. A single readable deletion in another note still uses the existing confirm dialog.
+
+### TP-STARTUP-OBSIDIAN-SYNC — first sync waits
+
+1. Set the startup delay to 30 (the default). On a second device, open the vault while Obsidian Sync is still downloading a note that contains a completed task.
+2. Watch the first sync.
+
+Expected: the plugin does not sync until the layout is ready and Obsidian Sync is idle, and then it waits the configured seconds. The completed task is not duplicated and its checkbox is not cleared. A startup sync that wants a mass deletion only notifies; it does not apply the deletions.
+
+### TP-EMPTY-DEXIE-BOOTSTRAP — an empty local database does not delete
+
+1. On a copy of the pilot vault, clear the plugin's local database (or use a new device profile) while the vault and TickTick both still have the same tasks. Do not use `<live-vault>`.
+2. Let the startup sync run, then run **Synchronize** once.
+
+Expected: 0 tasks deleted on TickTick, 0 lines removed or detached in the vault, 0 duplicate tasks. The guard reason for any invented deletion is `empty-dexie`.
+
+### Regressions
+
+Pilot status for each: **not run**.
+
+| ID | Steps | Expected |
+|----|--------|----------|
+| TP-GUARD-R-ONE-DELETE | Delete one synced line. **Synchronize**. Confirm the existing dialog. On a second line, delete, **Synchronize**, cancel. | Confirm removes that TickTick task. Cancel leaves it. The mass-delete dialog does not replace this dialog. |
+| TP-GUARD-R-OFF | Turn **Hold mass deletions** off. Repeat a case that would have been held. | Deletions follow the previous confirm / detach behavior. `checkPoint` may advance on a successful sync. |
+| TP-GUARD-R-SYNC-OK | With the network up and no mass deletion, **Synchronize**. | Notice is `Sync completed.` A normal title edit still reaches TickTick. |
+
+## Results
+
+| ID | Pilot status | Evidence |
+|----|----------------|----------|
+| TP-EMPTY-SIDE-GUARD | not run | |
+| TP-MASS-DELETE-THRESHOLD | not run | |
+| TP-MASS-DELETE-APPLY-ONCE | not run | |
+| TP-UNREADABLE-FILE-NO-DELETE | not run | |
+| TP-STARTUP-OBSIDIAN-SYNC | not run | |
+| TP-EMPTY-DEXIE-BOOTSTRAP | not run | |
+| TP-GUARD-R-ONE-DELETE | not run | |
+| TP-GUARD-R-OFF | not run | |
+| TP-GUARD-R-SYNC-OK | not run | |
