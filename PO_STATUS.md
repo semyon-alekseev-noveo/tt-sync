@@ -4,7 +4,7 @@
 **Audience:** Product owner / decision maker  
 **Repo:** `tickticksync` branch `abyss-mapping`  
 **Test vault:** `<pilot-vault>` (copy only; live vault `<live-vault>` untouched)  
-**Install:** BRAT → `https://github.com/semyon-alekseev-noveo/tt-sync` track **latest release** (**2.0.49**, tag `2.0.49`); plugin id **`tickticksync-abyss`** — `docs/BRAT_INSTALL.md`. Preset: `00 Inbox/TTS-data-preset.json`.
+**Install:** BRAT → `https://github.com/semyon-alekseev-noveo/tt-sync` track **latest release** (**2.0.50**, tag `2.0.50`); plugin id **`tickticksync-abyss`** — `docs/BRAT_INSTALL.md`. Preset: `00 Inbox/TTS-data-preset.json`.
 
 История изменений — только в `CHANGELOG.md`; здесь — снимок для PO.
 
@@ -27,6 +27,7 @@
 
 - Релиз **2.0.47:** `npx vitest run` — 67 файлов, 550 тестов. Эта ветка (ещё не релиз, версию не поднимали): **73 файла, 569 тестов**, `npm run build` — ok. В том числе `src/test/synchronizationInner.integration.test.ts`.
 - Пилот **2.0.48** (2026-10-20): debounce/open-note — pass; NOTE-L3b / Comments API — **fail**; DEL-1 — pass. Детали в `TEST_PLAN.md`, `ABYSS_FIRST_CASES.md`, `CHANGELOG.md`.
+- Релиз **2.0.50** (2026-10-20): PR #2 merged — id index, file-run cache, `[perf]`; `npx vitest run` → 79 files, 584 tests. Пилот TP-PERF-* — not run.
 - Детали и даты прогонов — в `CHANGELOG.md`.
 
 ## Problems
@@ -60,11 +61,10 @@
 
 ## To Be Done
 
-1. **PR #2** (`cursor/sync-perf-index-cache-aa83`): rebase на `abyss-mapping` → MR, merge владельцем; пилот TP-PERF-* (`TEST_PLAN.md`).
-2. **BUG-COMMENT-NO-PUSH** / NOTE-L3b на пилоте (**2.0.49** fail) — root-cause и fix после merge perf или параллельной ветки.
-3. **BUG-ACTIVEZONE-COMMENT-SHUFFLE** — failing test + fix (`pullSubtaskOrder` / `mergeAbyssBlock`).
-4. Gate: AF-5 в **Inbox**, DEL-3, CTX-D2 на грязных тегах.
-5. Открыто: GAP-COMMENT-EDIT, RISK-PULL-WINS-LOCAL, RISK-DUAL-STORE, RISK-LARGE-VAULT (частично в PR #2), TECH-START-1, TECH-CIRC-1.
+1. Пилот **2.0.50**: TP-PERF-* (`TEST_PLAN.md`); затем NOTE-L3b / **BUG-COMMENT-NO-PUSH** (fail на **2.0.49**).
+2. **BUG-ACTIVEZONE-COMMENT-SHUFFLE** — failing test + fix (`pullSubtaskOrder` / `mergeAbyssBlock`).
+3. Gate: AF-5 в **Inbox**, DEL-3, CTX-D2 на грязных тегах.
+4. Открыто: GAP-COMMENT-EDIT, RISK-PULL-WINS-LOCAL, RISK-DUAL-STORE, RISK-LARGE-VAULT (частично в **2.0.50**), TECH-START-1, TECH-CIRC-1.
 
 ## Аналитический мит 2026-10-19
 

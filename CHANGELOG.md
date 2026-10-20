@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-20 05:15 UTC
+
+- Context: Owner merged PR #2 into `abyss-mapping` and requested release **2.0.50**.
+- Target: Tag **2.0.50** (vault id index, per-sync file cache, `[perf]` sync timings).
+- Actions log: Bumped `package.json`, `manifest.json`, `versions.json` to **2.0.50**; `PO_STATUS.md` install baseline.
+- Validation: `npx vitest run` → 79 files, 584 passed; `npm run build` → ok.
+- Problems: NOTE-L3b / BUG-COMMENT-NO-PUSH still open on pilot; TP-PERF-* not run live yet.
+- To Be Done: BRAT **2.0.50** on pilot; TP-PERF-* rows in `TEST_PLAN.md`; return to comment push fix.
+- References: `TEST_PLAN.md`, `PO_STATUS.md`, `CHANGELOG.md`
+
 ### Iteration 2026-10-20 04:45 UTC
 
 - Context: Owner requested release **2.0.49**, cleanup pilot test notes/tasks, assess PR #2 merge.
