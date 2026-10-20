@@ -165,7 +165,7 @@ Release **2.0.48** (`8f4c524`, tag pushed 2026-10-20). Pilot plugin on `Thinkpad
 | TP1-SWITCH-FILE | not run | Same. |
 | TP1-NEW-ON-LEAVE | partial | Task created on leave with id; watch blank `- [ ]` line at EOF — may create empty TT task. |
 | TP1-NEW-ON-SYNC | pass | `00 Inbox/tp1-cli-smoke.md`: two new lines → **Synchronize** (`tickticksync-abyss:tts-sync`); ids `6ad6d78f…`, `6ad6d915…`. Journal `2026-10-20.jsonl`. |
-| TP1-CHILD-COMMENT | not run | Prior fail on **2.0.49**; fix `lastVaultPushWallMs` in pre-pull push — re-test NOTE-L3b after next build. |
+| TP1-CHILD-COMMENT | fail | **2.0.51** pilot: `gate-comment-249` `6ad6f43a…` — child line `gate-251-retest-b` stripped on sync; MCP `get_comment` empty. |
 | TP1-CHILD-DESC | pass | `- > tp1-desc-2048` → TickTick `content` = `tp1-desc-2048` (task `6ad6d78f…`, MCP). |
 | TP1-SIBLING-COMMENTS | not run | Blocked on comment API push. |
 | TP1-PULL-FAIL | not run | Network/session toggle not automated this session. |
@@ -267,7 +267,7 @@ Automated: `bugCommentNoPush.test.ts`, `synchronizationInner.integration.test.ts
 
 | ID | Pilot status | Evidence |
 |----|----------------|----------|
-| TP-BUG-COMMENT-NO-PUSH | not run | Install build from this PR; re-run NOTE-L3b on pilot vault. |
+| TP-BUG-COMMENT-NO-PUSH | fail | **2.0.51** Thinkpad-tts-test: `00 Inbox/abyss-active.md` `6ad6f43a…`; journal `sync-mvgaaegu` / `sync-mvg8smb7` **tt→obs** removed `gate-251-l3b-agent` / `gate-251-retest-b`; TickTick Comments empty (MCP). Plugin version via eval `2.0.51`. |
 
 ## Delta API pilot (`docs/TICKTICK_DELTA_API.md` §3.5)
 

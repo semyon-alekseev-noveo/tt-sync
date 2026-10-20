@@ -175,12 +175,20 @@ export function mergeAbyssBlock(newText: string, oldChild: string[], base?: stri
 	gen.forEach((l, i) => {
 		if (genKinds[i] === 'comment' || (genKinds[i] === 'cont' && comments.length)) comments.push(l);
 	});
-	// Never drop a local comment TickTick hasn't seen yet (it is pushed on the next local change).
+	// Vault comments are the same entity as TickTick Comments. Keep a local thread the
+	// generated block does not already show, unless `base` is a note that already contained
+	// that body under `Comments:` and the new block dropped it (deleted in TickTick).
+	// A missing base, or a description-only base, must not wipe vault bullets.
 	const have = new Set(comments.map(l => l.trim()));
+	const commentsIdx = base?.indexOf(COMMENTS_HEADER) ?? -1;
+	const syncedBodies = base !== undefined && commentsIdx >= 0 ? base.slice(commentsIdx + COMMENTS_HEADER.length) : '';
 	let carry = false;
 	oldChild.forEach((l, i) => {
-		if (oldKinds[i] === 'comment') { const body = l.trim().slice(2); carry = base !== undefined && !base.includes(body) && !have.has(l.trim()); }
-		else if (oldKinds[i] !== 'cont') carry = false;
+		if (oldKinds[i] === 'comment') {
+			const body = l.trim().slice(2);
+			const deletedInNote = syncedBodies.length > 0 && syncedBodies.includes(body);
+			carry = !have.has(l.trim()) && !deletedInNote;
+		} else if (oldKinds[i] !== 'cont') carry = false;
 		if (carry && (oldKinds[i] === 'comment' || oldKinds[i] === 'cont')) comments.push(l);
 	});
 	const tidy = (l: string) => l.replace(/[ \t]+$/, '').replace(/ {2,}%%/, ' %%');

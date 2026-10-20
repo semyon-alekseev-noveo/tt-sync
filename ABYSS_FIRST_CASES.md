@@ -65,6 +65,8 @@ Pass only with evidence: the note path, the `ticktick_id`, and either the journa
 | Date (UTC) | Vault | Build | Runner | Item | Result | Evidence |
 |------------|-------|-------|--------|------|--------|----------|
 | 2026-10-20 | Thinkpad-tts-test | 2.0.48 | Sam (manual) | AF-5 | partial | Checkbox in **project** (dishwasher / Active Zone): task on TTS-Projects, `#type/next` on line — not the plain-inbox AF-5 recipe; line stayed in vault. |
+| 2026-10-20 | Thinkpad-tts-test | 2.0.51 | agent (Obsidian CLI) | NOTE-L3b | fail | `00 Inbox/abyss-active.md` `6ad6f43a…`: added `gate-251-retest-b`; **Synchronize** (`tickticksync-abyss:tts-sync`); journal strips comment line; MCP Comments empty. |
+| 2026-10-20 | Thinkpad-tts-test | 2.0.51 | agent (Obsidian CLI) | BUG-COMMENT-NO-PUSH | fail | Same as NOTE-L3b row; `lastVaultPushWallMs` release did not reach TT Comments API on pilot. |
 | 2026-10-20 | Thinkpad-tts-test | 2.0.48 | Sam (manual) | NOTE-L3b | fail | `00 Inbox/manual-test.md` `6ad6e474…`: comment bullets in vault, not in TT Comments; Active Zone tasks reordered / comment moved between tasks. |
 | 2026-10-20 | Thinkpad-tts-test | 2.0.48 | Sam (manual) | DEL-1 | pass | Deleted line in Obs → **Synchronize** → confirm dialog → task removed in TT (slow sync; dialog is expected). |
 | 2026-10-20 | Thinkpad-tts-test | 2.0.48 | Sam (manual) | DEL-3 | not run | |

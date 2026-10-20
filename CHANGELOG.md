@@ -1,5 +1,35 @@
 # Changelog
 
+### Iteration 2026-10-20 08:40 UTC
+
+- Context: Owner asked to release the comment round-trip fix after the **2.0.51** pilot fail.
+- Target: Tag **2.0.52**.
+- Actions log: Bumped `package.json`, `manifest.json`, `versions.json` to **2.0.52**; `PO_STATUS.md` install baseline.
+- Validation: `npx vitest run` → 80 files, **587 passed**; `npm run build` — this iteration.
+- Problems: NOTE-L3b not re-run on **2.0.52**.
+- To Be Done: BRAT **2.0.52**; NOTE-L3b on the pilot.
+- References: `TEST_PLAN.md`, `PO_STATUS.md`, `CHANGELOG.md`
+
+### Iteration 2026-10-20 08:35 UTC
+
+- Context: NOTE-L3b on **2.0.51** stripped vault comment bullets on **tt→obs** rewrite while TickTick Comments stayed empty.
+- Target: A vault comment thread is the same entity as a TickTick comment: keep it across a line rewrite and push it before that rewrite.
+- Actions log: `mergeAbyssBlock` keeps local comments unless they were in a synced `Comments:` block and are absent from the new block. `persistToFile` calls `syncAbyssCommentsToTickTick` before `convertTaskToLine`.
+- Validation: `npx vitest run` → 80 files, **587 passed**.
+- Problems: Pilot NOTE-L3b not re-run on this build.
+- To Be Done: Build and re-run NOTE-L3b on the pilot.
+- References: `src/abyssFormat.ts`, `src/fileOperation.ts`, `CHANGELOG.md`
+
+### Iteration 2026-10-20 06:22 UTC
+
+- Context: Owner installed **2.0.51** on pilot; requested tester run per `DEV_FLOW.md`.
+- Target: **TP-BUG-COMMENT-NO-PUSH** / **NOTE-L3b** on Thinkpad-tts-test.
+- Actions log: Added comment bullets on `gate-comment-249` (`6ad6f43a…`); **Synchronize** via Obsidian CLI (`vault=Thinkpad-tts-test`, `tickticksync-abyss:tts-sync`); MCP `get_comment`; journal `2026-10-20.jsonl`. Updated `TEST_PLAN.md`, `ABYSS_FIRST_CASES.md`, `PO_STATUS.md`.
+- Validation: `npx vitest run` → **586 passed** (repo). Pilot NOTE-L3b → **fail**; TP1-CHILD-COMMENT → **fail**; sync completes (journal commits).
+- Problems: Vault comment lines removed on **tt→obs** without TT Comments API entries; tag shuffle on `gate-comment-249` (`#note/note-l3b-gate` → `#note/abyss-active`); overlapping `sync-mvgaaegu` / `sync-mvg8smb7` at same second.
+- To Be Done: Root-cause why `syncAbyssCommentsToTickTick` / sweep does not run or pull overwrites before map; consider isolated single-task note for next gate.
+- References: `TEST_PLAN.md`, `ABYSS_FIRST_CASES.md`, `CHANGELOG.md`
+
 ### Iteration 2026-10-20 06:15 UTC
 
 - Context: Owner merged PR #3 into `abyss-mapping` and requested release **2.0.51**.

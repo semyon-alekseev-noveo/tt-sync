@@ -50,10 +50,19 @@ describe('Abyss child block anywhere', () => {
 	});
 	it('note edited in TickTick replaces descriptions only', () => {
 		const gen = [FILE[1], ...noteToAbyssLines('новое', '\t')].join('\n');
-		const merged = mergeAbyssBlock(gen, child).split('\n');
+		const merged = mergeAbyssBlock(gen, child, note).split('\n');
 		expect(merged.filter(l => l.includes('- >') && !l.startsWith('\t\t'))).toEqual(['\t- > новое']);
 		expect(merged).toContain('\t\t- > описание подзадачи');
 		expect(merged.some(l => l.includes('коммент'))).toBe(false);
+	});
+	it('BUG-COMMENT-NO-PUSH keeps vault comments when the generated block has none', () => {
+		const gen = '- [ ] gate-comment-249 #obsidian #inbox %%[ticktick_id:: 6ad6f43a0aa12c21f30de04a]%%\n\t- > gate-desc-249';
+		const old = ['\t- > gate-desc-249', '\t- 2026-10-20 13:18: gate-251-retest-b'];
+		for (const base of [undefined, 'gate-desc-249'] as const) {
+			const out = mergeAbyssBlock(gen, old, base);
+			expect(out).toContain('gate-251-retest-b');
+			expect(out).toContain('- > gate-desc-249');
+		}
 	});
 });
 

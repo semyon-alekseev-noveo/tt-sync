@@ -4,7 +4,7 @@
 **Audience:** Product owner / decision maker  
 **Repo:** `tickticksync` branch `abyss-mapping`  
 **Test vault:** `<pilot-vault>` (copy only; live vault `<live-vault>` untouched)  
-**Install:** BRAT → `https://github.com/semyon-alekseev-noveo/tt-sync` track **latest release** (**2.0.51**, tag `2.0.51`); plugin id **`tickticksync-abyss`** — `docs/BRAT_INSTALL.md`. Preset: `00 Inbox/TTS-data-preset.json`.
+**Install:** BRAT → `https://github.com/semyon-alekseev-noveo/tt-sync` track **latest release** (**2.0.52**, tag `2.0.52`); plugin id **`tickticksync-abyss`** — `docs/BRAT_INSTALL.md`. Preset: `00 Inbox/TTS-data-preset.json`.
 
 История изменений — только в `CHANGELOG.md`; здесь — снимок для PO.
 
@@ -27,7 +27,8 @@
 
 - Релиз **2.0.47:** `npx vitest run` — 67 файлов, 550 тестов. Эта ветка (ещё не релиз, версию не поднимали): **73 файла, 569 тестов**, `npm run build` — ok. В том числе `src/test/synchronizationInner.integration.test.ts`.
 - Пилот **2.0.48** (2026-10-20): debounce/open-note — pass; NOTE-L3b / Comments API — **fail**; DEL-1 — pass. Детали в `TEST_PLAN.md`, `ABYSS_FIRST_CASES.md`, `CHANGELOG.md`.
-- Релиз **2.0.51** (2026-10-20): PR #3 — **BUG-COMMENT-NO-PUSH** (`lastVaultPushWallMs`), delta `add` merge, `docs/TICKTICK_DELTA_API.md`; vitest **586**. Пилот **TP-BUG-COMMENT-NO-PUSH** / NOTE-L3b — not run.
+- Релиз **2.0.52** (2026-10-20): vault-комментарий сохраняется при перерисовке строки и пушится в Comments API до записи файла; vitest **587**. Пилот NOTE-L3b на **2.0.52** — not run.
+- Релиз **2.0.51** (2026-10-20): PR #3 — `lastVaultPushWallMs`, delta `add`; пилот NOTE-L3b — **fail**.
 - Релиз **2.0.50** (2026-10-20): PR #2 — id index, file-run cache, `[perf]`; 584 tests. Пилот TP-PERF-* частично (`TEST_PLAN.md`).
 - Детали и даты прогонов — в `CHANGELOG.md`.
 
@@ -44,7 +45,7 @@
 | **BUG-PULL-COMMENT-STALE** | P2 | fixed on this branch | `vaultLineBehindTask` сравнивает отпечатки Comments API. `getTaskById` только если заголовок/статус/content уже совпали; повторного вызова в цикле vault-sync нет. Комментарии кэшируются на задаче (`_apiComments`) |
 | **RISK-PULL-WINS-LOCAL** | P2 | open | При победе локальной версии в LWW строка в vault может остаться устаревшей |
 | **BUG-COMMENT-MAP-ORPHAN** | P2 | fixed on this branch | `deleteCommentMapsForTask` вызывается из `TaskRepository` (delete/hard delete/purge), `markTaskDeleted` и pull при удалённой на TT задаче |
-| **BUG-COMMENT-NO-PUSH** | P0 | mitigated on branch | `pushLocalEditsFirst` → `lastVaultPushWallMs` (не checkpoint TT); sweep + `bugCommentNoPush.test.ts`, integration `BUG-COMMENT-NO-PUSH`. NOTE-L3b на пилоте после сборки. |
+| **BUG-COMMENT-NO-PUSH** | P0 | fix on branch (pilot **2.0.51** fail) | Перерисовка строки больше не снимает vault-комментарии, которых нет в `Comments:` базе; перед записью файла они пушатся в Comments API. NOTE-L3b на пилоте ещё не перегнан. |
 | **BUG-ACTIVEZONE-COMMENT-SHUFFLE** | P1 | open | При sync в project note (Active Zone): сортировка соседних задач и перенос comment-буллета с одной задачи на другую. Кейс в `ABYSS_FIRST_CASES.md`. |
 | **BUG-TICKTICK-ID-LEAK** | P1 | mitigated on branch | Канонический `%%[ticktick_id:: <24hex>]%%`, strip loose fragment из title; тест `bugTicktickIdLeak.test.ts`. Почистить дубли в TT вручную. |
 | **GAP-COMMENT-EDIT** | P2 | open | Правка комментария = delete + add (новые ID, шум в ленте TT) |
@@ -62,7 +63,7 @@
 
 ## To Be Done
 
-1. Собрать/поставить плагин с fix **BUG-COMMENT-NO-PUSH**; NOTE-L3b на пилоте. TP-PERF-LOG вручную (`[perf]` JSON).
+1. **BUG-COMMENT-NO-PUSH** — повторный анализ: pre-pull + sweep не доводят до Comments API на пилоте (**2.0.51** fail); см. журнал `2026-10-20.jsonl` `sync-mvgaaegu`. TP-PERF-LOG вручную (`[perf]` JSON).
 2. **BUG-ACTIVEZONE-COMMENT-SHUFFLE** — failing test + fix (`pullSubtaskOrder` / `mergeAbyssBlock`).
 3. Gate: AF-5 в **Inbox**, DEL-3, CTX-D2 на грязных тегах.
 4. Пилот **TP-DELTA-*** (`TEST_PLAN.md`, `docs/TICKTICK_DELTA_API.md` §3.5) → решение про **etag**-эхо и политику комментариев без N+1.

@@ -3,7 +3,7 @@ import { App, Notice, TFile, TFolder } from 'obsidian';
 import TickTickSync from '@/main';
 import type { ITask } from './api/types/Task';
 import { getSettings } from '@/settings';
-import { useAbyssCommentsApi } from '@/abyssCommentSync';
+import { syncAbyssCommentsToTickTick, useAbyssCommentsApi } from '@/abyssCommentSync';
 import { stripLegacyCommentsBlock } from '@/abyssFormat';
 import type { ITaskComment } from '@/api/types/TaskComment';
 import { NewFileMap } from '@/services/NewFileMap';
@@ -525,9 +525,22 @@ export class FileOperation {
 			let bLinePersisted = true;
 
 			if (useAbyssCommentsApi() && task.id && task.projectId) {
-				const already = (task as ITask & { _apiComments?: ITaskComment[] })._apiComments;
-				const comments = already ?? await this.plugin.tickTickRestAPI?.getTaskComments(task.projectId, task.id) ?? [];
-				if (!already) Object.defineProperty(task, '_apiComments', { value: comments, enumerable: false, configurable: true });
+				const rec = fileMap.getTaskRecord(task.id);
+				if (rec?.taskLines?.length && this.plugin.tickTickRestAPI) {
+					try {
+						await syncAbyssCommentsToTickTick(
+							this.plugin.tickTickRestAPI,
+							task.id,
+							task.projectId,
+							rec.taskLines,
+							task.content,
+						);
+					} catch (e) {
+						log.warn('Abyss comment push before vault write failed', task.id, e);
+					}
+				}
+				const comments = await this.plugin.tickTickRestAPI?.getTaskComments(task.projectId, task.id) ?? [];
+				Object.defineProperty(task, '_apiComments', { value: comments, enumerable: false, configurable: true });
 				task.content = stripLegacyCommentsBlock(task.content ?? '');
 				task.desc = stripLegacyCommentsBlock(task.desc ?? '');
 			}
