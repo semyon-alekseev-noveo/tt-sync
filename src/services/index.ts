@@ -29,6 +29,8 @@ import { loadTasksFromCache, markTaskDeleted } from "@/db/tasks";
 import { getAllFiles, getFile, upsertFile } from "@/db/files";
 import type { IProject } from '@/api/types/Project';
 import { isPathInPushScope, resolveProjectsList } from '@/syncScope';
+import { beginFileRun } from '@/sync/fileRunCache';
+import { finishSyncPerf, formatSyncPerf, formatSyncPerfShort, observeSyncApi, startSyncPerf, timePhase } from '@/sync/perf';
 
 const LOCK_TASKS = 'LOCK_TASKS';
 
@@ -177,117 +179,155 @@ export class TickTickService {
 	/** Push settled edits in an open note. Skips lines the caller marks (unfinished caret) and lines with no TickTick id. */
 	async pushSettledActiveFile(filepath: string, skipLines: number[] = []): Promise<void> {
 		if (!filepath || this.plugin.syncRunning || !isPathInPushScope(filepath)) return;
-		const run = async () => {
-			await doWithLock(LOCK_TASKS, async () => {
-				await this.plugin.taskModificationDetector.checkFileForModifications(filepath, undefined, {
-					skipLines: new Set(skipLines),
-					identifiedOnly: true,
+		const perfRun = startSyncPerf({ trigger: 'active-file', fullSync: false });
+		let endFiles = () => undefined;
+		let endApi = () => undefined;
+		let ok = true;
+		try {
+			endFiles = beginFileRun(this.plugin.app.vault);
+			endApi = observeSyncApi(this.plugin.tickTickRestAPI);
+			const run = async () => {
+				await doWithLock(LOCK_TASKS, async () => {
+					await this.plugin.taskModificationDetector.checkFileForModifications(filepath, undefined, {
+						skipLines: new Set(skipLines),
+						identifiedOnly: true,
+					});
 				});
+			};
+			await timePhase('activeFile', async () => {
+				if (this.plugin.syncActivity) {
+					await this.plugin.syncActivity.runInline('Updating open note…', run);
+				} else {
+					await run();
+				}
 			});
-		};
-		if (this.plugin.syncActivity) {
-			await this.plugin.syncActivity.runInline('Updating open note…', run);
-		} else {
-			await run();
+		} catch (error) {
+			ok = false;
+			throw error;
+		} finally {
+			endApi();
+			endFiles();
+			log.info(`[perf] ${formatSyncPerf(finishSyncPerf(perfRun, ok))}`);
 		}
 	}
 
 	async synchronizationInner(fullSync: boolean = false, trigger: SyncTrigger = 'manual'): Promise<SyncRunResult> {
 		const startTime = performance.now();
+		const perfRun = startSyncPerf({ trigger, fullSync });
 		const ui = this.plugin.syncActivity;
 		ui.beginFull(trigger);
+		let endFiles = () => undefined;
+		let endApi = () => undefined;
 		let syncOk = true;
 		let errorMessage = '';
 		try {
+			endFiles = beginFileRun(this.plugin.app.vault);
+			endApi = observeSyncApi(this.plugin.tickTickRestAPI);
 
 			log.debug(`TickTick scheduled synchronization task started at ${new Date().toLocaleString()}`);
 			// NEW: Use TaskCache
 			this.plugin.syncRunning = true;
-			ui.setFullStep('Preparing…');
-			await this.plugin.applyExternalSettings();
-			await this.plugin.checkSettingsMigration();
-			await this.plugin.taskCache?.fill();
+			await timePhase('prepare', async () => {
+				ui.setFullStep('Preparing…');
+				await this.plugin.applyExternalSettings();
+				await this.plugin.checkSettingsMigration();
+				await this.plugin.taskCache?.fill();
+			});
 
 			await doWithLock(LOCK_TASKS, async () => {
 				if (this.plugin.tickTickRestAPI) {
-					ui.setFullStep('Loading TickTick projects…');
-					const projects = await this.saveProjectsToCache();
-					if (projects) {
-						//check to see if we need to move any project files
-						const mostRecentModifiedTime = projects.reduce((latest, project) => {
-							return new Date(project.modifiedTime) > new Date(latest)
-								? project.modifiedTime
-								: latest;
-						}, projects[0].modifiedTime);
-						const mostRecentModifiedTimeDate = new Date(mostRecentModifiedTime);
-						log.debug(`Most recent modified time: ${mostRecentModifiedTime}`);
-						const meta = await db.meta.get("sync");
-						const lastFullSync = meta?.lastFullSync ?? 0;
-						const lastDeltaSync = meta?.lastDeltaSync ?? 0;
-						const lastSync = lastFullSync > lastDeltaSync ? lastFullSync : lastDeltaSync;
-						const lastSyncDate = lastSync ? new Date(lastSync) : null;
-						if (lastSyncDate && mostRecentModifiedTimeDate > lastSyncDate) {
-							log.debug(`TT Folder move detected. Moving all project files to new location.`)
-							ui.setFullStep('Reorganizing project folders…');
-							await this.reorganizeFilesToFolders();
-
+					const tickApi = this.plugin.tickTickRestAPI;
+					const projects = await timePhase('projects', async () => {
+						ui.setFullStep('Loading TickTick projects…');
+						const loaded = await this.saveProjectsToCache();
+						if (loaded) {
+							//check to see if we need to move any project files
+							const mostRecentModifiedTime = loaded.reduce((latest, project) => {
+								return new Date(project.modifiedTime) > new Date(latest)
+									? project.modifiedTime
+									: latest;
+							}, loaded[0].modifiedTime);
+							const mostRecentModifiedTimeDate = new Date(mostRecentModifiedTime);
+							log.debug(`Most recent modified time: ${mostRecentModifiedTime}`);
+							const meta = await db.meta.get("sync");
+							const lastFullSync = meta?.lastFullSync ?? 0;
+							const lastDeltaSync = meta?.lastDeltaSync ?? 0;
+							const lastSync = lastFullSync > lastDeltaSync ? lastFullSync : lastDeltaSync;
+							const lastSyncDate = lastSync ? new Date(lastSync) : null;
+							if (lastSyncDate && mostRecentModifiedTimeDate > lastSyncDate) {
+								log.debug(`TT Folder move detected. Moving all project files to new location.`)
+								ui.setFullStep('Reorganizing project folders…');
+								await this.reorganizeFilesToFolders();
+							}
 						}
-
-
-
-
-
-					}
+						return loaded;
+					});
 
 					// Ensure all vault files are registered in Files metadata
-					ui.setFullStep('Scanning vault files…');
-					await this.ensureVaultFilesRegistered();
+					await timePhase('register', async () => {
+						ui.setFullStep('Scanning vault files…');
+						await this.ensureVaultFilesRegistered();
+					});
 					// Push vault edits made since the last sync BEFORE pulling, otherwise the pull
 					// re-renders the line from TickTick and the local edit is lost (seen on [x] lines
 					// edited outside the editor, where no editor-change check fires).
-					ui.setFullStep('Pushing vault changes to TickTick…');
-					await this.pushLocalEditsFirst();
-					ui.setFullStep(fullSync ? 'Full sync from TickTick…' : 'Pulling updates from TickTick…');
-					await syncTickTickWithDexie(this.plugin.tickTickRestAPI, fullSync);
-					if (projects?.length) {
-						const healed = healTagListMappings(getSettings().tagListMappings, projects);
-						const pl = resolveProjectsList(projects, getSettings().projectsListName, getSettings().projectsListId);
-						const plUpd = pl && (pl.id !== getSettings().projectsListId || pl.name !== getSettings().projectsListName) ? { projectsListId: pl.id, projectsListName: pl.name } : {};
-						if (healed || Object.keys(plUpd).length) {
-							updateSettings({ ...(healed ? { tagListMappings: healed } : {}), ...plUpd }, { persist: false });
-							await this.plugin.saveSettings();
-							log.info('List mapping refreshed (rename-safe)');
+					await timePhase('push', async () => {
+						ui.setFullStep('Pushing vault changes to TickTick…');
+						await this.pushLocalEditsFirst();
+					});
+					await timePhase('pull', async () => {
+						ui.setFullStep(fullSync ? 'Full sync from TickTick…' : 'Pulling updates from TickTick…');
+						await syncTickTickWithDexie(tickApi, fullSync);
+						if (projects?.length) {
+							const healed = healTagListMappings(getSettings().tagListMappings, projects);
+							const pl = resolveProjectsList(projects, getSettings().projectsListName, getSettings().projectsListId);
+							const plUpd = pl && (pl.id !== getSettings().projectsListId || pl.name !== getSettings().projectsListName) ? { projectsListId: pl.id, projectsListName: pl.name } : {};
+							if (healed || Object.keys(plUpd).length) {
+								updateSettings({ ...(healed ? { tagListMappings: healed } : {}), ...plUpd }, { persist: false });
+								await this.plugin.saveSettings();
+								log.info('List mapping refreshed (rename-safe)');
+							}
 						}
-					}
-					// A list deleted in TickTick takes its tasks with it but they are not reported as deleted:
-					// treat tasks of vanished lists as deleted (guarded against a partial/failed project fetch).
-					try {
-						const live = new Set((projects ?? []).map(p => p.id));
-						if (projects && live.size > 0) {
-							const all = (await db.tasks.toArray()).filter(lt => !lt.deleted && lt.task?.projectId);
-							const gone = all.filter(lt => !lt.task.projectId.startsWith('inbox') && !live.has(lt.task.projectId));
-							if (gone.length && gone.length <= Math.max(5, all.length / 2)) {
-								for (const lt of gone) await markTaskDeleted(lt.task.id);
-								log.warn(`${gone.length} task(s) belonged to deleted TickTick lists; detaching`, gone.map(g => g.task.id));
-							} else if (gone.length) log.error(`Refusing to detach ${gone.length} tasks of missing lists (looks like a partial fetch)`);
-						}
-					} catch (e) { log.warn('vanished-list check failed', e); }
+						// A list deleted in TickTick takes its tasks with it but they are not reported as deleted:
+						// treat tasks of vanished lists as deleted (guarded against a partial/failed project fetch).
+						try {
+							const live = new Set((projects ?? []).map(p => p.id));
+							if (projects && live.size > 0) {
+								const all = (await db.tasks.toArray()).filter(lt => !lt.deleted && lt.task?.projectId);
+								const gone = all.filter(lt => !lt.task.projectId.startsWith('inbox') && !live.has(lt.task.projectId));
+								if (gone.length && gone.length <= Math.max(5, all.length / 2)) {
+									for (const lt of gone) await markTaskDeleted(lt.task.id);
+									log.warn(`${gone.length} task(s) belonged to deleted TickTick lists; detaching`, gone.map(g => g.task.id));
+								} else if (gone.length) log.error(`Refusing to detach ${gone.length} tasks of missing lists (looks like a partial fetch)`);
+							}
+						} catch (e) { log.warn('vanished-list check failed', e); }
+					});
 					//NEW: Use VaultSyncCoordinator
-					ui.setFullStep('Updating vault task lines…');
-					await this.plugin.vaultSyncCoordinator.syncVaultWithDatabase();
-					ui.setFullStep('Finalizing subtask order…');
-					try { await this.pullSubtaskOrder(this.locallyEdited); } catch (e) { log.warn('subtask order pull failed', e); }
+					await timePhase('vaultReconcile', async () => {
+						ui.setFullStep('Updating vault task lines…');
+						await this.plugin.vaultSyncCoordinator.syncVaultWithDatabase();
+					});
+					await timePhase('subtasks', async () => {
+						ui.setFullStep('Finalizing subtask order…');
+						try { await this.pullSubtaskOrder(this.locallyEdited); } catch (e) { log.warn('subtask order pull failed', e); }
+					});
 				}
 			});
-			ui.setFullStep('Syncing project notes…');
-			await this.syncFiles(false);
+			await timePhase('syncFiles', async () => {
+				ui.setFullStep('Syncing project notes…');
+				await this.syncFiles(false);
+			});
 		} catch (error) {
 			syncOk = false;
 			errorMessage = error instanceof Error ? error.message : String(error);
 			ui.setFullStep('Sync failed', errorMessage);
 			log.error('Error on synchronization: ', error);
 		} finally {
-			ui.endFull(syncOk);
+			endApi();
+			endFiles();
+			const report = finishSyncPerf(perfRun, syncOk);
+			log.info(`[perf] ${formatSyncPerf(report)}`);
+			ui.endFull(syncOk, formatSyncPerfShort(report));
 			// NEW: Clear TaskCache
 			this.plugin.taskCache?.clear();
 			this.plugin.syncRunning = false;

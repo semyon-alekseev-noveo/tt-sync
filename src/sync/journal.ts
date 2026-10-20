@@ -2,6 +2,7 @@ import { db } from '@/db/dexie';
 import type { JournalEntry } from '@/db/schema';
 import { getSettings } from '@/settings';
 import log from '@/utils/logger';
+import { addPhaseMs } from '@/sync/perf';
 
 const PRUNE_INTERVAL = 10;
 
@@ -17,6 +18,7 @@ export function logSyncEvent(
 
 async function persistEntry(entry: Omit<JournalEntry, "id">) {
 	if (!db?.journal) return;
+	const started = performance.now();
 	try {
 		await db.journal.add(entry);
 		writeCount++;
@@ -25,6 +27,8 @@ async function persistEntry(entry: Omit<JournalEntry, "id">) {
 		}
 	} catch (e) {
 		log.warn("[TickTickSync] Failed to persist journal entry", e);
+	} finally {
+		addPhaseMs('journal', performance.now() - started);
 	}
 }
 

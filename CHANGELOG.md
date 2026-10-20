@@ -50,6 +50,16 @@
 - To Be Done: Push `abyss-mapping`; pilot TP1-* and AF gate (`TEST_PLAN.md`, `ABYSS_FIRST_CASES.md`); optionally cherry-pick stash comment fixes.
 - References: `DEV_FLOW.md`, `docs/ANALYST_REFERENCE_DIAGRAMS.md`, `CHANGELOG.md`
 
+### Iteration 2026-10-19 17:24 UTC
+
+- Context: First slice of the large-vault performance review. Do not change sync results. The `getTaskById` / `getTaskComments` probe in `vaultLineBehindTask` stays for a later PR.
+- Target: Per-run timings and counters; an id→path index with the same hits as `String.includes`; a per-run cache of file text and `NewFileMap`.
+- Actions log: Branch `cursor/sync-perf-index-cache-aa83`, rebased onto `abyss-mapping` after PR #1 and **2.0.49**. No version bump. No tag. No merge.
+- Validation: `npx vitest run` → 77 files, 581 passed; `npm run build` → ok. Synthetic vault 2000 notes / 5000 tasks: id scan 555.8 ms → 5.1 ms, file reads 6000 → 4000, reconcile 586.9 ms → 22.3 ms. Idle-sync `getTaskById` baseline stays 3. Live vault and pilot Obsidian were **not** run.
+- Problems: RISK-LARGE-VAULT is only partly mitigated. `ensureVaultFilesRegistered` still walks every markdown file, and a quiet task is still probed with `getTaskById`.
+- To Be Done: Owner merges PR #2; run TP-PERF-* on `<pilot-vault>`.
+- References: `TEST_PLAN.md`, `ABYSS_FIRST_CASES.md` PERF-INDEX, PERF-CACHE, PERF-COUNTERS, `CHANGELOG.md`
+
 ### Iteration 2026-10-19 16:55 UTC
 
 - Context: Owner rule — every behavior change is recorded in the test plan, in the same PR.

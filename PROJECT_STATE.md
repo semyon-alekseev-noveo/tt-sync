@@ -23,7 +23,7 @@
 ## Validation
 
 - Build: `npm run build` in repo root; CI on `abyss-mapping` via `.github/workflows/ci.yml`.
-- Unit tests: `npx vitest run` (550 at **2.0.47**; this unreleased branch 569, including `synchronizationInner.integration.test.ts`). Abyss comments → TickTick **Comments API** when `syncAbyssCommentsViaApi` (default on); descriptions stay in `content`.
+- Unit tests: `npx vitest run` (550 at **2.0.47**; PR #1 branch 569; this branch 77 files, 581 passed, including the idle-sync `getTaskById` baseline of 3). Abyss comments → TickTick **Comments API** when `syncAbyssCommentsViaApi` (default on); descriptions stay in `content`.
 - Manual pilot: **`SMOKE_TESTS.md`**. Palette: **Synchronize** only; full TT pull on plugin load. Context tags **2.0.41** (`syncNoteContextTags`).
 - BRAT installs: GitHub Release assets from `.github/workflows/release.yml` (see `docs/BRAT_INSTALL.md`).
 - TT cleanup verified 2026-10-16 via MCP (no `ticktick` tag left on polluted set).
@@ -42,7 +42,7 @@
 1. Human or local Obsidian: NOTE-L3b, CTX-D2, one live gate AF + DEL + NOTE-L3b (`ABYSS_FIRST_CASES.md`). This cloud agent did not run them.
 2. Revoke the exposed `tp_…` token if it is still valid.
 3. Confirm Abyss Inbox is **With inbox tag** `#inbox` on the pilot. Untagged mode is still open.
-4. Still open in code: GAP-COMMENT-EDIT, RISK-PULL-WINS-LOCAL, RISK-DUAL-STORE, RISK-LARGE-VAULT, TECH-START-1, `main` ↔ `services` cycle.
+4. Still open in code: GAP-COMMENT-EDIT, RISK-PULL-WINS-LOCAL, RISK-DUAL-STORE, RISK-LARGE-VAULT (id index and per-run file cache landed; the `getTaskById` probe and `ensureVaultFilesRegistered` full scan remain), TECH-START-1, `main` ↔ `services` cycle.
 
 ## References
 

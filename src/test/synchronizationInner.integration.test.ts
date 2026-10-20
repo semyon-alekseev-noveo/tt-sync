@@ -13,6 +13,7 @@ import { TaskRepository } from '@/repositories/TaskRepository';
 import { TaskParser } from '@/taskParser';
 import { DEFAULT_SETTINGS, getSettings, updateSettings } from '@/settings';
 import { upsertCommentMap, listCommentMapsForTask, commentMapId } from '@/db/taskCommentMaps';
+import { lastSyncPerf } from '@/sync/perf';
 
 vi.mock('@/utils/logger', () => ({
 	default: { debug: vi.fn(), warn: vi.fn(), error: vi.fn(), info: vi.fn(), trace: vi.fn() },
@@ -352,5 +353,54 @@ describe('synchronizationInner integration', () => {
 		expect(result.ok).toBe(true);
 		const pushed = world.api.updateTask.mock.calls.length + world.api.addTaskComment.mock.calls.length;
 		expect(pushed).toBeGreaterThan(0);
+	});
+
+	it('PERF-COUNTERS records the idle-sync getTaskById baseline', async () => {
+		const world = await makeWorld();
+		let reads = 0;
+		const vault = (world.service.plugin as { app: { vault: { read: (f: { path: string }) => Promise<string> } } }).app.vault;
+		const origRead = vault.read;
+		vault.read = async (f: { path: string }) => { reads++; return origRead(f); };
+		const ids = ['aaaaaaaaaaaaaaaaaaaaaaaa', 'bbbbbbbbbbbbbbbbbbbbbbbb', 'cccccccccccccccccccccccc'];
+		const lines = ids.map(id => `- [ ] same title %%[ticktick_id:: ${id}]%%`).join('\n')
+			+ '\n- [ ] local title %%[ticktick_id:: dddddddddddddddddddddddd]%%'
+			+ '\n- [ ] gone %%[ticktick_id:: eeeeeeeeeeeeeeeeeeeeeeee]%%\n';
+		putFile(world, 'notes/idle.md', lines, 0);
+		const quiet = (id: string, title: string, deleted = false) => db.tasks.put({
+			localId: `tt:${id}`,
+			taskId: id,
+			task: {
+				id, projectId: 'proj-1', title, content: '', desc: '', status: 0,
+				modifiedTime: '2026-10-18T00:00:00.000+0000', tags: [],
+			} as never,
+			updatedAt: 1000,
+			lastVaultSync: 5000,
+			file: 'notes/idle.md',
+			source: 'ticktick',
+			deleted,
+		});
+		for (const id of ids) await quiet(id, 'same title');
+		await quiet('dddddddddddddddddddddddd', 'ticktick title');
+		await quiet('eeeeeeeeeeeeeeeeeeeeeeee', 'gone', true);
+		const result = await world.service.synchronizationInner(false, 'manual');
+		expect(result.ok).toBe(true);
+		// Baseline for the next PR. The probe is unchanged: one getTaskById per quiet task
+		// whose vault line still matches the pulled copy. A title that already differs, and
+		// a deleted task, are not probed.
+		expect(world.api.getTaskById.mock.calls.length).toBe(3);
+		const perf = lastSyncPerf();
+		expect(perf?.ok).toBe(true);
+		expect(perf?.trigger).toBe('manual');
+		expect(perf?.counts.tasksProbedById).toBe(3);
+		expect(perf?.counts.commentsFetched).toBe(3);
+		expect(perf?.counts.tasksTotal).toBe(5);
+		expect(perf?.counts.tasksChecked).toBe(5);
+		expect(perf?.counts.tasksDelta).toBe(0);
+		expect(perf?.phaseMs.pull).toBeGreaterThanOrEqual(0);
+		expect(perf?.phaseMs.vaultReconcile).toBeGreaterThanOrEqual(0);
+		expect(perf?.phaseMs.push).toBeGreaterThanOrEqual(0);
+		expect(perf?.phaseMs.syncFiles).toBeGreaterThanOrEqual(0);
+		expect(perf?.counts.httpByEndpoint.getTaskById ?? 0).toBe(0);
+		expect(reads).toBe(1);
 	});
 });

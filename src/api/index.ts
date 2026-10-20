@@ -10,6 +10,7 @@ import { API_ENDPOINTS } from './utils/get-api-endpoints';
 import log from '@/utils/logger';
 import { getSettings, updateSettings } from '@/settings';
 import { normalizeTrigger } from '@/utils/ReminderConverter';
+import { noteHttpCall } from '@/sync/perf';
 
 const _userAgent = window['navigator']['userAgent'];
 
@@ -60,6 +61,14 @@ interface UpdatePayload {
 	deleteAttachments: unknown[];
 	updateAttachments: unknown[];
 	update: unknown[];
+}
+
+function httpStatusOf(error: unknown): number | undefined {
+	if (!error || typeof error !== 'object') return undefined;
+	const status = (error as { status?: unknown }).status;
+	if (typeof status === 'number') return status;
+	const nested = (error as { response?: { status?: unknown } }).response?.status;
+	return typeof nested === 'number' ? nested : undefined;
 }
 
 /** Pull could not read the TickTick delta. Callers must not treat this as an empty change set. */
@@ -831,6 +840,7 @@ export class Tick {
 	async makeRequest(operation: string, url: string, method: string, body: unknown = undefined): Promise<unknown> {
 
 		this.lastError = undefined;
+		let noted = false;
 		try {
 			let requestOptions: RequestUrlParam | undefined;
 			if (operation == 'Login') {
@@ -842,6 +852,8 @@ export class Tick {
 				requestOptions = this.createRequestOptions(method, url, body);
 			}
 			const result = await requestUrl(requestOptions);
+			noteHttpCall(operation, url, result?.status);
+			noted = true;
 			if (result.status != 200) {
 				this.setError(operation, result, null);
 				return null;
@@ -852,6 +864,7 @@ export class Tick {
 			window.localStorage.setItem('TTS_Cookies', this.cookieHeader);
 			return result.json;
 		} catch (error) {
+			if (!noted) noteHttpCall(operation, url, httpStatusOf(error));
 			this.setError(operation, null, error);
 			log.error(error);
 			return null;

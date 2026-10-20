@@ -23,7 +23,7 @@ Release in git is **2.0.47**. This branch does not bump the version. The owner m
 
 - [ ] GAP-COMMENT-EDIT: editing a comment deletes and recreates it.
 - [ ] RISK-PULL-WINS-LOCAL: a local LWW win can leave the vault line old.
-- [ ] RISK-DUAL-STORE, RISK-LARGE-VAULT, TECH-START-1 (startup full pull blocks load).
+- [ ] RISK-DUAL-STORE, RISK-LARGE-VAULT (id index landed; N+1 `getTaskById` and `ensureVaultFilesRegistered` remain), TECH-START-1 (startup full pull blocks load).
 - [ ] Break the `main` ↔ `services` cycle. Do not start that until the live gate has a recorded result.
 - [ ] Redo journal is in the product (`Undo last sync`) and is not soaked on a vault in this branch.
 

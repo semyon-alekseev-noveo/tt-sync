@@ -1,15 +1,132 @@
 import type { App } from 'obsidian';
+import { noteFilesScanned } from '@/sync/perf';
 
-/** Ids (of `ids`) that already appear in some markdown note, mapped to the first note path containing them. */
+/**
+ * First note path that contains each id, same result as `text.includes(id)` in vault order.
+ * One pass builds the id→path map. A sync run may reuse that map until a file is written.
+ */
 export async function idsPresentInVault(app: App, ids: string[]): Promise<Map<string, string>> {
-	const left = new Set(ids.filter(Boolean)), found = new Map<string, string>();
-	if (!left.size) return found;
-	for (const f of app.vault.getMarkdownFiles()) {
-		const text = await app.vault.cachedRead(f);
-		for (const id of [...left]) if (text.includes(id)) { left.delete(id); found.set(id, f.path); }
-		if (!left.size) break;
+	const recalled = recallVaultIdIndex(ids);
+	if (recalled) return recalled;
+	const scan = createIdScan(ids);
+	const gen = vaultIdIndexGeneration();
+	if (!scan.done()) {
+		for (const f of app.vault.getMarkdownFiles()) {
+			const text = await app.vault.cachedRead(f);
+			noteFilesScanned(1);
+			if (scan.feed(f.path, text)) break;
+		}
 	}
+	const found = scan.result();
+	rememberVaultIdIndex(ids, found, gen);
 	return found;
+}
+
+/** Same map as {@link idsPresentInVault} for texts already in memory. */
+export function idsPresentInTexts(files: readonly { path: string; text: string }[], ids: readonly string[]): Map<string, string> {
+	const scan = createIdScan(ids);
+	if (!scan.done()) {
+		for (const f of files) if (scan.feed(f.path, f.text)) break;
+	}
+	return scan.result();
+}
+
+interface IdScan {
+	done(): boolean;
+	feed(path: string, text: string): boolean;
+	result(): Map<string, string>;
+}
+
+/**
+ * Literals grouped by length. A pattern of one length cannot hide a shorter id,
+ * and an exact literal match is the same hit `String.includes` would report.
+ * Files must be fed in vault order; the first hit wins.
+ */
+export function createIdScan(ids: readonly string[]): IdScan {
+	const unique: string[] = [];
+	const seen = new Set<string>();
+	for (const id of ids) {
+		if (!id || seen.has(id)) continue;
+		seen.add(id);
+		unique.push(id);
+	}
+	const byLen = new Map<number, string[]>();
+	for (const id of unique) {
+		const list = byLen.get(id.length);
+		if (list) list.push(id);
+		else byLen.set(id.length, [id]);
+	}
+	const groups = [...byLen.values()].map(list => new RegExp(list.map(escapeRegExp).join('|'), 'g'));
+	const found = new Map<string, string>();
+	return {
+		done: () => found.size === unique.length,
+		result: () => found,
+		feed(path: string, text: string): boolean {
+			if (found.size === unique.length || !text) return found.size === unique.length;
+			for (const re of groups) {
+				re.lastIndex = 0;
+				let match: RegExpExecArray | null;
+				while ((match = re.exec(text))) {
+					const id = match[0];
+					if (id && !found.has(id)) found.set(id, path);
+					// `includes` reports ids that start inside an earlier same-length hit.
+					// A global regex would skip that span, so resume one character in.
+					const next = match.index + 1;
+					if (re.lastIndex < next) break;
+					if (re.lastIndex > next) re.lastIndex = next;
+				}
+				if (found.size === unique.length) return true;
+			}
+			return found.size === unique.length;
+		},
+	};
+}
+
+function escapeRegExp(value: string): string {
+	return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+let indexLive = false;
+let indexGen = 0;
+let storedIndex: { gen: number; ids: Set<string>; found: Map<string, string> } | null = null;
+
+/** Drop the per-sync id→path map. File writes call this so the next lookup cannot be stale. */
+export function invalidateVaultIdIndex(): void {
+	indexGen++;
+	storedIndex = null;
+}
+
+export function openVaultIdIndex(): void {
+	indexLive = true;
+	invalidateVaultIdIndex();
+}
+
+export function closeVaultIdIndex(): void {
+	indexLive = false;
+	storedIndex = null;
+}
+
+export function vaultIdIndexGeneration(): number {
+	return indexGen;
+}
+
+export function recallVaultIdIndex(ids: readonly string[]): Map<string, string> | undefined {
+	if (!indexLive || !storedIndex || storedIndex.gen !== indexGen) return undefined;
+	for (const id of ids) if (id && !storedIndex.ids.has(id)) return undefined;
+	const out = new Map<string, string>();
+	for (const id of ids) {
+		if (!id) continue;
+		const path = storedIndex.found.get(id);
+		if (path) out.set(id, path);
+	}
+	return out;
+}
+
+export function rememberVaultIdIndex(ids: readonly string[], found: Map<string, string>, genAtStart: number): void {
+	if (!indexLive || genAtStart !== indexGen) return;
+	const idSet = new Set<string>();
+	for (const id of ids) if (id) idSet.add(id);
+	storedIndex = { gen: genAtStart, ids: idSet, found: new Map(found) };
 }
 
 const ID_RE = /%%\[ticktick_id:: ([0-9a-f]+)\]%%/;

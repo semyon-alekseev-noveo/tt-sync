@@ -20,7 +20,8 @@ import { allowVaultUpdate, fileForNewTickTickTask, isListAllowed, normalizeSyncT
 import { TaskDeletionModal } from '@/modals/TaskDeletionModal';
 import { FolderSyncService } from '@/services/FolderSyncService';
 import log from '@/utils/logger';
-import { NewFileMap } from '@/services/NewFileMap';
+import { syncFileMap } from '@/sync/fileRunCache';
+import { addCount } from '@/sync/perf';
 import { apiCommentsDifferFromVault, useAbyssCommentsApi } from '@/abyssCommentSync';
 
 export class VaultSyncCoordinator {
@@ -40,6 +41,7 @@ export class VaultSyncCoordinator {
 	 */
 	async syncVaultWithDatabase(): Promise<void> {
 		const tasks = await db.tasks.toArray();
+		addCount('tasksTotal', tasks.length);
 		// GTD scope: only tasks of allow-listed lists are written to the vault. Empty = nothing.
 		const syncedEntries = getSettings().syncedLists ?? [];
 		const allLists = await getAllProjects();
@@ -68,6 +70,7 @@ export class VaultSyncCoordinator {
 
 		// Categorize tasks by their target file and action needed
 		for (const lt of tasks) {
+			addCount('tasksChecked', 1);
 			let task = lt.task;
 			// Project parents are represented by project notes, never by task lines.
 			if (scheme?.isParentTask(task)) continue;
@@ -320,8 +323,7 @@ export class VaultSyncCoordinator {
 		} catch {
 			return same;
 		}
-		const fileMap = new NewFileMap(this.app, this.plugin, file);
-		await fileMap.init(text);
+		const fileMap = await syncFileMap(this.app, this.plugin, file, text);
 		const lineIdx = fileMap.getTaskIndex(task.id);
 		if (lineIdx < 0) return same;
 		const taskRec = fileMap.getTaskRecord(task.id);

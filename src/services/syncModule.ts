@@ -20,6 +20,7 @@ import log from '@/utils/logger';
 import { db } from "@/db/dexie";
 import { getAllProjects } from '@/db/projects';
 import { isPathInPushScope, normalizeSyncTag, resolveSyncedListIds, taskMatchesSyncLimit, type TaskSyncLimitOptions } from '@/syncScope';
+import { timePhase } from '@/sync/perf';
 
 export class SyncMan {
 	private readonly app: App;
@@ -370,6 +371,10 @@ export class SyncMan {
 
 
 	async backupTickTickAllResources() {
+		return timePhase('backup', () => this.backupTickTickAllResourcesInner());
+	}
+
+	private async backupTickTickAllResourcesInner() {
 		try {
 			// log.debug("backing up.")
 			// if (this.plugin.tickTickSyncAPI) {
