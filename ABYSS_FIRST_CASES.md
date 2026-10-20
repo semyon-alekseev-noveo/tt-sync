@@ -25,6 +25,9 @@ Preconditions for every AF row: plugin `tickticksync-abyss`, manual sync, `fileL
 | AF-7 | Moving the task to another mapped list rewrites the stage tag on that same line. |
 | AF-8 | A checkbox in a note outside `syncScopeFolders` is not pushed. |
 | NOTE-L3b | A child comment line, title unchanged, Synchronize. The text shows in the TickTick Comments panel. The description stays in the task body. |
+| BUG-COMMENT-NO-PUSH | Same as NOTE-L3b; regression when only comment bullets change or hash path skips API (`PO_STATUS.md`). |
+| BUG-TICKTICK-ID-LEAK | Title must not contain loose `ticktick_id::` outside `%%[ticktick_id:: <24hex>]%%`; canonical id wins if both present. |
+| BUG-ACTIVEZONE-COMMENT-SHUFFLE | Sync in a project Active Zone note must not move comment bullets between sibling tasks or reorder tasks without user edit. |
 | DEL-1 | Remove one in-scope checkbox, Synchronize, confirm the one dialog. The TickTick task is deleted. |
 | DEL-3 | Same as DEL-1, then Cancel. The TickTick task remains. The notice does not say the sync succeeded at deleting it. |
 
@@ -58,10 +61,10 @@ Pass only with evidence: the note path, the `ticktick_id`, and either the journa
 
 | Date (UTC) | Vault | Build | Runner | Item | Result | Evidence |
 |------------|-------|-------|--------|------|--------|----------|
-| 2026-10-20 | Thinkpad-tts-test | 2.0.48 | agent (no Obsidian) | AF-5 | not run | Release + vitest gate only; enable Obsidian CLI or run UI manually. |
-| 2026-10-20 | Thinkpad-tts-test | 2.0.48 | agent (no Obsidian) | NOTE-L3b | not run | MCP baseline: task `6ad5bb47…` has TT comments `comment-20-30`, `comment-20-31`; vault has four bullets — re-sync after gate session. |
-| 2026-10-20 | Thinkpad-tts-test | 2.0.48 | agent (no Obsidian) | DEL-1 | not run | |
-| 2026-10-20 | Thinkpad-tts-test | 2.0.48 | agent (no Obsidian) | DEL-3 | not run | |
+| 2026-10-20 | Thinkpad-tts-test | 2.0.48 | Sam (manual) | AF-5 | partial | Checkbox in **project** (dishwasher / Active Zone): task on TTS-Projects, `#type/next` on line — not the plain-inbox AF-5 recipe; line stayed in vault. |
+| 2026-10-20 | Thinkpad-tts-test | 2.0.48 | Sam (manual) | NOTE-L3b | fail | `00 Inbox/manual-test.md` `6ad6e474…`: comment bullets in vault, not in TT Comments; Active Zone tasks reordered / comment moved between tasks. |
+| 2026-10-20 | Thinkpad-tts-test | 2.0.48 | Sam (manual) | DEL-1 | pass | Deleted line in Obs → **Synchronize** → confirm dialog → task removed in TT (slow sync; dialog is expected). |
+| 2026-10-20 | Thinkpad-tts-test | 2.0.48 | Sam (manual) | DEL-3 | not run | |
 | | `<live-vault>` | | | Step 8 | not run | Blocked until the four rows above are pass. |
 
 This branch did not run the gate. Leave the result column as **not run** until you do.

@@ -1,16 +1,16 @@
 # Product owner brief — TickTickSync Abyss fork (project scheme)
 
-**Обновлено:** 2026-10-19  
+**Обновлено:** 2026-10-20  
 **Audience:** Product owner / decision maker  
 **Repo:** `tickticksync` branch `abyss-mapping`  
 **Test vault:** `<pilot-vault>` (copy only; live vault `<live-vault>` untouched)  
-**Install:** BRAT → `https://github.com/semyon-alekseev-noveo/tt-sync` track **latest release** (**2.0.47**, tag `2.0.47`); plugin id **`tickticksync-abyss`** — `docs/BRAT_INSTALL.md`. Preset: `00 Inbox/TTS-data-preset.json`.
+**Install:** BRAT → `https://github.com/semyon-alekseev-noveo/tt-sync` track **latest release** (**2.0.48**, tag `2.0.48`); plugin id **`tickticksync-abyss`** — `docs/BRAT_INSTALL.md`. Preset: `00 Inbox/TTS-data-preset.json`.
 
 История изменений — только в `CHANGELOG.md`; здесь — снимок для PO.
 
 ## Context
 
-- Релиз **2.0.47** выпущен: исправлены BUG-COMMENT-1 (комментарии Abyss не уходили в TickTick Comments, если hash строки не менялся) и BUG-TAG-1 (дубли тегов `note/`, `proj/`). Тег и ветка `abyss-mapping` отправлены в `tt-sync`.
+- Релиз **2.0.48** на `abyss-mapping`: PR #1 (fail-closed pull, debounce open-note 5s, BUG-COMMENT-INLINE, интеграционный тест). Релиз **2.0.47**: BUG-COMMENT-1 / BUG-TAG-1.
 - Abyss-first: задачи живут там, где их кладёт Abyss; TT зеркалит теги/списки и родителей-проекты (`ABYSS_FIRST_PLAN.md`, топология R / CASE-T4 отложена).
 - Комментарии Abyss → TickTick **Comments API** (`syncAbyssCommentsViaApi`, по умолчанию вкл.); описание остаётся в `content`.
 - Живой vault не трогаем; пилот — только `<pilot-vault>`. Ручной синк. Токен `tp_…`, если он светился в чате, отозвать.
@@ -26,7 +26,7 @@
 ## Validation
 
 - Релиз **2.0.47:** `npx vitest run` — 67 файлов, 550 тестов. Эта ветка (ещё не релиз, версию не поднимали): **73 файла, 569 тестов**, `npm run build` — ok. В том числе `src/test/synchronizationInner.integration.test.ts`.
-- Ручные smoke-сценарии: `SMOKE_TESTS.md` и каталог `ABYSS_FIRST_CASES.md`. NOTE-L3b, CTX-D2 и живой AF-гейт на пилоте **не прогонялись** в этой ветке.
+- Пилот **2.0.48** (2026-10-20): debounce/open-note — pass; NOTE-L3b / Comments API — **fail**; DEL-1 — pass. Детали в `TEST_PLAN.md`, `ABYSS_FIRST_CASES.md`, `CHANGELOG.md`.
 - Детали и даты прогонов — в `CHANGELOG.md`.
 
 ## Problems
@@ -42,6 +42,9 @@
 | **BUG-PULL-COMMENT-STALE** | P2 | fixed on this branch | `vaultLineBehindTask` сравнивает отпечатки Comments API. `getTaskById` только если заголовок/статус/content уже совпали; повторного вызова в цикле vault-sync нет. Комментарии кэшируются на задаче (`_apiComments`) |
 | **RISK-PULL-WINS-LOCAL** | P2 | open | При победе локальной версии в LWW строка в vault может остаться устаревшей |
 | **BUG-COMMENT-MAP-ORPHAN** | P2 | fixed on this branch | `deleteCommentMapsForTask` вызывается из `TaskRepository` (delete/hard delete/purge), `markTaskDeleted` и pull при удалённой на TT задаче |
+| **BUG-COMMENT-NO-PUSH** | P0 | mitigated on branch | `sweepAbyssCommentsInFile` после `checkFileForModifications`; тест `bugCommentNoPush.test.ts`. Повтор NOTE-L3b на пилоте после сборки. |
+| **BUG-ACTIVEZONE-COMMENT-SHUFFLE** | P1 | open | При sync в project note (Active Zone): сортировка соседних задач и перенос comment-буллета с одной задачи на другую. Кейс в `ABYSS_FIRST_CASES.md`. |
+| **BUG-TICKTICK-ID-LEAK** | P1 | mitigated on branch | Канонический `%%[ticktick_id:: <24hex>]%%`, strip loose fragment из title; тест `bugTicktickIdLeak.test.ts`. Почистить дубли в TT вручную. |
 | **GAP-COMMENT-EDIT** | P2 | open | Правка комментария = delete + add (новые ID, шум в ленте TT) |
 | **RISK-DUAL-STORE** | P2 | open | Две «истины»: Dexie `tasks` и `fileMetadata`/`syncFiles` → возможен дрейф |
 | **RISK-LARGE-VAULT** | P2 | open | Каждый sync сканирует все `.md` (`idsPresentInVault`, `ensureVaultFilesRegistered`) |
@@ -57,10 +60,11 @@
 
 ## To Be Done
 
-1. Пилот человеком или локальным агентом в Obsidian: NOTE-L3b, CTX-D2, один гейт AF + DEL + NOTE-L3b (`ABYSS_FIRST_CASES.md`). Результаты не выдумывать.
-2. Отозвать токен `tp_…`, если он ещё действует.
-3. Abyss Inbox: в плагине `#inbox` — тег стадии списка по умолчанию. Режим Abyss «untagged» после `#obsidian` задачу из Inbox убирает. Это настройка Abyss, не этот плагин. Проверить вид Inbox на пилоте.
-4. Открыто в коде: GAP-COMMENT-EDIT (правка комментария = delete + add), RISK-PULL-WINS-LOCAL, RISK-DUAL-STORE, RISK-LARGE-VAULT, TECH-START-1, TECH-CIRC-1.
+1. Собрать плагин из ветки, повтор **NOTE-L3b** на пилоте (после sweep). Зафиксировать pass/fail.
+2. **BUG-ACTIVEZONE-COMMENT-SHUFFLE** — failing test + fix (`pullSubtaskOrder` / `mergeAbyssBlock`).
+3. Почистить `manual-test.md` и дубли задач в TT после BUG-TICKTICK-ID-LEAK.
+4. Закрыть gate: AF-5 в **Inbox** (не только project), DEL-3, CTX-D2 на грязных тегах.
+5. Открыто: GAP-COMMENT-EDIT, RISK-PULL-WINS-LOCAL, RISK-DUAL-STORE, RISK-LARGE-VAULT, TECH-START-1, TECH-CIRC-1.
 
 ## Аналитический мит 2026-10-19
 

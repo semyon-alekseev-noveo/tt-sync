@@ -104,8 +104,12 @@ export const REGEX = {
 	// Source tag of a line born in the vault. Only counts as "synced" together with a ticktick_id.
 	OBSIDIAN_SOURCE: /^[\s]*[-] \[.\] [\s\S]*#obsidian(?![\w/-])[\s\S]*$/i,
 
+	/** Canonical Obsidian inline field (24-char hex task id). */
+	TickTick_ID_CANONICAL: /%%\[ticktick_id::\s*([a-f0-9]{24})\s*\]%%/i,
 	TickTick_ID: /\[ticktick_id::\s*[\d\S]+\]/,
 	TickTick_ID_NUM: /\[ticktick_id::\s*(.*?)\s*\]/,
+	/** Broken copy-paste: id text in title without `%%[…]%%` wrapper (BUG-TICKTICK-ID-LEAK). */
+	LOOSE_TICKTICK_ID_FRAGMENT: /\bticktick_id::\s*[a-f0-9]{24}\s*\]?/i,
 	TickTick_ID_DV_NUM: /ticktick_id(.*?)%/,
 	TickTick_LINK: /\[link\]\(.*?\)/,
 	DUE_DATE_WITH_EMOJ: new RegExp(`(${keywords.DUE_DATE})\\s?\\d{4}-\\d{2}-\\d{2}`), // DUE_DATE : new RegExp(`(?:${keywords.DUE_DATE})\\s?(\\d{4}-\\d{2}-\\d{2})`),
@@ -388,6 +392,7 @@ export class TaskParser {
 	//Remove Extraneous data from line.
 	getTaskContentFromLineText(lineText: string) {
 		let taskContent = lineText.replace(REGEX.TASK_CONTENT.REMOVE_INLINE_METADATA, '')
+			.replace(REGEX.LOOSE_TICKTICK_ID_FRAGMENT, '')
 			.replace(REGEX.TASK_CONTENT.REMOVE_TickTick_LINK, '')
 			.replace(REGEX.TASK_CONTENT.REMOVE_PRIORITY, '')
 			.replace(REGEX.TASK_CONTENT.REMOVE_RECURRENCE, '')
@@ -1009,6 +1014,7 @@ export class TaskParser {
 	}
 
 	hasTickTickId(text: string) {
+		if (REGEX.TickTick_ID_CANONICAL.test(text)) return true;
 		let result = REGEX.TickTick_ID.test(text);
 		if (!result) {
 			//try the dataview version
@@ -1055,12 +1061,15 @@ export class TaskParser {
 	}
 
 	getTickTickId(text: string) {
+		const canonical = REGEX.TickTick_ID_CANONICAL.exec(text);
+		if (canonical) return canonical[1];
 		let result = REGEX.TickTick_ID_NUM.exec(text);
 		if (!result) {
 			//try the dataview version
 			result = REGEX.TickTick_ID_DV_NUM.exec(text);
 		}
-		return result ? result[1].trim() : undefined;
+		const id = result ? result[1].trim() : undefined;
+		return id && /^[a-f0-9]{24}$/i.test(id) ? id : undefined;
 	}
 
 	isTaskOpen(line: string) {

@@ -1,5 +1,35 @@
 # Changelog
 
+### Iteration 2026-10-20 04:45 UTC
+
+- Context: Owner requested release **2.0.49**, cleanup pilot test notes/tasks, assess PR #2 merge.
+- Target: Tag **2.0.49** (comment sweep + ticktick id leak fixes); remove `manual-test.md` / `tp1-cli-smoke.md` and related TT tasks on pilot vault.
+- Actions log: Version **2.0.49**; push tag to `tt-sync`. Deleted pilot notes under `00 Inbox/`; deleted TickTick tasks `6ad6e474…`, `6ad6ea84…`, `6ad6ea86…`, `6ad6d78f…`, `6ad6d915…` on TTS-Inbox project.
+- Validation: `npx vitest run` → 75 files, 572 passed; `npm run build` → ok.
+- Problems: PR #2 branch **behind** `abyss-mapping` by 3 commits (draft); rebase before merge.
+- To Be Done: BRAT **2.0.49** on pilot; re-run NOTE-L3b; rebase/merge PR #2 after owner review.
+- References: `PO_STATUS.md`, `CHANGELOG.md`
+
+### Iteration 2026-10-20 04:30 UTC
+
+- Context: PO попросил завести три пункта в `PO_STATUS.md` и продолжить по `DEV_FLOW.md` после ручного пилота 2.0.48.
+- Target: Зафиксировать P0/P1 баги; regression tests + mitigations для Comments sweep и loose `ticktick_id`.
+- Actions log: `PO_STATUS.md` — BUG-COMMENT-NO-PUSH, BUG-ACTIVEZONE-COMMENT-SHUFFLE, BUG-TICKTICK-ID-LEAK; кейсы в `ABYSS_FIRST_CASES.md`. `TaskModificationDetector.sweepAbyssCommentsInFile`; `taskParser` canonical id + title strip. Tests `bugCommentNoPush.test.ts`, `bugTicktickIdLeak.test.ts`.
+- Validation: `npx vitest run` → 75 files, **572 passed**; `npm run build` → ok.
+- Problems: BUG-ACTIVEZONE-COMMENT-SHUFFLE open; pilot NOTE-L3b not re-run on new build.
+- To Be Done: Deploy build to pilot; NOTE-L3b; repro test for Active Zone shuffle.
+- References: `PO_STATUS.md`, `DEV_FLOW.md`, `CHANGELOG.md`
+
+### Iteration 2026-10-20 03:05 UTC
+
+- Context: Owner enabled Obsidian CLI; asked to run `TEST_PLAN.md` on pilot vault **2.0.48**.
+- Target: Execute pilot rows where CLI + **Synchronize** + TickTick MCP suffice; record honest pass/fail.
+- Actions log: `00 Inbox/tp1-cli-smoke.md`; `obsidian command id=tickticksync-abyss:tts-sync`; journal wait on `.tickticksync/journal/2026-10-20.jsonl`; MCP task/comment checks. Updated `TEST_PLAN.md` Results and `ABYSS_FIRST_CASES.md` gate log.
+- Validation: pass — TP1-NEW-ON-SYNC, TP1-CHILD-DESC, TP1-R-SYNC-OK, TP1-R-CHECKPOINT. fail — TP1-CHILD-COMMENT, TP1-R-TITLE, NOTE-L3b (Comments API). not run — debounce/editor/modal/network rows.
+- Problems: Comment bullets do not reach TickTick Comments on vault-disk + sync path (open). Title rename via `vault.modify` lost on pull (TP1-R-TITLE). `syncRunning` unreliable after manual clear; journal `commit` lines are the completion signal.
+- To Be Done: UI pass for debounce rows; fix or case-id comment push from `pushLocalEditsFirst`; manual AF-5 + DEL-* gate.
+- References: `TEST_PLAN.md`, `ABYSS_FIRST_CASES.md`, `CHANGELOG.md`
+
 ### Iteration 2026-10-20 02:40 UTC
 
 - Context: Owner requested release **2.0.48** then pilot tests per `TEST_PLAN.md` / `ABYSS_FIRST_CASES.md`.

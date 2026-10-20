@@ -157,30 +157,32 @@ Release **2.0.48** (`8f4c524`, tag pushed 2026-10-20). Pilot plugin on `Thinkpad
 
 | ID | Pilot status | Evidence |
 |----|----------------|----------|
-| AUTO-GATE | pass (CI) | `npx vitest run` on **2.0.48** → 73 files, 569 passed. Targeted: `activeFilePush.test.ts`, `synchronizationInner.integration.test.ts`, `abyssCommentSync.test.ts`, `notesSmoke.test.ts` → 20 passed. |
-| TP1-DEBOUNCE | not run | Obsidian not running; CLI disabled (Settings → General → Advanced). |
-| TP1-ID-ONLY | not run | |
-| TP1-CARET-UNFINISHED | not run | |
-| TP1-DURING-SYNC | not run | |
-| TP1-SWITCH-FILE | not run | |
-| TP1-NEW-ON-LEAVE | not run | |
-| TP1-NEW-ON-SYNC | not run | |
-| TP1-CHILD-COMMENT | not run | |
-| TP1-CHILD-DESC | not run | |
-| TP1-SIBLING-COMMENTS | not run | |
-| TP1-PULL-FAIL | not run | |
-| TP1-LOAD-NOTICE | not run | |
+| AUTO-GATE | pass (CI) | `npx vitest run` on **2.0.48** → 569 passed. |
+| TP1-DEBOUNCE | pass | Sam: rename with id in `manual-test`, ~5s → TT title updated (no ribbon). |
+| TP1-ID-ONLY | pass | New line without id not pushed on debounce; titled line updated quickly. Id for new line: **Synchronize** or leave line (not debounce-only). |
+| TP1-CARET-UNFINISHED | pass | Broken `%%` line not sent; needed one **Synchronize** before id on another new line. |
+| TP1-DURING-SYNC | not run | Same. |
+| TP1-SWITCH-FILE | not run | Same. |
+| TP1-NEW-ON-LEAVE | partial | Task created on leave with id; watch blank `- [ ]` line at EOF — may create empty TT task. |
+| TP1-NEW-ON-SYNC | pass | `00 Inbox/tp1-cli-smoke.md`: two new lines → **Synchronize** (`tickticksync-abyss:tts-sync`); ids `6ad6d78f…`, `6ad6d915…`. Journal `2026-10-20.jsonl`. |
+| TP1-CHILD-COMMENT | fail | Sam + CLI: comment bullets (`manual-test`, `tp1-cli-smoke`) do not appear in TT Comments. |
+| TP1-CHILD-DESC | pass | `- > tp1-desc-2048` → TickTick `content` = `tp1-desc-2048` (task `6ad6d78f…`, MCP). |
+| TP1-SIBLING-COMMENTS | not run | Blocked on comment API push. |
+| TP1-PULL-FAIL | not run | Network/session toggle not automated this session. |
+| TP1-LOAD-NOTICE | not run | Needs two Obsidian reloads + notice read. |
 | TP1-STALE-COMMENT | not run | |
-| TP1-COMMENT-MAP | not run | |
+| TP1-COMMENT-MAP | not run | Needs deletion confirm modal. |
 | TP1-QUIET-TITLE | not run | |
-| TP1-R-SYNC-OK | not run | |
-| TP1-R-CHECKPOINT | not run | |
-| TP1-R-TITLE | not run | |
-| TP1-R-DESC-FIELD | not run | |
+| TP1-R-SYNC-OK | pass | CLI sync + journal `commit` lines; pilot vault updated. |
+| TP1-R-CHECKPOINT | pass | `checkPoint` unchanged on no-delta sync (`1792465263108`); advances on pull when TT changes. |
+| TP1-R-TITLE | pass (UI) | Sam: title change in editor behaves like debounce path. CLI disk-only rename still fails (journal `mvg3m29s`). |
+| TP1-R-DESC-FIELD | partial | Desc in `content` pass; comment in Comments panel fail (same as TP1-CHILD-COMMENT). |
 | TP1-R-HASH-COMMENT | not run | |
-| TP1-R-KEYSTROKE | not run | |
-| TP1-R-UNFINISHED-LEAVE | not run | |
-| TP1-R-CHECKBOX | not run | |
-| TP1-R-DEL | not run | |
+| TP1-R-KEYSTROKE | not run | Editor-only. |
+| TP1-R-UNFINISHED-LEAVE | not run | Editor-only. |
+| TP1-R-CHECKBOX | not run | UI checkbox. |
+| TP1-R-DEL | not run | Confirm/cancel modals. |
 | TP1-R-SCOPE | not run | |
 | TP1-R-SUBTASK | not run | |
+
+Pilot run **2026-10-20** (Obsidian CLI + `command id=tickticksync-abyss:tts-sync`, journal wait). Note: `plugin.syncRunning` stayed `true` in eval after a forced clear; use journal commits, not `syncRunning`, to detect completion.

@@ -458,6 +458,41 @@ export class TaskModificationDetector {
 				}
 			}
 		}
+		await this.sweepAbyssCommentsInFile(filepath, fileMap, pushLimit);
+	}
+
+	/** BUG-COMMENT-NO-PUSH: push Comments API for every synced task in the file, not only lines that triggered hash diff. */
+	private async sweepAbyssCommentsInFile(
+		filepath: string,
+		fileMap: NewFileMap,
+		pushLimit: TaskSyncLimitOptions,
+	): Promise<void> {
+		if (!useAbyssCommentsApi()) return;
+		const lines = fileMap.getFileLines().split('\n');
+		const fenced = fencedLines(lines);
+		for (let i = 0; i < lines.length; i++) {
+			if (fenced.has(i)) continue;
+			const line = lines[i];
+			if (!this.plugin.taskParser?.isMarkdownTask(line)) continue;
+			const taskId = this.plugin.taskParser.getTickTickId(line);
+			if (!taskId) continue;
+			const taskRecord = fileMap.getTaskRecord(taskId);
+			if (!taskRecord?.taskLines?.length) continue;
+			const savedTask = await this.plugin.taskRepository.loadTaskById(taskId);
+			if (!savedTask?.projectId) continue;
+			if (pushLimit.allowedListIds?.size && !tickTickTaskEntersVault(savedTask, pushLimit)) continue;
+			try {
+				await syncAbyssCommentsToTickTick(
+					this.plugin.tickTickRestAPI,
+					taskId,
+					savedTask.projectId,
+					taskRecord.taskLines,
+					savedTask.content,
+				);
+			} catch (e) {
+				log.warn('Abyss comment sweep failed', taskId, filepath, e);
+			}
+		}
 	}
 
 	/**
