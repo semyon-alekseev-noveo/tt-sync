@@ -329,6 +329,39 @@ describe('synchronizationInner integration', () => {
 		expect(world.writes.some(w => w.updating && w.tasks.some(t => t.id === TASK))).toBe(true);
 	});
 
+	it('BUG-COMMENT-NO-PUSH pushes comments when vault mtime is below TickTick checkpoint', async () => {
+		const world = await makeWorld({ realDetector: true });
+		await db.meta.update('sync', {
+			lastFullSync: 5000,
+			lastDeltaSync: 5000,
+			lastVaultPushWallMs: 1000,
+		});
+		const line = `- [ ] parent %%[ticktick_id:: ${TASK}]%%`;
+		const text = `${line}\n\t- 2026-10-19 20:00: gate-comment-push\n`;
+		// Mtime after last push but before checkpoint — old code skipped pre-pull push.
+		putFile(world, 'notes/push.md', text, 2000);
+		world.metadata['notes/push.md'] = { TickTickTasks: [{ taskId: TASK }], defaultProjectId: 'proj-1' };
+		await db.tasks.put({
+			localId: `tt:${TASK}`,
+			taskId: TASK,
+			task: {
+				id: TASK, projectId: 'proj-1', title: 'parent', content: '', desc: '', status: 0,
+				lineHash: 'stale', tags: [], items: [], priority: 0,
+				modifiedTime: '2026-10-18T00:00:00.000+0000',
+			} as never,
+			updatedAt: 1000,
+			lastVaultSync: 1000,
+			file: 'notes/push.md',
+			source: 'obsidian',
+			deleted: false,
+		});
+		const result = await world.service.synchronizationInner(false, 'manual');
+		expect(result.ok).toBe(true);
+		expect(world.api.addTaskComment).toHaveBeenCalled();
+		const meta = await db.meta.get('sync');
+		expect(meta?.lastVaultPushWallMs).toBeGreaterThan(0);
+	});
+
 	it('BUG-COMMENT-INLINE push path sends a child comment through synchronizationInner', async () => {
 		const world = await makeWorld({ realDetector: true });
 		const line = `- [ ] parent %%[ticktick_id:: ${TASK}]%%`;

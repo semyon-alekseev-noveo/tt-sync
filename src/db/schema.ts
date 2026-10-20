@@ -11,6 +11,8 @@ export interface DeviceInfo {
 export type SyncMeta = {
 	lastFullSync: number;
 	lastDeltaSync: number;
+	/** Wall-clock ms when pre-pull vault push last finished; used for editedSince (not TickTick checkpoint). */
+	lastVaultPushWallMs?: number;
 
 	deviceId: string;
 	deviceLabel?: string;

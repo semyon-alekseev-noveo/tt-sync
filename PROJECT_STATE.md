@@ -18,12 +18,13 @@
 - **Direction (2026-10-16):** **Abyss-first** — tasks stay where Abyss puts them; TickTick mirrors tags/lists and project parents. See `ABYSS_FIRST_PLAN.md` (topology R / CASE-T4 parked).
 - **Still valid:** TT **Projects** ↔ project notes under `10 Projects/`; safety: `syncedLists`, `syncScopeFolders`, manual sync.
 - **Next execution order:** Steps 1–8 in `ABYSS_FIRST_PLAN.md`. Abyss Inbox in the plugin is the stage tag `#inbox` (§3.1). Untagged Abyss Inbox is still an open vault setting. Birth tag `#obsidian` stays.
+- **Sync research (2026-10-20):** `docs/TICKTICK_DELTA_API.md` — delta has no comments; echo suppression in `pull.ts` uses `modifiedTime` (candidate: `etag`); idle sync should avoid per-task GET after pilot §3.5 in `TEST_PLAN.md`.
 - **Redo:** journal `<vault>/.tickticksync/journal/`; palette undo previews then applies `planUndo`. Not soaked on the live vault.
 
 ## Validation
 
 - Build: `npm run build` in repo root; CI on `abyss-mapping` via `.github/workflows/ci.yml`.
-- Unit tests: `npx vitest run` (550 at **2.0.47**; PR #1 branch 569; this branch 77 files, 581 passed, including the idle-sync `getTaskById` baseline of 3). Abyss comments → TickTick **Comments API** when `syncAbyssCommentsViaApi` (default on); descriptions stay in `content`.
+- Unit tests: `npx vitest run` (586 on `abyss-mapping` + open PR branch; includes idle-sync `getTaskById` baseline of 3 and `BUG-COMMENT-NO-PUSH` integration test). Abyss comments → TickTick **Comments API** when `syncAbyssCommentsViaApi` (default on); descriptions stay in `content`.
 - Manual pilot: **`SMOKE_TESTS.md`**. Palette: **Synchronize** only; full TT pull on plugin load. Context tags **2.0.41** (`syncNoteContextTags`).
 - BRAT installs: GitHub Release assets from `.github/workflows/release.yml` (see `docs/BRAT_INSTALL.md`).
 - TT cleanup verified 2026-10-16 via MCP (no `ticktick` tag left on polluted set).
@@ -43,6 +44,7 @@
 2. Revoke the exposed `tp_…` token if it is still valid.
 3. Confirm Abyss Inbox is **With inbox tag** `#inbox` on the pilot. Untagged mode is still open.
 4. Still open in code: GAP-COMMENT-EDIT, RISK-PULL-WINS-LOCAL, RISK-DUAL-STORE, RISK-LARGE-VAULT (id index and per-run file cache landed; the `getTaskById` probe and `ensureVaultFilesRegistered` full scan remain), TECH-START-1, `main` ↔ `services` cycle.
+5. Delta pilot `TP-DELTA-*` then etag-based echo + comment pull policy per `docs/TICKTICK_DELTA_API.md` §3.2–3.3.
 
 ## References
 
@@ -58,6 +60,7 @@ Canonical:
 - `SMOKE_TESTS.md`
 - `ABYSS_NOTES_ALIGNMENT.md`
 - `ABYSS_MAPPING.md`
+- `docs/TICKTICK_DELTA_API.md` — delta API, echo/`etag`, comment gaps, recommended sync shape
 - `TODO.md`
 
 Archive (not requirements): `GTD_SYNC_CASES.md`, `GTD_SYNC_RESEARCH.md`, `TT_ABYSS_ROADMAP.md`, `SYNC_PROJECTS_AND_SUBTASKS.md`.

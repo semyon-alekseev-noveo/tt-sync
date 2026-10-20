@@ -1,6 +1,6 @@
 # Опорные схемы (аналитический мит 2026-10-19)
 
-**Назначение:** перед правкой бага смотреть, **какой поток** затронут, и не ломать соседние границы. Детальный research-sync — в [`GTD_SYNC_RESEARCH.md`](../GTD_SYNC_RESEARCH.md) §3; smoke-IDs — [`SMOKE_TESTS.md`](../SMOKE_TESTS.md).
+**Назначение:** перед правкой бага смотреть, **какой поток** затронут, и не ломать соседние границы. Детальный research-sync — в [`GTD_SYNC_RESEARCH.md`](../GTD_SYNC_RESEARCH.md) §3; delta/checkpoint/комментарии без N+1 — [`TICKTICK_DELTA_API.md`](TICKTICK_DELTA_API.md); smoke-IDs — [`SMOKE_TESTS.md`](../SMOKE_TESTS.md).
 
 ---
 
@@ -53,6 +53,7 @@ flowchart TB
 | Комментарии не в TT **Comments** | `TaskModificationDetector`, `abyssCommentSync`, `abyssFormat` | `VaultSyncCoordinator` routing, project scheme | `abyssCommentSync.test.ts`, `taskModificationCommentSmoke.test.ts`, NOTE-L3b |
 | Описание `- >` не в `content` | `taskParser`, `convertLineToTask` | `taskCommentMaps`, comment API | `notesSmoke.test.ts`, NOTE-L1 |
 | Тихий sync / ложный «completed» | `api/index getUpdatedTasks`, `sync.ts`, `main synchronizeNow` | Dexie schema | `sync.test.ts` pull error |
+| Delta / API rename не в vault / лишние `getTaskById` | `pull.ts` echo, `conflicts.ts`, `VaultSyncCoordinator vaultLineBehindTask`, `getUpdatedTasks` | Comment maps | `TICKTICK_DELTA_API.md`, `TEST_PLAN.md` TP-DELTA-* |
 | Строка в vault устарела | `VaultSyncCoordinator`, `fileOperation` | Push hash в TMD | `syncSmoke`, pull tests |
 | Дубли тегов | `contextTags`, `taskParser` push tags | Comment API | `contextTags.test.ts` CTX-D* |
 

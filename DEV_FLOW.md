@@ -53,7 +53,7 @@ Rules:
 
 Update canonical docs in the same PR as the code. Do not leave a second, older description of the same rule in a canonical file.
 
-Before changing sync, comments, or push/pull triggers, read [`docs/ANALYST_REFERENCE_DIAGRAMS.md`](docs/ANALYST_REFERENCE_DIAGRAMS.md) (mermaid boundaries from the 2026-10-19 analyst meet).
+Before changing sync, comments, or push/pull triggers, read [`docs/ANALYST_REFERENCE_DIAGRAMS.md`](docs/ANALYST_REFERENCE_DIAGRAMS.md) (mermaid boundaries from the 2026-10-19 analyst meet) and [`docs/TICKTICK_DELTA_API.md`](docs/TICKTICK_DELTA_API.md) (delta, echo/`etag`, comments without N+1).
 
 | Canonical | What it is |
 |-----------|------------|
@@ -65,6 +65,7 @@ Before changing sync, comments, or push/pull triggers, read [`docs/ANALYST_REFER
 | `PROJECT_STATE.md` | Short engineering snapshot (not a second changelog) |
 | `CHANGELOG.md` | Append-only history of what landed |
 | `SMOKE_TESTS.md` | How to run manual checks. The live-vault gate is the one in `ABYSS_FIRST_CASES.md` |
+| `docs/TICKTICK_DELTA_API.md` | TickTick `batch/check` research, pilot §3.5, recommended etag/comment sync shape |
 
 Archive (historical, not a source of requirements): `GTD_SYNC_CASES.md`, `GTD_SYNC_RESEARCH.md`, `TT_ABYSS_ROADMAP.md`, `SYNC_PROJECTS_AND_SUBTASKS.md`. A banner at the top of each archive file points here. If archive text disagrees with a canonical file, the canonical file wins.
 

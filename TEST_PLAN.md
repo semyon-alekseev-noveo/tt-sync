@@ -165,7 +165,7 @@ Release **2.0.48** (`8f4c524`, tag pushed 2026-10-20). Pilot plugin on `Thinkpad
 | TP1-SWITCH-FILE | not run | Same. |
 | TP1-NEW-ON-LEAVE | partial | Task created on leave with id; watch blank `- [ ]` line at EOF — may create empty TT task. |
 | TP1-NEW-ON-SYNC | pass | `00 Inbox/tp1-cli-smoke.md`: two new lines → **Synchronize** (`tickticksync-abyss:tts-sync`); ids `6ad6d78f…`, `6ad6d915…`. Journal `2026-10-20.jsonl`. |
-| TP1-CHILD-COMMENT | fail | Sam + CLI: comment bullets (`manual-test`, `tp1-cli-smoke`) do not appear in TT Comments. |
+| TP1-CHILD-COMMENT | not run | Prior fail on **2.0.49**; fix `lastVaultPushWallMs` in pre-pull push — re-test NOTE-L3b after next build. |
 | TP1-CHILD-DESC | pass | `- > tp1-desc-2048` → TickTick `content` = `tp1-desc-2048` (task `6ad6d78f…`, MCP). |
 | TP1-SIBLING-COMMENTS | not run | Blocked on comment API push. |
 | TP1-PULL-FAIL | not run | Network/session toggle not automated this session. |
@@ -189,7 +189,7 @@ Pilot run **2026-10-20** (Obsidian CLI + `command id=tickticksync-abyss:tts-sync
 
 ## PR — sync perf index and file cache
 
-Branch `cursor/sync-perf-index-cache-aa83` (rebased on `abyss-mapping` / **2.0.49**). PR #1 is merged. No version bump on this branch until owner tags. Every row below: **pilot status: not run**.
+Branch merged in **2.0.50**. Pilot vault **Thinkpad-tts-test**, plugin **2.0.50** (owner install). Automated run 2026-10-20 via Obsidian CLI + hook on `syncActivity.endFull` (see Results).
 
 What this PR must not change: which TickTick calls a sync makes, and which file wins for an id. `vaultLineBehindTask` still calls `getTaskById` and `getTaskComments` on the same conditions as before. The id scan is still the first markdown file in vault order whose text contains the id (`String.includes`), including text inside a fence. Empty ids are ignored.
 
@@ -238,12 +238,77 @@ Expected: TickTick shows the edit, same as on PR #1. One `[perf]` line has `"tri
 
 | ID | Pilot status | Evidence |
 |----|----------------|----------|
-| TP-PERF-LOG | not run | |
-| TP-PERF-UI | not run | |
-| TP-PERF-SAME | not run | |
-| TP-PERF-ACTIVE | not run | |
-| TP-PERF-R-PROBE | not run | |
-| TP-PERF-R-FENCE | not run | |
-| TP-PERF-R-DUP | not run | |
+| TP-PERF-LOG | partial | CLI hook on `console.info` did not persist across `obsidian` invocations; no `[perf]` JSON file captured. **Manual:** DevTools → filter `[perf]` on one **Synchronize** — expect one JSON line with `trigger:"manual"`, `phaseMs`, `counts`. |
+| TP-PERF-UI | pass | After **Synchronize** (hooks in same Obsidian session): notice detail `api 254 · probe 126 · read 735 · write 0` (quiet-ish run); second run same session `api 721 · probe 716 · read 737 · write 1`. Matches `formatSyncPerfShort`. |
+| TP-PERF-SAME | pass | Task `6ad5bb47…` in `00 Inbox/abyss-active.md`: line md5 unchanged across sync; `probe` ≥ 126 on first captured run (vault ~719 `.md` files). |
+| TP-PERF-ACTIVE | not run | Needs editor open + 5 s debounce; not automated this session. |
+| TP-PERF-R-PROBE | partial | Same as TP-PERF-SAME (`probe` 126 / 716 logged); no per-task TT API audit. |
+| TP-PERF-R-FENCE | not run | No dedicated fence fixture exercised. |
+| TP-PERF-R-DUP | not run | No duplicate-id fixture run. |
 | TP-PERF-R-MOVE | not run | |
-| TP-PERF-R-SYNC-OK | not run | |
+| TP-PERF-R-SYNC-OK | pass | **Synchronize** completed; `checkPoint` `1792472586718` → `1792472716421` on one run; unchanged on no-delta run. Vault line stable when quiet. |
+
+Pilot **2026-10-20** (agent, **2.0.50**): Obsidian CLI `tts-sync`; avoid polling with repeated `obsidian eval` during sync (reload drops hooks). CI: `syncPerf.test.ts`, `vaultIdScan.equivalence.test.ts`, `syncFileCache.test.ts`, `vaultIdScan.bench.test.ts` — pass on `abyss-mapping`.
+
+## PR — BUG-COMMENT-NO-PUSH and delta docs
+
+Branch targets `abyss-mapping`. Build from this branch (not necessarily a GitHub release tag until owner publishes).
+
+Preconditions: same as TP1-CHILD-COMMENT (`syncAbyssCommentsViaApi` on, in-scope note with `ticktick_id`).
+
+### TP-BUG-COMMENT-NO-PUSH — child comment reaches TickTick Comments after Synchronize
+
+1. On a synced task, add a child comment bullet (title unchanged). Save the note.
+2. Run **Synchronize** once (no need to edit the title line).
+
+Expected: the text appears in the TickTick **Comments** panel, not only in task `content`. Matches **NOTE-L3b** / `ABYSS_FIRST_CASES.md` **BUG-COMMENT-NO-PUSH**.
+
+Automated: `bugCommentNoPush.test.ts`, `synchronizationInner.integration.test.ts` (`BUG-COMMENT-NO-PUSH pushes comments when vault mtime is below TickTick checkpoint`). `getUpdatedTasks.deltaAdd.test.ts` covers delta `add` merge only (no pilot).
+
+| ID | Pilot status | Evidence |
+|----|----------------|----------|
+| TP-BUG-COMMENT-NO-PUSH | not run | Install build from this PR; re-run NOTE-L3b on pilot vault. |
+
+## Delta API pilot (`docs/TICKTICK_DELTA_API.md` §3.5)
+
+Run **before** replacing `modifiedTime` echo suppression with `etag` or dropping per-task `getTaskById` on idle sync. Needs a logged-in session (MCP or local `batch/check` capture). Record raw `update[]` fields (`modifiedTime`, `etag`, `commentCount`) in the Results table.
+
+### TP-DELTA-MCP-RENAME — API rename in delta
+
+1. Note `checkPoint` from meta or last successful sync.
+2. Rename a pilot task via TickTick MCP or Open API (not the mobile/desktop app).
+3. `GET batch/check/{checkPoint}` (or one **Synchronize** and log delta size).
+
+Expected: task appears in `update[]`. Note whether `modifiedTime` and `etag` changed vs before.
+
+### TP-DELTA-APP-RENAME — in-app rename in delta
+
+Same as above, but rename in the TickTick app.
+
+Expected: `modifiedTime` and `etag` typically change; task in `update[]`.
+
+### TP-DELTA-COMMENT — comment added in TickTick app
+
+1. Add a comment in the TickTick UI on a synced pilot task.
+2. Inspect delta for that task id.
+
+Expected: document whether the task is in `update[]` and whether `etag`, `modifiedTime`, or `commentCount` changed (**open** until pilot runs).
+
+### TP-DELTA-CLOSE-DELETE — complete and trash
+
+Complete one task and delete another. Inspect `update[]` / `delete[]`.
+
+Expected: closed task may appear as `update` with `status` 2 or -1; deleted id in `delete[]` (**verify** on pilot).
+
+### Delta pilot — Results
+
+| ID | Pilot status | Evidence |
+|----|----------------|----------|
+| TP-DELTA-MCP-RENAME | not run | |
+| TP-DELTA-APP-RENAME | not run | |
+| TP-DELTA-COMMENT | not run | |
+| TP-DELTA-CLOSE-DELETE | not run | |
+
+## Delta sync roadmap (after pilot)
+
+Planned cases when `etag` echo and idle zero-probe land (`docs/TICKTICK_DELTA_API.md` §3.3): **TP1-QUIET-TITLE-ETAG**, **TP-ECHO-ETAG**, **TP-COMMENT-COUNT**, **TP-IDLE-ZERO**, **TP-DAILY-RECONCILE**. All **not run** until implemented and piloted.
