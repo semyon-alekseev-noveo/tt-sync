@@ -25,7 +25,7 @@
 
 ## Validation
 
-- Релиз **2.0.47:** `npx vitest run` — 67 файлов, 550 тестов. Эта ветка (hotfix **BUG-STALE-EDITOR-WRITE**, версию не поднимали): **83 файла, 607 тестов**, `npm run build` — ok. В том числе `src/test/synchronizationInner.integration.test.ts`. Пилот hotfix-кейсов — **not run** (`TEST_PLAN.md`).
+- Релиз **2.0.47:** `npx vitest run` — 67 файлов, 550 тестов. Эта ветка (hotfix **BUG-STALE-EDITOR-WRITE**, версию не поднимали): **84 файла, 613 тестов**, `npm run build` — ok. В том числе `src/test/synchronizationInner.integration.test.ts`. Пилот hotfix-кейсов — **not run** (`TEST_PLAN.md`).
 - Пилот **2.0.48** (2026-10-20): debounce/open-note — pass; NOTE-L3b / Comments API — **fail**; DEL-1 — pass. Детали в `TEST_PLAN.md`, `ABYSS_FIRST_CASES.md`, `CHANGELOG.md`.
 - Релиз **2.0.53** (2026-10-20): idle sync без `getTaskById` на тихую задачу; эхо по `etag`; `getTaskComments` только при расхождении `commentCount`. Vitest **589**. Пилот `TP-IDLE-ZERO` — not run.
 - Релиз **2.0.52** (2026-10-20): vault-комментарий сохраняется при перерисовке строки; пилот NOTE-L3b — not run.
@@ -65,7 +65,7 @@
 
 ## To Be Done
 
-1. Пилот hotfix **BUG-STALE-EDITOR-WRITE**: `TP-EDITOR-TYPE-DURING-SYNC`, `TP-EDITOR-TYPE-DURING-PUSH`, `TP-EDITOR-OTHER-LEAF`, `TP-COMMENT-TT-DELETE`, `TP-NO-SELF-REPUSH`, `TP-COMPLETE-DURING-TYPE`, `TP-UNCOMPLETE-DURING-TYPE` (`TEST_PLAN.md`). Версию не поднимали.
+1. Пилот hotfix **BUG-STALE-EDITOR-WRITE**: `TP-EDITOR-TYPE-DURING-SYNC`, `TP-EDITOR-TYPE-DURING-PUSH`, `TP-EDITOR-OTHER-LEAF`, `TP-COMMENT-TT-DELETE`, `TP-NO-SELF-REPUSH`, `TP-COMPLETE-DURING-TYPE`, `TP-UNCOMPLETE-DURING-TYPE`, `TP-JOURNAL-EDITOR-PATCH`, `TP-UNDO-EDITOR-PATCH` (`TEST_PLAN.md`). Версию не поднимали.
 2. Пилот **2.0.53** `TP-IDLE-ZERO` и **TP-DELTA-*** (`docs/TICKTICK_DELTA_API.md` §3.5). В **2.0.53** тихий синк не вызывает `getTaskById`; суточная сверка, closed и trash ещё не сделаны.
 3. **BUG-COMMENT-NO-PUSH** — на **2.0.52** буллеты `task-13-43-vault-r3` в vault остались, в TT Comments пусто, прежние TT-комментарии стёрты (карта fingerprint → delete). Не блокирует пункт 1.
 4. **BUG-ACTIVEZONE-COMMENT-SHUFFLE** — failing test + fix (`pullSubtaskOrder` / `mergeAbyssBlock`).

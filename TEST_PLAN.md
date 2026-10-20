@@ -416,6 +416,20 @@ Expected: text on the other line stays. The checkbox flips only if that task lin
 
 Same as **TP-COMPLETE-DURING-TYPE**, but the task is reopened and the box returns to `[ ]`.
 
+### TP-JOURNAL-EDITOR-PATCH — an open-note patch is in the redo journal before it lands
+
+1. Open a synced note. Run **Synchronize** so it changes a task line while the note stays open.
+2. Open `.tickticksync/journal/` for today.
+
+Expected: a record for that file is pending before the editor changes, then committed. `before` is the buffer from before the patch. `after` is the buffer after it, including text you had already typed on another line. A patch that does not land (the task line changed, or you were still typing) has no committed record.
+
+### TP-UNDO-EDITOR-PATCH — undo restores an editor patch with the note open or closed
+
+1. After **TP-JOURNAL-EDITOR-PATCH**, run **Undo last sync** (preview, then apply) while the note is still open.
+2. Patch the note again, close it, and run **Undo last sync** once more. Also try **Preview undo of last sync** and **restore task version** on that task.
+
+Expected: preview lists the file restore. Apply puts the task line back. The same restore works when the note is closed. A record that was not committed is not undone.
+
 ### Other note writes on the same path
 
 These also go through `commitVaultText`. Each one is **not run** on a vault.
@@ -450,4 +464,6 @@ These already have automated tests. Re-run them with the suite. Do not mark a li
 | TP-STALE-FILE-WRITE | not run | Automated only: `staleFileWrite.test.ts`. No vault run. |
 | TP-COMPLETE-DURING-TYPE | not run | Automated: `completeDuringType.test.ts`. No vault run. |
 | TP-UNCOMPLETE-DURING-TYPE | not run | Automated: `completeDuringType.test.ts`. No vault run. |
+| TP-JOURNAL-EDITOR-PATCH | not run | Automated: `journalEditorPatch.test.ts`. No vault run. |
+| TP-UNDO-EDITOR-PATCH | not run | Automated: `journalEditorPatch.test.ts`. No vault run. |
 | Recurring roll, detach, duplicate strip, subtask reorder, tag/link/rename/repair/merge/force update/undo | not run | Automated guard: `noWholeNoteWrite.test.ts` (no direct whole-note write outside `commitVaultText`). |

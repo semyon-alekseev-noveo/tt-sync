@@ -7,7 +7,7 @@ import { TickTickRestAPI } from '@/services/TicktickRestAPI';
 import type TickTickSync from '@/main';
 import type { ITask } from '@/api/types/Task';
 import log from '@/utils/logger';
-import { commitVaultText, readNoteForWrite } from '@/services/vaultWrite';
+import { commitVaultText, editorsForFile, isHelperVaultWrite, readNoteForWrite, setNoteJournal } from '@/services/vaultWrite';
 
 const MAX_FILE = 256 * 1024;
 const clean = (t: unknown) => { if (!t || typeof t !== 'object') return t ?? null; const { dateHolder: _a, lineHash: _b, ...r } = t as Record<string, unknown>; void _a; void _b; return JSON.parse(JSON.stringify(r)); };
@@ -33,9 +33,17 @@ export function instrumentVault(app: App, r: RedoLog) {
 	const v = app.vault as unknown as Record<string, (...a: unknown[]) => Promise<unknown>>;
 	const orig = { process: v.process.bind(v), modify: v.modify.bind(v), create: v.create.bind(v), delete: v.delete.bind(v), trash: v.trash.bind(v), rename: v.rename.bind(v) };
 	const commitAll = async (ids: string[]) => { for (const id of ids) await r.commit(id); };
+	setNoteJournal({
+		prepare: async (path, before, after) => {
+			if (!r.active() || !journaled(path) || before === after) return null;
+			const ids = await recordWrite(r, path, before, after, 'update');
+			return { commit: () => commitAll(ids) };
+		},
+	});
 	v.process = async (file: unknown, fn: unknown, opts?: unknown) => {
 		const f = file as TFile; const fx = fn as (d: string) => string;
-		if (!r.active() || !journaled(f.path)) return orig.process(file, fn, opts);
+		// commitVaultText journals its own write, including an editor patch and a re-applied span.
+		if (!r.active() || !journaled(f.path) || isHelperVaultWrite()) return orig.process(file, fn, opts);
 		const before = await app.vault.read(f); const after = fx(before);
 		if (after === before) return orig.process(file, fn, opts);
 		const ids = await recordWrite(r, f.path, before, after, 'update');
@@ -96,7 +104,13 @@ export function makeEnv(plugin: TickTickSync): Env {
 		return null;
 	};
 	return {
-		read: async p => { const f = file(p); return f ? app.vault.read(f) : null; },
+		read: async p => {
+			const f = file(p);
+			if (!f) return null;
+			const open = editorsForFile(app, p).find(editor => typeof editor.getValue === 'function');
+			if (open) return open.getValue();
+			return app.vault.read(f);
+		},
 		write: async (p, text) => {
 			const f = file(p);
 			if (f) {
