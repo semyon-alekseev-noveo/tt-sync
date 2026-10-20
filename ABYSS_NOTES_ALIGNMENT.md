@@ -63,7 +63,7 @@ Canonical merge order on pull: **task line → descriptions → checklist items 
 | Direction | Path |
 |-----------|------|
 | Obs → TT | `convertLineToTask` writes the description into `content`. `syncAbyssCommentsToTickTick` pushes comment threads. A child comment or description line pushes the parent (`BUG-COMMENT-INLINE`) |
-| TT → Obs | `convertTaskToLine` writes the description. API comments are formatted as Abyss lines (`formatApiCommentAsAbyssLines`) and merged with `mergeAbyssBlock`. `vaultLineBehindTask` treats a TickTick-only comment as behind (`BUG-PULL-COMMENT-STALE`) |
+| TT → Obs | `convertTaskToLine` writes the description. API comments are formatted as Abyss lines (`formatApiCommentAsAbyssLines`) and merged with `mergeAbyssBlock`. A body stored in `taskCommentMaps` on the previous sync and missing from the current Comments API is removed; a vault comment with no map entry is kept. `vaultLineBehindTask` treats a TickTick-only comment as behind (`BUG-PULL-COMMENT-STALE`) |
 | Hash / change detect | `TaskModificationDetector` hashes `line + abyssLinesToNote(taskLines)` when the Comments API is on. `abyssDescriptionToNote` is not the hash |
 
 **Known limitations** (`ABYSS_MAPPING.md`):

@@ -20,6 +20,7 @@ import { allowVaultUpdate, fileForNewTickTickTask, isListAllowed, normalizeSyncT
 import { TaskDeletionModal } from '@/modals/TaskDeletionModal';
 import { FolderSyncService } from '@/services/FolderSyncService';
 import log from '@/utils/logger';
+import { commitVaultText, readNoteForWrite } from '@/services/vaultWrite';
 import { syncFileMap } from '@/sync/fileRunCache';
 import { addCount } from '@/sync/perf';
 import { apiCommentsDifferFromVault, useAbyssCommentsApi } from '@/abyssCommentSync';
@@ -432,7 +433,11 @@ export class VaultSyncCoordinator {
 				for (const id of allIds) {
 					await this.plugin.fileMetadataService.clearTaskFile(id);
 					await this.plugin.taskRepository.deleteTask(id);
-					if (f instanceof TFile) await this.app.vault.process(f, d => detachInContent(d, id, markerName()) ?? d);
+					if (f instanceof TFile) {
+						const snapshot = await readNoteForWrite(this.app, f);
+						const next = detachInContent(snapshot, id, markerName());
+						if (next && next !== snapshot) await commitVaultText(this.app, f, snapshot, next);
+					}
 				}
 			}
 			return true;

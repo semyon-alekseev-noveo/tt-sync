@@ -12,6 +12,7 @@ import { ProjectGroupRepository } from '@/repositories/ProjectGroupRepository';
 import { getProjectById } from '@/db/projects';
 import { upsertFile, deleteFile } from '@/db/files';
 import { NewFileMap } from '@/services/NewFileMap';
+import { commitVaultText } from '@/services/vaultWrite';
 import { FileLocationConflictModal } from '@/modals/FileLocationConflictModal';
 import log from '@/utils/logger';
 import type TickTickSync from '@/main';
@@ -382,6 +383,7 @@ export class FolderSyncService {
 		const targetMap = new NewFileMap(this.app, this.plugin, targetFile);
 		await targetMap.init();
 
+		const snapshot = targetMap.getFileLines();
 		const targetIds = new Set(targetMap.getTasks());
 		const sourceLines = sourceMap.getFileLines().split('\n');
 
@@ -411,7 +413,7 @@ export class FolderSyncService {
 			content = content ? `${content}\n${joined}` : joined;
 		}
 
-		await this.app.vault.modify(targetFile, content);
+		await commitVaultText(this.app, targetFile, snapshot, content);
 		log.debug(`Merged tasks from ${sourcePath} into ${targetPath}`);
 	}
 
