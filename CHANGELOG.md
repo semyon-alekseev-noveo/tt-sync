@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-20 06:15 UTC
+
+- Context: Owner merged PR #3 into `abyss-mapping` and requested release **2.0.51**.
+- Target: Tag **2.0.51** (BUG-COMMENT-NO-PUSH pre-pull push, delta `add` parsing, delta API research doc).
+- Actions log: Bumped `package.json`, `manifest.json`, `versions.json` to **2.0.51**; `PO_STATUS.md` install baseline.
+- Validation: `npx vitest run` → 80 files, **586 passed**; `npm run build` → ok.
+- Problems: NOTE-L3b live gate still **not run** on **2.0.51** build.
+- To Be Done: BRAT **2.0.51** on pilot; **TP-BUG-COMMENT-NO-PUSH**; **TP-DELTA-*** per `docs/TICKTICK_DELTA_API.md`.
+- References: `TEST_PLAN.md`, `PO_STATUS.md`, `CHANGELOG.md`
+
 ### Iteration 2026-10-20 06:10 UTC
 
 - Context: Owner shared delta API research (`tt-sync-ticktick-delta-api.md`); canonical copy and small code alignment.

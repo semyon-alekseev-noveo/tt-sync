@@ -4,7 +4,7 @@
 **Audience:** Product owner / decision maker  
 **Repo:** `tickticksync` branch `abyss-mapping`  
 **Test vault:** `<pilot-vault>` (copy only; live vault `<live-vault>` untouched)  
-**Install:** BRAT → `https://github.com/semyon-alekseev-noveo/tt-sync` track **latest release** (**2.0.50**, tag `2.0.50`); plugin id **`tickticksync-abyss`** — `docs/BRAT_INSTALL.md`. Preset: `00 Inbox/TTS-data-preset.json`.
+**Install:** BRAT → `https://github.com/semyon-alekseev-noveo/tt-sync` track **latest release** (**2.0.51**, tag `2.0.51`); plugin id **`tickticksync-abyss`** — `docs/BRAT_INSTALL.md`. Preset: `00 Inbox/TTS-data-preset.json`.
 
 История изменений — только в `CHANGELOG.md`; здесь — снимок для PO.
 
@@ -27,7 +27,8 @@
 
 - Релиз **2.0.47:** `npx vitest run` — 67 файлов, 550 тестов. Эта ветка (ещё не релиз, версию не поднимали): **73 файла, 569 тестов**, `npm run build` — ok. В том числе `src/test/synchronizationInner.integration.test.ts`.
 - Пилот **2.0.48** (2026-10-20): debounce/open-note — pass; NOTE-L3b / Comments API — **fail**; DEL-1 — pass. Детали в `TEST_PLAN.md`, `ABYSS_FIRST_CASES.md`, `CHANGELOG.md`.
-- Релиз **2.0.50** (2026-10-20): PR #2 merged — id index, file-run cache, `[perf]`; `npx vitest run` → 79 files, 584 tests. Пилот TP-PERF-* — not run.
+- Релиз **2.0.51** (2026-10-20): PR #3 — **BUG-COMMENT-NO-PUSH** (`lastVaultPushWallMs`), delta `add` merge, `docs/TICKTICK_DELTA_API.md`; vitest **586**. Пилот **TP-BUG-COMMENT-NO-PUSH** / NOTE-L3b — not run.
+- Релиз **2.0.50** (2026-10-20): PR #2 — id index, file-run cache, `[perf]`; 584 tests. Пилот TP-PERF-* частично (`TEST_PLAN.md`).
 - Детали и даты прогонов — в `CHANGELOG.md`.
 
 ## Problems
