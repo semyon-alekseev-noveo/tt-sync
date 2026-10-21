@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-21 08:08 UTC
+
+- Context: Pilot `task-11-16`: user removed all comment bullets in Obsidian (only `- > коммент 6` left); **Synchronize** did not remove TickTick Comments (five rows remained).
+- Target: **BUG-COMMENT-VAULT-WIPE** — vault removal of all comment bullets must delete TT Comments when line hash changes and Dexie maps exist.
+- Actions log: `obsidianRemovedCommentBullets` option on `syncAbyssCommentsToTickTick`; detector passes it when hash changes and vault has zero comment threads. Bump **2.0.67**.
+- Validation: `npx vitest run` → **667 passed**; `npm run build` ok.
+- Problems: Deleting **one** of several comment bullets while TT has extra comments may still need a follow-up (TT-ahead delete guard).
+- To Be Done: Tag **2.0.67**; pilot re-sync `2026-10-19.md`.
+- References: `src/abyssCommentSync.ts`, `CHANGELOG.md`
+
 ### Iteration 2026-10-21 07:59 UTC
 
 - Context: Pilot after **2.0.65**: `task-11-16` comments partly in TT but Obsidian showed `14:46: 2026-10-21T12:09:07+07:00: comment 2` duplicates; `2026-10-21.md` / `test-11-12` vault `коммент 1` not in TT.

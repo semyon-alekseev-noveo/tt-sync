@@ -107,6 +107,47 @@ describe('abyssCommentSync', () => {
 		expect(del).not.toHaveBeenCalled();
 	});
 
+	it('BUG-COMMENT-VAULT-WIPE deletes all TT comments when vault comment bullets were removed', async () => {
+		listMaps.mockResolvedValueOnce([
+			{
+				id: 'task1:comment 1',
+				taskId: 'task1',
+				projectId: 'proj1',
+				fingerprint: 'comment 1',
+				ticktickCommentId: 'c1',
+				body: 'comment 1',
+			},
+			{
+				id: 'task1:comment 2',
+				taskId: 'task1',
+				projectId: 'proj1',
+				fingerprint: 'comment 2',
+				ticktickCommentId: 'c2',
+				body: 'comment 2',
+			},
+		]);
+		const del = vi.fn().mockResolvedValue(true);
+		const api = {
+			getTaskComments: vi.fn().mockResolvedValue([
+				{ id: 'c1', title: 'comment 1' },
+				{ id: 'c2', title: 'comment 2' },
+			]),
+			addTaskComment: vi.fn(),
+			deleteTaskComment: del,
+		} as unknown as TickTickRestAPI;
+		await syncAbyssCommentsToTickTick(
+			api,
+			'task1',
+			'proj1',
+			['\t- > description only'],
+			undefined,
+			{ obsidianRemovedCommentBullets: true },
+		);
+		expect(del).toHaveBeenCalledTimes(2);
+		expect(del).toHaveBeenCalledWith('proj1', 'task1', 'c1');
+		expect(del).toHaveBeenCalledWith('proj1', 'task1', 'c2');
+	});
+
 	it('BUG-COMMENT-NO-TT-WIPE: preserves TickTick-only comments when vault has no comment bullets', async () => {
 		listMaps.mockResolvedValueOnce([
 			{

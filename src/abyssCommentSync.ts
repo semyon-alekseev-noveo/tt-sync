@@ -91,6 +91,11 @@ export function migrateLegacyCommentsInContent(content: string): { description: 
 	return { description: stripped, legacyBodies };
 }
 
+export type AbyssCommentSyncOptions = {
+	/** User removed all Abyss comment bullets (line hash changed, Dexie maps still present). */
+	obsidianRemovedCommentBullets?: boolean;
+};
+
 /**
  * Push Abyss comment threads to TickTick Comments API; descriptions stay in task `content` via parser.
  */
@@ -100,11 +105,31 @@ export async function syncAbyssCommentsToTickTick(
 	projectId: string,
 	taskLines: string[],
 	legacyContent?: string,
+	opts?: AbyssCommentSyncOptions,
 ): Promise<boolean> {
 	if (!api || !useAbyssCommentsApi() || !taskId || !projectId) return false;
 
 	const threads = extractAbyssCommentThreads(taskLines);
 	let maps = await listCommentMapsForTask(taskId);
+
+	if (
+		opts?.obsidianRemovedCommentBullets
+		&& threads.length === 0
+		&& maps.length > 0
+		&& deletionConfirmMode() !== 'skip'
+	) {
+		const remote = await api.getTaskComments(projectId, taskId);
+		let changed = false;
+		for (const c of remote) {
+			if (await api.deleteTaskComment(projectId, taskId, c.id)) changed = true;
+		}
+		maps = await listCommentMapsForTask(taskId);
+		for (const m of maps) {
+			await deleteCommentMap(m.id);
+			changed = true;
+		}
+		return changed;
+	}
 	const mapByFp = new Map(maps.map(m => [m.fingerprint, m]));
 
 	let changed = false;
