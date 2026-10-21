@@ -49,6 +49,7 @@ Preconditions for every AF row: plugin `tickticksync-abyss`, manual sync, `fileL
 | BUG-COMMENT-STALE-MAPS | After a mass TickTick Comments wipe, several vault bullets with stale Dexie maps must still **push** (`vaultHasUnpushedCommentThreads`); single mapped miss with other TT comments still waits for pull. |
 | BUG-COMMENT-TT-AHEAD-NO-DELETE | A comment created only in TickTick must survive **Synchronize** (push runs before pull; no `deleteTaskComment` for TT-ahead keys). |
 | BUG-COMMENT-BOTH-WAYS | When vault and TickTick both have comment keys the other side lacks, reconcile must **push** unpushed vault threads and still **pull** TT-ahead (not TT-ahead-only `behindComments`). |
+| BUG-COMMENT-PUSH-NO-ID | POST `/comment` responses without a top-level `id` must still yield a comment id (unwrap `ok`/`result`/`data`); vault-only pushes use plain comment text; several stale maps with TT comments still present must not block push. |
 | TP-EDITOR-OTHER-LEAF | The editor buffer is used only when that editor's file is the file being read. Another leaf's buffer is never written into the target note. |
 | TP-EDITOR-TYPE-DURING-SYNC | Typing in an open note during Synchronize stays in the editor. The task line updates, or the write waits until typing pauses. |
 | TP-EDITOR-TYPE-DURING-PUSH | Same as TP-EDITOR-TYPE-DURING-SYNC for the 5-second open-note push. |

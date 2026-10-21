@@ -129,7 +129,7 @@ export async function syncAbyssCommentsToTickTick(
 		}
 	}
 
-	const remote = await api.getTaskComments(projectId, taskId);
+	let remote = await api.getTaskComments(projectId, taskId);
 	const remoteIds = new Set(remote.map(c => c.id));
 	maps = await listCommentMapsForTask(taskId);
 	const plan = planCommentSync(taskLines, remote, maps);
@@ -147,10 +147,15 @@ export async function syncAbyssCommentsToTickTick(
 		changed = true;
 	}
 
+	const tickTickCommentTitle = (body: string) => {
+		const plain = commentBodyWithoutStamp(body);
+		return (plain || body).trim();
+	};
+
 	for (const v of plan.vaultOnly) {
 		const thread = v.thread;
 		const fp = mapFingerprintForThread(thread);
-		const created = await api.addTaskComment(projectId, taskId, thread.body);
+		const created = await api.addTaskComment(projectId, taskId, tickTickCommentTitle(thread.body));
 		if (created?.id) {
 			await upsertCommentMap({
 				id: commentMapId(taskId, fp),
@@ -190,6 +195,13 @@ export async function syncAbyssCommentsToTickTick(
 		}
 	}
 
+	// Re-plan after creates so deletes use a fresh remote list (BUG-COMMENT-PUSH-STALE-REMOTE).
+	remote = await api.getTaskComments(projectId, taskId);
+	remoteIds.clear();
+	for (const c of remote) remoteIds.add(c.id);
+	maps = await listCommentMapsForTask(taskId);
+	const planAfterPush = planCommentSync(taskLines, remote, maps);
+
 	const vaultKeys = new Set(normalizedKeysFromVaultLines(taskLines));
 	// Never delete TickTick comments when GET returned an empty list — avoids mass wipe on
 	// transient API failures or a partial vault read (BUG-COMMENT-NO-MASS-DELETE).
@@ -200,7 +212,7 @@ export async function syncAbyssCommentsToTickTick(
 		&& deletionConfirmMode() !== 'skip'
 		&& !remoteCommentKeysAheadOfVault(taskLines, remote)
 	) {
-		for (const entry of plan.mapWithoutVault) {
+		for (const entry of planAfterPush.mapWithoutVault) {
 			const m = entry.map;
 			const r = entry.remote;
 			if (!m || !r?.comment.id) continue;
@@ -214,7 +226,7 @@ export async function syncAbyssCommentsToTickTick(
 			changed = true;
 		}
 	}
-	for (const m of plan.orphanMaps) {
+	for (const m of planAfterPush.orphanMaps) {
 		await deleteCommentMap(m.id);
 		changed = true;
 	}

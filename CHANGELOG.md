@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-21 07:50 UTC
+
+- Context: Pilot **2.0.64**: manual sync logged **27** `addTaskComment` HTTP calls but `task-11-16` still had only two TickTick Comments; vault had `comment 2`–`comment 5`.
+- Target: **BUG-COMMENT-PUSH-NO-ID** — comments must actually land in TickTick after push.
+- Actions log: Parse POST `/comment` responses (`ok`/`result`/`data`); push plain comment text (no ISO stamp in TT title); `vaultHasUnpushedCommentThreads` when several stale maps + TT still has other comments; refresh remote before delete phase in `syncAbyssCommentsToTickTick`. Bump **2.0.65**.
+- Validation: `npx vitest run` → **665 passed**; `npm run build` ok.
+- Problems: Pilot **BUG-COMMENT-PUSH-NO-ID** — **not run** (deploy **2.0.65**, sync `2026-10-19.md`).
+- To Be Done: Tag **2.0.65**; verify MCP `get_comment` on `6ad83d…`.
+- References: `src/api/index.ts`, `src/sync/comments/match.ts`, `CHANGELOG.md`
+
 ### Iteration 2026-10-21 07:06 UTC
 
 - Context: Pilot on **2.0.63**: TickTick comments pulled into Obsidian, but vault `comment 2` / `comment 3` did not reach TickTick after **Synchronize**.

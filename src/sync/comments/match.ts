@@ -39,17 +39,26 @@ export function vaultHasUnpushedCommentThreads(
 	remoteCommentCount?: number,
 ): boolean {
 	const apiKeys = new Set(normalizedKeysFromRemote(remote));
+	const remoteIds = new Set(remote.map(c => c.id).filter((id): id is string => !!id));
 	const threads = extractAbyssCommentThreads(taskLines);
 	const missingFromApi = threads.filter(t => !apiKeys.has(normalizedCommentKey(t.body)));
 	if (missingFromApi.length === 0) return false;
 
-	for (const t of missingFromApi) {
+	const mapForThread = (t: AbyssCommentThread) => {
 		const key = normalizedCommentKey(t.body);
-		const mapped = maps.some(m => {
+		return maps.find(m => {
 			const mk = normalizedCommentKey(m.body);
 			return mk === key || m.fingerprint === commentFingerprint(t.body);
 		});
+	};
+
+	for (const t of missingFromApi) {
+		const mapped = mapForThread(t);
 		if (!mapped) return true;
+		if (mapped.ticktickCommentId && !remoteIds.has(mapped.ticktickCommentId)) {
+			// Several vault threads missing from TT with stale maps → push again (mass wipe / failed POST).
+			if (missingFromApi.length > 1) return true;
+		}
 	}
 
 	// One mapped thread missing while TT still has other comments → wait for pull (TP-COMMENT-TT-DELETE).

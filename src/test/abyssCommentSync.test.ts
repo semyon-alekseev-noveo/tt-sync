@@ -218,6 +218,6 @@ describe('abyssCommentSync', () => {
 		const lines = ['\t- 2026-10-19 20:00: only comment changed'];
 		const ok = await syncAbyssCommentsToTickTick(api, 'task1', 'proj1', lines);
 		expect(ok).toBe(true);
-		expect(add).toHaveBeenCalledWith('proj1', 'task1', '2026-10-19 20:00: only comment changed');
+		expect(add).toHaveBeenCalledWith('proj1', 'task1', 'only comment changed');
 	});
 });

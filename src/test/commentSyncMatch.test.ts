@@ -74,6 +74,41 @@ describe('planCommentSync', () => {
 		expect(vaultHasUnpushedCommentThreads(lines, [], maps, 0)).toBe(true);
 	});
 
+	it('vaultHasUnpushedCommentThreads is true when several mapped threads are missing but TT still has others', () => {
+		const lines = [
+			'\t- 2026-10-21T11:25:21+07:00: comment 1',
+			'\t- 2026-10-21T12:09:07+07:00: comment 2',
+			'\t- 2026-10-21T13:58:06+07:00: comment 3',
+		];
+		const maps = [
+			{
+				id: 't1:c1',
+				taskId: 't1',
+				projectId: 'p1',
+				fingerprint: 'comment 1',
+				ticktickCommentId: 'c1',
+				body: 'comment 1',
+			},
+			{
+				id: 't1:c2',
+				taskId: 't1',
+				projectId: 'p1',
+				fingerprint: 'comment 2',
+				ticktickCommentId: 'dead-2',
+				body: 'comment 2',
+			},
+			{
+				id: 't1:c3',
+				taskId: 't1',
+				projectId: 'p1',
+				fingerprint: 'comment 3',
+				ticktickCommentId: 'dead-3',
+				body: 'comment 3',
+			},
+		];
+		expect(vaultHasUnpushedCommentThreads(lines, [{ id: 'c1', title: 'comment 1' }], maps, 1)).toBe(true);
+	});
+
 	it('vaultHasUnpushedCommentThreads is false when one mapped thread is missing but TT still has others', () => {
 		const lines = [
 			'\t- 2026-10-21T11:25:21+07:00: kept',

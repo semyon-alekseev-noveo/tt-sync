@@ -63,6 +63,36 @@ interface UpdatePayload {
 	update: unknown[];
 }
 
+/** Unwrap TickTick POST /comment JSON into `{ id, title? }` or null when the id is missing. */
+export function parseTaskCommentFromApiResponse(response: unknown, fallbackTitle: string): ITaskComment | null {
+	if (!response || typeof response !== 'object') return null;
+	const raw = response as Record<string, unknown>;
+	const pick = (v: unknown): ITaskComment | null => {
+		if (!v || typeof v !== 'object') return null;
+		const o = v as Record<string, unknown>;
+		const id = o.id;
+		if (typeof id !== 'string' || !id.length) return null;
+		const t = o.title;
+		return { id, title: typeof t === 'string' ? t : fallbackTitle };
+	};
+	if (raw.ok === true && raw.result) {
+		const fromResult = pick(raw.result);
+		if (fromResult) return fromResult;
+	}
+	const direct = pick(raw);
+	if (direct) return direct;
+	if (raw.data) {
+		const fromData = pick(raw.data);
+		if (fromData) return fromData;
+	}
+	if (raw.result && raw.ok !== false) {
+		const fromLoose = pick(raw.result);
+		if (fromLoose) return fromLoose;
+	}
+	log.warn('Add Task Comment: response had no comment id', raw);
+	return null;
+}
+
 function httpStatusOf(error: unknown): number | undefined {
 	if (!error || typeof error !== 'object') return undefined;
 	const status = (error as { status?: unknown }).status;
@@ -797,11 +827,7 @@ export class Tick {
 			const url = `${this.apiUrl}/${taskComment(projectId, taskId)}`;
 			const body = { title: title.slice(0, 1024), content: title.slice(0, 1024) };
 			const response = await this.makeRequest('Add Task Comment', url, 'POST', body);
-			if (!response) return null;
-			const raw = response as { ok?: boolean; result?: ITaskComment; id?: string; title?: string };
-			if (raw.ok && raw.result) return raw.result;
-			if (raw.id) return { id: raw.id, title: raw.title ?? title };
-			return response as ITaskComment;
+			return parseTaskCommentFromApiResponse(response, title);
 		} catch (e) {
 			log.error('Add Task Comment failed: ', e);
 			this.setError('Add Task Comment', null, e);
