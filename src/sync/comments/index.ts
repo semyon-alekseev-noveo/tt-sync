@@ -18,4 +18,5 @@ export {
 	planCommentSync,
 	remoteCommentKeysAheadOfVault,
 	vaultCommentKeysAheadOfRemote,
+	vaultHasUnpushedCommentThreads,
 } from '@/sync/comments/match';

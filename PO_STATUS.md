@@ -4,7 +4,7 @@
 **Audience:** Product owner / decision maker  
 **Repo:** `tickticksync` branch `abyss-mapping`  
 **Test vault:** `<pilot-vault>` (copy only; live vault `<live-vault>` untouched)  
-**Install:** BRAT → `https://github.com/semyon-alekseev-noveo/tt-sync` track **latest release** (**2.0.59**, tag `2.0.59`); plugin id **`tickticksync-abyss`** — `docs/BRAT_INSTALL.md`. Preset: `00 Inbox/TTS-data-preset.json`.
+**Install:** BRAT → `https://github.com/semyon-alekseev-noveo/tt-sync` track **latest release** (**2.0.60**, tag `2.0.60`); plugin id **`tickticksync-abyss`** — `docs/BRAT_INSTALL.md`. Preset: `00 Inbox/TTS-data-preset.json`.
 
 История изменений — только в `CHANGELOG.md`; здесь — снимок для PO.
 
@@ -25,7 +25,8 @@
 
 ## Validation
 
-- Релиз **2.0.59** (2026-10-21): **BUG-COMMENT-VAULT-AHEAD** (push vault Abyss comments when TT Comments empty; fixes `task-11-16` / `2026-10-19.md` class), **BUG-COMMENT-MERGE-NO-STRIP**, **BUG-COMMENT-MANUAL-PRE-PULL**. Vitest **652**. Пилот после BRAT — **not run**.
+- Релиз **2.0.60** (2026-10-21): hotfix — `vaultHasUnpushedCommentThreads` restores **TP-COMMENT-TT-DELETE** while keeping **BUG-COMMENT-VAULT-AHEAD** push. Vitest **653**.
+- Релиз **2.0.59** (2026-10-21): **BUG-COMMENT-VAULT-AHEAD**, **BUG-COMMENT-MERGE-NO-STRIP**, **BUG-COMMENT-MANUAL-PRE-PULL**. Vitest **652**. Superseded by **2.0.60** for TT-delete regression.
 - Релиз **2.0.58** (2026-10-21): PR #9 comment sync wire — normalized keys (`planCommentSync`, **BUG-COMMENT-KEY-EQUIV**), no TT wipe when vault has no comment bullets (**BUG-COMMENT-NO-TT-WIPE**), active note in pre-pull push (**BUG-COMMENT-ACTIVE-NOTE**); `SyncRunContext` / `preparePhase` scaffold. Vitest **649**. Пилот NOTE-L3b / comment cases — **not run** (Thinkpad-tts-test).
 - Релиз **2.0.57** (2026-10-21): **BUG-DEFERRED-ID-PHASE2-DELETE** (pending marker guard in Phase 2 deletion; `pendingMarkerTaskIds`, prune at sync start). Vitest **635**. Пилот `BUG-DEFERRED-ID-PHASE2-DELETE` — **not run** (vault Thinkpad-tts-test).
 - Релиз **2.0.56** (2026-10-21): **BUG-EMPTY-EDITOR-DISK** (`repairEmptyEditorFromDisk`, disk fallback in `readNoteForWrite`, disk sync after open patch). Vitest **634**. Пилот `TP-EMPTY-EDITOR-DISK` — **not run** (vault Thinkpad-tts-test).

@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { commentSetsEquivalentByNormalizedKey, planCommentSync } from '@/sync/comments';
+import {
+	commentSetsEquivalentByNormalizedKey,
+	planCommentSync,
+	vaultHasUnpushedCommentThreads,
+} from '@/sync/comments';
 
 describe('planCommentSync', () => {
 	const taskId = 'task1';
@@ -28,6 +32,20 @@ describe('planCommentSync', () => {
 		expect(plan.linked).toHaveLength(1);
 		expect(plan.linked[0].vault).toBeUndefined();
 		expect(plan.remoteOnly).toHaveLength(0);
+	});
+
+	it('vaultHasUnpushedCommentThreads is false when mapped vault thread was deleted on TickTick', () => {
+		const body = '2026-10-20 12:00: deleted-in-ticktick';
+		const lines = [`\t- ${body}`];
+		expect(vaultHasUnpushedCommentThreads(lines, [], [{
+			id: 't1:x',
+			taskId: 't1',
+			projectId: 'p1',
+			fingerprint: body,
+			ticktickCommentId: 'c-old',
+			body,
+		}], 0)).toBe(false);
+		expect(vaultHasUnpushedCommentThreads(lines, [], [], 0)).toBe(true);
 	});
 
 	it('commentSetsEquivalentByNormalizedKey ignores stamp mismatch', () => {

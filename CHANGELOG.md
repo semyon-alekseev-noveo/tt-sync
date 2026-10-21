@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-21 05:38 UTC
+
+- Context: CI failed **TP-COMMENT-TT-DELETE** after **2.0.59** `vault-comments-ahead` push treated mapped TT-deleted threads as unpushed vault edits.
+- Target: Hotfix **2.0.60** on `abyss-mapping`.
+- Actions log: `vaultHasUnpushedCommentThreads` — push only when vault comment bullets are not mapped deletions with `commentCount === 0`; else `behindComments` pull for merge strip. Bump **2.0.60**.
+- Validation: `npx vitest run` → **653 passed**; `npm run build` ok.
+- Problems: — 
+- To Be Done: Tag **2.0.60**; BRAT on pilot.
+- References: `commentSyncMatch.test.ts`, `CHANGELOG.md`
+
 ### Iteration 2026-10-21 05:30 UTC
 
 - Context: Pilot `task-11-16` on `00 Inbox/2026-10-19.md` (ISO Abyss comment bullets, TT Comments empty); owner asked for push and release **2.0.59**.

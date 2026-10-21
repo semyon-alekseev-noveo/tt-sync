@@ -1,6 +1,6 @@
 import type { ITaskComment } from '@/api/types/TaskComment';
 import type { AbyssCommentThread } from '@/abyssFormat';
-import { extractAbyssCommentThreads } from '@/abyssFormat';
+import { commentFingerprint, extractAbyssCommentThreads } from '@/abyssFormat';
 import type { TaskCommentMap } from '@/db/schema';
 import {
 	normalizedCommentKey,
@@ -27,6 +27,31 @@ export function vaultCommentKeysAheadOfRemote(
 	const api = new Set(normalizedKeysFromRemote(remote));
 	return normalizedKeysFromVaultLines(taskLines).some(k => !api.has(k));
 }
+
+/**
+ * True when the vault has comment text that still needs a TickTick Comments API push.
+ * Mapped threads missing from an empty API with `remoteCommentCount === 0` are TT deletions, not unpushed edits.
+ */
+export function vaultHasUnpushedCommentThreads(
+	taskLines: string[],
+	remote: ReadonlyArray<{ title?: string }>,
+	maps: readonly TaskCommentMap[],
+	remoteCommentCount?: number,
+): boolean {
+	const apiKeys = new Set(normalizedKeysFromRemote(remote));
+	for (const t of extractAbyssCommentThreads(taskLines)) {
+		const key = normalizedCommentKey(t.body);
+		if (apiKeys.has(key)) continue;
+		const mapped = maps.some(m => {
+			const mk = normalizedCommentKey(m.body);
+			return mk === key || m.fingerprint === commentFingerprint(t.body);
+		});
+		if (mapped && remoteCommentCount === 0 && remote.length === 0) continue;
+		return true;
+	}
+	return false;
+}
+
 import type { CommentSyncMatch, CommentSyncPlan, RemoteCommentRef, VaultCommentThreadRef } from '@/sync/comments/types';
 
 function keysOverlap(a: ReadonlySet<string>, b: ReadonlySet<string>): boolean {

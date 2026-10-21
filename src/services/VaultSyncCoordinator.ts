@@ -28,7 +28,8 @@ import { syncCachedRead, syncFileMap, syncRead } from '@/sync/fileRunCache';
 import { addCount } from '@/sync/perf';
 import { notePluginWrite } from '@/utils/editedSince';
 import { apiCommentsDifferFromVault, syncAbyssCommentsToTickTick, useAbyssCommentsApi } from '@/abyssCommentSync';
-import { remoteCommentKeysAheadOfVault, vaultCommentKeysAheadOfRemote } from '@/sync/comments';
+import { listCommentMapsForTask } from '@/db/taskCommentMaps';
+import { remoteCommentKeysAheadOfVault, vaultCommentKeysAheadOfRemote, vaultHasUnpushedCommentThreads } from '@/sync/comments';
 import { abyssLinesToNote, extractAbyssCommentThreads } from '@/abyssFormat';
 
 export class VaultSyncCoordinator {
@@ -390,19 +391,30 @@ export class VaultSyncCoordinator {
 						reason = 'behindComments';
 						Object.defineProperty(remote, '_apiComments', { value: comments, enumerable: false, configurable: true });
 					} else if (vaultCommentKeysAheadOfRemote(taskRec.taskLines ?? [], comments)) {
-						try {
-							await syncAbyssCommentsToTickTick(
-								this.plugin.tickTickRestAPI,
-								remote.id,
-								remote.projectId,
-								taskRec.taskLines ?? [],
-								remote.content,
-							);
-						} catch (e) {
-							log.warn('vault-ahead comment push failed', task.id, e);
+						const maps = await listCommentMapsForTask(remote.id);
+						if (vaultHasUnpushedCommentThreads(
+							taskRec.taskLines ?? [],
+							comments,
+							maps,
+							commentCount,
+						)) {
+							try {
+								await syncAbyssCommentsToTickTick(
+									this.plugin.tickTickRestAPI,
+									remote.id,
+									remote.projectId,
+									taskRec.taskLines ?? [],
+									remote.content,
+								);
+							} catch (e) {
+								log.warn('vault-ahead comment push failed', task.id, e);
+							}
+							deferActiveFilePush(filePath);
+							return { behind: false, task: remote, localEdit: true, reason: 'vault-comments-ahead' };
 						}
-						deferActiveFilePush(filePath);
-						return { behind: false, task: remote, localEdit: true, reason: 'vault-comments-ahead' };
+						behind = true;
+						reason = 'behindComments';
+						Object.defineProperty(remote, '_apiComments', { value: comments, enumerable: false, configurable: true });
 					}
 				}
 			} catch (e) {
