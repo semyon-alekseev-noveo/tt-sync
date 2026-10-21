@@ -44,6 +44,11 @@ export function vaultHasUnpushedCommentThreads(
 	const missingFromApi = threads.filter(t => !apiKeys.has(normalizedCommentKey(t.body)));
 	if (missingFromApi.length === 0) return false;
 
+	// Dexie `commentCount` ahead of an empty GET means stale maps or a failed prior push.
+	if (remote.length === 0 && typeof remoteCommentCount === 'number' && remoteCommentCount > 0) {
+		return true;
+	}
+
 	const mapForThread = (t: AbyssCommentThread) => {
 		const key = normalizedCommentKey(t.body);
 		return maps.find(m => {
@@ -56,7 +61,9 @@ export function vaultHasUnpushedCommentThreads(
 		const mapped = mapForThread(t);
 		if (!mapped) return true;
 		if (mapped.ticktickCommentId && !remoteIds.has(mapped.ticktickCommentId)) {
-			// Several vault threads missing from TT with stale maps → push again (mass wipe / failed POST).
+			// Vault-origin stale id → failed POST or never landed; re-push even for a single thread.
+			if (mapped.origin === 'vault') return true;
+			// Several stale maps after mass TT wipe.
 			if (missingFromApi.length > 1) return true;
 		}
 	}
@@ -64,10 +71,15 @@ export function vaultHasUnpushedCommentThreads(
 	// One mapped thread missing while TT still has other comments → wait for pull (TP-COMMENT-TT-DELETE).
 	if (remote.length > 0) return false;
 
-	// Empty Comments API + commentCount 0: one mapped miss is a TT delete pending pull;
-	// several mapped misses are stale maps after a mass API wipe — push vault again.
+	// Empty Comments API + commentCount 0: one remote-origin mapped miss is a TT delete pending pull;
+	// unmapped or vault-origin threads still need a push.
 	if (remoteCommentCount === 0 && remote.length === 0) {
-		return missingFromApi.length > 1;
+		if (missingFromApi.length > 1) return true;
+		if (missingFromApi.length === 1) {
+			const m = mapForThread(missingFromApi[0]);
+			if (!m || m.origin === 'vault') return true;
+			return false;
+		}
 	}
 	return true;
 }

@@ -369,15 +369,19 @@ export class TaskModificationDetector {
 					return false;
 				}
 				// The 5s open-note push (identifiedOnly) calls the Comments API only when a comment line changed the hash.
-				if (useAbyssCommentsApi() && taskRecord.taskLines?.length && !options?.identifiedOnly) {
-					const threads = extractAbyssCommentThreads(taskRecord.taskLines);
-					if (threads.length) {
+				if (useAbyssCommentsApi() && savedTask.projectId) {
+					const lines = taskRecord.taskLines ?? [];
+					const threads = extractAbyssCommentThreads(lines);
+					const runCommentSync = threads.length > 0
+						? !options?.identifiedOnly
+						: true;
+					if (runCommentSync) {
 						try {
 							await syncAbyssCommentsToTickTick(
 								this.plugin.tickTickRestAPI,
 								taskId,
 								savedTask.projectId,
-								taskRecord.taskLines,
+								lines,
 								savedTask.content,
 							);
 						} catch (e) {

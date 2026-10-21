@@ -107,6 +107,28 @@ describe('abyssCommentSync', () => {
 		expect(del).not.toHaveBeenCalled();
 	});
 
+	it('BUG-COMMENT-VAULT-WIPE deletes without hash flag when maps are vault-origin', async () => {
+		listMaps.mockResolvedValueOnce([
+			{
+				id: 'task1:c1',
+				taskId: 'task1',
+				projectId: 'proj1',
+				fingerprint: 'comment 1',
+				ticktickCommentId: 'c1',
+				body: 'comment 1',
+				origin: 'vault',
+			},
+		]);
+		const del = vi.fn().mockResolvedValue(true);
+		const api = {
+			getTaskComments: vi.fn().mockResolvedValue([{ id: 'c1', title: 'comment 1' }]),
+			addTaskComment: vi.fn(),
+			deleteTaskComment: del,
+		} as unknown as TickTickRestAPI;
+		await syncAbyssCommentsToTickTick(api, 'task1', 'proj1', ['\t- > description only']);
+		expect(del).toHaveBeenCalledWith('proj1', 'task1', 'c1');
+	});
+
 	it('BUG-COMMENT-VAULT-WIPE deletes all TT comments when vault comment bullets were removed', async () => {
 		listMaps.mockResolvedValueOnce([
 			{
@@ -157,6 +179,7 @@ describe('abyssCommentSync', () => {
 				fingerprint: 'only on tt',
 				ticktickCommentId: 'tt-only',
 				body: 'only on tt',
+				origin: 'remote',
 			},
 		]);
 		const del = vi.fn();

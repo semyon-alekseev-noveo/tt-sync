@@ -74,6 +74,8 @@ export type TaskCommentMap = {
 	fingerprint: string;
 	ticktickCommentId: string;
 	body: string;
+	/** `remote` = map from TT-only pull path; do not treat empty vault as a user wipe. */
+	origin?: 'vault' | 'remote';
 };
 
 export type TaskFileMapping = {

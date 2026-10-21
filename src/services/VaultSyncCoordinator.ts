@@ -27,7 +27,12 @@ import { deferActiveFilePush } from '@/services/activeFilePush';
 import { syncCachedRead, syncFileMap, syncRead } from '@/sync/fileRunCache';
 import { addCount } from '@/sync/perf';
 import { notePluginWrite } from '@/utils/editedSince';
-import { apiCommentsDifferFromVault, syncAbyssCommentsToTickTick, useAbyssCommentsApi } from '@/abyssCommentSync';
+import {
+	apiCommentsDifferFromVault,
+	syncAbyssCommentsToTickTick,
+	useAbyssCommentsApi,
+	vaultHadSyncedCommentBullets,
+} from '@/abyssCommentSync';
 import { listCommentMapsForTask } from '@/db/taskCommentMaps';
 import { remoteCommentKeysAheadOfVault, vaultCommentKeysAheadOfRemote, vaultHasUnpushedCommentThreads } from '@/sync/comments';
 import { abyssLinesToNote, extractAbyssCommentThreads } from '@/abyssFormat';
@@ -136,10 +141,12 @@ export class VaultSyncCoordinator {
 				}
 			} else if (matchesFilter) {
 				let actionNeeded = this.determineActionNeeded(lt, targetFile);
-				if (actionNeeded.action === 'none' && targetFile) {
+				if (targetFile && (actionNeeded.action === 'none' || actionNeeded.action === 'update')) {
 					const behind = await this.vaultLineBehindTask(task, targetFile);
 					traceWrite(this.app, 'syncVaultWithDatabase', targetFile, 'decision', {
-						reason: behind.reason,
+						reason: actionNeeded.action === 'update' && !behind.behind && !behind.localEdit
+							? 'hasChanged'
+							: behind.reason,
 						taskIds: [task.id],
 					});
 					if (behind.localEdit) {
@@ -149,11 +156,6 @@ export class VaultSyncCoordinator {
 						task = await this.dropStaleStageTags(behind.task);
 						lt.task = task;
 					}
-				} else if (actionNeeded.action === 'update' && targetFile) {
-					traceWrite(this.app, 'syncVaultWithDatabase', targetFile, 'decision', {
-						reason: 'hasChanged',
-						taskIds: [task.id],
-					});
 				}
 				const realFile = presentAt.get(task.id);
 				if (actionNeeded.action === 'add' && realFile && realFile !== targetFile) {
@@ -334,9 +336,11 @@ export class VaultSyncCoordinator {
 		if (!(file instanceof TFile)) return same;
 		const parser = this.plugin.taskParser;
 		if (!parser) return same;
+		// Reconcile comment push/pull uses on-disk note text. An open editor buffer can omit
+		// child comment lines while the task line still matches Dexie (test-11-12 pilot).
 		let text: string;
 		try {
-			text = await readNoteForWrite(this.app, file);
+			text = await syncRead(this.app.vault, file);
 		} catch {
 			return same;
 		}
@@ -382,30 +386,47 @@ export class VaultSyncCoordinator {
 		const commentCountMismatch = commentCountKnown && commentCount !== vaultThreads;
 		const vaultHasUnmappedComments = vaultThreads > 0 && !commentCountKnown;
 		const shouldProbeComments = vaultThreads > 0 || commentCountMismatch || vaultHasUnmappedComments;
-		if (!behind && useAbyssCommentsApi() && remote.projectId && shouldProbeComments) {
+		if (useAbyssCommentsApi() && remote.projectId && shouldProbeComments) {
 			try {
 				const comments = await this.plugin.tickTickRestAPI?.getTaskComments(remote.projectId, remote.id) ?? [];
-				if (apiCommentsDifferFromVault(taskRec.taskLines, comments)) {
+				const commentsNeedSync = apiCommentsDifferFromVault(taskRec.taskLines, comments) || commentCountMismatch;
+				if (commentsNeedSync) {
+					const mapsForProbe = await listCommentMapsForTask(remote.id);
+					const vaultClearedAllComments = vaultThreads === 0 && vaultHadSyncedCommentBullets(mapsForProbe);
 					const remoteAhead = remoteCommentKeysAheadOfVault(taskRec.taskLines ?? [], comments);
 					const vaultAhead = vaultCommentKeysAheadOfRemote(taskRec.taskLines ?? [], comments);
 					let pushedVaultComments = false;
-					if (vaultAhead) {
-						const maps = await listCommentMapsForTask(remote.id);
-						if (vaultHasUnpushedCommentThreads(
+					let vaultWantsPush = false;
+					if (vaultClearedAllComments) {
+						try {
+							pushedVaultComments = await syncAbyssCommentsToTickTick(
+								this.plugin.tickTickRestAPI,
+								remote.id,
+								remote.projectId,
+								taskRec.taskLines ?? [],
+								remote.content,
+							);
+						} catch (e) {
+							log.warn('vault-cleared comment wipe failed', task.id, e);
+						}
+						deferActiveFilePush(filePath);
+					} else if (vaultAhead) {
+						const maps = mapsForProbe;
+						vaultWantsPush = vaultHasUnpushedCommentThreads(
 							taskRec.taskLines ?? [],
 							comments,
 							maps,
 							commentCount,
-						)) {
+						);
+						if (vaultWantsPush) {
 							try {
-								await syncAbyssCommentsToTickTick(
+								pushedVaultComments = await syncAbyssCommentsToTickTick(
 									this.plugin.tickTickRestAPI,
 									remote.id,
 									remote.projectId,
 									taskRec.taskLines ?? [],
 									remote.content,
 								);
-								pushedVaultComments = true;
 							} catch (e) {
 								log.warn('vault-ahead comment push failed', task.id, e);
 							}
@@ -413,16 +434,21 @@ export class VaultSyncCoordinator {
 						}
 					}
 					// BUG-COMMENT-BOTH-WAYS: TT-ahead must not skip vault-ahead push when both sides differ.
-					if (remoteAhead && deletionConfirmMode() !== 'skip') {
+					if (remoteAhead && !vaultClearedAllComments && deletionConfirmMode() !== 'skip') {
 						behind = true;
 						reason = 'behindComments';
 						Object.defineProperty(remote, '_apiComments', { value: comments, enumerable: false, configurable: true });
 					} else if (pushedVaultComments) {
 						return { behind: false, task: remote, localEdit: true, reason: 'vault-comments-ahead' };
-					} else if (vaultAhead && deletionConfirmMode() !== 'skip') {
+					} else if (vaultAhead && !vaultWantsPush && deletionConfirmMode() !== 'skip') {
 						behind = true;
 						reason = 'behindComments';
 						Object.defineProperty(remote, '_apiComments', { value: comments, enumerable: false, configurable: true });
+					} else if (vaultWantsPush && !pushedVaultComments) {
+						// BUG-COMMENT-RECONCILE-UPDATE: no-op / failed POST must not report in-sync
+						// while vault bullets are still missing from TickTick Comments.
+						log.warn('vault-ahead comment push returned no changes', task.id);
+						return { behind: false, task: remote, localEdit: true, reason: 'vault-comments-ahead' };
 					}
 				}
 			} catch (e) {

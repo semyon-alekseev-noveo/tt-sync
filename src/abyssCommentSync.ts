@@ -11,6 +11,7 @@ import {
 	normalizedCommentKey,
 	stripLegacyCommentsBlock,
 } from '@/abyssFormat';
+import type { TaskCommentMap } from '@/db/schema';
 import {
 	commentMapId,
 	deleteCommentMap,
@@ -96,6 +97,20 @@ export type AbyssCommentSyncOptions = {
 	obsidianRemovedCommentBullets?: boolean;
 };
 
+/** Dexie maps that came from vault pushes (not TT-only `remote` origin). */
+export function vaultHadSyncedCommentBullets(maps: readonly TaskCommentMap[]): boolean {
+	return maps.some(m => m.origin !== 'remote');
+}
+
+function shouldWipeRemoteCommentsForEmptyVault(
+	threads: AbyssCommentThread[],
+	maps: readonly TaskCommentMap[],
+	opts?: AbyssCommentSyncOptions,
+): boolean {
+	if (threads.length > 0 || maps.length === 0) return false;
+	return opts?.obsidianRemovedCommentBullets === true || vaultHadSyncedCommentBullets(maps);
+}
+
 /**
  * Push Abyss comment threads to TickTick Comments API; descriptions stay in task `content` via parser.
  */
@@ -112,12 +127,7 @@ export async function syncAbyssCommentsToTickTick(
 	const threads = extractAbyssCommentThreads(taskLines);
 	let maps = await listCommentMapsForTask(taskId);
 
-	if (
-		opts?.obsidianRemovedCommentBullets
-		&& threads.length === 0
-		&& maps.length > 0
-		&& deletionConfirmMode() !== 'skip'
-	) {
+	if (shouldWipeRemoteCommentsForEmptyVault(threads, maps, opts) && deletionConfirmMode() !== 'skip') {
 		const remote = await api.getTaskComments(projectId, taskId);
 		let changed = false;
 		for (const c of remote) {
@@ -149,6 +159,7 @@ export async function syncAbyssCommentsToTickTick(
 						fingerprint: fp,
 						ticktickCommentId: created.id,
 						body,
+						origin: 'vault',
 					});
 					changed = true;
 				}
@@ -170,8 +181,10 @@ export async function syncAbyssCommentsToTickTick(
 			fingerprint: fp,
 			ticktickCommentId: r.comment.id,
 			body: r.comment.title ?? '',
+			origin: 'remote',
 		});
-		changed = true;
+		// Map-only bookkeeping must not count as a vault→TT push (pilot test-11-12 /
+		// BUG-COMMENT-DISK-READ): do not set `changed` here.
 	}
 
 	const tickTickCommentTitle = (body: string) => {
@@ -191,6 +204,7 @@ export async function syncAbyssCommentsToTickTick(
 				fingerprint: fp,
 				ticktickCommentId: created.id,
 				body: thread.body,
+				origin: 'vault',
 			});
 			changed = true;
 		}
@@ -217,6 +231,7 @@ export async function syncAbyssCommentsToTickTick(
 				fingerprint: fp,
 				ticktickCommentId: created.id,
 				body: vaultBody,
+				origin: 'vault',
 			});
 			changed = true;
 		}

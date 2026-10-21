@@ -1,5 +1,169 @@
 # Changelog
 
+### Iteration 2026-10-21 14:05 UTC
+
+- Context: Owner asked to commit, push feature branch, and publish BRAT release **2.0.74**.
+- Target: Ship TickTick v2 comment POST body fix + pilot gate evidence on `tt-sync`; install pointer **2.0.74**.
+- Actions log: Staged code/tests/docs/pilot/github-issues; commit on `feat/comment-sync-2.0.63`; push `tt-sync`; `gh release create 2.0.74` with plugin assets; PO_STATUS install → **2.0.74**.
+- Validation: Versions in manifest/package/versions/dist = **2.0.74**; release URL returned after create (see this iteration References).
+- Problems: - No changes
+- To Be Done: Optional PR into `abyss-mapping` (do not merge); BRAT Check for updates on pilot.
+- References: `docs/BRAT_INSTALL.md`, `docs/pilot/results/PILOT-GATE-TEST-11-12/`, `CHANGELOG.md`
+
+### Iteration 2026-10-21 13:37 UTC
+
+- Context: Gate Comments pass on **2.0.74** already evidenced; tracker/docs still showed open.
+- Target: Close #10–#14/#21; align INDEX / PO_STATUS / TEST_PLAN / gate plan to **pass**.
+- Actions log: Updated results + github-issues INDEX; PO_STATUS + `PILOT-GATE-TEST-11-12.md` + TEST_PLAN rows; closed issues via `gh` with evidence links.
+- Validation: `gh issue list` — #10–#14/#21 **CLOSED**; #15–#20 remain **OPEN**.
+- Problems: write-trace stall after Phase 3b sync — **open** / non-blocking.
+- To Be Done: Next P0 focus **PILOT-BATCH-EDITOR-SAFETY** (#15–#18); optional write-trace follow-up.
+- References: `docs/pilot/results/PILOT-GATE-TEST-11-12/INDEX.md`, `docs/github-issues/INDEX.md`, `CHANGELOG.md`
+
+### Iteration 2026-10-21 13:34 UTC
+
+- Context: **2.0.74** POST fix deployed; need Phase 3b Comments proof on `test-11-12`.
+- Target: Reload + Synchronize; record Comments non-empty; link #13 / #21.
+- Actions log: Deploy dist; `plugin:reload` → **2.0.74**; `tts-sync`; cookie GET + MCP `get_comment` → `comment 1` + `test-new-verision`; write `16-phase-3b-verify.md`; create issue #21; comment #13.
+- Validation: Comments n=2 with `createdTime` ≈ 13:32:50 UTC; vitest **680** / build already green this cycle.
+- Problems: write-trace did not append gate decision for this sync (stall) — **open** / non-blocking for Comments criterion.
+- To Be Done: Optional clean sync for `in-sync` write-trace; owner close #13/#14/#21 when ready.
+- References: `docs/pilot/results/PILOT-GATE-TEST-11-12/16-phase-3b-verify.md`, `CHANGELOG.md`, issues #13 #21
+
+### Iteration 2026-10-21 13:31 UTC
+
+- Context: Phase 1b — v2 `POST /comment` HTTP 500 while Open API POST worked; Dexie maps empty.
+- Target: **BUG-COMMENT-API-POST-500** — recover plugin comment write; ship **2.0.74**; re-verify gate Comments.
+- Actions log: Live probe: `{title}`/`{title,content}` → 500; webapp body (`id`,`taskId`,`projectId`,`createdTime`,…) → 200 empty + comment created. `buildAddTaskCommentBody`; empty-body `makeRequest`; test `bugCommentApiPost500.test.ts`; bump **2.0.74**; evidence `15-phase-2b-post-fix.md`.
+- Validation: `npx vitest run` → **680 passed** (96 files); `npm run build` ok; live cookie POST with new body → 200 + GET titles.
+- Problems: Gate Phase 3b still needs reload + Synchronize evidence — **open** until Comments land.
+- To Be Done: Deploy + reload + `tts-sync`; MCP/plugin GET comments on `6ad83bc…`; comment #13; create BUG issue if missing.
+- References: `docs/pilot/results/PILOT-GATE-TEST-11-12/15-phase-2b-post-fix.md`, `src/api/index.ts`, `CHANGELOG.md`
+
+### Iteration 2026-10-21 13:23 UTC
+
+- Context: Phase 3 fail on **2.0.73** — need why `vault-comments-ahead` with empty TT Comments before any bump.
+- Target: Written hypothesis + case ID; no version bump unless POST path is fixable in-plugin.
+- Actions log: Read Phase 0–3 results; dump Dexie maps (empty); probe plugin `addTaskComment` → HTTP 500; MCP POST control OK; write `14-phase-1b-no-post.md`; update INDEX + `ABYSS_FIRST_CASES` (`BUG-COMMENT-API-POST-500`); comment #13.
+- Validation: Plugin v2 POST 500 on multiple tasks/bodies; GET comments + task body OK; maps table writable but unused.
+- Problems: TickTick v2 comment create broken for this account — **open**; gate blocked — **open**.
+- To Be Done: Recover v2 POST or Open API write path; then failing test + fix + **2.0.74** only if code changes; re-run Phase 3.
+- References: `docs/pilot/results/PILOT-GATE-TEST-11-12/14-phase-1b-no-post.md`, `CHANGELOG.md`, issue #13
+
+### Iteration 2026-10-21 13:22 UTC
+
+- Context: Second agent pass on Phase 3 (#13) — corroborate fail without inventing pass.
+- Target: Same gate check; enrich `13-phase-3-verify.md` if new evidence.
+- Actions log: `app:reload` + `tts-sync`; Cookie GET comments → `[]`; note extra `vault-comments-ahead` at 13:18; sync often stalls after vaultReconcile (no new perf line).
+- Validation: Comments still empty; body `new`; version **2.0.73**; issues left open.
+- Problems: Gate still **fail**; POST path / stall after reconcile — open.
+- To Be Done: New hypothesis before version bump; keep #12–#14 open.
+- References: `docs/pilot/results/PILOT-GATE-TEST-11-12/13-phase-3-verify.md`, `CHANGELOG.md`, issue #13
+
+### Iteration 2026-10-21 13:12 UTC
+
+- Context: Phase 3 (#13) after **2.0.73** deploy — agent must reload/sync without asking the human.
+- Target: Verify `test-11-12` Comments on TickTick; record pass/fail with evidence.
+- Actions log: `obsidian plugin:reload` + `command id=tickticksync-abyss:tts-sync`; probe `getTaskComments` via eval; write `13-phase-3-verify.md`; update INDEX, `ABYSS_FIRST_CASES`, `TEST_PLAN`.
+- Validation: Loaded **2.0.73**; write-trace `vault-comments-ahead`; TT Comments **empty** (n=0); task `content`=`new`.
+- Problems: Gate **fail** — comments not pushed; `syncRunning` can stick true after reload — open.
+- To Be Done: New hypothesis (stale maps / empty `vaultOnly`) before next bump; do not close #12–#14.
+- References: `docs/pilot/results/PILOT-GATE-TEST-11-12/13-phase-3-verify.md`, `CHANGELOG.md`, issue #13
+
+### Iteration 2026-10-21 12:58 UTC
+
+- Context: PILOT-GATE-TEST-11-12 Phase 2 (#12) — hypothesis said no-op vault-ahead push must not report `in-sync`.
+- Target: **BUG-COMMENT-RECONCILE-UPDATE** — keep `vault-comments-ahead` when `vaultWantsPush && !pushed`; ship **2.0.73** to pilot; evidence file for #12.
+- Actions log: Verified coordinator + remoteOnly `changed` guard; strengthened `vaultCommentBehind` expect; bump **2.0.73**; deploy `dist/` to pilot plugin folder; write `12-phase-2-fix.md` + INDEX; update `TEST_PLAN.md` row (pilot still **not run**).
+- Validation: `npx vitest run` → **677 passed** (95 files); `npm run build` ok; pilot `manifest.json` = **2.0.73**.
+- Problems: Live vault Phase 3 (#13) not run — open.
+- To Be Done: Human Phase 3 — reload Obsidian, Synchronize, confirm TT Comments on `test-11-12`.
+- References: `docs/pilot/results/PILOT-GATE-TEST-11-12/12-phase-2-fix.md`, `CHANGELOG.md`, issue #12
+
+### Iteration 2026-10-21 12:55 UTC
+
+- Context: Need GitHub trackers for next P0/P1 work after comment gate #14 without dumping every BUG-*.
+- Target: Sibling epic for shipped-but-unverified editor/safety pilots + Active Zone bug + Step 7 AF soak (blocked).
+- Actions log: Created tt-sync #15–#20; templates `docs/github-issues/10–13`, `15`, `20` + `INDEX.md`; plan `docs/pilot/PILOT-BATCH-EDITOR-SAFETY.md`; commented sibling link on #14.
+- Validation: `gh issue list -R semyon-alekseev-noveo/tt-sync --state open` shows #10–#20; no code/vitest this iteration.
+- Problems: Pilot results for #15–#18 not started; #20 blocked by #14+#15 — open.
+- To Be Done: Finish #14 Phase 2–3; then #16–#18 evidence under `docs/pilot/results/PILOT-BATCH-EDITOR-SAFETY/`.
+- References: `docs/github-issues/INDEX.md`, `CHANGELOG.md`, issues #15–#20
+
+### Iteration 2026-10-21 12:48 UTC
+
+- Context: Pilot results workflow should be a Cursor project rule, not only buried in docs.
+- Target: Agents always see handoff rules via `.cursor/rules/`.
+- Actions log: Added `.cursor/rules/pilot-results.mdc`; pointer from `dev-flow.mdc`, `AGENTS.md`; trimmed workflow duplicate from `docs/pilot/results/README.md`.
+- Validation: Docs only.
+- References: `.cursor/rules/pilot-results.mdc`, `CHANGELOG.md`
+
+### Iteration 2026-10-21 12:40 UTC
+
+- Context: Need git archive for pilot phase results so agents chain evidence without relying on issue comments.
+- Target: `docs/pilot/results/` convention + migrate PILOT-GATE Phase 0–1 from GitHub comments.
+- Actions log: Added `docs/pilot/results/README.md`, `PILOT-GATE-TEST-11-12/INDEX.md`, `10-phase-0-baseline.md`, `11-phase-1-hypothesis.md`; linked from `docs/pilot/PILOT-GATE-TEST-11-12.md` and issue templates.
+- Validation: Docs only.
+- References: `docs/pilot/results/README.md`, `CHANGELOG.md`
+
+### Iteration 2026-10-21 12:20 UTC
+
+- Context: Repeated pilot fixes without a closed gate; user asked for a documented plan and GitHub checklists per `DEV_FLOW.md`.
+- Target: **PILOT-GATE-TEST-11-12** — freeze scope to one task; phases 0–3; no further code until Phase 0 evidence on deployed build.
+- Actions log: Added `docs/pilot/PILOT-GATE-TEST-11-12.md`; GitHub issue bodies `docs/github-issues/00–04`; case + results row in `ABYSS_FIRST_CASES.md`; `PO_STATUS.md` P0 row.
+- Validation: Docs only; no code or vitest run this iteration.
+- Problems: Pilot gate still **not run**; `gh` not on agent PATH — issues created manually from markdown files.
+- References: `DEV_FLOW.md`, `docs/pilot/PILOT-GATE-TEST-11-12.md`, `CHANGELOG.md`
+
+### Iteration 2026-10-21 11:55 UTC
+
+- Context: Pilot **test-11-12** still empty after **2.0.71**; trace showed `vault-comments-ahead` without TT rows, then `in-sync` with open note.
+- Target: **BUG-COMMENT-DISK-READ** — reconcile reads comment bullets from disk; push on every `vaultAhead` (no `vaultHasUnpushed` gate); map-only upsert must not count as push success.
+- Actions log: `vaultLineBehindTask` uses `syncRead`; `vaultHasUnpushed` single-thread vault-origin/unmapped fix; `abyssCommentSync` remoteOnly `changed` guard. Bump **2.0.72**; pilot plugin refreshed.
+- Validation: `npx vitest run` → **677 passed**; `npm run build` ok.
+- Problems: Pilot **test-11-12** — **not run** until **2.0.72** reload + **Synchronize**.
+- References: `src/services/VaultSyncCoordinator.ts`, `CHANGELOG.md`
+
+### Iteration 2026-10-21 11:18 UTC
+
+- Context: Pilot **2.0.70** on `test-11-12` (`6ad83bc…`): vault has `comment 1` + `test-new-verision`; TT Comments empty after reload/sync; `write-trace` flipped from `vault-comments-ahead` to `behindComments` (11:11 UTC).
+- Target: **BUG-COMMENT-RECONCILE-UPDATE** — vault-ahead must not open TT→Obs pull when vault still needs push (failed POST or stale maps); only TT-delete-pending uses `behindComments` when `vaultHasUnpushedCommentThreads` is false.
+- Actions log: `VaultSyncCoordinator` tracks `vaultWantsPush`; `behindComments` on vault-ahead only when not pushing; warn when push returns no changes. Test `vaultCommentBehind` pilot stale-map fixture. Bump **2.0.71**; pilot plugin folder refreshed.
+- Validation: `npx vitest run` → **677 passed**; `npm run build` ok; MCP `add_comment` on task succeeds (API healthy).
+- Problems: Pilot **test-11-12** — **not run** until **2.0.71** reload + **Synchronize**; remove stray `mcp-probe-comment` on task if present.
+- To Be Done: MCP `get_comment` after pilot sync; GitHub issues for bug + fix checklist (gh unavailable in agent shell).
+- References: `src/services/VaultSyncCoordinator.ts`, `src/test/vaultCommentBehind.test.ts`, `CHANGELOG.md`
+
+### Iteration 2026-10-21 10:58 UTC
+
+- Context: Pilot **2.0.69** on `test-11-12` (`6ad83bc…`): vault has `comment 1` + `test-new-verision`; TT Comments empty; `write-trace` showed `vault-comments-ahead` without MCP comments.
+- Target: **BUG-COMMENT-RECONCILE-UPDATE** — comment reconcile must run when `commentCount` disagrees with vault threads; must not treat count mismatch as vault-cleared wipe; honor vault-origin stale maps; accept numeric POST `/comment` ids.
+- Actions log: `VaultSyncCoordinator` `commentsNeedSync` includes `commentCountMismatch`; `pushedVaultComments` only when `syncAbyssCommentsToTickTick` returns true; `vaultHasUnpushedCommentThreads` when count > 0 and GET empty; `parseTaskCommentFromApiResponse` coerces numeric ids. Bump **2.0.70**.
+- Validation: `npx vitest run` → **676 passed**; `npm run build` ok; pilot plugin folder refreshed from `dist/`.
+- Problems: Pilot **test-11-12** — **not run** until **2.0.70** reload + **Synchronize**.
+- To Be Done: Remove stray MCP probe comment on task if present; confirm TT Comments via MCP.
+- References: `src/services/VaultSyncCoordinator.ts`, `src/sync/comments/match.ts`, `src/api/index.ts`, `CHANGELOG.md`
+
+### Iteration 2026-10-21 08:40 UTC
+
+- Context: Pilot **2.0.68**: `task-11-16` gained TT Comments; `test-11-12` (`6ad83bc…`) vault bullets stayed empty on TT after **Synchronize**.
+- Target: **BUG-COMMENT-RECONCILE-UPDATE** — reconcile must not skip comment push when task is already `hasChanged`; stale vault-origin maps must re-push after failed POST.
+- Actions log: `VaultSyncCoordinator` calls `vaultLineBehindTask` for `update` and `none`; `vaultHasUnpushedCommentThreads` honors `origin: vault` on single stale map. Bump **2.0.69**.
+- Validation: `npx vitest run` → **671 passed**; `npm run build` ok.
+- Problems: Pilot **test-11-12** — **not run** until **2.0.69** deploy.
+- To Be Done: Reload plugin; sync `2026-10-21.md`; MCP Comments on `6ad83bc…`.
+- References: `src/services/VaultSyncCoordinator.ts`, `src/sync/comments/match.ts`, `CHANGELOG.md`
+
+### Iteration 2026-10-21 08:25 UTC
+
+- Context: Pilot **2.0.67** still left TT Comments on `task-11-16` and did not push `test-11-12` after vault edits; wipe only ran on hash change and reconcile re-pulled as `behindComments`.
+- Target: **BUG-COMMENT-VAULT-WIPE** (complete) — empty vault + vault-origin Dexie maps must delete all TT comments without hash change; coordinator must wipe even when notes field is `behind`.
+- Actions log: `TaskCommentMap.origin`; `vaultHadSyncedCommentBullets`; coordinator `vaultClearedAllComments` path; detector comment sync on zero threads when hash matches; drop `!behind` guard for comment probe. Bump **2.0.68**.
+- Validation: `npx vitest run` → **671 passed** (incl. test-11-12 `vaultCommentBehind`); `npm run build` ok; pilot plugin folder refreshed from `dist/`.
+- Problems: Pilot **BUG-COMMENT-VAULT-WIPE** / **BUG-COMMENT-VAULT-AHEAD** on `test-11-12` — **not run** until Obsidian reload + manual **Synchronize**.
+- To Be Done: Tag **2.0.68**; pilot sync `2026-10-19.md` and `2026-10-21.md`.
+- References: `src/abyssCommentSync.ts`, `src/services/VaultSyncCoordinator.ts`, `CHANGELOG.md`
+
 ### Iteration 2026-10-21 08:08 UTC
 
 - Context: Pilot `task-11-16`: user removed all comment bullets in Obsidian (only `- > коммент 6` left); **Synchronize** did not remove TickTick Comments (five rows remained).

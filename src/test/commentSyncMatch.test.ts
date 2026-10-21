@@ -27,11 +27,25 @@ describe('planCommentSync', () => {
 				fingerprint: 'tt only',
 				ticktickCommentId: 'c1',
 				body: 'tt only',
+				origin: 'remote',
 			},
 		]);
 		expect(plan.linked).toHaveLength(1);
 		expect(plan.linked[0].vault).toBeUndefined();
 		expect(plan.remoteOnly).toHaveLength(0);
+	});
+
+	it('vaultHasUnpushedCommentThreads is true when commentCount > 0 but GET is empty', () => {
+		const lines = ['\t- 2026-10-21T11:14:22+07:00: comment 1'];
+		expect(vaultHasUnpushedCommentThreads(lines, [], [{
+			id: 't1:x',
+			taskId: 't1',
+			projectId: 'p1',
+			fingerprint: 'comment 1',
+			ticktickCommentId: 'c-old',
+			body: 'comment 1',
+			origin: 'remote',
+		}], 2)).toBe(true);
 	});
 
 	it('vaultHasUnpushedCommentThreads is false when mapped vault thread was deleted on TickTick', () => {
@@ -44,7 +58,17 @@ describe('planCommentSync', () => {
 			fingerprint: body,
 			ticktickCommentId: 'c-old',
 			body,
+			origin: 'remote',
 		}], 0)).toBe(false);
+		expect(vaultHasUnpushedCommentThreads(lines, [], [{
+			id: 't1:x',
+			taskId: 't1',
+			projectId: 'p1',
+			fingerprint: body,
+			ticktickCommentId: 'c-old',
+			body,
+			origin: 'vault',
+		}], 0)).toBe(true);
 		expect(vaultHasUnpushedCommentThreads(lines, [], [], 0)).toBe(true);
 	});
 
@@ -130,6 +154,7 @@ describe('planCommentSync', () => {
 				fingerprint: 'deleted-in-tt',
 				ticktickCommentId: 'c-gone',
 				body: 'deleted-in-tt',
+				origin: 'remote',
 			},
 		];
 		expect(vaultHasUnpushedCommentThreads(lines, [{ title: 'kept' }], maps, 1)).toBe(false);

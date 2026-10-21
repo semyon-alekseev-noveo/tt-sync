@@ -27,4 +27,9 @@ describe('parseTaskCommentFromApiResponse', () => {
 	it('returns null when id is missing', () => {
 		expect(parseTaskCommentFromApiResponse({ ok: true, result: { title: 'no-id' } }, 'fb')).toBeNull();
 	});
+
+	it('coerces numeric comment ids from TickTick JSON', () => {
+		expect(parseTaskCommentFromApiResponse({ id: 12345, title: 'hi' }, 'fb'))
+			.toEqual({ id: '12345', title: 'hi' });
+	});
 });

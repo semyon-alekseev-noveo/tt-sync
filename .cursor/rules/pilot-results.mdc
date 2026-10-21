@@ -1,0 +1,30 @@
+---
+description: Pilot gate phases — git results archive, GitHub issues as trackers, agent handoff between phases.
+alwaysApply: true
+---
+
+Pilot work and GitHub gate issues (`PILOT-GATE-*`, tt-sync issues #10–#13 style):
+
+## Source of truth
+
+- **Canonical evidence:** `docs/pilot/results/<GATE-ID>/` (see `INDEX.md` + `<issue#>-<slug>.md` per phase).
+- **GitHub issues:** status and checklists only; each issue gets a **short comment** linking the published result file — not long logs in comments or wiki.
+- **Do not** treat issue comments, wiki, or chat as the archive. **Do not** mark `ABYSS_FIRST_CASES.md` / `TEST_PLAN.md` pilot **pass** without evidence in a phase file or linked logs.
+
+## Before starting a phase issue
+
+1. Open `docs/pilot/results/<GATE-ID>/INDEX.md`.
+2. Read **Inputs** from the previous phase file (e.g. before #11, read `10-phase-0-baseline.md`).
+3. Follow the active gate plan: `docs/pilot/PILOT-GATE-*.md` and `DEV_FLOW.md`.
+
+## When finishing a phase
+
+1. Create or update `docs/pilot/results/<GATE-ID>/<issue#>-<slug>.md` (Meta, Inputs, Evidence, Conclusion, Checklist).
+2. Update `INDEX.md` (status column).
+3. Comment on the GitHub issue with a link to that file (repo path or `blob/...` URL after push).
+4. Behavior change in the same work: `CHANGELOG.md`; gate pass also updates `ABYSS_FIRST_CASES.md` results log and `TEST_PLAN.md` in the **same PR** as code.
+
+## File naming
+
+- Prefix with GitHub issue number: `10-phase-0-baseline.md`, `11-phase-1-hypothesis.md`.
+- Layout details: `docs/pilot/results/README.md` (structure only — workflow is this rule).

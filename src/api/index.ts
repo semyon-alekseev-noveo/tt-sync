@@ -63,6 +63,25 @@ interface UpdatePayload {
 	update: unknown[];
 }
 
+/**
+ * Web-session POST `/comment` body. TickTick returns HTTP 500 `unknown_exception`
+ * for `{ title }` / `{ title, content }` alone; the web client sends a client id
+ * plus task/project ids (dida-cli web-api.md). See BUG-COMMENT-API-POST-500.
+ */
+export function buildAddTaskCommentBody(projectId: string, taskId: string, title: string): Record<string, unknown> {
+	const clipped = title.slice(0, 1024);
+	return {
+		id: ObjectID().toHexString(),
+		createdTime: new Date().toISOString().replace('Z', '+0000'),
+		taskId,
+		projectId,
+		title: clipped,
+		userProfile: { isMyself: true },
+		mentions: [],
+		isNew: true,
+	};
+}
+
 /** Unwrap TickTick POST /comment JSON into `{ id, title? }` or null when the id is missing. */
 export function parseTaskCommentFromApiResponse(response: unknown, fallbackTitle: string): ITaskComment | null {
 	if (!response || typeof response !== 'object') return null;
@@ -70,8 +89,9 @@ export function parseTaskCommentFromApiResponse(response: unknown, fallbackTitle
 	const pick = (v: unknown): ITaskComment | null => {
 		if (!v || typeof v !== 'object') return null;
 		const o = v as Record<string, unknown>;
-		const id = o.id;
-		if (typeof id !== 'string' || !id.length) return null;
+		const rawId = o.id ?? o.commentId;
+		const id = typeof rawId === 'string' ? rawId : (typeof rawId === 'number' ? String(rawId) : '');
+		if (!id.length) return null;
 		const t = o.title;
 		return { id, title: typeof t === 'string' ? t : fallbackTitle };
 	};
@@ -825,9 +845,13 @@ export class Tick {
 	async addTaskComment(projectId: string, taskId: string, title: string): Promise<ITaskComment | null> {
 		try {
 			const url = `${this.apiUrl}/${taskComment(projectId, taskId)}`;
-			const body = { title: title.slice(0, 1024), content: title.slice(0, 1024) };
+			const body = buildAddTaskCommentBody(projectId, taskId, title);
 			const response = await this.makeRequest('Add Task Comment', url, 'POST', body);
-			return parseTaskCommentFromApiResponse(response, title);
+			if (this._lastError) return null;
+			const parsed = parseTaskCommentFromApiResponse(response, String(body.title));
+			if (parsed) return parsed;
+			// TickTick often returns HTTP 200 with an empty body; the client id is the comment id.
+			return { id: String(body.id), title: String(body.title) };
 		} catch (e) {
 			log.error('Add Task Comment failed: ', e);
 			this.setError('Add Task Comment', null, e);
@@ -893,7 +917,20 @@ export class Tick {
 				(result.headers['set-cookie'] as unknown as string[]) ?? [];
 			this.cookieHeader = this.cookies.join('; ') + ';';
 			window.localStorage.setItem('TTS_Cookies', this.cookieHeader);
-			return result.json;
+			// Comment create (and some DELETEs) return HTTP 200 with an empty body.
+			// Accessing `result.json` then throws and used to look like a hard failure.
+			const text = typeof result.text === 'string' ? result.text : '';
+			if (!text.trim()) return {};
+			try {
+				return result.json;
+			} catch {
+				try {
+					return JSON.parse(text);
+				} catch (parseErr) {
+					this.setError(operation, result, parseErr);
+					return null;
+				}
+			}
 		} catch (error) {
 			if (!noted) noteHttpCall(operation, url, httpStatusOf(error));
 			this.setError(operation, null, error);
