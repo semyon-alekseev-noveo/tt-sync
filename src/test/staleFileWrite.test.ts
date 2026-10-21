@@ -173,6 +173,7 @@ describe('BUG-STALE-EDITOR-WRITE', () => {
 			},
 			replaceRange: () => { throw new Error('setValue/replaceRange of the whole buffer is not used'); },
 		};
+		let disk = snapshot;
 		let processed = 0;
 		const app = {
 			workspace: {
@@ -183,8 +184,11 @@ describe('BUG-STALE-EDITOR-WRITE', () => {
 			metadataCache: { getFileCache: () => ({ listItems: [] }) },
 			vault: {
 				getAbstractFileByPath: () => file,
-				read: async () => snapshot,
-				process: async () => { processed++; },
+				read: async () => disk,
+				process: async (_f: TFile, cb: (data: string) => string) => {
+					processed++;
+					disk = cb(disk);
+				},
 			},
 		} as unknown as App;
 		const plugin = {
@@ -204,7 +208,8 @@ describe('BUG-STALE-EDITOR-WRITE', () => {
 
 		await fileOperation.synchronizeToVault('notes/a.md', [task], true);
 
-		expect(processed).toBe(0);
+		expect(processed).toBe(1);
+		expect(disk).toBe(value);
 		expect(value).toContain('hello from the user');
 		expect(value).toContain('renamed');
 		expect(value.split('\n')[1]).toBe('hello from the user');
@@ -244,6 +249,63 @@ describe('BUG-STALE-EDITOR-WRITE', () => {
 
 		expect(disk).toBe(snapshot);
 		expect(upsertTask).not.toHaveBeenCalled();
+	});
+
+	it('TP-EMPTY-EDITOR-DISK repairs the editor from disk when the buffer was empty', async () => {
+		const file = makeTFile('notes/a.md');
+		const disk = '- [ ] on disk %%[ticktick_id:: task-1]%%\n';
+		let value = '';
+		const editor = {
+			getValue: () => value,
+			getLine: (i: number) => value.split('\n')[i] ?? '',
+			lineCount: () => (value === '' ? 1 : value.split('\n').length),
+			transaction: ({ changes }: { changes: { from: { line: number; ch: number }; to: { line: number; ch: number }; text: string }[] }) => {
+				for (const change of changes) value = change.text;
+			},
+		};
+		const app = {
+			workspace: {
+				getActiveFile: () => file,
+				activeEditor: { file, editor },
+				iterateAllLeaves: (cb: (leaf: { view: unknown }) => void) => cb({ view: { file, editor } }),
+			},
+			vault: { read: async () => disk, process: async () => undefined },
+		} as unknown as App;
+		const { repairEmptyEditorFromDisk } = await import('@/services/vaultWrite');
+		expect(await repairEmptyEditorFromDisk(app, file)).toBe(true);
+		expect(value).toBe(disk);
+	});
+
+	it('TP-EMPTY-EDITOR-DISK does not repair while the note was edited in the defer window', async () => {
+		const file = makeTFile('notes/a.md');
+		const disk = '- [ ] on disk\n';
+		noteEditorActivity(file.path);
+		const editor = { getValue: () => '', getLine: () => '', lineCount: () => 1, transaction: vi.fn() };
+		const app = {
+			workspace: {
+				activeEditor: { file, editor },
+				iterateAllLeaves: (cb: (leaf: { view: unknown }) => void) => cb({ view: { file, editor } }),
+			},
+			vault: { read: async () => disk },
+		} as unknown as App;
+		const { repairEmptyEditorFromDisk } = await import('@/services/vaultWrite');
+		expect(await repairEmptyEditorFromDisk(app, file)).toBe(false);
+		expect(editor.transaction).not.toHaveBeenCalled();
+		clearEditorActivity();
+	});
+
+	it('TP-EMPTY-EDITOR-DISK readNoteForWrite uses disk when the open buffer is empty', async () => {
+		const file = makeTFile('notes/a.md');
+		const disk = '- [ ] on disk\n';
+		const app = {
+			workspace: {
+				activeEditor: { file, editor: { getValue: () => '' } },
+				iterateAllLeaves: (cb: (leaf: { view: unknown }) => void) => cb({ view: { file, editor: { getValue: () => '' } } }),
+			},
+			vault: { read: async () => disk },
+		} as unknown as App;
+		const { readNoteForWrite } = await import('@/services/vaultWrite');
+		expect(await readNoteForWrite(app, file)).toBe(disk);
 	});
 
 	it('TP-EDITOR-OTHER-LEAF reads the file when the active editor shows another note', async () => {

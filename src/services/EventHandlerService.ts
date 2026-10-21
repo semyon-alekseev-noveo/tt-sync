@@ -3,13 +3,14 @@
  * Extracts event handling logic from main.ts
  */
 
-import { App, Editor, type MarkdownFileInfo, MarkdownView, TFolder } from 'obsidian';
+import { App, Editor, type MarkdownFileInfo, MarkdownView, TFile, TFolder } from 'obsidian';
 import type TickTickSync from '@/main';
 import { getSettings } from '@/settings';
 import { isPathInPushScope } from '@/syncScope';
 import { createActiveFilePushScheduler, deferActiveFilePush, planActiveFilePush, setActiveFilePushRelease } from '@/services/activeFilePush';
 import { noteEditorActivity } from '@/services/editorActivity';
 import { traceWrite } from '@/services/writeTrace';
+import { repairEmptyEditorFromDisk } from '@/services/vaultWrite';
 import log from '@/utils/logger';
 
 export class EventHandlerService {
@@ -233,10 +234,17 @@ export class EventHandlerService {
 	 * Register workspace events
 	 */
 	private registerWorkspaceEvents(): void {
+		const repairIfEmpty = (file: unknown) => {
+			if (!(file instanceof TFile) || file.extension !== 'md') return;
+			window.setTimeout(() => { void repairEmptyEditorFromDisk(this.app, file); }, 0);
+		};
+		this.plugin.registerEvent(this.app.workspace.on('file-open', repairIfEmpty));
 		this.plugin.registerEvent(
-			this.app.workspace.on('active-leaf-change', async () => {
+			this.app.workspace.on('active-leaf-change', async (leaf) => {
 				await this.plugin.setStatusBarText();
-			})
+				const view = leaf?.view;
+				if (view instanceof MarkdownView && view.file) repairIfEmpty(view.file);
+			}),
 		);
 	}
 

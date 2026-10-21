@@ -159,14 +159,60 @@ function editorOf(view: unknown, path: string): Editor | null {
 	return v.editor;
 }
 
+/** Replace the whole buffer through a single range change (no `setValue`). */
+function replaceEditorBuffer(editor: Editor, text: string): void {
+	const lineCount = typeof editor.lineCount === 'function' ? editor.lineCount() : 0;
+	const from = { line: 0, ch: 0 };
+	const to =
+		lineCount === 0
+			? from
+			: { line: lineCount - 1, ch: editor.getLine(lineCount - 1).length };
+	const change = { from, to, text };
+	if (typeof editor.transaction === 'function') editor.transaction({ changes: [change] });
+	else editor.replaceRange(text, from, to);
+}
+
 /**
- * Editor buffer only when that editor is showing `file`. Otherwise the file on disk.
+ * Obsidian sometimes shows an empty markdown buffer while the file on disk is intact.
+ * Repair every open editor for the path so the user sees disk text and sync does not plan from `""`.
+ */
+export async function repairEmptyEditorFromDisk(app: App, file: TFile): Promise<boolean> {
+	if (typedWithin(file.path, TYPING_DEFER_MS)) {
+		return false;
+	}
+	let disk: string;
+	try {
+		disk = await app.vault.read(file);
+	} catch {
+		return false;
+	}
+	if (!disk) return false;
+	let repaired = false;
+	for (const editor of editorsForFile(app, file.path)) {
+		if (bufferOf(editor) !== '') continue;
+		log.info(`Repairing empty editor buffer for ${file.path} from disk (${disk.length} chars)`);
+		replaceEditorBuffer(editor, disk);
+		repaired = true;
+	}
+	return repaired;
+}
+
+/**
+ * Editor buffer when a leaf shows `file`, unless the buffer is empty and disk is not — then disk wins for sync.
  * A hover or popout leaf can be the active editor for a different path.
  */
 export async function readNoteForWrite(app: App, file: TFile): Promise<string> {
-	const active = app.workspace?.activeEditor;
-	if (active?.editor && active.file?.path === file.path) {
-		return active.editor.getValue();
+	const editors = editorsForFile(app, file.path);
+	const editor = editorToPatch(editors);
+	if (editor) {
+		const editorText = bufferOf(editor);
+		if (editorText !== '') return editorText;
+		const diskText = await syncRead(app.vault, file);
+		if (diskText !== '') {
+			log.info(`Open note ${file.path}: empty editor buffer; using disk for sync read`);
+			return diskText;
+		}
+		return editorText;
 	}
 	return await syncRead(app.vault, file);
 }
@@ -299,7 +345,7 @@ function applyEditorSpans(editors: Editor[], spans: LineSpan[]): { applied: numb
  * Journal `before` → `after`, then apply only if the buffer is still `before`.
  * A miss does not commit the record. One retry covers a change during the journal append.
  */
-async function patchOpenEditors(file: TFile, editors: Editor[], spans: LineSpan[], attempt = 0): Promise<CommitResult> {
+async function patchOpenEditors(app: App, file: TFile, editors: Editor[], spans: LineSpan[], attempt = 0): Promise<CommitResult> {
 	const before = bufferOf(editors[0]);
 	const planned = applyLineSpans(before, spans);
 	if (planned.applied === 0 || planned.text === before) {
@@ -308,12 +354,22 @@ async function patchOpenEditors(file: TFile, editors: Editor[], spans: LineSpan[
 	const pending = await noteJournal?.prepare(file.path, before, planned.text) ?? null;
 	if (bufferOf(editors[0]) !== before) {
 		if (attempt >= 1) return { status: 'deferred', skipped: planned.skipped };
-		return patchOpenEditors(file, editors, spans, attempt + 1);
+		return patchOpenEditors(app, file, editors, spans, attempt + 1);
 	}
 	const { applied, skipped } = applyEditorSpans(editors, spans);
 	if (applied === 0) return { status: 'deferred', skipped };
-	if (bufferOf(editors[0]) === planned.text) await pending?.commit();
+	if (bufferOf(editors[0]) === planned.text) {
+		await pending?.commit();
+		await syncDiskToMatchEditor(app, file, planned.text);
+	}
 	return { status: 'written', skipped };
+}
+
+/** After an open-note patch, align disk with the editor using the same span guard as a closed note. */
+async function syncDiskToMatchEditor(app: App, file: TFile, editorText: string): Promise<void> {
+	const disk = await app.vault.read(file);
+	if (disk === editorText) return;
+	await writeClosedNote(app, file, disk, editorText, lineSpans(disk, editorText));
 }
 
 /**
@@ -340,6 +396,13 @@ function traceCommit(app: App, file: TFile, api: string, reason: string, spans: 
 }
 
 export async function commitVaultText(app: App, file: TFile, snapshot: string, next: string): Promise<CommitResult> {
+	if (editorsForFile(app, file.path).length) {
+		await repairEmptyEditorFromDisk(app, file);
+		if (!snapshot) {
+			const live = await readNoteForWrite(app, file);
+			if (live) snapshot = live;
+		}
+	}
 	if (next === snapshot) return { status: 'unchanged', skipped: 0 };
 	if (typedWithin(file.path, TYPING_DEFER_MS)) {
 		new Notice(OPEN_NOTE_DEFER_NOTICE);
@@ -359,7 +422,7 @@ export async function commitVaultText(app: App, file: TFile, snapshot: string, n
 			return { status: 'deferred', skipped: spans.length };
 		}
 		traceCommit(app, file, 'editor.transaction', safe.length === spans.length ? 'editor' : 'caret', spans, editor);
-		return patchOpenEditors(file, [editor], safe);
+		return patchOpenEditors(app, file, [editor], safe);
 	}
 	traceCommit(app, file, 'vault.process', 'closed', spans);
 	return writeClosedNote(app, file, snapshot, next, spans);

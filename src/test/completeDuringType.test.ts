@@ -94,6 +94,7 @@ describe('BUG-STALE-EDITOR-WRITE checkbox', () => {
 	it('TP-COMPLETE-DURING-TYPE patches an open editor on the task line and keeps text typed on another line', async () => {
 		const file = makeTFile('notes/a.md');
 		let value = OPEN;
+		let disk = OPEN;
 		let gets = 0;
 		let wholeFileWrites = 0;
 		const editor = {
@@ -121,15 +122,19 @@ describe('BUG-STALE-EDITOR-WRITE checkbox', () => {
 			},
 			vault: {
 				getAbstractFileByPath: () => file,
-				read: async () => OPEN,
+				read: async () => disk,
 				modify: async () => { wholeFileWrites++; },
-				process: async () => { wholeFileWrites++; },
+				process: async (_f: TFile, cb: (data: string) => string) => {
+					wholeFileWrites++;
+					disk = cb(disk);
+				},
 			},
 		} as unknown as App;
 
 		await pluginFor(app).completeTaskInTheFile(TASK);
 
-		expect(wholeFileWrites).toBe(0);
+		expect(wholeFileWrites).toBe(1);
+		expect(disk).toBe(value);
 		expect(value.split('\n')[0]).toContain('[x]');
 		expect(value).toContain('hello from the user');
 	});
@@ -184,6 +189,7 @@ describe('BUG-STALE-EDITOR-WRITE checkbox', () => {
 	it('TP-UNCOMPLETE-DURING-TYPE patches an open editor on the task line and keeps text typed on another line', async () => {
 		const file = makeTFile('notes/a.md');
 		let value = DONE;
+		let disk = DONE;
 		let gets = 0;
 		let wholeFileWrites = 0;
 		const editor = {
@@ -211,15 +217,19 @@ describe('BUG-STALE-EDITOR-WRITE checkbox', () => {
 			},
 			vault: {
 				getAbstractFileByPath: () => file,
-				read: async () => DONE,
+				read: async () => disk,
 				modify: async () => { wholeFileWrites++; },
-				process: async () => { wholeFileWrites++; },
+				process: async (_f: TFile, cb: (data: string) => string) => {
+					wholeFileWrites++;
+					disk = cb(disk);
+				},
 			},
 		} as unknown as App;
 
 		await pluginFor(app).uncompleteTaskInTheFile(TASK);
 
-		expect(wholeFileWrites).toBe(0);
+		expect(wholeFileWrites).toBe(1);
+		expect(disk).toBe(value);
 		expect(value.split('\n')[0]).toContain('[ ]');
 		expect(value.split('\n')[0]).not.toContain('[x]');
 		expect(value).toContain('hello from the user');
