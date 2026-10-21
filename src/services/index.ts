@@ -190,13 +190,22 @@ export class TickTickService {
 		return this.synchronizationInner(fullSync, trigger);
 	}
 
-	/** Push settled edits in an open note. Skips lines the caller marks (unfinished caret) and lines with no TickTick id. */
-	async pushSettledActiveFile(filepath: string, skipLines: number[] = []): Promise<void> {
+	/**
+	 * Push settled edits for a note after the quiet period.
+	 * Markdown editor: `identifiedOnly` (skip unfinished new checkboxes; comment sweep only via hash).
+	 * BUG-COMMENT-ABYSS-VIEW: Abyss / background vault.modify passes `identifiedOnly: false` so comment sweep runs.
+	 */
+	async pushSettledActiveFile(
+		filepath: string,
+		skipLines: number[] = [],
+		opts?: { identifiedOnly?: boolean },
+	): Promise<void> {
 		if (!filepath || !isPathInPushScope(filepath)) return;
 		if (this.plugin.syncRunning) {
 			deferActiveFilePush(filepath);
 			return;
 		}
+		const identifiedOnly = opts?.identifiedOnly !== false;
 		const perfRun = startSyncPerf({ trigger: 'active-file', fullSync: false });
 		let endFiles: () => void = () => undefined;
 		let endApi: () => void = () => undefined;
@@ -208,7 +217,7 @@ export class TickTickService {
 				await doWithLock(LOCK_TASKS, async () => {
 					await this.plugin.taskModificationDetector.checkFileForModifications(filepath, undefined, {
 						skipLines: new Set(skipLines),
-						identifiedOnly: true,
+						identifiedOnly,
 					});
 				});
 			};

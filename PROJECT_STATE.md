@@ -17,7 +17,7 @@
 
 - **Direction (2026-10-16):** **Abyss-first** — tasks stay where Abyss puts them; TickTick mirrors tags/lists and project parents. See `ABYSS_FIRST_PLAN.md` (topology R / CASE-T4 parked).
 - **Still valid:** TT **Projects** ↔ project notes under `10 Projects/`; safety: `syncedLists`, `syncScopeFolders`, manual sync.
-- **Next execution order:** Steps 1–8 in `ABYSS_FIRST_PLAN.md`. Comment gate **PILOT-GATE-TEST-11-12** / **BUG-COMMENT-API-POST-500** **pass** on **2.0.74** (`docs/pilot/results/PILOT-GATE-TEST-11-12/`). Next P0 pilot batch: **PILOT-BATCH-EDITOR-SAFETY** (#15–#18). Abyss Inbox stage tag `#inbox` (§3.1); untagged Inbox still open. Birth tag `#obsidian` stays.
+- **Next execution order:** Steps 1–8 in `ABYSS_FIRST_PLAN.md`. Comment gate **PILOT-GATE-TEST-11-12** / **BUG-COMMENT-API-POST-500** **pass** on **2.0.74**. **BUG-COMMENT-ABYSS-VIEW** **pass** on **2.0.75** (Abyss `vault.modify` → 5s open-note push; evidence `docs/pilot/results/BUG-COMMENT-ABYSS-VIEW/`; #23). Next P0 pilot batch: **PILOT-BATCH-EDITOR-SAFETY** (#15–#18). Abyss Inbox stage tag `#inbox` (§3.1); untagged Inbox still open. Birth tag `#obsidian` stays.
 - **Sync research (2026-10-20):** `docs/TICKTICK_DELTA_API.md` — delta has no comments; echo suppression in `pull.ts` uses `etag`; idle sync does not call `getTaskById` per quiet task.
 - **Deletion guard (2026-10-20):** over-threshold or empty-side deletions are held and the checkpoint stays. Defaults: guard on, more than 10 tasks and more than 20%, startup delay 30s. Pilot cases in `TEST_PLAN.md` are not run.
 - **Redo:** journal `<vault>/.tickticksync/journal/`; palette undo previews then applies `planUndo`. Not soaked on the live vault.
@@ -26,7 +26,7 @@
 ## Validation
 
 - Build: `npm run build` in repo root; CI on `abyss-mapping` via `.github/workflows/ci.yml`.
-- Unit tests: `npx vitest run` — see latest `CHANGELOG.md` iteration (currently **96** files, **680** passed; includes `synchronizationInner.integration.test.ts`). Abyss comments → TickTick **Comments API** when `syncAbyssCommentsViaApi` (default on); descriptions stay in `content`. v2 comment create uses webapp body (**2.0.74**, BUG-COMMENT-API-POST-500).
+- Unit tests: `npx vitest run` — see latest `CHANGELOG.md` iteration (currently **96** files, **682** passed; includes `synchronizationInner.integration.test.ts`). Abyss comments → TickTick **Comments API** when `syncAbyssCommentsViaApi` (default on); descriptions stay in `content`. v2 comment create uses webapp body (**2.0.74**, BUG-COMMENT-API-POST-500). Abyss view `vault.modify` schedules the open-note push (**2.0.75**, BUG-COMMENT-ABYSS-VIEW); see `docs/ANALYST_REFERENCE_DIAGRAMS.md` §2b.
 - Manual pilot: **`SMOKE_TESTS.md`**. Palette: **Synchronize** only; full TT pull on plugin load. Context tags **2.0.41** (`syncNoteContextTags`).
 - BRAT installs: GitHub Release assets from `.github/workflows/release.yml` (see `docs/BRAT_INSTALL.md`).
 - TT cleanup verified 2026-10-16 via MCP (no `ticktick` tag left on polluted set).

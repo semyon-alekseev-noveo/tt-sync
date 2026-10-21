@@ -1,5 +1,10 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { createActiveFilePushScheduler, planActiveFilePush, type ActiveFilePushContext } from '@/services/activeFilePush';
+import {
+	createActiveFilePushScheduler,
+	planActiveFilePush,
+	shouldNotifyPushOnVaultModify,
+	type ActiveFilePushContext,
+} from '@/services/activeFilePush';
 
 const ready: ActiveFilePushContext = {
 	hasToken: true,
@@ -52,5 +57,33 @@ describe('RISK-OPEN-FILE-EDIT', () => {
 		expect(push).toHaveBeenCalledTimes(1);
 		expect(push).toHaveBeenCalledWith('notes/a.md');
 		scheduler.dispose();
+	});
+
+	it('BUG-COMMENT-ABYSS-VIEW schedules push on vault.modify for in-scope notes', () => {
+		expect(shouldNotifyPushOnVaultModify({
+			hasToken: true,
+			isMarkdown: true,
+			inScope: true,
+		})).toBe(true);
+		expect(shouldNotifyPushOnVaultModify({
+			hasToken: true,
+			isMarkdown: true,
+			inScope: false,
+		})).toBe(false);
+		expect(shouldNotifyPushOnVaultModify({
+			hasToken: false,
+			isMarkdown: true,
+			inScope: true,
+		})).toBe(false);
+	});
+
+	it('BUG-COMMENT-ABYSS-VIEW still plans a push when there is no markdown caret (Abyss leaf)', () => {
+		expect(planActiveFilePush({
+			...ready,
+			caretLine: null,
+			caretIsTask: false,
+			caretTitle: '',
+			caretRaw: '',
+		})).toEqual({ push: true, skipLines: [], retryAfterSync: false });
 	});
 });

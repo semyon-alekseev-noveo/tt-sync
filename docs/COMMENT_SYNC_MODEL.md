@@ -24,6 +24,19 @@ Stamps are **display metadata**; they must not be the only match key.
 
 - `normalizedCommentKey`, `planCommentSync`, `commentSetsEquivalentByNormalizedKey` — `src/sync/comments/`
 - Target: `syncAbyssCommentsToTickTick`, `apiCommentsDifferFromVault`, and `mergeAbyssBlock` deletion hints call into this module only.
+- **Create (v2 POST):** body must match the TickTick web client (`id`, `taskId`, `projectId`, `createdTime`, `title`, …). Title-only payloads return HTTP 500 (`BUG-COMMENT-API-POST-500`, **2.0.74**). Empty 200 body still succeeds using the client-generated id.
+
+## When vault comments are pushed (triggers)
+
+Matching and POST body are useless if nothing schedules a push. See also `docs/ANALYST_REFERENCE_DIAGRAMS.md` §2b.
+
+| Path | Entry | Notes |
+|------|--------|--------|
+| Full **Synchronize** | `TaskModificationDetector.checkFileForModifications` → `syncAllAbyssCommentsInFile` | Always sweeps in-scope notes on manual/idle sync (with pre-pull push rules). |
+| Markdown typing | `workspace.on('editor-change')` → 5s debounce → `pushSettledActiveFile` | Caret path often uses `identifiedOnly: true`. |
+| **Abyss Tasks view** | `vault.on('modify')` → `shouldNotifyPushOnVaultModify` → same 5s debounce | No `editor-change`. Flush must not require `getActiveFile() === path`; Abyss/background uses `identifiedOnly: false` (**BUG-COMMENT-ABYSS-VIEW**, **2.0.75**). |
+
+Abyss view write ≠ editor-change. If only the editor path is wired, Comments stay empty until Synchronize.
 
 ## PR sequence
 

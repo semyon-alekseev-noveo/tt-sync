@@ -7,7 +7,13 @@ import { App, Editor, type MarkdownFileInfo, MarkdownView, TFile, TFolder } from
 import type TickTickSync from '@/main';
 import { getSettings } from '@/settings';
 import { isPathInPushScope } from '@/syncScope';
-import { createActiveFilePushScheduler, deferActiveFilePush, planActiveFilePush, setActiveFilePushRelease } from '@/services/activeFilePush';
+import {
+	createActiveFilePushScheduler,
+	deferActiveFilePush,
+	planActiveFilePush,
+	setActiveFilePushRelease,
+	shouldNotifyPushOnVaultModify,
+} from '@/services/activeFilePush';
 import { noteEditorActivity } from '@/services/editorActivity';
 import { traceWrite } from '@/services/writeTrace';
 import { repairEmptyEditorFromDisk } from '@/services/vaultWrite';
@@ -122,9 +128,13 @@ export class EventHandlerService {
 	}
 
 	private async flushActiveFilePush(filepath: string): Promise<void> {
-		const file = this.app.workspace.getActiveFile();
-		if (!file || file.path !== filepath) return;
-		const editor = this.app.workspace.activeEditor?.editor;
+		// BUG-COMMENT-ABYSS-VIEW: do not require getActiveFile() === filepath. Abyss view
+		// (and switching leaves before the 5s quiet period) still need the notified path pushed.
+		const file = this.app.vault.getAbstractFileByPath(filepath);
+		if (!(file instanceof TFile)) return;
+		const active = this.app.workspace.getActiveFile();
+		const isActive = active?.path === filepath;
+		const editor = isActive ? this.app.workspace.activeEditor?.editor : undefined;
 		const caretLine = editor ? editor.getCursor().line : null;
 		const caretRaw = editor && caretLine != null ? editor.getLine(caretLine) : '';
 		const parser = this.plugin.taskParser;
@@ -146,9 +156,14 @@ export class EventHandlerService {
 			return;
 		}
 		if (!plan.push) return;
-		traceWrite(this.app, 'flushActiveFilePush', filepath, 'push', { reason: 'push', caretLine });
+		// Markdown editor caret → identifiedOnly. Abyss leaf / no editor → full comment sweep.
+		const identifiedOnly = !!(isActive && editor);
+		traceWrite(this.app, 'flushActiveFilePush', filepath, 'push', {
+			reason: identifiedOnly ? 'push' : 'push-abyss-or-background',
+			caretLine,
+		});
 		try {
-			await this.plugin.service?.pushSettledActiveFile(filepath, plan.skipLines);
+			await this.plugin.service?.pushSettledActiveFile(filepath, plan.skipLines, { identifiedOnly });
 		} catch (error) {
 			log.warn('Active file push failed', filepath, error);
 		}
@@ -215,9 +230,20 @@ export class EventHandlerService {
 						log.debug('on modify non markdown file detected.', file.path);
 						return;
 					}
+					const inScope = isPathInPushScope(filepath);
 					const activateFile = this.app.workspace.getActiveFile();
+					// BUG-COMMENT-ABYSS-VIEW: Abyss Tasks writes the note via vault.modify while the
+					// Abyss leaf is focused (no editor-change). Schedule the same 5s push as typing.
+					if (shouldNotifyPushOnVaultModify({
+						hasToken: true,
+						isMarkdown: true,
+						inScope,
+					})) {
+						this.activeFilePush.notify(filepath);
+					}
 
-					// To avoid conflicts, do not check files being edited
+					// Markdown editor keystrokes: editor-change already debounces; skip immediate
+					// new-task scan so a half-typed checkbox is not created.
 					if (activateFile?.path === filepath) {
 						return;
 					}
