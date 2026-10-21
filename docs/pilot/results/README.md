@@ -36,3 +36,4 @@ Use the **GitHub issue number** prefix so issue ↔ file is obvious.
 |---------|--------|
 | `PILOT-GATE-TEST-11-12` | [`PILOT-GATE-TEST-11-12/INDEX.md`](PILOT-GATE-TEST-11-12/INDEX.md) |
 | `BUG-COMMENT-ABYSS-VIEW` | [`BUG-COMMENT-ABYSS-VIEW/INDEX.md`](BUG-COMMENT-ABYSS-VIEW/INDEX.md) |
+| `BUG-COMMENT-DUP-STAMP` | [`BUG-COMMENT-DUP-STAMP/INDEX.md`](BUG-COMMENT-DUP-STAMP/INDEX.md) |

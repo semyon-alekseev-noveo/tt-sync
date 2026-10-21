@@ -4,7 +4,7 @@
 **Audience:** Product owner / decision maker  
 **Repo:** `tickticksync` branch `abyss-mapping`  
 **Test vault:** `<pilot-vault>` (copy only; live vault `<live-vault>` untouched)  
-**Install:** BRAT → `https://github.com/semyon-alekseev-noveo/tt-sync` track **latest release** (**2.0.75**, tag `2.0.75`); plugin id **`tickticksync-abyss`** — `docs/BRAT_INSTALL.md`. Preset: `00 Inbox/TTS-data-preset.json`.
+**Install:** BRAT → `https://github.com/semyon-alekseev-noveo/tt-sync` track **latest release** (**2.0.76**, tag `2.0.76`); plugin id **`tickticksync-abyss`** — `docs/BRAT_INSTALL.md`. Preset: `00 Inbox/TTS-data-preset.json`.
 
 История изменений — только в `CHANGELOG.md`; здесь — снимок для PO.
 
@@ -25,6 +25,7 @@
 
 ## Validation
 
+- Релиз **2.0.76** (2026-10-21): **BUG-COMMENT-DUP-STAMP** — dedupe stamped+plain TT Comments; plain-only POST; skip create when key present. Vitest **685**. Pilot **pass** `docs/pilot/results/BUG-COMMENT-DUP-STAMP/` (`task-11-16` → 4 plain Comments).
 - Релиз **2.0.75** (2026-10-21): **BUG-COMMENT-ABYSS-VIEW** — Abyss `vault.modify` schedules 5s open-note push; flush without active markdown leaf. Pilot pass `docs/pilot/results/BUG-COMMENT-ABYSS-VIEW/`. Vitest **682**.
 - Релиз **2.0.74** (2026-10-21): **BUG-COMMENT-API-POST-500** — v2 comment POST uses webapp body; **PILOT-GATE-TEST-11-12** pass. Vitest **680**.
 - Релиз **2.0.64** (2026-10-21): **BUG-COMMENT-BOTH-WAYS** — при расхождении с обеих сторон reconcile пушит vault-only комменты в TT и не пропускает pull TT-only. Vitest **659**.
@@ -58,6 +59,7 @@
 | **BUG-COMMENT-INLINE** | P1 | fixed on this branch | Дочерняя comment/description строка вызывает `checkLineForModifications` родителя. Соседние comment-буллеты — отдельные треды (`extractAbyssCommentThreads`) |
 | **RISK-OPEN-FILE-EDIT** | P1 | mitigated on this branch | После 5 с тишины `editor-change` пушит строки с `ticktick_id`, кроме незакрытой строки захвата (`%%`). **BUG-COMMENT-ABYSS-VIEW**: `vault.modify` тоже планирует тот же debounce (Abyss view); flush не требует active markdown leaf. |
 | **BUG-COMMENT-ABYSS-VIEW** | P0 | **pass** (**2.0.75**) | Коммент из Abyss view → TT Comments: `vault.modify` планирует 5s push; flush без active markdown leaf. Evidence: `docs/pilot/results/BUG-COMMENT-ABYSS-VIEW/`. Issue #23. |
+| **BUG-COMMENT-DUP-STAMP** | P0 | open (analyst) | После Abyss push: пары stamped+plain в TT Comments на один vault-тред (`task-11-16`, count 8/4). Issue [#25](https://github.com/semyon-alekseev-noveo/tt-sync/issues/25). Фикса нет. |
 | **BUG-PULL-COMMENT-STALE** | P2 | fixed on this branch | `vaultLineBehindTask` сравнивает отпечатки Comments API. `getTaskById` только если заголовок/статус/content уже совпали; повторного вызова в цикле vault-sync нет. Комментарии кэшируются на задаче (`_apiComments`) |
 | **RISK-PULL-WINS-LOCAL** | P2 | open | При победе локальной версии в LWW строка в vault может остаться устаревшей |
 | **BUG-COMMENT-MAP-ORPHAN** | P2 | fixed on this branch | `deleteCommentMapsForTask` вызывается из `TaskRepository` (delete/hard delete/purge), `markTaskDeleted` и pull при удалённой на TT задаче |

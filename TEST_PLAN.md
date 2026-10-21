@@ -642,6 +642,15 @@ Automated: `pushLocalPaths.test.ts` (`BUG-COMMENT-ACTIVE-NOTE`).
 | BUG-COMMENT-RECONCILE-UPDATE | mitigated | **2.0.73** Phase 3: write-trace kept **`vault-comments-ahead`** while Comments empty (guard OK). Unblocked by **2.0.74** POST fix — Phase 3b Comments land. Evidence: `13-phase-3-verify.md`, `16-phase-3b-verify.md`. |
 | BUG-COMMENT-API-POST-500 | pass | **2.0.74**: webapp POST body + empty-200 client id (`bugCommentApiPost500.test.ts`). Pilot: reload + `tts-sync` → TT Comments **`comment 1`**, **`test-new-verision`**. Evidence: `15-phase-2b-post-fix.md`, `16-phase-3b-verify.md`. |
 | BUG-COMMENT-ABYSS-VIEW | pass | **2.0.75**: Abyss/`vault.modify` schedules 5s push; flush `push-abyss-or-background`. Pilot `task-11-16` / `2026-10-19.md` → TT Comments include user `comment 1` / `коммент 2` + verify bullets. Evidence: `docs/pilot/results/BUG-COMMENT-ABYSS-VIEW/`. Automated: `activeFilePush.test.ts`. |
+| BUG-COMMENT-DUP-STAMP | pass | **2.0.76**: stamped+plain TT pairs collapsed by `normalizedCommentKey`; creates always plain; no second POST when key present. Automated: `abyssCommentSync.test.ts`. Pilot: `task-11-16` → **4** plain Comments (no stamped twins). Evidence: `docs/pilot/results/BUG-COMMENT-DUP-STAMP/`. |
+
+### BUG-COMMENT-DUP-STAMP — stamped+plain TickTick pairs
+
+1. Task with vault Abyss comment bullets that already produced stamped+plain TT Comments (e.g. `task-11-16` after **2.0.75** Abyss push).
+2. Install **2.0.76**; **Synchronize** once (or open-note push).
+3. Optionally add one new Abyss-view comment and wait ≥5s.
+
+Expected: TickTick **Comments** has **one** entry per vault thread (plain title preferred). No new stamped twin for the same text. Automated: `abyssCommentSync.test.ts` (`BUG-COMMENT-DUP-STAMP`).
 
 ### BUG-COMMENT-ABYSS-VIEW — Abyss Tasks view comment push
 

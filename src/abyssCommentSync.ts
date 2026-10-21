@@ -170,6 +170,50 @@ export async function syncAbyssCommentsToTickTick(
 	let remote = await api.getTaskComments(projectId, taskId);
 	const remoteIds = new Set(remote.map(c => c.id));
 	maps = await listCommentMapsForTask(taskId);
+
+	const tickTickCommentTitle = (body: string) => {
+		const plain = commentBodyWithoutStamp(body);
+		return (plain || body).trim();
+	};
+
+	/** Prefer plain TT titles over vault-stamped twins when collapsing duplicates. */
+	const preferRemoteComment = (a: { title?: string }, b: { title?: string }): number => {
+		const aStamped = commentBodyWithoutStamp(a.title ?? '') !== (a.title ?? '').trim();
+		const bStamped = commentBodyWithoutStamp(b.title ?? '') !== (b.title ?? '').trim();
+		if (aStamped !== bStamped) return aStamped ? 1 : -1;
+		return 0;
+	};
+
+	// BUG-COMMENT-DUP-STAMP: collapse stamped+plain (or race) pairs before planning push.
+	if (remote.length > 1 && deletionConfirmMode() !== 'skip') {
+		const byKey = new Map<string, typeof remote>();
+		for (const c of remote) {
+			const key = normalizedCommentKey(c.title ?? '');
+			if (!key) continue;
+			const group = byKey.get(key) ?? [];
+			group.push(c);
+			byKey.set(key, group);
+		}
+		let deduped = false;
+		for (const group of byKey.values()) {
+			if (group.length < 2) continue;
+			const keep = [...group].sort(preferRemoteComment)[0];
+			for (const extra of group) {
+				if (extra.id === keep.id) continue;
+				if (await api.deleteTaskComment(projectId, taskId, extra.id)) {
+					changed = true;
+					deduped = true;
+				}
+				const map = maps.find(m => m.ticktickCommentId === extra.id);
+				if (map) await deleteCommentMap(map.id);
+			}
+		}
+		if (deduped) {
+			remote = await api.getTaskComments(projectId, taskId);
+			maps = await listCommentMapsForTask(taskId);
+		}
+	}
+
 	const plan = planCommentSync(taskLines, remote, maps);
 
 	for (const r of plan.remoteOnly) {
@@ -187,14 +231,30 @@ export async function syncAbyssCommentsToTickTick(
 		// BUG-COMMENT-DISK-READ): do not set `changed` here.
 	}
 
-	const tickTickCommentTitle = (body: string) => {
-		const plain = commentBodyWithoutStamp(body);
-		return (plain || body).trim();
-	};
+	const remoteKeysPresent = new Set(
+		remote.map(c => normalizedCommentKey(c.title ?? '')).filter(k => k.length > 0),
+	);
 
 	for (const v of plan.vaultOnly) {
 		const thread = v.thread;
 		const fp = mapFingerprintForThread(thread);
+		const key = normalizedCommentKey(thread.body);
+		// Race / twin: key already on TickTick — map it, do not POST again.
+		if (key && remoteKeysPresent.has(key)) {
+			const existing = remote.find(c => normalizedCommentKey(c.title ?? '') === key);
+			if (existing?.id) {
+				await upsertCommentMap({
+					id: commentMapId(taskId, fp),
+					taskId,
+					projectId,
+					fingerprint: fp,
+					ticktickCommentId: existing.id,
+					body: thread.body,
+					origin: 'vault',
+				});
+			}
+			continue;
+		}
 		const created = await api.addTaskComment(projectId, taskId, tickTickCommentTitle(thread.body));
 		if (created?.id) {
 			await upsertCommentMap({
@@ -206,6 +266,7 @@ export async function syncAbyssCommentsToTickTick(
 				body: thread.body,
 				origin: 'vault',
 			});
+			if (key) remoteKeysPresent.add(key);
 			changed = true;
 		}
 	}
@@ -220,7 +281,7 @@ export async function syncAbyssCommentsToTickTick(
 		if (!existing) continue;
 		if (deletionConfirmMode() === 'skip') continue;
 		await api.deleteTaskComment(projectId, taskId, existing.ticktickCommentId);
-		const created = await api.addTaskComment(projectId, taskId, vaultBody);
+		const created = await api.addTaskComment(projectId, taskId, tickTickCommentTitle(vaultBody));
 		if (created?.id) {
 			const fp = mapFingerprintForThread(link.vault.thread);
 			await deleteCommentMap(existing.id);

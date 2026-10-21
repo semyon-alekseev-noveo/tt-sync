@@ -1,5 +1,25 @@
 # Changelog
 
+### Iteration 2026-10-21 14:52 UTC
+
+- Context: **BUG-COMMENT-DUP-STAMP** (#25) — Abyss push left stamped+plain TT Comment pairs for the same normalized key.
+- Target: One TT comment per vault thread; strip stamp on all POSTs; collapse remote twins; ship **2.0.76**.
+- Actions log: Failing tests in `abyssCommentSync.test.ts`; dedupe-by-key before plan; skip vaultOnly when key present; linked re-post uses plain title; bump **2.0.76**; pilot results folder.
+- Validation: `npx vitest run` → **685 passed**; `npm run build` → dist **2.0.76**; pilot MCP `get_comment` on `task-11-16` → **4** plain titles (no stamped twins).
+- Problems: Concurrent double-flush race still possible without mutex — **mitigated** by key-present skip + dedupe.
+- To Be Done: Close #25; next P0 **PILOT-BATCH-EDITOR-SAFETY** (#15/#16).
+- References: https://github.com/semyon-alekseev-noveo/tt-sync/issues/25, `docs/pilot/results/BUG-COMMENT-DUP-STAMP/`, `CHANGELOG.md`
+
+### Iteration 2026-10-21 14:41 UTC
+
+- Context: After **BUG-COMMENT-ABYSS-VIEW** / #23 verify on `task-11-16`, owner saw TickTick Comments as stamped+plain pairs (count 8 for 4 threads).
+- Target: File analyst case **BUG-COMMENT-DUP-STAMP** + GitHub issue; no code fix.
+- Actions log: `gh issue create` #25 with screenshot; catalog row; `docs/github-issues/BUG-COMMENT-DUP-STAMP.md` + INDEX; comment on #23.
+- Validation: Issue URL returned; case ID unique in `ABYSS_FIRST_CASES.md` (no prior DUP-STAMP).
+- Problems: **BUG-COMMENT-DUP-STAMP** — **open** (analyst; hypothesized stamp/race double POST).
+- To Be Done: Failing test + fix in a later PR; do not reopen #23.
+- References: https://github.com/semyon-alekseev-noveo/tt-sync/issues/25, `docs/github-issues/BUG-COMMENT-DUP-STAMP.md`, `CHANGELOG.md`
+
 ### Iteration 2026-10-21 14:35 UTC
 
 - Context: Owner approved commit + BRAT release **2.0.75** for **BUG-COMMENT-ABYSS-VIEW**; asked canonical docs to explain Abyss → vault.modify → push path.
