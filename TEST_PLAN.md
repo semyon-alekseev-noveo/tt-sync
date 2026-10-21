@@ -628,6 +628,9 @@ Automated: `pushLocalPaths.test.ts` (`BUG-COMMENT-ACTIVE-NOTE`).
 | BUG-COMMENT-ACTIVE-NOTE | not run | Pilot 2026-10-21 `2026-10-21.md` comment bullets; journal lacked obs→tt comment pushes before fix. |
 | BUG-COMMENT-NO-TT-WIPE | not run | Pilot: sync cleared all TT Comments; fixed stamp/plain fingerprint + no wipe when vault has no comment lines. `abyssCommentSync.test.ts`. |
 | BUG-COMMENT-KEY-EQUIV | not run | `commentSyncModel.test.ts`; `apiCommentsDifferFromVault` + push via `planCommentSync`. |
+| BUG-COMMENT-MERGE-NO-STRIP | not run | `abyssStep3.test.ts`; empty Comments API + unknown `commentCount` must not strip vault bullets on pull merge. |
+| BUG-COMMENT-MANUAL-PRE-PULL | not run | `pushLocalPaths.test.ts`; manual sync pre-pull includes all in-scope registered paths. |
+| BUG-COMMENT-VAULT-AHEAD | not run | `vaultCommentBehind.test.ts`; `task-11-16` / `00 Inbox/2026-10-19.md` ISO-stamped bullets → TT Comments panel. |
 
 ### BUG-DEFERRED-ID-PHASE2-DELETE — create on open note, no false deletion
 

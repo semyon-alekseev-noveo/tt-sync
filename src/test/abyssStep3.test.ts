@@ -58,7 +58,7 @@ describe('Abyss child block anywhere', () => {
 	it('TP-COMMENT-TT-DELETE drops a mapped comment TickTick no longer has and keeps an unmapped one', () => {
 		const gen = '- [ ] T %%[ticktick_id:: abcdefabcdefabcdefabcdef]%%\n\t- > desc';
 		const old = ['\t- > desc', '\t- 2026-10-20 12:00: gone', '\t- 2026-10-20 12:05: local-only'];
-		const hint = { knownBodies: ['2026-10-20 12:00: gone'], apiBodies: [] as string[] };
+		const hint = { knownBodies: ['2026-10-20 12:00: gone'], apiBodies: [] as string[], remoteCommentCount: 0 };
 		const out = mergeAbyssBlock(gen, old, 'Comments:\n2026-10-20 12:00: gone', hint);
 		expect(out).not.toContain('gone');
 		expect(out).toContain('local-only');
@@ -92,6 +92,14 @@ describe('Abyss child block anywhere', () => {
 		expect(out).not.toContain('comment C\n');
 		expect(out).not.toMatch(/comment C$/m);
 	});
+	it('BUG-COMMENT-MERGE-NO-STRIP keeps mapped vault comments when API list is empty and commentCount is unknown', () => {
+		const gen = '- [ ] T %%[ticktick_id:: abcdefabcdefabcdefabcdef]%%\n\t- > desc';
+		const old = ['\t- > desc', '\t- 2026-10-20 12:00: still here'];
+		const hint = { knownBodies: ['2026-10-20 12:00: still here'], apiBodies: [] as string[] };
+		const out = mergeAbyssBlock(gen, old, 'desc', hint);
+		expect(out).toContain('still here');
+	});
+
 	it('BUG-COMMENT-NO-PUSH keeps vault comments when the generated block has none', () => {
 		const gen = '- [ ] gate-comment-249 #obsidian #inbox %%[ticktick_id:: 6ad6f43a0aa12c21f30de04a]%%\n\t- > gate-desc-249';
 		const old = ['\t- > gate-desc-249', '\t- 2026-10-20 13:18: gate-251-retest-b'];

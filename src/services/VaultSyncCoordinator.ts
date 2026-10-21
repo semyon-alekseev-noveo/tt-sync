@@ -27,7 +27,8 @@ import { deferActiveFilePush } from '@/services/activeFilePush';
 import { syncCachedRead, syncFileMap, syncRead } from '@/sync/fileRunCache';
 import { addCount } from '@/sync/perf';
 import { notePluginWrite } from '@/utils/editedSince';
-import { apiCommentsDifferFromVault, useAbyssCommentsApi } from '@/abyssCommentSync';
+import { apiCommentsDifferFromVault, syncAbyssCommentsToTickTick, useAbyssCommentsApi } from '@/abyssCommentSync';
+import { remoteCommentKeysAheadOfVault, vaultCommentKeysAheadOfRemote } from '@/sync/comments';
 import { abyssLinesToNote, extractAbyssCommentThreads } from '@/abyssFormat';
 
 export class VaultSyncCoordinator {
@@ -376,13 +377,33 @@ export class VaultSyncCoordinator {
 		let reason = behind ? 'behind' : 'in-sync';
 		const commentCount = (task as ITask & { commentCount?: number }).commentCount;
 		const vaultThreads = extractAbyssCommentThreads(taskRec.taskLines ?? []).length;
-		if (deletionConfirmMode() !== 'skip' && !behind && useAbyssCommentsApi() && remote.projectId && typeof commentCount === 'number' && commentCount !== vaultThreads) {
+		const commentCountKnown = typeof commentCount === 'number';
+		const commentCountMismatch = commentCountKnown && commentCount !== vaultThreads;
+		const vaultHasUnmappedComments = vaultThreads > 0 && !commentCountKnown;
+		const shouldProbeComments = vaultThreads > 0 || commentCountMismatch || vaultHasUnmappedComments;
+		if (deletionConfirmMode() !== 'skip' && !behind && useAbyssCommentsApi() && remote.projectId && shouldProbeComments) {
 			try {
 				const comments = await this.plugin.tickTickRestAPI?.getTaskComments(remote.projectId, remote.id) ?? [];
 				if (apiCommentsDifferFromVault(taskRec.taskLines, comments)) {
-					behind = true;
-					reason = 'behindComments';
-					Object.defineProperty(remote, '_apiComments', { value: comments, enumerable: false, configurable: true });
+					if (remoteCommentKeysAheadOfVault(taskRec.taskLines ?? [], comments)) {
+						behind = true;
+						reason = 'behindComments';
+						Object.defineProperty(remote, '_apiComments', { value: comments, enumerable: false, configurable: true });
+					} else if (vaultCommentKeysAheadOfRemote(taskRec.taskLines ?? [], comments)) {
+						try {
+							await syncAbyssCommentsToTickTick(
+								this.plugin.tickTickRestAPI,
+								remote.id,
+								remote.projectId,
+								taskRec.taskLines ?? [],
+								remote.content,
+							);
+						} catch (e) {
+							log.warn('vault-ahead comment push failed', task.id, e);
+						}
+						deferActiveFilePush(filePath);
+						return { behind: false, task: remote, localEdit: true, reason: 'vault-comments-ahead' };
+					}
 				}
 			} catch (e) {
 				log.debug('vault comment lookup failed', task.id, e);

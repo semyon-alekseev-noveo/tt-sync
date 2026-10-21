@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-21 05:30 UTC
+
+- Context: Pilot `task-11-16` on `00 Inbox/2026-10-19.md` (ISO Abyss comment bullets, TT Comments empty); owner asked for push and release **2.0.59**.
+- Target: Tag **2.0.59** on `abyss-mapping`.
+- Actions log: **BUG-COMMENT-VAULT-AHEAD** — `VaultSyncCoordinator` pushes when vault has comment threads and TT API does not (no false `behindComments` pull). **BUG-COMMENT-MERGE-NO-STRIP** — empty Comments API without `commentCount: 0` does not drop vault bullets on merge. **BUG-COMMENT-MANUAL-PRE-PULL** — manual sync pre-pull walks all in-scope registered notes. Bump to **2.0.59**; `PO_STATUS.md`.
+- Validation: `npx vitest run` → **93** files, **652 passed**; `npm run build` ok.
+- Problems: Pilot NOTE-L3b / **BUG-COMMENT-VAULT-AHEAD** on Thinkpad after install — **not run** (pending BRAT **2.0.59**).
+- To Be Done: BRAT **2.0.59**; re-sync `2026-10-19.md` and confirm TT Comments for `6ad83d003e30f4429d749e0a`.
+- References: `ABYSS_FIRST_CASES.md`, `TEST_PLAN.md`, `CHANGELOG.md`
+
 ### Iteration 2026-10-21 05:05 UTC
 
 - Context: PR #9 merged into `abyss-mapping`; owner asked for release **2.0.58**.

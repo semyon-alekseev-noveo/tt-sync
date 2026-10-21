@@ -16,9 +16,19 @@ export function activeMarkdownPathInPushScope(app: App): string | undefined {
  * Includes mtime-edited paths and the active in-scope note so comment-only edits
  * on an open leaf still reach the Comments API when disk mtime did not move (BUG-COMMENT-ACTIVE-NOTE).
  */
-export function pathsForPrePullPush(app: App, registeredPaths: string[], since: number): string[] {
+export function pathsForPrePullPush(
+	app: App,
+	registeredPaths: string[],
+	since: number,
+	opts?: { manualSync?: boolean },
+): string[] {
 	const out = new Set(editedSince(app, registeredPaths, since));
 	const active = activeMarkdownPathInPushScope(app);
 	if (active && registeredPaths.includes(active)) out.add(active);
+	if (opts?.manualSync) {
+		for (const p of registeredPaths) {
+			if (isPathInPushScope(p)) out.add(p);
+		}
+	}
 	return [...out];
 }

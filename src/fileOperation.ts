@@ -489,6 +489,7 @@ export class FileOperation {
 			const hint: TickTickCommentSync = {
 				knownBodies: maps.map(m => m.body),
 				apiBodies: comments.map(c => c.title ?? ''),
+				remoteCommentCount: (task as ITask & { commentCount?: number }).commentCount,
 			};
 			Object.defineProperty(task, '__ticktickComments', { value: hint, enumerable: false, configurable: true });
 			task.content = stripLegacyCommentsBlock(task.content ?? '');

@@ -13,4 +13,9 @@ export {
 	remoteCommentRef,
 	vaultThreadRef,
 } from '@/sync/comments/keys';
-export { commentSetsEquivalentByNormalizedKey, planCommentSync } from '@/sync/comments/match';
+export {
+	commentSetsEquivalentByNormalizedKey,
+	planCommentSync,
+	remoteCommentKeysAheadOfVault,
+	vaultCommentKeysAheadOfRemote,
+} from '@/sync/comments/match';

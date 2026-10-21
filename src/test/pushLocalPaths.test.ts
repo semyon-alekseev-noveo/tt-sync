@@ -31,6 +31,23 @@ describe('BUG-COMMENT-ACTIVE-NOTE pathsForPrePullPush', () => {
 		expect(paths).toEqual([path]);
 	});
 
+	it('manual sync includes every registered in-scope path', () => {
+		const a = '00 Inbox/a.md';
+		const b = '00 Inbox/b.md';
+		const outScope = '20 Archive/x.md';
+		const fileA = Object.assign(new TFile(), { path: a, extension: 'md', stat: { mtime: 100 } });
+		const app = {
+			vault: {
+				getAbstractFileByPath: (p: string) => (p === a ? fileA : null),
+			},
+			workspace: { getActiveFile: () => null, activeEditor: undefined },
+		};
+		const paths = pathsForPrePullPush(app as never, [a, b, outScope], 999_999, { manualSync: true });
+		expect(paths).toContain(a);
+		expect(paths).toContain(b);
+		expect(paths).not.toContain(outScope);
+	});
+
 	it('does not include active note when mtime qualifies it as a plugin-only write', () => {
 		const path = '00 Inbox/2026-10-21.md';
 		notePluginWrite(path, 9000);

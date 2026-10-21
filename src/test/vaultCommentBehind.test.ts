@@ -11,6 +11,15 @@ import { apiCommentsDifferFromVault } from '@/abyssCommentSync';
 vi.mock('@/utils/logger', () => ({
 	default: { debug: vi.fn(), warn: vi.fn(), error: vi.fn(), info: vi.fn() },
 }));
+vi.mock('@/db/projects', () => ({
+	getAllProjects: vi.fn().mockResolvedValue([{ id: 'proj-1', name: 'TTS-Inbox' }]),
+}));
+vi.mock('@/db/taskCommentMaps', () => ({
+	listCommentMapsForTask: vi.fn().mockResolvedValue([]),
+	upsertCommentMap: vi.fn(),
+	deleteCommentMap: vi.fn(),
+	commentMapId: (taskId: string, fp: string) => `${taskId}:${fp}`,
+}));
 
 class NoteFile extends TFile {
 	path: string;
@@ -96,5 +105,81 @@ describe('BUG-PULL-COMMENT-STALE', () => {
 		}, file.path);
 		expect(already.behind).toBe(true);
 		expect(getTaskById).not.toHaveBeenCalled();
+	});
+
+	it('BUG-COMMENT-VAULT-AHEAD pushes when vault has Abyss comments and TickTick has none', async () => {
+		updateSettings({
+			syncNotes: true,
+			abyssTasksFormat: true,
+			syncAbyssCommentsViaApi: true,
+			syncScopeFolders: ['00 Inbox/'],
+			tagMappings: [],
+			tagListMappings: [],
+		}, { persist: false });
+
+		const taskId = '6ad83d003e30f4429d749e0a';
+		const file = new NoteFile('00 Inbox/2026-10-19.md');
+		const text = [
+			`- [ ] task-11-16 #obsidian #note/2026-10-19 #inbox %%[ticktick_id:: ${taskId}]%%`,
+			'\t- 2026-10-21T11:25:21+07:00: comment 1',
+			'\t- 2026-10-21T12:09:07+07:00: comment 2',
+		].join('\n');
+		const getTaskComments = vi.fn().mockResolvedValue([]);
+		const addTaskComment = vi.fn().mockResolvedValue({ id: 'c-new', title: 'comment 1' });
+		const { TaskParser } = await import('@/taskParser');
+		const { abyssLinesToNote } = await import('@/abyssFormat');
+		const parser = new TaskParser({} as never, {} as never);
+		const taskLine = text.split('\n')[0];
+		const childLines = text.split('\n').slice(1);
+		const lineHash = await parser.getLineHash(taskLine + abyssLinesToNote(childLines));
+		const plugin = {
+			tickTickRestAPI: { getTaskComments, addTaskComment, deleteTaskComment: vi.fn() },
+			taskParser: parser,
+			projectScheme: { isParentTask: () => false },
+			fileOperation: { readFileContent: async () => text },
+			dateMan: {
+				parseDates: () => ({}),
+				stripDatesFromLine: (s: string) => s,
+				formatDateToISO: () => '',
+				addDatesToLine: (s: string) => s,
+				areDatesChanged: () => false,
+				addDateHolderToTask: () => undefined,
+			},
+			fileTaskQueries: { getDefaultProjectIdForFilepath: async () => 'proj-1' },
+			taskRepository: {
+				loadTaskById: async () => ({
+					id: taskId,
+					projectId: 'proj-1',
+					title: 'task-11-16',
+					content: '',
+					lineHash,
+				}),
+			},
+		};
+		parser.plugin = plugin as never;
+		const app = {
+			metadataCache: { getFileCache: () => ({ listItems: [] }) },
+			vault: { getAbstractFileByPath: () => file, read: async () => text },
+		};
+		const coordinator = new VaultSyncCoordinator(app as never, plugin as never);
+		const behind = (coordinator as unknown as {
+			vaultLineBehindTask(task: unknown, path: string): Promise<{ behind: boolean; localEdit: boolean; reason: string }>;
+		}).vaultLineBehindTask.bind(coordinator);
+
+		const result = await behind({
+			id: taskId,
+			projectId: 'proj-1',
+			title: 'task-11-16',
+			content: '',
+			desc: '',
+			status: 0,
+			commentCount: 0,
+			lineHash,
+		}, file.path);
+		expect(result.behind).toBe(false);
+		expect(result.localEdit).toBe(true);
+		expect(result.reason).toBe('vault-comments-ahead');
+		expect(getTaskComments).toHaveBeenCalled();
+		expect(addTaskComment).toHaveBeenCalled();
 	});
 });

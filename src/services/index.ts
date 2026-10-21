@@ -130,7 +130,7 @@ export class TickTickService {
 
 	private locallyEdited = new Set<string>();
 	private guardedPull: GuardedPull | undefined;
-	async pushLocalEditsFirst(since?: number) {
+	async pushLocalEditsFirst(since?: number, trigger: SyncTrigger = 'manual') {
 		this.locallyEdited = new Set();
 		const meta = since == null ? await db.meta.get("sync") : undefined;
 		if (meta?.pluginWriteMtimes) loadPluginWrites(meta.pluginWriteMtimes);
@@ -139,7 +139,9 @@ export class TickTickService {
 		const last = since ?? meta?.lastVaultPushWallMs ?? 0;
 		const files = await this.plugin.fileMetadataService?.getAllFileMetadata();
 		const registered = Object.keys(files ?? {});
-		const edited = pathsForPrePullPush(this.plugin.app, registered, last);
+		const edited = pathsForPrePullPush(this.plugin.app, registered, last, {
+			manualSync: trigger === 'manual',
+		});
 		this.locallyEdited = new Set(edited);
 		for (const path of edited) {
 			try { await this.plugin.taskModificationDetector.checkFileForModifications(path); }
@@ -303,7 +305,7 @@ export class TickTickService {
 					// edited outside the editor, where no editor-change check fires).
 					await timePhase('push', async () => {
 						ui.setFullStep('Pushing vault changes to TickTick…');
-						await this.pushLocalEditsFirst(pushSince);
+						await this.pushLocalEditsFirst(pushSince, trigger);
 					});
 					await timePhase('pull', async () => {
 						ui.setFullStep(fullSync ? 'Full sync from TickTick…' : 'Pulling updates from TickTick…');

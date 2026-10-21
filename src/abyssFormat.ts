@@ -190,6 +190,8 @@ export function commentStamp(line: string): Date | undefined {
 export interface TickTickCommentSync {
 	knownBodies: readonly string[];
 	apiBodies: readonly string[];
+	/** TickTick task `commentCount` when comments were fetched; omit only when the API list was not loaded. */
+	remoteCommentCount?: number;
 }
 
 /** Line indexes of vault comment threads deleted in TickTick since the previous sync. */
@@ -198,6 +200,8 @@ function commentLinesDeletedInTickTick(oldChild: string[], generatedComments: st
 	const skip = new Set<number>();
 	if (!known.size) return skip;
 	const api = new Set(ticktick.apiBodies.map(normalizedCommentKey).filter(fp => fp.length > 0));
+	// Empty API list without an explicit zero count is ambiguous (failed fetch or not yet pushed).
+	if (!api.size && ticktick.remoteCommentCount !== 0) return skip;
 	const generated = new Set(extractAbyssCommentThreads(generatedComments).map(t => normalizedCommentKey(t.body)));
 	const kinds = classifyChildren(oldChild);
 	let buf: string[] = [];

@@ -9,6 +9,24 @@ import {
 	remoteCommentRef,
 	vaultThreadRef,
 } from '@/sync/comments/keys';
+
+/** TickTick has normalized comment keys the vault lines do not (pull Comments API into the note). */
+export function remoteCommentKeysAheadOfVault(
+	taskLines: string[],
+	remote: ReadonlyArray<{ title?: string }>,
+): boolean {
+	const local = new Set(normalizedKeysFromVaultLines(taskLines));
+	return normalizedKeysFromRemote(remote).some(k => !local.has(k));
+}
+
+/** Vault has comment threads TickTick Comments API does not (push to TickTick). */
+export function vaultCommentKeysAheadOfRemote(
+	taskLines: string[],
+	remote: ReadonlyArray<{ title?: string }>,
+): boolean {
+	const api = new Set(normalizedKeysFromRemote(remote));
+	return normalizedKeysFromVaultLines(taskLines).some(k => !api.has(k));
+}
 import type { CommentSyncMatch, CommentSyncPlan, RemoteCommentRef, VaultCommentThreadRef } from '@/sync/comments/types';
 
 function keysOverlap(a: ReadonlySet<string>, b: ReadonlySet<string>): boolean {

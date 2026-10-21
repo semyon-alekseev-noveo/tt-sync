@@ -42,6 +42,9 @@ Preconditions for every AF row: plugin `tickticksync-abyss`, manual sync, `fileL
 | BUG-COMMENT-ACTIVE-NOTE | Child comment bullets under a synced task on the **active** in-scope note: manual **Synchronize** runs the Comments API push (and comment sweep) even when disk mtime did not pass `editedSince`. Matches NOTE-L3b for the open-leaf case. |
 | BUG-COMMENT-NO-TT-WIPE | **Synchronize** must not delete TickTick Comments that still match vault threads (stamp vs plain title) or that exist only on TickTick when the vault has no comment bullets under that task. |
 | BUG-COMMENT-KEY-EQUIV | Vault comment threads and TickTick `title` match by `normalizedCommentKey` (stamp stripped), not raw line hash; `apiCommentsDifferFromVault` and push/pull use `src/sync/comments/`. |
+| BUG-COMMENT-MERGE-NO-STRIP | Pull merge must not drop vault comment bullets when the Comments API returned an empty list but TickTick did not report `commentCount: 0` (avoids tt→obs strip before push). |
+| BUG-COMMENT-MANUAL-PRE-PULL | Manual **Synchronize** runs pre-pull push (and comment sweep) for every registered in-scope note, not only mtime-edited paths and the active leaf. |
+| BUG-COMMENT-VAULT-AHEAD | Vault has Abyss comment bullets and TickTick Comments API is empty (or behind on keys): reconcile must **push** to TickTick, not mark the line `behindComments` and pull from TickTick. |
 | TP-EDITOR-OTHER-LEAF | The editor buffer is used only when that editor's file is the file being read. Another leaf's buffer is never written into the target note. |
 | TP-EDITOR-TYPE-DURING-SYNC | Typing in an open note during Synchronize stays in the editor. The task line updates, or the write waits until typing pauses. |
 | TP-EDITOR-TYPE-DURING-PUSH | Same as TP-EDITOR-TYPE-DURING-SYNC for the 5-second open-note push. |

@@ -626,10 +626,10 @@ describe('synchronizationInner integration', () => {
 		plugin.taskModificationDetector.checkFileForModifications.mockClear();
 		const second = await world.service.synchronizationInner(false, 'manual');
 		expect(second.ok).toBe(true);
-		// pushLocalEditsFirst calls with the path only. syncFiles still walks registered notes.
+		// Manual sync pre-pull re-scans every in-scope registered note (BUG-COMMENT-MANUAL-PRE-PULL).
 		const pushCalls = plugin.taskModificationDetector.checkFileForModifications.mock.calls
 			.filter((call: unknown[]) => call.length === 1);
-		expect(pushCalls).toEqual([]);
+		expect(pushCalls.map((c: unknown[]) => c[0])).toEqual(['notes/wrote.md']);
 	});
 
 	it('TP-COMMENT-TT-DELETE removes a TickTick-deleted comment and the next sync writes nothing', async () => {
