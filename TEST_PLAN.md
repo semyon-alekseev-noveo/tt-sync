@@ -636,6 +636,7 @@ Automated: `pushLocalPaths.test.ts` (`BUG-COMMENT-ACTIVE-NOTE`).
 | BUG-COMMENT-TT-AHEAD-NO-DELETE | pass | Agent 2026-10-21 **2.0.63**: MCP added `pilot-tt-second-comment` on `6ad83d…`; manual sync; both TT comments remained. `abyssCommentSync.test.ts`. |
 | BUG-COMMENT-BOTH-WAYS | not run | **2.0.64**: vault has `comment 2`/`comment 3` not in TT while TT has comments not yet in vault — one **Synchronize** must `addTaskComment` for vault-only keys **and** pull TT-only keys (`vaultCommentBehind.test.ts`). Pilot: `task-11-16` / `2026-10-19.md`. |
 | BUG-COMMENT-PUSH-NO-ID | not run | **2.0.65**: unwrap POST `/comment` id; push plain comment text; stale multi-map must not block push (`addTaskCommentParse.test.ts`, `commentSyncMatch.test.ts`). Pilot: `task-11-16` → TT Comments include `comment 2`–`5`. |
+| BUG-COMMENT-PULL-DOUBLE-STAMP | not run | **2.0.66**: TT `title` with embedded ISO must pull as `YYYY-MM-DD HH:MM: plainText` only (`abyssCommentSync.test.ts`). Pilot: no `14:46: 2026-10-21T12:09:07…` bullets after sync. |
 
 ### BUG-COMMENT-NO-MASS-DELETE — new vault comment must not wipe TickTick
 

@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-21 07:59 UTC
+
+- Context: Pilot after **2.0.65**: `task-11-16` comments partly in TT but Obsidian showed `14:46: 2026-10-21T12:09:07+07:00: comment 2` duplicates; `2026-10-21.md` / `test-11-12` vault `коммент 1` not in TT.
+- Target: **BUG-COMMENT-PULL-DOUBLE-STAMP** — pull must not stack vault stamp on ISO text already in API `title`.
+- Actions log: `formatApiCommentAsAbyssLines` uses `commentBodyWithoutStamp` before `createdTime` stamp; test added. Bump **2.0.66**.
+- Validation: `npx vitest run` → **666 passed**; `npm run build` ok.
+- Problems: `коммент 1` on `6ad83bc…` — **open** until post-**2.0.66** manual sync; `- > коммент 6` is description not Comments API.
+- To Be Done: Tag **2.0.66**; pilot sync both notes.
+- References: `src/abyssCommentSync.ts`, `CHANGELOG.md`
+
 ### Iteration 2026-10-21 07:50 UTC
 
 - Context: Pilot **2.0.64**: manual sync logged **27** `addTaskComment` HTTP calls but `task-11-16` still had only two TickTick Comments; vault had `comment 2`–`comment 5`.

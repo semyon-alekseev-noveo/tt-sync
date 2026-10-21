@@ -64,8 +64,10 @@ export function formatApiCommentAsAbyssLines(comment: ITaskComment, indent: stri
 	const body = (comment.title ?? '').replace(/\r/g, '');
 	const lines = body.split('\n');
 	const stamp = comment.createdTime ? formatVaultCommentStamp(comment.createdTime) : '';
-	const firstBody = lines[0] ?? '';
-	const bullet = stamp && !firstBody.startsWith(stamp) ? `${stamp}: ${firstBody}` : firstBody || stamp;
+	const plainFirst = commentBodyWithoutStamp(lines[0] ?? '');
+	const bullet = plainFirst
+		? (stamp ? `${stamp}: ${plainFirst}` : plainFirst)
+		: stamp;
 	const out = [`${indent}- ${bullet}`];
 	for (let i = 1; i < lines.length; i++) {
 		out.push(`${indent}  ${lines[i]}`);

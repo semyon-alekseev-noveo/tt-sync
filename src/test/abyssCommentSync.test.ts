@@ -55,6 +55,20 @@ describe('abyssCommentSync', () => {
 		expect(lines[1]).toBe('\t  world');
 	});
 
+	it('BUG-COMMENT-PULL-DOUBLE-STAMP strips ISO prefix before vault stamp on pull', () => {
+		const lines = formatApiCommentAsAbyssLines(
+			{
+				id: 'c1',
+				title: '2026-10-21T12:09:07+07:00: comment 2',
+				createdTime: '2026-10-21T07:46:14+0000',
+			},
+			'\t',
+		);
+		expect(lines[0]).not.toContain('T12:09:07');
+		expect(lines[0]).toMatch(/comment 2$/);
+		expect(lines[0]).toMatch(/^\t- \d{4}-\d{2}-\d{2} \d{2}:\d{2}: comment 2$/);
+	});
+
 	it('migrates legacy Comments block from content', () => {
 		const { description, legacyBodies } = migrateLegacyCommentsInContent(
 			'desc\n\nComments:\n2026-10-14 09:00: old',
