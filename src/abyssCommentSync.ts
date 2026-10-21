@@ -4,8 +4,11 @@ import {
 	COMMENTS_HEADER,
 	abyssDescriptionToNote,
 	abyssLinesToNote,
+	commentBodyWithoutStamp,
 	commentFingerprint,
 	extractAbyssCommentThreads,
+	type AbyssCommentThread,
+	normalizedCommentKey,
 	stripLegacyCommentsBlock,
 } from '@/abyssFormat';
 import {
@@ -15,20 +18,41 @@ import {
 	upsertCommentMap,
 } from '@/db/taskCommentMaps';
 import { getSettings } from '@/settings';
+import { commentSetsEquivalentByNormalizedKey, planCommentSync } from '@/sync/comments';
 import { deletionConfirmMode } from '@/sync/massDeleteGuard';
 import log from '@/utils/logger';
 
-/** True when the vault's comment threads and the TickTick Comments list are not the same set. */
+/** True when vault and TickTick comment sets differ by normalized content keys. */
 export function apiCommentsDifferFromVault(taskLines: string[] | undefined, remote: { title?: string }[]): boolean {
-	const local = extractAbyssCommentThreads(taskLines ?? []).map(t => t.fingerprint).sort();
-	const api = remote.map(c => commentFingerprint(c.title ?? '')).filter(fp => fp.length > 0).sort();
-	if (local.length !== api.length) return true;
-	return local.some((fp, i) => fp !== api[i]);
+	return !commentSetsEquivalentByNormalizedKey(taskLines ?? [], remote);
 }
 
 export function useAbyssCommentsApi(): boolean {
 	const s = getSettings();
 	return !!(s.syncNotes && s.abyssTasksFormat && s.syncAbyssCommentsViaApi);
+}
+
+function mapFingerprintForThread(thread: AbyssCommentThread): string {
+	return normalizedCommentKey(thread.body) || thread.fingerprint;
+}
+
+function mapFingerprintForRemoteTitle(title: string): string {
+	return normalizedCommentKey(title) || commentFingerprint(title);
+}
+
+/** True when a Dexie map still matches a vault comment thread (stamp vs plain TT title). */
+export function vaultStillHasMappedComment(
+	map: { fingerprint: string; body: string },
+	threads: AbyssCommentThread[],
+): boolean {
+	const mapKey = normalizedCommentKey(map.body) || map.fingerprint;
+	for (const t of threads) {
+		if (mapFingerprintForThread(t) === mapKey) return true;
+		if (commentFingerprint(t.body) === commentFingerprint(map.body)) return true;
+		const plain = commentBodyWithoutStamp(t.body);
+		if (map.body && (plain === map.body || normalizedCommentKey(plain) === mapKey)) return true;
+	}
+	return false;
 }
 
 export function formatApiCommentAsAbyssLines(comment: ITaskComment, indent: string): string[] {
@@ -73,9 +97,8 @@ export async function syncAbyssCommentsToTickTick(
 	if (!api || !useAbyssCommentsApi() || !taskId || !projectId) return false;
 
 	const threads = extractAbyssCommentThreads(taskLines);
-	const maps = await listCommentMapsForTask(taskId);
+	let maps = await listCommentMapsForTask(taskId);
 	const mapByFp = new Map(maps.map(m => [m.fingerprint, m]));
-	const mapByTtId = new Map(maps.map(m => [m.ticktickCommentId, m]));
 
 	let changed = false;
 
@@ -83,7 +106,7 @@ export async function syncAbyssCommentsToTickTick(
 		const { legacyBodies } = migrateLegacyCommentsInContent(legacyContent);
 		for (const line of legacyBodies) {
 			const body = line.replace(/^\s*-\s*/, '');
-			const fp = commentFingerprint(body);
+			const fp = mapFingerprintForRemoteTitle(body);
 			if (!mapByFp.has(fp) && body) {
 				const created = await api.addTaskComment(projectId, taskId, body);
 				if (created?.id) {
@@ -103,70 +126,74 @@ export async function syncAbyssCommentsToTickTick(
 
 	const remote = await api.getTaskComments(projectId, taskId);
 	const remoteIds = new Set(remote.map(c => c.id));
+	maps = await listCommentMapsForTask(taskId);
+	const plan = planCommentSync(taskLines, remote, maps);
 
-	for (const thread of threads) {
-		const existing = mapByFp.get(thread.fingerprint);
-		if (!existing) {
-			const created = await api.addTaskComment(projectId, taskId, thread.body);
-			if (created?.id) {
-				await upsertCommentMap({
-					id: commentMapId(taskId, thread.fingerprint),
-					taskId,
-					projectId,
-					fingerprint: thread.fingerprint,
-					ticktickCommentId: created.id,
-					body: thread.body,
-				});
-				changed = true;
-			}
-			continue;
-		}
-		if (existing.body !== thread.body) {
-			if (deletionConfirmMode() === 'skip') continue;
-			await api.deleteTaskComment(projectId, taskId, existing.ticktickCommentId);
-			const created = await api.addTaskComment(projectId, taskId, thread.body);
-			if (created?.id) {
-				await deleteCommentMap(existing.id);
-				await upsertCommentMap({
-					id: commentMapId(taskId, thread.fingerprint),
-					taskId,
-					projectId,
-					fingerprint: thread.fingerprint,
-					ticktickCommentId: created.id,
-					body: thread.body,
-				});
-				changed = true;
-			}
-		}
+	for (const r of plan.remoteOnly) {
+		const fp = mapFingerprintForRemoteTitle(r.comment.title ?? '');
+		await upsertCommentMap({
+			id: commentMapId(taskId, fp),
+			taskId,
+			projectId,
+			fingerprint: fp,
+			ticktickCommentId: r.comment.id,
+			body: r.comment.title ?? '',
+		});
+		changed = true;
 	}
 
-	const localFps = new Set(threads.map(t => t.fingerprint));
-	for (const m of maps) {
-		if (!localFps.has(m.fingerprint)) {
-			if (deletionConfirmMode() === 'skip') continue;
-			if (remoteIds.has(m.ticktickCommentId)) {
-				await api.deleteTaskComment(projectId, taskId, m.ticktickCommentId);
-			}
-			await deleteCommentMap(m.id);
+	for (const v of plan.vaultOnly) {
+		const thread = v.thread;
+		const fp = mapFingerprintForThread(thread);
+		const created = await api.addTaskComment(projectId, taskId, thread.body);
+		if (created?.id) {
+			await upsertCommentMap({
+				id: commentMapId(taskId, fp),
+				taskId,
+				projectId,
+				fingerprint: fp,
+				ticktickCommentId: created.id,
+				body: thread.body,
+			});
 			changed = true;
 		}
 	}
 
-	for (const c of remote) {
-		if (!mapByTtId.has(c.id)) {
-			const fp = commentFingerprint(c.title ?? '');
-			if (!localFps.has(fp)) {
-				// TickTick-only comment; map for pull stability
-				await upsertCommentMap({
-					id: commentMapId(taskId, fp),
-					taskId,
-					projectId,
-					fingerprint: fp,
-					ticktickCommentId: c.id,
-					body: c.title ?? '',
-				});
-			}
+	for (const link of plan.linked) {
+		if (!link.vault || !link.remote) continue;
+		const vaultBody = link.vault.thread.body;
+		const remoteTitle = link.remote.comment.title ?? '';
+		if (normalizedCommentKey(vaultBody) === normalizedCommentKey(remoteTitle)) continue;
+		if (vaultBody === remoteTitle) continue;
+		const existing = link.map;
+		if (!existing) continue;
+		if (deletionConfirmMode() === 'skip') continue;
+		await api.deleteTaskComment(projectId, taskId, existing.ticktickCommentId);
+		const created = await api.addTaskComment(projectId, taskId, vaultBody);
+		if (created?.id) {
+			const fp = mapFingerprintForThread(link.vault.thread);
+			await deleteCommentMap(existing.id);
+			await upsertCommentMap({
+				id: commentMapId(taskId, fp),
+				taskId,
+				projectId,
+				fingerprint: fp,
+				ticktickCommentId: created.id,
+				body: vaultBody,
+			});
+			changed = true;
 		}
+	}
+
+	for (const m of maps) {
+		if (vaultStillHasMappedComment(m, threads)) continue;
+		if (threads.length === 0) continue;
+		if (deletionConfirmMode() === 'skip') continue;
+		if (remoteIds.has(m.ticktickCommentId)) {
+			await api.deleteTaskComment(projectId, taskId, m.ticktickCommentId);
+		}
+		await deleteCommentMap(m.id);
+		changed = true;
 	}
 
 	return changed;

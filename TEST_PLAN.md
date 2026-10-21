@@ -613,6 +613,22 @@ Expected: the line is visible in the editor. `cat` on the file path matches what
 
 Automated: `staleFileWrite.test.ts` (`TP-EMPTY-EDITOR-DISK`).
 
+### BUG-COMMENT-ACTIVE-NOTE — comments on the open note
+
+1. Open an in-scope note with a task that has `ticktick_id`.
+2. Add a child comment bullet (`- 2026-…: text` or Abyss stamp line). Stay on that note.
+3. **Synchronize** once.
+
+Expected: comment appears in TickTick **Comments** (NOTE-L3b / `syncAbyssCommentsViaApi`). Vault comment lines stay.
+
+Automated: `pushLocalPaths.test.ts` (`BUG-COMMENT-ACTIVE-NOTE`).
+
+| ID | Pilot status | Evidence |
+|----|----------------|----------|
+| BUG-COMMENT-ACTIVE-NOTE | not run | Pilot 2026-10-21 `2026-10-21.md` comment bullets; journal lacked obs→tt comment pushes before fix. |
+| BUG-COMMENT-NO-TT-WIPE | not run | Pilot: sync cleared all TT Comments; fixed stamp/plain fingerprint + no wipe when vault has no comment lines. `abyssCommentSync.test.ts`. |
+| BUG-COMMENT-KEY-EQUIV | not run | `commentSyncModel.test.ts`; `apiCommentsDifferFromVault` + push via `planCommentSync`. |
+
 ### BUG-DEFERRED-ID-PHASE2-DELETE — create on open note, no false deletion
 
 1. Open a daily/inbox note with the caret on a new `- [ ]` line (no `ticktick_id`).

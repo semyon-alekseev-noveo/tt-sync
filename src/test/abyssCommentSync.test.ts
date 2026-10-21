@@ -1,7 +1,9 @@
 import { describe, expect, it, vi } from 'vitest';
 
+const listMaps = vi.fn().mockResolvedValue([]);
+
 vi.mock('@/db/taskCommentMaps', () => ({
-	listCommentMapsForTask: vi.fn().mockResolvedValue([]),
+	listCommentMapsForTask: (...args: unknown[]) => listMaps(...args),
 	upsertCommentMap: vi.fn().mockResolvedValue(undefined),
 	deleteCommentMap: vi.fn().mockResolvedValue(undefined),
 	commentMapId: (taskId: string, fp: string) => `${taskId}:${fp}`,
@@ -65,6 +67,51 @@ describe('abyssCommentSync', () => {
 	it('syncAbyssCommentsViaApi defaults on in fork settings', () => {
 		const s = getSettings() as { syncAbyssCommentsViaApi?: boolean };
 		expect(s.syncAbyssCommentsViaApi).toBe(true);
+	});
+
+	it('BUG-COMMENT-NO-TT-WIPE: does not delete TickTick comments when vault stamp differs from map body', async () => {
+		const S = getSettings() as Record<string, unknown>;
+		Object.assign(S, { syncNotes: true, abyssTasksFormat: true, syncAbyssCommentsViaApi: true });
+		listMaps.mockResolvedValueOnce([
+			{
+				id: 'task1:comment 1',
+				taskId: 'task1',
+				projectId: 'proj1',
+				fingerprint: 'comment 1',
+				ticktickCommentId: 'tt-c1',
+				body: 'comment 1',
+			},
+		]);
+		const del = vi.fn();
+		const api = {
+			getTaskComments: vi.fn().mockResolvedValue([{ id: 'tt-c1', title: 'comment 1' }]),
+			addTaskComment: vi.fn(),
+			deleteTaskComment: del,
+		} as unknown as TickTickRestAPI;
+		const lines = ['\t- 2026-10-21T11:14:22+07:00: comment 1'];
+		await syncAbyssCommentsToTickTick(api, 'task1', 'proj1', lines);
+		expect(del).not.toHaveBeenCalled();
+	});
+
+	it('BUG-COMMENT-NO-TT-WIPE: preserves TickTick-only comments when vault has no comment bullets', async () => {
+		listMaps.mockResolvedValueOnce([
+			{
+				id: 'task1:only on tt',
+				taskId: 'task1',
+				projectId: 'proj1',
+				fingerprint: 'only on tt',
+				ticktickCommentId: 'tt-only',
+				body: 'only on tt',
+			},
+		]);
+		const del = vi.fn();
+		const api = {
+			getTaskComments: vi.fn().mockResolvedValue([{ id: 'tt-only', title: 'only on tt' }]),
+			addTaskComment: vi.fn(),
+			deleteTaskComment: del,
+		} as unknown as TickTickRestAPI;
+		await syncAbyssCommentsToTickTick(api, 'task1', 'proj1', ['\t- > description only']);
+		expect(del).not.toHaveBeenCalled();
 	});
 
 	it('NOTE-C1: pushes comment threads via API (BUG-COMMENT-1)', async () => {

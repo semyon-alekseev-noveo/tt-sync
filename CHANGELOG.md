@@ -1,5 +1,25 @@
 # Changelog
 
+### Iteration 2026-10-21 04:45 UTC
+
+- Context: Owner asked for comment match model (Abyss stamp vs TickTick plain title) and failing tests before wiring push/pull.
+- Target: `src/sync/comments/` + `docs/COMMENT_SYNC_MODEL.md`; no full wire to `apiCommentsDifferFromVault` yet.
+- Actions log: `normalizedCommentKey`, `planCommentSync`, `commentSetsEquivalentByNormalizedKey`; tests `commentSyncKeys`, `commentSyncMatch`, `commentSyncModel` (`it.fails` wire test). Case **BUG-COMMENT-KEY-EQUIV**. Prior local fixes: **BUG-COMMENT-NO-TT-WIPE**, **BUG-COMMENT-ACTIVE-NOTE**, `preparePhase`, `pushLocalPaths`.
+- Validation: `npx vitest run` → **648 passed**, **1 expected fail** (`commentSyncModel.test.ts` wire gap).
+- Problems: Push/pull still use legacy fingerprints in places; pilot comments not re-validated.
+- To Be Done: Wire `apiCommentsDifferFromVault` + `syncAbyssCommentsToTickTick` to `planCommentSync`; release **2.0.58**; continue sync phase extract.
+- References: `docs/COMMENT_SYNC_MODEL.md`, `docs/SYNC_MODULARIZATION.md`, `CHANGELOG.md`
+
+### Iteration 2026-10-21 04:10 UTC
+
+- Context: Owner asked for modular sync plan after comparing with obsidian-todoist-plugin; reduce `TickTickService` god-object risk (`TECH-CIRC-1`).
+- Target: Phase 0 scaffolding only — no behavior change to sync phases.
+- Actions log: `src/sync/SyncRunContext.ts`; `src/sync/phases/types.ts` stub; `docs/SYNC_MODULARIZATION.md` (module map, PR 1 file list); `synchronizationInner` uses `createSyncRunContext` for pending-marker reconcile + debug `syncId`. `syncRunContext.test.ts`. `PROJECT_STATE.md` updated.
+- Validation: `npx vitest run` → 89 files, **637 passed**; `npm run build` ok.
+- Problems: Phase 1 extract not started; `guardedPull` / `locallyEdited` still on `TickTickService`.
+- To Be Done: PR 1 per `docs/SYNC_MODULARIZATION.md`.
+- References: `docs/SYNC_MODULARIZATION.md`, `PROJECT_STATE.md`, `CHANGELOG.md`
+
 ### Iteration 2026-10-21 03:58 UTC
 
 - Context: Pilot repro **BUG-DEFERRED-ID-PHASE2-DELETE** on Thinkpad-tts-test (`00 Inbox/2026-10-21.md`, `test-10-35`) on **2.0.56**: TickTick task created while `%%[ticktick_id:: …]%%` deferred (caret on line) → false Phase 2 deletion prompt.
