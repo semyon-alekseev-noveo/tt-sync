@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-21 07:06 UTC
+
+- Context: Pilot on **2.0.63**: TickTick comments pulled into Obsidian, but vault `comment 2` / `comment 3` did not reach TickTick after **Synchronize**.
+- Target: **BUG-COMMENT-BOTH-WAYS** — reconcile must push vault-ahead threads before (or alongside) TT-ahead pull, not TT-ahead-only `behindComments`.
+- Actions log: `VaultSyncCoordinator.vaultLineBehindTask` — push when `vaultAhead`, then still set `behindComments` when `remoteAhead`; test in `vaultCommentBehind.test.ts`. Bump **2.0.64**.
+- Validation: `npx vitest run` → **659 passed**; `npm run build` ok.
+- Problems: Pilot **BUG-COMMENT-BOTH-WAYS** — **not run** (deploy **2.0.64** to pilot, reload, sync `2026-10-19.md`).
+- To Be Done: Tag **2.0.64**; pilot verify MCP Comments include `comment 2` and `comment 3`.
+- References: `src/services/VaultSyncCoordinator.ts`, `ABYSS_FIRST_CASES.md`, `CHANGELOG.md`
+
 ### Iteration 2026-10-21 06:42 UTC
 
 - Context: Pilot on **2.0.62**: Abyss comment did not reach TT; second comment created in TickTick disappeared after **Synchronize**.

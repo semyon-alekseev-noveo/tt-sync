@@ -4,7 +4,7 @@
 **Audience:** Product owner / decision maker  
 **Repo:** `tickticksync` branch `abyss-mapping`  
 **Test vault:** `<pilot-vault>` (copy only; live vault `<live-vault>` untouched)  
-**Install:** BRAT → `https://github.com/semyon-alekseev-noveo/tt-sync` track **latest release** (**2.0.63**, tag `2.0.63`); plugin id **`tickticksync-abyss`** — `docs/BRAT_INSTALL.md`. Preset: `00 Inbox/TTS-data-preset.json`.
+**Install:** BRAT → `https://github.com/semyon-alekseev-noveo/tt-sync` track **latest release** (**2.0.64**, tag `2.0.64`); plugin id **`tickticksync-abyss`** — `docs/BRAT_INSTALL.md`. Preset: `00 Inbox/TTS-data-preset.json`.
 
 История изменений — только в `CHANGELOG.md`; здесь — снимок для PO.
 
@@ -25,6 +25,7 @@
 
 ## Validation
 
+- Релиз **2.0.64** (2026-10-21): **BUG-COMMENT-BOTH-WAYS** — при расхождении с обеих сторон reconcile пушит vault-only комменты в TT и не пропускает pull TT-only. Vitest **659**.
 - Релиз **2.0.63** (2026-10-21): **BUG-COMMENT-TT-AHEAD-NO-DELETE** — не удалять TT Comments, которых ещё нет в vault (push до pull). Включает **2.0.61**/**2.0.62**. Vitest **658**.
 - Релиз **2.0.62** (2026-10-21): **BUG-COMMENT-STALE-MAPS** — после массового wipe в TT снова пушит несколько vault-комментов со stale maps; reconcile не блокируется guard `skip` для vault-ahead. Vitest **657**. Пилот — **partial** (`TEST_PLAN.md`).
 - Релиз **2.0.61** (2026-10-21): **BUG-COMMENT-NO-MASS-DELETE** — push path no longer deletes mapped TT comments when API list is empty or when adding a new vault bullet. Vitest **655**.

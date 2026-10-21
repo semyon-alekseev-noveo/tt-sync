@@ -634,6 +634,7 @@ Automated: `pushLocalPaths.test.ts` (`BUG-COMMENT-ACTIVE-NOTE`).
 | BUG-COMMENT-NO-MASS-DELETE | not run | **2.0.61**: add 3rd Abyss comment on `2026-10-19.md` / `6ad83d…` — existing TT Comments must remain; journal must not show `deleteTaskComment` storm. `abyssCommentSync.test.ts`. |
 | BUG-COMMENT-STALE-MAPS | partial | Agent 2026-10-21: Obsidian CLI manual sync → `write-trace` `vault-comments-ahead` for `6ad83d…`; MCP Comments not fully repopulated from vault (probe via MCP only). **2.0.62** deployed to pilot plugin folder. |
 | BUG-COMMENT-TT-AHEAD-NO-DELETE | pass | Agent 2026-10-21 **2.0.63**: MCP added `pilot-tt-second-comment` on `6ad83d…`; manual sync; both TT comments remained. `abyssCommentSync.test.ts`. |
+| BUG-COMMENT-BOTH-WAYS | not run | **2.0.64**: vault has `comment 2`/`comment 3` not in TT while TT has comments not yet in vault — one **Synchronize** must `addTaskComment` for vault-only keys **and** pull TT-only keys (`vaultCommentBehind.test.ts`). Pilot: `task-11-16` / `2026-10-19.md`. |
 
 ### BUG-COMMENT-NO-MASS-DELETE — new vault comment must not wipe TickTick
 

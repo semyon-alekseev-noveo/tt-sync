@@ -182,4 +182,86 @@ describe('BUG-PULL-COMMENT-STALE', () => {
 		expect(getTaskComments).toHaveBeenCalled();
 		expect(addTaskComment).toHaveBeenCalled();
 	});
+
+	it('BUG-COMMENT-BOTH-WAYS pushes vault-ahead then marks behindComments when TickTick also has extra comments', async () => {
+		updateSettings({
+			syncNotes: true,
+			abyssTasksFormat: true,
+			syncAbyssCommentsViaApi: true,
+			syncScopeFolders: ['00 Inbox/'],
+			tagMappings: [],
+			tagListMappings: [],
+		}, { persist: false });
+
+		const taskId = '6ad83d003e30f4429d749e0a';
+		const file = new NoteFile('00 Inbox/2026-10-19.md');
+		const text = [
+			`- [ ] task-11-16 #obsidian #note/2026-10-19 #inbox %%[ticktick_id:: ${taskId}]%%`,
+			'\t- 2026-10-21T11:25:21+07:00: comment 1',
+			'\t- 2026-10-21T12:09:07+07:00: comment 2',
+			'\t- 2026-10-21T13:58:06+07:00: comment 3',
+		].join('\n');
+		const getTaskComments = vi.fn().mockResolvedValue([
+			{ id: 'c1', title: 'comment 1' },
+			{ id: 'c2', title: 'pilot-tt-second-comment' },
+		]);
+		const addTaskComment = vi.fn().mockResolvedValue({ id: 'c-new', title: 'comment 2' });
+		const { TaskParser } = await import('@/taskParser');
+		const { abyssLinesToNote } = await import('@/abyssFormat');
+		const parser = new TaskParser({} as never, {} as never);
+		const taskLine = text.split('\n')[0];
+		const childLines = text.split('\n').slice(1);
+		const lineHash = await parser.getLineHash(taskLine + abyssLinesToNote(childLines));
+		const plugin = {
+			tickTickRestAPI: { getTaskComments, addTaskComment, deleteTaskComment: vi.fn() },
+			taskParser: parser,
+			projectScheme: { isParentTask: () => false },
+			fileOperation: { readFileContent: async () => text },
+			dateMan: {
+				parseDates: () => ({}),
+				stripDatesFromLine: (s: string) => s,
+				formatDateToISO: () => '',
+				addDatesToLine: (s: string) => s,
+				areDatesChanged: () => false,
+				addDateHolderToTask: () => undefined,
+			},
+			fileTaskQueries: { getDefaultProjectIdForFilepath: async () => 'proj-1' },
+			taskRepository: {
+				loadTaskById: async () => ({
+					id: taskId,
+					projectId: 'proj-1',
+					title: 'task-11-16',
+					content: '',
+					lineHash,
+				}),
+			},
+		};
+		parser.plugin = plugin as never;
+		const app = {
+			metadataCache: { getFileCache: () => ({ listItems: [] }) },
+			vault: { getAbstractFileByPath: () => file, read: async () => text },
+		};
+		const coordinator = new VaultSyncCoordinator(app as never, plugin as never);
+		const behind = (coordinator as unknown as {
+			vaultLineBehindTask(task: unknown, path: string): Promise<{ behind: boolean; localEdit: boolean; reason: string }>;
+		}).vaultLineBehindTask.bind(coordinator);
+
+		const result = await behind({
+			id: taskId,
+			projectId: 'proj-1',
+			title: 'task-11-16',
+			content: '',
+			desc: '',
+			status: 0,
+			commentCount: 2,
+			lineHash,
+		}, file.path);
+		expect(addTaskComment).toHaveBeenCalled();
+		expect(result.behind).toBe(true);
+		expect(result.reason).toBe('behindComments');
+		expect(result.task._apiComments).toEqual([
+			{ id: 'c1', title: 'comment 1' },
+			{ id: 'c2', title: 'pilot-tt-second-comment' },
+		]);
+	});
 });

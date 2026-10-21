@@ -386,11 +386,10 @@ export class VaultSyncCoordinator {
 			try {
 				const comments = await this.plugin.tickTickRestAPI?.getTaskComments(remote.projectId, remote.id) ?? [];
 				if (apiCommentsDifferFromVault(taskRec.taskLines, comments)) {
-					if (remoteCommentKeysAheadOfVault(taskRec.taskLines ?? [], comments)) {
-						behind = true;
-						reason = 'behindComments';
-						Object.defineProperty(remote, '_apiComments', { value: comments, enumerable: false, configurable: true });
-					} else if (vaultCommentKeysAheadOfRemote(taskRec.taskLines ?? [], comments)) {
+					const remoteAhead = remoteCommentKeysAheadOfVault(taskRec.taskLines ?? [], comments);
+					const vaultAhead = vaultCommentKeysAheadOfRemote(taskRec.taskLines ?? [], comments);
+					let pushedVaultComments = false;
+					if (vaultAhead) {
 						const maps = await listCommentMapsForTask(remote.id);
 						if (vaultHasUnpushedCommentThreads(
 							taskRec.taskLines ?? [],
@@ -406,17 +405,24 @@ export class VaultSyncCoordinator {
 									taskRec.taskLines ?? [],
 									remote.content,
 								);
+								pushedVaultComments = true;
 							} catch (e) {
 								log.warn('vault-ahead comment push failed', task.id, e);
 							}
 							deferActiveFilePush(filePath);
-							return { behind: false, task: remote, localEdit: true, reason: 'vault-comments-ahead' };
 						}
-						if (deletionConfirmMode() !== 'skip') {
-							behind = true;
-							reason = 'behindComments';
-							Object.defineProperty(remote, '_apiComments', { value: comments, enumerable: false, configurable: true });
-						}
+					}
+					// BUG-COMMENT-BOTH-WAYS: TT-ahead must not skip vault-ahead push when both sides differ.
+					if (remoteAhead && deletionConfirmMode() !== 'skip') {
+						behind = true;
+						reason = 'behindComments';
+						Object.defineProperty(remote, '_apiComments', { value: comments, enumerable: false, configurable: true });
+					} else if (pushedVaultComments) {
+						return { behind: false, task: remote, localEdit: true, reason: 'vault-comments-ahead' };
+					} else if (vaultAhead && deletionConfirmMode() !== 'skip') {
+						behind = true;
+						reason = 'behindComments';
+						Object.defineProperty(remote, '_apiComments', { value: comments, enumerable: false, configurable: true });
 					}
 				}
 			} catch (e) {
