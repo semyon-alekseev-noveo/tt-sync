@@ -1,5 +1,25 @@
 # Changelog
 
+### Iteration 2026-10-21 05:05 UTC
+
+- Context: PR #9 merged into `abyss-mapping`; owner asked for release **2.0.58**.
+- Target: Tag **2.0.58** on `abyss-mapping`.
+- Actions log: Bump `package.json`, `manifest.json`, `versions.json` to **2.0.58**; `PO_STATUS.md` install baseline. Ships PR #9: normalized comment keys (`planCommentSync`, **BUG-COMMENT-KEY-EQUIV**), no TT comment wipe when vault has no bullets (**BUG-COMMENT-NO-TT-WIPE**), active note in pre-pull push (**BUG-COMMENT-ACTIVE-NOTE**), `SyncRunContext` / `preparePhase` scaffold.
+- Validation: `npx vitest run` → **93** files, **649 passed**; `npm run build` ok.
+- Problems: Pilot **NOTE-L3b** / comment cases in `TEST_PLAN.md` — **not run**.
+- To Be Done: `git push tt-sync 2.0.58`; BRAT **2.0.58** on Thinkpad-tts-test; pilot comment soak.
+- References: `docs/COMMENT_SYNC_MODEL.md`, `TEST_PLAN.md`, `PO_STATUS.md`, `CHANGELOG.md`
+
+### Iteration 2026-10-21 04:55 UTC
+
+- Context: Owner said go on PR B — wire comment sync model to push/pull equivalence checks.
+- Target: Branch `feat/comment-sync-wire` — **BUG-COMMENT-KEY-EQUIV** + modular scaffold + pilot comment fixes (merged as PR #9).
+- Actions log: Wire `apiCommentsDifferFromVault` and `syncAbyssCommentsToTickTick` to `planCommentSync` / `normalizedCommentKey`; `mergeAbyssBlock` TT-delete hints use normalized keys; `src/sync/comments/*`, `SyncRunContext`, `preparePhase`, `pushLocalPaths`.
+- Validation: `npx vitest run` → **93** files, **649 passed**; `npm run build` ok.
+- Problems: Pilot **NOTE-L3b** / **BUG-COMMENT-KEY-EQUIV** not run on Thinkpad-tts-test.
+- To Be Done: Release **2.0.58** (done in 05:05 iteration).
+- References: `docs/COMMENT_SYNC_MODEL.md`, `TEST_PLAN.md`, `CHANGELOG.md`
+
 ### Iteration 2026-10-21 04:45 UTC
 
 - Context: Owner asked for comment match model (Abyss stamp vs TickTick plain title) and failing tests before wiring push/pull.
