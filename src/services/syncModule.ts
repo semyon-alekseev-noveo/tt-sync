@@ -487,6 +487,7 @@ export class SyncMan {
 			const updatedLineText = await this.plugin.taskParser.convertTaskToLine(updatedTask, this.plugin.taskParser.getNumTabs(lineText));
 			fileMap.updateTask(updatedTask, updatedLineText);
 			await this.plugin.taskRepository.upsertTask(updatedTask, undefined, Date.now());
+			await this.plugin.taskRepository.markVaultInSync?.(updatedTask.id);
 		}
 		for (const idx of removeAt.sort((a, b) => b - a)) {
 			fileMap.removeLineAt(idx);

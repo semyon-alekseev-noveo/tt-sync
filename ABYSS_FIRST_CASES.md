@@ -45,6 +45,11 @@ Preconditions for every AF row: plugin `tickticksync-abyss`, manual sync, `fileL
 | TP-UNCOMPLETE-DURING-TYPE | Reopening a task clears that task line only, with the same rules as TP-COMPLETE-DURING-TYPE. |
 | TP-JOURNAL-EDITOR-PATCH | An open-note line patch is written to `.tickticksync/journal` before the editor changes. `before` and `after` are the buffer. A patch that does not land has no committed record. |
 | TP-UNDO-EDITOR-PATCH | Undo last sync, preview, and restore task version reverse that patch when the note is open and when it is closed. |
+| TP-NO-CARET-REWRITE | After the 5-second open-note push, typing a new version of that same line and waiting past the 2-second typing pause must not be overwritten by the next full sync. The editor line stays the typed text. No editor transaction rewrites that line. |
+| TP-ACTIVE-PUSH-DURING-SYNC | A 5-second open-note push that comes due while a sync is running is run after that sync, not dropped. A file saved during the sync is a local edit on the next sync. `lastVaultPushWallMs` is the start of the push phase. A file this plugin wrote is excluded by path and mtime. |
+| TP-NO-STALE-VIEW-READ | During a sync or a 5-second push, Obsidian's own `vault.read` is not replaced. A modify listener registered before the run reads the new disk text. |
+| TP-ABYSS-LOCAL-CHILD-KEEP | Rewriting an Abyss block keeps a description or comment the user edited locally and has not pushed. The previous TickTick comment does not reappear beside the edit. |
+| TP-TWO-LEAVES | A line patch for one file is applied to one editor. A second leaf showing that file is not patched again. |
 
 Unit tests cover parts of AF-1, AF-5, AF-8, comments, a failed pull, and PERF-INDEX / PERF-CACHE / PERF-COUNTERS. They do not replace the live gate.
 

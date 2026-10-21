@@ -42,6 +42,16 @@ interface SyncPerfRun {
 let current: SyncPerfRun | null = null;
 let lastReport: SyncPerfReport | null = null;
 let orphanBackupMs = 0;
+const phaseStack: string[] = [];
+
+/** Innermost `timePhase` name, for the write trace. */
+export function currentSyncPhase(): string | undefined {
+	return phaseStack[phaseStack.length - 1];
+}
+
+export function currentSyncTrigger(): SyncPerfTrigger | undefined {
+	return current?.trigger;
+}
 
 function emptyCounts(): SyncPerfCounts {
 	return {
@@ -103,13 +113,16 @@ export function resetSyncPerfForTests(): void {
 	current = null;
 	lastReport = null;
 	orphanBackupMs = 0;
+	phaseStack.length = 0;
 }
 
 export async function timePhase<T>(name: string, fn: () => Promise<T>): Promise<T> {
 	const t0 = performance.now();
+	phaseStack.push(name);
 	try {
 		return await fn();
 	} finally {
+		phaseStack.pop();
 		addPhaseMs(name, performance.now() - t0);
 	}
 }

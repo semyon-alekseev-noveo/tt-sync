@@ -1,6 +1,7 @@
 import { childBlocks, sortOrdersFromLines, reorderLinesBySortOrder } from '@/subtaskOrder';
-import { commitVaultText, readNoteForWrite } from '@/services/vaultWrite';
-import { editedSince } from '@/utils/editedSince';
+import { commitVaultText, editorsForFile, readNoteForWrite } from '@/services/vaultWrite';
+import { deferActiveFilePush, releaseDeferredActiveFilePushes } from '@/services/activeFilePush';
+import { editedSince, loadPluginWrites, pluginWriteMtimes } from '@/utils/editedSince';
 import { healTagListMappings } from '@/listMapping';
 import { idsPresentInVault, dedupeTaskIds } from '@/utils/vaultIdScan';
 import { shouldBackupToday } from '@/backupPolicy';
@@ -32,7 +33,7 @@ import { loadTasksFromCache, markTaskDeleted } from "@/db/tasks";
 import { getAllFiles, getFile, upsertFile } from "@/db/files";
 import type { IProject } from '@/api/types/Project';
 import { isPathInPushScope, resolveProjectsList } from '@/syncScope';
-import { beginFileRun } from '@/sync/fileRunCache';
+import { beginFileRun, syncCachedRead, syncRead } from '@/sync/fileRunCache';
 import { finishSyncPerf, formatSyncPerf, formatSyncPerfShort, observeSyncApi, startSyncPerf, timePhase } from '@/sync/perf';
 
 const LOCK_TASKS = 'LOCK_TASKS';
@@ -126,15 +127,17 @@ export class TickTickService {
 
 	private locallyEdited = new Set<string>();
 	private guardedPull: GuardedPull | undefined;
-	async pushLocalEditsFirst() {
+	async pushLocalEditsFirst(since?: number) {
 		this.locallyEdited = new Set();
-		const meta = await db.meta.get("sync");
+		const meta = since == null ? await db.meta.get("sync") : undefined;
+		if (meta?.pluginWriteMtimes) loadPluginWrites(meta.pluginWriteMtimes);
 		// BUG-COMMENT-NO-PUSH: vault mtime must compare to last push time, not TickTick checkpoint
 		// (checkpoint often exceeds file mtime after pull, so comment-only edits were skipped).
-		const last = meta?.lastVaultPushWallMs ?? 0;
+		const last = since ?? meta?.lastVaultPushWallMs ?? 0;
 		const files = await this.plugin.fileMetadataService?.getAllFileMetadata();
-		this.locallyEdited = new Set(editedSince(this.plugin.app, Object.keys(files ?? {}), last));
-		for (const path of editedSince(this.plugin.app, Object.keys(files ?? {}), last)) {
+		const edited = editedSince(this.plugin.app, Object.keys(files ?? {}), last);
+		this.locallyEdited = new Set(edited);
+		for (const path of edited) {
 			try { await this.plugin.taskModificationDetector.checkFileForModifications(path); }
 			catch (e) { log.warn('pre-pull push failed', path, e); }
 			try { await this.pushSubtaskOrder(path); } catch (e) { log.warn('subtask order push failed', path, e); }
@@ -145,7 +148,7 @@ export class TickTickService {
 	async pushSubtaskOrder(path: string) {
 		const f = this.plugin.app.vault.getAbstractFileByPath(path);
 		if (!(f instanceof TFile)) return;
-		const lines = (await this.plugin.app.vault.read(f)).split('\n');
+		const lines = (await syncRead(this.plugin.app.vault, f)).split('\n');
 		const upd: { id: string; projectId: string; sortOrder: number }[] = [];
 		for (const [, blocks] of childBlocks(lines)) {
 			const so: Record<string, number | undefined> = {}; const pid: Record<string, string> = {};
@@ -183,13 +186,17 @@ export class TickTickService {
 
 	/** Push settled edits in an open note. Skips lines the caller marks (unfinished caret) and lines with no TickTick id. */
 	async pushSettledActiveFile(filepath: string, skipLines: number[] = []): Promise<void> {
-		if (!filepath || this.plugin.syncRunning || !isPathInPushScope(filepath)) return;
+		if (!filepath || !isPathInPushScope(filepath)) return;
+		if (this.plugin.syncRunning) {
+			deferActiveFilePush(filepath);
+			return;
+		}
 		const perfRun = startSyncPerf({ trigger: 'active-file', fullSync: false });
-		let endFiles = () => undefined;
-		let endApi = () => undefined;
+		let endFiles: () => void = () => undefined;
+		let endApi: () => void = () => undefined;
 		let ok = true;
 		try {
-			endFiles = beginFileRun(this.plugin.app.vault);
+			endFiles = beginFileRun(this.plugin.app.vault, { editorOpen: (path) => editorsForFile(this.plugin.app, path).length > 0 });
 			endApi = observeSyncApi(this.plugin.tickTickRestAPI);
 			const run = async () => {
 				await doWithLock(LOCK_TASKS, async () => {
@@ -221,14 +228,14 @@ export class TickTickService {
 		const perfRun = startSyncPerf({ trigger, fullSync });
 		const ui = this.plugin.syncActivity;
 		ui.beginFull(trigger);
-		let endFiles = () => undefined;
-		let endApi = () => undefined;
+		let endFiles: () => void = () => undefined;
+		let endApi: () => void = () => undefined;
 		let syncOk = true;
 		let errorMessage = '';
 		clearGuardRun();
 		this.guardedPull = undefined;
 		try {
-			endFiles = beginFileRun(this.plugin.app.vault);
+			endFiles = beginFileRun(this.plugin.app.vault, { editorOpen: (path) => editorsForFile(this.plugin.app, path).length > 0 });
 			endApi = observeSyncApi(this.plugin.tickTickRestAPI);
 
 			log.debug(`TickTick scheduled synchronization task started at ${new Date().toLocaleString()}`);
@@ -275,6 +282,13 @@ export class TickTickService {
 						ui.setFullStep('Scanning vault files…');
 						await this.ensureVaultFilesRegistered();
 					});
+					// Marker at the start of this sync's vault push. The deletion guard prefetches
+					// getUpdatedTasks before that push, so the stamp is taken first. This run still
+					// compares files to the previous stamp. Plugin writes are excluded by mtime.
+					const pushMeta = await db.meta.get('sync');
+					const pushSince = pushMeta?.lastVaultPushWallMs ?? 0;
+					loadPluginWrites(pushMeta?.pluginWriteMtimes);
+					await db.meta.update('sync', { lastVaultPushWallMs: Date.now() });
 					// Plan deletions in both directions before any of them are applied.
 					await timePhase('deletionGuard', async () => {
 						ui.setFullStep('Checking deletions…');
@@ -285,7 +299,7 @@ export class TickTickService {
 					// edited outside the editor, where no editor-change check fires).
 					await timePhase('push', async () => {
 						ui.setFullStep('Pushing vault changes to TickTick…');
-						await this.pushLocalEditsFirst();
+						await this.pushLocalEditsFirst(pushSince);
 					});
 					await timePhase('pull', async () => {
 						ui.setFullStep(fullSync ? 'Full sync from TickTick…' : 'Pulling updates from TickTick…');
@@ -332,8 +346,6 @@ export class TickTickService {
 				ui.setFullStep('Syncing project notes…');
 				await this.syncFiles(false);
 			});
-			// After every vault write in this run, so a file we just wrote is not a local edit next time.
-			await db.meta.update('sync', { lastVaultPushWallMs: Date.now() });
 		} catch (error) {
 			syncOk = false;
 			errorMessage = error instanceof Error ? error.message : String(error);
@@ -349,7 +361,10 @@ export class TickTickService {
 			ui.endFull(syncOk, formatSyncPerfShort(report));
 			// NEW: Clear TaskCache
 			this.plugin.taskCache?.clear();
+			try { await db.meta.update('sync', { pluginWriteMtimes: pluginWriteMtimes() }); }
+			catch (e) { log.warn('plugin write map save failed', e); }
 			this.plugin.syncRunning = false;
+			releaseDeferredActiveFilePushes();
 			try { await this.plugin.applyExternalSettings(); } catch (e) { log.error('Applying external settings failed', e); }
 			const endTime = performance.now();
 			log.debug(`TickTick scheduled synchronization task completed at ${new Date().toLocaleString()}, took ${(endTime - startTime).toFixed(2)} ms`);
@@ -1013,7 +1028,7 @@ export class TickTickService {
 		try {
 			const mdFiles = this.plugin.app.vault.getMarkdownFiles();
 			const texts: { path: string; text: string }[] = [];
-			for (const f of mdFiles) { const text = await this.plugin.app.vault.cachedRead(f); if (text.includes('ticktick_id::')) texts.push({ path: f.path, text }); }
+			for (const f of mdFiles) { const text = await syncCachedRead(this.plugin.app.vault, f); if (text.includes('ticktick_id::')) texts.push({ path: f.path, text }); }
 			const owners = new Map<string, string>();
 			for (const lt of await db.tasks.toArray()) if (lt.file && !lt.deleted) owners.set(lt.task?.id ?? lt.taskId, lt.file);
 			for (const c of dedupeTaskIds(texts, id => owners.get(id))) {

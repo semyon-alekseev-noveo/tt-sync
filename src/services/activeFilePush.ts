@@ -19,15 +19,45 @@ export interface ActiveFilePushContext {
  * The caret line is skipped only while it is still an unfinished capture. Other lines
  * (including a parent whose comment child just changed) are pushed.
  */
-export function planActiveFilePush(ctx: ActiveFilePushContext): { push: boolean; skipLines: number[] } {
-	if (!ctx.hasToken || ctx.syncRunning || !ctx.inScope || !ctx.isMarkdown) {
-		return { push: false, skipLines: [] };
+export interface ActiveFilePushPlan {
+	push: boolean;
+	skipLines: number[];
+	/** The quiet period already elapsed, but a sync is running. Run the push when it ends. */
+	retryAfterSync: boolean;
+}
+
+const deferredDuringSync = new Set<string>();
+let releaseHook: ((paths: string[]) => void) | null = null;
+
+export function planActiveFilePush(ctx: ActiveFilePushContext): ActiveFilePushPlan {
+	if (!ctx.hasToken || !ctx.inScope || !ctx.isMarkdown) {
+		return { push: false, skipLines: [], retryAfterSync: false };
+	}
+	if (ctx.syncRunning) {
+		return { push: false, skipLines: [], retryAfterSync: true };
 	}
 	const skipLines: number[] = [];
 	if (ctx.caretLine != null && ctx.caretIsTask && isUnfinishedCapture(ctx.caretTitle, ctx.caretRaw)) {
 		skipLines.push(ctx.caretLine);
 	}
-	return { push: true, skipLines };
+	return { push: true, skipLines, retryAfterSync: false };
+}
+
+/** Remember a path whose 5-second push came due while a sync was running. */
+export function deferActiveFilePush(filepath: string): void {
+	if (filepath) deferredDuringSync.add(filepath);
+}
+
+export function setActiveFilePushRelease(hook: ((paths: string[]) => void) | null): void {
+	releaseHook = hook;
+}
+
+/** After syncRunning is cleared. The hook pushes; callers without a hook get the paths back. */
+export function releaseDeferredActiveFilePushes(): string[] {
+	const paths = [...deferredDuringSync];
+	deferredDuringSync.clear();
+	if (paths.length && releaseHook) releaseHook(paths);
+	return paths;
 }
 
 /** One timer per note. A new keystroke resets it. */

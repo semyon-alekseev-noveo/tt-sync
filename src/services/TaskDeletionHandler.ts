@@ -18,6 +18,7 @@ import type { ITask } from '@/api/types/Task';
 import { FileTaskQueries } from '@/repositories/FileTaskQueries';
 import { TaskDeletionModal, type DeletionPromptResult } from '@/modals/TaskDeletionModal';
 import { getSettings } from '@/settings';
+import { syncCachedRead } from '@/sync/fileRunCache';
 import { isPathInPushScope } from '@/syncScope';
 import { db } from '@/db/dexie';
 import { classifyFileRead, deletionConfirmMode, obsidianSyncFileState } from '@/sync/massDeleteGuard';
@@ -278,7 +279,7 @@ export class TaskDeletionHandler {
 				continue;
 			}
 			try {
-				const content = await this.app.vault.cachedRead(file);
+				const content = await syncCachedRead(this.app.vault, file);
 				if (taskIdPattern.test(content)) {
 					return file.path;
 				}

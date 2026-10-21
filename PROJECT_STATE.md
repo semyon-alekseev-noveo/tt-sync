@@ -25,7 +25,7 @@
 ## Validation
 
 - Build: `npm run build` in repo root; CI on `abyss-mapping` via `.github/workflows/ci.yml`.
-- Unit tests: `npx vitest run` (586 on `abyss-mapping` + open PR branch; includes idle-sync `getTaskById` baseline of 3 and `BUG-COMMENT-NO-PUSH` integration test). Abyss comments → TickTick **Comments API** when `syncAbyssCommentsViaApi` (default on); descriptions stay in `content`.
+- Unit tests: `npx vitest run` (87 files, **631 passed** on this branch; includes idle-sync `getTaskById` baseline of 3, `BUG-COMMENT-NO-PUSH`, and the open-note buffer cases). Abyss comments → TickTick **Comments API** when `syncAbyssCommentsViaApi` (default on); descriptions stay in `content`.
 - Manual pilot: **`SMOKE_TESTS.md`**. Palette: **Synchronize** only; full TT pull on plugin load. Context tags **2.0.41** (`syncNoteContextTags`).
 - BRAT installs: GitHub Release assets from `.github/workflows/release.yml` (see `docs/BRAT_INSTALL.md`).
 - TT cleanup verified 2026-10-16 via MCP (no `ticktick` tag left on polluted set).

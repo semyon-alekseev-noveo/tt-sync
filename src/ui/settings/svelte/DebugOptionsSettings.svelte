@@ -10,12 +10,14 @@
 	export let plugin: TickTickSync;
 
 	let debugMode: boolean = false;
+	let debugWriteTrace: boolean = false;
 	let showDebugInfo = false;
 	let debugString = '';
 	let copyStatus = '';
 
 	onMount(async () => {
 		debugMode = getSettings().debugMode;
+		debugWriteTrace = getSettings().debugWriteTrace;
 	});
 
 	async function generateDebugInfoSubset() {
@@ -104,6 +106,25 @@
 							log.setLevel(newLevel);
 							await plugin.saveSettings();
 					  }}
+				/>
+			</label>
+		</div>
+	</div>
+
+	<div class="setting-item">
+		<div class="setting-item-info">
+			<div class="setting-item-name">Write trace</div>
+			<div class="setting-item-description">Log every note write and update decision. Off by default. After turning this on, reload the plugin. Lines go to the console (warn, prefixed [write-trace]) and to .tickticksync/write-trace.jsonl in the vault.</div>
+		</div>
+		<div class="setting-item-control">
+			<label class="checkbox-container" class:is-enabled={debugWriteTrace}>
+				<input
+					type="checkbox"
+					bind:checked={debugWriteTrace}
+					on:change={async () => {
+						updateSettings({ debugWriteTrace });
+						await plugin.saveSettings();
+					}}
 				/>
 			</label>
 		</div>

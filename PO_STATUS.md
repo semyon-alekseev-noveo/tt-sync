@@ -26,7 +26,8 @@
 ## Validation
 
 - Релиз **2.0.54** (2026-10-20): PR #4 **BUG-STALE-EDITOR-WRITE** (`commitVaultText`, journal editor patches); PR #5 mass-deletion / empty-side guard. Vitest **625**. Пилот hotfix и `TP-EMPTY-SIDE-GUARD` — **not run** (`TEST_PLAN.md`).
-- Релиз **2.0.47:** `npx vitest run` — 67 файлов, 550 тестов. В том числе `src/test/synchronizationInner.integration.test.ts`.
+- PR #6 на базе **2.0.54** (открытая заметка не откатывается, версию не поднимали): **87 файлов, 631 тест**, `npm run build` — ok. В том числе `src/test/synchronizationInner.integration.test.ts`. Пилот TP-NO-CARET-REWRITE и см. `TEST_PLAN.md` — **not run** (vault Thinkpad-tts-test).
+- Релиз **2.0.47:** `npx vitest run` — 67 файлов, 550 тестов.
 - Пилот **2.0.48** (2026-10-20): debounce/open-note — pass; NOTE-L3b / Comments API — **fail**; DEL-1 — pass. Детали в `TEST_PLAN.md`, `ABYSS_FIRST_CASES.md`, `CHANGELOG.md`.
 - Релиз **2.0.53** (2026-10-20): idle sync без `getTaskById` на тихую задачу; эхо по `etag`; `getTaskComments` только при расхождении `commentCount`. Vitest **589**. Пилот `TP-IDLE-ZERO` — not run.
 - Релиз **2.0.54** включает **EMPTY-SIDE-GUARD**: порог массового удаления и пустая сторона держат удаления и чекпоинт. Пилот `TP-EMPTY-SIDE-GUARD` — **not run**.
@@ -50,6 +51,7 @@
 | **BUG-COMMENT-MAP-ORPHAN** | P2 | fixed on this branch | `deleteCommentMapsForTask` вызывается из `TaskRepository` (delete/hard delete/purge), `markTaskDeleted` и pull при удалённой на TT задаче |
 | **BUG-COMMENT-NO-PUSH** | P0 | fix on branch (pilot **2.0.51** fail) | Перерисовка строки больше не снимает vault-комментарии, которых нет в `Comments:` базе; перед записью файла они пушатся в Comments API. NOTE-L3b на пилоте ещё не перегнан. |
 | **BUG-STALE-EDITOR-WRITE** | P0 | fixed в **2.0.54** (pilot **not run**) | Открытая заметка переписывалась из снимка, снятого до Comments API. Нажатия за это окно пропадали из редактора, файл на диске оставался новее. Комментарий, удалённый в TickTick, оставался в заметке, поэтому перезапись шла на каждом sync. |
+| **BUG-OPEN-NOTE-BUFFER** | P0 | fix PR #6 on **2.0.54** (pilot **not run**) | На 2.0.54 буфер открытой заметки откатывался, файл на диске оставался новым. Пуш без `lastVaultSync`, строка под курсором как vault-behind, `syncRead` / `syncCachedRead`, merge детей из Dexie. Кейсы TP-NO-CARET-REWRITE, TP-ACTIVE-PUSH-DURING-SYNC, TP-NO-STALE-VIEW-READ, TP-ABYSS-LOCAL-CHILD-KEEP, TP-TWO-LEAVES. |
 | **BUG-ACTIVEZONE-COMMENT-SHUFFLE** | P1 | open | При sync в project note (Active Zone): сортировка соседних задач и перенос comment-буллета с одной задачи на другую. Кейс в `ABYSS_FIRST_CASES.md`. |
 | **BUG-TICKTICK-ID-LEAK** | P1 | mitigated on branch | Канонический `%%[ticktick_id:: <24hex>]%%`, strip loose fragment из title; тест `bugTicktickIdLeak.test.ts`. Почистить дубли в TT вручную. |
 | **GAP-COMMENT-EDIT** | P2 | open | Правка комментария = delete + add (новые ID, шум в ленте TT) |
@@ -67,7 +69,7 @@
 
 ## To Be Done
 
-1. Пилот **2.0.54** hotfix **BUG-STALE-EDITOR-WRITE**: `TP-EDITOR-*`, `TP-COMMENT-TT-DELETE`, `TP-NO-SELF-REPUSH`, `TP-COMPLETE-DURING-TYPE`, `TP-UNCOMPLETE-DURING-TYPE`, `TP-JOURNAL-EDITOR-PATCH`, `TP-UNDO-EDITOR-PATCH`; пилот `TP-EMPTY-SIDE-GUARD` (`TEST_PLAN.md`).
+1. Пилот **2.0.54** hotfix **BUG-STALE-EDITOR-WRITE** и PR #6 **BUG-OPEN-NOTE-BUFFER**: `TP-EDITOR-*`, `TP-COMMENT-TT-DELETE`, `TP-NO-SELF-REPUSH`, `TP-COMPLETE-DURING-TYPE`, `TP-UNCOMPLETE-DURING-TYPE`, `TP-JOURNAL-EDITOR-PATCH`, `TP-UNDO-EDITOR-PATCH`, `TP-NO-CARET-REWRITE`, `TP-ACTIVE-PUSH-DURING-SYNC`, `TP-NO-STALE-VIEW-READ`, `TP-ABYSS-LOCAL-CHILD-KEEP`, `TP-TWO-LEAVES`; пилот `TP-EMPTY-SIDE-GUARD` (`TEST_PLAN.md`).
 2. Пилот **2.0.53** `TP-IDLE-ZERO` и **TP-DELTA-*** (`docs/TICKTICK_DELTA_API.md` §3.5). В **2.0.53** тихий синк не вызывает `getTaskById`; суточная сверка, closed и trash ещё не сделаны.
 3. **BUG-COMMENT-NO-PUSH** — на **2.0.52** буллеты `task-13-43-vault-r3` в vault остались, в TT Comments пусто, прежние TT-комментарии стёрты (карта fingerprint → delete). Не блокирует пункт 1.
 4. **BUG-ACTIVEZONE-COMMENT-SHUFFLE** — failing test + fix (`pullSubtaskOrder` / `mergeAbyssBlock`).

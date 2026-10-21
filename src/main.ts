@@ -13,6 +13,7 @@ import '@/static/styles.css';
 
 import { type Editor, type MarkdownFileInfo, MarkdownView, Notice, Plugin, TFolder } from 'obsidian';
 import { commitVaultText, readNoteForWrite } from '@/services/vaultWrite';
+import { installWriteTraceWatch } from '@/services/writeTrace';
 
 //settings
 import { getSettings, mergeDeviceLists, updateSettings } from './settings';
@@ -820,6 +821,7 @@ export default class TickTickSync extends Plugin {
 	}
 
 	private async pluginLoad() {
+		installWriteTraceWatch(this);
 		if (!this.redo) {
 			// write-ahead redo log (.tickticksync/journal), see src/redo
 			this.redo = new RedoLog(makeAdapter(this.app));

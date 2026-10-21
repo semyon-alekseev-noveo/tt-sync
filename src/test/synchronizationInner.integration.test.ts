@@ -16,6 +16,8 @@ import { upsertCommentMap, listCommentMapsForTask, commentMapId } from '@/db/tas
 import { commentFingerprint } from '@/abyssFormat';
 import { FileOperation } from '@/fileOperation';
 import { lastSyncPerf } from '@/sync/perf';
+import { noteEditorActivity, clearEditorActivity } from '@/services/editorActivity';
+import { commitVaultText, readNoteForWrite } from '@/services/vaultWrite';
 
 vi.mock('@/utils/logger', () => ({
 	default: { debug: vi.fn(), warn: vi.fn(), error: vi.fn(), info: vi.fn(), trace: vi.fn() },
@@ -434,7 +436,9 @@ describe('synchronizationInner integration', () => {
 		expect(perf?.phaseMs.push).toBeGreaterThanOrEqual(0);
 		expect(perf?.phaseMs.syncFiles).toBeGreaterThanOrEqual(0);
 		expect(perf?.counts.httpByEndpoint.getTaskById ?? 0).toBe(0);
-		expect(reads).toBe(1);
+		// One shared plugin read of the note. The closed detach of the deleted line reads the file from disk again; vault.read itself is not cached.
+		expect(reads).toBe(2);
+		expect(reads).toBeLessThan(5);
 	});
 
 	function vaultWriteCount(world: World): { count: () => number } {
@@ -472,6 +476,121 @@ describe('synchronizationInner integration', () => {
 		expect(writes.count()).toBe(0);
 		expect(world.api.getTaskById).not.toHaveBeenCalled();
 		expect(world.api.getTaskComments).not.toHaveBeenCalled();
+	});
+
+	it('TP-NO-CARET-REWRITE does not roll the open line back to the copy just pushed', async () => {
+		vi.useFakeTimers({ toFake: ['Date'] });
+		try {
+			const world = await makeWorld({ realDetector: true });
+			const plugin = world.service.plugin as {
+				app: {
+					vault: { getAbstractFileByPath: (p: string) => unknown };
+					workspace: {
+						activeEditor: unknown;
+						getActiveFile: () => unknown;
+						iterateAllLeaves?: (cb: (leaf: { view?: unknown }) => void) => void;
+					};
+				};
+				fileOperation: { synchronizeToVault: (path: string, tasks: { id?: string; title?: string }[], updating: boolean) => Promise<unknown> };
+			};
+			const path = 'notes/open.md';
+			const v1 = `- [ ] title v1 %%[ticktick_id:: ${TASK}]%%`;
+			putFile(world, path, `${v1}\n`, 1_000);
+			world.metadata[path] = { TickTickTasks: [{ taskId: TASK }], defaultProjectId: 'proj-1' };
+			await db.tasks.put({
+				localId: `tt:${TASK}`,
+				taskId: TASK,
+				task: {
+					id: TASK, projectId: 'proj-1', title: 'title v1', content: '', desc: '', status: 0,
+					lineHash: 'stale', tags: [], items: [], priority: 0,
+					modifiedTime: '2026-10-18T00:00:00.000+0000',
+				} as never,
+				updatedAt: 1000,
+				lastVaultSync: 1000,
+				file: path,
+				source: 'obsidian',
+				deleted: false,
+			});
+			const row = world.files.get(path)!;
+			let buffer = `${v1}\n`;
+			const transactions: string[] = [];
+			const editor = {
+				getValue: () => buffer,
+				getLine: (i: number) => buffer.split('\n')[i] ?? '',
+				lineCount: () => buffer.split('\n').length,
+				hasFocus: () => true,
+				getCursor: () => ({ line: 0, ch: 4 }),
+				transaction: ({ changes }: { changes: { text: string }[] }) => {
+					transactions.push(changes.map(c => c.text).join('\n'));
+					for (const change of changes) {
+						if (change.text) buffer = change.text.endsWith('\n') ? change.text : `${change.text}\n`;
+					}
+				},
+				replaceRange: () => { transactions.push('replaceRange'); },
+			};
+			plugin.app.workspace.activeEditor = { file: row.file, editor };
+			plugin.app.workspace.getActiveFile = () => row.file;
+			plugin.app.workspace.iterateAllLeaves = (cb) => { cb({ view: { file: row.file, editor } }); };
+			clearEditorActivity();
+			await world.service.pushSettledActiveFile(path);
+			transactions.length = 0;
+			buffer = `- [ ] title v2 %%[ticktick_id:: ${TASK}]%%\n`;
+			noteEditorActivity(path);
+			vi.advanceTimersByTime(3000);
+			plugin.fileOperation.synchronizeToVault = async (filePath, tasks, updating) => {
+				world.writes.push({ path: filePath, tasks, updating });
+				const file = plugin.app.vault.getAbstractFileByPath(filePath);
+				if (!file) return false;
+				const snapshot = await readNoteForWrite(plugin.app as never, file as never);
+				const next = snapshot.split('\n').map(line => line.includes(TASK) ? v1 : line).join('\n');
+				await commitVaultText(plugin.app as never, file as never, snapshot, next);
+				return true;
+			};
+			const result = await world.service.synchronizationInner(false, 'manual');
+			expect(result.ok).toBe(true);
+			expect(buffer).toContain('title v2');
+			expect(transactions.some(text => text.includes('title v1'))).toBe(false);
+		} finally {
+			vi.useRealTimers();
+			clearEditorActivity();
+		}
+	});
+
+	it('TP-ACTIVE-PUSH-DURING-SYNC treats a save during sync as a local edit next time', async () => {
+		const world = await makeWorld({ realDetector: true });
+		const path = 'notes/during.md';
+		putFile(world, path, `- [ ] quiet %%[ticktick_id:: ${TASK}]%%\n`, 1_000);
+		world.metadata[path] = { TickTickTasks: [{ taskId: TASK }], defaultProjectId: 'proj-1' };
+		await db.meta.update('sync', { lastFullSync: 0, lastDeltaSync: 0, lastVaultPushWallMs: 0 });
+		let second = false;
+		let pushesOnSecondPrePull = 0;
+		world.api.getUpdatedTasks.mockImplementation(async () => {
+			if (!second) {
+				// A user save during this sync, after the push marker and before the sync ends.
+				// The wait keeps the mtime later than that marker.
+				await new Promise(r => setTimeout(r, 5));
+				const row = world.files.get(path);
+				if (row) row.file.stat.mtime = Date.now();
+			}
+			world.api.checkpoint = 60;
+			return { update: [], delete: [] };
+		});
+		const first = await world.service.synchronizationInner(false, 'manual');
+		expect(first.ok).toBe(true);
+		second = true;
+		const det = (world.service.plugin as { taskModificationDetector: { checkFileForModifications: (...args: unknown[]) => Promise<void> } }).taskModificationDetector;
+		const spy = vi.spyOn(det, 'checkFileForModifications');
+		// The mock replaces the method, so call through the prototype to avoid recursion.
+		// Count only the pre-pull push. checkDB calls the same method with one argument later.
+		spy.mockImplementation(async (...args: unknown[]) => {
+			const stack = new Error().stack ?? '';
+			if (args[0] === path && args.length === 1 && stack.includes('pushLocalEditsFirst')) pushesOnSecondPrePull++;
+			return Object.getPrototypeOf(det).checkFileForModifications.apply(det, args);
+		});
+		const secondResult = await world.service.synchronizationInner(false, 'manual');
+		expect(secondResult.ok).toBe(true);
+		expect(pushesOnSecondPrePull).toBeGreaterThan(0);
+		spy.mockRestore();
 	});
 
 	it('TP-NO-SELF-REPUSH does not rescan a file the plugin just wrote', async () => {

@@ -1,5 +1,8 @@
 import { Notice, TFile, type App, type Editor } from 'obsidian';
 import { TYPING_DEFER_MS, typedWithin } from '@/services/editorActivity';
+import { traceWrite } from '@/services/writeTrace';
+import { invalidateFileRun, syncRead } from '@/sync/fileRunCache';
+import { notePluginWrite } from '@/utils/editedSince';
 import log from '@/utils/logger';
 
 export const OPEN_NOTE_DEFER_NOTICE = 'Open note will update when you pause typing.';
@@ -47,14 +50,18 @@ export function isHelperVaultWrite(): boolean {
 	return helperVaultWrites > 0;
 }
 
-/** Line-level diff of two note texts. Spans do not overlap and refer to `before`. */
-export function lineSpans(before: string, after: string): LineSpan[] {
+/**
+ * Line-level diff of two note texts. Spans do not overlap and refer to `before`.
+ * A note open in an editor never collapses to one whole-document span.
+ */
+export function lineSpans(before: string, after: string, opts?: { openEditor?: boolean }): LineSpan[] {
 	if (before === after) return [];
 	const a = before.split('\n');
 	const b = after.split('\n');
 	const n = a.length;
 	const m = b.length;
 	if (n * m > 1_500_000) {
+		if (opts?.openEditor) return endsDiff(a, b);
 		return [{ start: 0, oldCount: n, oldLines: a, newLines: b }];
 	}
 	const dp: number[][] = Array.from({ length: n + 1 }, () => new Array<number>(m + 1).fill(0));
@@ -106,6 +113,23 @@ export function lineSpans(before: string, after: string): LineSpan[] {
 	return spans;
 }
 
+/** One middle span between a shared prefix and a shared suffix. Used when the LCS table would be huge and an editor is open. */
+function endsDiff(a: string[], b: string[]): LineSpan[] {
+	let prefix = 0;
+	const limit = Math.min(a.length, b.length);
+	while (prefix < limit && a[prefix] === b[prefix]) prefix++;
+	let aEnd = a.length;
+	let bEnd = b.length;
+	while (aEnd > prefix && bEnd > prefix && a[aEnd - 1] === b[bEnd - 1]) {
+		aEnd--;
+		bEnd--;
+	}
+	const oldLines = a.slice(prefix, aEnd);
+	const newLines = b.slice(prefix, bEnd);
+	if (!oldLines.length && !newLines.length) return [];
+	return [{ start: prefix, oldCount: oldLines.length, oldLines, newLines }];
+}
+
 /**
  * Apply spans to `current`. A span is applied only when the lines at its index
  * still equal the planned old text. Other spans are skipped.
@@ -144,7 +168,7 @@ export async function readNoteForWrite(app: App, file: TFile): Promise<string> {
 	if (active?.editor && active.file?.path === file.path) {
 		return active.editor.getValue();
 	}
-	return await app.vault.read(file);
+	return await syncRead(app.vault, file);
 }
 
 /** Editors that currently show `path`, including a hover or popout leaf. */
@@ -164,6 +188,41 @@ export function editorsForFile(app: App, path: string): Editor[] {
 		found.push(active.editor);
 	}
 	return found;
+}
+
+/** The focused editor, or the first one showing the file. One patch per file. */
+function editorToPatch(editors: Editor[]): Editor | null {
+	if (!editors.length) return null;
+	return editors.find(editor => typeof editor.hasFocus === 'function' && editor.hasFocus()) ?? editors[0];
+}
+
+function caretLines(editor: Editor): { lo: number; hi: number } | null {
+	if (typeof editor.hasFocus !== 'function' || !editor.hasFocus()) return null;
+	let lo = Number.POSITIVE_INFINITY;
+	let hi = -1;
+	const take = (pos: { line?: number } | null | undefined) => {
+		if (typeof pos?.line === 'number' && Number.isFinite(pos.line)) {
+			lo = Math.min(lo, pos.line);
+			hi = Math.max(hi, pos.line);
+		}
+	};
+	if (typeof editor.getCursor === 'function') {
+		take(editor.getCursor());
+		try { take(editor.getCursor('from')); } catch { /* single-argument cursor */ }
+		try { take(editor.getCursor('to')); } catch { /* single-argument cursor */ }
+	}
+	const selections = typeof editor.listSelections === 'function' ? editor.listSelections() : [];
+	for (const sel of selections ?? []) {
+		take(sel?.anchor);
+		take(sel?.head);
+	}
+	if (!Number.isFinite(lo) || hi < 0) return null;
+	return { lo, hi };
+}
+
+function spanOverlaps(span: LineSpan, range: { lo: number; hi: number }): boolean {
+	const spanHi = span.oldCount === 0 ? span.start : span.start + span.oldCount - 1;
+	return span.start <= range.hi && spanHi >= range.lo;
 }
 
 function spanChange(editor: Editor, span: LineSpan): RangeChange | null {
@@ -266,26 +325,61 @@ async function patchOpenEditors(file: TFile, editors: Editor[], spans: LineSpan[
  * Never replaces the whole editor buffer. A keystroke in the last two seconds defers the write and records nothing.
  * A patch that does not land leaves the journal entry uncommitted.
  */
+function traceCommit(app: App, file: TFile, api: string, reason: string, spans: LineSpan[], editor?: Editor | null): void {
+	const range = editor ? caretLines(editor) : null;
+	traceWrite(app, 'commitVaultText', file.path, api, {
+		reason,
+		focus: typeof editor?.hasFocus === 'function' ? editor.hasFocus() : undefined,
+		spans: spans.map(span => ({
+			start: span.start,
+			oldCount: span.oldCount,
+			newCount: span.newLines.length,
+			touchesCaret: !!(range && spanOverlaps(span, range)),
+		})),
+	});
+}
+
 export async function commitVaultText(app: App, file: TFile, snapshot: string, next: string): Promise<CommitResult> {
 	if (next === snapshot) return { status: 'unchanged', skipped: 0 };
 	if (typedWithin(file.path, TYPING_DEFER_MS)) {
 		new Notice(OPEN_NOTE_DEFER_NOTICE);
 		log.info(`Deferring write of ${file.path}: the note was edited moments ago`);
+		traceCommit(app, file, 'defer', 'typing', []);
 		return { status: 'deferred', skipped: 0 };
 	}
-	const spans = lineSpans(snapshot, next);
 	const editors = editorsForFile(app, file.path);
-	if (editors.length) return patchOpenEditors(file, editors, spans);
+	const editor = editorToPatch(editors);
+	const spans = lineSpans(snapshot, next, { openEditor: !!editor });
+	if (editor) {
+		const range = caretLines(editor);
+		const safe = range ? spans.filter(span => !spanOverlaps(span, range)) : spans;
+		if (!safe.length) {
+			log.info(`Deferring write of ${file.path}: a span covers the cursor`);
+			traceCommit(app, file, 'defer', 'caret', spans, editor);
+			return { status: 'deferred', skipped: spans.length };
+		}
+		traceCommit(app, file, 'editor.transaction', safe.length === spans.length ? 'editor' : 'caret', spans, editor);
+		return patchOpenEditors(file, [editor], safe);
+	}
+	traceCommit(app, file, 'vault.process', 'closed', spans);
 	return writeClosedNote(app, file, snapshot, next, spans);
 }
 
+function rememberClosedWrite(file: TFile, before: number | undefined): void {
+	invalidateFileRun(file.path, true);
+	const mtime = file.stat?.mtime;
+	if (typeof mtime === 'number' && mtime !== before) notePluginWrite(file.path, mtime);
+}
+
 async function writeClosedNote(app: App, file: TFile, snapshot: string, next: string, spans: LineSpan[]): Promise<CommitResult> {
+	const beforeMtime = file.stat?.mtime;
 	const live = await app.vault.read(file);
 	const first = textFrom(snapshot, next, spans, live);
 	const pending = first.text === live ? null : await noteJournal?.prepare(file.path, live, first.text) ?? null;
 	const drifted = await commitClosed(app, file, live, first.text, (data) => textFrom(snapshot, next, spans, data));
 	if (drifted.wrote) {
 		await pending?.commit();
+		rememberClosedWrite(file, beforeMtime);
 		return { status: 'written', skipped: first.skipped };
 	}
 	if (!drifted.again) return { status: 'deferred', skipped: first.skipped };
@@ -293,6 +387,7 @@ async function writeClosedNote(app: App, file: TFile, snapshot: string, next: st
 	const second = await commitClosed(app, file, drifted.again.before, drifted.again.after, (data) => ({ text: data, skipped: 0 }));
 	if (!second.wrote) return { status: 'deferred', skipped: drifted.again.skipped };
 	await pendingAgain?.commit();
+	rememberClosedWrite(file, beforeMtime);
 	return { status: 'written', skipped: drifted.again.skipped };
 }
 
@@ -325,4 +420,10 @@ async function commitClosed(
 		helperVaultWrites--;
 	}
 	return { wrote, again };
+}
+
+/** Front matter goes through the helper so a raw `processFrontMatter` is not a second write path. */
+export async function commitFrontMatter(app: App, file: TFile, fn: (frontmatter: Record<string, unknown>) => void): Promise<void> {
+	traceWrite(app, 'commitFrontMatter', file.path, 'processFrontMatter', { reason: 'frontmatter' });
+	await app.fileManager?.processFrontMatter(file, fn);
 }

@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-20 15:20 UTC
+
+- Context: On 2.0.54 the open note's editor buffer rolled back while the file on disk stayed current. It did not happen on 2.0.47. `commitVaultText` (PR #4) did not stop it.
+- Target: No version bump. A local edit on the open line is pushed, not overwritten. The 5-second push is rescheduled when a sync is running. Obsidian's own `vault.read` is not replaced during a sync.
+- Actions log: After a vault→TickTick save, `lastVaultSync` matches `updatedAt`. `vaultLineBehindTask` treats a hash mismatch as a local edit. A span that covers the cursor or selection is deferred while that editor has focus; the 2-second typing window still defers the whole file. One editor is patched per file. Notes large enough to skip the line diff use a prefix/suffix span while an editor is open. `lastVaultPushWallMs` is taken before the deletion-guard prefetch (that prefetch is `getUpdatedTasks`), and this run still compares files to the previous stamp. Plugin writes are excluded by path and mtime, only when the write moved the mtime. `app.vault.read` / `cachedRead` are not swapped; plugin code uses `syncRead` / `syncCachedRead` and does not cache a file open in an editor. `mergeAbyssBlock` keeps an unpushed local description or comment and does not put the old TickTick comment back beside it. The merge write-back in the 5-second push is skipped when the note changed after the push started. Setting `debugWriteTrace` (default off) logs each write and update decision to the console (`warn`, prefix `[write-trace]`) and to `<vault>/.tickticksync/write-trace.jsonl`. Reload the plugin after turning it on so the view-reload check is installed. Enable it in Settings → Write trace.
+- Validation: `npx vitest run` → 87 files, **631 passed**; `npm run build` ok. The five new cases failed before the fix and pass now. Pilot rows in `TEST_PLAN.md` are **not run** (vault Thinkpad-tts-test).
+- Problems: Pilot not run. A task with no `lineHash` still uses the field compare. An editor patch does not move disk mtime; a later autosave can look like a user edit. The second leaf is not patched. The `setViewData` check needs a reload.
+- To Be Done: Pilot the new section. Do not tag from this branch.
+- References: `TEST_PLAN.md`, `ABYSS_FIRST_CASES.md`, `PO_STATUS.md`
+
 ### Iteration 2026-10-20 14:15 UTC
 
 - Context: Owner merged PR #4 (stale editor write hotfix) and PR #5 (mass-deletion guard) and asked for release **2.0.54**.

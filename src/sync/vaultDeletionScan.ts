@@ -1,4 +1,5 @@
 import { classifyFileRead, obsidianSyncFileState, vaultIndexReady, type FileTrust } from '@/sync/massDeleteGuard';
+import { syncCachedRead } from '@/sync/fileRunCache';
 
 const TASK_ID = /%%\[ticktick_id::\s*([a-zA-Z0-9]+)\]%%/gi;
 
@@ -54,7 +55,7 @@ export async function scanVaultForDeletionGuard(app: {
 		let text = '';
 		let readOk = true;
 		try {
-			const read = await app.vault.cachedRead(file);
+			const read = await syncCachedRead(app.vault, file);
 			if (typeof read !== 'string') readOk = false;
 			else text = read;
 		} catch {

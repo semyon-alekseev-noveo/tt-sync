@@ -212,14 +212,36 @@ function commentLinesDeletedInTickTick(oldChild: string[], generatedComments: st
 	return skip;
 }
 
-/** `base` = note text last synced with TickTick (legacy `Comments:` block only). Comments API deletions use `ticktick`, not `base`. */
+function descBody(line: string): string {
+	const t = line.trim();
+	if (t === '- >') return '';
+	if (t.startsWith('- > ')) return t.slice(4);
+	return t.replace(/^- /, '');
+}
+
+/**
+ * `base` = note text last synced with TickTick (legacy `Comments:` block only). Comments API deletions use `ticktick`, not `base`.
+ * A description or comment that is in the vault and not in the generated block or the last synced base is an unpushed local edit.
+ * Those lines stay. A generated comment the vault no longer has is not put back beside that edit.
+ */
 export function mergeAbyssBlock(newText: string, oldChild: string[], base?: string, ticktick?: TickTickCommentSync): string {
 	const [head, ...gen] = newText.split('\n');
 	const genKinds = classifyChildren(gen);
 	const pick = (k: ChildKind[]) => gen.filter((_, i) => k.includes(genKinds[i]));
 	const oldKinds = classifyChildren(oldChild);
 	const kept = oldChild.filter((_, i) => oldKinds[i] === 'keep');
-	const descs = gen.filter((_, i) => genKinds[i] === 'desc');
+	const genDescs = gen.filter((_, i) => genKinds[i] === 'desc');
+	const localDescs = oldChild.filter((_, i) => oldKinds[i] === 'desc');
+	const commentsIdx = base?.indexOf(COMMENTS_HEADER) ?? -1;
+	const baseDesc = base === undefined ? undefined : (commentsIdx >= 0 ? base.slice(0, commentsIdx) : base);
+	const genDescBodies = new Set(genDescs.map(descBody));
+	const unpushedDesc = localDescs.some(line => {
+		const body = descBody(line);
+		if (genDescBodies.has(body)) return false;
+		if (baseDesc !== undefined && body.length > 0 && baseDesc.includes(body)) return false;
+		return body.length > 0 || baseDesc === undefined;
+	});
+	const descs = unpushedDesc ? localDescs : genDescs;
 	const comments: string[] = [];
 	gen.forEach((l, i) => {
 		if (genKinds[i] === 'comment' || (genKinds[i] === 'cont' && comments.length)) comments.push(l);
@@ -228,10 +250,31 @@ export function mergeAbyssBlock(newText: string, oldChild: string[], base?: stri
 	// Comments API: drop a thread that taskCommentMaps knew and the current API list does not.
 	// Legacy notes: drop a thread whose body sat under `Comments:` in `base` and is gone from the new block.
 	// A missing base, an empty map, or a description-only base must not wipe vault bullets.
-	const have = new Set(comments.map(l => l.trim()));
 	const deletedInTickTick = ticktick ? commentLinesDeletedInTickTick(oldChild, comments, ticktick) : null;
-	const commentsIdx = base?.indexOf(COMMENTS_HEADER) ?? -1;
 	const syncedBodies = !ticktick && base !== undefined && commentsIdx >= 0 ? base.slice(commentsIdx + COMMENTS_HEADER.length) : '';
+	const localThreads = extractAbyssCommentThreads(oldChild);
+	const genThreads = extractAbyssCommentThreads(comments);
+	const localFps = new Set(localThreads.map(t => t.fingerprint));
+	const genFps = new Set(genThreads.map(t => t.fingerprint));
+	const knownFps = new Set((ticktick?.knownBodies ?? []).map(commentFingerprint).filter(fp => fp.length > 0));
+	const bodyDeletedInNote = (body: string) => syncedBodies.length > 0 && syncedBodies.includes(body);
+	const unpushedLocalComment = localThreads.some(thread => {
+		if (!thread.fingerprint || genFps.has(thread.fingerprint)) return false;
+		if (knownFps.has(thread.fingerprint)) return false;
+		if (bodyDeletedInNote(thread.body)) return false;
+		return true;
+	});
+	if (unpushedLocalComment) {
+		const drop = new Set(genThreads.filter(thread =>
+			!localFps.has(thread.fingerprint)
+			&& (knownFps.has(thread.fingerprint) || bodyDeletedInNote(thread.body)),
+		).map(thread => thread.fingerprint));
+		if (drop.size) {
+			comments.length = 0;
+			for (const thread of genThreads) if (!drop.has(thread.fingerprint)) comments.push(...thread.lines);
+		}
+	}
+	const have = new Set(comments.map(l => l.trim()));
 	let carry = false;
 	oldChild.forEach((l, i) => {
 		if (oldKinds[i] === 'comment') {
