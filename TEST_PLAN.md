@@ -631,6 +631,19 @@ Automated: `pushLocalPaths.test.ts` (`BUG-COMMENT-ACTIVE-NOTE`).
 | BUG-COMMENT-MERGE-NO-STRIP | not run | `abyssStep3.test.ts`; empty Comments API + unknown `commentCount` must not strip vault bullets on pull merge. |
 | BUG-COMMENT-MANUAL-PRE-PULL | not run | `pushLocalPaths.test.ts`; manual sync pre-pull includes all in-scope registered paths. |
 | BUG-COMMENT-VAULT-AHEAD | not run | `vaultCommentBehind.test.ts`; `task-11-16` / `00 Inbox/2026-10-19.md` ISO-stamped bullets → TT Comments panel. |
+| BUG-COMMENT-NO-MASS-DELETE | not run | **2.0.61**: add 3rd Abyss comment on `2026-10-19.md` / `6ad83d…` — existing TT Comments must remain; journal must not show `deleteTaskComment` storm. `abyssCommentSync.test.ts`. |
+| BUG-COMMENT-STALE-MAPS | partial | Agent 2026-10-21: Obsidian CLI manual sync → `write-trace` `vault-comments-ahead` for `6ad83d…`; MCP Comments not fully repopulated from vault (probe via MCP only). **2.0.62** deployed to pilot plugin folder. |
+| BUG-COMMENT-TT-AHEAD-NO-DELETE | pass | Agent 2026-10-21 **2.0.63**: MCP added `pilot-tt-second-comment` on `6ad83d…`; manual sync; both TT comments remained. `abyssCommentSync.test.ts`. |
+
+### BUG-COMMENT-NO-MASS-DELETE — new vault comment must not wipe TickTick
+
+1. Task with **two** comments already in TickTick Comments and matching vault bullets + Dexie maps.
+2. Add a **third** child comment bullet in the vault (ISO stamp line).
+3. **Synchronize** once.
+
+Expected: third comment is **added** via API; **no** `deleteTaskComment` for the first two. If `getTaskComments` returns empty transiently, push must **not** delete mapped comments.
+
+Automated: `abyssCommentSync.test.ts` (**BUG-COMMENT-NO-MASS-DELETE**).
 
 ### BUG-DEFERRED-ID-PHASE2-DELETE — create on open note, no false deletion
 

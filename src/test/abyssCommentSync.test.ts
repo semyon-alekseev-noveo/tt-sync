@@ -114,6 +114,98 @@ describe('abyssCommentSync', () => {
 		expect(del).not.toHaveBeenCalled();
 	});
 
+	it('BUG-COMMENT-NO-MASS-DELETE: adding a third Abyss comment does not delete existing TT comments', async () => {
+		const S = getSettings() as Record<string, unknown>;
+		Object.assign(S, { syncNotes: true, abyssTasksFormat: true, syncAbyssCommentsViaApi: true });
+		listMaps.mockResolvedValueOnce([
+			{
+				id: 'task1:comment 1',
+				taskId: 'task1',
+				projectId: 'proj1',
+				fingerprint: 'comment 1',
+				ticktickCommentId: 'tt-1',
+				body: 'comment 1',
+			},
+			{
+				id: 'task1:comment 2',
+				taskId: 'task1',
+				projectId: 'proj1',
+				fingerprint: 'comment 2',
+				ticktickCommentId: 'tt-2',
+				body: 'comment 2',
+			},
+		]);
+		const del = vi.fn();
+		const add = vi.fn().mockResolvedValue({ id: 'tt-3', title: 'comment 3' });
+		const api = {
+			getTaskComments: vi.fn().mockResolvedValue([
+				{ id: 'tt-1', title: 'comment 1' },
+				{ id: 'tt-2', title: 'comment 2' },
+			]),
+			addTaskComment: add,
+			deleteTaskComment: del,
+		} as unknown as TickTickRestAPI;
+		const lines = [
+			'\t- 2026-10-21T11:25:21+07:00: comment 1',
+			'\t- 2026-10-21T12:09:07+07:00: comment 2',
+			'\t- 2026-10-21T12:30:00+07:00: comment 3',
+		];
+		await syncAbyssCommentsToTickTick(api, 'task1', 'proj1', lines);
+		expect(del).not.toHaveBeenCalled();
+		expect(add).toHaveBeenCalledTimes(1);
+	});
+
+	it('BUG-COMMENT-TT-AHEAD-NO-DELETE: TickTick-only comment is not deleted on push before pull', async () => {
+		const S = getSettings() as Record<string, unknown>;
+		Object.assign(S, { syncNotes: true, abyssTasksFormat: true, syncAbyssCommentsViaApi: true });
+		const del = vi.fn();
+		const api = {
+			getTaskComments: vi.fn().mockResolvedValue([
+				{ id: 'tt-1', title: 'comment 1' },
+				{ id: 'tt-2', title: 'from ticktick app' },
+			]),
+			addTaskComment: vi.fn(),
+			deleteTaskComment: del,
+		} as unknown as TickTickRestAPI;
+		listMaps.mockResolvedValue([
+			{
+				id: 'task1:comment 1',
+				taskId: 'task1',
+				projectId: 'proj1',
+				fingerprint: 'comment 1',
+				ticktickCommentId: 'tt-1',
+				body: 'comment 1',
+			},
+		]);
+		const lines = ['\t- 2026-10-21T11:25:21+07:00: comment 1'];
+		await syncAbyssCommentsToTickTick(api, 'task1', 'proj1', lines);
+		expect(del).not.toHaveBeenCalled();
+	});
+
+	it('BUG-COMMENT-NO-MASS-DELETE: empty GET must not delete mapped TT comments', async () => {
+		const S = getSettings() as Record<string, unknown>;
+		Object.assign(S, { syncNotes: true, abyssTasksFormat: true, syncAbyssCommentsViaApi: true });
+		listMaps.mockResolvedValueOnce([
+			{
+				id: 'task1:comment 1',
+				taskId: 'task1',
+				projectId: 'proj1',
+				fingerprint: 'comment 1',
+				ticktickCommentId: 'tt-1',
+				body: 'comment 1',
+			},
+		]);
+		const del = vi.fn();
+		const api = {
+			getTaskComments: vi.fn().mockResolvedValue([]),
+			addTaskComment: vi.fn().mockResolvedValue({ id: 'tt-new', title: 'x' }),
+			deleteTaskComment: del,
+		} as unknown as TickTickRestAPI;
+		const lines = ['\t- 2026-10-21T11:25:21+07:00: comment 1', '\t- brand new'];
+		await syncAbyssCommentsToTickTick(api, 'task1', 'proj1', lines);
+		expect(del).not.toHaveBeenCalled();
+	});
+
 	it('NOTE-C1: pushes comment threads via API (BUG-COMMENT-1)', async () => {
 		const S = getSettings() as Record<string, unknown>;
 		Object.assign(S, { syncNotes: true, abyssTasksFormat: true, syncAbyssCommentsViaApi: true });

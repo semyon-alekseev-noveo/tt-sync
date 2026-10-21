@@ -39,17 +39,28 @@ export function vaultHasUnpushedCommentThreads(
 	remoteCommentCount?: number,
 ): boolean {
 	const apiKeys = new Set(normalizedKeysFromRemote(remote));
-	for (const t of extractAbyssCommentThreads(taskLines)) {
+	const threads = extractAbyssCommentThreads(taskLines);
+	const missingFromApi = threads.filter(t => !apiKeys.has(normalizedCommentKey(t.body)));
+	if (missingFromApi.length === 0) return false;
+
+	for (const t of missingFromApi) {
 		const key = normalizedCommentKey(t.body);
-		if (apiKeys.has(key)) continue;
 		const mapped = maps.some(m => {
 			const mk = normalizedCommentKey(m.body);
 			return mk === key || m.fingerprint === commentFingerprint(t.body);
 		});
-		if (mapped && remoteCommentCount === 0 && remote.length === 0) continue;
-		return true;
+		if (!mapped) return true;
 	}
-	return false;
+
+	// One mapped thread missing while TT still has other comments → wait for pull (TP-COMMENT-TT-DELETE).
+	if (remote.length > 0) return false;
+
+	// Empty Comments API + commentCount 0: one mapped miss is a TT delete pending pull;
+	// several mapped misses are stale maps after a mass API wipe — push vault again.
+	if (remoteCommentCount === 0 && remote.length === 0) {
+		return missingFromApi.length > 1;
+	}
+	return true;
 }
 
 import type { CommentSyncMatch, CommentSyncPlan, RemoteCommentRef, VaultCommentThreadRef } from '@/sync/comments/types';

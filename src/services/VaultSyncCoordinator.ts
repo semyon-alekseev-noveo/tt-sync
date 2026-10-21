@@ -382,7 +382,7 @@ export class VaultSyncCoordinator {
 		const commentCountMismatch = commentCountKnown && commentCount !== vaultThreads;
 		const vaultHasUnmappedComments = vaultThreads > 0 && !commentCountKnown;
 		const shouldProbeComments = vaultThreads > 0 || commentCountMismatch || vaultHasUnmappedComments;
-		if (deletionConfirmMode() !== 'skip' && !behind && useAbyssCommentsApi() && remote.projectId && shouldProbeComments) {
+		if (!behind && useAbyssCommentsApi() && remote.projectId && shouldProbeComments) {
 			try {
 				const comments = await this.plugin.tickTickRestAPI?.getTaskComments(remote.projectId, remote.id) ?? [];
 				if (apiCommentsDifferFromVault(taskRec.taskLines, comments)) {
@@ -412,9 +412,11 @@ export class VaultSyncCoordinator {
 							deferActiveFilePush(filePath);
 							return { behind: false, task: remote, localEdit: true, reason: 'vault-comments-ahead' };
 						}
-						behind = true;
-						reason = 'behindComments';
-						Object.defineProperty(remote, '_apiComments', { value: comments, enumerable: false, configurable: true });
+						if (deletionConfirmMode() !== 'skip') {
+							behind = true;
+							reason = 'behindComments';
+							Object.defineProperty(remote, '_apiComments', { value: comments, enumerable: false, configurable: true });
+						}
 					}
 				}
 			} catch (e) {

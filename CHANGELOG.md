@@ -1,5 +1,35 @@
 # Changelog
 
+### Iteration 2026-10-21 06:42 UTC
+
+- Context: Pilot on **2.0.62**: Abyss comment did not reach TT; second comment created in TickTick disappeared after **Synchronize**.
+- Target: Release **2.0.63** — **BUG-COMMENT-TT-AHEAD-NO-DELETE** plus shipped **2.0.61**/**2.0.62** comment fixes.
+- Actions log: Push must not `deleteTaskComment` for TT-ahead keys (`remoteCommentKeysAheadOfVault`) because push runs before pull; **BUG-COMMENT-STALE-MAPS**, **BUG-COMMENT-NO-MASS-DELETE**, coordinator comment probe. Tests **658**; pilot MCP both TT comments after sync on **2.0.63**.
+- Validation: `npx vitest run` → **658 passed**; `npm run build` ok; pilot `6ad83d…` kept `comment 1` + `pilot-tt-second-comment` after manual sync.
+- Problems: Vault→TT push for new Abyss-only lines — still verify in UI after **2.0.63** BRAT install.
+- To Be Done: Tag **2.0.63**; PR into `abyss-mapping`.
+- References: `src/abyssCommentSync.ts`, `CHANGELOG.md`
+
+### Iteration 2026-10-21 06:20 UTC
+
+- Context: Pilot **Thinkpad-tts-test** `00 Inbox/2026-10-19.md` / `task-11-16`; agent ran Obsidian + **Synchronize**; MCP `get_comment` stayed empty while vault had Abyss bullets.
+- Target: **BUG-COMMENT-STALE-MAPS** — push after mass TT wipe with stale Dexie maps; keep **TP-COMMENT-TT-DELETE** when TT still has other comments.
+- Actions log: Rework `vaultHasUnpushedCommentThreads`; allow comment probe/push when mass-delete guard is `skip` but vault is ahead on keys; pilot line + deploy **2.0.62**. Automated **657** tests.
+- Validation: `npx vitest run` → **657 passed**; pilot: `write-trace` `vault-comments-ahead` on `2026-10-19.md` (manual sync 06:17 UTC); MCP still showed only probe comment — plugin `addTaskComment` from Obsidian not confirmed in this run.
+- Problems: Pilot **BUG-COMMENT-STALE-MAPS** — **partial** (reconcile push path fires; TT Comments panel not fully verified).
+- To Be Done: User re-test from Abyss UI + **Synchronize** on **2.0.62**; tag release.
+- References: `src/sync/comments/match.ts`, `CHANGELOG.md`
+
+### Iteration 2026-10-21 05:52 UTC
+
+- Context: Pilot after **2.0.60**: add Abyss comment on `2026-10-19.md` / `task-11-16`, **Synchronize** → all TickTick Comments deleted.
+- Target: Hotfix **2.0.61** — **BUG-COMMENT-NO-MASS-DELETE** on push path.
+- Actions log: `syncAbyssCommentsToTickTick` uses `plan.mapWithoutVault` + vault key set; skip TT deletes when `getTaskComments` returns `[]`; regression tests in `abyssCommentSync.test.ts`. Case in `ABYSS_FIRST_CASES.md`, `TEST_PLAN.md`. Bump **2.0.61**.
+- Validation: `npx vitest run` → **655 passed**; `npm run build` ok.
+- Problems: Pilot **BUG-COMMENT-NO-MASS-DELETE** — **not run** (pending BRAT **2.0.61**).
+- To Be Done: Tag **2.0.61**; pilot re-sync `2026-10-19.md`.
+- References: `src/abyssCommentSync.ts`, `CHANGELOG.md`
+
 ### Iteration 2026-10-21 05:38 UTC
 
 - Context: CI failed **TP-COMMENT-TT-DELETE** after **2.0.59** `vault-comments-ahead` push treated mapped TT-deleted threads as unpushed vault edits.

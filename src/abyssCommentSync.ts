@@ -18,7 +18,12 @@ import {
 	upsertCommentMap,
 } from '@/db/taskCommentMaps';
 import { getSettings } from '@/settings';
-import { commentSetsEquivalentByNormalizedKey, planCommentSync } from '@/sync/comments';
+import {
+	commentSetsEquivalentByNormalizedKey,
+	normalizedKeysFromVaultLines,
+	planCommentSync,
+	remoteCommentKeysAheadOfVault,
+} from '@/sync/comments';
 import { deletionConfirmMode } from '@/sync/massDeleteGuard';
 import log from '@/utils/logger';
 
@@ -185,13 +190,31 @@ export async function syncAbyssCommentsToTickTick(
 		}
 	}
 
-	for (const m of maps) {
-		if (vaultStillHasMappedComment(m, threads)) continue;
-		if (threads.length === 0) continue;
-		if (deletionConfirmMode() === 'skip') continue;
-		if (remoteIds.has(m.ticktickCommentId)) {
-			await api.deleteTaskComment(projectId, taskId, m.ticktickCommentId);
+	const vaultKeys = new Set(normalizedKeysFromVaultLines(taskLines));
+	// Never delete TickTick comments when GET returned an empty list — avoids mass wipe on
+	// transient API failures or a partial vault read (BUG-COMMENT-NO-MASS-DELETE).
+	// When TickTick has comment keys the vault lacks, pull must add bullets first (push runs
+	// before pull); deleting here wiped TT-only comments (BUG-COMMENT-TT-AHEAD-NO-DELETE).
+	if (
+		remote.length > 0
+		&& deletionConfirmMode() !== 'skip'
+		&& !remoteCommentKeysAheadOfVault(taskLines, remote)
+	) {
+		for (const entry of plan.mapWithoutVault) {
+			const m = entry.map;
+			const r = entry.remote;
+			if (!m || !r?.comment.id) continue;
+			const mapKey = normalizedCommentKey(m.body) || normalizedCommentKey(m.fingerprint);
+			if (mapKey && vaultKeys.has(mapKey)) continue;
+			if (vaultStillHasMappedComment(m, threads)) continue;
+			if (remoteIds.has(m.ticktickCommentId)) {
+				await api.deleteTaskComment(projectId, taskId, m.ticktickCommentId);
+			}
+			await deleteCommentMap(m.id);
+			changed = true;
 		}
+	}
+	for (const m of plan.orphanMaps) {
 		await deleteCommentMap(m.id);
 		changed = true;
 	}

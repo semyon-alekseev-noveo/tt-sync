@@ -45,6 +45,9 @@ Preconditions for every AF row: plugin `tickticksync-abyss`, manual sync, `fileL
 | BUG-COMMENT-MERGE-NO-STRIP | Pull merge must not drop vault comment bullets when the Comments API returned an empty list but TickTick did not report `commentCount: 0` (avoids tt→obs strip before push). |
 | BUG-COMMENT-MANUAL-PRE-PULL | Manual **Synchronize** runs pre-pull push (and comment sweep) for every registered in-scope note, not only mtime-edited paths and the active leaf. |
 | BUG-COMMENT-VAULT-AHEAD | Vault has Abyss comment bullets and TickTick Comments API is empty (or behind on keys): reconcile must **push** to TickTick, not mark the line `behindComments` and pull from TickTick. |
+| BUG-COMMENT-NO-MASS-DELETE | Adding a new Abyss comment bullet and **Synchronize** must not call TickTick comment **delete** for existing mapped threads; empty `getTaskComments` must not trigger mass delete on push. |
+| BUG-COMMENT-STALE-MAPS | After a mass TickTick Comments wipe, several vault bullets with stale Dexie maps must still **push** (`vaultHasUnpushedCommentThreads`); single mapped miss with other TT comments still waits for pull. |
+| BUG-COMMENT-TT-AHEAD-NO-DELETE | A comment created only in TickTick must survive **Synchronize** (push runs before pull; no `deleteTaskComment` for TT-ahead keys). |
 | TP-EDITOR-OTHER-LEAF | The editor buffer is used only when that editor's file is the file being read. Another leaf's buffer is never written into the target note. |
 | TP-EDITOR-TYPE-DURING-SYNC | Typing in an open note during Synchronize stays in the editor. The task line updates, or the write waits until typing pauses. |
 | TP-EDITOR-TYPE-DURING-PUSH | Same as TP-EDITOR-TYPE-DURING-SYNC for the 5-second open-note push. |
@@ -96,6 +99,7 @@ Pass only with evidence: the note path, the `ticktick_id`, and either the journa
 | 2026-10-20 | Thinkpad-tts-test | 2.0.48 | Sam (manual) | NOTE-L3b | fail | `00 Inbox/manual-test.md` `6ad6e474…`: comment bullets in vault, not in TT Comments; Active Zone tasks reordered / comment moved between tasks. |
 | 2026-10-20 | Thinkpad-tts-test | 2.0.48 | Sam (manual) | DEL-1 | pass | Deleted line in Obs → **Synchronize** → confirm dialog → task removed in TT (slow sync; dialog is expected). |
 | 2026-10-20 | Thinkpad-tts-test | 2.0.48 | Sam (manual) | DEL-3 | not run | |
+| 2026-10-21 | Thinkpad-tts-test | 2.0.62 | agent (Obsidian CLI) | BUG-COMMENT-STALE-MAPS / NOTE-L3b | partial | `00 Inbox/2026-10-19.md` `6ad83d…`: Abyss bullets on disk; **Synchronize** → `write-trace` `vault-comments-ahead`; MCP Comments not fully repopulated (probe comment only). Plugin **2.0.62** in vault folder. |
 | | `<live-vault>` | | | Step 8 | not run | Blocked until the four rows above are pass. |
 
 This branch did not run the gate. Leave the result column as **not run** until you do.

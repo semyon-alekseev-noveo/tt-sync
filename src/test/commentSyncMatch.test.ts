@@ -48,6 +48,58 @@ describe('planCommentSync', () => {
 		expect(vaultHasUnpushedCommentThreads(lines, [], [], 0)).toBe(true);
 	});
 
+	it('vaultHasUnpushedCommentThreads is true when several mapped threads are missing after mass TT wipe', () => {
+		const lines = [
+			'\t- 2026-10-21T11:25:21+07:00: comment 1',
+			'\t- 2026-10-21T12:09:07+07:00: comment 2',
+		];
+		const maps = [
+			{
+				id: 't1:c1',
+				taskId: 't1',
+				projectId: 'p1',
+				fingerprint: 'comment 1',
+				ticktickCommentId: 'dead-1',
+				body: 'comment 1',
+			},
+			{
+				id: 't1:c2',
+				taskId: 't1',
+				projectId: 'p1',
+				fingerprint: 'comment 2',
+				ticktickCommentId: 'dead-2',
+				body: 'comment 2',
+			},
+		];
+		expect(vaultHasUnpushedCommentThreads(lines, [], maps, 0)).toBe(true);
+	});
+
+	it('vaultHasUnpushedCommentThreads is false when one mapped thread is missing but TT still has others', () => {
+		const lines = [
+			'\t- 2026-10-21T11:25:21+07:00: kept',
+			'\t- 2026-10-21T12:09:07+07:00: deleted-in-tt',
+		];
+		const maps = [
+			{
+				id: 't1:kept',
+				taskId: 't1',
+				projectId: 'p1',
+				fingerprint: 'kept',
+				ticktickCommentId: 'c-kept',
+				body: 'kept',
+			},
+			{
+				id: 't1:gone',
+				taskId: 't1',
+				projectId: 'p1',
+				fingerprint: 'deleted-in-tt',
+				ticktickCommentId: 'c-gone',
+				body: 'deleted-in-tt',
+			},
+		];
+		expect(vaultHasUnpushedCommentThreads(lines, [{ title: 'kept' }], maps, 1)).toBe(false);
+	});
+
 	it('commentSetsEquivalentByNormalizedKey ignores stamp mismatch', () => {
 		const lines = ['\t- 2026-10-21T11:14:22+07:00: a', '\t- b'];
 		const remote = [{ title: 'a' }, { title: 'b' }];

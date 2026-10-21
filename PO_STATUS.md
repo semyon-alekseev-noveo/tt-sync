@@ -4,7 +4,7 @@
 **Audience:** Product owner / decision maker  
 **Repo:** `tickticksync` branch `abyss-mapping`  
 **Test vault:** `<pilot-vault>` (copy only; live vault `<live-vault>` untouched)  
-**Install:** BRAT → `https://github.com/semyon-alekseev-noveo/tt-sync` track **latest release** (**2.0.60**, tag `2.0.60`); plugin id **`tickticksync-abyss`** — `docs/BRAT_INSTALL.md`. Preset: `00 Inbox/TTS-data-preset.json`.
+**Install:** BRAT → `https://github.com/semyon-alekseev-noveo/tt-sync` track **latest release** (**2.0.63**, tag `2.0.63`); plugin id **`tickticksync-abyss`** — `docs/BRAT_INSTALL.md`. Preset: `00 Inbox/TTS-data-preset.json`.
 
 История изменений — только в `CHANGELOG.md`; здесь — снимок для PO.
 
@@ -25,6 +25,9 @@
 
 ## Validation
 
+- Релиз **2.0.63** (2026-10-21): **BUG-COMMENT-TT-AHEAD-NO-DELETE** — не удалять TT Comments, которых ещё нет в vault (push до pull). Включает **2.0.61**/**2.0.62**. Vitest **658**.
+- Релиз **2.0.62** (2026-10-21): **BUG-COMMENT-STALE-MAPS** — после массового wipe в TT снова пушит несколько vault-комментов со stale maps; reconcile не блокируется guard `skip` для vault-ahead. Vitest **657**. Пилот — **partial** (`TEST_PLAN.md`).
+- Релиз **2.0.61** (2026-10-21): **BUG-COMMENT-NO-MASS-DELETE** — push path no longer deletes mapped TT comments when API list is empty or when adding a new vault bullet. Vitest **655**.
 - Релиз **2.0.60** (2026-10-21): hotfix — `vaultHasUnpushedCommentThreads` restores **TP-COMMENT-TT-DELETE** while keeping **BUG-COMMENT-VAULT-AHEAD** push. Vitest **653**.
 - Релиз **2.0.59** (2026-10-21): **BUG-COMMENT-VAULT-AHEAD**, **BUG-COMMENT-MERGE-NO-STRIP**, **BUG-COMMENT-MANUAL-PRE-PULL**. Vitest **652**. Superseded by **2.0.60** for TT-delete regression.
 - Релиз **2.0.58** (2026-10-21): PR #9 comment sync wire — normalized keys (`planCommentSync`, **BUG-COMMENT-KEY-EQUIV**), no TT wipe when vault has no comment bullets (**BUG-COMMENT-NO-TT-WIPE**), active note in pre-pull push (**BUG-COMMENT-ACTIVE-NOTE**); `SyncRunContext` / `preparePhase` scaffold. Vitest **649**. Пилот NOTE-L3b / comment cases — **not run** (Thinkpad-tts-test).
