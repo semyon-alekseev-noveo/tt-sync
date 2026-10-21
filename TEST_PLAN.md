@@ -697,12 +697,12 @@ Automated: `pendingMarkerDeletion.test.ts` (`BUG-DEFERRED-ID-PHASE2-DELETE`).
 
 | ID | Pilot status | Evidence |
 |----|----------------|----------|
-| TP-NO-CARET-REWRITE | not run | Automated: `synchronizationInner.integration.test.ts`. Vault Thinkpad-tts-test not run. |
-| TP-ACTIVE-PUSH-DURING-SYNC | not run | Automated: `activeFilePush.test.ts`, `synchronizationInner.integration.test.ts`. Vault not run. |
-| TP-NO-STALE-VIEW-READ | not run | Automated: `tpNoStaleViewRead.test.ts`. Vault not run. |
+| TP-NO-CARET-REWRITE | pass | **2.0.76** pilot: `2026-10-21.md` marker `caret-verify-*` survived Synchronize (disk + `obsidian read`). Evidence: `docs/pilot/results/PILOT-BATCH-EDITOR-SAFETY/16-open-note-editor.md`. |
+| TP-ACTIVE-PUSH-DURING-SYNC | pass | **2.0.76** pilot: edit then immediate sync; vault kept `active-push-*`; MCP title landed. Evidence: same #16 file. |
+| TP-NO-STALE-VIEW-READ | pass | **2.0.76** write-trace: `setViewData` with `bufferEqDisk: true` (no stale `fileRunActive` reload). Evidence: same #16 file. |
 | TP-ABYSS-LOCAL-CHILD-KEEP | not run | Automated: `abyssStep3.test.ts`. Vault not run. |
 | TP-TWO-LEAVES | not run | Automated: `tpTwoLeaves.test.ts`. Vault not run. |
-| TP-EMPTY-EDITOR-DISK | not run | Automated: `staleFileWrite.test.ts`. Pilot repro 2026-10-21 `00 Inbox/2026-10-20.md`: disk had text, Obsidian UI empty until fix. |
+| TP-EMPTY-EDITOR-DISK | pass | **2.0.76** pilot: close/reopen `2026-10-20.md` → task visible; matches disk. Evidence: same #16 file. |
 
 ## Release 2.0.77 — TECH-SYNC-MODULARIZATION epic close (#31)
 

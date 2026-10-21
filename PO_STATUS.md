@@ -27,6 +27,7 @@
 
 - Релиз **2.0.77** (2026-10-22): **TECH-SYNC-MODULARIZATION** (#31) — PRs #34–#40 on `abyss-mapping` (phases, lifecycle, vault-io, PluginContext, taskParser, TMD, store ports). Vitest **688**. Comment fixes **2.0.75**/**2.0.76** are being re-cut onto this tip as **2.0.78** (supersedes open #24/#26/#54).
 - Релиз **2.0.76** (2026-10-21): **BUG-COMMENT-DUP-STAMP** — dedupe stamped+plain TT Comments; plain-only POST; skip create when key present. Vitest **685**. Pilot **pass** `docs/pilot/results/BUG-COMMENT-DUP-STAMP/` (`task-11-16` → 4 plain Comments).
+- Пилот **2.0.76** (2026-10-21): **#16** open-note/editor — **pass** (4 rows); filed **BUG-COMMENT-VAULT-DUP-KEY** [#27](https://github.com/semyon-alekseev-noveo/tt-sync/issues/27) (vault stamp twins). Evidence `docs/pilot/results/PILOT-BATCH-EDITOR-SAFETY/`.
 - Релиз **2.0.75** (2026-10-21): **BUG-COMMENT-ABYSS-VIEW** — Abyss `vault.modify` schedules 5s open-note push; flush without active markdown leaf. Pilot pass `docs/pilot/results/BUG-COMMENT-ABYSS-VIEW/`. Vitest **682**.
 - Релиз **2.0.74** (2026-10-21): **BUG-COMMENT-API-POST-500** — v2 comment POST uses webapp body; **PILOT-GATE-TEST-11-12** pass. Vitest **680**.
 - Релиз **2.0.64** (2026-10-21): **BUG-COMMENT-BOTH-WAYS** — при расхождении с обеих сторон reconcile пушит vault-only комменты в TT и не пропускает pull TT-only. Vitest **659**.
