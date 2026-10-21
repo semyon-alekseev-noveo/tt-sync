@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-21 14:59 UTC
+
+- Context: After **2.0.76**, run P0 **PILOT-BATCH-EDITOR-SAFETY** #16 open-note/editor verify; sticky `local-edit` on `2026-10-19.md`.
+- Target: Record #16 pilot results; file vault-side comment twin bug if confirmed.
+- Actions log: Pilot TP-EMPTY-EDITOR-DISK / TP-NO-CARET-REWRITE / TP-ACTIVE-PUSH-DURING-SYNC / TP-NO-STALE-VIEW-READ on **2.0.76**; evidence under `docs/pilot/results/PILOT-BATCH-EDITOR-SAFETY/`; `gh issue create` #27 **BUG-COMMENT-VAULT-DUP-KEY**.
+- Validation: Four #16 rows **pass**; vault note has 8 Abyss bullets for 4 keys (fail → #27); vitest editor-cluster subset **7 passed**.
+- Problems: **BUG-COMMENT-VAULT-DUP-KEY** — **open** (analyst).
+- To Be Done: #17 EMPTY-SIDE-GUARD; #18 deferred-id; fix #27 with failing test.
+- References: https://github.com/semyon-alekseev-noveo/tt-sync/issues/16, https://github.com/semyon-alekseev-noveo/tt-sync/issues/27, `CHANGELOG.md`
+
 ### Iteration 2026-10-21 14:52 UTC
 
 - Context: **BUG-COMMENT-DUP-STAMP** (#25) — Abyss push left stamped+plain TT Comment pairs for the same normalized key.
