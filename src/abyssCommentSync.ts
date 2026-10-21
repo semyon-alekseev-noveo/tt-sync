@@ -11,6 +11,7 @@ import {
 	normalizedCommentKey,
 	stripLegacyCommentsBlock,
 } from '@/abyssFormat';
+import type { TaskCommentMap } from '@/db/schema';
 import {
 	commentMapId,
 	deleteCommentMap,
@@ -18,7 +19,12 @@ import {
 	upsertCommentMap,
 } from '@/db/taskCommentMaps';
 import { getSettings } from '@/settings';
-import { commentSetsEquivalentByNormalizedKey, planCommentSync } from '@/sync/comments';
+import {
+	commentSetsEquivalentByNormalizedKey,
+	normalizedKeysFromVaultLines,
+	planCommentSync,
+	remoteCommentKeysAheadOfVault,
+} from '@/sync/comments';
 import { deletionConfirmMode } from '@/sync/massDeleteGuard';
 import log from '@/utils/logger';
 
@@ -59,8 +65,10 @@ export function formatApiCommentAsAbyssLines(comment: ITaskComment, indent: stri
 	const body = (comment.title ?? '').replace(/\r/g, '');
 	const lines = body.split('\n');
 	const stamp = comment.createdTime ? formatVaultCommentStamp(comment.createdTime) : '';
-	const firstBody = lines[0] ?? '';
-	const bullet = stamp && !firstBody.startsWith(stamp) ? `${stamp}: ${firstBody}` : firstBody || stamp;
+	const plainFirst = commentBodyWithoutStamp(lines[0] ?? '');
+	const bullet = plainFirst
+		? (stamp ? `${stamp}: ${plainFirst}` : plainFirst)
+		: stamp;
 	const out = [`${indent}- ${bullet}`];
 	for (let i = 1; i < lines.length; i++) {
 		out.push(`${indent}  ${lines[i]}`);
@@ -84,6 +92,25 @@ export function migrateLegacyCommentsInContent(content: string): { description: 
 	return { description: stripped, legacyBodies };
 }
 
+export type AbyssCommentSyncOptions = {
+	/** User removed all Abyss comment bullets (line hash changed, Dexie maps still present). */
+	obsidianRemovedCommentBullets?: boolean;
+};
+
+/** Dexie maps that came from vault pushes (not TT-only `remote` origin). */
+export function vaultHadSyncedCommentBullets(maps: readonly TaskCommentMap[]): boolean {
+	return maps.some(m => m.origin !== 'remote');
+}
+
+function shouldWipeRemoteCommentsForEmptyVault(
+	threads: AbyssCommentThread[],
+	maps: readonly TaskCommentMap[],
+	opts?: AbyssCommentSyncOptions,
+): boolean {
+	if (threads.length > 0 || maps.length === 0) return false;
+	return opts?.obsidianRemovedCommentBullets === true || vaultHadSyncedCommentBullets(maps);
+}
+
 /**
  * Push Abyss comment threads to TickTick Comments API; descriptions stay in task `content` via parser.
  */
@@ -93,11 +120,26 @@ export async function syncAbyssCommentsToTickTick(
 	projectId: string,
 	taskLines: string[],
 	legacyContent?: string,
+	opts?: AbyssCommentSyncOptions,
 ): Promise<boolean> {
 	if (!api || !useAbyssCommentsApi() || !taskId || !projectId) return false;
 
 	const threads = extractAbyssCommentThreads(taskLines);
 	let maps = await listCommentMapsForTask(taskId);
+
+	if (shouldWipeRemoteCommentsForEmptyVault(threads, maps, opts) && deletionConfirmMode() !== 'skip') {
+		const remote = await api.getTaskComments(projectId, taskId);
+		let changed = false;
+		for (const c of remote) {
+			if (await api.deleteTaskComment(projectId, taskId, c.id)) changed = true;
+		}
+		maps = await listCommentMapsForTask(taskId);
+		for (const m of maps) {
+			await deleteCommentMap(m.id);
+			changed = true;
+		}
+		return changed;
+	}
 	const mapByFp = new Map(maps.map(m => [m.fingerprint, m]));
 
 	let changed = false;
@@ -117,6 +159,7 @@ export async function syncAbyssCommentsToTickTick(
 						fingerprint: fp,
 						ticktickCommentId: created.id,
 						body,
+						origin: 'vault',
 					});
 					changed = true;
 				}
@@ -124,7 +167,7 @@ export async function syncAbyssCommentsToTickTick(
 		}
 	}
 
-	const remote = await api.getTaskComments(projectId, taskId);
+	let remote = await api.getTaskComments(projectId, taskId);
 	const remoteIds = new Set(remote.map(c => c.id));
 	maps = await listCommentMapsForTask(taskId);
 	const plan = planCommentSync(taskLines, remote, maps);
@@ -138,14 +181,21 @@ export async function syncAbyssCommentsToTickTick(
 			fingerprint: fp,
 			ticktickCommentId: r.comment.id,
 			body: r.comment.title ?? '',
+			origin: 'remote',
 		});
-		changed = true;
+		// Map-only bookkeeping must not count as a vault→TT push (pilot test-11-12 /
+		// BUG-COMMENT-DISK-READ): do not set `changed` here.
 	}
+
+	const tickTickCommentTitle = (body: string) => {
+		const plain = commentBodyWithoutStamp(body);
+		return (plain || body).trim();
+	};
 
 	for (const v of plan.vaultOnly) {
 		const thread = v.thread;
 		const fp = mapFingerprintForThread(thread);
-		const created = await api.addTaskComment(projectId, taskId, thread.body);
+		const created = await api.addTaskComment(projectId, taskId, tickTickCommentTitle(thread.body));
 		if (created?.id) {
 			await upsertCommentMap({
 				id: commentMapId(taskId, fp),
@@ -154,6 +204,7 @@ export async function syncAbyssCommentsToTickTick(
 				fingerprint: fp,
 				ticktickCommentId: created.id,
 				body: thread.body,
+				origin: 'vault',
 			});
 			changed = true;
 		}
@@ -180,18 +231,44 @@ export async function syncAbyssCommentsToTickTick(
 				fingerprint: fp,
 				ticktickCommentId: created.id,
 				body: vaultBody,
+				origin: 'vault',
 			});
 			changed = true;
 		}
 	}
 
-	for (const m of maps) {
-		if (vaultStillHasMappedComment(m, threads)) continue;
-		if (threads.length === 0) continue;
-		if (deletionConfirmMode() === 'skip') continue;
-		if (remoteIds.has(m.ticktickCommentId)) {
-			await api.deleteTaskComment(projectId, taskId, m.ticktickCommentId);
+	// Re-plan after creates so deletes use a fresh remote list (BUG-COMMENT-PUSH-STALE-REMOTE).
+	remote = await api.getTaskComments(projectId, taskId);
+	remoteIds.clear();
+	for (const c of remote) remoteIds.add(c.id);
+	maps = await listCommentMapsForTask(taskId);
+	const planAfterPush = planCommentSync(taskLines, remote, maps);
+
+	const vaultKeys = new Set(normalizedKeysFromVaultLines(taskLines));
+	// Never delete TickTick comments when GET returned an empty list — avoids mass wipe on
+	// transient API failures or a partial vault read (BUG-COMMENT-NO-MASS-DELETE).
+	// When TickTick has comment keys the vault lacks, pull must add bullets first (push runs
+	// before pull); deleting here wiped TT-only comments (BUG-COMMENT-TT-AHEAD-NO-DELETE).
+	if (
+		remote.length > 0
+		&& deletionConfirmMode() !== 'skip'
+		&& !remoteCommentKeysAheadOfVault(taskLines, remote)
+	) {
+		for (const entry of planAfterPush.mapWithoutVault) {
+			const m = entry.map;
+			const r = entry.remote;
+			if (!m || !r?.comment.id) continue;
+			const mapKey = normalizedCommentKey(m.body) || normalizedCommentKey(m.fingerprint);
+			if (mapKey && vaultKeys.has(mapKey)) continue;
+			if (vaultStillHasMappedComment(m, threads)) continue;
+			if (remoteIds.has(m.ticktickCommentId)) {
+				await api.deleteTaskComment(projectId, taskId, m.ticktickCommentId);
+			}
+			await deleteCommentMap(m.id);
+			changed = true;
 		}
+	}
+	for (const m of planAfterPush.orphanMaps) {
 		await deleteCommentMap(m.id);
 		changed = true;
 	}

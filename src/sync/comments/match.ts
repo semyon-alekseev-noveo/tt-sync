@@ -39,17 +39,49 @@ export function vaultHasUnpushedCommentThreads(
 	remoteCommentCount?: number,
 ): boolean {
 	const apiKeys = new Set(normalizedKeysFromRemote(remote));
-	for (const t of extractAbyssCommentThreads(taskLines)) {
+	const remoteIds = new Set(remote.map(c => c.id).filter((id): id is string => !!id));
+	const threads = extractAbyssCommentThreads(taskLines);
+	const missingFromApi = threads.filter(t => !apiKeys.has(normalizedCommentKey(t.body)));
+	if (missingFromApi.length === 0) return false;
+
+	// Dexie `commentCount` ahead of an empty GET means stale maps or a failed prior push.
+	if (remote.length === 0 && typeof remoteCommentCount === 'number' && remoteCommentCount > 0) {
+		return true;
+	}
+
+	const mapForThread = (t: AbyssCommentThread) => {
 		const key = normalizedCommentKey(t.body);
-		if (apiKeys.has(key)) continue;
-		const mapped = maps.some(m => {
+		return maps.find(m => {
 			const mk = normalizedCommentKey(m.body);
 			return mk === key || m.fingerprint === commentFingerprint(t.body);
 		});
-		if (mapped && remoteCommentCount === 0 && remote.length === 0) continue;
-		return true;
+	};
+
+	for (const t of missingFromApi) {
+		const mapped = mapForThread(t);
+		if (!mapped) return true;
+		if (mapped.ticktickCommentId && !remoteIds.has(mapped.ticktickCommentId)) {
+			// Vault-origin stale id → failed POST or never landed; re-push even for a single thread.
+			if (mapped.origin === 'vault') return true;
+			// Several stale maps after mass TT wipe.
+			if (missingFromApi.length > 1) return true;
+		}
 	}
-	return false;
+
+	// One mapped thread missing while TT still has other comments → wait for pull (TP-COMMENT-TT-DELETE).
+	if (remote.length > 0) return false;
+
+	// Empty Comments API + commentCount 0: one remote-origin mapped miss is a TT delete pending pull;
+	// unmapped or vault-origin threads still need a push.
+	if (remoteCommentCount === 0 && remote.length === 0) {
+		if (missingFromApi.length > 1) return true;
+		if (missingFromApi.length === 1) {
+			const m = mapForThread(missingFromApi[0]);
+			if (!m || m.origin === 'vault') return true;
+			return false;
+		}
+	}
+	return true;
 }
 
 import type { CommentSyncMatch, CommentSyncPlan, RemoteCommentRef, VaultCommentThreadRef } from '@/sync/comments/types';

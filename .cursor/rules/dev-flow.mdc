@@ -5,6 +5,7 @@ alwaysApply: true
 
 Follow DEV_FLOW.md at the repo root.
 
+- Pilot gate phases and issue handoff: `.cursor/rules/pilot-results.mdc` (results under `docs/pilot/results/`).
 - Case ID and expected behavior in ABYSS_FIRST_CASES.md (or PO_STATUS.md for an open bug) before the code change.
 - Failing test named by that ID, then the fix. Do not delete or weaken tests to go green.
 - `npx vitest run` and `npm run build` must pass, including the synchronizationInner integration test.

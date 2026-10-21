@@ -4,7 +4,7 @@
 **Audience:** Product owner / decision maker  
 **Repo:** `tickticksync` branch `abyss-mapping`  
 **Test vault:** `<pilot-vault>` (copy only; live vault `<live-vault>` untouched)  
-**Install:** BRAT → `https://github.com/semyon-alekseev-noveo/tt-sync` track **latest release** (**2.0.60**, tag `2.0.60`); plugin id **`tickticksync-abyss`** — `docs/BRAT_INSTALL.md`. Preset: `00 Inbox/TTS-data-preset.json`.
+**Install:** BRAT → `https://github.com/semyon-alekseev-noveo/tt-sync` track **latest release** (**2.0.74**, tag `2.0.74`); plugin id **`tickticksync-abyss`** — `docs/BRAT_INSTALL.md`. Preset: `00 Inbox/TTS-data-preset.json`.
 
 История изменений — только в `CHANGELOG.md`; здесь — снимок для PO.
 
@@ -25,6 +25,11 @@
 
 ## Validation
 
+- Релиз **2.0.74** (2026-10-21): **BUG-COMMENT-API-POST-500** — v2 comment POST uses webapp body; **PILOT-GATE-TEST-11-12** pass. Vitest **680**.
+- Релиз **2.0.64** (2026-10-21): **BUG-COMMENT-BOTH-WAYS** — при расхождении с обеих сторон reconcile пушит vault-only комменты в TT и не пропускает pull TT-only. Vitest **659**.
+- Релиз **2.0.63** (2026-10-21): **BUG-COMMENT-TT-AHEAD-NO-DELETE** — не удалять TT Comments, которых ещё нет в vault (push до pull). Включает **2.0.61**/**2.0.62**. Vitest **658**.
+- Релиз **2.0.62** (2026-10-21): **BUG-COMMENT-STALE-MAPS** — после массового wipe в TT снова пушит несколько vault-комментов со stale maps; reconcile не блокируется guard `skip` для vault-ahead. Vitest **657**. Пилот — **partial** (`TEST_PLAN.md`).
+- Релиз **2.0.61** (2026-10-21): **BUG-COMMENT-NO-MASS-DELETE** — push path no longer deletes mapped TT comments when API list is empty or when adding a new vault bullet. Vitest **655**.
 - Релиз **2.0.60** (2026-10-21): hotfix — `vaultHasUnpushedCommentThreads` restores **TP-COMMENT-TT-DELETE** while keeping **BUG-COMMENT-VAULT-AHEAD** push. Vitest **653**.
 - Релиз **2.0.59** (2026-10-21): **BUG-COMMENT-VAULT-AHEAD**, **BUG-COMMENT-MERGE-NO-STRIP**, **BUG-COMMENT-MANUAL-PRE-PULL**. Vitest **652**. Superseded by **2.0.60** for TT-delete regression.
 - Релиз **2.0.58** (2026-10-21): PR #9 comment sync wire — normalized keys (`planCommentSync`, **BUG-COMMENT-KEY-EQUIV**), no TT wipe when vault has no comment bullets (**BUG-COMMENT-NO-TT-WIPE**), active note in pre-pull push (**BUG-COMMENT-ACTIVE-NOTE**); `SyncRunContext` / `preparePhase` scaffold. Vitest **649**. Пилот NOTE-L3b / comment cases — **not run** (Thinkpad-tts-test).
@@ -54,6 +59,7 @@
 | **BUG-PULL-COMMENT-STALE** | P2 | fixed on this branch | `vaultLineBehindTask` сравнивает отпечатки Comments API. `getTaskById` только если заголовок/статус/content уже совпали; повторного вызова в цикле vault-sync нет. Комментарии кэшируются на задаче (`_apiComments`) |
 | **RISK-PULL-WINS-LOCAL** | P2 | open | При победе локальной версии в LWW строка в vault может остаться устаревшей |
 | **BUG-COMMENT-MAP-ORPHAN** | P2 | fixed on this branch | `deleteCommentMapsForTask` вызывается из `TaskRepository` (delete/hard delete/purge), `markTaskDeleted` и pull при удалённой на TT задаче |
+| **PILOT-GATE-TEST-11-12** | P0 | **pass** (**2.0.74**) | `test-11-12` → TT Comments `comment 1` + `test-new-verision`. Evidence: `docs/pilot/results/PILOT-GATE-TEST-11-12/16-phase-3b-verify.md`. Корневой фикс **BUG-COMMENT-API-POST-500** (#21). Issues #10–#14/#21 closed. |
 | **BUG-COMMENT-NO-PUSH** | P0 | fix on branch (pilot **2.0.51** fail) | Перерисовка строки больше не снимает vault-комментарии, которых нет в `Comments:` базе; перед записью файла они пушатся в Comments API. NOTE-L3b на пилоте ещё не перегнан. |
 | **BUG-STALE-EDITOR-WRITE** | P0 | fixed в **2.0.54** (pilot **not run**) | Открытая заметка переписывалась из снимка, снятого до Comments API. Нажатия за это окно пропадали из редактора, файл на диске оставался новее. Комментарий, удалённый в TickTick, оставался в заметке, поэтому перезапись шла на каждом sync. |
 | **BUG-OPEN-NOTE-BUFFER** | P0 | fixed в **2.0.55** (pilot **not run**) | На 2.0.54 буфер открытой заметки откатывался, файл на диске оставался новым. Пуш без `lastVaultSync`, строка под курсором как vault-behind, `syncRead` / `syncCachedRead`, merge детей из Dexie. Кейсы TP-NO-CARET-REWRITE, TP-ACTIVE-PUSH-DURING-SYNC, TP-NO-STALE-VIEW-READ, TP-ABYSS-LOCAL-CHILD-KEEP, TP-TWO-LEAVES. |

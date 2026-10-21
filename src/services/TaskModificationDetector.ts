@@ -4,7 +4,8 @@ import { mergeTask, conflictNote } from '@/merge3';
 import { isBlankTitle, isUnfinishedCapture, stripFileLinks } from '@/projectScheme';
 import { abyssLinesToNote, isAbyssNoteLine, mergeAbyssBlock, stripLegacyCommentsBlock } from '@/abyssFormat';
 import { extractAbyssCommentThreads } from '@/abyssFormat';
-import { syncAbyssCommentsToTickTick, useAbyssCommentsApi } from '@/abyssCommentSync';
+import { syncAbyssCommentsToTickTick, useAbyssCommentsApi, type AbyssCommentSyncOptions } from '@/abyssCommentSync';
+import { listCommentMapsForTask } from '@/db/taskCommentMaps';
 import { appendContextTags, dedupeTags, stripInjectedContextTags } from '@/contextTags';
 /**
  * TaskModificationDetector - Detects task changes in markdown files
@@ -368,15 +369,19 @@ export class TaskModificationDetector {
 					return false;
 				}
 				// The 5s open-note push (identifiedOnly) calls the Comments API only when a comment line changed the hash.
-				if (useAbyssCommentsApi() && taskRecord.taskLines?.length && !options?.identifiedOnly) {
-					const threads = extractAbyssCommentThreads(taskRecord.taskLines);
-					if (threads.length) {
+				if (useAbyssCommentsApi() && savedTask.projectId) {
+					const lines = taskRecord.taskLines ?? [];
+					const threads = extractAbyssCommentThreads(lines);
+					const runCommentSync = threads.length > 0
+						? !options?.identifiedOnly
+						: true;
+					if (runCommentSync) {
 						try {
 							await syncAbyssCommentsToTickTick(
 								this.plugin.tickTickRestAPI,
 								taskId,
 								savedTask.projectId,
-								taskRecord.taskLines,
+								lines,
 								savedTask.content,
 							);
 						} catch (e) {
@@ -494,17 +499,31 @@ export class TaskModificationDetector {
 			const taskId = this.plugin.taskParser.getTickTickId(line);
 			if (!taskId) continue;
 			const taskRecord = fileMap.getTaskRecord(taskId);
-			if (!taskRecord?.taskLines?.length) continue;
+			if (!taskRecord) continue;
 			const savedTask = await this.plugin.taskRepository.loadTaskById(taskId);
 			if (!savedTask?.projectId) continue;
 			if (pushLimit.allowedListIds?.size && !tickTickTaskEntersVault(savedTask, pushLimit)) continue;
+			let taskNotes = '';
+			if (getSettings().syncNotes && taskRecord.taskLines?.length) {
+				taskNotes = useAbyssCommentsApi()
+					? abyssLinesToNote(taskRecord.taskLines)
+					: (this.plugin.taskParser.getNoteString(taskRecord, taskId) ?? '');
+			}
+			const newHash = await this.plugin.taskParser?.getLineHash(taskRecord.task + taskNotes);
 			try {
+				const commentOpts = await this.abyssCommentSyncOptions(
+					taskId,
+					taskRecord.taskLines ?? [],
+					savedTask.lineHash,
+					newHash ?? '',
+				);
 				await syncAbyssCommentsToTickTick(
 					this.plugin.tickTickRestAPI,
 					taskId,
 					savedTask.projectId,
-					taskRecord.taskLines,
+					taskRecord.taskLines ?? [],
 					savedTask.content,
+					commentOpts,
 				);
 			} catch (e) {
 				log.warn('Abyss comment sweep failed', taskId, filepath, e);
@@ -556,6 +575,19 @@ export class TaskModificationDetector {
 	 * (docs/TICKTICK_DELTA_API.md §3.2). Returning false keeps comment sync on the
 	 * unchanged-hash path. A line whose hash matches Dexie is not pushed.
 	 */
+	private async abyssCommentSyncOptions(
+		taskId: string,
+		taskLines: string[],
+		savedLineHash: string | undefined,
+		newLineHash: string,
+	): Promise<AbyssCommentSyncOptions | undefined> {
+		if (!savedLineHash || !newLineHash || newLineHash === savedLineHash) return undefined;
+		if (extractAbyssCommentThreads(taskLines).length > 0) return undefined;
+		const maps = await listCommentMapsForTask(taskId);
+		if (!maps.length) return undefined;
+		return { obsidianRemovedCommentBullets: true };
+	}
+
 	private async skipPushWhenTickTickRenamedVaultLine(
 		_lineTask: ITask,
 		_savedTask: ITask,
@@ -752,16 +784,23 @@ export class TaskModificationDetector {
 			await this.plugin.taskRepository.markVaultInSync?.(lineTask.id);
 		}
 
-		if (useAbyssCommentsApi() && taskRecord.taskLines?.length) {
+		if (useAbyssCommentsApi()) {
 			const projectId = lineTask.projectId || savedTask.projectId;
 			if (projectId) {
 				try {
+					const commentOpts = await this.abyssCommentSyncOptions(
+						taskId,
+						taskRecord.taskLines ?? [],
+						savedTask.lineHash,
+						newHash,
+					);
 					const commentPushed = await syncAbyssCommentsToTickTick(
 						this.plugin.tickTickRestAPI,
 						taskId,
 						projectId,
-						taskRecord.taskLines,
+						taskRecord.taskLines ?? [],
 						savedTask.content,
+						commentOpts,
 					);
 					if (commentPushed) modified = true;
 				} catch (e) {
