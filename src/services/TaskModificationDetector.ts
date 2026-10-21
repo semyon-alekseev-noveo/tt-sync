@@ -32,6 +32,7 @@ import type { ITask } from '@/api/types/Task';
 import type { LocalTask } from '@/db/schema';
 import { NewFileMap, type ITaskItemRecord, type ITaskRecord } from '@/services/NewFileMap';
 import { commitVaultText, editorsForFile, readNoteForWrite } from '@/services/vaultWrite';
+import { registerPendingMarkerTaskId } from '@/sync/pendingMarkerTaskIds';
 import { syncCachedRead, syncRead } from '@/sync/fileRunCache';
 import { FolderSyncService } from '@/services/FolderSyncService';
 import { getSettings } from '@/settings';
@@ -1067,6 +1068,7 @@ export class TaskModificationDetector {
 				const stillThere = planned.every((text, i) => editor.getLine(cursor.line + i) === text);
 				if (!stillThere) {
 					log.info('Deferring new-task line write: the open line changed');
+					registerPendingMarkerTaskId(newTask.id);
 				} else if (file instanceof TFile) {
 					const snapshot = typeof editor.getValue === 'function' ? editor.getValue() : fileMap.getFileLines();
 					const lines = snapshot.split('\n');
@@ -1076,14 +1078,20 @@ export class TaskModificationDetector {
 						...decoratedText.split('\n'),
 						...lines.slice(start + 1 + noteLineCount),
 					].join('\n');
-					await commitVaultText(this.app, file, snapshot, next);
+					const commit = await commitVaultText(this.app, file, snapshot, next);
+					if (commit.status === 'deferred') {
+						registerPendingMarkerTaskId(newTask.id);
+					}
 				}
 			} else if (line !== null) {
 				const file = this.app.vault.getAbstractFileByPath(fileMap.getFilePath());
 				if (file instanceof TFile) {
 					const snapshot = fileMap.getFileLines();
 					fileMap.replaceLines(line, 1 + noteLineCount, decoratedText);
-					await commitVaultText(this.app, file, snapshot, fileMap.getFileLines());
+					const commit = await commitVaultText(this.app, file, snapshot, fileMap.getFileLines());
+					if (commit.status === 'deferred') {
+						registerPendingMarkerTaskId(newTask.id);
+					}
 				}
 			}
 		} catch (error) {

@@ -613,6 +613,19 @@ Expected: the line is visible in the editor. `cat` on the file path matches what
 
 Automated: `staleFileWrite.test.ts` (`TP-EMPTY-EDITOR-DISK`).
 
+### BUG-DEFERRED-ID-PHASE2-DELETE — create on open note, no false deletion
+
+1. Open a daily/inbox note with the caret on a new `- [ ]` line (no `ticktick_id`).
+2. Run **Synchronize** (or wait for startup sync).
+
+Expected: TickTick shows the new task; the note eventually gets `%%[ticktick_id:: …]%%` when the caret moves or typing pauses. **No** “task lines were removed from Obsidian” dialog for that task in the same run.
+
+Automated: `pendingMarkerDeletion.test.ts` (`BUG-DEFERRED-ID-PHASE2-DELETE`).
+
+| ID | Pilot status | Evidence |
+|----|----------------|----------|
+| BUG-DEFERRED-ID-PHASE2-DELETE | not run | Pilot 2026-10-21 `00 Inbox/2026-10-21.md` `test-10-35`: TT create + false delete modal, no id in file (`write-trace` defer caret). |
+
 ### Regressions that must still hold
 
 | ID | What must still hold |
