@@ -98,6 +98,25 @@ export function commentFingerprint(body: string): string {
 	return body.trim().replace(/\s+/g, ' ').toLowerCase();
 }
 
+/** Drop leading `YYYY-MM-DD` / ISO stamp before the comment text (vault line or map body). */
+export function commentBodyWithoutStamp(body: string): string {
+	return body
+		.trim()
+		.replace(/^(\d{4}-\d{2}-\d{2}(?:[T ][\d:+. -]+(?:[+-]\d{2}:\d{2})?)?):\s*/, '')
+		.trim();
+}
+
+export function normalizedCommentKey(body: string): string {
+	return commentFingerprint(commentBodyWithoutStamp(body));
+}
+
+export function commentFingerprintsForThread(thread: AbyssCommentThread): string[] {
+	const fps = new Set<string>([thread.fingerprint, commentFingerprint(thread.body)]);
+	const plain = normalizedCommentKey(thread.body);
+	if (plain) fps.add(plain);
+	return [...fps];
+}
+
 /** TickTick note text -> Abyss child lines. `ind` = full indent of child lines. */
 export function noteToAbyssLines(note: string, ind: string): string[] {
 	const lines = note.replace(/\r/g, '').split('\n');
@@ -175,11 +194,11 @@ export interface TickTickCommentSync {
 
 /** Line indexes of vault comment threads deleted in TickTick since the previous sync. */
 function commentLinesDeletedInTickTick(oldChild: string[], generatedComments: string[], ticktick: TickTickCommentSync): Set<number> {
-	const known = new Set(ticktick.knownBodies.map(commentFingerprint).filter(fp => fp.length > 0));
+	const known = new Set(ticktick.knownBodies.map(normalizedCommentKey).filter(fp => fp.length > 0));
 	const skip = new Set<number>();
 	if (!known.size) return skip;
-	const api = new Set(ticktick.apiBodies.map(commentFingerprint).filter(fp => fp.length > 0));
-	const generated = new Set(extractAbyssCommentThreads(generatedComments).map(t => t.fingerprint));
+	const api = new Set(ticktick.apiBodies.map(normalizedCommentKey).filter(fp => fp.length > 0));
+	const generated = new Set(extractAbyssCommentThreads(generatedComments).map(t => normalizedCommentKey(t.body)));
 	const kinds = classifyChildren(oldChild);
 	let buf: string[] = [];
 	let idx: number[] = [];
@@ -190,7 +209,7 @@ function commentLinesDeletedInTickTick(oldChild: string[], generatedComments: st
 			.map(l => (l.startsWith('- ') ? l.slice(2) : l))
 			.join('\n')
 			.replace(/^\s+/, '');
-		const fp = commentFingerprint(body);
+		const fp = normalizedCommentKey(body);
 		if (known.has(fp) && !api.has(fp) && !generated.has(fp)) idx.forEach(i => skip.add(i));
 		buf = [];
 		idx = [];

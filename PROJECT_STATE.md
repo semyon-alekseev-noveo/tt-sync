@@ -21,11 +21,12 @@
 - **Sync research (2026-10-20):** `docs/TICKTICK_DELTA_API.md` — delta has no comments; echo suppression in `pull.ts` uses `etag`; idle sync does not call `getTaskById` per quiet task.
 - **Deletion guard (2026-10-20):** over-threshold or empty-side deletions are held and the checkpoint stays. Defaults: guard on, more than 10 tasks and more than 20%, startup delay 30s. Pilot cases in `TEST_PLAN.md` are not run.
 - **Redo:** journal `<vault>/.tickticksync/journal/`; palette undo previews then applies `planUndo`. Not soaked on the live vault.
+- **Modularization (2026-10-21):** Phase 0 — `src/sync/SyncRunContext.ts`, plan in `docs/SYNC_MODULARIZATION.md`. Next: PR 1 extract `synchronizationInner` phases without behavior change (`TECH-CIRC-1`).
 
 ## Validation
 
 - Build: `npm run build` in repo root; CI on `abyss-mapping` via `.github/workflows/ci.yml`.
-- Unit tests: `npx vitest run` (87 files, **631 passed** on this branch; includes idle-sync `getTaskById` baseline of 3, `BUG-COMMENT-NO-PUSH`, and the open-note buffer cases). Abyss comments → TickTick **Comments API** when `syncAbyssCommentsViaApi` (default on); descriptions stay in `content`.
+- Unit tests: `npx vitest run` — see latest `CHANGELOG.md` iteration (currently **89** files, **637** passed; includes `synchronizationInner.integration.test.ts`). Abyss comments → TickTick **Comments API** when `syncAbyssCommentsViaApi` (default on); descriptions stay in `content`.
 - Manual pilot: **`SMOKE_TESTS.md`**. Palette: **Synchronize** only; full TT pull on plugin load. Context tags **2.0.41** (`syncNoteContextTags`).
 - BRAT installs: GitHub Release assets from `.github/workflows/release.yml` (see `docs/BRAT_INSTALL.md`).
 - TT cleanup verified 2026-10-16 via MCP (no `ticktick` tag left on polluted set).
@@ -45,7 +46,8 @@
 2. Revoke the exposed `tp_…` token if it is still valid.
 3. Confirm Abyss Inbox is **With inbox tag** `#inbox` on the pilot. Untagged mode is still open.
 4. Still open in code: GAP-COMMENT-EDIT, RISK-PULL-WINS-LOCAL, RISK-DUAL-STORE, RISK-LARGE-VAULT (id index and per-run file cache landed; the `getTaskById` probe and `ensureVaultFilesRegistered` full scan remain), TECH-START-1, `main` ↔ `services` cycle.
-5. Delta pilot `TP-DELTA-*` then etag-based echo + comment pull policy per `docs/TICKTICK_DELTA_API.md` §3.2–3.3.
+5. **Sync modularization:** PR 1 per `docs/SYNC_MODULARIZATION.md` (extract phases from `TickTickService.synchronizationInner`). PR 2 lifecycle / pending markers via `SyncRunContext` only.
+6. Delta pilot `TP-DELTA-*` then etag-based echo + comment pull policy per `docs/TICKTICK_DELTA_API.md` §3.2–3.3.
 
 ## References
 
@@ -62,6 +64,8 @@ Canonical:
 - `ABYSS_NOTES_ALIGNMENT.md`
 - `ABYSS_MAPPING.md`
 - `docs/TICKTICK_DELTA_API.md` — delta API, echo/`etag`, comment gaps, recommended sync shape
+- `docs/SYNC_MODULARIZATION.md` — module boundaries, phase list, PR 1–4 sequence
+- `docs/ANALYST_REFERENCE_DIAGRAMS.md` — analyst layer diagram (bug routing)
 - `TODO.md`
 
 Archive (not requirements): `GTD_SYNC_CASES.md`, `GTD_SYNC_RESEARCH.md`, `TT_ABYSS_ROADMAP.md`, `SYNC_PROJECTS_AND_SUBTASKS.md`.

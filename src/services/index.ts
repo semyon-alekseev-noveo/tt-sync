@@ -1,7 +1,7 @@
 import { childBlocks, sortOrdersFromLines, reorderLinesBySortOrder } from '@/subtaskOrder';
 import { commitVaultText, editorsForFile, readNoteForWrite } from '@/services/vaultWrite';
 import { deferActiveFilePush, releaseDeferredActiveFilePushes } from '@/services/activeFilePush';
-import { editedSince, loadPluginWrites, pluginWriteMtimes } from '@/utils/editedSince';
+import { loadPluginWrites, pluginWriteMtimes } from '@/utils/editedSince';
 import { healTagListMappings } from '@/listMapping';
 import { idsPresentInVault, dedupeTaskIds } from '@/utils/vaultIdScan';
 import { shouldBackupToday } from '@/backupPolicy';
@@ -26,7 +26,9 @@ import { getTick } from '@/api/tick_singleton_factory'
 import { syncTickTickWithDexie } from '@/sync/sync';
 import { prepareDeletionGuard, type GuardedPull } from '@/sync/deletionGuardRun';
 import { clearGuardRun, deletionConfirmMode } from '@/sync/massDeleteGuard';
-import { prunePendingMarkerTaskIds } from '@/sync/pendingMarkerTaskIds';
+import { createSyncRunContext } from '@/sync/SyncRunContext';
+import { runPreparePhase } from '@/sync/phases/preparePhase';
+import { pathsForPrePullPush } from '@/sync/vault-push/pushLocalPaths';
 import type { SyncRunResult } from '@/sync/result';
 import { db, initDB } from "@/db/dexie";
 import { getAllProjects, getProjectById, upsertProjects } from '@/db/projects';
@@ -136,7 +138,8 @@ export class TickTickService {
 		// (checkpoint often exceeds file mtime after pull, so comment-only edits were skipped).
 		const last = since ?? meta?.lastVaultPushWallMs ?? 0;
 		const files = await this.plugin.fileMetadataService?.getAllFileMetadata();
-		const edited = editedSince(this.plugin.app, Object.keys(files ?? {}), last);
+		const registered = Object.keys(files ?? {});
+		const edited = pathsForPrePullPush(this.plugin.app, registered, last);
 		this.locallyEdited = new Set(edited);
 		for (const path of edited) {
 			try { await this.plugin.taskModificationDetector.checkFileForModifications(path); }
@@ -235,7 +238,9 @@ export class TickTickService {
 		let errorMessage = '';
 		clearGuardRun();
 		this.guardedPull = undefined;
-		await prunePendingMarkerTaskIds((ids) => idsPresentInVault(this.plugin.app, ids));
+		const syncCtx = createSyncRunContext({ trigger, fullSync });
+		await syncCtx.reconcilePendingMarkers((ids) => idsPresentInVault(this.plugin.app, ids));
+		log.debug(`TickTickSync run ${syncCtx.syncId} (${trigger}, fullSync=${fullSync})`);
 		try {
 			endFiles = beginFileRun(this.plugin.app.vault, { editorOpen: (path) => editorsForFile(this.plugin.app, path).length > 0 });
 			endApi = observeSyncApi(this.plugin.tickTickRestAPI);
@@ -244,10 +249,7 @@ export class TickTickService {
 			// NEW: Use TaskCache
 			this.plugin.syncRunning = true;
 			await timePhase('prepare', async () => {
-				ui.setFullStep('Preparing…');
-				await this.plugin.applyExternalSettings();
-				await this.plugin.checkSettingsMigration();
-				await this.plugin.taskCache?.fill();
+				await runPreparePhase({ plugin: this.plugin, service: this, ui, ctx: syncCtx });
 			});
 
 			await doWithLock(LOCK_TASKS, async () => {
@@ -354,6 +356,7 @@ export class TickTickService {
 			ui.setFullStep('Sync failed', errorMessage);
 			log.error('Error on synchronization: ', error);
 		} finally {
+			syncCtx.resetLifecycle();
 			clearGuardRun();
 			this.guardedPull = undefined;
 			endApi();
