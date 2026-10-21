@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-21 02:50 UTC
+
+- Context: Owner merged PR #6 (open note buffer rollback on 2.0.54) and asked for release **2.0.55**.
+- Target: Tag **2.0.55**.
+- Actions log: Bumped `package.json`, `manifest.json`, `versions.json` to **2.0.55**; `PO_STATUS.md` install baseline. **2.0.55** ships PR #6: `lastVaultSync` after vault save, cursor/selection defer spans, `syncRead` / `syncCachedRead`, local Abyss child keep in `mergeAbyssBlock`, optional `debugWriteTrace`, and related tests in `TEST_PLAN.md`.
+- Validation: `npx vitest run` → 87 files, **631 passed**; `npm run build` ok.
+- Problems: Pilot rows for **BUG-OPEN-NOTE-BUFFER** and prior **2.0.54** hotfix cases in `TEST_PLAN.md` are **not run**.
+- To Be Done: BRAT **2.0.55**; pilot open-note-buffer and hotfix sections.
+- References: `TEST_PLAN.md`, `PO_STATUS.md`, `CHANGELOG.md`
+
 ### Iteration 2026-10-20 15:20 UTC
 
 - Context: On 2.0.54 the open note's editor buffer rolled back while the file on disk stayed current. It did not happen on 2.0.47. `commitVaultText` (PR #4) did not stop it.
