@@ -1,7 +1,5 @@
 # Changelog
 
-## Unreleased
-
 ### Iteration 2026-10-20 15:20 UTC
 
 - Context: On 2.0.54 the open note's editor buffer rolled back while the file on disk stayed current. It did not happen on 2.0.47. `commitVaultText` (PR #4) did not stop it.
@@ -12,8 +10,15 @@
 - To Be Done: Pilot the new section. Do not tag from this branch.
 - References: `TEST_PLAN.md`, `ABYSS_FIRST_CASES.md`, `PO_STATUS.md`
 
-- Mass-deletion / empty-side guard. A sync plans vault→TickTick and TickTick→vault task and comment deletions before applying any of them. More than 10 tasks and more than 20% of tracked tasks, or any deletion while one side looks empty, applies nothing destructive and leaves the checkpoint. Creates and updates still run. Manual sync can apply once, skip, or open a report under `.tickticksync/reports/`. Startup and scheduled sync only notify. Unreadable, conflict, sync-pending, and skipped files do not produce deletions. Startup waits for layout ready and Obsidian Sync idle, then 30 seconds by default. Settings: `massDeleteGuardEnabled` (default on), `massDeleteTaskThreshold` (10), `massDeletePercentThreshold` (20), `massDeletePreviewCount` (20), `startupSyncDelaySeconds` (30). Turning the guard off restores the previous deletion behavior. No version bump.
-- Validation: `npx vitest run` → 81 files, **601 passed**; `npm run build` ok. Pilot rows in `TEST_PLAN.md` are **not run**.
+### Iteration 2026-10-20 14:15 UTC
+
+- Context: Owner merged PR #4 (stale editor write hotfix) and PR #5 (mass-deletion guard) and asked for release **2.0.54**.
+- Target: Tag **2.0.54**.
+- Actions log: Bumped `package.json`, `manifest.json`, `versions.json` to **2.0.54**; `PO_STATUS.md` install baseline. **2.0.54** ships open-note writes through `commitVaultText`, redo journal patches for editor transactions, and mass-deletion / empty-side guard (`massDeleteGuard.ts`, settings, manual modal).
+- Validation: `npx vitest run` → 85 files, **625 passed**; `npm run build` ok.
+- Problems: Pilot hotfix rows and `TP-EMPTY-SIDE-GUARD` in `TEST_PLAN.md` are **not run**.
+- To Be Done: BRAT **2.0.54**; pilot hotfix and deletion-guard cases.
+- References: `TEST_PLAN.md`, `PO_STATUS.md`, `CHANGELOG.md`
 
 ### Iteration 2026-10-20 13:50 UTC
 
