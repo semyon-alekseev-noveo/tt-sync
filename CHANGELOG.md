@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-21 03:25 UTC
+
+- Context: Pilot repro **BUG-EMPTY-EDITOR-DISK** on Thinkpad-tts-test (`00 Inbox/2026-10-20.md`): disk had text, markdown view empty after reopen on **2.0.55**.
+- Target: **TP-EMPTY-EDITOR-DISK** / release **2.0.56** on branch `feat/tp-empty-editor-disk`.
+- Actions log: `repairEmptyEditorFromDisk` on file-open and active-leaf focus; `readNoteForWrite` disk fallback when buffer empty; `syncDiskToMatchEditor` after open-note patch; `identifiedOnly` documented as **TP-NEW-TASK-NOT-5S**. Docs in `ABYSS_FIRST_CASES.md`, `TEST_PLAN.md`, `PO_STATUS.md`.
+- Validation: `npx vitest run` → 87 files, **634 passed**; `npm run build` ok. Copied `dist/main.js` (+ manifest) to Thinkpad-tts-test plugin folder.
+- Problems: Pilot **TP-EMPTY-EDITOR-DISK** row still **not run** after install.
+- To Be Done: Manual pilot on Thinkpad-tts-test; PR into `abyss-mapping`.
+- References: `TEST_PLAN.md`, `ABYSS_FIRST_CASES.md`, `PO_STATUS.md`, `CHANGELOG.md`
+
 ### Iteration 2026-10-21 02:50 UTC
 
 - Context: Owner merged PR #6 (open note buffer rollback on 2.0.54) and asked for release **2.0.55**.

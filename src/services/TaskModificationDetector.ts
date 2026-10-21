@@ -1000,8 +1000,7 @@ export class TaskModificationDetector {
 
 				if (file && lineNumber !== undefined) {
 					try {
-						const open = editorsForFile(this.app, file.path);
-						const fileContent = open[0] ? open[0].getValue() : await syncRead(this.app.vault, file);
+						const fileContent = await readNoteForWrite(this.app, file);
 						const lines = fileContent.split('\n');
 						if (lines[lineNumber] !== lineText) {
 							log.info(`Deferring item id write in ${filepath}: the line changed`);

@@ -598,6 +598,21 @@ Expected: the edited description and the edited comment stay. The previous comme
 
 Expected: the focused editor (or the first, if neither has focus) receives the patch once. The note is not patched a second time in the other leaf.
 
+### TP-NEW-TASK-NOT-5S — new line without id (expectation, not a failure)
+
+1. Open an inbox/daily note, add a **new** checkbox **without** `ticktick_id`, wait 5+ seconds (do not run Synchronize).
+
+Expected: TickTick does **not** get a new task yet. The line is picked up after you leave the line (settled capture), run **Synchronize**, or edit the file while it is not the active tab. Automated guard: `identifiedOnly` in `pushSettledActiveFile` (`ABYSS_FIRST_CASES.md` **TP-NEW-TASK-NOT-5S**).
+
+### TP-EMPTY-EDITOR-DISK — empty editor, text on disk
+
+1. On the pilot vault, open a daily/inbox note, type a task line, wait until Obsidian has saved (or run a quiet 5s push).
+2. Close the note tab and reopen the same file (or switch away and back).
+
+Expected: the line is visible in the editor. `cat` on the file path matches what you typed. No TickTickSync notice.
+
+Automated: `staleFileWrite.test.ts` (`TP-EMPTY-EDITOR-DISK`).
+
 ### Regressions that must still hold
 
 | ID | What must still hold |
@@ -615,3 +630,4 @@ Expected: the focused editor (or the first, if neither has focus) receives the p
 | TP-NO-STALE-VIEW-READ | not run | Automated: `tpNoStaleViewRead.test.ts`. Vault not run. |
 | TP-ABYSS-LOCAL-CHILD-KEEP | not run | Automated: `abyssStep3.test.ts`. Vault not run. |
 | TP-TWO-LEAVES | not run | Automated: `tpTwoLeaves.test.ts`. Vault not run. |
+| TP-EMPTY-EDITOR-DISK | not run | Automated: `staleFileWrite.test.ts`. Pilot repro 2026-10-21 `00 Inbox/2026-10-20.md`: disk had text, Obsidian UI empty until fix. |
