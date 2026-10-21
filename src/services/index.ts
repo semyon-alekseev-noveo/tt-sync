@@ -26,6 +26,7 @@ import { getTick } from '@/api/tick_singleton_factory'
 import { syncTickTickWithDexie } from '@/sync/sync';
 import { prepareDeletionGuard, type GuardedPull } from '@/sync/deletionGuardRun';
 import { clearGuardRun, deletionConfirmMode } from '@/sync/massDeleteGuard';
+import { prunePendingMarkerTaskIds } from '@/sync/pendingMarkerTaskIds';
 import type { SyncRunResult } from '@/sync/result';
 import { db, initDB } from "@/db/dexie";
 import { getAllProjects, getProjectById, upsertProjects } from '@/db/projects';
@@ -234,6 +235,7 @@ export class TickTickService {
 		let errorMessage = '';
 		clearGuardRun();
 		this.guardedPull = undefined;
+		await prunePendingMarkerTaskIds((ids) => idsPresentInVault(this.plugin.app, ids));
 		try {
 			endFiles = beginFileRun(this.plugin.app.vault, { editorOpen: (path) => editorsForFile(this.plugin.app, path).length > 0 });
 			endApi = observeSyncApi(this.plugin.tickTickRestAPI);

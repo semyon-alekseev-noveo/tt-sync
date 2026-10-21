@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-21 03:58 UTC
+
+- Context: Pilot repro **BUG-DEFERRED-ID-PHASE2-DELETE** on Thinkpad-tts-test (`00 Inbox/2026-10-21.md`, `test-10-35`) on **2.0.56**: TickTick task created while `%%[ticktick_id:: …]%%` deferred (caret on line) → false Phase 2 deletion prompt.
+- Target: Release **2.0.57** on branch `feat/bug-deferred-id-phase2-delete`.
+- Actions log: `pendingMarkerTaskIds` registry; `registerPendingMarkerTaskId` when marker write defers; `TaskDeletionHandler.processSyncRemovedTasks` skips pending ids; `prunePendingMarkerTaskIds` at sync start via `idsPresentInVault`. Regression `pendingMarkerDeletion.test.ts`. Docs in `ABYSS_FIRST_CASES.md`, `TEST_PLAN.md`, `PO_STATUS.md`. Bump `manifest.json`, `package.json`, `versions.json` to **2.0.57**.
+- Validation: `npx vitest run` → 88 files, **635 passed**; `npm run build` ok.
+- Problems: Pilot **BUG-DEFERRED-ID-PHASE2-DELETE** in `TEST_PLAN.md` is **not run**.
+- To Be Done: PR into `abyss-mapping`; owner tags **2.0.57** after merge; pilot case on Thinkpad-tts-test.
+- References: `TEST_PLAN.md`, `ABYSS_FIRST_CASES.md`, `PO_STATUS.md`, `CHANGELOG.md`
+
 ### Iteration 2026-10-21 03:32 UTC
 
 - Context: Owner asked for release **2.0.56** after **TP-EMPTY-EDITOR-DISK** on `feat/tp-empty-editor-disk`.

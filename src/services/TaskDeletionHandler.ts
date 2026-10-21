@@ -22,6 +22,7 @@ import { syncCachedRead } from '@/sync/fileRunCache';
 import { isPathInPushScope } from '@/syncScope';
 import { db } from '@/db/dexie';
 import { classifyFileRead, deletionConfirmMode, obsidianSyncFileState } from '@/sync/massDeleteGuard';
+import { isPendingMarkerTaskId } from '@/sync/pendingMarkerTaskIds';
 import log from '@/utils/logger';
 
 export class TaskDeletionHandler {
@@ -185,6 +186,12 @@ export class TaskDeletionHandler {
 		}
 		for (const id of await this.collectTaskIdsAbsentFromVault()) {
 			taskIds.add(id);
+		}
+		for (const id of [...taskIds]) {
+			if (isPendingMarkerTaskId(id)) {
+				log.info(`TickTickSync: skipping deletion prompt for ${id}; vault marker write is still pending`);
+				taskIds.delete(id);
+			}
 		}
 		if (taskIds.size > 0) {
 			await this.deleteTasksByIds(
