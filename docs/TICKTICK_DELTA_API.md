@@ -92,7 +92,9 @@ Upstream пишет: «such an edit may go unnoticed by delta-based sync» ([Tic
 | `/project/all/trash/page` | GET; `from={cursor}` | Страница корзины с курсором | dida-cli «live read 2026-05-10» | **С** (новая форма: «/page» вместо «/pagination») |
 | `/task/{id}` | GET; `projectId` | Одна задача | Плагин (`getTask`) | **В** |
 | `/project/{pid}/task/{tid}/comments` | GET | Комментарии одной задачи: `id`, `title`, `createdTime`, `modifiedTime` | Плагин; dida-cli «Stable without attachments» | **В** |
-| `/project/{pid}/task/{tid}/comment` (POST), `/comment/{cid}` (PUT, DELETE) | Запись | Создание, правка, удаление. **PUT существует** (dida-cli), значит GAP-COMMENT-EDIT решается без удаления и пересоздания | dida-cli | **С** |
+| `/project/{pid}/task/{tid}/comment` (POST), `/comment/{cid}` (PUT, DELETE) | Запись | Создание, правка, удаление. **PUT существует** (dida-cli), значит GAP-COMMENT-EDIT решается без удаления и пересоздания. **POST body (плагин ≥2.0.74):** webapp shape — `id`, `taskId`, `projectId`, `createdTime`, `title`, …; `{ title }` alone → HTTP 500 (`BUG-COMMENT-API-POST-500`). Empty 200 → success via client id. | dida-cli; плагин `buildAddTaskCommentBody` | **В** (POST shape verified on pilot) |
+
+**Push trigger ≠ API contract.** Даже с правильным POST комментарий из **Abyss Tasks view** не уйдёт, пока плагин не запланирует open-note push на `vault.modify` (не только `editor-change`) — **BUG-COMMENT-ABYSS-VIEW** / **2.0.75**. См. `docs/ANALYST_REFERENCE_DIAGRAMS.md` §2b, `docs/COMMENT_SYNC_MODEL.md`.
 | `/batch/task` | POST `{add, update, delete, addAttachments, updateAttachments, deleteAttachments}` | `id2etag`, `id2error` | pyticktick `post_task_v2`, ticktick-mcp-v2 | **В** |
 | `/batch/taskProject`, `/batch/taskParent` | POST | Перенос в проект, смена родителя | dida-cli, плагин | **В** |
 | `/task/activity/count/all` | POST | Только счётчики «due activity», не история | dida-cli | **С**, для синка бесполезен |

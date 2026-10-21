@@ -641,6 +641,17 @@ Automated: `pushLocalPaths.test.ts` (`BUG-COMMENT-ACTIVE-NOTE`).
 | BUG-COMMENT-VAULT-WIPE | not run | **2.0.68**: remove all comment bullets, **Synchronize** (even if line hash already matches) → all TT Comments deleted; no `behindComments` re-pull; `vaultCommentBehind.test.ts` + `abyssCommentSync.test.ts`. Pilot: `task-11-16` (`6ad83d…`). |
 | BUG-COMMENT-RECONCILE-UPDATE | mitigated | **2.0.73** Phase 3: write-trace kept **`vault-comments-ahead`** while Comments empty (guard OK). Unblocked by **2.0.74** POST fix — Phase 3b Comments land. Evidence: `13-phase-3-verify.md`, `16-phase-3b-verify.md`. |
 | BUG-COMMENT-API-POST-500 | pass | **2.0.74**: webapp POST body + empty-200 client id (`bugCommentApiPost500.test.ts`). Pilot: reload + `tts-sync` → TT Comments **`comment 1`**, **`test-new-verision`**. Evidence: `15-phase-2b-post-fix.md`, `16-phase-3b-verify.md`. |
+| BUG-COMMENT-ABYSS-VIEW | pass | **2.0.75**: Abyss/`vault.modify` schedules 5s push; flush `push-abyss-or-background`. Pilot `task-11-16` / `2026-10-19.md` → TT Comments include user `comment 1` / `коммент 2` + verify bullets. Evidence: `docs/pilot/results/BUG-COMMENT-ABYSS-VIEW/`. Automated: `activeFilePush.test.ts`. |
+
+### BUG-COMMENT-ABYSS-VIEW — Abyss Tasks view comment push
+
+1. Open a synced task in **Abyss Tasks** (not the markdown editor). Stay in Abyss.
+2. Add a child comment bullet under `task-11-16` (or any in-scope synced task).
+3. Wait ≥5s without switching to the markdown editor and without **Synchronize**.
+
+Expected: TickTick **Comments** shows the new text. write-trace may show `flushActiveFilePush` with reason `push-abyss-or-background`.
+
+Automated: `activeFilePush.test.ts` (`BUG-COMMENT-ABYSS-VIEW`).
 
 ### BUG-COMMENT-NO-MASS-DELETE — new vault comment must not wipe TickTick
 

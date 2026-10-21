@@ -90,6 +90,26 @@
 - To Be Done: PR into `abyss-mapping`; comment #31; next slice = lifecycle extract from `syncFiles` (PR 2).
 - References: `docs/SYNC_MODULARIZATION.md`, `docs/pilot/results/TECH-SYNC-MODULARIZATION/`, `CHANGELOG.md`
 
+### Iteration 2026-10-21 14:35 UTC
+
+- Context: Owner approved commit + BRAT release **2.0.75** for **BUG-COMMENT-ABYSS-VIEW**; asked canonical docs to explain Abyss → vault.modify → push path.
+- Target: Ship **2.0.75**; document open-note triggers vs POST body; close #23; PR into `abyss-mapping` (no merge).
+- Actions log: Bump manifest/package/versions/dist; architecture notes in `ANALYST_REFERENCE_DIAGRAMS` §2b, `COMMENT_SYNC_MODEL`, `TICKTICK_DELTA_API`, `ABYSS_NOTES_ALIGNMENT`; update TEST_PLAN/PO/PROJECT_STATE/cases; `gh release create 2.0.75`.
+- Validation: `npm run build` → dist **2.0.75**; prior vitest **682**; release assets match **2.0.74** pattern.
+- Problems: Duplicate-comment race under syncRunning — **open** (unchanged).
+- To Be Done: BRAT Check for updates on pilot; next P0 **PILOT-BATCH-EDITOR-SAFETY** (#15–#18).
+- References: `docs/pilot/results/BUG-COMMENT-ABYSS-VIEW/`, `docs/ANALYST_REFERENCE_DIAGRAMS.md`, `CHANGELOG.md`
+
+### Iteration 2026-10-21 14:27 UTC
+
+- Context: User added comments on **task-11-16** in Abyss view (did not leave Abyss); TT Comments empty on **2.0.74**.
+- Target: **BUG-COMMENT-ABYSS-VIEW** — Abyss `vault.modify` must schedule open-note push; Comments land without markdown editor.
+- Actions log: Baseline evidence; fix `EventHandlerService` + `activeFilePush` (`shouldNotifyPushOnVaultModify`, flush without active-file requirement, Abyss sweep); tests; deploy pilot (no version bump); verify MCP + write-trace.
+- Validation: `npx vitest run` → **682 passed**; `npm run build` ok; MCP Comments for `6ad83d…` include `comment 1`, `коммент 2`, `abyss-view-verify-*`; write-trace `push-abyss-or-background`.
+- Problems: Startup sync can stick `syncRunning` and defer push briefly — **mitigated** by release-after-sync; possible duplicate TT Comments under race — **open**.
+- To Be Done: Owner commit/PR when ready; optional release bump; watch duplicate-comment race.
+- References: `docs/pilot/results/BUG-COMMENT-ABYSS-VIEW/`, `CHANGELOG.md`
+
 ### Iteration 2026-10-21 14:05 UTC
 
 - Context: Owner asked to commit, push feature branch, and publish BRAT release **2.0.74**.
