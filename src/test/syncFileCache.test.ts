@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { TFile } from 'obsidian';
-import { beginFileRun, syncFileMap, syncRead } from '@/sync/fileRunCache';
+import { beginFileRun, syncFileMap, syncRead } from '@/sync/vault-io';
 import { NewFileMap } from '@/services/NewFileMap';
 import { TaskParser } from '@/taskParser';
 

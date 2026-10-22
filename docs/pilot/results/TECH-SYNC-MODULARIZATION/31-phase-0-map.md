@@ -35,7 +35,7 @@ Historical note from owner: `vaultReconcile` + `syncFiles` often **20–45s** co
 |--------|------|------|
 | orchestrator | `services/index.ts` → thin `synchronizationInner` | Phase order, locks, perf, `SyncRunContext` |
 | phases | `src/sync/phases/*` | One function per `timePhase` name |
-| vault-io | `vaultWrite`, `fileRunCache`, `pendingMarkerTaskIds` | Read/write note (PR 3 facade) |
+| vault-io | `src/sync/vault-io/` (+ facade `index.ts`) | Read/write note, cache, pending markers (**PR 3**) |
 | vault-push | TMD, `activeFilePush`, `NewFileMap`, `vault-push/pushLocalPaths` | Obsidian → TT |
 | vault-pull | `VaultSyncCoordinator`, `fileOperation` | TT/Dexie → lines |
 | tt-remote | `sync/sync.ts`, `pull.ts`, `api/` | Delta / Dexie ingest |

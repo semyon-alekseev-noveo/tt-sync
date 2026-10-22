@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { idsPresentInTexts, idsPresentInVault } from '@/utils/vaultIdScan';
-import { beginFileRun } from '@/sync/fileRunCache';
+import { beginFileRun } from '@/sync/vault-io';
 
 /** The previous O(N·T) scan. Equivalence is against this, not against a new interpretation. */
 async function idsPresentInVaultNaive(app: { vault: { getMarkdownFiles: () => { path: string }[]; cachedRead: (f: { path: string }) => Promise<string> } }, ids: string[]): Promise<Map<string, string>> {

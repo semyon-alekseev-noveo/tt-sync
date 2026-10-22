@@ -11,7 +11,7 @@ import {
 	isPendingMarkerTaskId,
 	prunePendingMarkerTaskIds,
 	registerPendingMarkerTaskId,
-} from '@/sync/pendingMarkerTaskIds';
+} from '@/sync/vault-io';
 import type { SyncPerfTrigger } from '@/sync/perf';
 
 /** Names match `timePhase` in `TickTickService.synchronizationInner`. */

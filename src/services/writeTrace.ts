@@ -1,7 +1,7 @@
 import { MarkdownView, TFile, type App, type Editor } from 'obsidian';
 import { getSettings } from '@/settings';
 import { typedAgoMs } from '@/services/editorActivity';
-import { fileRunIsActive } from '@/sync/fileRunCache';
+import { fileRunIsActive } from '@/sync/vault-io/fileRunCache';
 import { currentSyncPhase, currentSyncTrigger } from '@/sync/perf';
 import log from '@/utils/logger';
 

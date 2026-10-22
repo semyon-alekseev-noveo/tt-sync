@@ -1,5 +1,5 @@
 import { fencedLines } from '@/utils/vaultIdScan';
-import { syncCachedRead } from '@/sync/fileRunCache';
+import { syncCachedRead } from '@/sync/vault-io';
 // Detach a task line from TickTick sync after the task was deleted in TickTick.
 // Result: `[-]` (cancelled), no ticktick_id, no TickTick link, no sync-marker tag,
 // plus DETACH_MARK so the line is never tagged/pushed again (even in full-vault mode).

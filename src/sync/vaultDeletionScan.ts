@@ -1,5 +1,5 @@
 import { classifyFileRead, obsidianSyncFileState, vaultIndexReady, type FileTrust } from '@/sync/massDeleteGuard';
-import { syncCachedRead } from '@/sync/fileRunCache';
+import { syncCachedRead } from '@/sync/vault-io';
 
 const TASK_ID = /%%\[ticktick_id::\s*([a-zA-Z0-9]+)\]%%/gi;
 

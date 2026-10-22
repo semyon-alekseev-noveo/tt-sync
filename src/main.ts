@@ -12,7 +12,7 @@ import { getTick } from '@/api/tick_singleton_factory';
 import '@/static/styles.css';
 
 import { type Editor, type MarkdownFileInfo, MarkdownView, Notice, Plugin, TFolder } from 'obsidian';
-import { commitVaultText, readNoteForWrite } from '@/services/vaultWrite';
+import { commitVaultText, readNoteForWrite } from '@/sync/vault-io';
 import { installWriteTraceWatch } from '@/services/writeTrace';
 
 //settings

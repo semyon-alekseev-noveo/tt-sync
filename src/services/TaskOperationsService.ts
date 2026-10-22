@@ -17,7 +17,7 @@ import type TickTickSync from '@/main';
 import type { ITask } from '@/api/types/Task';
 import { FileTaskQueries } from '@/repositories/FileTaskQueries';
 import { getSettings } from '@/settings';
-import { syncRead } from '@/sync/fileRunCache';
+import { syncRead } from '@/sync/vault-io';
 import log from '@/utils/logger';
 
 export class TaskOperationsService {

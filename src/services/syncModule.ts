@@ -21,7 +21,7 @@ import { db } from "@/db/dexie";
 import { getAllProjects } from '@/db/projects';
 import { isPathInPushScope, normalizeSyncTag, resolveSyncedListIds, taskMatchesSyncLimit, type TaskSyncLimitOptions } from '@/syncScope';
 import { timePhase } from '@/sync/perf';
-import { commitVaultText, readNoteForWrite } from '@/services/vaultWrite';
+import { commitVaultText, readNoteForWrite } from '@/sync/vault-io';
 
 export class SyncMan {
 	private readonly app: App;

@@ -18,7 +18,7 @@ import type { ITask } from '@/api/types/Task';
 import { FileTaskQueries } from '@/repositories/FileTaskQueries';
 import { TaskDeletionModal, type DeletionPromptResult } from '@/modals/TaskDeletionModal';
 import { getSettings } from '@/settings';
-import { syncCachedRead } from '@/sync/fileRunCache';
+import { syncCachedRead } from '@/sync/vault-io';
 import { isPathInPushScope } from '@/syncScope';
 import { db } from '@/db/dexie';
 import { classifyFileRead, deletionConfirmMode, obsidianSyncFileState } from '@/sync/massDeleteGuard';

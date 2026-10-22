@@ -21,10 +21,9 @@ import { allowVaultUpdate, fileForNewTickTickTask, isListAllowed, normalizeSyncT
 import { TaskDeletionModal } from '@/modals/TaskDeletionModal';
 import { FolderSyncService } from '@/services/FolderSyncService';
 import log from '@/utils/logger';
-import { commitVaultText, readNoteForWrite } from '@/services/vaultWrite';
+import { commitVaultText, readNoteForWrite, syncCachedRead, syncFileMap, syncRead } from '@/sync/vault-io';
 import { traceWrite } from '@/services/writeTrace';
 import { deferActiveFilePush } from '@/services/activeFilePush';
-import { syncCachedRead, syncFileMap, syncRead } from '@/sync/fileRunCache';
 import { addCount } from '@/sync/perf';
 import { notePluginWrite } from '@/utils/editedSince';
 import {

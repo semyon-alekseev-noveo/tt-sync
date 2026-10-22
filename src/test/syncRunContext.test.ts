@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { createSyncRunContext } from '@/sync/SyncRunContext';
-import { clearPendingMarkerTaskIds, isPendingMarkerTaskId } from '@/sync/pendingMarkerTaskIds';
+import { clearPendingMarkerTaskIds, isPendingMarkerTaskId } from '@/sync/vault-io';
 
 describe('SyncRunContext', () => {
 	beforeEach(() => {

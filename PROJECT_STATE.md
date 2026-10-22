@@ -21,7 +21,7 @@
 - **Sync research (2026-10-20):** `docs/TICKTICK_DELTA_API.md` — delta has no comments; echo suppression in `pull.ts` uses `etag`; idle sync does not call `getTaskById` per quiet task.
 - **Deletion guard (2026-10-20):** over-threshold or empty-side deletions are held and the checkpoint stays. Defaults: guard on, more than 10 tasks and more than 20%, startup delay 30s. Pilot cases in `TEST_PLAN.md` are not run.
 - **Redo:** journal `<vault>/.tickticksync/journal/`; palette undo previews then applies `planUndo`. Not soaked on the live vault.
-- **Modularization (2026-10-22):** PR 1 phases under `src/sync/phases/*`; PR 2 lifecycle `runVaultDeletionPhase` + `TaskDeletionHandler` via `SyncRunContext`. Evidence: `docs/pilot/results/TECH-SYNC-MODULARIZATION/`. Next: PR 3 `vault-io` facade; then break `main` ↔ `services` (`TECH-CIRC-1`).
+- **Modularization (2026-10-22):** PR 1 phases under `src/sync/phases/*`; PR 2 lifecycle `runVaultDeletionPhase`; PR 3 `src/sync/vault-io/` facade (`readNoteForWrite` / `commitVaultText` / cache). Evidence: `docs/pilot/results/TECH-SYNC-MODULARIZATION/`. Next: PR 4 break `main` ↔ `services` (`TECH-CIRC-1`).
 
 ## Validation
 

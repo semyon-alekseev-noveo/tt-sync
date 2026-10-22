@@ -7,7 +7,7 @@ import type TickTickSync from '@/main';
 import type { ITask } from '@/api/types/Task';
 import { FileOperation } from '@/fileOperation';
 import { clearEditorActivity, noteEditorActivity } from '@/services/editorActivity';
-import { applyLineSpans, lineSpans } from '@/services/vaultWrite';
+import { applyLineSpans, lineSpans } from '@/sync/vault-io';
 import { getSettings, updateSettings } from '@/settings';
 
 vi.mock('@/utils/logger', () => ({
@@ -271,7 +271,7 @@ describe('BUG-STALE-EDITOR-WRITE', () => {
 			},
 			vault: { read: async () => disk, process: async () => undefined },
 		} as unknown as App;
-		const { repairEmptyEditorFromDisk } = await import('@/services/vaultWrite');
+		const { repairEmptyEditorFromDisk } = await import('@/sync/vault-io');
 		expect(await repairEmptyEditorFromDisk(app, file)).toBe(true);
 		expect(value).toBe(disk);
 	});
@@ -288,7 +288,7 @@ describe('BUG-STALE-EDITOR-WRITE', () => {
 			},
 			vault: { read: async () => disk },
 		} as unknown as App;
-		const { repairEmptyEditorFromDisk } = await import('@/services/vaultWrite');
+		const { repairEmptyEditorFromDisk } = await import('@/sync/vault-io');
 		expect(await repairEmptyEditorFromDisk(app, file)).toBe(false);
 		expect(editor.transaction).not.toHaveBeenCalled();
 		clearEditorActivity();
@@ -304,7 +304,7 @@ describe('BUG-STALE-EDITOR-WRITE', () => {
 			},
 			vault: { read: async () => disk },
 		} as unknown as App;
-		const { readNoteForWrite } = await import('@/services/vaultWrite');
+		const { readNoteForWrite } = await import('@/sync/vault-io');
 		expect(await readNoteForWrite(app, file)).toBe(disk);
 	});
 

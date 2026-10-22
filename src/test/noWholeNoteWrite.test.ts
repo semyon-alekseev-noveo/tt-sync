@@ -15,7 +15,7 @@ const SRC = join(process.cwd(), 'src');
  * deletionGuardRun opens a report, not a note overwrite.
  */
 const ALLOW: Record<string, Set<string>> = {
-	'src/services/vaultWrite.ts': new Set(['*']),
+	'src/sync/vault-io/vaultWrite.ts': new Set(['*']),
 	'src/redo/obsidian.ts': new Set(['vault-assign', 'method-assign']),
 	'src/sync/deletionGuardRun.ts': new Set(['openFile']),
 	'src/services/writeTrace.ts': new Set(['setViewData', 'adapter-append']),

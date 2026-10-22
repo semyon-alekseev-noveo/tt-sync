@@ -10,7 +10,7 @@ import { isPathInPushScope } from '@/syncScope';
 import { createActiveFilePushScheduler, deferActiveFilePush, planActiveFilePush, setActiveFilePushRelease } from '@/services/activeFilePush';
 import { noteEditorActivity } from '@/services/editorActivity';
 import { traceWrite } from '@/services/writeTrace';
-import { repairEmptyEditorFromDisk } from '@/services/vaultWrite';
+import { repairEmptyEditorFromDisk } from '@/sync/vault-io';
 import log from '@/utils/logger';
 
 export class EventHandlerService {

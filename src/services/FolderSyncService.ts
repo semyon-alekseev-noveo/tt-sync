@@ -12,7 +12,7 @@ import { ProjectGroupRepository } from '@/repositories/ProjectGroupRepository';
 import { getProjectById } from '@/db/projects';
 import { upsertFile, deleteFile } from '@/db/files';
 import { NewFileMap } from '@/services/NewFileMap';
-import { commitVaultText } from '@/services/vaultWrite';
+import { commitVaultText } from '@/sync/vault-io';
 import { FileLocationConflictModal } from '@/modals/FileLocationConflictModal';
 import log from '@/utils/logger';
 import type TickTickSync from '@/main';

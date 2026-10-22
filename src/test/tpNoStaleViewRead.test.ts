@@ -3,7 +3,7 @@
  * A modify listener registered before the run (the open view) reads the new disk text.
  */
 import { describe, expect, it } from 'vitest';
-import { beginFileRun } from '@/sync/fileRunCache';
+import { beginFileRun } from '@/sync/vault-io';
 
 describe('TP-NO-STALE-VIEW-READ', () => {
 	it('TP-NO-STALE-VIEW-READ a modify listener registered before the run reads the new disk text', async () => {

@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { TaskDeletionHandler } from '@/services/TaskDeletionHandler';
 import { createSyncRunContext } from '@/sync/SyncRunContext';
-import { clearPendingMarkerTaskIds } from '@/sync/pendingMarkerTaskIds';
+import { clearPendingMarkerTaskIds } from '@/sync/vault-io';
 
 describe('BUG-DEFERRED-ID-PHASE2-DELETE', () => {
 	beforeEach(() => {
