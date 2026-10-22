@@ -1,5 +1,5 @@
 import type { App, TFile } from 'obsidian';
-import type TickTickSync from '@/main';
+import type { PluginContext } from '@/pluginContext';
 import { NewFileMap } from '@/services/NewFileMap';
 import { noteFileRead, noteVaultWrite } from '@/sync/perf';
 import { closeVaultIdIndex, invalidateVaultIdIndex, openVaultIdIndex } from '@/utils/vaultIdScan';
@@ -130,7 +130,7 @@ async function readThrough(
 	return typeof text === 'string' ? text : '';
 }
 
-export async function syncFileMap(app: App, plugin: TickTickSync, file: TFile, text: string): Promise<NewFileMap> {
+export async function syncFileMap(app: App, plugin: PluginContext, file: TFile, text: string): Promise<NewFileMap> {
 	const run = active;
 	if (!run) {
 		const created = new NewFileMap(app, plugin, file);

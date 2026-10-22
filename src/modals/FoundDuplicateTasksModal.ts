@@ -1,6 +1,6 @@
 import { PROMPT_TIMEOUT_MS } from '@/modals/TaskDeletionModal';
 import { App, Modal, Setting, TFile } from 'obsidian';
-import TickTickSync from '@/main';
+import type { PluginContext } from '@/pluginContext';
 import log from '@/utils/logger';
 import type { ITask } from '@/api/types/Task';
 import { db } from "@/db/dexie";
@@ -22,7 +22,7 @@ export class FoundDuplicateTasksModal extends Modal {
 
     constructor(
         app: App,
-        private plugin: TickTickSync,
+        private plugin: PluginContext,
         private duplicates: Record<string, string[]>,
         private taskIds: Record<string, string>
     ) {

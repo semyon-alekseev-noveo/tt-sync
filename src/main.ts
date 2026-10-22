@@ -9,6 +9,7 @@ import { ensureSession } from '@/autoLogin';
 import { loginPatch } from '@/loginSettings';
 import { bumpProjectsVersion } from '@/projectsVersion';
 import { getTick } from '@/api/tick_singleton_factory';
+import type { PluginContext } from '@/pluginContext';
 import '@/static/styles.css';
 
 import { type Editor, type MarkdownFileInfo, MarkdownView, Notice, Plugin, TFolder } from 'obsidian';
@@ -79,7 +80,7 @@ import { FolderMigrationService } from '@/services/FolderMigrationService';
 import { TagService } from '@/services/TagService';
 import { SyncActivityIndicator } from '@/services/SyncActivityIndicator';
 
-export default class TickTickSync extends Plugin {
+export default class TickTickSync extends Plugin implements PluginContext {
 
 	readonly service: TickTickService = new TickTickService(this);
 	readonly syncActivity = new SyncActivityIndicator(this);

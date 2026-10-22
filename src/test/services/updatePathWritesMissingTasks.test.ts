@@ -39,8 +39,8 @@ vi.mock('@/utils/logger', () => ({
 
 const tasksInFile: LocalTask[] = [];
 
-// fileOperation.ts imports TickTickSync from '@/main' as a value, which drags in
-// the whole plugin (and Svelte) — stub it out.
+// Historical stub: fileOperation used to value-import `@/main`. It now takes
+// PluginContext; keep the mock so older transitive imports stay cheap.
 vi.mock('@/main', () => ({ default: class {} }));
 
 vi.mock('@/db/dexie', () => ({

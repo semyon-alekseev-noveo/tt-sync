@@ -1,6 +1,6 @@
 # Sync modularization plan
 
-**Status:** **PR 3 landed** — vault I/O facade at `src/sync/vault-io/` (`readNoteForWrite` / `commitVaultText` / file-run cache / pending markers). Push/pull import from `@/sync/vault-io`. Next: PR 4 break `main` ↔ `services` (or store ports). Evidence: `docs/pilot/results/TECH-SYNC-MODULARIZATION/`.
+**Status:** **PR 4 landed** — `PluginContext` port at `src/pluginContext.ts` breaks `main` ↔ `services` (`TECH-CIRC-1`). Services / vault helpers take the port; `TickTickSync` in `main.ts` implements it. Next: PR 5 split `taskParser`, or store ports / timed `vaultDeletion`. Evidence: `docs/pilot/results/TECH-SYNC-MODULARIZATION/`.
 
 **Canonical boundaries:** [`ANALYST_REFERENCE_DIAGRAMS.md`](ANALYST_REFERENCE_DIAGRAMS.md). Process: [`DEV_FLOW.md`](../DEV_FLOW.md).
 
@@ -104,9 +104,22 @@ Phase 2 vault→TT deletion is implemented in **lifecycle** (`runVaultDeletionPh
 
 See **`docs/COMMENT_SYNC_MODEL.md`**. PR A: keys + `planCommentSync` + tests (incl. failing wire test). PR B: wire `abyssCommentSync` + `apiCommentsDifferFromVault` + merge hints.
 
-### PR 4+ — Store ports
+### PR 4 — Break `main` ↔ `services` (**done**)
 
-- `FileTaskQueries` / `TaskRepository` interfaces used by lifecycle and push; no `db` in orchestrator.
+- Add `src/pluginContext.ts` (`PluginContext` extends Obsidian `Plugin` + sync collaborators).
+- `TickTickSync` in `main.ts` `implements PluginContext`.
+- Services, `fileOperation`, `taskParser`, sync phases/lifecycle/vault-io, and service-used modals import `@/pluginContext` — not `@/main`.
+- Guard test: `src/test/pluginContext.noMainImport.test.ts`.
+
+**Out of scope PR 4:** remaining `main` cycles via `query/` / `redo/` / `ui/settings` value imports; god-class splits (`TaskModificationDetector`, `TickTickService`); store ports.
+
+**Gate:** same as PR 1; `pluginContext.noMainImport` green.
+
+### PR 5+ — Parser split / TMD / store ports
+
+- PR 5: split `taskParser.ts` by concern (re-export old path).
+- PR 6: split `TaskModificationDetector` (detect vs push).
+- PR 7: `FileTaskQueries` / `TaskRepository` interfaces; no `db` in orchestrator.
 
 ## Bug → module (quick routing)
 

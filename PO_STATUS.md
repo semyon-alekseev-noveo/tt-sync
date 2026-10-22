@@ -21,7 +21,7 @@
 1. **Надёжный sync без тихих сбоев:** любая ошибка pull/push видна пользователю, чекпоинт не обманывает.
 2. **Abyss-комментарии и теги стабильны:** правка дочерней строки и TT-only изменения комментариев доезжают без ручных обходов.
 3. **Безопасный запуск на живом vault:** Step 6 (кейсы AF-*) и Step 8, плюс soak NOTE-L3b на пилоте. Один живой прогон, не отдельный набор.
-4. **Поддерживаемость:** интеграционный тест `synchronizationInner` есть на этой ветке. Цикл `main` ↔ `services` ещё открыт.
+4. **Поддерживаемость:** интеграционный тест `synchronizationInner` есть на этой ветке. Цикл `main` ↔ `services` снят (`PluginContext`); god-классы ещё open.
 
 ## Validation
 
@@ -72,7 +72,7 @@
 | **RISK-LARGE-VAULT** | P2 | partial on this branch | `idsPresentInVault` — один проход и кэш id→path на время синка; текст файла и NewFileMap читаются один раз за прогон. N+1 `getTaskById` в `vaultLineBehindTask` не менялся. `ensureVaultFilesRegistered` по-прежнему обходит все `.md` |
 | **TECH-START-1** | P2 | open | Полный pull на старте блокирует инициализацию |
 | **TECH-API-1** | P1 | open (риск) | Неофициальный клиент `Tick`: изменения TT ломают sync, покрытие тестами минимальное |
-| **TECH-CIRC-1 / GOD-1/2** | P2 | open | Цикл `main` ↔ `services`; god-классы `TickTickService`, `TaskModificationDetector` |
+| **TECH-CIRC-1 / GOD-1/2** | P2 | partial | Цикл `main` ↔ `services` снят (`PluginContext`, PR 4 / #31); god-классы `TickTickService`, `TaskModificationDetector` ещё open |
 | **DOC-STALE-1** | P3 | mitigated on this branch | Канон: `DEV_FLOW.md`, `PO_STATUS.md`, `ABYSS_FIRST_PLAN.md`. `GTD_SYNC_*`, `TT_ABYSS_ROADMAP.md`, `SYNC_PROJECTS_AND_SUBTASKS.md` — архив. Comments API описан в `ABYSS_NOTES_ALIGNMENT.md` |
 | Прежние | — | open | Токен `tp_…` из чата — отозвать; `data.json` тест-vault дрейфует от §2 — не синкать вслепую |
 
@@ -87,7 +87,7 @@
 3. **BUG-COMMENT-NO-PUSH** — на **2.0.52** буллеты `task-13-43-vault-r3` в vault остались, в TT Comments пусто, прежние TT-комментарии стёрты (карта fingerprint → delete). Не блокирует пункт 1.
 4. **BUG-ACTIVEZONE-COMMENT-SHUFFLE** — failing test + fix (`pullSubtaskOrder` / `mergeAbyssBlock`).
 5. Gate: AF-5 в **Inbox**, DEL-3, CTX-D2 на грязных тегах.
-6. Открыто: GAP-COMMENT-EDIT, RISK-PULL-WINS-LOCAL, RISK-DUAL-STORE, RISK-LARGE-VAULT (частично в **2.0.50**), TECH-START-1, TECH-CIRC-1. В delta теперь учитывается `syncTaskBean.add` (тест `getUpdatedTasks.deltaAdd.test.ts`).
+6. Открыто: GAP-COMMENT-EDIT, RISK-PULL-WINS-LOCAL, RISK-DUAL-STORE, RISK-LARGE-VAULT (частично в **2.0.50**), TECH-START-1; TECH-CIRC-1 цикл mitigated (god-классы remain). В delta теперь учитывается `syncTaskBean.add` (тест `getUpdatedTasks.deltaAdd.test.ts`).
 
 ## Аналитический мит 2026-10-19
 
@@ -99,7 +99,7 @@
 
 **Analyst B — архитектура плагина**
 - Слои: `main.ts` → `TickTickService` (god-class) → Dexie/репозитории → `VaultSyncCoordinator`/`fileOperation`; `Tick` — неофициальный API-клиент.
-- Связность: цикл `main` ↔ `services`, глобальные синглтоны (`getSettings`, `db`, `getTick`), дубль `FileOperation`.
+- Связность: цикл `main` ↔ `services` снят (`PluginContext`); глобальные синглтоны (`getSettings`, `db`, `getTick`), дубль `FileOperation`.
 - Нет тестов: `EventHandlerService`, `FolderSyncService`, `main.ts` lifecycle, `Tick`, полный `synchronizationInner`.
 - BUG-NOTICE-1 подтверждён.
 

@@ -1,5 +1,5 @@
 import { App, Modal, Setting } from 'obsidian';
-import TickTickSync from '@/main';
+import type { PluginContext } from '@/pluginContext';
 import { getAllProjects } from "@/db/projects";
 import { getAllFiles } from "@/db/files";
 import { db } from "@/db/dexie";
@@ -9,10 +9,10 @@ export class SetDefaultProjectForFileModal extends Modal {
 	defaultProjectId!: string;
 	defaultProjectName!: string;
 	filepath: string;
-	plugin: TickTickSync;
+	plugin: PluginContext;
 
 
-	constructor(app: App, plugin: TickTickSync, filepath: string) {
+	constructor(app: App, plugin: PluginContext, filepath: string) {
 		super(app);
 		this.filepath = filepath;
 		this.plugin = plugin;

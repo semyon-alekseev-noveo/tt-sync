@@ -2,14 +2,14 @@
  * Shared dependencies for sync phase functions (PR 1 extract).
  * Populated by TickTickService; phases must not construct services themselves.
  */
-import type TickTickSync from '@/main';
+import type { PluginContext } from '@/pluginContext';
 import type { TickTickService } from '@/services/index';
 import type { TickTickRestAPI } from '@/services/TicktickRestAPI';
 import type { SyncActivityIndicator } from '@/services/SyncActivityIndicator';
 import type { SyncRunContext } from '@/sync/SyncRunContext';
 
 export interface SyncPhaseDeps {
-	plugin: TickTickSync;
+	plugin: PluginContext;
 	service: TickTickService;
 	ui: SyncActivityIndicator;
 	ctx: SyncRunContext;

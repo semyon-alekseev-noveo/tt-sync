@@ -4,7 +4,7 @@ import { deferActiveFilePush, releaseDeferredActiveFilePushes } from '@/services
 import { loadPluginWrites, pluginWriteMtimes } from '@/utils/editedSince';
 import { idsPresentInVault, dedupeTaskIds } from '@/utils/vaultIdScan';
 import { shouldBackupToday } from '@/backupPolicy';
-import TickTickSync from '@/main';
+import type { PluginContext } from '@/pluginContext';
 import { Tick } from '@/api';
 import { getDefaultFolder, getSettings, updateSettings } from '@/settings';
 import { doWithLock } from '@/utils/locks';
@@ -52,12 +52,12 @@ const LOCK_TASKS = 'LOCK_TASKS';
 //TODO: encapsulate all api and cache
 export class TickTickService {
 	initialized: boolean = false;
-	plugin: TickTickSync;
+	plugin: PluginContext;
 	tickTickSync!: SyncMan;
 	api?: Tick;
 	fileOperation?: FileOperation;
 
-	constructor(plugin: TickTickSync) {
+	constructor(plugin: PluginContext) {
 		this.plugin = plugin;
 	}
 

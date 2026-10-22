@@ -2,7 +2,7 @@ import type { ITask } from '@/api/types/Task';
 import type { ITag } from '@/api/types/Tag';
 import { type IBatch, Tick, TickTickPullError } from '@/api';
 import { App, Notice } from 'obsidian';
-import TickTickSync from '@/main';
+import type { PluginContext } from '@/pluginContext';
 import type { IProject } from '@/api/types/Project';
 import type { ITaskComment } from '@/api/types/TaskComment';
 import { getSettings, updateSettings } from '@/settings';
@@ -19,13 +19,13 @@ export class TickTickRestAPI {
 		this._checkpoint = value;
 	}
 	app: App;
-	plugin: TickTickSync;
+	plugin: PluginContext;
 	api: Tick | null;
 	token: string;
 	baseURL: string;
 	private _checkpoint: number;
 
-	constructor(app: App, plugin: TickTickSync, api: Tick | null) {
+	constructor(app: App, plugin: PluginContext, api: Tick | null) {
 		//super(app,settings);
 		this.app = app;
 		this.plugin = plugin;

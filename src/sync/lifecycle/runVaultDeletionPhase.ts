@@ -3,13 +3,13 @@
  * Owns clearPendingDeletions + TaskDeletionHandler.processSyncRemovedTasks.
  * Callers must hold LOCK_TASKS with the preceding file-pass when ordering matters.
  */
-import type TickTickSync from '@/main';
+import type { PluginContext } from '@/pluginContext';
 import { clearPendingDeletions } from '@/modals/TaskDeletionModal';
 import type { SyncRunContext } from '@/sync/SyncRunContext';
 import log from '@/utils/logger';
 
 export interface VaultDeletionDeps {
-	plugin: TickTickSync;
+	plugin: PluginContext;
 	ctx: Pick<SyncRunContext, 'isPendingMarker'>;
 }
 
