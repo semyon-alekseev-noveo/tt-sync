@@ -8,5 +8,5 @@ Plan: [`docs/SYNC_MODULARIZATION.md`](../../../SYNC_MODULARIZATION.md)
 | Map + PR 1 phases extract | [`31-phase-0-map.md`](31-phase-0-map.md) | **landed** — [PR #34](https://github.com/semyon-alekseev-noveo/tt-sync/pull/34) |
 | PR 2 lifecycle / vaultDeletion | [`31-pr2-lifecycle.md`](31-pr2-lifecycle.md) | **landed** — [PR #35](https://github.com/semyon-alekseev-noveo/tt-sync/pull/35) |
 | PR 3 vault-io facade | [`31-pr3-vault-io.md`](31-pr3-vault-io.md) | **landed** — [PR #36](https://github.com/semyon-alekseev-noveo/tt-sync/pull/36) (stacks on #35) |
-| PR 4 break main ↔ services | [`31-pr4-plugin-context.md`](31-pr4-plugin-context.md) | **landed** — PR stacks on #36 |
+| PR 4 break main ↔ services | [`31-pr4-plugin-context.md`](31-pr4-plugin-context.md) | **landed** — [PR #37](https://github.com/semyon-alekseev-noveo/tt-sync/pull/37) (stacks on #36) |
 | PR 5–7 parser / TMD / store ports | — | pending |
