@@ -720,4 +720,21 @@ Expected: sync finishes without a silent failure notice; plugin version in setti
 |----|----------------|----------|
 | TP-MOD-RELEASE-SMOKE | **pass** | Deploy **2.0.77**; CLI reload + `tts-sync`; `checkPoint` advanced; evidence `docs/pilot/results/TECH-SYNC-MODULARIZATION/31-release-2.0.77-smoke.md` |
 
-Note: **2.0.75**/**2.0.76** comment twin / open-note push fixes are **not** in this release (still on open PRs #24/#26).
+Note: **2.0.75**/**2.0.76** comment fixes are included in combined tip **2.0.78** (this PR).
+
+
+## Release 2.0.78 — comment fixes on modularized tip
+
+Re-cuts **BUG-COMMENT-ABYSS-VIEW** (2.0.75) and **BUG-COMMENT-DUP-STAMP** (2.0.76) onto modularization + **2.0.77**. Supersedes open PRs #24/#26/#54.
+
+### TP-COMMENT-FIXES-ON-MOD — deploy 2.0.78 and Synchronize once
+
+1. Install release **2.0.78** into `<pilot-vault>/.obsidian/plugins/tickticksync-abyss/`.
+2. Reload the plugin.
+3. Run **Synchronize** once.
+
+Expected: sync finishes; plugin version **2.0.78**. Smoke only — do not invent Abyss-view / DUP-STAMP re-verify unless re-run.
+
+| ID | Pilot status | Evidence |
+|----|----------------|----------|
+| TP-COMMENT-FIXES-ON-MOD | not run | Pending deploy after release |

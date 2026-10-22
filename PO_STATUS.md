@@ -4,7 +4,7 @@
 **Audience:** Product owner / decision maker  
 **Repo:** `tickticksync` branch `abyss-mapping`  
 **Test vault:** `<pilot-vault>` (copy only; live vault `<live-vault>` untouched)  
-**Install:** BRAT → `https://github.com/semyon-alekseev-noveo/tt-sync` track **latest release** (**2.0.77**, tag `2.0.77`); plugin id **`tickticksync-abyss`** — `docs/BRAT_INSTALL.md`. Preset: `00 Inbox/TTS-data-preset.json`.
+**Install:** BRAT → `https://github.com/semyon-alekseev-noveo/tt-sync` track **latest release** (**2.0.78**, tag `2.0.78`); plugin id **`tickticksync-abyss`** — `docs/BRAT_INSTALL.md`. Preset: `00 Inbox/TTS-data-preset.json`.
 
 История изменений — только в `CHANGELOG.md`; здесь — снимок для PO.
 
@@ -25,7 +25,8 @@
 
 ## Validation
 
-- Релиз **2.0.77** (2026-10-22): **TECH-SYNC-MODULARIZATION** (#31) — PRs #34–#40 on `abyss-mapping` (phases, lifecycle, vault-io, PluginContext, taskParser, TMD, store ports). Vitest **688**. Comment fixes **2.0.75**/**2.0.76** are being re-cut onto this tip as **2.0.78** (supersedes open #24/#26/#54).
+- Релиз **2.0.78** (2026-10-22): modularization tip (**2.0.77**) + re-cut **BUG-COMMENT-ABYSS-VIEW** / **BUG-COMMENT-DUP-STAMP** (was open #24/#26). Combined PR into `abyss-mapping`; closes obsolete #24/#26/#54.
+- Релиз **2.0.77** (2026-10-22): **TECH-SYNC-MODULARIZATION** (#31) — PRs #34–#40 on `abyss-mapping` (phases, lifecycle, vault-io, PluginContext, taskParser, TMD, store ports). Vitest **688**. Modularization-only tip (comment fixes were not ancestors).
 - Релиз **2.0.76** (2026-10-21): **BUG-COMMENT-DUP-STAMP** — dedupe stamped+plain TT Comments; plain-only POST; skip create when key present. Vitest **685**. Pilot **pass** `docs/pilot/results/BUG-COMMENT-DUP-STAMP/` (`task-11-16` → 4 plain Comments).
 - Пилот **2.0.76** (2026-10-21): **#16** open-note/editor — **pass** (4 rows); filed **BUG-COMMENT-VAULT-DUP-KEY** [#27](https://github.com/semyon-alekseev-noveo/tt-sync/issues/27) (vault stamp twins). Evidence `docs/pilot/results/PILOT-BATCH-EDITOR-SAFETY/`.
 - Релиз **2.0.75** (2026-10-21): **BUG-COMMENT-ABYSS-VIEW** — Abyss `vault.modify` schedules 5s open-note push; flush without active markdown leaf. Pilot pass `docs/pilot/results/BUG-COMMENT-ABYSS-VIEW/`. Vitest **682**.
@@ -61,7 +62,7 @@
 | **BUG-COMMENT-INLINE** | P1 | fixed on this branch | Дочерняя comment/description строка вызывает `checkLineForModifications` родителя. Соседние comment-буллеты — отдельные треды (`extractAbyssCommentThreads`) |
 | **RISK-OPEN-FILE-EDIT** | P1 | mitigated on this branch | После 5 с тишины `editor-change` пушит строки с `ticktick_id`, кроме незакрытой строки захвата (`%%`). **BUG-COMMENT-ABYSS-VIEW**: `vault.modify` тоже планирует тот же debounce (Abyss view); flush не требует active markdown leaf. |
 | **BUG-COMMENT-ABYSS-VIEW** | P0 | **pass** (**2.0.75**) | Коммент из Abyss view → TT Comments: `vault.modify` планирует 5s push; flush без active markdown leaf. Evidence: `docs/pilot/results/BUG-COMMENT-ABYSS-VIEW/`. Issue #23. |
-| **BUG-COMMENT-DUP-STAMP** | P0 | open (analyst) | После Abyss push: пары stamped+plain в TT Comments на один vault-тред (`task-11-16`, count 8/4). Issue [#25](https://github.com/semyon-alekseev-noveo/tt-sync/issues/25). Фикса нет. |
+| **BUG-COMMENT-DUP-STAMP** | P0 | **pass** (**2.0.76**, on tip **2.0.78**) | После Abyss push: пары stamped+plain в TT Comments на один vault-тред. Fixed: dedupe by key, plain-only POST, skip create when key present. Issue [#25](https://github.com/semyon-alekseev-noveo/tt-sync/issues/25) closed. |
 | **BUG-PULL-COMMENT-STALE** | P2 | fixed on this branch | `vaultLineBehindTask` сравнивает отпечатки Comments API. `getTaskById` только если заголовок/статус/content уже совпали; повторного вызова в цикле vault-sync нет. Комментарии кэшируются на задаче (`_apiComments`) |
 | **RISK-PULL-WINS-LOCAL** | P2 | open | При победе локальной версии в LWW строка в vault может остаться устаревшей |
 | **BUG-COMMENT-MAP-ORPHAN** | P2 | fixed on this branch | `deleteCommentMapsForTask` вызывается из `TaskRepository` (delete/hard delete/purge), `markTaskDeleted` и pull при удалённой на TT задаче |
@@ -69,7 +70,7 @@
 | **BUG-COMMENT-NO-PUSH** | P0 | fix on branch (pilot **2.0.51** fail) | Перерисовка строки больше не снимает vault-комментарии, которых нет в `Comments:` базе; перед записью файла они пушатся в Comments API. NOTE-L3b на пилоте ещё не перегнан. |
 | **BUG-STALE-EDITOR-WRITE** | P0 | fixed в **2.0.54** (pilot **not run**) | Открытая заметка переписывалась из снимка, снятого до Comments API. Нажатия за это окно пропадали из редактора, файл на диске оставался новее. Комментарий, удалённый в TickTick, оставался в заметке, поэтому перезапись шла на каждом sync. |
 | **BUG-OPEN-NOTE-BUFFER** | P0 | fixed в **2.0.55** (pilot **not run**) | На 2.0.54 буфер открытой заметки откатывался, файл на диске оставался новым. Пуш без `lastVaultSync`, строка под курсором как vault-behind, `syncRead` / `syncCachedRead`, merge детей из Dexie. Кейсы TP-NO-CARET-REWRITE, TP-ACTIVE-PUSH-DURING-SYNC, TP-NO-STALE-VIEW-READ, TP-ABYSS-LOCAL-CHILD-KEEP, TP-TWO-LEAVES. |
-| **BUG-EMPTY-EDITOR-DISK** | P0 | fixed в **2.0.56** (pilot **not run**) | Диск с текстом, markdown view пустой после reopen; 2.0.55 не закрывает. **TP-EMPTY-EDITOR-DISK**: repair on open, disk fallback in `readNoteForWrite`, disk sync after open patch. |
+| **BUG-EMPTY-EDITOR-DISK** | P0 | fixed в **2.0.56** (pilot **pass** on **2.0.76**) | Диск с текстом, markdown view пустой после reopen. **TP-EMPTY-EDITOR-DISK** pilot pass `#16`. |
 | **BUG-DEFERRED-ID-PHASE2-DELETE** | P0 | fixed в **2.0.57** (pilot **not run**) | Создание в TT при открытой daily note: id в файл отложен (`commitVaultText` caret), Dexie уже знает задачу → ложный «удалена из Obsidian»; в строке нет `%%[ticktick_id:: …]%%`, Abyss view пусто. Guard: `registerPendingMarkerTaskId`, skip Phase 2 delete, `prunePendingMarkerTaskIds` at sync start. |
 | **BUG-ACTIVEZONE-COMMENT-SHUFFLE** | P1 | open | При sync в project note (Active Zone): сортировка соседних задач и перенос comment-буллета с одной задачи на другую. Кейс в `ABYSS_FIRST_CASES.md`. |
 | **BUG-TICKTICK-ID-LEAK** | P1 | mitigated on branch | Канонический `%%[ticktick_id:: <24hex>]%%`, strip loose fragment из title; тест `bugTicktickIdLeak.test.ts`. Почистить дубли в TT вручную. |
