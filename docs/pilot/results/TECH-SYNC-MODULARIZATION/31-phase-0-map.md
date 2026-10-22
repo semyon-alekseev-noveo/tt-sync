@@ -65,7 +65,7 @@ Also: `SyncRunContext.projects`; `pushSinceMs` / `guardedPull` / `locallyEdited`
 
 ## Conclusion
 
-PR 1 completes the phase extract checklist item on #31. Next slice: **PR 2** — `lifecycle/runVaultDeletionPhase.ts` out of `syncFiles`, then optional timed pilot compare of `phaseMs.vaultReconcile` vs `syncFiles` after clearer boundaries.
+PR 1 completes the phase extract checklist item on #31. Next slice was **PR 2** — see [`31-pr2-lifecycle.md`](31-pr2-lifecycle.md).
 
 ## Checklist
 
@@ -73,5 +73,5 @@ PR 1 completes the phase extract checklist item on #31. Next slice: **PR 2** —
 - [x] Hotspots from pilot perf recorded
 - [x] Phase functions extracted; orchestrator thin
 - [ ] PR merged into `abyss-mapping` (owner)
-- [ ] PR 2 lifecycle extract
+- [x] PR 2 lifecycle extract — [`31-pr2-lifecycle.md`](31-pr2-lifecycle.md)
 - [ ] Import-cycle CI / file-size DoD (epic close)

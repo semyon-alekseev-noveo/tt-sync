@@ -1,6 +1,6 @@
 # Sync modularization plan
 
-**Status:** **PR 1 landed** — all `synchronizationInner` phases live under `src/sync/phases/*`; orchestrator only calls them. Next: PR 2 lifecycle (`syncFiles` Phase 2 delete). Evidence: `docs/pilot/results/TECH-SYNC-MODULARIZATION/`.
+**Status:** **PR 2 landed** — Phase 2 vault→TT deletion lives in `src/sync/lifecycle/runVaultDeletionPhase.ts`; `TaskDeletionHandler` uses `SyncRunContext.isPendingMarker` only. Next: PR 3 `vault-io` facade. Evidence: `docs/pilot/results/TECH-SYNC-MODULARIZATION/`.
 
 **Canonical boundaries:** [`ANALYST_REFERENCE_DIAGRAMS.md`](ANALYST_REFERENCE_DIAGRAMS.md). Process: [`DEV_FLOW.md`](../DEV_FLOW.md).
 
@@ -19,7 +19,7 @@ The [Todoist Obsidian plugin](https://github.com/jamiebrynes7/obsidian-todoist-p
 | **vault-push** | `TaskModificationDetector`, `activeFilePush`, `NewFileMap` | Obsidian → TT | Pull, Phase 2 delete |
 | **vault-pull** | `VaultSyncCoordinator`, `fileOperation` (pull) | TT/Dexie → lines | Push hash, create in TT |
 | **tt-remote** | `sync/sync.ts`, `pull.ts`, `api/` | Delta, Dexie ingest | `commitVaultText` |
-| **lifecycle** | `TaskDeletionHandler`, `massDeleteGuard`, `deletionGuardRun` | Delete prompts, guards | Direct editor patch |
+| **lifecycle** | `TaskDeletionHandler`, `massDeleteGuard`, `deletionGuardRun`, `lifecycle/runVaultDeletionPhase` | Delete prompts, guards | Direct editor patch |
 | **store** | `repositories/*`, `db/*` | Dexie access | Vault I/O |
 
 ## `SyncRunContext`
@@ -28,7 +28,7 @@ One object per `synchronizationInner` run (`src/sync/SyncRunContext.ts`):
 
 - Identity: `syncId`, `trigger`, `fullSync`
 - Cross-phase: `pushSinceMs`, `guardedPull`, `locallyEdited`
-- Lifecycle bridge: `registerPendingMarker` / `reconcilePendingMarkers` (wraps `pendingMarkerTaskIds` until state moves fully into context)
+- Lifecycle bridge: `registerPendingMarker` / `reconcilePendingMarkers` / `isPendingMarker` (wraps `pendingMarkerTaskIds` until state moves fully into context)
 
 Future: `createdTaskIdsThisRun`, `filesPushed`, `pluginWritePaths` — add when a phase needs them; do not grow the service class.
 
@@ -45,9 +45,9 @@ Future: `createdTaskIdsThisRun`, `filesPushed`, `pluginWritePaths` — add when 
 | 6 | `pull` | `syncTickTickWithDexie`, list mapping heal, vanished lists |
 | 7 | `vaultReconcile` | `vaultSyncCoordinator.syncVaultWithDatabase` |
 | 8 | `subtasks` | `pullSubtaskOrder` |
-| 9 | `syncFiles` | `syncFiles` (+ Phase 2 delete inside today) |
+| 9 | `syncFiles` | `syncFiles` (file pass + calls `runVaultDeletionPhase` inside same `LOCK_TASKS`) |
 
-Phase 2 vault→TT deletion (`processSyncRemovedTasks`) currently runs **inside** `syncFiles`; target module **lifecycle**, invoked from orchestrator **after** `syncFiles` file pass or as explicit phase `vaultDeletion` (rename in a later PR).
+Phase 2 vault→TT deletion is implemented in **lifecycle** (`runVaultDeletionPhase`); still invoked from `syncFiles` so Phase 1→2 stays under one lock. A later PR may promote it to a timed `vaultDeletion` phase after the file pass.
 
 ## PR sequence
 
@@ -79,10 +79,15 @@ Phase 2 vault→TT deletion (`processSyncRemovedTasks`) currently runs **inside*
 
 **Gate:** `npx vitest run`, `npm run build`, `synchronizationInner.integration.test.ts` unchanged green.
 
-### PR 2 — Lifecycle boundary
+### PR 2 — Lifecycle boundary (**done**)
 
-- Extract `processSyncRemovedTasks` call to `lifecycle/runVaultDeletionPhase.ts`.
-- `TaskDeletionHandler` reads `ctx.isPendingMarker` only (no direct import of push module).
+- Extract `processSyncRemovedTasks` call to `lifecycle/runVaultDeletionPhase.ts` (**done**).
+- `TaskDeletionHandler` reads `ctx.isPendingMarker` only — no direct import of `pendingMarkerTaskIds` (**done**).
+- `runSyncFilesPhase` / `syncFiles` pass `SyncRunContext`; direct `syncFiles` callers get a fallback context.
+
+**Out of scope PR 2:** promoting deletion to a separate `timePhase('vaultDeletion')`; moving `syncFiles` Phase 1 body out of the service.
+
+**Gate:** same as PR 1; `runVaultDeletionPhase.test.ts` + `pendingMarkerDeletion` (BUG-DEFERRED-ID-PHASE2-DELETE).
 
 ### PR 3 — `vault-io` facade
 

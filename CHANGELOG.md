@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-22 03:32 UTC
+
+- Context: TECH-SYNC-MODULARIZATION (#31) PR 2 — Phase 2 delete still inline in `syncFiles`; handler imported pending-marker module directly.
+- Target: Extract-only lifecycle boundary — `runVaultDeletionPhase` + `TaskDeletionHandler` via `SyncRunContext.isPendingMarker` only.
+- Actions log: Added `src/sync/lifecycle/runVaultDeletionPhase.ts`; wired `syncFiles`/`runSyncFilesPhase` to pass ctx; removed `pendingMarkerTaskIds` import from handler; docs + pilot `31-pr2-lifecycle.md`.
+- Validation: `npx vitest run` → **98** files, **686** passed; `npm run build` → ok.
+- Problems: - No changes
+- To Be Done: PR into `abyss-mapping` (stack on #34); comment #31; next = PR 3 vault-io facade.
+- References: `docs/SYNC_MODULARIZATION.md`, `docs/pilot/results/TECH-SYNC-MODULARIZATION/31-pr2-lifecycle.md`, `CHANGELOG.md`
+
 ### Iteration 2026-10-22 03:28 UTC
 
 - Context: Resume #31 after prior agent disconnect; PR 1 extract already on `feat/tech-sync-modularization-pr1`.

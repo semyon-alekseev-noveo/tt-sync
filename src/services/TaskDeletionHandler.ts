@@ -22,7 +22,7 @@ import { syncCachedRead } from '@/sync/fileRunCache';
 import { isPathInPushScope } from '@/syncScope';
 import { db } from '@/db/dexie';
 import { classifyFileRead, deletionConfirmMode, obsidianSyncFileState } from '@/sync/massDeleteGuard';
-import { isPendingMarkerTaskId } from '@/sync/pendingMarkerTaskIds';
+import type { SyncRunContext } from '@/sync/SyncRunContext';
 import log from '@/utils/logger';
 
 export class TaskDeletionHandler {
@@ -171,8 +171,12 @@ export class TaskDeletionHandler {
 
 	/**
 	 * After phase 1: one deletion dialog for all removed/orphan tasks, then per-file checklist item cleanup.
+	 * Pending-marker checks go through SyncRunContext only (no direct pendingMarkerTaskIds import).
 	 */
-	async processSyncRemovedTasks(filePaths: string[]): Promise<void> {
+	async processSyncRemovedTasks(
+		filePaths: string[],
+		ctx: Pick<SyncRunContext, 'isPendingMarker'>,
+	): Promise<void> {
 		const mode = deletionConfirmMode();
 		if (mode === 'skip') {
 			log.info('TickTickSync: mass-delete guard skipped vault→TickTick deletions for this run');
@@ -188,7 +192,7 @@ export class TaskDeletionHandler {
 			taskIds.add(id);
 		}
 		for (const id of [...taskIds]) {
-			if (isPendingMarkerTaskId(id)) {
+			if (ctx.isPendingMarker(id)) {
 				log.info(`TickTickSync: skipping deletion prompt for ${id}; vault marker write is still pending`);
 				taskIds.delete(id);
 			}
