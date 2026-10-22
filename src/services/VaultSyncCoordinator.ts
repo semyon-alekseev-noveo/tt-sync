@@ -387,27 +387,23 @@ export class VaultSyncCoordinator {
 		const shouldProbeComments = vaultThreads > 0 || commentCountMismatch || vaultHasUnmappedComments;
 		if (useAbyssCommentsApi() && remote.projectId && shouldProbeComments) {
 			try {
-				const comments = await this.plugin.tickTickRestAPI?.getTaskComments(remote.projectId, remote.id) ?? [];
+				const comments = await this.plugin.tickTickRestAPI?.getTaskComments(remote.projectId, remote.id);
+				// BUG-COMMENT-GET-FAIL-OPEN: unknown remote → no create/delete/map decisions.
+				if (comments === null || comments === undefined) {
+					log.warn('vault comment lookup unknown; skipping comment reconcile', task.id);
+				} else {
 				const commentsNeedSync = apiCommentsDifferFromVault(taskRec.taskLines, comments) || commentCountMismatch;
 				if (commentsNeedSync) {
 					const mapsForProbe = await listCommentMapsForTask(remote.id);
-					const vaultClearedAllComments = vaultThreads === 0 && vaultHadSyncedCommentBullets(mapsForProbe);
+					// Probe-only empty vault threads must not wipe TT (BUG-COMMENT-EMPTY-VAULT-WIPE).
+					// Intentional clear goes through push.ts with obsidianRemovedCommentBullets.
+					const vaultClearedMapsOnly = vaultThreads === 0 && vaultHadSyncedCommentBullets(mapsForProbe);
 					const remoteAhead = remoteCommentKeysAheadOfVault(taskRec.taskLines ?? [], comments);
 					const vaultAhead = vaultCommentKeysAheadOfRemote(taskRec.taskLines ?? [], comments);
 					let pushedVaultComments = false;
 					let vaultWantsPush = false;
-					if (vaultClearedAllComments) {
-						try {
-							pushedVaultComments = await syncAbyssCommentsToTickTick(
-								this.plugin.tickTickRestAPI,
-								remote.id,
-								remote.projectId,
-								taskRec.taskLines ?? [],
-								remote.content,
-							);
-						} catch (e) {
-							log.warn('vault-cleared comment wipe failed', task.id, e);
-						}
+					if (vaultClearedMapsOnly) {
+						// Do not wipe from coordinator; let remoteAhead re-pull if TT still has comments.
 						deferActiveFilePush(filePath);
 					} else if (vaultAhead) {
 						const maps = mapsForProbe;
@@ -433,7 +429,7 @@ export class VaultSyncCoordinator {
 						}
 					}
 					// BUG-COMMENT-BOTH-WAYS: TT-ahead must not skip vault-ahead push when both sides differ.
-					if (remoteAhead && !vaultClearedAllComments && deletionConfirmMode() !== 'skip') {
+					if (remoteAhead && deletionConfirmMode() !== 'skip') {
 						behind = true;
 						reason = 'behindComments';
 						Object.defineProperty(remote, '_apiComments', { value: comments, enumerable: false, configurable: true });
@@ -449,6 +445,7 @@ export class VaultSyncCoordinator {
 						log.warn('vault-ahead comment push returned no changes', task.id);
 						return { behind: false, task: remote, localEdit: true, reason: 'vault-comments-ahead' };
 					}
+				}
 				}
 			} catch (e) {
 				log.debug('vault comment lookup failed', task.id, e);

@@ -297,17 +297,78 @@ export function mergeAbyssBlock(newText: string, oldChild: string[], base?: stri
 			for (const thread of genThreads) if (!drop.has(thread.fingerprint)) comments.push(...thread.lines);
 		}
 	}
+	// Exact line match plus normalized keys so pull does not keep wall-clock + ISO twins
+	// (BUG-COMMENT-VAULT-DUP-KEY).
 	const have = new Set(comments.map(l => l.trim()));
+	const haveKeys = new Set(
+		extractAbyssCommentThreads(comments).map(t => normalizedCommentKey(t.body)).filter(k => k.length > 0),
+	);
 	let carry = false;
 	oldChild.forEach((l, i) => {
 		if (oldKinds[i] === 'comment') {
 			const body = l.trim().slice(2);
+			const key = normalizedCommentKey(body);
 			const deletedInNote = syncedBodies.length > 0 && syncedBodies.includes(body);
 			const deletedOnServer = deletedInTickTick?.has(i) ?? false;
-			carry = !have.has(l.trim()) && !deletedInNote && !deletedOnServer;
+			const keyAlreadyPresent = key.length > 0 && haveKeys.has(key);
+			carry = !have.has(l.trim()) && !keyAlreadyPresent && !deletedInNote && !deletedOnServer;
 		} else if (oldKinds[i] !== 'cont') carry = false;
-		if (carry && (oldKinds[i] === 'comment' || oldKinds[i] === 'cont') && !deletedInTickTick?.has(i)) comments.push(l);
+		if (carry && (oldKinds[i] === 'comment' || oldKinds[i] === 'cont') && !deletedInTickTick?.has(i)) {
+			comments.push(l);
+			if (oldKinds[i] === 'comment') {
+				const key = normalizedCommentKey(l.trim().slice(2));
+				if (key) haveKeys.add(key);
+			}
+		}
 	});
+	const collapsedComments = collapseAbyssCommentLinesByKey(comments);
 	const tidy = (l: string) => l.replace(/[ \t]+$/, '').replace(/ {2,}%%/, ' %%');
-	return [head, ...[...descs, ...pick(['item']), ...kept, ...comments].map(tidy)].join('\n');
+	return [head, ...[...descs, ...pick(['item']), ...kept, ...collapsedComments].map(tidy)].join('\n');
+}
+
+/** Prefer wall-clock stamp over ISO stamp when collapsing twin Abyss comment bullets. */
+function preferCommentThread(a: AbyssCommentThread, b: AbyssCommentThread): number {
+	const iso = (body: string) => /^\d{4}-\d{2}-\d{2}T/.test(body.trim());
+	const wall = (body: string) => /^\d{4}-\d{2}-\d{2} \d{1,2}:\d{2}/.test(body.trim());
+	const aIso = iso(a.body);
+	const bIso = iso(b.body);
+	if (aIso !== bIso) return aIso ? 1 : -1;
+	const aWall = wall(a.body);
+	const bWall = wall(b.body);
+	if (aWall !== bWall) return aWall ? -1 : 1;
+	return 0;
+}
+
+/**
+ * One Abyss comment bullet per `normalizedCommentKey` (BUG-COMMENT-VAULT-DUP-KEY).
+ * Prefers wall-clock stamp over ISO stamp twins.
+ */
+export function collapseAbyssCommentLinesByKey(lines: string[]): string[] {
+	const threads = extractAbyssCommentThreads(lines);
+	if (threads.length <= 1) return lines;
+	const byKey = new Map<string, AbyssCommentThread[]>();
+	const order: string[] = [];
+	const noKey: AbyssCommentThread[] = [];
+	for (const t of threads) {
+		const key = normalizedCommentKey(t.body);
+		if (!key) {
+			noKey.push(t);
+			continue;
+		}
+		const group = byKey.get(key);
+		if (!group) {
+			byKey.set(key, [t]);
+			order.push(key);
+		} else {
+			group.push(t);
+		}
+	}
+	const out: string[] = [];
+	for (const key of order) {
+		const group = byKey.get(key)!;
+		const keep = [...group].sort(preferCommentThread)[0];
+		out.push(...keep.lines);
+	}
+	for (const t of noKey) out.push(...t.lines);
+	return out;
 }

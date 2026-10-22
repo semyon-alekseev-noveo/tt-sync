@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-22 10:26 UTC
+
+- Context: P0 comment safety bugs #27/#28/#29 on tip **2.0.78** (vault stamp twins; empty-vault wipe; getTaskComments fail-open).
+- Target: Ship **2.0.79** with failing BUG-* tests → fixes; one PR into `abyss-mapping`; do not release from feature branch.
+- Actions log: Branch `fix/p0-comment-bugs-2.0.79`; merge collapse by `normalizedCommentKey`; wipe only with hash flag + vault-origin maps; `getTaskComments` → `null` on unknown; bump **2.0.79**; docs + pilot results under `PILOT-BATCH-EDITOR-SAFETY`.
+- Validation: `npx vitest run` → **100** files, **697** passed; `npm run build` → ok.
+- Problems: Pilot vault re-verify for #27–#29 — **not run** (unit only this iteration).
+- To Be Done: Owner merges PR → release **2.0.79** from `abyss-mapping`; pilot evidence; close #27/#28/#29 after verify.
+- References: issues #27/#28/#29, `docs/pilot/results/PILOT-BATCH-EDITOR-SAFETY/`, `CHANGELOG.md`
+
 ### Iteration 2026-10-22 10:00 UTC
 
 - Context: Owner decided release policy for PROC-RELEASE-GATE (#30) after retagging **2.0.78** from pre-merge tip onto the merge commit.

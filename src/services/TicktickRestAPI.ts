@@ -231,13 +231,14 @@ export class TickTickRestAPI {
 	}
 
 
-	async getTaskComments(projectId: string, taskId: string): Promise<ITaskComment[]> {
+	async getTaskComments(projectId: string, taskId: string): Promise<ITaskComment[] | null> {
 		await this.initializeAPI();
 		try {
-			return (await this.api?.getTaskComments(projectId, taskId)) ?? [];
+			if (!this.api) return null;
+			return await this.api.getTaskComments(projectId, taskId);
 		} catch (error) {
 			log.error('Error getting task comments:', error);
-			return [];
+			return null;
 		}
 	}
 

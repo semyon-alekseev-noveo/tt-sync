@@ -2,7 +2,7 @@
 
 Tracker issues live on [`semyon-alekseev-noveo/tt-sync`](https://github.com/semyon-alekseev-noveo/tt-sync/issues). Long evidence lives under [`docs/pilot/results/`](../pilot/results/) — not in issue comments.
 
-**Release tip (2026-10-22):** [`abyss-mapping` @ `ad95e3e`](https://github.com/semyon-alekseev-noveo/tt-sync/commit/ad95e3e8a8cbea430c7255ddc8fcba2726e5ed4f) = merge [#55](https://github.com/semyon-alekseev-noveo/tt-sync/pull/55) → **[2.0.78](https://github.com/semyon-alekseev-noveo/tt-sync/releases/tag/2.0.78)** (modularization **2.0.77** + comment fixes **2.0.75**/**2.0.76**). Tag peel = tip.
+**Release tip (2026-10-22):** **[2.0.78](https://github.com/semyon-alekseev-noveo/tt-sync/releases/tag/2.0.78)** on `abyss-mapping`. **2.0.79** pending PR (`fix/p0-comment-bugs-2.0.79`) for #27/#28/#29.
 
 ## Status table (audit 2026-10-22)
 
@@ -13,9 +13,9 @@ Tracker issues live on [`semyon-alekseev-noveo/tt-sync`](https://github.com/semy
 | BUG-COMMENT-API-POST-500 | [#21](https://github.com/semyon-alekseev-noveo/tt-sync/issues/21) | P0 | **closed / pass** (**2.0.74**) | keep closed |
 | BUG-COMMENT-ABYSS-VIEW | [#23](https://github.com/semyon-alekseev-noveo/tt-sync/issues/23) | P0 | **closed / pass** (**2.0.75**); on tip via **2.0.78** | keep closed |
 | BUG-COMMENT-DUP-STAMP | [#25](https://github.com/semyon-alekseev-noveo/tt-sync/issues/25) | P0 | **closed / pass** (**2.0.76**); on tip via **2.0.78** | keep closed |
-| BUG-COMMENT-VAULT-DUP-KEY | [#27](https://github.com/semyon-alekseev-noveo/tt-sync/issues/27) | P0 | **open** (analyst; still in cases / code) | **keep** — next comment fix |
-| BUG-COMMENT-EMPTY-VAULT-WIPE | [#28](https://github.com/semyon-alekseev-noveo/tt-sync/issues/28) | P0 | **open** — wipe branch still in `abyssCommentSync` | **keep** |
-| BUG-COMMENT-GET-FAIL-OPEN | [#29](https://github.com/semyon-alekseev-noveo/tt-sync/issues/29) | P0 | **open** — `getTaskComments` still returns `[]` on error | **keep** |
+| BUG-COMMENT-VAULT-DUP-KEY | [#27](https://github.com/semyon-alekseev-noveo/tt-sync/issues/27) | P0 | **fix in 2.0.79** (unit); pilot not run | **keep open** until release+pilot |
+| BUG-COMMENT-EMPTY-VAULT-WIPE | [#28](https://github.com/semyon-alekseev-noveo/tt-sync/issues/28) | P0 | **fix in 2.0.79** (unit); pilot not run | **keep open** until release+pilot |
+| BUG-COMMENT-GET-FAIL-OPEN | [#29](https://github.com/semyon-alekseev-noveo/tt-sync/issues/29) | P0 | **fix in 2.0.79** (unit); pilot not run | **keep open** until release+pilot |
 | PILOT-BATCH-EDITOR-SAFETY | [#15](https://github.com/semyon-alekseev-noveo/tt-sync/issues/15) | P0 | **open** (#17/#18 left) | **keep** — retarget pilot build note to **2.0.78** |
 | └ open-note / editor | [#16](https://github.com/semyon-alekseev-noveo/tt-sync/issues/16) | P0 | **closed / pass** (**2.0.76**) | keep closed |
 | └ EMPTY-SIDE-GUARD | [#17](https://github.com/semyon-alekseev-noveo/tt-sync/issues/17) | P0 | **open** — pilot not run | **keep** |

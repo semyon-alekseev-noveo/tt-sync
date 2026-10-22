@@ -482,13 +482,19 @@ export class FileOperation {
 					log.warn('Abyss comment push before vault write failed', task.id, e);
 				}
 			}
-			const comments = await this.plugin.tickTickRestAPI.getTaskComments(task.projectId, task.id) ?? [];
-			Object.defineProperty(task, '_apiComments', { value: comments, enumerable: false, configurable: true });
+			const comments = await this.plugin.tickTickRestAPI.getTaskComments(task.projectId, task.id);
+			// BUG-COMMENT-GET-FAIL-OPEN: unknown remote → omit _apiComments so merge keeps vault bullets.
+			if (comments !== null) {
+				Object.defineProperty(task, '_apiComments', { value: comments, enumerable: false, configurable: true });
+			}
 			const maps = await listCommentMapsForTask(task.id);
 			const hint: TickTickCommentSync = {
 				knownBodies: maps.map(m => m.body),
-				apiBodies: comments.map(c => c.title ?? ''),
-				remoteCommentCount: (task as ITask & { commentCount?: number }).commentCount,
+				apiBodies: comments === null ? [] : comments.map(c => c.title ?? ''),
+				// Omit remoteCommentCount when GET failed so merge does not strip on empty apiBodies.
+				...(comments !== null
+					? { remoteCommentCount: (task as ITask & { commentCount?: number }).commentCount }
+					: {}),
 			};
 			Object.defineProperty(task, '__ticktickComments', { value: hint, enumerable: false, configurable: true });
 			task.content = stripLegacyCommentsBlock(task.content ?? '');

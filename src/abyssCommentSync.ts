@@ -102,13 +102,22 @@ export function vaultHadSyncedCommentBullets(maps: readonly TaskCommentMap[]): b
 	return maps.some(m => m.origin !== 'remote');
 }
 
+/**
+ * Wipe only when the push path saw a line-hash change that cleared Abyss bullets
+ * (BUG-COMMENT-EMPTY-VAULT-WIPE). Maps alone must not imply user intent — a stale
+ * empty vault read must not delete TickTick comments.
+ */
 function shouldWipeRemoteCommentsForEmptyVault(
 	threads: AbyssCommentThread[],
 	maps: readonly TaskCommentMap[],
 	opts?: AbyssCommentSyncOptions,
 ): boolean {
 	if (threads.length > 0 || maps.length === 0) return false;
-	return opts?.obsidianRemovedCommentBullets === true || vaultHadSyncedCommentBullets(maps);
+	return opts?.obsidianRemovedCommentBullets === true;
+}
+
+function isVaultOriginCommentMap(m: TaskCommentMap): boolean {
+	return m.origin !== 'remote';
 }
 
 /**
@@ -129,12 +138,23 @@ export async function syncAbyssCommentsToTickTick(
 
 	if (shouldWipeRemoteCommentsForEmptyVault(threads, maps, opts) && deletionConfirmMode() !== 'skip') {
 		const remote = await api.getTaskComments(projectId, taskId);
+		// BUG-COMMENT-GET-FAIL-OPEN: unknown remote state → no deletes.
+		if (remote === null) {
+			log.warn('Abyss comment wipe skipped: getTaskComments returned unknown state', taskId);
+			return false;
+		}
+		const vaultOriginIds = new Set(
+			maps.filter(isVaultOriginCommentMap).map(m => m.ticktickCommentId).filter(Boolean),
+		);
 		let changed = false;
+		// BUG-COMMENT-EMPTY-VAULT-WIPE: delete only vault-pushed comments; keep TT-only.
 		for (const c of remote) {
+			if (!vaultOriginIds.has(c.id)) continue;
 			if (await api.deleteTaskComment(projectId, taskId, c.id)) changed = true;
 		}
 		maps = await listCommentMapsForTask(taskId);
 		for (const m of maps) {
+			if (!isVaultOriginCommentMap(m)) continue;
 			await deleteCommentMap(m.id);
 			changed = true;
 		}
@@ -168,6 +188,11 @@ export async function syncAbyssCommentsToTickTick(
 	}
 
 	let remote = await api.getTaskComments(projectId, taskId);
+	// BUG-COMMENT-GET-FAIL-OPEN: failed GET must not look like "no comments" → vaultOnly re-create.
+	if (remote === null) {
+		log.warn('Abyss comment push skipped: getTaskComments returned unknown state', taskId);
+		return changed;
+	}
 	const remoteIds = new Set(remote.map(c => c.id));
 	maps = await listCommentMapsForTask(taskId);
 
@@ -209,7 +234,12 @@ export async function syncAbyssCommentsToTickTick(
 			}
 		}
 		if (deduped) {
-			remote = await api.getTaskComments(projectId, taskId);
+			const refreshed = await api.getTaskComments(projectId, taskId);
+			if (refreshed === null) {
+				log.warn('Abyss comment push skipped after dedupe: getTaskComments unknown', taskId);
+				return changed;
+			}
+			remote = refreshed;
 			maps = await listCommentMapsForTask(taskId);
 		}
 	}
@@ -299,7 +329,12 @@ export async function syncAbyssCommentsToTickTick(
 	}
 
 	// Re-plan after creates so deletes use a fresh remote list (BUG-COMMENT-PUSH-STALE-REMOTE).
-	remote = await api.getTaskComments(projectId, taskId);
+	const remoteAfterPush = await api.getTaskComments(projectId, taskId);
+	if (remoteAfterPush === null) {
+		log.warn('Abyss comment delete phase skipped: getTaskComments unknown after push', taskId);
+		return changed;
+	}
+	remote = remoteAfterPush;
 	remoteIds.clear();
 	for (const c of remote) remoteIds.add(c.id);
 	maps = await listCommentMapsForTask(taskId);

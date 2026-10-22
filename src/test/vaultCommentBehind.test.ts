@@ -436,7 +436,7 @@ describe('BUG-PULL-COMMENT-STALE', () => {
 		expect(addTaskComment).toHaveBeenCalledWith('proj-1', taskId, 'test-new-verision');
 	});
 
-	it('BUG-COMMENT-VAULT-WIPE coordinator wipes TT when vault has no comment threads but vault-origin maps', async () => {
+	it('BUG-COMMENT-EMPTY-VAULT-WIPE: coordinator must not wipe TT on empty vault threads without hash flag', async () => {
 		updateSettings({
 			syncNotes: true,
 			abyssTasksFormat: true,
@@ -519,10 +519,9 @@ describe('BUG-PULL-COMMENT-STALE', () => {
 			commentCount: 2,
 			lineHash,
 		}, file.path);
-		expect(deleteTaskComment).toHaveBeenCalledTimes(2);
-		expect(result.behind).toBe(false);
-		expect(result.localEdit).toBe(true);
-		expect(result.reason).toBe('vault-comments-ahead');
+		expect(deleteTaskComment).not.toHaveBeenCalled();
+		expect(result.behind).toBe(true);
+		expect(result.reason).toBe('behindComments');
 	});
 
 	it('BUG-COMMENT-BOTH-WAYS pushes vault-ahead then marks behindComments when TickTick also has extra comments', async () => {
