@@ -5,7 +5,7 @@
 - Context: Owner asked to bring stale comment-fix PRs #24/#26 and bump #54 into mergeable state on modularized `abyss-mapping` (release tip **2.0.77**).
 - Target: One combined tip **2.0.78** — modularization + BUG-COMMENT-ABYSS-VIEW + BUG-COMMENT-DUP-STAMP; open PR into `abyss-mapping`; close obsolete #24/#26/#54; release + pilot smoke.
 - Actions log: Branch `feat/comment-fixes-2.0.78` from `chore/release-2.0.77-modularization`; cherry-pick dee9569 / ab05fdf / 5b8467b with conflict resolution (keep modular structure); bump **2.0.78**; docs/PO/TEST_PLAN.
-- Validation: pending gate + release (filled after `npx vitest run` / `npm run build`).
+- Validation: `npx vitest run` → **100** files, **693** passed; `npm run build` → ok (`dist/main.js` **2.0.78**).
 - Problems: - No changes
 - To Be Done: Owner merges combined PR; BRAT Check for updates → **2.0.78**; continue PROC-RELEASE-GATE (#30); fix #27 vault dup key.
 - References: `CHANGELOG.md`, `docs/pilot/results/BUG-COMMENT-ABYSS-VIEW/`, `docs/pilot/results/BUG-COMMENT-DUP-STAMP/`
