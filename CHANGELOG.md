@@ -1,5 +1,25 @@
 # Changelog
 
+### Iteration 2026-10-22 09:29 UTC
+
+- Context: Owner asked to bring stale comment-fix PRs #24/#26 and bump #54 into mergeable state on modularized `abyss-mapping` (release tip **2.0.77**).
+- Target: One combined tip **2.0.78** — modularization + BUG-COMMENT-ABYSS-VIEW + BUG-COMMENT-DUP-STAMP; open PR into `abyss-mapping`; close obsolete #24/#26/#54; release + pilot smoke.
+- Actions log: Branch `feat/comment-fixes-2.0.78` from `chore/release-2.0.77-modularization`; cherry-pick dee9569 / ab05fdf / 5b8467b with conflict resolution (keep modular structure); bump **2.0.78**; docs/PO/TEST_PLAN.
+- Validation: `npx vitest run` → **100** files, **693** passed; `npm run build` → ok (`dist/main.js` **2.0.78**). Release **2.0.78** published. Pilot smoke **pass**: deploy + reload + `tts-sync` (cleared stuck `syncRunning`); `checkPoint` advanced (`55-release-smoke.md`).
+- Problems: First `tts-sync` after reload left `syncRunning` stuck true until cleared via eval — **mitigated** for smoke; still open for #30 reliability.
+- To Be Done: Owner merges [#55](https://github.com/semyon-alekseev-noveo/tt-sync/pull/55); BRAT Check for updates → **2.0.78**; continue PROC-RELEASE-GATE (#30); fix #27 vault dup key.
+- References: https://github.com/semyon-alekseev-noveo/tt-sync/pull/55, https://github.com/semyon-alekseev-noveo/tt-sync/releases/tag/2.0.78, `docs/pilot/results/COMMENT-FIXES-2.0.78/`, `CHANGELOG.md`
+
+### Iteration 2026-10-22 08:15 UTC
+
+- Context: Epic #31 TECH-SYNC-MODULARIZATION stack (#34–#40) merged on `abyss-mapping`; owner asked for release + pilot smoke before closing the epic.
+- Target: Release **2.0.77** from modularization tip; encode epic-close ⇒ release + gate; close #31 with evidence.
+- Actions log: Branch `chore/release-2.0.77-modularization`; bump `package.json` / `manifest.json` / `versions.json`; update `DEV_FLOW.md`, `.cursor/rules/dev-flow.mdc`, `PO_STATUS.md`, `PROJECT_STATE.md`, `TEST_PLAN.md`, pilot results; GitHub release + pilot deploy.
+- Validation: `npx vitest run` → **100** files, **688** passed; `npm run build` → ok (`dist/main.js` 2.0.77). Pilot smoke **pass**: deploy + reload + `tts-sync`; `checkPoint` advanced (`31-release-2.0.77-smoke.md`).
+- Problems: GitHub releases **2.0.75**/**2.0.76** (comment fixes) are still on open PRs #24/#26 — not ancestors of this tip (`open` for #30).
+- To Be Done: Owner merges version-bump PR [#54](https://github.com/semyon-alekseev-noveo/tt-sync/pull/54) into `abyss-mapping`; land #24/#26 or re-cut after merge; continue PROC-RELEASE-GATE (#30).
+- References: https://github.com/semyon-alekseev-noveo/tt-sync/releases/tag/2.0.77, https://github.com/semyon-alekseev-noveo/tt-sync/pull/54, `docs/pilot/results/TECH-SYNC-MODULARIZATION/`, `DEV_FLOW.md`, `CHANGELOG.md`
+
 ### Iteration 2026-10-22 07:19 UTC
 
 - Context: TECH-SYNC-MODULARIZATION (#31) PR 7 — orchestrator phases still imported Dexie; store was concrete classes only.
@@ -79,6 +99,56 @@
 - Problems: - No changes
 - To Be Done: PR into `abyss-mapping`; comment #31; next slice = lifecycle extract from `syncFiles` (PR 2).
 - References: `docs/SYNC_MODULARIZATION.md`, `docs/pilot/results/TECH-SYNC-MODULARIZATION/`, `CHANGELOG.md`
+
+### Iteration 2026-10-21 14:59 UTC
+
+- Context: After **2.0.76**, run P0 **PILOT-BATCH-EDITOR-SAFETY** #16 open-note/editor verify; sticky `local-edit` on `2026-10-19.md`.
+- Target: Record #16 pilot results; file vault-side comment twin bug if confirmed.
+- Actions log: Pilot TP-EMPTY-EDITOR-DISK / TP-NO-CARET-REWRITE / TP-ACTIVE-PUSH-DURING-SYNC / TP-NO-STALE-VIEW-READ on **2.0.76**; evidence under `docs/pilot/results/PILOT-BATCH-EDITOR-SAFETY/`; `gh issue create` #27 **BUG-COMMENT-VAULT-DUP-KEY**.
+- Validation: Four #16 rows **pass**; vault note has 8 Abyss bullets for 4 keys (fail → #27); vitest editor-cluster subset **7 passed**.
+- Problems: **BUG-COMMENT-VAULT-DUP-KEY** — **open** (analyst).
+- To Be Done: #17 EMPTY-SIDE-GUARD; #18 deferred-id; fix #27 with failing test.
+- References: https://github.com/semyon-alekseev-noveo/tt-sync/issues/16, https://github.com/semyon-alekseev-noveo/tt-sync/issues/27, `CHANGELOG.md`
+
+### Iteration 2026-10-21 14:52 UTC
+
+- Context: **BUG-COMMENT-DUP-STAMP** (#25) — Abyss push left stamped+plain TT Comment pairs for the same normalized key.
+- Target: One TT comment per vault thread; strip stamp on all POSTs; collapse remote twins; ship **2.0.76**.
+- Actions log: Failing tests in `abyssCommentSync.test.ts`; dedupe-by-key before plan; skip vaultOnly when key present; linked re-post uses plain title; bump **2.0.76**; pilot results folder.
+- Validation: `npx vitest run` → **685 passed**; `npm run build` → dist **2.0.76**; pilot MCP `get_comment` on `task-11-16` → **4** plain titles (no stamped twins).
+- Problems: Concurrent double-flush race still possible without mutex — **mitigated** by key-present skip + dedupe.
+- To Be Done: Close #25; next P0 **PILOT-BATCH-EDITOR-SAFETY** (#15/#16).
+- References: https://github.com/semyon-alekseev-noveo/tt-sync/issues/25, `docs/pilot/results/BUG-COMMENT-DUP-STAMP/`, `CHANGELOG.md`
+
+### Iteration 2026-10-21 14:41 UTC
+
+- Context: After **BUG-COMMENT-ABYSS-VIEW** / #23 verify on `task-11-16`, owner saw TickTick Comments as stamped+plain pairs (count 8 for 4 threads).
+- Target: File analyst case **BUG-COMMENT-DUP-STAMP** + GitHub issue; no code fix.
+- Actions log: `gh issue create` #25 with screenshot; catalog row; `docs/github-issues/BUG-COMMENT-DUP-STAMP.md` + INDEX; comment on #23.
+- Validation: Issue URL returned; case ID unique in `ABYSS_FIRST_CASES.md` (no prior DUP-STAMP).
+- Problems: **BUG-COMMENT-DUP-STAMP** — **open** (analyst; hypothesized stamp/race double POST).
+- To Be Done: Failing test + fix in a later PR; do not reopen #23.
+- References: https://github.com/semyon-alekseev-noveo/tt-sync/issues/25, `docs/github-issues/BUG-COMMENT-DUP-STAMP.md`, `CHANGELOG.md`
+
+### Iteration 2026-10-21 14:35 UTC
+
+- Context: Owner approved commit + BRAT release **2.0.75** for **BUG-COMMENT-ABYSS-VIEW**; asked canonical docs to explain Abyss → vault.modify → push path.
+- Target: Ship **2.0.75**; document open-note triggers vs POST body; close #23; PR into `abyss-mapping` (no merge).
+- Actions log: Bump manifest/package/versions/dist; architecture notes in `ANALYST_REFERENCE_DIAGRAMS` §2b, `COMMENT_SYNC_MODEL`, `TICKTICK_DELTA_API`, `ABYSS_NOTES_ALIGNMENT`; update TEST_PLAN/PO/PROJECT_STATE/cases; `gh release create 2.0.75`.
+- Validation: `npm run build` → dist **2.0.75**; prior vitest **682**; release assets match **2.0.74** pattern.
+- Problems: Duplicate-comment race under syncRunning — **open** (unchanged).
+- To Be Done: BRAT Check for updates on pilot; next P0 **PILOT-BATCH-EDITOR-SAFETY** (#15–#18).
+- References: `docs/pilot/results/BUG-COMMENT-ABYSS-VIEW/`, `docs/ANALYST_REFERENCE_DIAGRAMS.md`, `CHANGELOG.md`
+
+### Iteration 2026-10-21 14:27 UTC
+
+- Context: User added comments on **task-11-16** in Abyss view (did not leave Abyss); TT Comments empty on **2.0.74**.
+- Target: **BUG-COMMENT-ABYSS-VIEW** — Abyss `vault.modify` must schedule open-note push; Comments land without markdown editor.
+- Actions log: Baseline evidence; fix `EventHandlerService` + `activeFilePush` (`shouldNotifyPushOnVaultModify`, flush without active-file requirement, Abyss sweep); tests; deploy pilot (no version bump); verify MCP + write-trace.
+- Validation: `npx vitest run` → **682 passed**; `npm run build` ok; MCP Comments for `6ad83d…` include `comment 1`, `коммент 2`, `abyss-view-verify-*`; write-trace `push-abyss-or-background`.
+- Problems: Startup sync can stick `syncRunning` and defer push briefly — **mitigated** by release-after-sync; possible duplicate TT Comments under race — **open**.
+- To Be Done: Owner commit/PR when ready; optional release bump; watch duplicate-comment race.
+- References: `docs/pilot/results/BUG-COMMENT-ABYSS-VIEW/`, `CHANGELOG.md`
 
 ### Iteration 2026-10-21 14:05 UTC
 

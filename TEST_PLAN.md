@@ -641,6 +641,26 @@ Automated: `pushLocalPaths.test.ts` (`BUG-COMMENT-ACTIVE-NOTE`).
 | BUG-COMMENT-VAULT-WIPE | not run | **2.0.68**: remove all comment bullets, **Synchronize** (even if line hash already matches) → all TT Comments deleted; no `behindComments` re-pull; `vaultCommentBehind.test.ts` + `abyssCommentSync.test.ts`. Pilot: `task-11-16` (`6ad83d…`). |
 | BUG-COMMENT-RECONCILE-UPDATE | mitigated | **2.0.73** Phase 3: write-trace kept **`vault-comments-ahead`** while Comments empty (guard OK). Unblocked by **2.0.74** POST fix — Phase 3b Comments land. Evidence: `13-phase-3-verify.md`, `16-phase-3b-verify.md`. |
 | BUG-COMMENT-API-POST-500 | pass | **2.0.74**: webapp POST body + empty-200 client id (`bugCommentApiPost500.test.ts`). Pilot: reload + `tts-sync` → TT Comments **`comment 1`**, **`test-new-verision`**. Evidence: `15-phase-2b-post-fix.md`, `16-phase-3b-verify.md`. |
+| BUG-COMMENT-ABYSS-VIEW | pass | **2.0.75**: Abyss/`vault.modify` schedules 5s push; flush `push-abyss-or-background`. Pilot `task-11-16` / `2026-10-19.md` → TT Comments include user `comment 1` / `коммент 2` + verify bullets. Evidence: `docs/pilot/results/BUG-COMMENT-ABYSS-VIEW/`. Automated: `activeFilePush.test.ts`. |
+| BUG-COMMENT-DUP-STAMP | pass | **2.0.76**: stamped+plain TT pairs collapsed by `normalizedCommentKey`; creates always plain; no second POST when key present. Automated: `abyssCommentSync.test.ts`. Pilot: `task-11-16` → **4** plain Comments (no stamped twins). Evidence: `docs/pilot/results/BUG-COMMENT-DUP-STAMP/`. |
+
+### BUG-COMMENT-DUP-STAMP — stamped+plain TickTick pairs
+
+1. Task with vault Abyss comment bullets that already produced stamped+plain TT Comments (e.g. `task-11-16` after **2.0.75** Abyss push).
+2. Install **2.0.76**; **Synchronize** once (or open-note push).
+3. Optionally add one new Abyss-view comment and wait ≥5s.
+
+Expected: TickTick **Comments** has **one** entry per vault thread (plain title preferred). No new stamped twin for the same text. Automated: `abyssCommentSync.test.ts` (`BUG-COMMENT-DUP-STAMP`).
+
+### BUG-COMMENT-ABYSS-VIEW — Abyss Tasks view comment push
+
+1. Open a synced task in **Abyss Tasks** (not the markdown editor). Stay in Abyss.
+2. Add a child comment bullet under `task-11-16` (or any in-scope synced task).
+3. Wait ≥5s without switching to the markdown editor and without **Synchronize**.
+
+Expected: TickTick **Comments** shows the new text. write-trace may show `flushActiveFilePush` with reason `push-abyss-or-background`.
+
+Automated: `activeFilePush.test.ts` (`BUG-COMMENT-ABYSS-VIEW`).
 
 ### BUG-COMMENT-NO-MASS-DELETE — new vault comment must not wipe TickTick
 
@@ -677,9 +697,44 @@ Automated: `pendingMarkerDeletion.test.ts` (`BUG-DEFERRED-ID-PHASE2-DELETE`).
 
 | ID | Pilot status | Evidence |
 |----|----------------|----------|
-| TP-NO-CARET-REWRITE | not run | Automated: `synchronizationInner.integration.test.ts`. Vault Thinkpad-tts-test not run. |
-| TP-ACTIVE-PUSH-DURING-SYNC | not run | Automated: `activeFilePush.test.ts`, `synchronizationInner.integration.test.ts`. Vault not run. |
-| TP-NO-STALE-VIEW-READ | not run | Automated: `tpNoStaleViewRead.test.ts`. Vault not run. |
+| TP-NO-CARET-REWRITE | pass | **2.0.76** pilot: `2026-10-21.md` marker `caret-verify-*` survived Synchronize (disk + `obsidian read`). Evidence: `docs/pilot/results/PILOT-BATCH-EDITOR-SAFETY/16-open-note-editor.md`. |
+| TP-ACTIVE-PUSH-DURING-SYNC | pass | **2.0.76** pilot: edit then immediate sync; vault kept `active-push-*`; MCP title landed. Evidence: same #16 file. |
+| TP-NO-STALE-VIEW-READ | pass | **2.0.76** write-trace: `setViewData` with `bufferEqDisk: true` (no stale `fileRunActive` reload). Evidence: same #16 file. |
 | TP-ABYSS-LOCAL-CHILD-KEEP | not run | Automated: `abyssStep3.test.ts`. Vault not run. |
 | TP-TWO-LEAVES | not run | Automated: `tpTwoLeaves.test.ts`. Vault not run. |
-| TP-EMPTY-EDITOR-DISK | not run | Automated: `staleFileWrite.test.ts`. Pilot repro 2026-10-21 `00 Inbox/2026-10-20.md`: disk had text, Obsidian UI empty until fix. |
+| TP-EMPTY-EDITOR-DISK | pass | **2.0.76** pilot: close/reopen `2026-10-20.md` → task visible; matches disk. Evidence: same #16 file. |
+
+## Release 2.0.77 — TECH-SYNC-MODULARIZATION epic close (#31)
+
+Extract-only stack landed as PRs #34–#40 on `abyss-mapping`. No intended behavior change. Gate: vitest + build + one pilot **Synchronize** smoke.
+
+### TP-MOD-RELEASE-SMOKE — deploy 2.0.77 and Synchronize once
+
+1. Install release **2.0.77** into `<pilot-vault>/.obsidian/plugins/tickticksync-abyss/` (`main.js`, `manifest.json`, `styles.css`).
+2. Reload the plugin (`obsidian plugin:reload id=tickticksync-abyss` or app reload).
+3. Run **Synchronize** once (`tickticksync-abyss:tts-sync`).
+
+Expected: sync finishes without a silent failure notice; plugin version in settings/manifest is **2.0.77**. This is a smoke check, not a comment-gate re-run.
+
+| ID | Pilot status | Evidence |
+|----|----------------|----------|
+| TP-MOD-RELEASE-SMOKE | **pass** | Deploy **2.0.77**; CLI reload + `tts-sync`; `checkPoint` advanced; evidence `docs/pilot/results/TECH-SYNC-MODULARIZATION/31-release-2.0.77-smoke.md` |
+
+Note: **2.0.75**/**2.0.76** comment fixes are included in combined tip **2.0.78** (this PR).
+
+
+## Release 2.0.78 — comment fixes on modularized tip
+
+Re-cuts **BUG-COMMENT-ABYSS-VIEW** (2.0.75) and **BUG-COMMENT-DUP-STAMP** (2.0.76) onto modularization + **2.0.77**. Supersedes open PRs #24/#26/#54.
+
+### TP-COMMENT-FIXES-ON-MOD — deploy 2.0.78 and Synchronize once
+
+1. Install release **2.0.78** into `<pilot-vault>/.obsidian/plugins/tickticksync-abyss/`.
+2. Reload the plugin.
+3. Run **Synchronize** once.
+
+Expected: sync finishes; plugin version **2.0.78**. Smoke only — do not invent Abyss-view / DUP-STAMP re-verify unless re-run.
+
+| ID | Pilot status | Evidence |
+|----|----------------|----------|
+| TP-COMMENT-FIXES-ON-MOD | **pass** | Deploy **2.0.78**; CLI reload + `tts-sync` (after clearing stuck `syncRunning`); `checkPoint` advanced; evidence `docs/pilot/results/COMMENT-FIXES-2.0.78/55-release-smoke.md` |

@@ -43,6 +43,18 @@ export function planActiveFilePush(ctx: ActiveFilePushContext): ActiveFilePushPl
 	return { push: true, skipLines, retryAfterSync: false };
 }
 
+/**
+ * BUG-COMMENT-ABYSS-VIEW: Abyss Tasks (and any non-markdown-editor writer) fires vault.modify
+ * but not workspace editor-change. The debounced open-note push must still be scheduled.
+ */
+export function shouldNotifyPushOnVaultModify(ctx: {
+	hasToken: boolean;
+	isMarkdown: boolean;
+	inScope: boolean;
+}): boolean {
+	return !!(ctx.hasToken && ctx.isMarkdown && ctx.inScope);
+}
+
 /** Remember a path whose 5-second push came due while a sync was running. */
 export function deferActiveFilePush(filepath: string): void {
 	if (filepath) deferredDuringSync.add(filepath);

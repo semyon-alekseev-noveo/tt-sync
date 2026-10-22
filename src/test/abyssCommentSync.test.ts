@@ -298,4 +298,72 @@ describe('abyssCommentSync', () => {
 		expect(ok).toBe(true);
 		expect(add).toHaveBeenCalledWith('proj1', 'task1', 'only comment changed');
 	});
+
+	it('BUG-COMMENT-DUP-STAMP: does not POST when remote already has plain twin of vault stamp', async () => {
+		const S = getSettings() as Record<string, unknown>;
+		Object.assign(S, { syncNotes: true, abyssTasksFormat: true, syncAbyssCommentsViaApi: true });
+		listMaps.mockResolvedValue([]);
+		const add = vi.fn();
+		const del = vi.fn();
+		const api = {
+			getTaskComments: vi.fn().mockResolvedValue([{ id: 'tt-plain', title: 'comment 1' }]),
+			addTaskComment: add,
+			deleteTaskComment: del,
+		} as unknown as TickTickRestAPI;
+		await syncAbyssCommentsToTickTick(api, 'task1', 'proj1', ['\t- 2026-10-21 21:22: comment 1']);
+		expect(add).not.toHaveBeenCalled();
+	});
+
+	it('BUG-COMMENT-DUP-STAMP: deletes stamped+plain remote pair keeping one by normalized key', async () => {
+		const S = getSettings() as Record<string, unknown>;
+		Object.assign(S, { syncNotes: true, abyssTasksFormat: true, syncAbyssCommentsViaApi: true });
+		listMaps.mockResolvedValue([]);
+		const add = vi.fn();
+		const del = vi.fn().mockResolvedValue(true);
+		let remote = [
+			{ id: 'tt-stamped', title: '2026-10-21 21:22: comment 1' },
+			{ id: 'tt-plain', title: 'comment 1' },
+		];
+		const api = {
+			getTaskComments: vi.fn(async () => remote),
+			addTaskComment: add,
+			deleteTaskComment: vi.fn(async (_p: string, _t: string, id: string) => {
+				remote = remote.filter(c => c.id !== id);
+				return del(_p, _t, id);
+			}),
+		} as unknown as TickTickRestAPI;
+		await syncAbyssCommentsToTickTick(api, 'task1', 'proj1', ['\t- 2026-10-21 21:22: comment 1']);
+		expect(add).not.toHaveBeenCalled();
+		expect(del).toHaveBeenCalledWith('proj1', 'task1', 'tt-stamped');
+		expect(del).not.toHaveBeenCalledWith('proj1', 'task1', 'tt-plain');
+		expect(remote).toEqual([{ id: 'tt-plain', title: 'comment 1' }]);
+	});
+
+	it('BUG-COMMENT-DUP-STAMP: content re-post uses plain title not vault stamp', async () => {
+		const S = getSettings() as Record<string, unknown>;
+		Object.assign(S, { syncNotes: true, abyssTasksFormat: true, syncAbyssCommentsViaApi: true });
+		listMaps.mockResolvedValue([
+			{
+				id: 'task1:updated',
+				taskId: 'task1',
+				projectId: 'proj1',
+				fingerprint: 'updated',
+				ticktickCommentId: 'tt-old',
+				body: 'updated',
+				origin: 'vault',
+			},
+		]);
+		const add = vi.fn().mockResolvedValue({ id: 'tt-new', title: 'updated' });
+		const del = vi.fn().mockResolvedValue(true);
+		const api = {
+			getTaskComments: vi.fn().mockResolvedValue([{ id: 'tt-old', title: 'stale other' }]),
+			addTaskComment: add,
+			deleteTaskComment: del,
+		} as unknown as TickTickRestAPI;
+		// Map id links remote; vault aliases overlap map ("updated") while remote title differs.
+		await syncAbyssCommentsToTickTick(api, 'task1', 'proj1', ['\t- 2026-10-21 21:22: updated']);
+		expect(del).toHaveBeenCalledWith('proj1', 'task1', 'tt-old');
+		expect(add).toHaveBeenCalledWith('proj1', 'task1', 'updated');
+		expect(add.mock.calls.some((c: unknown[]) => String(c[2]).includes('2026-10-21'))).toBe(false);
+	});
 });

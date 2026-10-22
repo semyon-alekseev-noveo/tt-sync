@@ -7,12 +7,23 @@ Tracker issues live on [`semyon-alekseev-noveo/tt-sync`](https://github.com/semy
 | PILOT-GATE-TEST-11-12 | [#14](https://github.com/semyon-alekseev-noveo/tt-sync/issues/14) | P0 | **closed / pass** (**2.0.74**) | — |
 | Phase 0–3 (comment gate) | [#10](https://github.com/semyon-alekseev-noveo/tt-sync/issues/10)–[#13](https://github.com/semyon-alekseev-noveo/tt-sync/issues/13) | P0 | **closed** | under #14 |
 | BUG-COMMENT-API-POST-500 | [#21](https://github.com/semyon-alekseev-noveo/tt-sync/issues/21) | P0 | **closed / pass** (**2.0.74**) | — |
-| PILOT-BATCH-EDITOR-SAFETY | [#15](https://github.com/semyon-alekseev-noveo/tt-sync/issues/15) | P0 | open | Soft: was #14; now unblocked for focus |
-| └ open-note / editor | [#16](https://github.com/semyon-alekseev-noveo/tt-sync/issues/16) | P0 | open | #15 |
+| BUG-COMMENT-ABYSS-VIEW | [#23](https://github.com/semyon-alekseev-noveo/tt-sync/issues/23) | P0 | **closed / pass** (**2.0.75**) | — |
+| BUG-COMMENT-DUP-STAMP | [#25](https://github.com/semyon-alekseev-noveo/tt-sync/issues/25) | P0 | **closed / pass** (**2.0.76**) | Soft: after #23; stamped+plain TT pairs |
+| BUG-COMMENT-VAULT-DUP-KEY | [#27](https://github.com/semyon-alekseev-noveo/tt-sync/issues/27) | P0 | open (analyst) | Soft: after #25; vault wall-clock+ISO twins |
+| PILOT-BATCH-EDITOR-SAFETY | [#15](https://github.com/semyon-alekseev-noveo/tt-sync/issues/15) | P0 | open (#17/#18 left) | Soft: was #14; now unblocked for focus |
+| └ open-note / editor | [#16](https://github.com/semyon-alekseev-noveo/tt-sync/issues/16) | P0 | **closed / pass** (**2.0.76**) | #15 |
 | └ EMPTY-SIDE-GUARD | [#17](https://github.com/semyon-alekseev-noveo/tt-sync/issues/17) | P0 | open | #15 |
 | └ deferred-id | [#18](https://github.com/semyon-alekseev-noveo/tt-sync/issues/18) | P0 | open | #15 |
 | BUG-ACTIVEZONE-COMMENT-SHUFFLE | [#19](https://github.com/semyon-alekseev-noveo/tt-sync/issues/19) | P1 | open | Soft: #15 |
 | Step 7 AF-* pilot soak | [#20](https://github.com/semyon-alekseev-noveo/tt-sync/issues/20) | P1 | open | #14 pass + #15 |
+| TECH-SYNC-MODULARIZATION | [#31](https://github.com/semyon-alekseev-noveo/tt-sync/issues/31) | P1 | **closed** — release **2.0.77** (PRs #34–#40 on `abyss-mapping`) | extract-only stack |
+| └ PR1 phases | [#41](https://github.com/semyon-alekseev-noveo/tt-sync/issues/41) | P1 | **closed** → [PR #34](https://github.com/semyon-alekseev-noveo/tt-sync/pull/34) | #31 |
+| └ PR2 lifecycle | [#47](https://github.com/semyon-alekseev-noveo/tt-sync/issues/47) | P1 | **closed** → [PR #35](https://github.com/semyon-alekseev-noveo/tt-sync/pull/35) | #31 |
+| └ PR3 vault-io | [#42](https://github.com/semyon-alekseev-noveo/tt-sync/issues/42) | P1 | **closed** → [PR #36](https://github.com/semyon-alekseev-noveo/tt-sync/pull/36) | #31 |
+| └ PR4 PluginContext | [#43](https://github.com/semyon-alekseev-noveo/tt-sync/issues/43) | P1 | **closed** → [PR #37](https://github.com/semyon-alekseev-noveo/tt-sync/pull/37) | #31 |
+| └ PR5 taskParser | [#45](https://github.com/semyon-alekseev-noveo/tt-sync/issues/45) | P1 | **closed** → [PR #38](https://github.com/semyon-alekseev-noveo/tt-sync/pull/38) | #31 |
+| └ PR6 TaskModificationDetector | [#46](https://github.com/semyon-alekseev-noveo/tt-sync/issues/46) | P1 | **closed** → [PR #39](https://github.com/semyon-alekseev-noveo/tt-sync/pull/39) | #31 |
+| └ PR7 store ports | [#48](https://github.com/semyon-alekseev-noveo/tt-sync/issues/48) | P1 | **closed** → [PR #40](https://github.com/semyon-alekseev-noveo/tt-sync/pull/40) | #31 |
 
 ## Templates
 
@@ -25,6 +36,8 @@ Tracker issues live on [`semyon-alekseev-noveo/tt-sync`](https://github.com/semy
 | `13-verify-deferred-id.md` | #18 |
 | `15-bug-activezone-comment-shuffle.md` | #19 |
 | `20-epic-step7-af-soak.md` | #20 |
+| `BUG-COMMENT-DUP-STAMP.md` | #25 |
+| `BUG-COMMENT-VAULT-DUP-KEY.md` | #27 |
 
 ## Naming
 

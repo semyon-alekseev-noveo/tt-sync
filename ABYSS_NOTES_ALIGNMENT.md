@@ -65,11 +65,12 @@ Canonical merge order on pull: **task line → descriptions → checklist items 
 | Obs → TT | `convertLineToTask` writes the description into `content`. `syncAbyssCommentsToTickTick` pushes comment threads. A child comment or description line pushes the parent (`BUG-COMMENT-INLINE`) |
 | TT → Obs | `convertTaskToLine` writes the description. API comments are formatted as Abyss lines (`formatApiCommentAsAbyssLines`) and merged with `mergeAbyssBlock`. A body stored in `taskCommentMaps` on the previous sync and missing from the current Comments API is removed; a vault comment with no map entry is kept. `vaultLineBehindTask` treats a TickTick-only comment as behind (`BUG-PULL-COMMENT-STALE`) |
 | Hash / change detect | `TaskModificationDetector` hashes `line + abyssLinesToNote(taskLines)` when the Comments API is on. `abyssDescriptionToNote` is not the hash |
+| Open-note / Abyss view | Markdown `editor-change` **or** in-scope `vault.modify` schedules the 5s debounced push (`BUG-COMMENT-ABYSS-VIEW`). Abyss Tasks writes the note without focusing the markdown editor — that path must still call Comments API. POST body still needs the webapp shape (**2.0.74**). Diagram: `docs/ANALYST_REFERENCE_DIAGRAMS.md` §2b |
 
 **Known limitations** (`ABYSS_MAPPING.md`):
 
 - Description lines placed *after* subtasks in the file may sit outside the contiguous Abyss region (edge case).
-- Editing `.md` on disk without Obsidian does not trigger push (editor buffer / file watcher).
+- Editing `.md` **outside** Obsidian (external editor / sync client) does not fire Obsidian `vault.modify` / `editor-change` in this process — no automatic open-note push until Synchronize or a reload that sees the file.
 
 **Known API quirk:** Title-only or body-only TT edits may not bump `modifiedTime` — same class of issue as rename; mitigations exist for title (`vaultLineBehindTask`, `skipPushWhenTickTickRenamedVaultLine`); body may need similar soak.
 
