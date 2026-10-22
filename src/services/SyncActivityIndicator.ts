@@ -1,4 +1,4 @@
-import type TickTickSync from '@/main';
+import type { PluginContext } from '@/pluginContext';
 import { SyncProgressNotice } from '@/modals/SyncProgressNotice';
 import { getSettings } from '@/settings';
 
@@ -18,7 +18,7 @@ export class SyncActivityIndicator {
 	private fullActive = false;
 	private inlineDepth = 0;
 
-	constructor(_plugin: TickTickSync) {}
+	constructor(_plugin: PluginContext) {}
 
 	beginFull(trigger: SyncTrigger): void {
 		if (!shouldShowFullSyncProgress(trigger)) return;

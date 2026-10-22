@@ -13,7 +13,7 @@ import { markerName } from '@/taskParser';
  */
 
 import { App, Notice, TFile } from 'obsidian';
-import type TickTickSync from '@/main';
+import type { PluginContext } from '@/pluginContext';
 import type { ITask } from '@/api/types/Task';
 import { FileTaskQueries } from '@/repositories/FileTaskQueries';
 import { getSettings } from '@/settings';
@@ -22,10 +22,10 @@ import log from '@/utils/logger';
 
 export class TaskOperationsService {
 	private app: App;
-	private plugin: TickTickSync;
+	private plugin: PluginContext;
 	private fileTaskQueries: FileTaskQueries;
 
-	constructor(app: App, plugin: TickTickSync) {
+	constructor(app: App, plugin: PluginContext) {
 		this.app = app;
 		this.plugin = plugin;
 		this.fileTaskQueries = new FileTaskQueries();

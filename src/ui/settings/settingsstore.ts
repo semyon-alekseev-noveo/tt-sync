@@ -1,14 +1,14 @@
-import type TickTickSync from '@/main';
+import type { PluginContext } from '@/pluginContext';
 import { type Writable, writable } from 'svelte/store';
 import { type ITickTickSyncSettings, setSettings, settings } from '@/settings';
 
 // New: keep a reference to the plugin instance
-let currentPlugin: TickTickSync | null = null;
+let currentPlugin: PluginContext | null = null;
 
 export let settingsStore: Writable<ITickTickSyncSettings>;
 
 // Call from plugin setup (after loadSettings, when opening the settings tab)
-export function settingsLoad(plugin: TickTickSync) {
+export function settingsLoad(plugin: PluginContext) {
 	currentPlugin = plugin;
 
 	if (settingsStore) {

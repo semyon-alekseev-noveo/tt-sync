@@ -2,7 +2,7 @@ import { idsPresentInVault } from '@/utils/vaultIdScan';
 import { stripFileLinks } from '@/projectScheme';
 import { detachInContent, enrichDeletionItems, descendantsOf } from '@/detach';
 import { markerName } from '@/taskParser';
-import TickTickSync from '@/main';
+import type { PluginContext } from '@/pluginContext';
 import {
 	App,
 	MarkdownView,
@@ -25,10 +25,10 @@ import { commitVaultText, readNoteForWrite } from '@/sync/vault-io';
 
 export class SyncMan {
 	private readonly app: App;
-	private readonly plugin: TickTickSync;
+	private readonly plugin: PluginContext;
 
 
-	constructor(app: App, plugin: TickTickSync) {
+	constructor(app: App, plugin: PluginContext) {
 		this.app = app;
 		this.plugin = plugin;
 	}

@@ -31,7 +31,7 @@ import { scanVaultForDeletionGuard } from '@/sync/vaultDeletionScan';
 import { isPathInPushScope } from '@/syncScope';
 import log from '@/utils/logger';
 import type { TickTickRestAPI } from '@/services/TicktickRestAPI';
-import type TickTickSync from '@/main';
+import type { PluginContext } from '@/pluginContext';
 
 export interface GuardedPull {
 	applyDeletions: boolean;
@@ -41,7 +41,7 @@ export interface GuardedPull {
 }
 
 export async function prepareDeletionGuard(
-	plugin: TickTickSync,
+	plugin: PluginContext,
 	api: TickTickRestAPI,
 	trigger: SyncRunTrigger,
 	fullSync: boolean,
@@ -172,7 +172,7 @@ export async function prepareDeletionGuard(
 	};
 }
 
-async function openReport(plugin: TickTickSync, path: string): Promise<void> {
+async function openReport(plugin: PluginContext, path: string): Promise<void> {
 	try {
 		const file = plugin.app.vault.getAbstractFileByPath(path);
 		if (file instanceof TFile) {

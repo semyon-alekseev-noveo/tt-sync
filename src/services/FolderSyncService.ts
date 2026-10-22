@@ -15,14 +15,14 @@ import { NewFileMap } from '@/services/NewFileMap';
 import { commitVaultText } from '@/sync/vault-io';
 import { FileLocationConflictModal } from '@/modals/FileLocationConflictModal';
 import log from '@/utils/logger';
-import type TickTickSync from '@/main';
+import type { PluginContext } from '@/pluginContext';
 
 export class FolderSyncService {
 	private app: App;
 	private projectGroupRepo: ProjectGroupRepository;
-	private plugin: TickTickSync;
+	private plugin: PluginContext;
 
-	constructor(app: App, plugin: TickTickSync, projectGroupRepo: ProjectGroupRepository) {
+	constructor(app: App, plugin: PluginContext, projectGroupRepo: ProjectGroupRepository) {
 		this.app = app;
 		this.projectGroupRepo = projectGroupRepo;
 		this.plugin = plugin;

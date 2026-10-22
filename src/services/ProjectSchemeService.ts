@@ -1,6 +1,6 @@
 // IO side of the pilot project scheme (see src/projectScheme.ts).
 import { TFile, type App } from 'obsidian';
-import type TickTickSync from '@/main';
+import type { PluginContext } from '@/pluginContext';
 import type { ITask } from '@/api/types/Task';
 import { getSettings, updateSettings } from '@/settings';
 import { getAllProjects } from '@/db/projects';
@@ -21,7 +21,7 @@ export class ProjectSchemeService {
 	private blocked = false;
 	private parentLimit: TaskSyncLimitOptions = {};
 
-	constructor(private app: App, private plugin: TickTickSync) {}
+	constructor(private app: App, private plugin: PluginContext) {}
 
 	enabled(): boolean { return !!getSettings().projectSchemeEnabled; }
 

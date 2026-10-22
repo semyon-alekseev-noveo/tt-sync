@@ -4,7 +4,7 @@ import { isDetached } from '@/detach';
 import { abyssRegionEnd, mergeAbyssBlock, type TickTickCommentSync } from '@/abyssFormat';
 import { App, type ListItemCache, TFile } from 'obsidian';
 import type { ITask } from '@/api/types/Task';
-import type TickTickSync from '@/main';
+import type { PluginContext } from '@/pluginContext';
 import { getSettings } from '@/settings';
 import log from '@/utils/logger';
 
@@ -60,13 +60,13 @@ export function getTitle(text: string): string {
 export class NewFileMap {
 	file: TFile;
 	private app: App;
-	private plugin: TickTickSync;
+	private plugin: PluginContext;
 	// only used for debugging
 	// private headings: { heading: string; startLine: number; endLine: number; }[] | undefined;
 	private fileLines: string[] = [];
 	private entries: TaskEntry[] = [];
 
-	constructor(app: App, plugin: TickTickSync, file: TFile) {
+	constructor(app: App, plugin: PluginContext, file: TFile) {
 		this.app = app;
 		this.plugin = plugin;
 		this.file = file;

@@ -41,7 +41,7 @@ No live-vault pilot this slice (extract-only; no behavior claim).
 
 ## Conclusion
 
-PR 3 vault-io facade is extract-complete. Next slice: **PR 4** — break `main` ↔ `services` (`TECH-CIRC-1`), or store ports / timed `vaultDeletion` per plan order.
+PR 3 vault-io facade is extract-complete. Next slice: **PR 4** — see [`31-pr4-plugin-context.md`](31-pr4-plugin-context.md).
 
 ## Checklist
 
@@ -49,4 +49,4 @@ PR 3 vault-io facade is extract-complete. Next slice: **PR 4** — break `main` 
 - [x] Facade `index.ts`; push/pull import from `@/sync/vault-io`
 - [x] Vitest + build green
 - [ ] PR merged into `abyss-mapping` (owner; stacks on #35 / #34)
-- [ ] PR 4 main↔services or store ports
+- [x] PR 4 main↔services — [`31-pr4-plugin-context.md`](31-pr4-plugin-context.md)

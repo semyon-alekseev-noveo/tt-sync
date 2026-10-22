@@ -4,7 +4,7 @@
  */
 
 import { App, Editor, type MarkdownFileInfo, MarkdownView, TFile, TFolder } from 'obsidian';
-import type TickTickSync from '@/main';
+import type { PluginContext } from '@/pluginContext';
 import { getSettings } from '@/settings';
 import { isPathInPushScope } from '@/syncScope';
 import { createActiveFilePushScheduler, deferActiveFilePush, planActiveFilePush, setActiveFilePushRelease } from '@/services/activeFilePush';
@@ -15,14 +15,14 @@ import log from '@/utils/logger';
 
 export class EventHandlerService {
 	private app: App;
-	private plugin: TickTickSync;
+	private plugin: PluginContext;
 	private processTimeout?: number;
 	private activeFilePush = createActiveFilePushScheduler({
 		debounceMs: 5000,
 		push: (filepath) => { void this.flushActiveFilePush(filepath); },
 	});
 
-	constructor(app: App, plugin: TickTickSync) {
+	constructor(app: App, plugin: PluginContext) {
 		this.app = app;
 		this.plugin = plugin;
 		setActiveFilePushRelease((paths) => {

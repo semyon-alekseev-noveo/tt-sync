@@ -1,6 +1,6 @@
 import { markerName } from '@/taskParser';
 import { App, Notice, TFile, TFolder } from 'obsidian';
-import TickTickSync from '@/main';
+import type { PluginContext } from '@/pluginContext';
 import type { ITask } from './api/types/Task';
 import { getSettings } from '@/settings';
 import { syncAbyssCommentsToTickTick, useAbyssCommentsApi } from '@/abyssCommentSync';
@@ -17,10 +17,10 @@ import { db } from '@/db/dexie';
 
 export class FileOperation {
 	app: App;
-	plugin: TickTickSync;
+	plugin: PluginContext;
 
 
-	constructor(app: App, plugin: TickTickSync) {
+	constructor(app: App, plugin: PluginContext) {
 		//super(app,settings);
 		this.app = app;
 		this.plugin = plugin;

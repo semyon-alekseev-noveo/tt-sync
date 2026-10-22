@@ -13,7 +13,7 @@ import { stripFileLinks } from '@/projectScheme';
  */
 
 import { App, MarkdownView, Notice, TFile, TFolder } from 'obsidian';
-import type TickTickSync from '@/main';
+import type { PluginContext } from '@/pluginContext';
 import type { ITask } from '@/api/types/Task';
 import { FileTaskQueries } from '@/repositories/FileTaskQueries';
 import { TaskDeletionModal, type DeletionPromptResult } from '@/modals/TaskDeletionModal';
@@ -27,10 +27,10 @@ import log from '@/utils/logger';
 
 export class TaskDeletionHandler {
 	private app: App;
-	private plugin: TickTickSync;
+	private plugin: PluginContext;
 	private fileTaskQueries: FileTaskQueries;
 
-	constructor(app: App, plugin: TickTickSync) {
+	constructor(app: App, plugin: PluginContext) {
 		this.app = app;
 		this.plugin = plugin;
 		this.fileTaskQueries = new FileTaskQueries();

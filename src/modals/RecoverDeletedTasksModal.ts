@@ -1,14 +1,14 @@
 import { App, Modal, Notice, Setting } from 'obsidian';
-import type TickTickSync from '@/main';
+import type { PluginContext } from '@/pluginContext';
 import type { LocalTask } from '@/db/schema';
 import log from '@/utils/logger';
 
 export class RecoverDeletedTasksModal extends Modal {
-	private plugin: TickTickSync;
+	private plugin: PluginContext;
 	private items: LocalTask[] = [];
 	private resolvePromise!: (value: boolean) => void;
 
-	constructor(app: App, plugin: TickTickSync, tasks: LocalTask[]) {
+	constructor(app: App, plugin: PluginContext, tasks: LocalTask[]) {
 		super(app);
 		this.plugin = plugin;
 		this.items = [...tasks];

@@ -7,7 +7,7 @@ import { isListTag, isStageToken, listForTags, obsidianTagForStageTag, tagForLis
 import { checkboxChar, restoreStatus, tagForStatusChar, isStatusTag, type IStatusMapping } from '@/statusMapping';
 const warnedConflicts = new Set<string>();
 import { type App, type MetadataCache, Notice } from 'obsidian';
-import type TickTickSync from '@/main';
+import type { PluginContext } from '@/pluginContext';
 import type { ITask, ITaskItem, Reminder } from '@/api/types/Task';
 import { getSettings, updateSettings } from '@/settings';
 import { sha256 } from 'crypto-hash';
@@ -157,9 +157,9 @@ export function abyssTagConflicts(tags: string[], ch: string | undefined, smap: 
 
 export class TaskParser {
 	app: App;
-	plugin: TickTickSync;
+	plugin: PluginContext;
 
-	constructor(app: App, plugin: TickTickSync) {
+	constructor(app: App, plugin: PluginContext) {
 		//super(app,settings);
 		this.app = app;
 		this.plugin = plugin;

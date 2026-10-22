@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-22 06:41 UTC
+
+- Context: TECH-SYNC-MODULARIZATION (#31) PR 4 — `main` ↔ `services` cycle (**TECH-CIRC-1**) after vault-io extract.
+- Target: Extract-only dependency inversion via `PluginContext`; services stop importing `@/main`; no behavior change.
+- Actions log: Added `src/pluginContext.ts`; `TickTickSync implements PluginContext`; retargeted services/fileOperation/taskParser/sync + service modals/settingsstore; guard test `pluginContext.noMainImport`; docs + pilot `31-pr4-plugin-context.md`.
+- Validation: `npx vitest run` → **99** files, **687** passed; `npm run build` → ok.
+- Problems: - No changes
+- To Be Done: PR into `abyss-mapping` (stack on #36); comment #31; next = PR 5 `taskParser` split or store ports.
+- References: `docs/SYNC_MODULARIZATION.md`, `docs/pilot/results/TECH-SYNC-MODULARIZATION/31-pr4-plugin-context.md`, `CHANGELOG.md`
+
 ### Iteration 2026-10-22 03:42 UTC
 
 - Context: TECH-SYNC-MODULARIZATION (#31) PR 3 — vault write/cache/pending-marker modules still split across `services/` and `sync/`.

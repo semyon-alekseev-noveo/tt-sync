@@ -8,7 +8,7 @@ import { markerName } from '@/taskParser';
  */
 
 import { App, Notice, TFile, TFolder } from 'obsidian';
-import type TickTickSync from '@/main';
+import type { PluginContext } from '@/pluginContext';
 import type { ITask } from '@/api/types/Task';
 import type { LocalTask } from '@/db/schema';
 import { db } from "@/db/dexie";
@@ -38,10 +38,10 @@ import { abyssLinesToNote, extractAbyssCommentThreads } from '@/abyssFormat';
 
 export class VaultSyncCoordinator {
 	private app: App;
-	private plugin: TickTickSync;
+	private plugin: PluginContext;
 	private folderSyncService?: FolderSyncService;
 
-	constructor(app: App, plugin: TickTickSync, folderSyncService?: FolderSyncService) {
+	constructor(app: App, plugin: PluginContext, folderSyncService?: FolderSyncService) {
 		this.app = app;
 		this.plugin = plugin;
 		this.folderSyncService = folderSyncService;

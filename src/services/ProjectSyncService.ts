@@ -1,5 +1,5 @@
 import { App, Notice, TFile, TFolder } from 'obsidian';
-import type TickTickSync from '@/main';
+import type { PluginContext } from '@/pluginContext';
 import type { IProject } from '@/api/types/Project';
 import type { FolderSyncService } from '@/services/FolderSyncService';
 import { FoundDuplicateListsModal } from '@/modals/FoundDuplicateListsModal';
@@ -12,10 +12,10 @@ import { healSyncedLists, isListAllowed, unmatchedEntries } from '@/syncScope';
 
 export class ProjectSyncService {
 	app: App;
-	plugin: TickTickSync;
+	plugin: PluginContext;
 	folderSyncService?: FolderSyncService;
 
-	constructor(app: App, plugin: TickTickSync) {
+	constructor(app: App, plugin: PluginContext) {
 		this.app = app;
 		this.plugin = plugin;
 	}
@@ -209,7 +209,7 @@ export class ProjectSyncService {
 		}
 	}
 
-	private async showFoundDuplicatesModal(app: App, plugin: TickTickSync, projects: IProject[]) {
+	private async showFoundDuplicatesModal(app: App, plugin: PluginContext, projects: IProject[]) {
 		const myModal = new FoundDuplicateListsModal(app, plugin, projects, () => {});
 		return await myModal.showModal();
 	}

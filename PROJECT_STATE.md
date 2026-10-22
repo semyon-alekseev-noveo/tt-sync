@@ -21,12 +21,12 @@
 - **Sync research (2026-10-20):** `docs/TICKTICK_DELTA_API.md` — delta has no comments; echo suppression in `pull.ts` uses `etag`; idle sync does not call `getTaskById` per quiet task.
 - **Deletion guard (2026-10-20):** over-threshold or empty-side deletions are held and the checkpoint stays. Defaults: guard on, more than 10 tasks and more than 20%, startup delay 30s. Pilot cases in `TEST_PLAN.md` are not run.
 - **Redo:** journal `<vault>/.tickticksync/journal/`; palette undo previews then applies `planUndo`. Not soaked on the live vault.
-- **Modularization (2026-10-22):** PR 1 phases under `src/sync/phases/*`; PR 2 lifecycle `runVaultDeletionPhase`; PR 3 `src/sync/vault-io/` facade (`readNoteForWrite` / `commitVaultText` / cache). Evidence: `docs/pilot/results/TECH-SYNC-MODULARIZATION/`. Next: PR 4 break `main` ↔ `services` (`TECH-CIRC-1`).
+- **Modularization (2026-10-22):** PR 1–3 done (phases, lifecycle, vault-io). PR 4: `PluginContext` breaks `main` ↔ `services` (`TECH-CIRC-1`). Evidence: `docs/pilot/results/TECH-SYNC-MODULARIZATION/`. Next: PR 5 `taskParser` split / store ports.
 
 ## Validation
 
 - Build: `npm run build` in repo root; CI on `abyss-mapping` via `.github/workflows/ci.yml`.
-- Unit tests: `npx vitest run` — see latest `CHANGELOG.md` iteration (currently **98** files, **686** passed; includes `synchronizationInner.integration.test.ts`). Abyss comments → TickTick **Comments API** when `syncAbyssCommentsViaApi` (default on); descriptions stay in `content`. v2 comment create uses webapp body (**2.0.74**, BUG-COMMENT-API-POST-500).
+- Unit tests: `npx vitest run` — see latest `CHANGELOG.md` iteration (currently **99** files, **687** passed; includes `synchronizationInner.integration.test.ts`). Abyss comments → TickTick **Comments API** when `syncAbyssCommentsViaApi` (default on); descriptions stay in `content`. v2 comment create uses webapp body (**2.0.74**, BUG-COMMENT-API-POST-500).
 - Manual pilot: **`SMOKE_TESTS.md`**. Palette: **Synchronize** only; full TT pull on plugin load. Context tags **2.0.41** (`syncNoteContextTags`).
 - BRAT installs: GitHub Release assets from `.github/workflows/release.yml` (see `docs/BRAT_INSTALL.md`).
 - TT cleanup verified 2026-10-16 via MCP (no `ticktick` tag left on polluted set).
@@ -45,8 +45,8 @@
 1. Fast sync is `docs/TICKTICK_DELTA_API.md` §3: one `batch/check`, no per-task `getTaskById` / `getTaskComments`, echo via `etag`. PR #2 kept the probe. **2.0.52** startup still did 455 probes and 229 comment fetches. Pilot §3.5 first.
 2. Revoke the exposed `tp_…` token if it is still valid.
 3. Confirm Abyss Inbox is **With inbox tag** `#inbox` on the pilot. Untagged mode is still open.
-4. Still open in code: GAP-COMMENT-EDIT, RISK-PULL-WINS-LOCAL, RISK-DUAL-STORE, RISK-LARGE-VAULT (id index and per-run file cache landed; the `getTaskById` probe and `ensureVaultFilesRegistered` full scan remain), TECH-START-1, `main` ↔ `services` cycle.
-5. **Sync modularization:** PR 1–2 done (phases + lifecycle deletion). Next: PR 3 `vault-io` facade; PR 4 break `main` ↔ `services`. See `docs/SYNC_MODULARIZATION.md` + epic #31.
+4. Still open in code: GAP-COMMENT-EDIT, RISK-PULL-WINS-LOCAL, RISK-DUAL-STORE, RISK-LARGE-VAULT (id index and per-run file cache landed; the `getTaskById` probe and `ensureVaultFilesRegistered` full scan remain), TECH-START-1; god-classes `TickTickService` / `TaskModificationDetector` (TECH-CIRC-1 cycle mitigated).
+5. **Sync modularization:** PR 1–4 done. Next: PR 5 `taskParser` split (or store ports / timed `vaultDeletion`). See `docs/SYNC_MODULARIZATION.md` + epic #31.
 6. Delta pilot `TP-DELTA-*` then etag-based echo + comment pull policy per `docs/TICKTICK_DELTA_API.md` §3.2–3.3.
 
 ## References
