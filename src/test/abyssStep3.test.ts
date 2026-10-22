@@ -5,6 +5,7 @@ import {
 	classifyChildren,
 	collapseAbyssCommentLinesByKey,
 	mergeAbyssBlock,
+	rewriteAbyssChildrenCollapsingCommentKeys,
 	noteToAbyssLines,
 } from '@/abyssFormat';
 import { restoreStatus, tagForStatusChar, checkboxChar, parseStatusMappingText, DEFAULT_STATUS_MAPPINGS } from '@/statusMapping';
@@ -145,6 +146,18 @@ describe('Abyss child block anywhere', () => {
 		];
 		const out = collapseAbyssCommentLinesByKey(lines);
 		expect(out).toEqual(['\t- 2026-10-21 21:22: comment 1']);
+	});
+
+	it('BUG-COMMENT-VAULT-DUP-KEY: rewriteAbyssChildrenCollapsingCommentKeys keeps desc and collapses twins', () => {
+		const out = rewriteAbyssChildrenCollapsingCommentKeys([
+			'\t- > note body',
+			'\t- 2026-10-21 21:22: comment 1',
+			'\t- 2026-10-21T21:11:41+07:00: comment 1',
+		]);
+		expect(out).toEqual([
+			'\t- > note body',
+			'\t- 2026-10-21 21:22: comment 1',
+		]);
 	});
 });
 

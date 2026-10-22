@@ -643,16 +643,16 @@ Automated: `pushLocalPaths.test.ts` (`BUG-COMMENT-ACTIVE-NOTE`).
 | BUG-COMMENT-API-POST-500 | pass | **2.0.74**: webapp POST body + empty-200 client id (`bugCommentApiPost500.test.ts`). Pilot: reload + `tts-sync` → TT Comments **`comment 1`**, **`test-new-verision`**. Evidence: `15-phase-2b-post-fix.md`, `16-phase-3b-verify.md`. |
 | BUG-COMMENT-ABYSS-VIEW | pass | **2.0.75**: Abyss/`vault.modify` schedules 5s push; flush `push-abyss-or-background`. Pilot `task-11-16` / `2026-10-19.md` → TT Comments include user `comment 1` / `коммент 2` + verify bullets. Evidence: `docs/pilot/results/BUG-COMMENT-ABYSS-VIEW/`. Automated: `activeFilePush.test.ts`. |
 | BUG-COMMENT-DUP-STAMP | pass | **2.0.76**: stamped+plain TT pairs collapsed by `normalizedCommentKey`; creates always plain; no second POST when key present. Automated: `abyssCommentSync.test.ts`. Pilot: `task-11-16` → **4** plain Comments (no stamped twins). Evidence: `docs/pilot/results/BUG-COMMENT-DUP-STAMP/`. |
-| BUG-COMMENT-VAULT-DUP-KEY | unit pass; live **fail** on 2.0.79 smoke | **2.0.79**: merge/collapse one Abyss bullet per `normalizedCommentKey` (wall-clock over ISO). Automated: `abyssStep3.test.ts`. Pilot after Synchronize: `task-11-16` still had 21 Abyss lines (not 4). Issue #27. Evidence: `58-release-2.0.79-smoke.md`. |
+| BUG-COMMENT-VAULT-DUP-KEY | unit pass; live **fail** on 2.0.79 smoke; fix **2.0.80** | **2.0.80**: quiet sync marks `vault-comment-dup-keys` → vault rewrite (merge collapse); twins-only hash mismatch is not sticky `local-edit`. Automated: `vaultCommentBehind.test.ts`, `abyssStep3.test.ts`. **2.0.79** smoke: `task-11-16` still had 21 Abyss lines (`58-release-2.0.79-smoke.md`). Pilot on **2.0.80**: one bullet per key. Issue #27. |
 | BUG-COMMENT-EMPTY-VAULT-WIPE | not run (unit pass) | **2.0.79**: wipe only with `obsidianRemovedCommentBullets`; delete vault-origin only; coordinator probe does not wipe. Automated: `abyssCommentSync.test.ts`, `vaultCommentBehind.test.ts`. Issue #28. |
 | BUG-COMMENT-GET-FAIL-OPEN | not run (unit pass) | **2.0.79**: `getTaskComments` → `null` on failure; push skips creates/deletes. Automated: `abyssCommentSync.test.ts`. Issue #29. |
 
 ### BUG-COMMENT-VAULT-DUP-KEY — vault wall-clock + ISO twins
 
 1. On pilot, open `00 Inbox/2026-10-19.md` under `task-11-16` with twin wall-clock + ISO Abyss bullets (or reproduce after Abyss push + pull).
-2. Install **2.0.79**; **Synchronize** once.
+2. Install **2.0.80**; **Synchronize** once.
 
-Expected: one Abyss comment bullet per logical text (`normalizedCommentKey`); no ISO + wall-clock pair; write-trace can settle (not sticky `local-edit` from twins alone). Automated: `abyssStep3.test.ts` (`BUG-COMMENT-VAULT-DUP-KEY`).
+Expected: one Abyss comment bullet per logical text (`normalizedCommentKey`); no ISO + wall-clock pair; write-trace reason can be `vault-comment-dup-keys` then settle (not sticky `local-edit` from twins alone). Automated: `vaultCommentBehind.test.ts`, `abyssStep3.test.ts` (`BUG-COMMENT-VAULT-DUP-KEY`).
 
 ### BUG-COMMENT-EMPTY-VAULT-WIPE — empty vault must not mass-delete TT-only
 

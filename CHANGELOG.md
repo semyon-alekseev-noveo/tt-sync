@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-22 10:58 UTC
+
+- Context: After release **2.0.79**, pilot `task-11-16` still had ~21 Abyss comment twins; #27 stayed open (merge collapse never ran on quiet sync).
+- Target: Synchronize rewrites in-scope vault twins by `normalizedCommentKey`; ship **2.0.80** PR into `abyss-mapping`; do not release until merged.
+- Actions log: Branch `fix/bug-comment-vault-dup-key-2.0.80`; `vaultHasDuplicateCommentKeys`; `vaultLineBehindTask` → `vault-comment-dup-keys` (no TT wipe); twins-only hash mismatch not sticky `local-edit`; bump **2.0.80**; docs + `27-vault-dup-key-2.0.80-unit.md`.
+- Validation: `npx vitest run` → **100** files, **701** passed; `npm run build` → ok (`dist/` **2.0.80**).
+- Problems: Pilot collapse on Thinkpad-tts-test — **not run** until owner merges and releases **2.0.80**.
+- To Be Done: Owner merges this PR; release **2.0.80** from `abyss-mapping`; pilot `task-11-16`; comment #27. Docs [#59](https://github.com/semyon-alekseev-noveo/tt-sync/pull/59) already on `abyss-mapping`.
+- References: https://github.com/semyon-alekseev-noveo/tt-sync/issues/27, `docs/pilot/results/PILOT-BATCH-EDITOR-SAFETY/27-vault-dup-key-2.0.80-unit.md`, `CHANGELOG.md`
+
 ### Iteration 2026-10-22 10:47 UTC
 
 - Context: PR #58 merged on `abyss-mapping`; owner asked for release **2.0.79** + pilot smoke (no feature-branch tag, no retag).

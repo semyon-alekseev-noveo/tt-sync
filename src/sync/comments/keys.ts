@@ -36,6 +36,17 @@ export function normalizedKeysFromVaultLines(taskLines: string[]): string[] {
 		.sort();
 }
 
+/**
+ * True when the vault has more Abyss comment threads than unique `normalizedCommentKey`s
+ * (wall-clock + ISO stamp twins). Quiet sync must rewrite the note (BUG-COMMENT-VAULT-DUP-KEY).
+ */
+export function vaultHasDuplicateCommentKeys(taskLines: string[]): boolean {
+	const keys = extractAbyssCommentThreads(taskLines)
+		.map(t => normalizedCommentKey(t.body))
+		.filter(k => k.length > 0);
+	return keys.length > new Set(keys).size;
+}
+
 export function normalizedKeysFromRemote(remote: ReadonlyArray<{ title?: string }>): string[] {
 	return remote
 		.map(c => normalizedCommentKey(c.title ?? ''))
