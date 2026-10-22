@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-22 07:10 UTC
+
+- Context: TECH-SYNC-MODULARIZATION (#31) PR 6 — monolithic `TaskModificationDetector` (~1138 lines) after taskParser split.
+- Target: Extract-only split detect vs push under `src/sync/vault-push/taskModification/`; keep `@/services/TaskModificationDetector` stable; no behavior change.
+- Actions log: Added modules (types, detect, push, newTasks, scan) + mixin facade; services re-export + vault-push barrel; docs + pilot `31-pr6-task-modification-detector.md`.
+- Validation: `npx vitest run` → **99** files, **687** passed; `npm run build` → ok.
+- Problems: - No changes
+- To Be Done: PR into `abyss-mapping` (stack on #38); comment #31; next = PR 7 store ports or timed `vaultDeletion`.
+- References: `docs/SYNC_MODULARIZATION.md`, `docs/pilot/results/TECH-SYNC-MODULARIZATION/31-pr6-task-modification-detector.md`, `CHANGELOG.md`
+
 ### Iteration 2026-10-22 06:54 UTC
 
 - Context: TECH-SYNC-MODULARIZATION (#31) PR 5 — monolithic `taskParser.ts` (~1545 lines) after PluginContext extract.
