@@ -21,7 +21,7 @@
 - **Sync research (2026-10-20):** `docs/TICKTICK_DELTA_API.md` — delta has no comments; echo suppression in `pull.ts` uses `etag`; idle sync does not call `getTaskById` per quiet task.
 - **Deletion guard (2026-10-20):** over-threshold or empty-side deletions are held and the checkpoint stays. Defaults: guard on, more than 10 tasks and more than 20%, startup delay 30s. Pilot cases in `TEST_PLAN.md` are not run.
 - **Redo:** journal `<vault>/.tickticksync/journal/`; palette undo previews then applies `planUndo`. Not soaked on the live vault.
-- **Modularization (2026-10-22):** PR 1–3 done (phases, lifecycle, vault-io). PR 4: `PluginContext` breaks `main` ↔ `services` (`TECH-CIRC-1`). Evidence: `docs/pilot/results/TECH-SYNC-MODULARIZATION/`. Next: PR 5 `taskParser` split / store ports.
+- **Modularization (2026-10-22):** PR 1–5 done (phases, lifecycle, vault-io, `PluginContext`, `taskParser` split). Evidence: `docs/pilot/results/TECH-SYNC-MODULARIZATION/`. Next: PR 6 `TaskModificationDetector` split / store ports.
 
 ## Validation
 
@@ -46,7 +46,7 @@
 2. Revoke the exposed `tp_…` token if it is still valid.
 3. Confirm Abyss Inbox is **With inbox tag** `#inbox` on the pilot. Untagged mode is still open.
 4. Still open in code: GAP-COMMENT-EDIT, RISK-PULL-WINS-LOCAL, RISK-DUAL-STORE, RISK-LARGE-VAULT (id index and per-run file cache landed; the `getTaskById` probe and `ensureVaultFilesRegistered` full scan remain), TECH-START-1; god-classes `TickTickService` / `TaskModificationDetector` (TECH-CIRC-1 cycle mitigated).
-5. **Sync modularization:** PR 1–4 done. Next: PR 5 `taskParser` split (or store ports / timed `vaultDeletion`). See `docs/SYNC_MODULARIZATION.md` + epic #31.
+5. **Sync modularization:** PR 1–5 done. Next: PR 6 `TaskModificationDetector` split (or store ports / timed `vaultDeletion`). See `docs/SYNC_MODULARIZATION.md` + epic #31.
 6. Delta pilot `TP-DELTA-*` then etag-based echo + comment pull policy per `docs/TICKTICK_DELTA_API.md` §3.2–3.3.
 
 ## References

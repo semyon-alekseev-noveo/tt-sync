@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-22 06:54 UTC
+
+- Context: TECH-SYNC-MODULARIZATION (#31) PR 5 — monolithic `taskParser.ts` (~1545 lines) after PluginContext extract.
+- Target: Extract-only split by concern under `src/taskParser/`; keep `@/taskParser` imports stable; no behavior change.
+- Actions log: Added concern modules (regex, tags, reminders, markers, structure, diff, notes, convertToLine/ToTask) + mixin facade; root re-export; docs + pilot `31-pr5-task-parser.md`.
+- Validation: `npx vitest run` → **99** files, **687** passed; `npm run build` → ok.
+- Problems: - No changes
+- To Be Done: PR into `abyss-mapping` (stack on #37); comment #31; next = PR 6 `TaskModificationDetector` split or store ports.
+- References: `docs/SYNC_MODULARIZATION.md`, `docs/pilot/results/TECH-SYNC-MODULARIZATION/31-pr5-task-parser.md`, `CHANGELOG.md`
+
 ### Iteration 2026-10-22 06:41 UTC
 
 - Context: TECH-SYNC-MODULARIZATION (#31) PR 4 — `main` ↔ `services` cycle (**TECH-CIRC-1**) after vault-io extract.
