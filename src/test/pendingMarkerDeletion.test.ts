@@ -1,9 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { TaskDeletionHandler } from '@/services/TaskDeletionHandler';
-import {
-	clearPendingMarkerTaskIds,
-	registerPendingMarkerTaskId,
-} from '@/sync/pendingMarkerTaskIds';
+import { createSyncRunContext } from '@/sync/SyncRunContext';
+import { clearPendingMarkerTaskIds } from '@/sync/pendingMarkerTaskIds';
 
 describe('BUG-DEFERRED-ID-PHASE2-DELETE', () => {
 	beforeEach(() => {
@@ -40,8 +38,9 @@ describe('BUG-DEFERRED-ID-PHASE2-DELETE', () => {
 		(handler as unknown as { checkForDeletedTaskItems: () => Promise<void> }).checkForDeletedTaskItems =
 			async () => undefined;
 
-		registerPendingMarkerTaskId(taskId);
-		await handler.processSyncRemovedTasks([filePath]);
+		const ctx = createSyncRunContext({ trigger: 'manual', fullSync: false });
+		ctx.registerPendingMarker(taskId);
+		await handler.processSyncRemovedTasks([filePath], ctx);
 
 		expect(deleteTasksByIds).not.toHaveBeenCalled();
 	});

@@ -16,14 +16,15 @@ import { NewFileMap } from '@/services/NewFileMap';
 import log from '@/utils/logger';
 import { FoundDuplicateTasksModal } from '@/modals/FoundDuplicateTasksModal';
 import { CleanupDatabaseModal } from '@/modals/CleanupDatabaseModal';
-import { TaskDeletionModal, clearPendingDeletions, type DeletionItem } from '@/modals/TaskDeletionModal';
+import { TaskDeletionModal, type DeletionItem } from '@/modals/TaskDeletionModal';
+import { runVaultDeletionPhase } from '@/sync/lifecycle/runVaultDeletionPhase';
 import { OrphanTaskModal, type OrphanItem } from '@/modals/OrphanTaskModal';
 import type { SyncTrigger } from '@/services/SyncActivityIndicator';
 import type { PendingTickTickDeletion } from '@/services/TaskModificationDetector';
 import type { ITask } from '@/api/types/Task';
 import { getTick } from '@/api/tick_singleton_factory'
 import { clearGuardRun } from '@/sync/massDeleteGuard';
-import { createSyncRunContext } from '@/sync/SyncRunContext';
+import { createSyncRunContext, type SyncRunContext } from '@/sync/SyncRunContext';
 import {
 	runDeletionGuardPhase,
 	runPreparePhase,
@@ -936,9 +937,13 @@ export class TickTickService {
 	// }
 
 	/**
+	 * Project-note file pass (Phase 1). Vault→TT deletion (Phase 2) runs via
+	 * `runVaultDeletionPhase` inside the same LOCK_TASKS acquisition.
 	 * @param bForceUpdate
+	 * @param ctx Sync run context for pending-marker checks; created when omitted (direct callers).
 	 */
-	async syncFiles(bForceUpdate: boolean) {
+	async syncFiles(bForceUpdate: boolean, ctx?: SyncRunContext) {
+		const syncCtx = ctx ?? createSyncRunContext({ trigger: 'manual', fullSync: false });
 		const filesToSync = await this.plugin.fileMetadataService?.getAllFileMetadata();
 		if (!filesToSync) {
 			log.warn('No sync files found.');
@@ -1133,15 +1138,13 @@ export class TickTickService {
 				}
 			}
 
-			// Phase 2: Process deletions for all files.
+			// Phase 2: Process deletions for all files (lifecycle module).
 			// Moved tasks already have updated file paths, so they won't be
 			// detected as deleted from their old file.
-			clearPendingDeletions();
-			try {
-				await this.plugin.taskDeletionHandler.processSyncRemovedTasks(Object.keys(newFilesToSync));
-			} catch (error) {
-				log.error('An error occurred in deletedTaskCheck:', error);
-			}
+			await runVaultDeletionPhase(
+				{ plugin: this.plugin, ctx: syncCtx },
+				Object.keys(newFilesToSync),
+			);
 		});
 	}
 }

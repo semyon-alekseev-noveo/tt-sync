@@ -50,7 +50,7 @@ flowchart TB
   REPO --> DEX
 ```
 
-**Phase modules (PR 1 / #31):** `prepare` → `projects` → `register` → `deletionGuard` → `push` → `pull` → `vaultReconcile` → `subtasks` → `syncFiles`. Plan: [`SYNC_MODULARIZATION.md`](SYNC_MODULARIZATION.md). Bug routing by phase: vault lines → `vaultReconcile` / `VaultSyncCoordinator`; pre-pull vault edits → `push` / TMD; Dexie ingest → `pull` / `sync.ts`; Phase 2 delete still inside `syncFiles` until PR 2.
+**Phase modules (PR 1–2 / #31):** `prepare` → `projects` → `register` → `deletionGuard` → `push` → `pull` → `vaultReconcile` → `subtasks` → `syncFiles` (Phase 2 delete → `lifecycle/runVaultDeletionPhase`, `ctx.isPendingMarker`). Plan: [`SYNC_MODULARIZATION.md`](SYNC_MODULARIZATION.md). Bug routing by phase: vault lines → `vaultReconcile` / `VaultSyncCoordinator`; pre-pull vault edits → `push` / TMD; Dexie ingest → `pull` / `sync.ts`; false delete / pending marker → lifecycle + `SyncRunContext`.
 
 | Если баг… | Править в первую очередь | Не трогать без нужды | Прогон |
 |-----------|--------------------------|----------------------|--------|

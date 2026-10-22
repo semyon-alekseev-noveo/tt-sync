@@ -182,7 +182,10 @@ describe('TickTickService', () => {
 			expect(modDetector.checkFileForModifications).toHaveBeenCalledTimes(1);
 			expect(modDetector.checkFileForModifications.mock.calls[0][0]).toBe('Projects/ProjectA.md');
 			// Verify deletions ran (one vault-wide pass)
-			expect(deletionHandler.processSyncRemovedTasks).toHaveBeenCalledWith(['Projects/ProjectA.md']);
+			expect(deletionHandler.processSyncRemovedTasks).toHaveBeenCalledWith(
+				['Projects/ProjectA.md'],
+				expect.objectContaining({ isPendingMarker: expect.any(Function) }),
+			);
 		});
 
 		it('should run modifications on all files before deletions on any file', async () => {
@@ -225,7 +228,10 @@ describe('TickTickService', () => {
 
 			await service.syncFiles(false);
 
-			expect((mockPlugin as { taskDeletionHandler: { processSyncRemovedTasks: Mock } }).taskDeletionHandler.processSyncRemovedTasks).toHaveBeenCalledWith([]);
+			expect((mockPlugin as { taskDeletionHandler: { processSyncRemovedTasks: Mock } }).taskDeletionHandler.processSyncRemovedTasks).toHaveBeenCalledWith(
+				[],
+				expect.objectContaining({ isPendingMarker: expect.any(Function) }),
+			);
 		});
 
 		it('should not skip deletions when modifications fail', async () => {
@@ -244,7 +250,10 @@ describe('TickTickService', () => {
 			// Should not throw, and deletions should still run
 			await expect(service.syncFiles(false)).resolves.not.toThrow();
 
-			expect((mockPlugin as { taskDeletionHandler: { processSyncRemovedTasks: Mock } }).taskDeletionHandler.processSyncRemovedTasks).toHaveBeenCalledWith(['Projects/ProjectA.md']);
+			expect((mockPlugin as { taskDeletionHandler: { processSyncRemovedTasks: Mock } }).taskDeletionHandler.processSyncRemovedTasks).toHaveBeenCalledWith(
+				['Projects/ProjectA.md'],
+				expect.objectContaining({ isPendingMarker: expect.any(Function) }),
+			);
 		});
 
 		it('should present cleanup modal and delete metadata for files missing from vault when confirmed', async () => {
@@ -399,7 +408,10 @@ describe('TickTickService', () => {
 
 			await service.syncFiles(false);
 
-			expect(deletionHandler.processSyncRemovedTasks).toHaveBeenCalledWith(['Projects/ProjectA.md', 'Projects/ProjectB.md']);
+			expect(deletionHandler.processSyncRemovedTasks).toHaveBeenCalledWith(
+				['Projects/ProjectA.md', 'Projects/ProjectB.md'],
+				expect.objectContaining({ isPendingMarker: expect.any(Function) }),
+			);
 		});
 	});
 

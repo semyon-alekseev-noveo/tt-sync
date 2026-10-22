@@ -53,10 +53,10 @@ describe('sync phases (PR 1 extract smoke)', () => {
 		expect(deps.plugin.vaultSyncCoordinator.syncVaultWithDatabase).toHaveBeenCalled();
 	});
 
-	it('runSyncFilesPhase calls service.syncFiles(false)', async () => {
+	it('runSyncFilesPhase calls service.syncFiles(false, ctx)', async () => {
 		const deps = mockDeps();
 		await runSyncFilesPhase(deps);
-		expect(deps.service.syncFiles).toHaveBeenCalledWith(false);
+		expect(deps.service.syncFiles).toHaveBeenCalledWith(false, deps.ctx);
 	});
 
 	it('runSubtasksPhase uses ctx.locallyEdited', async () => {

@@ -236,7 +236,7 @@ describe('EMPTY-SIDE-GUARD', () => {
 			planned: [],
 			mode: 'skip',
 		});
-		await handler.processSyncRemovedTasks(['n.md']);
+		await handler.processSyncRemovedTasks(['n.md'], { isPendingMarker: () => false });
 		expect(spy).not.toHaveBeenCalled();
 		expect(deletionConfirmMode()).toBe('skip');
 		clearGuardRun();
