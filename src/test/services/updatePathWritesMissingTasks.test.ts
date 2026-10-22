@@ -18,6 +18,7 @@ import type { LocalTask } from '@/db/schema';
 import { FileOperation } from '@/fileOperation';
 import { NewFileMap } from '@/services/NewFileMap';
 import { TaskDeletionHandler } from '@/services/TaskDeletionHandler';
+import { FileTaskQueries } from '@/repositories/FileTaskQueries';
 
 const notices: string[] = [];
 
@@ -224,6 +225,7 @@ describe('TaskDeletionHandler on an unreadable file', () => {
 		} as unknown as App;
 		const plugin = {
 			fileOperation: { readFileContent: async () => fileContent },
+			fileTaskQueries: new FileTaskQueries(),
 		} as unknown as TickTickSync;
 
 		const handler = new TaskDeletionHandler(app, plugin);

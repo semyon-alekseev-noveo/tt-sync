@@ -1,5 +1,3 @@
-import { db } from '@/db/dexie';
-import { markTaskDeleted } from '@/db/tasks';
 import { healTagListMappings } from '@/listMapping';
 import { getSettings, updateSettings } from '@/settings';
 import { deletionConfirmMode } from '@/sync/massDeleteGuard';
@@ -36,7 +34,8 @@ export async function runPullPhase(deps: SyncPhaseDeps): Promise<void> {
 	try {
 		const live = new Set((projects ?? []).map((p) => p.id));
 		if (projects && live.size > 0) {
-			const all = (await db.tasks.toArray()).filter((lt) => !lt.deleted && lt.task?.projectId);
+			const allRows = await plugin.taskRepository.loadAllLocalTasks();
+			const all = allRows.filter((lt) => !lt.deleted && lt.task?.projectId);
 			const gone = all.filter(
 				(lt) => !lt.task.projectId.startsWith('inbox') && !live.has(lt.task.projectId),
 			);
@@ -44,7 +43,7 @@ export async function runPullPhase(deps: SyncPhaseDeps): Promise<void> {
 			if (mode === 'skip') {
 				if (gone.length) log.warn(`Mass-delete guard held ${gone.length} task(s) from missing TickTick lists`);
 			} else if (gone.length && (mode === 'force' || gone.length <= Math.max(5, all.length / 2))) {
-				for (const lt of gone) await markTaskDeleted(lt.task.id);
+				for (const lt of gone) await plugin.taskRepository.deleteTask(lt.task.id);
 				log.warn(
 					`${gone.length} task(s) belonged to deleted TickTick lists; detaching`,
 					gone.map((g) => g.task.id),

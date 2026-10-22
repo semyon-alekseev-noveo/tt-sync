@@ -15,7 +15,7 @@ import { markerName } from '@/taskParser';
 import { App, Notice, TFile } from 'obsidian';
 import type { PluginContext } from '@/pluginContext';
 import type { ITask } from '@/api/types/Task';
-import { FileTaskQueries } from '@/repositories/FileTaskQueries';
+import type { FileTaskQueriesPort } from '@/repositories/ports';
 import { getSettings } from '@/settings';
 import { syncRead } from '@/sync/vault-io';
 import log from '@/utils/logger';
@@ -23,12 +23,12 @@ import log from '@/utils/logger';
 export class TaskOperationsService {
 	private app: App;
 	private plugin: PluginContext;
-	private fileTaskQueries: FileTaskQueries;
+	private fileTaskQueries: FileTaskQueriesPort;
 
 	constructor(app: App, plugin: PluginContext) {
 		this.app = app;
 		this.plugin = plugin;
-		this.fileTaskQueries = new FileTaskQueries();
+		this.fileTaskQueries = plugin.fileTaskQueries;
 	}
 
 	/**

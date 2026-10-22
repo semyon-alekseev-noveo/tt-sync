@@ -1,9 +1,6 @@
 /**
- * FileTaskQueries - Direct database queries for file-task relationships
- * REPLACES the redundant FileMetadata abstraction
- *
- * This service provides simple, direct queries instead of building
- * intermediate FileMetadata objects that duplicate database data.
+ * FileTaskQueries - Dexie adapter for {@link FileTaskQueriesPort}.
+ * Direct database queries for file-task relationships (replaces FileMetadata abstraction).
  */
 
 import { db } from "@/db/dexie";
@@ -13,8 +10,9 @@ import log from "@/utils/logger";
 import { getSettings } from '@/settings';
 import { getAllProjects } from '@/db/projects';
 import { pathForProjectId, projectIdForPath } from '@/projectMapping';
+import type { FileTaskQueriesPort } from "@/repositories/ports/FileTaskQueries";
 
-export class FileTaskQueries {
+export class FileTaskQueries implements FileTaskQueriesPort {
 	/**
 	 * Get all task IDs in a specific file
 	 */

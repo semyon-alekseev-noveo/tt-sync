@@ -11,4 +11,4 @@ Plan: [`docs/SYNC_MODULARIZATION.md`](../../../SYNC_MODULARIZATION.md)
 | PR 4 break main ↔ services | [`31-pr4-plugin-context.md`](31-pr4-plugin-context.md) | **landed** — [PR #37](https://github.com/semyon-alekseev-noveo/tt-sync/pull/37) (stacks on #36) |
 | PR 5 split taskParser | [`31-pr5-task-parser.md`](31-pr5-task-parser.md) | **open** — [PR #38](https://github.com/semyon-alekseev-noveo/tt-sync/pull/38) (stacks on #37) |
 | PR 6 split TaskModificationDetector | [`31-pr6-task-modification-detector.md`](31-pr6-task-modification-detector.md) | **open** — [PR #39](https://github.com/semyon-alekseev-noveo/tt-sync/pull/39) (stacks on #38) |
-| PR 7 store ports | — | pending |
+| PR 7 store ports | [`31-pr7-store-ports.md`](31-pr7-store-ports.md) | **open** — [PR #40](https://github.com/semyon-alekseev-noveo/tt-sync/pull/40) (stacks on #39) |
