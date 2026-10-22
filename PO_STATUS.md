@@ -4,7 +4,7 @@
 **Audience:** Product owner / decision maker  
 **Repo:** `tickticksync` branch `abyss-mapping`  
 **Test vault:** `<pilot-vault>` (copy only; live vault `<live-vault>` untouched)  
-**Install:** BRAT → `https://github.com/semyon-alekseev-noveo/tt-sync` track **latest release** (**2.0.78**, tag `2.0.78`); plugin id **`tickticksync-abyss`** — `docs/BRAT_INSTALL.md`. Preset: `00 Inbox/TTS-data-preset.json`.
+**Install:** BRAT → `https://github.com/semyon-alekseev-noveo/tt-sync` track **latest release** (**2.0.78** tip; **2.0.79** pending merge); plugin id **`tickticksync-abyss`** — `docs/BRAT_INSTALL.md`. Preset: `00 Inbox/TTS-data-preset.json`.
 
 История изменений — только в `CHANGELOG.md`; здесь — снимок для PO.
 
@@ -25,6 +25,7 @@
 
 ## Validation
 
+- PR **2.0.79** (2026-10-22, pending merge): **BUG-COMMENT-VAULT-DUP-KEY** (#27), **BUG-COMMENT-EMPTY-VAULT-WIPE** (#28), **BUG-COMMENT-GET-FAIL-OPEN** (#29). Vitest **697**. Pilot — **not run**.
 - Релиз **2.0.78** (2026-10-22): modularization tip (**2.0.77**) + re-cut **BUG-COMMENT-ABYSS-VIEW** / **BUG-COMMENT-DUP-STAMP** (was open #24/#26). Combined PR into `abyss-mapping`; closes obsolete #24/#26/#54.
 - Релиз **2.0.77** (2026-10-22): **TECH-SYNC-MODULARIZATION** (#31) — PRs #34–#40 on `abyss-mapping` (phases, lifecycle, vault-io, PluginContext, taskParser, TMD, store ports). Vitest **688**. Modularization-only tip (comment fixes were not ancestors).
 - Релиз **2.0.76** (2026-10-21): **BUG-COMMENT-DUP-STAMP** — dedupe stamped+plain TT Comments; plain-only POST; skip create when key present. Vitest **685**. Pilot **pass** `docs/pilot/results/BUG-COMMENT-DUP-STAMP/` (`task-11-16` → 4 plain Comments).

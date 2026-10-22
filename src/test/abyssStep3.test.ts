@@ -1,5 +1,12 @@
 import { describe, expect, it, vi } from 'vitest';
-import { abyssRegionEnd, abyssLinesToNote, classifyChildren, mergeAbyssBlock, noteToAbyssLines } from '@/abyssFormat';
+import {
+	abyssRegionEnd,
+	abyssLinesToNote,
+	classifyChildren,
+	collapseAbyssCommentLinesByKey,
+	mergeAbyssBlock,
+	noteToAbyssLines,
+} from '@/abyssFormat';
 import { restoreStatus, tagForStatusChar, checkboxChar, parseStatusMappingText, DEFAULT_STATUS_MAPPINGS } from '@/statusMapping';
 import { projectIdForPath, pathForProjectId, parseProjectMappingText } from '@/projectMapping';
 import { TaskParser } from '@/taskParser';
@@ -108,6 +115,36 @@ describe('Abyss child block anywhere', () => {
 			expect(out).toContain('gate-251-retest-b');
 			expect(out).toContain('- > gate-desc-249');
 		}
+	});
+
+	it('BUG-COMMENT-VAULT-DUP-KEY: merge keeps one bullet per normalized key (wall-clock + ISO twins)', () => {
+		const id = '6ad83d003e30f4429d749e0a';
+		const gen = [
+			`- [ ] task-11-16 %%[ticktick_id:: ${id}]%%`,
+			'\t- 2026-10-21 21:11: comment 1',
+			'\t- 2026-10-21 21:15: коммент 2',
+		].join('\n');
+		const old = [
+			'\t- 2026-10-21 21:22: comment 1',
+			'\t- 2026-10-21T21:11:41+07:00: comment 1',
+			'\t- 2026-10-21 21:22: коммент 2',
+			'\t- 2026-10-21T21:15:23+07:00: коммент 2',
+		];
+		const out = mergeAbyssBlock(gen, old);
+		const commentLines = out.split('\n').filter(l => /^\t- /.test(l) && !l.includes('- >'));
+		expect(commentLines).toHaveLength(2);
+		expect(commentLines.some(l => l.includes('T21:'))).toBe(false);
+		expect(out).toMatch(/comment 1/);
+		expect(out).toMatch(/коммент 2/);
+	});
+
+	it('BUG-COMMENT-VAULT-DUP-KEY: collapse prefers wall-clock over ISO for the same key', () => {
+		const lines = [
+			'\t- 2026-10-21T21:11:41+07:00: comment 1',
+			'\t- 2026-10-21 21:22: comment 1',
+		];
+		const out = collapseAbyssCommentLinesByKey(lines);
+		expect(out).toEqual(['\t- 2026-10-21 21:22: comment 1']);
 	});
 });
 

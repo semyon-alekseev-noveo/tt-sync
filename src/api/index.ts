@@ -816,29 +816,37 @@ export class Tick {
 		}
 	}
 
-	async getTaskComments(projectId: string, taskId: string): Promise<ITaskComment[]> {
+	/**
+	 * Fetch TickTick comments for a task.
+	 * Returns `null` when the remote state is unknown (HTTP/network failure or
+	 * unparseable body) so callers fail closed instead of treating the miss as
+	 * an empty list (BUG-COMMENT-GET-FAIL-OPEN).
+	 */
+	async getTaskComments(projectId: string, taskId: string): Promise<ITaskComment[] | null> {
 		try {
 			const url = `${this.apiUrl}/${taskComments(projectId, taskId)}`;
 			const response = await this.makeRequest('Get Task Comments', url, 'GET', undefined);
-			if (!response) return [];
+			if (!response) return null;
 			if (Array.isArray(response)) return response as ITaskComment[];
+			if (typeof response !== 'object') return null;
 			const wrapped = response as {
 				comments?: ITaskComment[];
 				data?: ITaskComment[];
 				result?: ITaskComment[] | { comments?: ITaskComment[] };
 			};
-			if (wrapped.comments?.length) return wrapped.comments;
-			if (wrapped.data?.length) return wrapped.data;
+			if (Array.isArray(wrapped.comments)) return wrapped.comments;
+			if (Array.isArray(wrapped.data)) return wrapped.data;
 			const r = wrapped.result;
 			if (Array.isArray(r)) return r;
 			if (r && typeof r === 'object' && Array.isArray((r as { comments?: ITaskComment[] }).comments)) {
 				return (r as { comments: ITaskComment[] }).comments;
 			}
-			return [];
+			// Non-empty body we cannot parse → unknown, not empty.
+			return null;
 		} catch (e) {
 			log.error('Get Task Comments failed: ', e);
 			this.setError('Get Task Comments', null, e);
-			return [];
+			return null;
 		}
 	}
 

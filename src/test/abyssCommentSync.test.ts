@@ -107,8 +107,8 @@ describe('abyssCommentSync', () => {
 		expect(del).not.toHaveBeenCalled();
 	});
 
-	it('BUG-COMMENT-VAULT-WIPE deletes without hash flag when maps are vault-origin', async () => {
-		listMaps.mockResolvedValueOnce([
+	it('BUG-COMMENT-EMPTY-VAULT-WIPE: maps alone without hash flag must not wipe TT comments', async () => {
+		listMaps.mockResolvedValue([
 			{
 				id: 'task1:c1',
 				taskId: 'task1',
@@ -126,11 +126,54 @@ describe('abyssCommentSync', () => {
 			deleteTaskComment: del,
 		} as unknown as TickTickRestAPI;
 		await syncAbyssCommentsToTickTick(api, 'task1', 'proj1', ['\t- > description only']);
-		expect(del).toHaveBeenCalledWith('proj1', 'task1', 'c1');
+		expect(del).not.toHaveBeenCalled();
 	});
 
-	it('BUG-COMMENT-VAULT-WIPE deletes all TT comments when vault comment bullets were removed', async () => {
-		listMaps.mockResolvedValueOnce([
+	it('BUG-COMMENT-EMPTY-VAULT-WIPE: empty vault + vault-origin map + TT-only comment keeps TT-only', async () => {
+		listMaps.mockResolvedValue([
+			{
+				id: 'task1:comment 1',
+				taskId: 'task1',
+				projectId: 'proj1',
+				fingerprint: 'comment 1',
+				ticktickCommentId: 'c1',
+				body: 'comment 1',
+				origin: 'vault',
+			},
+			{
+				id: 'task1:only on tt',
+				taskId: 'task1',
+				projectId: 'proj1',
+				fingerprint: 'only on tt',
+				ticktickCommentId: 'tt-only',
+				body: 'only on tt',
+				origin: 'remote',
+			},
+		]);
+		const del = vi.fn().mockResolvedValue(true);
+		const api = {
+			getTaskComments: vi.fn().mockResolvedValue([
+				{ id: 'c1', title: 'comment 1' },
+				{ id: 'tt-only', title: 'only on tt' },
+			]),
+			addTaskComment: vi.fn(),
+			deleteTaskComment: del,
+		} as unknown as TickTickRestAPI;
+		await syncAbyssCommentsToTickTick(
+			api,
+			'task1',
+			'proj1',
+			['\t- > description only'],
+			undefined,
+			{ obsidianRemovedCommentBullets: true },
+		);
+		expect(del).toHaveBeenCalledTimes(1);
+		expect(del).toHaveBeenCalledWith('proj1', 'task1', 'c1');
+		expect(del).not.toHaveBeenCalledWith('proj1', 'task1', 'tt-only');
+	});
+
+	it('BUG-COMMENT-VAULT-WIPE deletes vault-origin TT comments when vault bullets were removed with hash flag', async () => {
+		listMaps.mockResolvedValue([
 			{
 				id: 'task1:comment 1',
 				taskId: 'task1',
@@ -168,6 +211,44 @@ describe('abyssCommentSync', () => {
 		expect(del).toHaveBeenCalledTimes(2);
 		expect(del).toHaveBeenCalledWith('proj1', 'task1', 'c1');
 		expect(del).toHaveBeenCalledWith('proj1', 'task1', 'c2');
+	});
+
+	it('BUG-COMMENT-GET-FAIL-OPEN: failed getTaskComments must not re-create mapped vault threads', async () => {
+		const S = getSettings() as Record<string, unknown>;
+		Object.assign(S, { syncNotes: true, abyssTasksFormat: true, syncAbyssCommentsViaApi: true });
+		listMaps.mockResolvedValue([
+			{
+				id: 'task1:comment 1',
+				taskId: 'task1',
+				projectId: 'proj1',
+				fingerprint: 'comment 1',
+				ticktickCommentId: 'tt-1',
+				body: 'comment 1',
+				origin: 'vault',
+			},
+			{
+				id: 'task1:comment 2',
+				taskId: 'task1',
+				projectId: 'proj1',
+				fingerprint: 'comment 2',
+				ticktickCommentId: 'tt-2',
+				body: 'comment 2',
+				origin: 'vault',
+			},
+		]);
+		const add = vi.fn();
+		const del = vi.fn();
+		const api = {
+			getTaskComments: vi.fn().mockResolvedValue(null),
+			addTaskComment: add,
+			deleteTaskComment: del,
+		} as unknown as TickTickRestAPI;
+		await syncAbyssCommentsToTickTick(api, 'task1', 'proj1', [
+			'\t- 2026-10-21 21:22: comment 1',
+			'\t- 2026-10-21 21:22: comment 2',
+		]);
+		expect(add).not.toHaveBeenCalled();
+		expect(del).not.toHaveBeenCalled();
 	});
 
 	it('BUG-COMMENT-NO-TT-WIPE: preserves TickTick-only comments when vault has no comment bullets', async () => {
