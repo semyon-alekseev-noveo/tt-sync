@@ -5,7 +5,7 @@
 import { describe, expect, it } from 'vitest';
 import { TFile, type App, type Editor } from 'obsidian';
 import { clearEditorActivity } from '@/services/editorActivity';
-import { commitVaultText } from '@/services/vaultWrite';
+import { commitVaultText } from '@/sync/vault-io';
 
 function file(path: string): TFile {
 	return Object.assign(Object.create(TFile.prototype), { path, stat: { mtime: 1, ctime: 0, size: 1 } }) as TFile;

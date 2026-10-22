@@ -10,7 +10,7 @@ import { RedoLog, type Adapter } from '@/redo/log';
 import { instrumentVault, makeEnv } from '@/redo/obsidian';
 import { execute, lastSyncId, planUndo } from '@/redo/rollback';
 import { clearEditorActivity, noteEditorActivity } from '@/services/editorActivity';
-import { commitVaultText, setNoteJournal } from '@/services/vaultWrite';
+import { commitVaultText, setNoteJournal } from '@/sync/vault-io';
 
 const ID = 'abcdefabcdefabcdefabcdef';
 const BEFORE = `- [ ] old %%[ticktick_id:: ${ID}]%%\nhello\n`;

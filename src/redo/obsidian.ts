@@ -7,7 +7,7 @@ import { TickTickRestAPI } from '@/services/TicktickRestAPI';
 import type TickTickSync from '@/main';
 import type { ITask } from '@/api/types/Task';
 import log from '@/utils/logger';
-import { commitVaultText, editorsForFile, isHelperVaultWrite, readNoteForWrite, setNoteJournal } from '@/services/vaultWrite';
+import { commitVaultText, editorsForFile, isHelperVaultWrite, readNoteForWrite, setNoteJournal } from '@/sync/vault-io';
 
 const MAX_FILE = 256 * 1024;
 const clean = (t: unknown) => { if (!t || typeof t !== 'object') return t ?? null; const { dateHolder: _a, lineHash: _b, ...r } = t as Record<string, unknown>; void _a; void _b; return JSON.parse(JSON.stringify(r)); };

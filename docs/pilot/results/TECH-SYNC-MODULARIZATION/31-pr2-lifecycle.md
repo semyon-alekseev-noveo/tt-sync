@@ -47,4 +47,4 @@ PR 2 lifecycle boundary is extract-complete. Next slice: **PR 3** — `vault-io`
 - [x] `TaskDeletionHandler` via `SyncRunContext` only for pending markers
 - [x] Vitest + build green
 - [ ] PR merged into `abyss-mapping` (owner; depends on #34 or stacked review)
-- [ ] PR 3 vault-io facade
+- [x] PR 3 vault-io facade (see [`31-pr3-vault-io.md`](31-pr3-vault-io.md))

@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-22 03:42 UTC
+
+- Context: TECH-SYNC-MODULARIZATION (#31) PR 3 — vault write/cache/pending-marker modules still split across `services/` and `sync/`.
+- Target: Extract-only `vault-io` facade; push/pull import `@/sync/vault-io` only; no behavior change.
+- Actions log: Moved `vaultWrite`, `fileRunCache`, `pendingMarkerTaskIds` under `src/sync/vault-io/`; added facade `index.ts` + thin old-path re-exports; retargeted consumers; docs + pilot `31-pr3-vault-io.md`.
+- Validation: `npx vitest run` → **98** files, **686** passed; `npm run build` → ok.
+- Problems: - No changes
+- To Be Done: PR into `abyss-mapping` (stack on #35); comment #31; next = PR 4 main↔services break.
+- References: `docs/SYNC_MODULARIZATION.md`, `docs/pilot/results/TECH-SYNC-MODULARIZATION/31-pr3-vault-io.md`, `CHANGELOG.md`
+
 ### Iteration 2026-10-22 03:32 UTC
 
 - Context: TECH-SYNC-MODULARIZATION (#31) PR 2 — Phase 2 delete still inline in `syncFiles`; handler imported pending-marker module directly.

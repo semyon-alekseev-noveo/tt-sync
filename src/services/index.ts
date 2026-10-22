@@ -1,5 +1,5 @@
 import { childBlocks, sortOrdersFromLines, reorderLinesBySortOrder } from '@/subtaskOrder';
-import { commitVaultText, editorsForFile, readNoteForWrite } from '@/services/vaultWrite';
+import { beginFileRun, commitVaultText, editorsForFile, readNoteForWrite, syncCachedRead, syncRead } from '@/sync/vault-io';
 import { deferActiveFilePush, releaseDeferredActiveFilePushes } from '@/services/activeFilePush';
 import { loadPluginWrites, pluginWriteMtimes } from '@/utils/editedSince';
 import { idsPresentInVault, dedupeTaskIds } from '@/utils/vaultIdScan';
@@ -44,7 +44,6 @@ import { loadTasksFromCache } from "@/db/tasks";
 import { getAllFiles, getFile, upsertFile } from "@/db/files";
 import type { IProject } from '@/api/types/Project';
 import { isPathInPushScope } from '@/syncScope';
-import { beginFileRun, syncCachedRead, syncRead } from '@/sync/fileRunCache';
 import { finishSyncPerf, formatSyncPerf, formatSyncPerfShort, observeSyncApi, startSyncPerf, timePhase } from '@/sync/perf';
 
 const LOCK_TASKS = 'LOCK_TASKS';

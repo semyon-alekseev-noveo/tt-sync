@@ -1,6 +1,6 @@
 # Sync modularization plan
 
-**Status:** **PR 2 landed** — Phase 2 vault→TT deletion lives in `src/sync/lifecycle/runVaultDeletionPhase.ts`; `TaskDeletionHandler` uses `SyncRunContext.isPendingMarker` only. Next: PR 3 `vault-io` facade. Evidence: `docs/pilot/results/TECH-SYNC-MODULARIZATION/`.
+**Status:** **PR 3 landed** — vault I/O facade at `src/sync/vault-io/` (`readNoteForWrite` / `commitVaultText` / file-run cache / pending markers). Push/pull import from `@/sync/vault-io`. Next: PR 4 break `main` ↔ `services` (or store ports). Evidence: `docs/pilot/results/TECH-SYNC-MODULARIZATION/`.
 
 **Canonical boundaries:** [`ANALYST_REFERENCE_DIAGRAMS.md`](ANALYST_REFERENCE_DIAGRAMS.md). Process: [`DEV_FLOW.md`](../DEV_FLOW.md).
 
@@ -15,7 +15,7 @@ The [Todoist Obsidian plugin](https://github.com/jamiebrynes7/obsidian-todoist-p
 | Module | Path (current → target) | Owns | Must not |
 |--------|-------------------------|------|----------|
 | **orchestrator** | `services/index.ts` → `sync/orchestrator/` | Phase order, locks, perf, `SyncRunContext` | Line parse rules, `vault.process` |
-| **vault-io** | `vaultWrite.ts`, `fileRunCache.ts`, `pendingMarkerTaskIds.ts` | Read/write note, defer, cache, pending markers | TT API, deletion modals |
+| **vault-io** | `src/sync/vault-io/` (`vaultWrite`, `fileRunCache`, `pendingMarkerTaskIds`; facade `index.ts`) | Read/write note, defer, cache, pending markers | TT API, deletion modals |
 | **vault-push** | `TaskModificationDetector`, `activeFilePush`, `NewFileMap` | Obsidian → TT | Pull, Phase 2 delete |
 | **vault-pull** | `VaultSyncCoordinator`, `fileOperation` (pull) | TT/Dexie → lines | Push hash, create in TT |
 | **tt-remote** | `sync/sync.ts`, `pull.ts`, `api/` | Delta, Dexie ingest | `commitVaultText` |
@@ -89,10 +89,16 @@ Phase 2 vault→TT deletion is implemented in **lifecycle** (`runVaultDeletionPh
 
 **Gate:** same as PR 1; `runVaultDeletionPhase.test.ts` + `pendingMarkerDeletion` (BUG-DEFERRED-ID-PHASE2-DELETE).
 
-### PR 3 — `vault-io` facade
+### PR 3 — `vault-io` facade (**done**)
 
-- `src/sync/vault-io/index.ts` exports `readNoteForWrite`, `commitVaultText`, cache invalidation.
-- Push/pull import from `vault-io` only.
+- Move `vaultWrite.ts`, `fileRunCache.ts`, `pendingMarkerTaskIds.ts` under `src/sync/vault-io/`.
+- `src/sync/vault-io/index.ts` exports `readNoteForWrite`, `commitVaultText`, cache APIs, pending-marker helpers.
+- Push (`TaskModificationDetector`), pull (`VaultSyncCoordinator`, `fileOperation`), orchestrator, and tests import from `@/sync/vault-io`.
+- Thin re-exports remain at old paths (`services/vaultWrite.ts`, `sync/fileRunCache.ts`, `sync/pendingMarkerTaskIds.ts`) for transitional imports.
+
+**Out of scope PR 3:** moving pending-marker *storage* into `SyncRunContext`; changing write/defer behavior; timed `vaultDeletion` phase.
+
+**Gate:** same as PR 1; `noWholeNoteWrite` allow-list points at `src/sync/vault-io/vaultWrite.ts`.
 
 ### Comment sync (`src/sync/comments/`)
 

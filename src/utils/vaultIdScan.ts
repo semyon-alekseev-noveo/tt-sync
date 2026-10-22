@@ -1,5 +1,5 @@
 import type { App } from 'obsidian';
-import { syncCachedRead } from '@/sync/fileRunCache';
+import { syncCachedRead } from '@/sync/vault-io/fileRunCache';
 import { noteFilesScanned } from '@/sync/perf';
 
 /**

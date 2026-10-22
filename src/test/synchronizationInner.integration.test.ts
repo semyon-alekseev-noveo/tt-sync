@@ -17,7 +17,7 @@ import { commentFingerprint } from '@/abyssFormat';
 import { FileOperation } from '@/fileOperation';
 import { lastSyncPerf } from '@/sync/perf';
 import { noteEditorActivity, clearEditorActivity } from '@/services/editorActivity';
-import { commitVaultText, readNoteForWrite } from '@/services/vaultWrite';
+import { commitVaultText, readNoteForWrite } from '@/sync/vault-io';
 
 vi.mock('@/utils/logger', () => ({
 	default: { debug: vi.fn(), warn: vi.fn(), error: vi.fn(), info: vi.fn(), trace: vi.fn() },

@@ -6,7 +6,7 @@
 import { describe, expect, it } from 'vitest';
 import { TFile } from 'obsidian';
 import { idsPresentInTexts, idsPresentInVault } from '@/utils/vaultIdScan';
-import { beginFileRun, syncFileMap, syncRead } from '@/sync/fileRunCache';
+import { beginFileRun, syncFileMap, syncRead } from '@/sync/vault-io';
 import { TaskParser } from '@/taskParser';
 import { resetSyncPerfForTests, lastSyncPerf, startSyncPerf, finishSyncPerf } from '@/sync/perf';
 

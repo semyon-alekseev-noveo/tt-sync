@@ -8,8 +8,7 @@ import { stripLegacyCommentsBlock, type TickTickCommentSync } from '@/abyssForma
 import type { ITaskComment } from '@/api/types/TaskComment';
 import { listCommentMapsForTask } from '@/db/taskCommentMaps';
 import { NewFileMap } from '@/services/NewFileMap';
-import { commitVaultText, readNoteForWrite } from '@/services/vaultWrite';
-import { syncCachedRead } from '@/sync/fileRunCache';
+import { commitVaultText, readNoteForWrite, syncCachedRead } from '@/sync/vault-io';
 import log from '@/utils/logger';
 import type { DeletionItem } from './modals/TaskDeletionModal';
 import { TaskDeletionModal } from './modals/TaskDeletionModal';

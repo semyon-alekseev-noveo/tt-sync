@@ -6,8 +6,7 @@ import { getSettings, updateSettings } from '@/settings';
 import { getAllProjects } from '@/db/projects';
 import { isListAllowed, normalizeSyncTag, resolveProjectsList, resolveSyncedListIds, type TaskSyncLimitOptions, taskMatchesSyncLimit } from '@/syncScope';
 import log from '@/utils/logger';
-import { commitFrontMatter, commitVaultText, readNoteForWrite } from '@/services/vaultWrite';
-import { syncRead } from '@/sync/fileRunCache';
+import { commitFrontMatter, commitVaultText, readNoteForWrite, syncRead } from '@/sync/vault-io';
 import { traceWrite } from '@/services/writeTrace';
 import {
 	isProjectNote, isSchemeParentTask, isProjectParentDuplicateLine, linkTarget, isDoneStatus, planProjects, renderProjectNote, renderProjectTemplate, sanitizeTitle, pickProjectNote, planTitle,
