@@ -5,10 +5,10 @@
 - Context: Epic #31 TECH-SYNC-MODULARIZATION stack (#34–#40) merged on `abyss-mapping`; owner asked for release + pilot smoke before closing the epic.
 - Target: Release **2.0.77** from modularization tip; encode epic-close ⇒ release + gate; close #31 with evidence.
 - Actions log: Branch `chore/release-2.0.77-modularization`; bump `package.json` / `manifest.json` / `versions.json`; update `DEV_FLOW.md`, `.cursor/rules/dev-flow.mdc`, `PO_STATUS.md`, `PROJECT_STATE.md`, `TEST_PLAN.md`, pilot results; GitHub release + pilot deploy.
-- Validation: `npx vitest run` → **100** files, **688** passed; `npm run build` → ok (`dist/main.js` 2.0.77). Pilot smoke: see `docs/pilot/results/TECH-SYNC-MODULARIZATION/31-release-2.0.77-smoke.md`.
+- Validation: `npx vitest run` → **100** files, **688** passed; `npm run build` → ok (`dist/main.js` 2.0.77). Pilot smoke **pass**: deploy + reload + `tts-sync`; `checkPoint` advanced (`31-release-2.0.77-smoke.md`).
 - Problems: GitHub releases **2.0.75**/**2.0.76** (comment fixes) are still on open PRs #24/#26 — not ancestors of this tip (`open` for #30).
-- To Be Done: Owner merges version-bump PR into `abyss-mapping`; land #24/#26 or re-cut after merge; continue PROC-RELEASE-GATE (#30).
-- References: https://github.com/semyon-alekseev-noveo/tt-sync/releases/tag/2.0.77, `docs/pilot/results/TECH-SYNC-MODULARIZATION/`, `DEV_FLOW.md`, `CHANGELOG.md`
+- To Be Done: Owner merges version-bump PR [#54](https://github.com/semyon-alekseev-noveo/tt-sync/pull/54) into `abyss-mapping`; land #24/#26 or re-cut after merge; continue PROC-RELEASE-GATE (#30).
+- References: https://github.com/semyon-alekseev-noveo/tt-sync/releases/tag/2.0.77, https://github.com/semyon-alekseev-noveo/tt-sync/pull/54, `docs/pilot/results/TECH-SYNC-MODULARIZATION/`, `DEV_FLOW.md`, `CHANGELOG.md`
 
 ### Iteration 2026-10-22 07:19 UTC
 

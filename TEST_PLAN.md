@@ -698,6 +698,6 @@ Expected: sync finishes without a silent failure notice; plugin version in setti
 
 | ID | Pilot status | Evidence |
 |----|----------------|----------|
-| TP-MOD-RELEASE-SMOKE | pending | Fill after CLI smoke: `docs/pilot/results/TECH-SYNC-MODULARIZATION/31-release-2.0.77-smoke.md` |
+| TP-MOD-RELEASE-SMOKE | **pass** | Deploy **2.0.77**; CLI reload + `tts-sync`; `checkPoint` advanced; evidence `docs/pilot/results/TECH-SYNC-MODULARIZATION/31-release-2.0.77-smoke.md` |
 
 Note: **2.0.75**/**2.0.76** comment twin / open-note push fixes are **not** in this release (still on open PRs #24/#26).

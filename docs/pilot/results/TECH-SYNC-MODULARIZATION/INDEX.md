@@ -12,4 +12,4 @@ Plan: [`docs/SYNC_MODULARIZATION.md`](../../../SYNC_MODULARIZATION.md)
 | PR 5 split taskParser | [`31-pr5-task-parser.md`](31-pr5-task-parser.md) | **landed** — [PR #38](https://github.com/semyon-alekseev-noveo/tt-sync/pull/38) |
 | PR 6 split TaskModificationDetector | [`31-pr6-task-modification-detector.md`](31-pr6-task-modification-detector.md) | **landed** — [PR #39](https://github.com/semyon-alekseev-noveo/tt-sync/pull/39) |
 | PR 7 store ports | [`31-pr7-store-ports.md`](31-pr7-store-ports.md) | **landed** — [PR #40](https://github.com/semyon-alekseev-noveo/tt-sync/pull/40) |
-| Release **2.0.77** + smoke | [`31-release-2.0.77-smoke.md`](31-release-2.0.77-smoke.md) | **pending** — fill after deploy |
+| Release **2.0.77** + smoke | [`31-release-2.0.77-smoke.md`](31-release-2.0.77-smoke.md) | **pass** — [release 2.0.77](https://github.com/semyon-alekseev-noveo/tt-sync/releases/tag/2.0.77) |
