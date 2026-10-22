@@ -76,11 +76,13 @@ Phase names: use **Step 1–8** from `ABYSS_FIRST_PLAN.md`. Do not start a new �
 - `manifest.json` `version` is the plugin version. Do not bump it, tag it, or publish a GitHub release unless the owner asked for that release.
 - Record the change in `CHANGELOG.md` in the same PR (context, what changed, how it was verified, what is still open).
 - The owner tags and publishes. BRAT installs from that release (`docs/BRAT_INSTALL.md`).
+- Prefer releasing a commit that is (or will be) on `abyss-mapping` after green CI — see epic [#30](https://github.com/semyon-alekseev-noveo/tt-sync/issues/30) **PROC-RELEASE-GATE**. Until that gate lands in Actions, cut the version bump on a feature branch from `abyss-mapping`, open a PR into `abyss-mapping`, and publish the release from that tip only when the owner asked for the release.
+- **Epic close (multi-PR / long work):** do not close the epic issue until (1) regression gate green (`npx vitest run` + `npm run build`), (2) a GitHub release exists for the landed stack, and (3) for sync-related epics, pilot smoke is recorded under `docs/pilot/results/` (honest pass / fail / not run). Close the epic with a short comment linking the release URL and the evidence file.
 
 ## Branches and pull requests
 
 - Work on a branch. Open a pull request into `abyss-mapping`.
-- Do not push to `abyss-mapping` or `master`. Do not merge. Do not create tags.
+- Do not push to `abyss-mapping` or `master`. Do not merge. Do not create tags (except when the owner explicitly asks for a release in the current task — then tag/release from the version-bump branch tip and still open the PR; the owner merges).
 - One PR may contain several commits (process, fix, docs). Stacked PRs are fine when a later change depends on an earlier one; each still targets the owner’s merge.
 
 ## Safety

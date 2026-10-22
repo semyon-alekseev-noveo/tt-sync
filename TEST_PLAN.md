@@ -683,3 +683,21 @@ Automated: `pendingMarkerDeletion.test.ts` (`BUG-DEFERRED-ID-PHASE2-DELETE`).
 | TP-ABYSS-LOCAL-CHILD-KEEP | not run | Automated: `abyssStep3.test.ts`. Vault not run. |
 | TP-TWO-LEAVES | not run | Automated: `tpTwoLeaves.test.ts`. Vault not run. |
 | TP-EMPTY-EDITOR-DISK | not run | Automated: `staleFileWrite.test.ts`. Pilot repro 2026-10-21 `00 Inbox/2026-10-20.md`: disk had text, Obsidian UI empty until fix. |
+
+## Release 2.0.77 — TECH-SYNC-MODULARIZATION epic close (#31)
+
+Extract-only stack landed as PRs #34–#40 on `abyss-mapping`. No intended behavior change. Gate: vitest + build + one pilot **Synchronize** smoke.
+
+### TP-MOD-RELEASE-SMOKE — deploy 2.0.77 and Synchronize once
+
+1. Install release **2.0.77** into `<pilot-vault>/.obsidian/plugins/tickticksync-abyss/` (`main.js`, `manifest.json`, `styles.css`).
+2. Reload the plugin (`obsidian plugin:reload id=tickticksync-abyss` or app reload).
+3. Run **Synchronize** once (`tickticksync-abyss:tts-sync`).
+
+Expected: sync finishes without a silent failure notice; plugin version in settings/manifest is **2.0.77**. This is a smoke check, not a comment-gate re-run.
+
+| ID | Pilot status | Evidence |
+|----|----------------|----------|
+| TP-MOD-RELEASE-SMOKE | pending | Fill after CLI smoke: `docs/pilot/results/TECH-SYNC-MODULARIZATION/31-release-2.0.77-smoke.md` |
+
+Note: **2.0.75**/**2.0.76** comment twin / open-note push fixes are **not** in this release (still on open PRs #24/#26).

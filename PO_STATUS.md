@@ -1,10 +1,10 @@
 # Product owner brief — TickTickSync Abyss fork (project scheme)
 
-**Обновлено:** 2026-10-21  
+**Обновлено:** 2026-10-22  
 **Audience:** Product owner / decision maker  
 **Repo:** `tickticksync` branch `abyss-mapping`  
 **Test vault:** `<pilot-vault>` (copy only; live vault `<live-vault>` untouched)  
-**Install:** BRAT → `https://github.com/semyon-alekseev-noveo/tt-sync` track **latest release** (**2.0.74**, tag `2.0.74`); plugin id **`tickticksync-abyss`** — `docs/BRAT_INSTALL.md`. Preset: `00 Inbox/TTS-data-preset.json`.
+**Install:** BRAT → `https://github.com/semyon-alekseev-noveo/tt-sync` track **latest release** (**2.0.77**, tag `2.0.77`); plugin id **`tickticksync-abyss`** — `docs/BRAT_INSTALL.md`. Preset: `00 Inbox/TTS-data-preset.json`.
 
 История изменений — только в `CHANGELOG.md`; здесь — снимок для PO.
 
@@ -21,10 +21,11 @@
 1. **Надёжный sync без тихих сбоев:** любая ошибка pull/push видна пользователю, чекпоинт не обманывает.
 2. **Abyss-комментарии и теги стабильны:** правка дочерней строки и TT-only изменения комментариев доезжают без ручных обходов.
 3. **Безопасный запуск на живом vault:** Step 6 (кейсы AF-*) и Step 8, плюс soak NOTE-L3b на пилоте. Один живой прогон, не отдельный набор.
-4. **Поддерживаемость:** интеграционный тест `synchronizationInner` есть на этой ветке. Цикл `main` ↔ `services` снят (`PluginContext`); god-классы ещё open.
+4. **Поддерживаемость:** интеграционный тест `synchronizationInner` есть на этой ветке. Цикл `main` ↔ `services` снят (`PluginContext`); sync phases/store ports extracted (#31); god-класс `TickTickService` ещё open.
 
 ## Validation
 
+- Релиз **2.0.77** (2026-10-22): **TECH-SYNC-MODULARIZATION** (#31) — PRs #34–#40 on `abyss-mapping` (phases, lifecycle, vault-io, PluginContext, taskParser, TMD, store ports). Vitest **688**. Note: GitHub **2.0.75**/**2.0.76** comment fixes remain on open PRs #24/#26 (not in this tree).
 - Релиз **2.0.74** (2026-10-21): **BUG-COMMENT-API-POST-500** — v2 comment POST uses webapp body; **PILOT-GATE-TEST-11-12** pass. Vitest **680**.
 - Релиз **2.0.64** (2026-10-21): **BUG-COMMENT-BOTH-WAYS** — при расхождении с обеих сторон reconcile пушит vault-only комменты в TT и не пропускает pull TT-only. Vitest **659**.
 - Релиз **2.0.63** (2026-10-21): **BUG-COMMENT-TT-AHEAD-NO-DELETE** — не удалять TT Comments, которых ещё нет в vault (push до pull). Включает **2.0.61**/**2.0.62**. Vitest **658**.

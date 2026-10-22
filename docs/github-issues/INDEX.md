@@ -13,6 +13,14 @@ Tracker issues live on [`semyon-alekseev-noveo/tt-sync`](https://github.com/semy
 | └ deferred-id | [#18](https://github.com/semyon-alekseev-noveo/tt-sync/issues/18) | P0 | open | #15 |
 | BUG-ACTIVEZONE-COMMENT-SHUFFLE | [#19](https://github.com/semyon-alekseev-noveo/tt-sync/issues/19) | P1 | open | Soft: #15 |
 | Step 7 AF-* pilot soak | [#20](https://github.com/semyon-alekseev-noveo/tt-sync/issues/20) | P1 | open | #14 pass + #15 |
+| TECH-SYNC-MODULARIZATION | [#31](https://github.com/semyon-alekseev-noveo/tt-sync/issues/31) | P1 | **closed** — release **2.0.77** (PRs #34–#40 on `abyss-mapping`) | extract-only stack |
+| └ PR1 phases | [#41](https://github.com/semyon-alekseev-noveo/tt-sync/issues/41) | P1 | **closed** → [PR #34](https://github.com/semyon-alekseev-noveo/tt-sync/pull/34) | #31 |
+| └ PR2 lifecycle | [#47](https://github.com/semyon-alekseev-noveo/tt-sync/issues/47) | P1 | **closed** → [PR #35](https://github.com/semyon-alekseev-noveo/tt-sync/pull/35) | #31 |
+| └ PR3 vault-io | [#42](https://github.com/semyon-alekseev-noveo/tt-sync/issues/42) | P1 | **closed** → [PR #36](https://github.com/semyon-alekseev-noveo/tt-sync/pull/36) | #31 |
+| └ PR4 PluginContext | [#43](https://github.com/semyon-alekseev-noveo/tt-sync/issues/43) | P1 | **closed** → [PR #37](https://github.com/semyon-alekseev-noveo/tt-sync/pull/37) | #31 |
+| └ PR5 taskParser | [#45](https://github.com/semyon-alekseev-noveo/tt-sync/issues/45) | P1 | **closed** → [PR #38](https://github.com/semyon-alekseev-noveo/tt-sync/pull/38) | #31 |
+| └ PR6 TaskModificationDetector | [#46](https://github.com/semyon-alekseev-noveo/tt-sync/issues/46) | P1 | **closed** → [PR #39](https://github.com/semyon-alekseev-noveo/tt-sync/pull/39) | #31 |
+| └ PR7 store ports | [#48](https://github.com/semyon-alekseev-noveo/tt-sync/issues/48) | P1 | **closed** → [PR #40](https://github.com/semyon-alekseev-noveo/tt-sync/pull/40) | #31 |
 
 ## Templates
 
