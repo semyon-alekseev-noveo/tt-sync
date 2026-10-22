@@ -46,12 +46,13 @@
 
 ## To Be Done
 
-1. Fast sync is `docs/TICKTICK_DELTA_API.md` §3: one `batch/check`, no per-task `getTaskById` / `getTaskComments`, echo via `etag`. PR #2 kept the probe. **2.0.52** startup still did 455 probes and 229 comment fetches. Pilot §3.5 first.
-2. Revoke the exposed `tp_…` token if it is still valid.
-3. Confirm Abyss Inbox is **With inbox tag** `#inbox` on the pilot. Untagged mode is still open.
-4. Still open in code: GAP-COMMENT-EDIT, RISK-PULL-WINS-LOCAL, RISK-DUAL-STORE, RISK-LARGE-VAULT (id index and per-run file cache landed; the `getTaskById` probe and `ensureVaultFilesRegistered` full scan remain), TECH-START-1; god-class `TickTickService` (TMD + store ports in PR 6–7; TECH-CIRC-1 cycle mitigated).
-5. **Sync modularization:** epic #31 closed on **2.0.77**. Next (new work): timed `vaultDeletion` (or further store extract from services / tt-remote). See `docs/SYNC_MODULARIZATION.md`.
-6. Delta pilot `TP-DELTA-*` then etag-based echo + comment pull policy per `docs/TICKTICK_DELTA_API.md` §3.2–3.3.
+1. **[P0] PERF/DELTA [#62](https://github.com/semyon-alekseev-noveo/tt-sync/issues/62):** measure + cut sync wall-time; `docs/TICKTICK_DELTA_API.md` §3; pilot `TP-DELTA-*` / `TP-IDLE-ZERO` / remaining `TP-PERF-*`. Folds TECH-START-1 + RISK-LARGE-VAULT remainder (`getTaskById` / full `.md` scan). Historical: **2.0.52** startup ~455 probes / ~229 comment fetches.
+2. Revoke the exposed `tp_…` token if it is still valid — [#32](https://github.com/semyon-alekseev-noveo/tt-sync/issues/32).
+3. Pilot vault config — [#64](https://github.com/semyon-alekseev-noveo/tt-sync/issues/64): Abyss Inbox **With inbox tag** `#inbox`; fix test-vault `data.json` drift before Sync.
+4. Product risks — [#63](https://github.com/semyon-alekseev-noveo/tt-sync/issues/63): GAP-COMMENT-EDIT, RISK-PULL-WINS-LOCAL, RISK-DUAL-STORE, BUG-TICKTICK-ID-LEAK.
+5. Residual comment soak — [#65](https://github.com/semyon-alekseev-noveo/tt-sync/issues/65): re-run NOTE-L3b / BUG-COMMENT-NO-PUSH on tip (not a re-open of #14).
+6. Post-#31 modularization — [#66](https://github.com/semyon-alekseev-noveo/tt-sync/issues/66): timed `vaultDeletion` / further `TickTickService` extract; TECH-API-1 note. See `docs/SYNC_MODULARIZATION.md`.
+7. Editor-safety / Step 7 pilots still open: [#15](https://github.com/semyon-alekseev-noveo/tt-sync/issues/15) (#17/#18), [#20](https://github.com/semyon-alekseev-noveo/tt-sync/issues/20); #28/#29 case pilots.
 
 ## References
 

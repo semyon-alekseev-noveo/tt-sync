@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-22 12:05 UTC
+
+- Context: Documented backlog gaps had no GitHub trackers; owner asked to file issues with **perf/delta as P0**.
+- Target: Few high-signal issues on `semyon-alekseev-noveo/tt-sync`; update `docs/github-issues/INDEX.md` + `PROJECT_STATE.md` pointers; PR into `abyss-mapping` (no merge/release).
+- Actions log: Created #62 (PERF/DELTA P0), #63 (product risks), #64 (pilot config), #65 (NOTE-L3b residual), #66 (post-#31 / TECH-API-1); skipped DEL-3/CTX-D2 (under #20) and items already on #15–#33.
+- Validation: `gh issue view 62,63,64,65,66 --repo semyon-alekseev-noveo/tt-sync` → open with P0/P1/P2 labels; INDEX table lists them.
+- Problems: No changes — tracker-only iteration (`resolved`).
+- To Be Done: Owner merges docs PR; pick up #62 after #15 soft dependency allows; do not invent pilot pass rows.
+- References: https://github.com/semyon-alekseev-noveo/tt-sync/issues/62, `docs/github-issues/INDEX.md`, `CHANGELOG.md`
+
 ### Iteration 2026-10-22 11:30 UTC
 
 - Context: Owner merged [#60](https://github.com/semyon-alekseev-noveo/tt-sync/pull/60); release **2.0.80** from `abyss-mapping` tip (PROC-RELEASE-GATE).
