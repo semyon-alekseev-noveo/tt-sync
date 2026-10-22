@@ -50,11 +50,11 @@ No live-vault pilot this slice (extract-only; no behavior claim).
 
 ## Conclusion
 
-PR 4 dependency inversion is extract-complete: **TECH-CIRC-1** `main` ↔ `services` back-edge removed. Next slice: **PR 5** split `taskParser`, or store ports / timed `vaultDeletion` per plan.
+PR 4 dependency inversion is extract-complete: **TECH-CIRC-1** `main` ↔ `services` back-edge removed. Next slice: **PR 5** — see [`31-pr5-task-parser.md`](31-pr5-task-parser.md).
 
 ## Checklist
 
 - [x] `PluginContext` port; services do not import `@/main`
 - [x] Vitest + build green
 - [ ] PR merged into `abyss-mapping` (owner; stacks on #36 / #35 / #34)
-- [ ] PR 5 parser split / store ports
+- [x] PR 5 parser split — [`31-pr5-task-parser.md`](31-pr5-task-parser.md)

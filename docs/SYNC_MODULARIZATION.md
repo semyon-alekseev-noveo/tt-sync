@@ -1,6 +1,6 @@
 # Sync modularization plan
 
-**Status:** **PR 4 landed** — `PluginContext` port at `src/pluginContext.ts` breaks `main` ↔ `services` (`TECH-CIRC-1`). Services / vault helpers take the port; `TickTickSync` in `main.ts` implements it. Next: PR 5 split `taskParser`, or store ports / timed `vaultDeletion`. Evidence: `docs/pilot/results/TECH-SYNC-MODULARIZATION/`.
+**Status:** **PR 5 landed** — `taskParser` split under `src/taskParser/` (regex, tags, reminders, markers, structure, diff, notes, convertToLine/ToTask + mixin facade). Root `src/taskParser.ts` re-exports. Next: PR 6 split `TaskModificationDetector`, or store ports / timed `vaultDeletion`. Evidence: `docs/pilot/results/TECH-SYNC-MODULARIZATION/`.
 
 **Canonical boundaries:** [`ANALYST_REFERENCE_DIAGRAMS.md`](ANALYST_REFERENCE_DIAGRAMS.md). Process: [`DEV_FLOW.md`](../DEV_FLOW.md).
 
@@ -21,6 +21,7 @@ The [Todoist Obsidian plugin](https://github.com/jamiebrynes7/obsidian-todoist-p
 | **tt-remote** | `sync/sync.ts`, `pull.ts`, `api/` | Delta, Dexie ingest | `commitVaultText` |
 | **lifecycle** | `TaskDeletionHandler`, `massDeleteGuard`, `deletionGuardRun`, `lifecycle/runVaultDeletionPhase` | Delete prompts, guards | Direct editor patch |
 | **store** | `repositories/*`, `db/*` | Dexie access | Vault I/O |
+| **parser** | `src/taskParser/` (+ root `taskParser.ts` re-export) | Line ↔ `ITask` parse/format | TT API, vault write |
 
 ## `SyncRunContext`
 
@@ -115,9 +116,18 @@ See **`docs/COMMENT_SYNC_MODEL.md`**. PR A: keys + `planCommentSync` + tests (in
 
 **Gate:** same as PR 1; `pluginContext.noMainImport` green.
 
-### PR 5+ — Parser split / TMD / store ports
+### PR 5 — Split `taskParser` (**done**)
 
-- PR 5: split `taskParser.ts` by concern (re-export old path).
+- Move implementations under `src/taskParser/` by concern; compose `TaskParser` via mixins (`applyMixins`).
+- Root `src/taskParser.ts` re-exports `TaskParser`, `REGEX`, `markerName`, `flatTagName`, `abyssTagConflicts` (call sites unchanged).
+- Module map: `regex`, `tags`, `reminders`, `markers`, `structure`, `diff`, `notes`, `convertToLine`, `convertToTask`, facade `TaskParser.ts` + `index.ts`.
+
+**Out of scope PR 5:** changing parse/format behavior; splitting `TaskModificationDetector`; store ports.
+
+**Gate:** same as PR 1; parser suites + `synchronizationInner.integration.test.ts` green.
+
+### PR 6+ — TMD / store ports
+
 - PR 6: split `TaskModificationDetector` (detect vs push).
 - PR 7: `FileTaskQueries` / `TaskRepository` interfaces; no `db` in orchestrator.
 
