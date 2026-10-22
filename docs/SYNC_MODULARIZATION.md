@@ -1,6 +1,6 @@
 # Sync modularization plan
 
-**Status:** **PR 5 landed** — `taskParser` split under `src/taskParser/` (regex, tags, reminders, markers, structure, diff, notes, convertToLine/ToTask + mixin facade). Root `src/taskParser.ts` re-exports. Next: PR 6 split `TaskModificationDetector`, or store ports / timed `vaultDeletion`. Evidence: `docs/pilot/results/TECH-SYNC-MODULARIZATION/`.
+**Status:** **PR 6 landed** — `TaskModificationDetector` split under `src/sync/vault-push/taskModification/` (detect, push, newTasks, scan + mixin facade). Root `src/services/TaskModificationDetector.ts` re-exports. Next: PR 7 store ports (`FileTaskQueries` / `TaskRepository`), or timed `vaultDeletion`. Evidence: `docs/pilot/results/TECH-SYNC-MODULARIZATION/`.
 
 **Canonical boundaries:** [`ANALYST_REFERENCE_DIAGRAMS.md`](ANALYST_REFERENCE_DIAGRAMS.md). Process: [`DEV_FLOW.md`](../DEV_FLOW.md).
 
@@ -16,7 +16,7 @@ The [Todoist Obsidian plugin](https://github.com/jamiebrynes7/obsidian-todoist-p
 |--------|-------------------------|------|----------|
 | **orchestrator** | `services/index.ts` → `sync/orchestrator/` | Phase order, locks, perf, `SyncRunContext` | Line parse rules, `vault.process` |
 | **vault-io** | `src/sync/vault-io/` (`vaultWrite`, `fileRunCache`, `pendingMarkerTaskIds`; facade `index.ts`) | Read/write note, defer, cache, pending markers | TT API, deletion modals |
-| **vault-push** | `TaskModificationDetector`, `activeFilePush`, `NewFileMap` | Obsidian → TT | Pull, Phase 2 delete |
+| **vault-push** | `src/sync/vault-push/taskModification/` (+ `services/TaskModificationDetector.ts` re-export), `activeFilePush`, `NewFileMap`, `pushLocalPaths` | Obsidian → TT | Pull, Phase 2 delete |
 | **vault-pull** | `VaultSyncCoordinator`, `fileOperation` (pull) | TT/Dexie → lines | Push hash, create in TT |
 | **tt-remote** | `sync/sync.ts`, `pull.ts`, `api/` | Delta, Dexie ingest | `commitVaultText` |
 | **lifecycle** | `TaskDeletionHandler`, `massDeleteGuard`, `deletionGuardRun`, `lifecycle/runVaultDeletionPhase` | Delete prompts, guards | Direct editor patch |
@@ -126,9 +126,19 @@ See **`docs/COMMENT_SYNC_MODEL.md`**. PR A: keys + `planCommentSync` + tests (in
 
 **Gate:** same as PR 1; parser suites + `synchronizationInner.integration.test.ts` green.
 
-### PR 6+ — TMD / store ports
+### PR 6 — Split `TaskModificationDetector` (**done**)
 
-- PR 6: split `TaskModificationDetector` (detect vs push).
+- Move implementations under `src/sync/vault-push/taskModification/` by concern; compose via mixins (`applyMixins`).
+- Modules: `types`, `detect`, `push`, `newTasks`, `scan`, facade `TaskModificationDetector.ts` + `index.ts`.
+- Root `src/services/TaskModificationDetector.ts` re-exports (call sites unchanged).
+- Barrel: `src/sync/vault-push/index.ts` also exports the facade + pre-pull path helpers.
+
+**Out of scope PR 6:** changing detect/push behavior; store ports; timed `vaultDeletion`.
+
+**Gate:** same as PR 1; TMD suites + `synchronizationInner.integration.test.ts` green.
+
+### PR 7+ — store ports
+
 - PR 7: `FileTaskQueries` / `TaskRepository` interfaces; no `db` in orchestrator.
 
 ## Bug → module (quick routing)

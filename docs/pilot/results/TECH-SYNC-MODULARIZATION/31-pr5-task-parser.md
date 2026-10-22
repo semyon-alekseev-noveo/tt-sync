@@ -48,11 +48,11 @@ No live-vault pilot this slice (extract-only; no behavior claim).
 
 ## Conclusion
 
-PR 5 parser split is extract-complete. Next slice: **PR 6** split `TaskModificationDetector` (detect vs push), or store ports / timed `vaultDeletion` per plan.
+PR 5 parser split is extract-complete. Next slice: **PR 6** — see [`31-pr6-task-modification-detector.md`](31-pr6-task-modification-detector.md).
 
 ## Checklist
 
 - [x] Concern modules under `src/taskParser/`; thin root re-export
 - [x] Vitest + build green
 - [ ] PR merged into `abyss-mapping` (owner; stacks on #37 / #36 / #35 / #34)
-- [ ] PR 6 TMD split / store ports
+- [x] PR 6 TMD split — [`31-pr6-task-modification-detector.md`](31-pr6-task-modification-detector.md)
