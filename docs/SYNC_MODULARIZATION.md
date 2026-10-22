@@ -1,6 +1,6 @@
 # Sync modularization plan
 
-**Status:** Phase 0 landed (`SyncRunContext`, this doc). Phase 1 is extract-only (no behavior change).
+**Status:** **PR 1 landed** — all `synchronizationInner` phases live under `src/sync/phases/*`; orchestrator only calls them. Next: PR 2 lifecycle (`syncFiles` Phase 2 delete). Evidence: `docs/pilot/results/TECH-SYNC-MODULARIZATION/`.
 
 **Canonical boundaries:** [`ANALYST_REFERENCE_DIAGRAMS.md`](ANALYST_REFERENCE_DIAGRAMS.md). Process: [`DEV_FLOW.md`](../DEV_FLOW.md).
 
@@ -61,20 +61,21 @@ Phase 2 vault→TT deletion (`processSyncRemovedTasks`) currently runs **inside*
 | Add | `src/sync/phases/types.ts` — `SyncPhaseDeps` (plugin, service facades) |
 | Add | `src/sync/phases/preparePhase.ts` (**done**) |
 | Add | `src/sync/vault-push/pushLocalPaths.ts` (**done**, comment active-note path) |
-| Add | `src/sync/phases/projectsPhase.ts` |
-| Add | `src/sync/phases/registerPhase.ts` |
-| Add | `src/sync/phases/deletionGuardPhase.ts` |
-| Add | `src/sync/phases/pushPhase.ts` |
-| Add | `src/sync/phases/pullPhase.ts` |
-| Add | `src/sync/phases/vaultReconcilePhase.ts` |
-| Add | `src/sync/phases/subtasksPhase.ts` |
-| Add | `src/sync/phases/index.ts` — re-exports |
-| Change | `src/services/index.ts` — `synchronizationInner` calls phases; remove duplicated bodies |
-| Add | `src/test/syncRunContext.test.ts` |
+| Add | `src/sync/phases/projectsPhase.ts` (**done**) |
+| Add | `src/sync/phases/registerPhase.ts` (**done**) |
+| Add | `src/sync/phases/deletionGuardPhase.ts` (**done**) |
+| Add | `src/sync/phases/pushPhase.ts` (**done**) |
+| Add | `src/sync/phases/pullPhase.ts` (**done**) |
+| Add | `src/sync/phases/vaultReconcilePhase.ts` (**done**) |
+| Add | `src/sync/phases/subtasksPhase.ts` (**done**) |
+| Add | `src/sync/phases/syncFilesPhase.ts` (**done** — thin call; body still on service) |
+| Add | `src/sync/phases/index.ts` — re-exports (**done**) |
+| Change | `src/services/index.ts` — `synchronizationInner` calls phases; remove duplicated bodies (**done**) |
+| Add | `src/test/syncRunContext.test.ts` (**done**, Phase 0) |
 | Add | `docs/SYNC_MODULARIZATION.md` (this file) |
 | Change | `PROJECT_STATE.md` — snapshot + link here |
 
-**Out of scope PR 1:** moving `syncFiles` / deletion out of `index.ts`; breaking `main` ↔ `services` cycle; changing `pendingMarkerTaskIds` storage.
+**Out of scope PR 1:** moving `syncFiles` / deletion **bodies** out of `index.ts`; breaking `main` ↔ `services` cycle; changing `pendingMarkerTaskIds` storage.
 
 **Gate:** `npx vitest run`, `npm run build`, `synchronizationInner.integration.test.ts` unchanged green.
 

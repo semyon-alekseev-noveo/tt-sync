@@ -2,7 +2,6 @@ import { childBlocks, sortOrdersFromLines, reorderLinesBySortOrder } from '@/sub
 import { commitVaultText, editorsForFile, readNoteForWrite } from '@/services/vaultWrite';
 import { deferActiveFilePush, releaseDeferredActiveFilePushes } from '@/services/activeFilePush';
 import { loadPluginWrites, pluginWriteMtimes } from '@/utils/editedSince';
-import { healTagListMappings } from '@/listMapping';
 import { idsPresentInVault, dedupeTaskIds } from '@/utils/vaultIdScan';
 import { shouldBackupToday } from '@/backupPolicy';
 import TickTickSync from '@/main';
@@ -23,19 +22,27 @@ import type { SyncTrigger } from '@/services/SyncActivityIndicator';
 import type { PendingTickTickDeletion } from '@/services/TaskModificationDetector';
 import type { ITask } from '@/api/types/Task';
 import { getTick } from '@/api/tick_singleton_factory'
-import { syncTickTickWithDexie } from '@/sync/sync';
-import { prepareDeletionGuard, type GuardedPull } from '@/sync/deletionGuardRun';
-import { clearGuardRun, deletionConfirmMode } from '@/sync/massDeleteGuard';
+import { clearGuardRun } from '@/sync/massDeleteGuard';
 import { createSyncRunContext } from '@/sync/SyncRunContext';
-import { runPreparePhase } from '@/sync/phases/preparePhase';
+import {
+	runDeletionGuardPhase,
+	runPreparePhase,
+	runProjectsPhase,
+	runPullPhase,
+	runPushPhase,
+	runRegisterPhase,
+	runSubtasksPhase,
+	runSyncFilesPhase,
+	runVaultReconcilePhase,
+} from '@/sync/phases';
 import { pathsForPrePullPush } from '@/sync/vault-push/pushLocalPaths';
 import type { SyncRunResult } from '@/sync/result';
 import { db, initDB } from "@/db/dexie";
 import { getAllProjects, getProjectById, upsertProjects } from '@/db/projects';
-import { loadTasksFromCache, markTaskDeleted } from "@/db/tasks";
+import { loadTasksFromCache } from "@/db/tasks";
 import { getAllFiles, getFile, upsertFile } from "@/db/files";
 import type { IProject } from '@/api/types/Project';
-import { isPathInPushScope, resolveProjectsList } from '@/syncScope';
+import { isPathInPushScope } from '@/syncScope';
 import { beginFileRun, syncCachedRead, syncRead } from '@/sync/fileRunCache';
 import { finishSyncPerf, formatSyncPerf, formatSyncPerfShort, observeSyncApi, startSyncPerf, timePhase } from '@/sync/perf';
 
@@ -129,8 +136,7 @@ export class TickTickService {
 	}
 
 	private locallyEdited = new Set<string>();
-	private guardedPull: GuardedPull | undefined;
-	async pushLocalEditsFirst(since?: number, trigger: SyncTrigger = 'manual') {
+	async pushLocalEditsFirst(since?: number, trigger: SyncTrigger = 'manual'): Promise<Set<string>> {
 		this.locallyEdited = new Set();
 		const meta = since == null ? await db.meta.get("sync") : undefined;
 		if (meta?.pluginWriteMtimes) loadPluginWrites(meta.pluginWriteMtimes);
@@ -148,6 +154,7 @@ export class TickTickService {
 			catch (e) { log.warn('pre-pull push failed', path, e); }
 			try { await this.pushSubtaskOrder(path); } catch (e) { log.warn('subtask order push failed', path, e); }
 		}
+		return this.locallyEdited;
 	}
 
 	/** Obsidian -> TickTick: sibling line order under a parent becomes child sortOrder. */
@@ -239,8 +246,8 @@ export class TickTickService {
 		let syncOk = true;
 		let errorMessage = '';
 		clearGuardRun();
-		this.guardedPull = undefined;
 		const syncCtx = createSyncRunContext({ trigger, fullSync });
+		const phaseDeps = { plugin: this.plugin, service: this, ui, ctx: syncCtx };
 		await syncCtx.reconcilePendingMarkers((ids) => idsPresentInVault(this.plugin.app, ids));
 		log.debug(`TickTickSync run ${syncCtx.syncId} (${trigger}, fullSync=${fullSync})`);
 		try {
@@ -251,107 +258,22 @@ export class TickTickService {
 			// NEW: Use TaskCache
 			this.plugin.syncRunning = true;
 			await timePhase('prepare', async () => {
-				await runPreparePhase({ plugin: this.plugin, service: this, ui, ctx: syncCtx });
+				await runPreparePhase(phaseDeps);
 			});
 
 			await doWithLock(LOCK_TASKS, async () => {
 				if (this.plugin.tickTickRestAPI) {
-					const tickApi = this.plugin.tickTickRestAPI;
-					const projects = await timePhase('projects', async () => {
-						ui.setFullStep('Loading TickTick projects…');
-						const loaded = await this.saveProjectsToCache();
-						if (loaded) {
-							//check to see if we need to move any project files
-							const mostRecentModifiedTime = loaded.reduce((latest, project) => {
-								return new Date(project.modifiedTime) > new Date(latest)
-									? project.modifiedTime
-									: latest;
-							}, loaded[0].modifiedTime);
-							const mostRecentModifiedTimeDate = new Date(mostRecentModifiedTime);
-							log.debug(`Most recent modified time: ${mostRecentModifiedTime}`);
-							const meta = await db.meta.get("sync");
-							const lastFullSync = meta?.lastFullSync ?? 0;
-							const lastDeltaSync = meta?.lastDeltaSync ?? 0;
-							const lastSync = lastFullSync > lastDeltaSync ? lastFullSync : lastDeltaSync;
-							const lastSyncDate = lastSync ? new Date(lastSync) : null;
-							if (lastSyncDate && mostRecentModifiedTimeDate > lastSyncDate) {
-								log.debug(`TT Folder move detected. Moving all project files to new location.`)
-								ui.setFullStep('Reorganizing project folders…');
-								await this.reorganizeFilesToFolders();
-							}
-						}
-						return loaded;
-					});
-
-					// Ensure all vault files are registered in Files metadata
-					await timePhase('register', async () => {
-						ui.setFullStep('Scanning vault files…');
-						await this.ensureVaultFilesRegistered();
-					});
-					// Marker at the start of this sync's vault push. The deletion guard prefetches
-					// getUpdatedTasks before that push, so the stamp is taken first. This run still
-					// compares files to the previous stamp. Plugin writes are excluded by mtime.
-					const pushMeta = await db.meta.get('sync');
-					const pushSince = pushMeta?.lastVaultPushWallMs ?? 0;
-					loadPluginWrites(pushMeta?.pluginWriteMtimes);
-					await db.meta.update('sync', { lastVaultPushWallMs: Date.now() });
-					// Plan deletions in both directions before any of them are applied.
-					await timePhase('deletionGuard', async () => {
-						ui.setFullStep('Checking deletions…');
-						this.guardedPull = await prepareDeletionGuard(this.plugin, tickApi, trigger, fullSync, projects);
-					});
-					// Push vault edits made since the last sync BEFORE pulling, otherwise the pull
-					// re-renders the line from TickTick and the local edit is lost (seen on [x] lines
-					// edited outside the editor, where no editor-change check fires).
-					await timePhase('push', async () => {
-						ui.setFullStep('Pushing vault changes to TickTick…');
-						await this.pushLocalEditsFirst(pushSince, trigger);
-					});
-					await timePhase('pull', async () => {
-						ui.setFullStep(fullSync ? 'Full sync from TickTick…' : 'Pulling updates from TickTick…');
-						await syncTickTickWithDexie(tickApi, fullSync, this.guardedPull);
-						if (projects?.length) {
-							const healed = healTagListMappings(getSettings().tagListMappings, projects);
-							const pl = resolveProjectsList(projects, getSettings().projectsListName, getSettings().projectsListId);
-							const plUpd = pl && (pl.id !== getSettings().projectsListId || pl.name !== getSettings().projectsListName) ? { projectsListId: pl.id, projectsListName: pl.name } : {};
-							if (healed || Object.keys(plUpd).length) {
-								updateSettings({ ...(healed ? { tagListMappings: healed } : {}), ...plUpd }, { persist: false });
-								await this.plugin.saveSettings();
-								log.info('List mapping refreshed (rename-safe)');
-							}
-						}
-						// A list deleted in TickTick takes its tasks with it but they are not reported as deleted:
-						// treat tasks of vanished lists as deleted (guarded against a partial/failed project fetch).
-						try {
-							const live = new Set((projects ?? []).map(p => p.id));
-							if (projects && live.size > 0) {
-								const all = (await db.tasks.toArray()).filter(lt => !lt.deleted && lt.task?.projectId);
-								const gone = all.filter(lt => !lt.task.projectId.startsWith('inbox') && !live.has(lt.task.projectId));
-								const mode = deletionConfirmMode();
-								if (mode === 'skip') {
-									if (gone.length) log.warn(`Mass-delete guard held ${gone.length} task(s) from missing TickTick lists`);
-								} else if (gone.length && (mode === 'force' || gone.length <= Math.max(5, all.length / 2))) {
-									for (const lt of gone) await markTaskDeleted(lt.task.id);
-									log.warn(`${gone.length} task(s) belonged to deleted TickTick lists; detaching`, gone.map(g => g.task.id));
-								} else if (gone.length) log.error(`Refusing to detach ${gone.length} tasks of missing lists (looks like a partial fetch)`);
-							}
-						} catch (e) { log.warn('vanished-list check failed', e); }
-					});
-					//NEW: Use VaultSyncCoordinator
-					await timePhase('vaultReconcile', async () => {
-						ui.setFullStep('Updating vault task lines…');
-						await this.plugin.vaultSyncCoordinator.syncVaultWithDatabase();
-					});
-					await timePhase('subtasks', async () => {
-						ui.setFullStep('Finalizing subtask order…');
-						try { await this.pullSubtaskOrder(this.locallyEdited); } catch (e) { log.warn('subtask order pull failed', e); }
-					});
+					const lockedDeps = { ...phaseDeps, tickApi: this.plugin.tickTickRestAPI };
+					await timePhase('projects', () => runProjectsPhase(lockedDeps));
+					await timePhase('register', () => runRegisterPhase(lockedDeps));
+					await timePhase('deletionGuard', () => runDeletionGuardPhase(lockedDeps));
+					await timePhase('push', () => runPushPhase(lockedDeps));
+					await timePhase('pull', () => runPullPhase(lockedDeps));
+					await timePhase('vaultReconcile', () => runVaultReconcilePhase(lockedDeps));
+					await timePhase('subtasks', () => runSubtasksPhase(lockedDeps));
 				}
 			});
-			await timePhase('syncFiles', async () => {
-				ui.setFullStep('Syncing project notes…');
-				await this.syncFiles(false);
-			});
+			await timePhase('syncFiles', () => runSyncFilesPhase(phaseDeps));
 		} catch (error) {
 			syncOk = false;
 			errorMessage = error instanceof Error ? error.message : String(error);
@@ -360,7 +282,6 @@ export class TickTickService {
 		} finally {
 			syncCtx.resetLifecycle();
 			clearGuardRun();
-			this.guardedPull = undefined;
 			endApi();
 			endFiles();
 			const report = finishSyncPerf(perfRun, syncOk);

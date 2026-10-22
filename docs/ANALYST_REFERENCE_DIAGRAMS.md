@@ -16,6 +16,7 @@ flowchart TB
   subgraph Orchestration["Orchestration"]
     SVC[TickTickService services/index.ts]
     SYNC[synchronizationInner]
+    PHASES[sync/phases/* prepare…syncFiles]
   end
   subgraph Push["Obsidian → TickTick"]
     TMD[TaskModificationDetector]
@@ -36,9 +37,10 @@ flowchart TB
   MAIN --> EVT
   MAIN --> SVC
   SVC --> SYNC
-  SYNC --> TMD
-  SYNC --> PULL
-  SYNC --> VSC
+  SYNC --> PHASES
+  PHASES --> TMD
+  PHASES --> PULL
+  PHASES --> VSC
   TMD --> TP
   TMD --> ABYSS_PUSH
   TMD --> API
@@ -47,6 +49,8 @@ flowchart TB
   FO --> ABYSS_PULL
   REPO --> DEX
 ```
+
+**Phase modules (PR 1 / #31):** `prepare` → `projects` → `register` → `deletionGuard` → `push` → `pull` → `vaultReconcile` → `subtasks` → `syncFiles`. Plan: [`SYNC_MODULARIZATION.md`](SYNC_MODULARIZATION.md). Bug routing by phase: vault lines → `vaultReconcile` / `VaultSyncCoordinator`; pre-pull vault edits → `push` / TMD; Dexie ingest → `pull` / `sync.ts`; Phase 2 delete still inside `syncFiles` until PR 2.
 
 | Если баг… | Править в первую очередь | Не трогать без нужды | Прогон |
 |-----------|--------------------------|----------------------|--------|

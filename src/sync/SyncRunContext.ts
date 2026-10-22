@@ -5,6 +5,7 @@
  * vault-io, push, pull, and lifecycle do not rely on scattered module globals.
  * Phase extraction PRs will take `SyncRunContext` as the first argument.
  */
+import type { IProject } from '@/api/types/Project';
 import type { GuardedPull } from '@/sync/deletionGuardRun';
 import {
 	isPendingMarkerTaskId,
@@ -42,7 +43,10 @@ export interface SyncRunContext {
 	/** `lastVaultPushWallMs` snapshot for this run's vault→TT push. */
 	pushSinceMs: number;
 
-	/** Set at start of run; updated when push stamp is written. */
+	/** Projects loaded in the `projects` phase; used by deletionGuard and pull. */
+	projects?: IProject[];
+
+	/** Set by deletionGuard; consumed by pull. */
 	guardedPull?: GuardedPull;
 
 	/** File paths edited locally during push (subtask order). */
