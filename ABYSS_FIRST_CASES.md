@@ -123,6 +123,8 @@ Pass only with evidence: the note path, the `ticktick_id`, and either the journa
 | 2026-10-21 | Thinkpad-tts-test | 2.0.76 | agent (Obsidian CLI) | TP-NO-CARET-REWRITE / TP-ACTIVE-PUSH-DURING-SYNC / TP-NO-STALE-VIEW-READ / TP-EMPTY-EDITOR-DISK | pass | #16 open-note cluster. Evidence: `docs/pilot/results/PILOT-BATCH-EDITOR-SAFETY/16-open-note-editor.md`. |
 | 2026-10-21 | Thinkpad-tts-test | 2.0.76 | agent | BUG-COMMENT-VAULT-DUP-KEY | fail | `2026-10-19.md` has 8 Abyss bullets (wall-clock + ISO) for 4 keys; sticky `local-edit`. Issue #27. |
 | 2026-10-22 | unit | 2.0.79 | agent | BUG-COMMENT-VAULT-DUP-KEY / EMPTY-VAULT-WIPE / GET-FAIL-OPEN | pass (unit) | Vitest **697**; pilot vault — **not run**. Issues #27/#28/#29. |
+| 2026-10-22 | Thinkpad-tts-test | 2.0.79 | agent | release Synchronize smoke | pass | Deploy/reload/`tts-sync`; CP advanced; release https://github.com/semyon-alekseev-noveo/tt-sync/releases/tag/2.0.79. |
+| 2026-10-22 | Thinkpad-tts-test | 2.0.79 | agent | BUG-COMMENT-VAULT-DUP-KEY | fail | `task-11-16` still 21 Abyss lines after Synchronize (unit pass only). Issue #27. |
 | | `<live-vault>` | | | Step 8 | not run | Blocked until the four rows above are pass. |
 
 This branch did not run the gate. Leave the result column as **not run** until you do.

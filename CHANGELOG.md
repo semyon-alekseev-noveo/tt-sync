@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-22 10:47 UTC
+
+- Context: PR #58 merged on `abyss-mapping`; owner asked for release **2.0.79** + pilot smoke (no feature-branch tag, no retag).
+- Target: Tag merge tip once; deploy Thinkpad-tts-test; record evidence; close #27/#28/#29 only if case-verifiable.
+- Actions log: Fetched `abyss-mapping` @ `38e7371`; vitest+build; GitHub release **2.0.79** with assets; pilot deploy/reload/`tts-sync`; docs under `PILOT-BATCH-EDITOR-SAFETY/`.
+- Validation: `npx vitest run` → **100** files, **697** passed; `npm run build` → ok; plugin **2.0.79**; `checkPoint` `1792660281617` → `1792664146187`.
+- Problems: #27 live twins still on `task-11-16` after Synchronize; #28/#29 case paths not induced — issues stay **open**.
+- To Be Done: Case-specific pilot for #27 (collapse/cleanup) then #28/#29; continue #15 (#17/#18).
+- References: https://github.com/semyon-alekseev-noveo/tt-sync/releases/tag/2.0.79, `docs/pilot/results/PILOT-BATCH-EDITOR-SAFETY/58-release-2.0.79-smoke.md`, `CHANGELOG.md`
+
 ### Iteration 2026-10-22 10:26 UTC
 
 - Context: P0 comment safety bugs #27/#28/#29 on tip **2.0.78** (vault stamp twins; empty-vault wipe; getTaskComments fail-open).
