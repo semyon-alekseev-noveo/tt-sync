@@ -8,7 +8,7 @@
 | GitHub | [tt-sync #31](https://github.com/semyon-alekseev-noveo/tt-sync/issues/31) |
 | Recorded | 2026-10-22 UTC |
 | Base | `abyss-mapping` @ `25eed74` |
-| Status | **open** — PR 1 extract landed on feature branch; not merged |
+| Status | **open** — PR 1 extract in [PR #34](https://github.com/semyon-alekseev-noveo/tt-sync/pull/34); not merged |
 
 ## Inputs
 
