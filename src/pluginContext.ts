@@ -16,10 +16,9 @@ import type { DateMan } from '@/dateMan';
 import type { FileOperation } from '@/fileOperation';
 import type { RedoLog } from '@/redo/log';
 import type { FileMetadataService } from '@/repositories/FileMetadataService';
-import type { FileTaskQueries } from '@/repositories/FileTaskQueries';
 import type { ProjectGroupRepository } from '@/repositories/ProjectGroupRepository';
 import type { TaskCache } from '@/repositories/TaskCache';
-import type { TaskRepository } from '@/repositories/TaskRepository';
+import type { FileTaskQueriesPort, SyncMetaPort, TaskRepositoryPort } from '@/repositories/ports';
 import type { EventHandlerService } from '@/services/EventHandlerService';
 import type { FolderMigrationService } from '@/services/FolderMigrationService';
 import type { FolderSyncService } from '@/services/FolderSyncService';
@@ -46,8 +45,10 @@ export interface PluginContext extends Plugin {
 	readonly fileMetadataService: FileMetadataService;
 	readonly dateMan: DateMan;
 	readonly tagService: TagService;
-	taskRepository: TaskRepository;
-	fileTaskQueries: FileTaskQueries;
+	/** Store ports — sync layers must not reach Dexie for these concerns. */
+	taskRepository: TaskRepositoryPort;
+	fileTaskQueries: FileTaskQueriesPort;
+	syncMeta: SyncMetaPort;
 	taskCache: TaskCache;
 	projectGroupRepository: ProjectGroupRepository;
 	projectSyncService: ProjectSyncService;

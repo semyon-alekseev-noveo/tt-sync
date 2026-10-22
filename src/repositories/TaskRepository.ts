@@ -1,6 +1,6 @@
 /**
- * TaskRepository - Responsible for all database operations related to tasks
- * Extracts database access logic from CacheOperation
+ * TaskRepository - Dexie adapter for {@link TaskRepositoryPort}.
+ * Extracts database access logic from CacheOperation.
  */
 
 import { db } from "@/db/dexie";
@@ -8,9 +8,10 @@ import { deleteCommentMapsForTask } from '@/db/taskCommentMaps';
 import type { ITask } from "@/api/types/Task";
 import type { LocalTask } from "@/db/schema";
 import { getCurrentDeviceInfo } from "@/db/device";
+import type { TaskRepositoryPort } from "@/repositories/ports/TaskRepository";
 import log from "@/utils/logger";
 
-export class TaskRepository {
+export class TaskRepository implements TaskRepositoryPort {
 	/**
 	 * Load a task by its TickTick ID
 	 */
@@ -45,6 +46,18 @@ export class TaskRepository {
 			return localTasks.map(lt => lt.task);
 		} catch (error) {
 			log.error("Error loading all tasks:", error);
+			return [];
+		}
+	}
+
+	/**
+	 * Load all LocalTask rows (including soft-deleted).
+	 */
+	async loadAllLocalTasks(): Promise<LocalTask[]> {
+		try {
+			return await db.tasks.toArray();
+		} catch (error) {
+			log.error("Error loading all local tasks:", error);
 			return [];
 		}
 	}

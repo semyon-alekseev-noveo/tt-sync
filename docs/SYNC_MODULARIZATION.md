@@ -1,6 +1,6 @@
 # Sync modularization plan
 
-**Status:** **PR 6 landed** — `TaskModificationDetector` split under `src/sync/vault-push/taskModification/` (detect, push, newTasks, scan + mixin facade). Root `src/services/TaskModificationDetector.ts` re-exports. Next: PR 7 store ports (`FileTaskQueries` / `TaskRepository`), or timed `vaultDeletion`. Evidence: `docs/pilot/results/TECH-SYNC-MODULARIZATION/`.
+**Status:** **PR 7 landed** — store ports (`FileTaskQueriesPort` / `TaskRepositoryPort` / `SyncMetaPort`); orchestrator phases use `PluginContext` ports, not `@/db/*`. Next: timed `vaultDeletion` phase, or further store extraction from services. Evidence: `docs/pilot/results/TECH-SYNC-MODULARIZATION/`.
 
 **Canonical boundaries:** [`ANALYST_REFERENCE_DIAGRAMS.md`](ANALYST_REFERENCE_DIAGRAMS.md). Process: [`DEV_FLOW.md`](../DEV_FLOW.md).
 
@@ -20,7 +20,7 @@ The [Todoist Obsidian plugin](https://github.com/jamiebrynes7/obsidian-todoist-p
 | **vault-pull** | `VaultSyncCoordinator`, `fileOperation` (pull) | TT/Dexie → lines | Push hash, create in TT |
 | **tt-remote** | `sync/sync.ts`, `pull.ts`, `api/` | Delta, Dexie ingest | `commitVaultText` |
 | **lifecycle** | `TaskDeletionHandler`, `massDeleteGuard`, `deletionGuardRun`, `lifecycle/runVaultDeletionPhase` | Delete prompts, guards | Direct editor patch |
-| **store** | `repositories/*`, `db/*` | Dexie access | Vault I/O |
+| **store** | `repositories/ports/*` + Dexie adapters (`TaskRepository`, `FileTaskQueries`, `SyncMetaRepository`), `db/*` | Dexie access behind ports | Vault I/O; phases must not import `@/db/*` |
 | **parser** | `src/taskParser/` (+ root `taskParser.ts` re-export) | Line ↔ `ITask` parse/format | TT API, vault write |
 
 ## `SyncRunContext`
@@ -137,9 +137,22 @@ See **`docs/COMMENT_SYNC_MODEL.md`**. PR A: keys + `planCommentSync` + tests (in
 
 **Gate:** same as PR 1; TMD suites + `synchronizationInner.integration.test.ts` green.
 
-### PR 7+ — store ports
+### PR 7 — store ports (**done**)
 
-- PR 7: `FileTaskQueries` / `TaskRepository` interfaces; no `db` in orchestrator.
+- Ports: `src/repositories/ports/{FileTaskQueries,TaskRepository,SyncMeta}.ts` (+ barrel `index.ts`).
+- Dexie adapters: `FileTaskQueries` / `TaskRepository` / `SyncMetaRepository` `implements` those ports.
+- `PluginContext.taskRepository` / `fileTaskQueries` / `syncMeta` typed as ports; `main` constructs adapters.
+- Orchestrator phases (`deletionGuard`, `projects`, `pull`) use ports only — no `@/db/*` imports.
+- `TaskDeletionHandler` / `TaskOperationsService` take `plugin.fileTaskQueries` (port) instead of `new FileTaskQueries()`.
+- Guard: `src/test/storePorts.noDexieInOrchestrator.test.ts`.
+
+**Out of scope PR 7:** moving `tt-remote` (`sync.ts` / `pull.ts`) off Dexie; timed `vaultDeletion`; splitting `TickTickService`.
+
+**Gate:** same as PR 1; storePorts guard + `synchronizationInner.integration.test.ts` green.
+
+### PR 8+ — next slices
+
+- Timed `vaultDeletion` phase (promote `runVaultDeletionPhase` out of `syncFiles` lock body), and/or further store extraction from services / tt-remote.
 
 ## Bug → module (quick routing)
 

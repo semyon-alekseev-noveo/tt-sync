@@ -65,8 +65,10 @@ import type { DeviceInfo } from '@/db/schema';
 import { FileMetadataService } from '@/repositories/FileMetadataService';
 import { TaskRepository } from '@/repositories/TaskRepository';
 import { FileTaskQueries } from '@/repositories/FileTaskQueries';
+import { SyncMetaRepository } from '@/repositories/SyncMetaRepository';
 import { TaskCache } from '@/repositories/TaskCache';
 import { ProjectGroupRepository } from '@/repositories/ProjectGroupRepository';
+import type { FileTaskQueriesPort, SyncMetaPort, TaskRepositoryPort } from '@/repositories/ports';
 
 //NEW: Service layer
 import { ProjectSyncService } from '@/services/ProjectSyncService';
@@ -92,9 +94,10 @@ export default class TickTickSync extends Plugin implements PluginContext {
 
 	readonly lastLines: Map<string, number> = new Map(); //lastLine object {path:line} is saved in lastLines map
 
-	//NEW: Repository layer
-	taskRepository!: TaskRepository;
-	fileTaskQueries!: FileTaskQueries;
+	//NEW: Repository layer (store ports; Dexie adapters constructed in initializePlugin)
+	taskRepository!: TaskRepositoryPort;
+	fileTaskQueries!: FileTaskQueriesPort;
+	syncMeta!: SyncMetaPort;
 	taskCache!: TaskCache;
 	projectGroupRepository!: ProjectGroupRepository;
 
@@ -534,9 +537,10 @@ export default class TickTickSync extends Plugin implements PluginContext {
 		// Load Dexie first as it's the source of truth
 		await initDB();
 
-		//NEW: Initialize repositories
+		//NEW: Initialize repositories (Dexie adapters behind store ports)
 		this.taskRepository = new TaskRepository();
 		this.fileTaskQueries = new FileTaskQueries();
+		this.syncMeta = new SyncMetaRepository();
 		this.taskCache = new TaskCache();
 		this.projectGroupRepository = new ProjectGroupRepository();
 

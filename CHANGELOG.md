@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-22 07:19 UTC
+
+- Context: TECH-SYNC-MODULARIZATION (#31) PR 7 — orchestrator phases still imported Dexie; store was concrete classes only.
+- Target: Extract-only store ports (`FileTaskQueries` / `TaskRepository` / `SyncMeta`); no `db` in sync phases; no behavior change.
+- Actions log: Added `repositories/ports/*` + `SyncMetaRepository`; typed `PluginContext`; rewired phases + deletion/ops handlers; guard `storePorts.noDexieInOrchestrator`; docs + pilot `31-pr7-store-ports.md`.
+- Validation: `npx vitest run` → **100** files, **688** passed; `npm run build` → ok.
+- Problems: - No changes
+- To Be Done: PR into `abyss-mapping` (stack on #39); comment #31; next = timed `vaultDeletion` or further store extract.
+- References: `docs/SYNC_MODULARIZATION.md`, `docs/pilot/results/TECH-SYNC-MODULARIZATION/31-pr7-store-ports.md`, `CHANGELOG.md`
+
 ### Iteration 2026-10-22 07:10 UTC
 
 - Context: TECH-SYNC-MODULARIZATION (#31) PR 6 — monolithic `TaskModificationDetector` (~1138 lines) after taskParser split.

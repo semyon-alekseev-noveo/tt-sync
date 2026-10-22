@@ -116,6 +116,10 @@ async function makeWorld(opts?: { realDetector?: boolean }): Promise<World> {
 		},
 		fileTaskQueries: { getDefaultProjectIdForFilepath: async () => 'proj-1' },
 		taskRepository: new TaskRepository(),
+		syncMeta: {
+			getSyncMeta: async () => db.meta.get('sync'),
+			updateSyncMeta: async (partial) => db.meta.update('sync', partial),
+		},
 		fileMetadataService: {
 			getAllFileMetadata: async () => metadata,
 			checkForDuplicates: async () => ({ duplicates: {}, taskIds: {} }),

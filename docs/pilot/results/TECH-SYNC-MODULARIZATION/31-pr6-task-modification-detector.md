@@ -44,11 +44,11 @@ No live-vault pilot this slice (extract-only; no behavior claim).
 
 ## Conclusion
 
-PR 6 TMD split is extract-complete. Next slice: **PR 7** store ports (`FileTaskQueries` / `TaskRepository`), or timed `vaultDeletion` per plan.
+PR 6 TMD split is extract-complete. Next slice: **PR 7** — see [`31-pr7-store-ports.md`](31-pr7-store-ports.md).
 
 ## Checklist
 
 - [x] Concern modules under `src/sync/vault-push/taskModification/`; thin services re-export
 - [x] Vitest + build green
 - [ ] PR merged into `abyss-mapping` (owner; stacks on #38 / #37 / #36 / #35 / #34)
-- [ ] PR 7 store ports / timed `vaultDeletion`
+- [x] PR 7 store ports — [`31-pr7-store-ports.md`](31-pr7-store-ports.md)
