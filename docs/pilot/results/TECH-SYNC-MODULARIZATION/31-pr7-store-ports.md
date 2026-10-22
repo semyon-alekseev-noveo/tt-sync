@@ -8,7 +8,7 @@
 | GitHub | [tt-sync #31](https://github.com/semyon-alekseev-noveo/tt-sync/issues/31) |
 | Recorded | 2026-10-22 UTC |
 | Base | `feat/tech-sync-modularization-pr6` (PR #39 still open) |
-| Status | **open** — PR on `feat/tech-sync-modularization-pr7` (stacks on #39) |
+| Status | **open** — [PR #40](https://github.com/semyon-alekseev-noveo/tt-sync/pull/40) on `feat/tech-sync-modularization-pr7` (stacks on #39) |
 
 ## Inputs
 
