@@ -34,7 +34,7 @@
 ## Problems
 
 - **BUG-COMMENT-DUP-STAMP** ([#25](https://github.com/semyon-alekseev-noveo/tt-sync/issues/25)): **resolved** on **2.0.76** (unit + pilot; 4 plain Comments on `task-11-16`).
-- **BUG-COMMENT-VAULT-DUP-KEY** ([#27](https://github.com/semyon-alekseev-noveo/tt-sync/issues/27)): quiet-sync rewrite in **2.0.80** (unit); 2.0.79 smoke left `task-11-16` twins — **keep open** until release+pilot.
+- **BUG-COMMENT-VAULT-DUP-KEY** ([#27](https://github.com/semyon-alekseev-noveo/tt-sync/issues/27)): quiet-sync rewrite in **2.0.80**; pilot pass on PR tip; 2.0.79 smoke left twins — leave open until merge + GitHub release.
 - **BUG-COMMENT-EMPTY-VAULT-WIPE** ([#28](https://github.com/semyon-alekseev-noveo/tt-sync/issues/28)): unit fixed **2.0.79**; case pilot **not run** — **keep open**.
 - **BUG-COMMENT-GET-FAIL-OPEN** ([#29](https://github.com/semyon-alekseev-noveo/tt-sync/issues/29)): unit fixed **2.0.79**; case pilot **not run** — **keep open**.
 - BRAT missing settings gear when `addSettingTab` ran after async `loadSettings` or layout/sync (`resolved` in 2.0.17 — sync `addSettingTab` in `onload`, command `open-settings` fallback).
