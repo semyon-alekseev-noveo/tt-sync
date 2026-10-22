@@ -737,4 +737,4 @@ Expected: sync finishes; plugin version **2.0.78**. Smoke only — do not invent
 
 | ID | Pilot status | Evidence |
 |----|----------------|----------|
-| TP-COMMENT-FIXES-ON-MOD | not run | Pending deploy after release |
+| TP-COMMENT-FIXES-ON-MOD | **pass** | Deploy **2.0.78**; CLI reload + `tts-sync` (after clearing stuck `syncRunning`); `checkPoint` advanced; evidence `docs/pilot/results/COMMENT-FIXES-2.0.78/55-release-smoke.md` |
