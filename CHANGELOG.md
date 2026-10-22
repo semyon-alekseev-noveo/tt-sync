@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-22 10:00 UTC
+
+- Context: Owner decided release policy for PROC-RELEASE-GATE (#30) after retagging **2.0.78** from pre-merge tip onto the merge commit.
+- Target: Encode “release only after merge to `abyss-mapping`; never retag the same `2.0.x`” in process docs/rules.
+- Actions log: Updated `DEV_FLOW.md` Versioning/releases + Branches; `.cursor/rules/dev-flow.mdc`; `docs/github-issues/30-proc-release-gate.md` + INDEX; comment on #30.
+- Validation: Docs-only; no `vitest` / build run required for this iteration.
+- Problems: Actions gate items on #30 remain open (`open`).
+- To Be Done: Owner merges this docs PR; encode `release.yml` checks when ready.
+- References: https://github.com/semyon-alekseev-noveo/tt-sync/issues/30, `DEV_FLOW.md`, `CHANGELOG.md`
+
 ### Iteration 2026-10-22 09:29 UTC
 
 - Context: Owner asked to bring stale comment-fix PRs #24/#26 and bump #54 into mergeable state on modularized `abyss-mapping` (release tip **2.0.77**).

@@ -11,6 +11,8 @@ Follow DEV_FLOW.md at the repo root.
 - `npx vitest run` and `npm run build` must pass, including the synchronizationInner integration test.
 - Update canonical docs in the same PR. Archive docs (GTD_SYNC_*, TT_ABYSS_ROADMAP, SYNC_PROJECTS_AND_SUBTASKS) are not requirements.
 - Every PR that changes behavior updates TEST_PLAN.md in that same PR (steps, expected result, pilot status). Reject a PR that does not.
-- Branch and pull request into abyss-mapping only. Do not push abyss-mapping or master, do not merge. Do not tag unless the owner asked for a release in this task.
+- Branch and pull request into abyss-mapping only. Do not push abyss-mapping or master, do not merge.
+- Releases (PROC-RELEASE-GATE #30): only from abyss-mapping after the bump/fix PR is merged. Never release from a feature branch. Never force-move/retag the same 2.0.x onto a later merge commit — wait for merge then tag once, or bump for a new tag.
+- Do not tag or publish a GitHub release unless the owner asked for that release in this task (and then only on the merged abyss-mapping tip).
 - Epic close (multi-PR): release + regression gate (+ pilot smoke when sync-related) before closing the issue; link release URL and `docs/pilot/results/` evidence. Align with PROC-RELEASE-GATE (#30).
 - Pilot vault only. No secrets or personal absolute paths. Do not invent live-vault results.
