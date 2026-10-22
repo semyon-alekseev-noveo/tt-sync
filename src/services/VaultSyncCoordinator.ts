@@ -33,8 +33,17 @@ import {
 	vaultHadSyncedCommentBullets,
 } from '@/abyssCommentSync';
 import { listCommentMapsForTask } from '@/db/taskCommentMaps';
-import { remoteCommentKeysAheadOfVault, vaultCommentKeysAheadOfRemote, vaultHasUnpushedCommentThreads } from '@/sync/comments';
-import { abyssLinesToNote, extractAbyssCommentThreads } from '@/abyssFormat';
+import {
+	remoteCommentKeysAheadOfVault,
+	vaultCommentKeysAheadOfRemote,
+	vaultHasDuplicateCommentKeys,
+	vaultHasUnpushedCommentThreads,
+} from '@/sync/comments';
+import {
+	abyssLinesToNote,
+	extractAbyssCommentThreads,
+	rewriteAbyssChildrenCollapsingCommentKeys,
+} from '@/abyssFormat';
 
 export class VaultSyncCoordinator {
 	private app: App;
@@ -360,7 +369,22 @@ export class VaultSyncCoordinator {
 			}
 			const hash = await parser.getLineHash((taskRec.task ?? '') + taskNotes);
 			if (hash && hash !== task.lineHash) {
-				return { behind: false, task, localEdit: true, reason: 'local-edit' };
+				// Twins alone can make hash ≠ lineHash while TT keys already match; do not
+				// treat that as a sticky local-edit that skips vault rewrite (BUG-COMMENT-VAULT-DUP-KEY).
+				const lines = taskRec.taskLines ?? [];
+				if (
+					useAbyssCommentsApi()
+					&& vaultHasDuplicateCommentKeys(lines)
+				) {
+					const collapsedNotes = abyssLinesToNote(rewriteAbyssChildrenCollapsingCommentKeys(lines));
+					const collapsedHash = await parser.getLineHash((taskRec.task ?? '') + collapsedNotes);
+					if (collapsedHash !== task.lineHash) {
+						return { behind: false, task, localEdit: true, reason: 'local-edit' };
+					}
+					// Fall through: collapse rewrite via behind + mergeAbyssBlock.
+				} else {
+					return { behind: false, task, localEdit: true, reason: 'local-edit' };
+				}
 			}
 		}
 
@@ -380,26 +404,35 @@ export class VaultSyncCoordinator {
 		let behind = fieldsDiffer(task);
 		let reason = behind ? 'behind' : 'in-sync';
 		const commentCount = (task as ITask & { commentCount?: number }).commentCount;
-		const vaultThreads = extractAbyssCommentThreads(taskRec.taskLines ?? []).length;
+		const taskLines = taskRec.taskLines ?? [];
+		const vaultThreads = extractAbyssCommentThreads(taskLines).length;
+		const vaultDupKeys = vaultHasDuplicateCommentKeys(taskLines);
 		const commentCountKnown = typeof commentCount === 'number';
 		const commentCountMismatch = commentCountKnown && commentCount !== vaultThreads;
 		const vaultHasUnmappedComments = vaultThreads > 0 && !commentCountKnown;
-		const shouldProbeComments = vaultThreads > 0 || commentCountMismatch || vaultHasUnmappedComments;
+		const shouldProbeComments =
+			vaultThreads > 0 || commentCountMismatch || vaultHasUnmappedComments || vaultDupKeys;
 		if (useAbyssCommentsApi() && remote.projectId && shouldProbeComments) {
 			try {
 				const comments = await this.plugin.tickTickRestAPI?.getTaskComments(remote.projectId, remote.id);
 				// BUG-COMMENT-GET-FAIL-OPEN: unknown remote → no create/delete/map decisions.
 				if (comments === null || comments === undefined) {
 					log.warn('vault comment lookup unknown; skipping comment reconcile', task.id);
+					// Still rewrite vault twins via merge collapse without TT create/delete.
+					if (vaultDupKeys) {
+						behind = true;
+						reason = 'vault-comment-dup-keys';
+					}
 				} else {
-				const commentsNeedSync = apiCommentsDifferFromVault(taskRec.taskLines, comments) || commentCountMismatch;
+				const commentsNeedSync =
+					apiCommentsDifferFromVault(taskLines, comments) || commentCountMismatch || vaultDupKeys;
 				if (commentsNeedSync) {
 					const mapsForProbe = await listCommentMapsForTask(remote.id);
 					// Probe-only empty vault threads must not wipe TT (BUG-COMMENT-EMPTY-VAULT-WIPE).
 					// Intentional clear goes through push.ts with obsidianRemovedCommentBullets.
 					const vaultClearedMapsOnly = vaultThreads === 0 && vaultHadSyncedCommentBullets(mapsForProbe);
-					const remoteAhead = remoteCommentKeysAheadOfVault(taskRec.taskLines ?? [], comments);
-					const vaultAhead = vaultCommentKeysAheadOfRemote(taskRec.taskLines ?? [], comments);
+					const remoteAhead = remoteCommentKeysAheadOfVault(taskLines, comments);
+					const vaultAhead = vaultCommentKeysAheadOfRemote(taskLines, comments);
 					let pushedVaultComments = false;
 					let vaultWantsPush = false;
 					if (vaultClearedMapsOnly) {
@@ -408,7 +441,7 @@ export class VaultSyncCoordinator {
 					} else if (vaultAhead) {
 						const maps = mapsForProbe;
 						vaultWantsPush = vaultHasUnpushedCommentThreads(
-							taskRec.taskLines ?? [],
+							taskLines,
 							comments,
 							maps,
 							commentCount,
@@ -419,7 +452,7 @@ export class VaultSyncCoordinator {
 									this.plugin.tickTickRestAPI,
 									remote.id,
 									remote.projectId,
-									taskRec.taskLines ?? [],
+									taskLines,
 									remote.content,
 								);
 							} catch (e) {
@@ -444,11 +477,21 @@ export class VaultSyncCoordinator {
 						// while vault bullets are still missing from TickTick Comments.
 						log.warn('vault-ahead comment push returned no changes', task.id);
 						return { behind: false, task: remote, localEdit: true, reason: 'vault-comments-ahead' };
+					} else if (vaultDupKeys) {
+						// Keys match TT but vault still has wall-clock+ISO twins — merge rewrite
+						// (BUG-COMMENT-VAULT-DUP-KEY). Do not POST/DELETE on TT.
+						behind = true;
+						reason = 'vault-comment-dup-keys';
+						Object.defineProperty(remote, '_apiComments', { value: comments, enumerable: false, configurable: true });
 					}
 				}
 				}
 			} catch (e) {
 				log.debug('vault comment lookup failed', task.id, e);
+				if (vaultDupKeys) {
+					behind = true;
+					reason = 'vault-comment-dup-keys';
+				}
 			}
 		}
 		return { behind, task: remote, localEdit: false, reason };

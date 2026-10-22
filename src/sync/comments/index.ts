@@ -11,6 +11,7 @@ export {
 	normalizedKeysFromRemote,
 	normalizedKeysFromVaultLines,
 	remoteCommentRef,
+	vaultHasDuplicateCommentKeys,
 	vaultThreadRef,
 } from '@/sync/comments/keys';
 export {

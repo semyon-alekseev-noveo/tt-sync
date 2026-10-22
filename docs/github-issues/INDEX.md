@@ -2,7 +2,7 @@
 
 Tracker issues live on [`semyon-alekseev-noveo/tt-sync`](https://github.com/semyon-alekseev-noveo/tt-sync/issues). Long evidence lives under [`docs/pilot/results/`](../pilot/results/) — not in issue comments.
 
-**Release tip (2026-10-22):** **[2.0.79](https://github.com/semyon-alekseev-noveo/tt-sync/releases/tag/2.0.79)** on `abyss-mapping` (merge [#58](https://github.com/semyon-alekseev-noveo/tt-sync/pull/58)).
+**Release tip (2026-10-22):** **[2.0.79](https://github.com/semyon-alekseev-noveo/tt-sync/releases/tag/2.0.79)** on `abyss-mapping` (merge [#58](https://github.com/semyon-alekseev-noveo/tt-sync/pull/58); smoke docs [#59](https://github.com/semyon-alekseev-noveo/tt-sync/pull/59)). **2.0.80** pending PR (`fix/bug-comment-vault-dup-key-2.0.80`) for #27 quiet-sync collapse.
 
 ## Status table (audit 2026-10-22)
 
@@ -13,10 +13,10 @@ Tracker issues live on [`semyon-alekseev-noveo/tt-sync`](https://github.com/semy
 | BUG-COMMENT-API-POST-500 | [#21](https://github.com/semyon-alekseev-noveo/tt-sync/issues/21) | P0 | **closed / pass** (**2.0.74**) | keep closed |
 | BUG-COMMENT-ABYSS-VIEW | [#23](https://github.com/semyon-alekseev-noveo/tt-sync/issues/23) | P0 | **closed / pass** (**2.0.75**); on tip via **2.0.78** | keep closed |
 | BUG-COMMENT-DUP-STAMP | [#25](https://github.com/semyon-alekseev-noveo/tt-sync/issues/25) | P0 | **closed / pass** (**2.0.76**); on tip via **2.0.78** | keep closed |
-| BUG-COMMENT-VAULT-DUP-KEY | [#27](https://github.com/semyon-alekseev-noveo/tt-sync/issues/27) | P0 | **fix in 2.0.79** (unit); smoke ok; twins still on `task-11-16` | **keep open** — case pilot incomplete |
+| BUG-COMMENT-VAULT-DUP-KEY | [#27](https://github.com/semyon-alekseev-noveo/tt-sync/issues/27) | P0 | **fix in 2.0.80** (quiet sync); pilot pass on PR tip | **keep open** until merge + GitHub release |
 | BUG-COMMENT-EMPTY-VAULT-WIPE | [#28](https://github.com/semyon-alekseev-noveo/tt-sync/issues/28) | P0 | **fix in 2.0.79** (unit); case pilot not run | **keep open** |
 | BUG-COMMENT-GET-FAIL-OPEN | [#29](https://github.com/semyon-alekseev-noveo/tt-sync/issues/29) | P0 | **fix in 2.0.79** (unit); case pilot not run | **keep open** |
-| PILOT-BATCH-EDITOR-SAFETY | [#15](https://github.com/semyon-alekseev-noveo/tt-sync/issues/15) | P0 | **open** (#17/#18/#27–#29 left) | **keep** — install tip **2.0.79** |
+| PILOT-BATCH-EDITOR-SAFETY | [#15](https://github.com/semyon-alekseev-noveo/tt-sync/issues/15) | P0 | **open** (#17/#18/#27–#29 left) | **keep** — install tip **2.0.79**; **2.0.80** pending merge for #27 |
 | └ open-note / editor | [#16](https://github.com/semyon-alekseev-noveo/tt-sync/issues/16) | P0 | **closed / pass** (**2.0.76**) | keep closed |
 | └ EMPTY-SIDE-GUARD | [#17](https://github.com/semyon-alekseev-noveo/tt-sync/issues/17) | P0 | **open** — pilot not run | **keep** |
 | └ deferred-id | [#18](https://github.com/semyon-alekseev-noveo/tt-sync/issues/18) | P0 | **open** — pilot not run | **keep** |

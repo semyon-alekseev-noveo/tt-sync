@@ -340,6 +340,42 @@ function preferCommentThread(a: AbyssCommentThread, b: AbyssCommentThread): numb
 }
 
 /**
+ * Rewrite Abyss child lines collapsing comment twins by `normalizedCommentKey`.
+ * Non-comment children stay; comment threads are collapsed in place at the first comment.
+ */
+export function rewriteAbyssChildrenCollapsingCommentKeys(childLines: string[]): string[] {
+	const kinds = classifyChildren(childLines);
+	const commentIdx = new Set<number>();
+	let inComment = false;
+	for (let i = 0; i < childLines.length; i++) {
+		const k = kinds[i];
+		if (k === 'comment') {
+			inComment = true;
+			commentIdx.add(i);
+		} else if (k === 'cont' && inComment) {
+			commentIdx.add(i);
+		} else {
+			inComment = false;
+		}
+	}
+	if (commentIdx.size === 0) return childLines;
+	const collapsed = collapseAbyssCommentLinesByKey(childLines.filter((_, i) => commentIdx.has(i)));
+	const out: string[] = [];
+	let inserted = false;
+	for (let i = 0; i < childLines.length; i++) {
+		if (commentIdx.has(i)) {
+			if (!inserted) {
+				out.push(...collapsed);
+				inserted = true;
+			}
+			continue;
+		}
+		out.push(childLines[i]);
+	}
+	return out;
+}
+
+/**
  * One Abyss comment bullet per `normalizedCommentKey` (BUG-COMMENT-VAULT-DUP-KEY).
  * Prefers wall-clock stamp over ISO stamp twins.
  */
