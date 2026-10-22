@@ -6,7 +6,7 @@
 - Build: **2.0.80** (`manifest.json` / local `dist/`)
 - Issue: [#27](https://github.com/semyon-alekseev-noveo/tt-sync/issues/27)
 - PR: [#60](https://github.com/semyon-alekseev-noveo/tt-sync/pull/60)
-- Status: **unit pass** + **pilot pass** (local deploy of PR tip; release still pending merge)
+- Status: **unit pass** + **pilot pass**; GitHub release **2.0.80** shipped — see [60-release-2.0.80-smoke.md](60-release-2.0.80-smoke.md)
 
 ## Inputs
 
@@ -47,7 +47,7 @@ Kept lines (one per `normalizedCommentKey`):
 
 ## Conclusion
 
-Quiet sync rewrite works on pilot for #27. Do **not** close #27 until owner merges [#60](https://github.com/semyon-alekseev-noveo/tt-sync/pull/60) and releases **2.0.80** from `abyss-mapping` (PROC-RELEASE-GATE).
+Quiet sync rewrite works on pilot for #27. Merge + release **2.0.80** completed; post-release smoke in [60-release-2.0.80-smoke.md](60-release-2.0.80-smoke.md).
 
 ## Checklist
 
@@ -55,4 +55,4 @@ Quiet sync rewrite works on pilot for #27. Do **not** close #27 until owner merg
 - [x] Fix in `VaultSyncCoordinator.vaultLineBehindTask`
 - [x] Bump **2.0.80**; `TEST_PLAN.md` + `CHANGELOG.md`
 - [x] Pilot Synchronize collapse on `task-11-16` (local PR tip)
-- [ ] GitHub release **2.0.80** after merge (owner)
+- [x] GitHub release **2.0.80** after merge (`e13c195`)

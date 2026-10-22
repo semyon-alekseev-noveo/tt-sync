@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-22 11:30 UTC
+
+- Context: Owner merged [#60](https://github.com/semyon-alekseev-noveo/tt-sync/pull/60); release **2.0.80** from `abyss-mapping` tip (PROC-RELEASE-GATE).
+- Target: One tag at merge commit; vitest+build; pilot deploy; close #27; leave #28/#29 open unless case-verified.
+- Actions log: Fetched `abyss-mapping` @ `e13c195`; vitest+build; tagged `2.0.80` once; GitHub release with assets; deployed release to Thinkpad-tts-test; Synchronize; evidence `60-release-2.0.80-smoke.md`; PO install pointer → **2.0.80**.
+- Validation: `npx vitest run` → **100** files, **701** passed; `npm run build` → ok; plugin **2.0.80**; `task-11-16` stays **4** Abyss bullets (no ISO twins).
+- Problems: #28/#29 case pilots still **not run** — issues stay open (`open`).
+- To Be Done: Case-specific pilot for #28/#29 when fixtures exist; continue #15 (#17/#18).
+- References: https://github.com/semyon-alekseev-noveo/tt-sync/releases/tag/2.0.80, `docs/pilot/results/PILOT-BATCH-EDITOR-SAFETY/60-release-2.0.80-smoke.md`, `CHANGELOG.md`
+
 ### Iteration 2026-10-22 10:58 UTC
 
 - Context: After release **2.0.79**, pilot `task-11-16` still had ~21 Abyss comment twins; #27 stayed open (merge collapse never ran on quiet sync).
