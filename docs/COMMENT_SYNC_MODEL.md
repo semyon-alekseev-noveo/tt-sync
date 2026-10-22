@@ -2,7 +2,7 @@
 
 **Status:** Wired — `apiCommentsDifferFromVault`, `syncAbyssCommentsToTickTick`, and `mergeAbyssBlock` deletion hints use `normalizedCommentKey` / `planCommentSync`.
 
-**Related:** `ABYSS_NOTES_ALIGNMENT.md`, `docs/SYNC_MODULARIZATION.md` (future `sync/comments` module owner).
+**Related:** `ABYSS_NOTES_ALIGNMENT.md`, `docs/SYNC_MODULARIZATION.md` (`sync/comments` owns keys/plan; push still via `vault-push` / TMD; orchestrator phases in `src/sync/phases/*`).
 
 ## Wire formats
 

@@ -1,5 +1,25 @@
 # Changelog
 
+### Iteration 2026-10-22 03:28 UTC
+
+- Context: Resume #31 after prior agent disconnect; PR 1 extract already on `feat/tech-sync-modularization-pr1`.
+- Target: Re-verify gate, open PR into `abyss-mapping`, comment evidence on #31.
+- Actions log: Re-ran vitest + build; opened PR #34; commented on #31 with module map + next slice.
+- Validation: `npx vitest run` → **97** files, **685** passed; `npm run build` → ok.
+- Problems: - No changes
+- To Be Done: Owner merges #34; next slice = PR 2 lifecycle (`runVaultDeletionPhase` out of `syncFiles`).
+- References: https://github.com/semyon-alekseev-noveo/tt-sync/pull/34, `docs/pilot/results/TECH-SYNC-MODULARIZATION/`, `CHANGELOG.md`
+
+### Iteration 2026-10-22 03:15 UTC
+
+- Context: Epic #31 TECH-SYNC-MODULARIZATION — sync takes ~45s on pilot; god `TickTickService` blocks safe perf/fix slices.
+- Target: PR 1 extract-only — move `synchronizationInner` phase bodies into `src/sync/phases/*` with no behavior change.
+- Actions log: Added projects/register/deletionGuard/push/pull/vaultReconcile/subtasks/syncFiles phase modules; thinned orchestrator; wired `SyncRunContext.projects` / `pushSinceMs` / `guardedPull`; updated SYNC_MODULARIZATION, ANALYST_REFERENCE_DIAGRAMS, PROJECT_STATE; wrote `docs/pilot/results/TECH-SYNC-MODULARIZATION/`.
+- Validation: `npx vitest run` → **97** files, **685** passed; `npm run build` → ok (`dist/main.js`).
+- Problems: - No changes
+- To Be Done: PR into `abyss-mapping`; comment #31; next slice = lifecycle extract from `syncFiles` (PR 2).
+- References: `docs/SYNC_MODULARIZATION.md`, `docs/pilot/results/TECH-SYNC-MODULARIZATION/`, `CHANGELOG.md`
+
 ### Iteration 2026-10-21 14:05 UTC
 
 - Context: Owner asked to commit, push feature branch, and publish BRAT release **2.0.74**.

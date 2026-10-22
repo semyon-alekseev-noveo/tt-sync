@@ -34,4 +34,5 @@ Use the **GitHub issue number** prefix so issue ↔ file is obvious.
 
 | Gate ID | Index |
 |---------|--------|
+| `TECH-SYNC-MODULARIZATION` | [`TECH-SYNC-MODULARIZATION/INDEX.md`](TECH-SYNC-MODULARIZATION/INDEX.md) |
 | `PILOT-GATE-TEST-11-12` | [`PILOT-GATE-TEST-11-12/INDEX.md`](PILOT-GATE-TEST-11-12/INDEX.md) |
