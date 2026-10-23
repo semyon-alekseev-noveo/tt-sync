@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-23 07:39 UTC
+
+- Context: Owner merged [#95](https://github.com/semyon-alekseev-noveo/tt-sync/pull/95) (PERF/DELTA slice 4 empty-sweep / #94); tip still **2.0.83** — need bump before tag (PROC-RELEASE-GATE #30).
+- Target: Bump **2.0.84** on a release PR into `abyss-mapping`; tag/release only after owner merges.
+- Actions log: Branch `chore/release-2.0.84` from merge tip `3242405`; `npm version 2.0.84`; PO/PROJECT_STATE install pointers; no behavior change beyond #95 already on tip.
+- Validation: `npx vitest run` → **101** files, **712** passed; `npm run build` → ok (`manifest.json` **2.0.84**).
+- Problems: GitHub release **2.0.84** blocked on merge (`open` until owner); live `#85` re-pilot still pending — do not invent.
+- To Be Done: Owner merges this PR; then tag **2.0.84** once on `abyss-mapping` tip; update plugin; `#85` re-pilot; leave epic #62 open.
+- References: https://github.com/semyon-alekseev-noveo/tt-sync/pull/95, https://github.com/semyon-alekseev-noveo/tt-sync/issues/62, #94, #85, `CHANGELOG.md`
+
 ### Iteration 2026-10-23 07:05 UTC
 
 - Context: After **2.0.83** live quiet still ~**871** `getTaskComments` (`PERF-DELTA/83-idle-zero-2.0.83.md`); many are empty Abyss threads / double hash-unchanged+file-sweep calls (#94).

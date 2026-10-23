@@ -4,7 +4,7 @@
 **Audience:** Product owner / decision maker  
 **Repo:** `tickticksync` branch `abyss-mapping`  
 **Test vault:** `<pilot-vault>` (copy only; live vault `<live-vault>` untouched)  
-**Install:** BRAT → `https://github.com/semyon-alekseev-noveo/tt-sync` track **latest release** (**2.0.83** after bump PR merges + tag); plugin id **`tickticksync-abyss`** — `docs/BRAT_INSTALL.md`. Preset: `00 Inbox/TTS-data-preset.json`. Until then tip still serves **2.0.82**.
+**Install:** BRAT → `https://github.com/semyon-alekseev-noveo/tt-sync` track **latest release** (**2.0.84** after bump PR merges + tag); plugin id **`tickticksync-abyss`** — `docs/BRAT_INSTALL.md`. Preset: `00 Inbox/TTS-data-preset.json`. Until then tip still serves **2.0.83**.
 
 История изменений — только в `CHANGELOG.md`; здесь — снимок для PO.
 
@@ -25,7 +25,8 @@
 
 ## Validation
 
-- Релиз **2.0.83** (pending bump merge): PERF/DELTA slice 3 from [#91](https://github.com/semyon-alekseev-noveo/tt-sync/pull/91) (#83) — stop double comment-sweep / `TP-IDLE-MANUAL-SCOPE`. Epic [#62](https://github.com/semyon-alekseev-noveo/tt-sync/issues/62) stays open; #85 re-pilot after tag.
+- Релиз **2.0.84** (pending bump merge): PERF/DELTA slice 4 from [#95](https://github.com/semyon-alekseev-noveo/tt-sync/pull/95) (#94) — empty-thread skip + `deferCommentSweep` / `TP-IDLE-EMPTY-SWEEP`. Epic [#62](https://github.com/semyon-alekseev-noveo/tt-sync/issues/62) stays open; #85 re-pilot after tag.
+- Релиз **2.0.83** (2026-10-23): PERF/DELTA slice 3 from [#91](https://github.com/semyon-alekseev-noveo/tt-sync/pull/91) (#83) — stop double comment-sweep / `TP-IDLE-MANUAL-SCOPE`. Live quiet comments **871** (`PERF-DELTA/83-idle-zero-2.0.83.md`); idle-zero still fail.
 - Релиз **2.0.82** (2026-10-23): PERF/DELTA slice 2 from [#88](https://github.com/semyon-alekseev-noveo/tt-sync/pull/88) (#82) — `commentCount` backfill + idle-fast sync / `preparePersistNetwork` gate. Live `TP-IDLE-ZERO` **fail** (`getTaskComments` **1741**; `PERF-DELTA/82-idle-zero-2.0.82.md`).
 - Релиз **2.0.81** (2026-10-23): PERF/DELTA slice 1 from [#79](https://github.com/semyon-alekseev-noveo/tt-sync/pull/79) — idle skip `getTaskComments` when vault threads already match `commentCount`. Live `TP-IDLE-ZERO` **fail** (1757 comment GETs; `PERF-DELTA/81-idle-zero-2.0.81.md`).
 - Релиз **2.0.80** (2026-10-22): **BUG-COMMENT-VAULT-DUP-KEY** (#27) quiet-sync rewrite; merge [#60](https://github.com/semyon-alekseev-noveo/tt-sync/pull/60); Vitest **701**. Pilot `task-11-16` stays **4** bullets after release deploy (`docs/pilot/results/PILOT-BATCH-EDITOR-SAFETY/60-release-2.0.80-smoke.md`). #27 closed; #28/#29 stay open (unit-only).
