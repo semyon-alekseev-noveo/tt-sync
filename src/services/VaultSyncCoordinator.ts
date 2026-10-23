@@ -410,8 +410,11 @@ export class VaultSyncCoordinator {
 		const commentCountKnown = typeof commentCount === 'number';
 		const commentCountMismatch = commentCountKnown && commentCount !== vaultThreads;
 		const vaultHasUnmappedComments = vaultThreads > 0 && !commentCountKnown;
+		// TP-IDLE-ZERO / docs/TICKTICK_DELTA_API.md §3.2: do not GET comments merely because
+		// the vault already has threads. Probe only on count mismatch, unknown count with
+		// vault threads, or stamp twins (vaultDupKeys). Matched count + clean keys → idle skip.
 		const shouldProbeComments =
-			vaultThreads > 0 || commentCountMismatch || vaultHasUnmappedComments || vaultDupKeys;
+			commentCountMismatch || vaultHasUnmappedComments || vaultDupKeys;
 		if (useAbyssCommentsApi() && remote.projectId && shouldProbeComments) {
 			try {
 				const comments = await this.plugin.tickTickRestAPI?.getTaskComments(remote.projectId, remote.id);
