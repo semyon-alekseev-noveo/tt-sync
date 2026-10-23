@@ -339,28 +339,52 @@ Implemented from `docs/TICKTICK_DELTA_API.md` §3.2 before the §3.5 pilot, on t
 
 **#62 slice 1:** removed the `vaultThreads > 0` always-probe branch in `vaultLineBehindTask`. Matched `commentCount` + clean keys → no reconcile GET.
 
-**#62 slice 2 (this PR / [#82](https://github.com/semyon-alekseev-noveo/tt-sync/issues/82)):** (1) pull echo-skip **backfills** missing Dexie `commentCount` from delta; (2) `syncAbyssCommentsToTickTick` idle-fast skip when count matches + maps cover; (3) `preparePersistNetwork` skips `getTaskComments` on the same predicate. Does **not** remove double-sweep (#83). Case ID: `TP-IDLE-ZERO-SWEEP`.
+**#62 slice 2 ([#82](https://github.com/semyon-alekseev-noveo/tt-sync/issues/82) / **2.0.82**):** (1) pull echo-skip **backfills** missing Dexie `commentCount` from delta; (2) `syncAbyssCommentsToTickTick` idle-fast skip when count matches + maps cover; (3) `preparePersistNetwork` skips `getTaskComments` on the same predicate. Case ID: `TP-IDLE-ZERO-SWEEP`.
 
-1. Install a build that contains slice 2. Prefer notes whose Dexie `commentCount` is populated (after one full sync or backfill) and matches vault threads with covering maps. Do not edit the vault. Run **Synchronize** twice.
+**#62 slice 3 (this PR / [#83](https://github.com/semyon-alekseev-noveo/tt-sync/issues/83)):** stop double comment-sweep on quiet/manual sync. Case ID: `TP-IDLE-MANUAL-SCOPE`.
+
+1. Install a build that contains slice 2 (+ slice 3 when testing double-sweep). Prefer notes whose Dexie `commentCount` is populated (after one full sync or backfill) and matches vault threads with covering maps. Do not edit the vault. Run **Synchronize** twice.
 2. Read the `[perf]` line.
 
-Expected (unit): matched idle tasks → no `getTaskComments` from sync or preparePersist. Expected (live): `getTaskComments` sharply down vs **1757** on **2.0.81**; remaining GETs may still come from double-sweep until #83. Do **not** mark `TP-IDLE-ZERO` pass while quiet probes stay in the thousands.
+Expected (unit): matched idle tasks → no `getTaskComments` from sync or preparePersist. Expected (live, after release): `getTaskComments` sharply down vs **1757** on **2.0.81** / **1741** on **2.0.82**; remaining GETs after slice 3 should be ~one vault pass (not ~2×). Do **not** mark `TP-IDLE-ZERO` pass until re-pilot (#85).
 
 | ID | Pilot status | Evidence |
 |----|----------------|----------|
-| TP-IDLE-ZERO | **fail** (**2.0.82**; also **2.0.81**) | Automated still pass. Live quiet ×2 on **2.0.82**: `getTaskComments` **1741** / `getTaskById` **68** / `vaultWrites` 0 (`batch/check` 2) — only −16 comments vs 1757 on 2.0.81. Evidence: `docs/pilot/results/PERF-DELTA/82-idle-zero-2.0.82.md` (prior: `81-idle-zero-2.0.81.md`). Tracker [#85](https://github.com/semyon-alekseev-noveo/tt-sync/issues/85) stays open; next likely [#83](https://github.com/semyon-alekseev-noveo/tt-sync/issues/83). |
-| TP-IDLE-ZERO-SWEEP | not run live (unit pass) | Vitest: `abyssCommentSync.test.ts`, `pull_field_mapping.test.ts`, `preparePersistNetworkIdle.test.ts`. Live idle still fail on 2.0.82 (above). |
+| TP-IDLE-ZERO | **fail** (**2.0.81** / **2.0.82**) | Automated still pass. Live quiet ×2 on **2.0.82**: `getTaskComments` **1741** / `getTaskById` **68** / `vaultWrites` 0 (`batch/check` 2) — only −16 comments vs 1757 on 2.0.81. Evidence: `docs/pilot/results/PERF-DELTA/82-idle-zero-2.0.82.md` (also `81-idle-zero-2.0.81.md`). Re-pilot after #83: [#85](https://github.com/semyon-alekseev-noveo/tt-sync/issues/85). |
+| TP-IDLE-ZERO-SWEEP | not run live (unit pass) | Vitest: `abyssCommentSync.test.ts`, `pull_field_mapping.test.ts`, `preparePersistNetworkIdle.test.ts`. Live idle still fail on 2.0.82. |
+
+## TP-IDLE-MANUAL-SCOPE — quiet manual does not double-sweep comments
+
+**#62 slice 3 / [#83](https://github.com/semyon-alekseev-noveo/tt-sync/issues/83).** After slice 2, quiet manual still ~2× comment GETs vs startup (`phaseMs.push` + `syncFiles` each ~full sweep). Policy:
+
+1. `pathsForPrePullPush` on manual sync = **edited-since `lastVaultPushWallMs` + active in-scope note** only (no full-vault expand). Supersedes **BUG-COMMENT-MANUAL-PRE-PULL**.
+2. `syncFiles` skips `checkFileForModifications` (and thus `sweepAbyssCommentsInFile`) for paths already in that run’s `ctx.locallyEdited` (pre-pull set).
+3. **BUG-COMMENT-NO-PUSH** / **NOTE-L3b** / **BUG-COMMENT-ACTIVE-NOTE** still apply for files that actually changed (mtime / edited set / active leaf). Quiet files get one sweep in `syncFiles`, not two.
+
+### Steps (manual)
+
+1. Build with slice 3 (no vault edits). Open an in-scope note or none. **Synchronize** once; read `[perf]`.
+2. Add a child comment under a task on a **saved** note (or the active leaf), **Synchronize**. Confirm TickTick Comments has the text (NOTE-L3b / BUG-COMMENT-NO-PUSH).
+
+Expected: quiet run comment GETs ≈ one vault pass (~startup order), not ~2×. Comment-only edit still reaches Comments API. Do **not** invent `TP-IDLE-ZERO` pass — leave #85 for re-pilot after release.
+
+Automated: `pushLocalPaths.test.ts`, `TickTickService.test.ts` (`TP-IDLE-MANUAL-SCOPE`); `bugCommentNoPush.test.ts` must stay green.
+
+| ID | Pilot status | Evidence |
+|----|----------------|----------|
+| TP-IDLE-MANUAL-SCOPE | not run live (unit pass) | Vitest named by ID. Live: after merge/release via #85. |
+| BUG-COMMENT-NO-PUSH | residual soak | Must not regress; #65 soak on tip after release. |
 
 ## After §3.5 (`docs/TICKTICK_DELTA_API.md` §3.2)
 
 Items 1 and 2 shipped in **2.0.53** from the §3.2 defaults, before the §3.5 pilot. Treating them as future work is outdated. The four `TP-DELTA-*` rows above are still **not run**, and `skipPushWhenTickTickRenamedVaultLine` is already off in **2.0.53** without that evidence. Items 3–5 are not started. `syncTaskBean.add` is already merged in `getUpdatedTasks`.
 
 1. **Echo. Done in 2.0.53.** `pull.ts` skips a delta row only when `rt.etag === local.task.etag`. `skipPushWhenTickTickRenamedVaultLine` no longer calls `getTaskById`. Still open: persist `id2etag` from `batch/task` without the follow-up `getTaskById` inside `TicktickRestAPI.updateTask`.
-2. **Idle vault. Done in 2.0.53; comment idle cut restored in #62 slice 1; push/persist idle-fast in slice 2.** `vaultLineBehindTask` compares the line to Dexie. `syncAbyssCommentsToTickTick` / `preparePersistNetwork` skip GET when `commentCount` matches + maps cover (`TP-IDLE-ZERO-SWEEP`). Pull echo-skip backfills missing `commentCount`. Double-sweep still open (#83). Pilot **TP-IDLE-ZERO** on **2.0.81** and **2.0.82** = **fail** (1741 comment GETs on 2.0.82); #85 stays open.
+2. **Idle vault. Done in 2.0.53; comment idle cut restored in #62 slice 1; push/persist idle-fast in slice 2; double-sweep cut in slice 3.** `vaultLineBehindTask` compares the line to Dexie. `syncAbyssCommentsToTickTick` / `preparePersistNetwork` skip GET when `commentCount` matches + maps cover (`TP-IDLE-ZERO-SWEEP`). Pre-pull is edited+active only; `syncFiles` skips already-swept paths (`TP-IDLE-MANUAL-SCOPE` / #83). Pilot **TP-IDLE-ZERO** on **2.0.81**/**2.0.82** = **fail** (1741 on 2.0.82); re-pilot #85 after #83 release.
 3. **Comments. Not started.** A TickTick-only comment that changes neither `etag`, `commentCount`, nor `update[]` is not left to a daily reconcile. Confirm that delay on the §3.5 pilot (#84) before coding it.
 4. **Closed and trash. Not started.** `project/all/closed` and trash pagination are not a daily job.
 5. **Daily job. Not started.** Closed window, trash, comment backfill, and one `batch/check/0` compare are not implemented.
-6. **Tests.** `TP-IDLE-ZERO`, `TP-IDLE-ZERO-SWEEP`, and `TP-ECHO-ETAG` exist and pass in vitest. Live idle / delta pilots still open (#84/#85). `TP1-QUIET-TITLE-ETAG`, `TP-COMMENT-COUNT`, and `TP-DAILY-RECONCILE` are not implemented.
+6. **Tests.** `TP-IDLE-ZERO`, `TP-IDLE-ZERO-SWEEP`, `TP-IDLE-MANUAL-SCOPE`, and `TP-ECHO-ETAG` exist and pass in vitest. Live idle / delta pilots still open (#84/#85). `TP1-QUIET-TITLE-ETAG`, `TP-COMMENT-COUNT`, and `TP-DAILY-RECONCILE` are not implemented.
 
 ## PR — mass-deletion / empty-side guard
 
@@ -634,7 +658,7 @@ Automated: `pushLocalPaths.test.ts` (`BUG-COMMENT-ACTIVE-NOTE`).
 | BUG-COMMENT-NO-TT-WIPE | not run | Pilot: sync cleared all TT Comments; fixed stamp/plain fingerprint + no wipe when vault has no comment lines. `abyssCommentSync.test.ts`. |
 | BUG-COMMENT-KEY-EQUIV | not run | `commentSyncModel.test.ts`; `apiCommentsDifferFromVault` + push via `planCommentSync`. |
 | BUG-COMMENT-MERGE-NO-STRIP | not run | `abyssStep3.test.ts`; empty Comments API + unknown `commentCount` must not strip vault bullets on pull merge. |
-| BUG-COMMENT-MANUAL-PRE-PULL | not run | `pushLocalPaths.test.ts`; manual sync pre-pull includes all in-scope registered paths. |
+| BUG-COMMENT-MANUAL-PRE-PULL | superseded | Replaced by **TP-IDLE-MANUAL-SCOPE** (#83): pre-pull = edited + active only. |
 | BUG-COMMENT-VAULT-AHEAD | pass | Gate **2.0.74** Phase 3b: `test-11-12` (`6ad83bc…`) / `00 Inbox/2026-10-21.md` → TT Comments **`comment 1`**, **`test-new-verision`**. Evidence: `16-phase-3b-verify.md`. (Earlier probe unit coverage from **2.0.68**.) |
 | PILOT-GATE-TEST-11-12 | pass | **2.0.74** Phase 3b Comments criterion. Evidence: `docs/pilot/results/PILOT-GATE-TEST-11-12/16-phase-3b-verify.md` (also `15-phase-2b-post-fix.md`). |
 | BUG-COMMENT-NO-MASS-DELETE | not run | **2.0.61**: add 3rd Abyss comment on `2026-10-19.md` / `6ad83d…` — existing TT Comments must remain; journal must not show `deleteTaskComment` storm. `abyssCommentSync.test.ts`. |

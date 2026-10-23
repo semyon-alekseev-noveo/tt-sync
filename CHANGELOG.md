@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-23 05:42 UTC
+
+- Context: Live `TP-IDLE-ZERO` still **fail** on **2.0.82** (`getTaskComments` 1741 ≈ 2× startup); epic #62 slice 3 = stop double-sweep (#83).
+- Target: Quiet/manual Synchronize must not full-vault comment-sweep twice; keep BUG-COMMENT-NO-PUSH for edited/active; no version bump.
+- Actions log: Narrowed `pathsForPrePullPush` (drop manual all-paths); `syncFiles` skips mods for `ctx.locallyEdited`; cases `TP-IDLE-MANUAL-SCOPE`; evidence `PERF-DELTA/83-slice3-manual-scope.md`; brought `82-idle-zero-2.0.82.md` onto tip docs.
+- Validation: `npx vitest run` + `npm run build` (see PR); `bugCommentNoPush.test.ts` green.
+- Problems: Live idle still open (#85) — do not invent pass; residual NO-PUSH soak on tip (#65).
+- To Be Done: Owner merges this PR; bump/release; #85 re-pilot; leave #62 open.
+- References: https://github.com/semyon-alekseev-noveo/tt-sync/issues/83, #62, #85, `docs/pilot/results/PERF-DELTA/83-slice3-manual-scope.md`, `CHANGELOG.md`
+
 ### Iteration 2026-10-23 04:47 UTC
 
 - Context: Owner installed **2.0.82** on pilot; #85 asked for live `TP-IDLE-ZERO` re-measure after slice 2.

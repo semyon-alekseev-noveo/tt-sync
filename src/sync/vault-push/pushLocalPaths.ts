@@ -15,20 +15,20 @@ export function activeMarkdownPathInPushScope(app: App): string | undefined {
  * Files to run through pre-pull push (`checkFileForModifications` + comment sweep).
  * Includes mtime-edited paths and the active in-scope note so comment-only edits
  * on an open leaf still reach the Comments API when disk mtime did not move (BUG-COMMENT-ACTIVE-NOTE).
+ *
+ * TP-IDLE-MANUAL-SCOPE (#83): do **not** expand to every registered path on manual
+ * sync — that doubled the vault comment sweep with `syncFiles`. Quiet Synchronize
+ * sweeps only edited + active here; `syncFiles` covers the rest once.
+ * `opts.manualSync` is accepted for callers but no longer changes the set.
  */
 export function pathsForPrePullPush(
 	app: App,
 	registeredPaths: string[],
 	since: number,
-	opts?: { manualSync?: boolean },
+	_opts?: { manualSync?: boolean },
 ): string[] {
 	const out = new Set(editedSince(app, registeredPaths, since));
 	const active = activeMarkdownPathInPushScope(app);
 	if (active && registeredPaths.includes(active)) out.add(active);
-	if (opts?.manualSync) {
-		for (const p of registeredPaths) {
-			if (isPathInPushScope(p)) out.add(p);
-		}
-	}
 	return [...out];
 }
