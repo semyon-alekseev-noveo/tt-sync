@@ -328,10 +328,10 @@ Expected: closed task may appear as `update` with `status` 2 or -1; deleted id i
 
 | ID | Pilot status | Evidence |
 |----|----------------|----------|
-| TP-DELTA-MCP-RENAME | not run | |
-| TP-DELTA-APP-RENAME | not run | |
-| TP-DELTA-COMMENT | not run | |
-| TP-DELTA-CLOSE-DELETE | not run | |
+| TP-DELTA-MCP-RENAME | not run | Deferred with epic [#62](https://github.com/semyon-alekseev-noveo/tt-sync/issues/62) close → [#84](https://github.com/semyon-alekseev-noveo/tt-sync/issues/84). Do not invent pass. |
+| TP-DELTA-APP-RENAME | not run | Same — #84. |
+| TP-DELTA-COMMENT | not run | Same — #84 (does TT-app comment bump `commentCount` / `etag` / `update[]`?). |
+| TP-DELTA-CLOSE-DELETE | not run | Same — #84. |
 
 ## TP-IDLE-ZERO — quiet sync does not probe each task
 

@@ -27,7 +27,8 @@ Tracker issues live on [`semyon-alekseev-noveo/tt-sync`](https://github.com/semy
 | └ PR1–PR7 | [#41](https://github.com/semyon-alekseev-noveo/tt-sync/issues/41)–[#48](https://github.com/semyon-alekseev-noveo/tt-sync/issues/48) | P1 | **closed** → PRs #34–#40 | keep closed |
 | SEC-CREDS-1 | [#32](https://github.com/semyon-alekseev-noveo/tt-sync/issues/32) | P1 | **open** — owner revoke + autologin decision | **keep** (pre–Step 8) |
 | Repo hygiene backlog | [#33](https://github.com/semyon-alekseev-noveo/tt-sync/issues/33) | P3 | **open** / backlog | **keep** — do not pick up before #15/#20 |
-| **PERF/DELTA** (wall-time + delta path) | [#62](https://github.com/semyon-alekseev-noveo/tt-sync/issues/62) | **P0** | **open** — idle-zero **pass** on **2.0.85**; remaining `#84` `TP-DELTA-*` / P2; evidence `PERF-DELTA/85-idle-zero-2.0.85.md` | **active** 2026-10-23 |
+| **PERF/DELTA** (wall-time + delta path) | [#62](https://github.com/semyon-alekseev-noveo/tt-sync/issues/62) | **P0** | **closed** — idle/wall-time on **2.0.85**; `TP-DELTA-*` → #84; evidence `PERF-DELTA/62-epic-close.md` | **done** 2026-10-23 |
+| Post-PERF regression | [#102](https://github.com/semyon-alekseev-noveo/tt-sync/issues/102) | P1 | **open** — after #62 close | **next** 2026-10-23 |
 | └ Slice 2 commentCount / idle-fast / preparePersist | [#82](https://github.com/semyon-alekseev-noveo/tt-sync/issues/82) | P0 | **closed** — **2.0.82** | keep closed |
 | └ Slice 3 stop double-sweep | [#83](https://github.com/semyon-alekseev-noveo/tt-sync/issues/83) | P0 | **closed** — **2.0.83**; live partial (~½ GETs) | keep closed if GH closed |
 | └ Slice 4 empty-thread skip | [#94](https://github.com/semyon-alekseev-noveo/tt-sync/issues/94) | P0 | **closed** — **2.0.84**; live comments **0** | keep closed |
