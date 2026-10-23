@@ -2,13 +2,23 @@
 
 ### Iteration 2026-10-23 07:05 UTC
 
-- Context: After **2.0.83** (slice 3), quiet sync still ~**871** `getTaskComments`; many are empty Abyss threads / double hash-unchanged+file-sweep calls (#94).
+- Context: After **2.0.83** live quiet still ~**871** `getTaskComments` (`PERF-DELTA/83-idle-zero-2.0.83.md`); many are empty Abyss threads / double hash-unchanged+file-sweep calls (#94).
 - Target: Skip Comments GET when threads+maps empty; defer per-line comment sync on full-file checks to `sweepAbyssCommentsInFile`; no version bump.
 - Actions log: `canSkipAbyssCommentNetwork` empty-fast; `deferCommentSweep` in `scan.ts`; cases `TP-IDLE-EMPTY-SWEEP`; evidence `PERF-DELTA/94-slice4-empty-sweep.md`; TEST_PLAN / ABYSS / INDEX / PROJECT_STATE.
 - Validation: `npx vitest run` → **101** files, **712** passed; `npm run build` → ok.
 - Problems: Live idle still open (#85) — do not invent pass; leave epic #62 open.
 - To Be Done: Owner merges this PR; bump/release; #85 re-pilot; leave #62 open.
 - References: https://github.com/semyon-alekseev-noveo/tt-sync/issues/94, #62, #85, `docs/pilot/results/PERF-DELTA/94-slice4-empty-sweep.md`, `CHANGELOG.md`
+
+### Iteration 2026-10-23 06:54 UTC
+
+- Context: Owner installed **2.0.83**; #85 asked for live `TP-IDLE-ZERO` after slice 3 double-sweep.
+- Target: Quiet sync ×2 on Thinkpad-tts-test; record real `[perf]`; update `TEST_PLAN` honestly; PR into `abyss-mapping`.
+- Actions log: Obsidian CLI reload + `tts-sync` ×2; `[perf]` hook; wrote `PERF-DELTA/83-idle-zero-2.0.83.md` + INDEX; updated `TEST_PLAN` / `ABYSS_FIRST_CASES` / PROJECT_STATE / issues INDEX.
+- Validation: Quiet1/Quiet2: `getTaskComments` **871**, `getTaskById` **44**, `vaultWrites` 0, `batch/check` 2, `totalMs` ~250–276 s (`phaseMs.push` ~30 ms); vs 2.0.82 quiet **1741** / ~475 s.
+- Problems: Idle-zero still **fail** (871≠0) — remaining `syncFiles` sweep (`open` on #85/#62); do not invent pass.
+- To Be Done: Owner merges docs PR; next idle cuts / #84; leave epic #62 open.
+- References: https://github.com/semyon-alekseev-noveo/tt-sync/issues/85, #62, #83, `docs/pilot/results/PERF-DELTA/83-idle-zero-2.0.83.md`, `CHANGELOG.md`
 
 ### Iteration 2026-10-23 06:04 UTC
 

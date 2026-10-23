@@ -134,7 +134,8 @@ Pass only with evidence: the note path, the `ticktick_id`, and either the journa
 | 2026-10-23 | Thinkpad-tts-test | 2.0.81 | agent | TP-IDLE-ZERO | fail | Quiet ×2: `getTaskComments` **1757** / `getTaskById` **68**. Evidence: `docs/pilot/results/PERF-DELTA/81-idle-zero-2.0.81.md`. |
 | 2026-10-23 | unit | tip (#82) | agent | TP-IDLE-ZERO-SWEEP | pass (unit) | commentCount backfill + idle-fast sync/preparePersist; live still fail on 2.0.82. |
 | 2026-10-23 | Thinkpad-tts-test | 2.0.82 | agent | TP-IDLE-ZERO | fail | Quiet ×2: `getTaskComments` **1741** / `getTaskById` **68** (−16 vs 81). Evidence: `docs/pilot/results/PERF-DELTA/82-idle-zero-2.0.82.md`. #85 open; next #83. |
-| 2026-10-23 | unit | tip (#83) | agent | TP-IDLE-MANUAL-SCOPE | pass (unit) | Narrow pre-pull + skip syncFiles re-sweep; live re-pilot **not run** (#85). |
+| 2026-10-23 | unit | tip (#83) | agent | TP-IDLE-MANUAL-SCOPE | pass (unit) | Narrow pre-pull + skip syncFiles re-sweep. |
+| 2026-10-23 | Thinkpad-tts-test | 2.0.83 | agent | TP-IDLE-ZERO / TP-IDLE-MANUAL-SCOPE | fail / partial | Quiet ×2: comments **871** (~½ of 1741), `totalMs` ~250–276 s, `push` ~30 ms. Evidence: `PERF-DELTA/83-idle-zero-2.0.83.md`. #85 open. |
 | 2026-10-23 | unit | tip (#94) | agent | TP-IDLE-EMPTY-SWEEP | pass (unit) | Empty-thread skip + deferCommentSweep; live re-pilot **not run** (#85). |
 | | `<live-vault>` | | | Step 8 | not run | Blocked until the four rows above are pass. |
 

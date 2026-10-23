@@ -12,7 +12,7 @@
 
 ## Inputs
 
-- Post-slice 3 baseline on **2.0.83**: quiet `getTaskComments` ~**871** (one vault pass vs ~1741 on 2.0.82).
+- Live baseline on **2.0.83**: [83-idle-zero-2.0.83.md](83-idle-zero-2.0.83.md) — quiet `getTaskComments` **871** (one vault pass vs **1741** on 2.0.82).
 - Analyst: [62-analyst-dual-brief.md](62-analyst-dual-brief.md) — residual GETs include empty-comment tasks.
 - Slice 3 unit: [83-slice3-manual-scope.md](83-slice3-manual-scope.md).
 
