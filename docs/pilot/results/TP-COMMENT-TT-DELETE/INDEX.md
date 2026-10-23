@@ -6,5 +6,6 @@ Gate for GitHub [#104](https://github.com/semyon-alekseev-noveo/tt-sync/issues/1
 |-------|------|--------|
 | Unit fix + policy | [104-unit-fix.md](104-unit-fix.md) | **pass (unit)** |
 | Live on **2.0.86** | [104-live-2.0.86.md](104-live-2.0.86.md) | **fail** — `flushActiveFilePush` re-POST after `behindComments` |
+| Analyst residual | [104-analyst-hypothesis.md](104-analyst-hypothesis.md) | H1–H3 **unit green**; live re-pilot pending release |
 
 Do not mark `TEST_PLAN` / `ABYSS_FIRST_CASES` live **pass** until a Thinkpad-tts-test run is **pass**.

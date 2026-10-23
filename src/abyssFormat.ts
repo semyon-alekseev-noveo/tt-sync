@@ -200,8 +200,10 @@ function commentLinesDeletedInTickTick(oldChild: string[], generatedComments: st
 	const skip = new Set<number>();
 	if (!known.size) return skip;
 	const api = new Set(ticktick.apiBodies.map(normalizedCommentKey).filter(fp => fp.length > 0));
-	// Empty API list without an explicit zero count is ambiguous (failed fetch or not yet pushed).
-	if (!api.size && ticktick.remoteCommentCount !== 0) return skip;
+	// Empty API without a loaded count is ambiguous (failed fetch) — BUG-COMMENT-MERGE-NO-STRIP /
+	// BUG-COMMENT-GET-FAIL-OPEN. A numeric count (even stale >0) with a successful empty GET still
+	// means TT deleted those known bodies (TP-COMMENT-TT-DELETE / H2).
+	if (!api.size && typeof ticktick.remoteCommentCount !== 'number') return skip;
 	const generated = new Set(extractAbyssCommentThreads(generatedComments).map(t => normalizedCommentKey(t.body)));
 	const kinds = classifyChildren(oldChild);
 	let buf: string[] = [];
