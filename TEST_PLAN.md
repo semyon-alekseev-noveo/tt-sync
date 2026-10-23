@@ -328,10 +328,10 @@ Expected: closed task may appear as `update` with `status` 2 or -1; deleted id i
 
 | ID | Pilot status | Evidence |
 |----|----------------|----------|
-| TP-DELTA-MCP-RENAME | not run | Deferred with epic [#62](https://github.com/semyon-alekseev-noveo/tt-sync/issues/62) close → [#84](https://github.com/semyon-alekseev-noveo/tt-sync/issues/84). Do not invent pass. |
-| TP-DELTA-APP-RENAME | not run | Same — #84. |
-| TP-DELTA-COMMENT | not run | Same — #84 (does TT-app comment bump `commentCount` / `etag` / `update[]`?). |
-| TP-DELTA-CLOSE-DELETE | not run | Same — #84. |
+| TP-DELTA-MCP-RENAME | **pass** (**2.0.85** #84) | In `update[]`; `etag` changed; **`modifiedTime` unchanged**. Evidence: `PERF-DELTA/84-tp-delta-pilot.md`. |
+| TP-DELTA-APP-RENAME | not run | No TickTick app UI this session. |
+| TP-DELTA-COMMENT | **pass (MCP)**; app UI not run | MCP comment → `update[]`; bumps `commentCount` (0→1), `etag`, `modifiedTime`. App UI still unverified. |
+| TP-DELTA-CLOSE-DELETE | **pass** (**2.0.85** #84) | Complete → `update[]` `status` 2; delete → `delete[]` as `{taskId,projectId}`. |
 
 ## TP-IDLE-ZERO — quiet sync does not probe each task
 

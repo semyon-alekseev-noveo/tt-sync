@@ -15,7 +15,7 @@ Gate for GitHub epic [#62](https://github.com/semyon-alekseev-noveo/tt-sync/issu
 | Live `[perf]` + `TP-IDLE-ZERO` on **2.0.84** | [84-idle-zero-2.0.84.md](84-idle-zero-2.0.84.md) / [#85](https://github.com/semyon-alekseev-noveo/tt-sync/issues/85) | **fail** idle-zero (`getTaskById` **44**); **comments 0** (was 871) |
 | Slice 5 — cut quiet `getTaskById` / `TP-IDLE-BYID-ZERO` | [98-slice5-idle-byid.md](98-slice5-idle-byid.md) / [#98](https://github.com/semyon-alekseev-noveo/tt-sync/issues/98) | **unit locked**; live = [85-idle-zero-2.0.85.md](85-idle-zero-2.0.85.md) |
 | Live `[perf]` + `TP-IDLE-ZERO` on **2.0.85** | [85-idle-zero-2.0.85.md](85-idle-zero-2.0.85.md) / [#85](https://github.com/semyon-alekseev-noveo/tt-sync/issues/85) | **pass** — byId **0**, comments **0**, `totalMs` ~7 s |
-| `TP-DELTA-*` §3.5 pilot | issue [#84](https://github.com/semyon-alekseev-noveo/tt-sync/issues/84) | **not run** — deferred out of epic close (standalone P1) |
+| `TP-DELTA-*` §3.5 pilot | [84-tp-delta-pilot.md](84-tp-delta-pilot.md) / [#84](https://github.com/semyon-alekseev-noveo/tt-sync/issues/84) | **complete (honest)** — MCP rename/comment/close-delete; app UI not run |
 | Re-pilot `TP-IDLE-ZERO` after slice 2–5 | issue [#85](https://github.com/semyon-alekseev-noveo/tt-sync/issues/85) | **pass** on **2.0.85** — closed |
 | TECH-START-1 / register scan | issue [#86](https://github.com/semyon-alekseev-noveo/tt-sync/issues/86) | not started (P2) — deferred |
 | Per-phase `[perf]` comment counters | issue [#87](https://github.com/semyon-alekseev-noveo/tt-sync/issues/87) | not started (P2) — deferred |
