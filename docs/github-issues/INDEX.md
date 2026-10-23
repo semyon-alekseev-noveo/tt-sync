@@ -31,6 +31,7 @@ Tracker issues live on [`semyon-alekseev-noveo/tt-sync`](https://github.com/semy
 | └ Slice 2 commentCount / idle-fast / preparePersist | [#82](https://github.com/semyon-alekseev-noveo/tt-sync/issues/82) | P0 | **closed** — **2.0.82** | keep closed |
 | └ Slice 3 stop double-sweep | [#83](https://github.com/semyon-alekseev-noveo/tt-sync/issues/83) | P0 | **closed** — **2.0.83**; live partial (~½ GETs) | keep closed if GH closed |
 | └ Slice 4 empty-thread skip | [#94](https://github.com/semyon-alekseev-noveo/tt-sync/issues/94) | P0 | **closed** — **2.0.84**; live comments **0** | keep closed |
+| └ Slice 5 cut quiet `getTaskById` | [#98](https://github.com/semyon-alekseev-noveo/tt-sync/issues/98) | P0 | **open** — 20 ProjectScheme + 24 false parentChanged | **new** 2026-10-23 |
 | └ Pilot TP-DELTA-* | [#84](https://github.com/semyon-alekseev-noveo/tt-sync/issues/84) | P1 | **open** | **new** 2026-10-23 |
 | └ Re-pilot TP-IDLE-ZERO | [#85](https://github.com/semyon-alekseev-noveo/tt-sync/issues/85) | P0 | **open** — **fail** on **2.0.84** (byId **44**); comments **0** | **active** 2026-10-23 |
 | └ TECH-START-1 / register scan | [#86](https://github.com/semyon-alekseev-noveo/tt-sync/issues/86) | P2 | **open** | **new** 2026-10-23 |
