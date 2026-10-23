@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-23 04:05 UTC
+
+- Context: Owner merged [#88](https://github.com/semyon-alekseev-noveo/tt-sync/pull/88) (PERF/DELTA slice 2 idle-fast + `commentCount` backfill); tip still **2.0.81** — need a bump before tag (PROC-RELEASE-GATE #30).
+- Target: Bump **2.0.82** on a release PR into `abyss-mapping`; tag/release only after owner merges (no feature-branch tag, no retag).
+- Actions log: Branch `chore/release-2.0.82` from merge tip `d40b7e9`; `npm version 2.0.82`; PO/PROJECT_STATE install pointers; reopen epic #62 (auto-closed by #88); no behavior change beyond #88 already on tip.
+- Validation: `npx vitest run` → **101** files, **708** passed; `npm run build` → ok (`dist/manifest.json` **2.0.82**).
+- Problems: GitHub release **2.0.82** blocked on merge (`open` until owner); live `#85` re-pilot still **not run** — do not invent.
+- To Be Done: Owner merges this PR; then tag **2.0.82** once on `abyss-mapping` tip; update plugin; `#85` re-pilot; leave epic #62 open.
+- References: https://github.com/semyon-alekseev-noveo/tt-sync/pull/88, https://github.com/semyon-alekseev-noveo/tt-sync/issues/62, #82, #85, `CHANGELOG.md`
+
 ### Iteration 2026-10-23 03:50 UTC
 
 - Context: Dual-analyst consensus after **2.0.81** `TP-IDLE-ZERO` fail (1757 comment GETs); epic #62 needs slice 2 + child trackers.
