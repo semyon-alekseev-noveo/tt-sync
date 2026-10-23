@@ -344,19 +344,19 @@ Implemented from `docs/TICKTICK_DELTA_API.md` §3.2 before the §3.5 pilot, on t
 1. Install a build that contains slice 2. Prefer notes whose Dexie `commentCount` is populated (after one full sync or backfill) and matches vault threads with covering maps. Do not edit the vault. Run **Synchronize** twice.
 2. Read the `[perf]` line.
 
-Expected (unit): matched idle tasks → no `getTaskComments` from sync or preparePersist. Expected (live, after release): `getTaskComments` sharply down vs **1757** on **2.0.81**; remaining GETs may still come from double-sweep until #83. Do **not** mark `TP-IDLE-ZERO` pass until re-pilot (#85).
+Expected (unit): matched idle tasks → no `getTaskComments` from sync or preparePersist. Expected (live): `getTaskComments` sharply down vs **1757** on **2.0.81**; remaining GETs may still come from double-sweep until #83. Do **not** mark `TP-IDLE-ZERO` pass while quiet probes stay in the thousands.
 
 | ID | Pilot status | Evidence |
 |----|----------------|----------|
-| TP-IDLE-ZERO | **fail** (**2.0.81**) | Automated still pass. Live quiet sync ×2: `getTaskComments` **1757** / `getTaskById` **68**. Evidence: `docs/pilot/results/PERF-DELTA/81-idle-zero-2.0.81.md`. Re-pilot: [#85](https://github.com/semyon-alekseev-noveo/tt-sync/issues/85). |
-| TP-IDLE-ZERO-SWEEP | not run (unit pass) | Vitest: `abyssCommentSync.test.ts`, `pull_field_mapping.test.ts`, `preparePersistNetworkIdle.test.ts`. Live: after merge/release via #85. |
+| TP-IDLE-ZERO | **fail** (**2.0.82**; also **2.0.81**) | Automated still pass. Live quiet ×2 on **2.0.82**: `getTaskComments` **1741** / `getTaskById` **68** / `vaultWrites` 0 (`batch/check` 2) — only −16 comments vs 1757 on 2.0.81. Evidence: `docs/pilot/results/PERF-DELTA/82-idle-zero-2.0.82.md` (prior: `81-idle-zero-2.0.81.md`). Tracker [#85](https://github.com/semyon-alekseev-noveo/tt-sync/issues/85) stays open; next likely [#83](https://github.com/semyon-alekseev-noveo/tt-sync/issues/83). |
+| TP-IDLE-ZERO-SWEEP | not run live (unit pass) | Vitest: `abyssCommentSync.test.ts`, `pull_field_mapping.test.ts`, `preparePersistNetworkIdle.test.ts`. Live idle still fail on 2.0.82 (above). |
 
 ## After §3.5 (`docs/TICKTICK_DELTA_API.md` §3.2)
 
 Items 1 and 2 shipped in **2.0.53** from the §3.2 defaults, before the §3.5 pilot. Treating them as future work is outdated. The four `TP-DELTA-*` rows above are still **not run**, and `skipPushWhenTickTickRenamedVaultLine` is already off in **2.0.53** without that evidence. Items 3–5 are not started. `syncTaskBean.add` is already merged in `getUpdatedTasks`.
 
 1. **Echo. Done in 2.0.53.** `pull.ts` skips a delta row only when `rt.etag === local.task.etag`. `skipPushWhenTickTickRenamedVaultLine` no longer calls `getTaskById`. Still open: persist `id2etag` from `batch/task` without the follow-up `getTaskById` inside `TicktickRestAPI.updateTask`.
-2. **Idle vault. Done in 2.0.53; comment idle cut restored in #62 slice 1; push/persist idle-fast in slice 2.** `vaultLineBehindTask` compares the line to Dexie. `syncAbyssCommentsToTickTick` / `preparePersistNetwork` skip GET when `commentCount` matches + maps cover (`TP-IDLE-ZERO-SWEEP`). Pull echo-skip backfills missing `commentCount`. Double-sweep still open (#83). Pilot **TP-IDLE-ZERO** on **2.0.81** = **fail**; re-pilot #85.
+2. **Idle vault. Done in 2.0.53; comment idle cut restored in #62 slice 1; push/persist idle-fast in slice 2.** `vaultLineBehindTask` compares the line to Dexie. `syncAbyssCommentsToTickTick` / `preparePersistNetwork` skip GET when `commentCount` matches + maps cover (`TP-IDLE-ZERO-SWEEP`). Pull echo-skip backfills missing `commentCount`. Double-sweep still open (#83). Pilot **TP-IDLE-ZERO** on **2.0.81** and **2.0.82** = **fail** (1741 comment GETs on 2.0.82); #85 stays open.
 3. **Comments. Not started.** A TickTick-only comment that changes neither `etag`, `commentCount`, nor `update[]` is not left to a daily reconcile. Confirm that delay on the §3.5 pilot (#84) before coding it.
 4. **Closed and trash. Not started.** `project/all/closed` and trash pagination are not a daily job.
 5. **Daily job. Not started.** Closed window, trash, comment backfill, and one `batch/check/0` compare are not implemented.
