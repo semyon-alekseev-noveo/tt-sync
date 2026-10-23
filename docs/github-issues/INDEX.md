@@ -2,7 +2,7 @@
 
 Tracker issues live on [`semyon-alekseev-noveo/tt-sync`](https://github.com/semyon-alekseev-noveo/tt-sync/issues). Long evidence lives under [`docs/pilot/results/`](../pilot/results/) — not in issue comments.
 
-**Release tip (2026-10-22):** **[2.0.80](https://github.com/semyon-alekseev-noveo/tt-sync/releases/tag/2.0.80)** on `abyss-mapping` (merge [#60](https://github.com/semyon-alekseev-noveo/tt-sync/pull/60); smoke `60-release-2.0.80-smoke.md`).
+**Release tip (2026-10-23):** track **2.0.86** after release PR merges (ships #104 unit fix from [#108](https://github.com/semyon-alekseev-noveo/tt-sync/pull/108)). Prior: **[2.0.85](https://github.com/semyon-alekseev-noveo/tt-sync/releases/tag/2.0.85)**.
 
 ## Status table (audit 2026-10-22)
 
