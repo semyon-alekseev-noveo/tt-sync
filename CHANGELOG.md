@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-23 16:16 UTC
+
+- Context: [#87](https://github.com/semyon-alekseev-noveo/tt-sync/issues/87) P2 — per-phase `[perf]` comment counters after PERF/DELTA.
+- Target: Attribute `getTaskComments` to innermost `timePhase` in `commentsByPhase` (no behavior change).
+- Actions log: Extend `SyncPerfCounts` + `observeSyncApi`; unit in `syncPerf.test.ts`.
+- Validation: `npx vitest run src/test/syncPerf.test.ts` → **5** passed.
+- Problems: None (`resolved` for #87 unit).
+- To Be Done: Owner merges; close #87.
+- References: https://github.com/semyon-alekseev-noveo/tt-sync/issues/87, `src/sync/perf.ts`, `CHANGELOG.md`
+
 ### Iteration 2026-10-23 15:47 UTC
 
 - Context: Owner merged [#109](https://github.com/semyon-alekseev-noveo/tt-sync/pull/109); tagged **2.0.86**; live TP-COMMENT-TT-DELETE on Thinkpad-tts-test.

@@ -200,7 +200,7 @@ Preconditions unless a case says otherwise: logged in, `syncNotes` and `abyssTas
 1. Run **Synchronize** on the pilot vault.
 2. Open the plugin log (info or debug).
 
-Expected: one new line that starts with `[perf]` and then one JSON object. The object has `trigger` `manual`, `phaseMs` for the phases that ran (`prepare`, `projects`, `register`, `push`, `pull`, `vaultReconcile`, `subtasks`, `syncFiles`; `journal` inside pull when the journal wrote; `comments` inside vault reconcile when comments were fetched; `backup` when a backup ran), and `counts`: `httpByEndpoint` (with `getTaskById` and `getTaskComments` when those HTTP calls happened), `http429`, `filesRead`, `filesScanned`, `tasksChecked`, `vaultWrites`. A second Synchronize writes a second line.
+Expected: one new line that starts with `[perf]` and then one JSON object. The object has `trigger` `manual`, `phaseMs` for the phases that ran (`prepare`, `projects`, `register`, `push`, `pull`, `vaultReconcile`, `subtasks`, `syncFiles`; `journal` inside pull when the journal wrote; `comments` inside vault reconcile when comments were fetched; `backup` when a backup ran), and `counts`: `httpByEndpoint` (with `getTaskById` and `getTaskComments` when those HTTP calls happened), `commentsByPhase` (per innermost `timePhase` — [#87](https://github.com/semyon-alekseev-noveo/tt-sync/issues/87)), `http429`, `filesRead`, `filesScanned`, `tasksChecked`, `vaultWrites`. A second Synchronize writes a second line.
 
 ### TP-PERF-UI — the finished sync notice shows a short count line
 

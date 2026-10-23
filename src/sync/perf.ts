@@ -16,6 +16,8 @@ export interface SyncPerfCounts {
 	tasksDelta: number;
 	tasksProbedById: number;
 	commentsFetched: number;
+	/** getTaskComments attributed to innermost `timePhase` (#87 / PERF-DELTA). */
+	commentsByPhase: Record<string, number>;
 	apiCalls: number;
 	http429: number;
 	httpByEndpoint: Record<string, number>;
@@ -64,6 +66,7 @@ function emptyCounts(): SyncPerfCounts {
 		tasksDelta: 0,
 		tasksProbedById: 0,
 		commentsFetched: 0,
+		commentsByPhase: {},
 		apiCalls: 0,
 		http429: 0,
 		httpByEndpoint: {},
@@ -95,6 +98,7 @@ export function finishSyncPerf(run: SyncPerfRun, ok: boolean): SyncPerfReport {
 		phaseMs: roundRecord(run.phaseMs),
 		counts: {
 			...run.counts,
+			commentsByPhase: { ...run.counts.commentsByPhase },
 			httpByEndpoint: { ...run.counts.httpByEndpoint },
 		},
 		ok,
@@ -136,7 +140,7 @@ export function addPhaseMs(name: string, ms: number): void {
 	current.phaseMs[name] = (current.phaseMs[name] ?? 0) + ms;
 }
 
-type CountKey = Exclude<keyof SyncPerfCounts, 'httpByEndpoint'>;
+type CountKey = Exclude<keyof SyncPerfCounts, 'httpByEndpoint' | 'commentsByPhase'>;
 
 export function addCount(name: CountKey, n = 1): void {
 	if (!current || !n) return;
@@ -217,7 +221,15 @@ function watch(api: object, method: 'getTaskById' | 'getTaskComments', kind: 'ge
 		const t0 = performance.now();
 		try {
 			if (kind === 'getTaskById') addCount('tasksProbedById', 1);
-			else addCount('commentsFetched', 1);
+			else {
+				addCount('commentsFetched', 1);
+				// #87: attribute comment GETs to innermost sync phase (push / reconcile / …).
+				if (current) {
+					const phase = currentSyncPhase() ?? 'unknown';
+					const bag = current.counts.commentsByPhase;
+					bag[phase] = (bag[phase] ?? 0) + 1;
+				}
+			}
 			return invoke ? await invoke.apply(api, args) : undefined;
 		} finally {
 			if (kind === 'getTaskComments') addPhaseMs('comments', performance.now() - t0);

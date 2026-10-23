@@ -37,7 +37,7 @@ Tracker issues live on [`semyon-alekseev-noveo/tt-sync`](https://github.com/semy
 | └ Pilot TP-DELTA-* | [#84](https://github.com/semyon-alekseev-noveo/tt-sync/issues/84) | P1 | **complete (honest)** — MCP pass; app UI not run; evidence `PERF-DELTA/84-tp-delta-pilot.md` | **done** 2026-10-23 |
 | └ Re-pilot TP-IDLE-ZERO | [#85](https://github.com/semyon-alekseev-noveo/tt-sync/issues/85) | P0 | **pass** on **2.0.85** — close | **done** 2026-10-23 |
 | └ TECH-START-1 / register scan | [#86](https://github.com/semyon-alekseev-noveo/tt-sync/issues/86) | P2 | **open** | **new** 2026-10-23 |
-| └ Per-phase `[perf]` comment counters | [#87](https://github.com/semyon-alekseev-noveo/tt-sync/issues/87) | P2 | **open** | **new** 2026-10-23 |
+| └ Per-phase `[perf]` comment counters | [#87](https://github.com/semyon-alekseev-noveo/tt-sync/issues/87) | P2 | **unit done** — `commentsByPhase` on tip | **fix** 2026-10-23 |
 | Sync product risks cluster | [#63](https://github.com/semyon-alekseev-noveo/tt-sync/issues/63) | P1 | **open** — GAP-COMMENT-EDIT, RISK-PULL-WINS-LOCAL, RISK-DUAL-STORE, BUG-TICKTICK-ID-LEAK | **new** 2026-10-22 |
 | Pilot vault config | [#64](https://github.com/semyon-alekseev-noveo/tt-sync/issues/64) | P1 | **open** — Abyss Inbox `#inbox`; test-vault `data.json` drift | **new** 2026-10-22 |
 | NOTE-L3b / BUG-COMMENT-NO-PUSH recheck | [#65](https://github.com/semyon-alekseev-noveo/tt-sync/issues/65) | P1 | **open** — residual soak on tip (not #14 duplicate) | **new** 2026-10-22 |
