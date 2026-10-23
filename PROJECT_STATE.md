@@ -21,7 +21,7 @@
 - **Sync research (2026-10-20):** `docs/TICKTICK_DELTA_API.md` — delta has no comments; echo suppression in `pull.ts` uses `etag`; idle sync does not call `getTaskById` per quiet task.
 - **Deletion guard (2026-10-20):** over-threshold or empty-side deletions are held and the checkpoint stays. Defaults: guard on, more than 10 tasks and more than 20%, startup delay 30s. Pilot cases in `TEST_PLAN.md` are not run.
 - **Redo:** journal `<vault>/.tickticksync/journal/`; palette undo previews then applies `planUndo`. Not soaked on the live vault.
-- **Modularization (2026-10-22):** PR 1–7 landed on `abyss-mapping` (#34–#40); release **2.0.77** closes epic #31. Evidence: `docs/pilot/results/TECH-SYNC-MODULARIZATION/`. **2.0.78** re-cuts comment fixes (**2.0.75**/**2.0.76**) onto that tip. **2.0.79** released (merge #58): #28/#29 unit guards + merge collapse for #27 (twins still on disk). **2.0.80** released (merge #60): quiet-sync `vault-comment-dup-keys` rewrite; #27 closed; #28/#29 stay open unit-only. **2.0.81** released (post-#79/#80): slice 1 idle probe cut; live `TP-IDLE-ZERO` **fail** (1757). **2.0.82** released (slice 2): live re-pilot still **fail** (`getTaskComments` **1741**); evidence `PERF-DELTA/82-idle-zero-2.0.82.md`. Slice 3 (#83 / [#91](https://github.com/semyon-alekseev-noveo/tt-sync/pull/91)) on tip: stop double-sweep / `TP-IDLE-MANUAL-SCOPE` — bump **2.0.83** pending (no tag until bump merges).
+- **Modularization (2026-10-22):** PR 1–7 landed on `abyss-mapping` (#34–#40); release **2.0.77** closes epic #31. Evidence: `docs/pilot/results/TECH-SYNC-MODULARIZATION/`. **2.0.78** re-cuts comment fixes (**2.0.75**/**2.0.76**) onto that tip. **2.0.79** released (merge #58): #28/#29 unit guards + merge collapse for #27 (twins still on disk). **2.0.80** released (merge #60): quiet-sync `vault-comment-dup-keys` rewrite; #27 closed; #28/#29 stay open unit-only. **2.0.81** released (post-#79/#80): slice 1 idle probe cut; live `TP-IDLE-ZERO` **fail** (1757). **2.0.82** released (slice 2): live fail (`getTaskComments` **1741**). **2.0.83** released (slice 3 / #83): live quiet comments **871** (~½), `totalMs` ~250–276 s — idle-zero still **fail**; evidence `PERF-DELTA/83-idle-zero-2.0.83.md`.
 
 ## Validation
 
@@ -46,7 +46,7 @@
 
 ## To Be Done
 
-1. **[P0] PERF/DELTA [#62](https://github.com/semyon-alekseev-noveo/tt-sync/issues/62):** Live `TP-IDLE-ZERO` **fail** on **2.0.82** (`PERF-DELTA/82-idle-zero-2.0.82.md`, #85 open). #83 slice 3 merged ([#91](https://github.com/semyon-alekseev-noveo/tt-sync/pull/91)); bump **2.0.83** then #85 re-pilot; #84 (`TP-DELTA-*`), #86/#87 (P2). Consensus: `PERF-DELTA/62-analyst-dual-brief.md`. Do not invent pass rows.
+1. **[P0] PERF/DELTA [#62](https://github.com/semyon-alekseev-noveo/tt-sync/issues/62):** Live `TP-IDLE-ZERO` **fail** on **2.0.83** (`PERF-DELTA/83-idle-zero-2.0.83.md`, comments **871**, #85 open) — slice 3 cut ~½ vs 2.0.82. Next: remaining `syncFiles` idle GETs / #84 (`TP-DELTA-*`), #86/#87 (P2). Consensus: `PERF-DELTA/62-analyst-dual-brief.md`. Do not invent pass rows.
 2. Revoke the exposed `tp_…` token if it is still valid — [#32](https://github.com/semyon-alekseev-noveo/tt-sync/issues/32).
 3. Pilot vault config — [#64](https://github.com/semyon-alekseev-noveo/tt-sync/issues/64): Abyss Inbox **With inbox tag** `#inbox`; fix test-vault `data.json` drift before Sync.
 4. Product risks — [#63](https://github.com/semyon-alekseev-noveo/tt-sync/issues/63): GAP-COMMENT-EDIT, RISK-PULL-WINS-LOCAL, RISK-DUAL-STORE, BUG-TICKTICK-ID-LEAK.
