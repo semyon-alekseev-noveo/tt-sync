@@ -1,20 +1,32 @@
 #!/usr/bin/env node
 /**
  * Smoke test: merge GTD preset into vault data.json, simulate upgrade save from empty memory.
- * Usage: node scripts/vault-gtd-smoke.mjs [path-to-data.json]
+ *
+ * Usage:
+ *   node scripts/vault-gtd-smoke.mjs <path-to-data.json> [path-to-preset.json]
+ *   TTS_VAULT_DATA=/path/to/data.json TTS_VAULT_PRESET=/path/to/preset.json node scripts/vault-gtd-smoke.mjs
+ *
+ * No personal absolute paths in defaults (DEV_FLOW / #33).
  */
-import { readFileSync, writeFileSync, copyFileSync } from 'node:fs';
+import { readFileSync, writeFileSync, copyFileSync, existsSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const vaultData =
-	process.argv[2] ||
-	'/home/sam/obsidian/Thinkpad-tts-test/.obsidian/plugins/tickticksync-abyss/data.json';
-const presetPath = join(
-	repoRoot,
-	'../obsidian/Thinkpad-tts-test/00 Inbox/TTS-data-preset.json',
-);
+const vaultData = process.argv[2] || process.env.TTS_VAULT_DATA;
+const presetPath =
+	process.argv[3] ||
+	process.env.TTS_VAULT_PRESET ||
+	join(repoRoot, 'docs/fixtures/TTS-data-preset.json');
+
+if (!vaultData) {
+	console.error(
+		'Usage: node scripts/vault-gtd-smoke.mjs <path-to-data.json> [path-to-preset.json]\n' +
+			'   or: TTS_VAULT_DATA=... [TTS_VAULT_PRESET=...] node scripts/vault-gtd-smoke.mjs\n' +
+			'Paths must be supplied — no machine-local defaults (issue #33).',
+	);
+	process.exit(2);
+}
 
 const SESSION_KEYS = [
 	'token',
@@ -55,7 +67,6 @@ function gtdSummary(data) {
 	};
 }
 
-// Dynamic import of TS-built logic via vitest is heavy; inline minimal disk-first merge check.
 function buildPersistedLike(memory, disk) {
 	const out = { ...(disk ?? {}) };
 	const GTD_ARRAY = ['syncedLists', 'tagListMappings', 'syncScopeFolders'];
@@ -76,13 +87,17 @@ function buildPersistedLike(memory, disk) {
 }
 
 const dataPath = resolve(vaultData);
+if (!existsSync(dataPath)) {
+	console.error('data.json not found:', dataPath);
+	process.exit(2);
+}
 const backup = dataPath + '.pre-smoke-' + Date.now();
 copyFileSync(dataPath, backup);
 
 let data = loadJson(dataPath);
 let preset;
 try {
-	preset = loadJson(presetPath);
+	preset = loadJson(resolve(presetPath));
 } catch {
 	console.warn('Preset not found at', presetPath, '— skipping import merge');
 	preset = {};
@@ -93,7 +108,6 @@ data = mergePreset(data, preset);
 writeFileSync(dataPath, JSON.stringify(data, null, 2) + '\n');
 const afterImport = gtdSummary(data);
 
-// Simulate fresh plugin memory (defaults) + checkpoint save after upgrade
 const emptyMemory = {
 	version: '2.0.23',
 	checkPoint: data.checkPoint,
