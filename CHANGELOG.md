@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-23 01:54 UTC
+
+- Context: Owner merged [#79](https://github.com/semyon-alekseev-noveo/tt-sync/pull/79) (PERF/DELTA slice 1 idle comment-probe cut); tip still **2.0.80** — need a bump before tag (PROC-RELEASE-GATE #30).
+- Target: Bump **2.0.81** on a release PR into `abyss-mapping`; tag/release only after owner merges (no feature-branch tag, no retag).
+- Actions log: Branch `chore/release-2.0.81` from merge tip `eb3ad3a`; `npm version 2.0.81`; PO/PROJECT_STATE install pointers; no behavior change beyond #79 already on tip.
+- Validation: `npx vitest run` → **100** files, **703** passed; `npm run build` → ok (`dist/manifest.json` **2.0.81**).
+- Problems: GitHub release **2.0.81** blocked on merge (`open` until owner); live `[perf]` / `TP-IDLE-ZERO` pilot still **not run**.
+- To Be Done: Owner merges this PR; then tag **2.0.81** once on `abyss-mapping` tip; comment #62; leave epic open.
+- References: https://github.com/semyon-alekseev-noveo/tt-sync/pull/79, https://github.com/semyon-alekseev-noveo/tt-sync/issues/62, `CHANGELOG.md`
+
 ### Iteration 2026-10-23 01:43 UTC
 
 - Context: Epic [#62](https://github.com/semyon-alekseev-noveo/tt-sync/issues/62) PERF/DELTA first slice; quiet sync still GETed Comments for every task with Abyss threads (`vaultThreads > 0`), against TP-IDLE-ZERO / `TICKTICK_DELTA_API.md` §3.2.
