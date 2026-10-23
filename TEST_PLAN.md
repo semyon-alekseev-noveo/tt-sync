@@ -337,27 +337,30 @@ Expected: closed task may appear as `update` with `status` 2 or -1; deleted id i
 
 Implemented from `docs/TICKTICK_DELTA_API.md` §3.2 before the §3.5 pilot, on the document's default: echo by `etag`, vault compare against Dexie, comments fetched only when `commentCount` differs from the vault thread count (or count is unknown with vault threads, or stamp twins).
 
-**#62 slice 1 (this PR):** removed the `vaultThreads > 0` always-probe branch that re-fetched Comments on every quiet task that already had matching Abyss bullets. Matched `commentCount` + clean keys → no `getTaskComments`.
+**#62 slice 1:** removed the `vaultThreads > 0` always-probe branch in `vaultLineBehindTask`. Matched `commentCount` + clean keys → no reconcile GET.
 
-1. Install a build that contains this change. Do not edit the vault. Prefer a note with synced Abyss comments whose Dexie `commentCount` matches the vault thread count. Run **Synchronize**.
+**#62 slice 2 (this PR / [#82](https://github.com/semyon-alekseev-noveo/tt-sync/issues/82)):** (1) pull echo-skip **backfills** missing Dexie `commentCount` from delta; (2) `syncAbyssCommentsToTickTick` idle-fast skip when count matches + maps cover; (3) `preparePersistNetwork` skips `getTaskComments` on the same predicate. Does **not** remove double-sweep (#83). Case ID: `TP-IDLE-ZERO-SWEEP`.
+
+1. Install a build that contains slice 2. Prefer notes whose Dexie `commentCount` is populated (after one full sync or backfill) and matches vault threads with covering maps. Do not edit the vault. Run **Synchronize** twice.
 2. Read the `[perf]` line.
 
-Expected: `getTaskById` is 0 and `getTaskComments` is 0 when no task's `commentCount` differs from its vault threads (and no stamp twins / unknown count). A task whose Dexie title already differs is still rewritten from Dexie, without `getTaskById`. Quiet tasks that already have matching comment threads must not appear in `httpByEndpoint.getTaskComments`.
+Expected (unit): matched idle tasks → no `getTaskComments` from sync or preparePersist. Expected (live, after release): `getTaskComments` sharply down vs **1757** on **2.0.81**; remaining GETs may still come from double-sweep until #83. Do **not** mark `TP-IDLE-ZERO` pass until re-pilot (#85).
 
 | ID | Pilot status | Evidence |
 |----|----------------|----------|
-| TP-IDLE-ZERO | **fail** (**2.0.81**) | Automated still pass. Live quiet sync ×2 on Thinkpad-tts-test: `getTaskComments` **1757** / `getTaskById` **68** both runs (`vaultWrites` 0); startup earlier same session `getTaskComments` 879 / `getTaskById` 44. Evidence: `docs/pilot/results/PERF-DELTA/81-idle-zero-2.0.81.md`. |
+| TP-IDLE-ZERO | **fail** (**2.0.81**) | Automated still pass. Live quiet sync ×2: `getTaskComments` **1757** / `getTaskById` **68**. Evidence: `docs/pilot/results/PERF-DELTA/81-idle-zero-2.0.81.md`. Re-pilot: [#85](https://github.com/semyon-alekseev-noveo/tt-sync/issues/85). |
+| TP-IDLE-ZERO-SWEEP | not run (unit pass) | Vitest: `abyssCommentSync.test.ts`, `pull_field_mapping.test.ts`, `preparePersistNetworkIdle.test.ts`. Live: after merge/release via #85. |
 
 ## After §3.5 (`docs/TICKTICK_DELTA_API.md` §3.2)
 
 Items 1 and 2 shipped in **2.0.53** from the §3.2 defaults, before the §3.5 pilot. Treating them as future work is outdated. The four `TP-DELTA-*` rows above are still **not run**, and `skipPushWhenTickTickRenamedVaultLine` is already off in **2.0.53** without that evidence. Items 3–5 are not started. `syncTaskBean.add` is already merged in `getUpdatedTasks`.
 
 1. **Echo. Done in 2.0.53.** `pull.ts` skips a delta row only when `rt.etag === local.task.etag`. `skipPushWhenTickTickRenamedVaultLine` no longer calls `getTaskById`. Still open: persist `id2etag` from `batch/task` without the follow-up `getTaskById` inside `TicktickRestAPI.updateTask`.
-2. **Idle vault. Done in 2.0.53; comment idle cut restored in #62 slice 1.** `vaultLineBehindTask` compares the line to Dexie. `getTaskComments` runs only when `commentCount` differs from vault threads, count is unknown with vault threads, or stamp twins (`vaultDupKeys`) — not merely because vault threads exist. A manual Repair command that calls `getTaskById` is not added. Pilot **TP-IDLE-ZERO** on **2.0.81** = **fail** (see table above / `PERF-DELTA/81-idle-zero-2.0.81.md`).
-3. **Comments. Not started.** A TickTick-only comment that changes neither `etag`, `commentCount`, nor `update[]` is not left to a daily reconcile. Confirm that delay on the §3.5 pilot before coding it.
+2. **Idle vault. Done in 2.0.53; comment idle cut restored in #62 slice 1; push/persist idle-fast in slice 2.** `vaultLineBehindTask` compares the line to Dexie. `syncAbyssCommentsToTickTick` / `preparePersistNetwork` skip GET when `commentCount` matches + maps cover (`TP-IDLE-ZERO-SWEEP`). Pull echo-skip backfills missing `commentCount`. Double-sweep still open (#83). Pilot **TP-IDLE-ZERO** on **2.0.81** = **fail**; re-pilot #85.
+3. **Comments. Not started.** A TickTick-only comment that changes neither `etag`, `commentCount`, nor `update[]` is not left to a daily reconcile. Confirm that delay on the §3.5 pilot (#84) before coding it.
 4. **Closed and trash. Not started.** `project/all/closed` and trash pagination are not a daily job.
 5. **Daily job. Not started.** Closed window, trash, comment backfill, and one `batch/check/0` compare are not implemented.
-6. **Tests.** `TP-IDLE-ZERO` and `TP-ECHO-ETAG` exist and pass in vitest. Their pilot status is **not run**. `TP1-QUIET-TITLE-ETAG`, `TP-COMMENT-COUNT`, and `TP-DAILY-RECONCILE` are not implemented.
+6. **Tests.** `TP-IDLE-ZERO`, `TP-IDLE-ZERO-SWEEP`, and `TP-ECHO-ETAG` exist and pass in vitest. Live idle / delta pilots still open (#84/#85). `TP1-QUIET-TITLE-ETAG`, `TP-COMMENT-COUNT`, and `TP-DAILY-RECONCILE` are not implemented.
 
 ## PR — mass-deletion / empty-side guard
 

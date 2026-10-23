@@ -3,7 +3,11 @@ import { App, Notice, TFile, TFolder } from 'obsidian';
 import type { PluginContext } from '@/pluginContext';
 import type { ITask } from './api/types/Task';
 import { getSettings } from '@/settings';
-import { syncAbyssCommentsToTickTick, useAbyssCommentsApi } from '@/abyssCommentSync';
+import {
+	canSkipAbyssCommentNetwork,
+	syncAbyssCommentsToTickTick,
+	useAbyssCommentsApi,
+} from '@/abyssCommentSync';
 import { stripLegacyCommentsBlock, type TickTickCommentSync } from '@/abyssFormat';
 import type { ITaskComment } from '@/api/types/TaskComment';
 import { listCommentMapsForTask } from '@/db/taskCommentMaps';
@@ -461,7 +465,12 @@ export class FileOperation {
 		}
 	}
 
-	/** Comments API for every task in the group, before the note is read for writing. */
+	/**
+	 * Comments API before the note is read for writing.
+	 * TP-IDLE-ZERO-SWEEP / #62 slice 2: skip GET (and idle sync) when Dexie
+	 * `commentCount` matches vault threads and maps cover keys — merge keeps
+	 * vault bullets without `_apiComments`.
+	 */
 	private async preparePersistNetwork(tasks: ITask[], file: TFile): Promise<void> {
 		if (!useAbyssCommentsApi() || !this.plugin.tickTickRestAPI) return;
 		const prep = new NewFileMap(this.app, this.plugin, file);
@@ -469,14 +478,24 @@ export class FileOperation {
 		for (const task of tasks) {
 			if (!task.id || !task.projectId) continue;
 			const rec = prep.getTaskRecord(task.id);
-			if (rec?.taskLines?.length) {
+			const taskLines = rec?.taskLines ?? [];
+			const mapsBefore = await listCommentMapsForTask(task.id);
+			const commentCount = (task as ITask & { commentCount?: number }).commentCount;
+			const idleSkip = canSkipAbyssCommentNetwork(taskLines, mapsBefore, commentCount);
+			if (idleSkip) {
+				task.content = stripLegacyCommentsBlock(task.content ?? '');
+				task.desc = stripLegacyCommentsBlock(task.desc ?? '');
+				continue;
+			}
+			if (taskLines.length) {
 				try {
 					await syncAbyssCommentsToTickTick(
 						this.plugin.tickTickRestAPI,
 						task.id,
 						task.projectId,
-						rec.taskLines,
+						taskLines,
 						task.content,
+						{ remoteCommentCount: commentCount },
 					);
 				} catch (e) {
 					log.warn('Abyss comment push before vault write failed', task.id, e);
@@ -492,9 +511,7 @@ export class FileOperation {
 				knownBodies: maps.map(m => m.body),
 				apiBodies: comments === null ? [] : comments.map(c => c.title ?? ''),
 				// Omit remoteCommentCount when GET failed so merge does not strip on empty apiBodies.
-				...(comments !== null
-					? { remoteCommentCount: (task as ITask & { commentCount?: number }).commentCount }
-					: {}),
+				...(comments !== null ? { remoteCommentCount: commentCount } : {}),
 			};
 			Object.defineProperty(task, '__ticktickComments', { value: hint, enumerable: false, configurable: true });
 			task.content = stripLegacyCommentsBlock(task.content ?? '');

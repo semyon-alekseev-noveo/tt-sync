@@ -146,6 +146,7 @@ export class TaskModificationScan {
 								savedTask.projectId,
 								lines,
 								savedTask.content,
+								{ remoteCommentCount: savedTask.commentCount },
 							);
 						} catch (e) {
 							log.warn('Abyss comment API sync failed (hash unchanged)', taskId, e);
@@ -288,7 +289,7 @@ export class TaskModificationScan {
 					savedTask.projectId,
 					taskRecord.taskLines ?? [],
 					savedTask.content,
-					commentOpts,
+					{ ...commentOpts, remoteCommentCount: savedTask.commentCount },
 				);
 			} catch (e) {
 				log.warn('Abyss comment sweep failed', taskId, filepath, e);

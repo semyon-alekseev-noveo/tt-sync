@@ -14,6 +14,7 @@ import {
 	stripLegacyCommentsBlock,
 } from '@/abyssFormat';
 import {
+	canSkipAbyssCommentNetwork,
 	formatApiCommentAsAbyssLines,
 	migrateLegacyCommentsInContent,
 	syncAbyssCommentsToTickTick,
@@ -81,6 +82,56 @@ describe('abyssCommentSync', () => {
 	it('syncAbyssCommentsViaApi defaults on in fork settings', () => {
 		const s = getSettings() as { syncAbyssCommentsViaApi?: boolean };
 		expect(s.syncAbyssCommentsViaApi).toBe(true);
+	});
+
+	it('TP-IDLE-ZERO-SWEEP: canSkip when commentCount matches and maps cover vault threads', () => {
+		const lines = ['\t- 2026-10-21 21:22: comment 1'];
+		const maps = [{
+			id: 'task1:comment 1',
+			taskId: 'task1',
+			projectId: 'proj1',
+			fingerprint: 'comment 1',
+			ticktickCommentId: 'tt-c1',
+			body: 'comment 1',
+			origin: 'vault' as const,
+		}];
+		expect(canSkipAbyssCommentNetwork(lines, maps, 1)).toBe(true);
+		expect(canSkipAbyssCommentNetwork(lines, maps, undefined)).toBe(false);
+		expect(canSkipAbyssCommentNetwork(lines, maps, 2)).toBe(false);
+		expect(canSkipAbyssCommentNetwork(lines, [], 1)).toBe(false);
+		expect(canSkipAbyssCommentNetwork(lines, maps, 1, { obsidianRemovedCommentBullets: true })).toBe(false);
+	});
+
+	it('TP-IDLE-ZERO-SWEEP: syncAbyssCommentsToTickTick skips getTaskComments when idle-safe', async () => {
+		const S = getSettings() as Record<string, unknown>;
+		Object.assign(S, { syncNotes: true, abyssTasksFormat: true, syncAbyssCommentsViaApi: true });
+		listMaps.mockResolvedValue([
+			{
+				id: 'task1:comment 1',
+				taskId: 'task1',
+				projectId: 'proj1',
+				fingerprint: 'comment 1',
+				ticktickCommentId: 'tt-c1',
+				body: 'comment 1',
+				origin: 'vault',
+			},
+		]);
+		const getTaskComments = vi.fn().mockResolvedValue([{ id: 'tt-c1', title: 'comment 1' }]);
+		const api = {
+			getTaskComments,
+			addTaskComment: vi.fn(),
+			deleteTaskComment: vi.fn(),
+		} as unknown as TickTickRestAPI;
+		const ok = await syncAbyssCommentsToTickTick(
+			api,
+			'task1',
+			'proj1',
+			['\t- 2026-10-21 21:22: comment 1'],
+			undefined,
+			{ remoteCommentCount: 1 },
+		);
+		expect(ok).toBe(false);
+		expect(getTaskComments).not.toHaveBeenCalled();
 	});
 
 	it('BUG-COMMENT-NO-TT-WIPE: does not delete TickTick comments when vault stamp differs from map body', async () => {

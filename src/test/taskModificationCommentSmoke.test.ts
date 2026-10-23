@@ -111,6 +111,7 @@ describe('NOTE-C2 — comment sync when line hash unchanged (BUG-COMMENT-1)', ()
 			'in',
 			taskLines,
 			'',
+			{ remoteCommentCount: undefined },
 		);
 	});
 });
