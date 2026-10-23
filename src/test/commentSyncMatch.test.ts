@@ -35,17 +35,20 @@ describe('planCommentSync', () => {
 		expect(plan.remoteOnly).toHaveLength(0);
 	});
 
-	it('vaultHasUnpushedCommentThreads is true when commentCount > 0 but GET is empty', () => {
+	it('TP-COMMENT-TT-DELETE: single mapped miss + empty GET waits for pull even with stale commentCount', () => {
 		const lines = ['\t- 2026-10-21T11:14:22+07:00: comment 1'];
-		expect(vaultHasUnpushedCommentThreads(lines, [], [{
+		const map = {
 			id: 't1:x',
 			taskId: 't1',
 			projectId: 'p1',
 			fingerprint: 'comment 1',
 			ticktickCommentId: 'c-old',
 			body: 'comment 1',
-			origin: 'remote',
-		}], 2)).toBe(true);
+			origin: 'remote' as const,
+		};
+		// Dexie count often still 1 after TT delete until task pull (#104).
+		expect(vaultHasUnpushedCommentThreads(lines, [], [map], 1)).toBe(false);
+		expect(vaultHasUnpushedCommentThreads(lines, [], [{ ...map, origin: 'vault' }], 1)).toBe(false);
 	});
 
 	it('vaultHasUnpushedCommentThreads is false when mapped vault thread was deleted on TickTick', () => {
@@ -60,6 +63,7 @@ describe('planCommentSync', () => {
 			body,
 			origin: 'remote',
 		}], 0)).toBe(false);
+		// Vault-origin single miss is also TT-delete pending pull (not re-push).
 		expect(vaultHasUnpushedCommentThreads(lines, [], [{
 			id: 't1:x',
 			taskId: 't1',
@@ -68,7 +72,8 @@ describe('planCommentSync', () => {
 			ticktickCommentId: 'c-old',
 			body,
 			origin: 'vault',
-		}], 0)).toBe(true);
+		}], 0)).toBe(false);
+		// Unmapped thread still needs a create push.
 		expect(vaultHasUnpushedCommentThreads(lines, [], [], 0)).toBe(true);
 	});
 

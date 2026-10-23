@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-23 14:07 UTC
+
+- Context: [#104](https://github.com/semyon-alekseev-noveo/tt-sync/issues/104) — live `TP-COMMENT-TT-DELETE` fail on **2.0.85** (vault re-push after TT delete).
+- Target: Single mapped miss waits for pull (any origin); keep STALE-MAPS multi re-push; no invented live pass.
+- Actions log: Rework `vaultHasUnpushedCommentThreads`; update `commentSyncMatch` + ABYSS/TEST_PLAN; evidence `TP-COMMENT-TT-DELETE/104-unit-fix.md`.
+- Validation: `npx vitest run` → **715** passed; `npm run build` → ok.
+- Problems: Live re-pilot still **not run** (`open` until vault evidence).
+- To Be Done: Owner merges PR; bump/release when ready; re-run TT-DELETE on Thinkpad-tts-test.
+- References: https://github.com/semyon-alekseev-noveo/tt-sync/issues/104, `docs/pilot/results/TP-COMMENT-TT-DELETE/104-unit-fix.md`, `CHANGELOG.md`
+
 ### Iteration 2026-10-23 14:02 UTC
 
 - Context: Owner asked for [#84](https://github.com/semyon-alekseev-noveo/tt-sync/issues/84) `TP-DELTA-*` §3.5 after #102.

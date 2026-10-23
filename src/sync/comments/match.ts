@@ -30,24 +30,24 @@ export function vaultCommentKeysAheadOfRemote(
 
 /**
  * True when the vault has comment text that still needs a TickTick Comments API push.
- * Mapped threads missing from an empty API with `remoteCommentCount === 0` are TT deletions, not unpushed edits.
+ *
+ * - Unmapped vault threads → true (need create).
+ * - Empty GET + several mapped ids missing → true (BUG-COMMENT-STALE-MAPS / test-11-12).
+ * - Empty GET + one mapped miss (any origin) → false (TP-COMMENT-TT-DELETE: wait for pull).
+ *   Dexie `commentCount` is ignored here — it often stays >0 until the next task pull (#104).
+ * - Partial GET + several mapped misses → true; one mapped miss → false.
  */
 export function vaultHasUnpushedCommentThreads(
 	taskLines: string[],
 	remote: ReadonlyArray<{ title?: string }>,
 	maps: readonly TaskCommentMap[],
-	remoteCommentCount?: number,
+	_remoteCommentCount?: number,
 ): boolean {
 	const apiKeys = new Set(normalizedKeysFromRemote(remote));
 	const remoteIds = new Set(remote.map(c => c.id).filter((id): id is string => !!id));
 	const threads = extractAbyssCommentThreads(taskLines);
 	const missingFromApi = threads.filter(t => !apiKeys.has(normalizedCommentKey(t.body)));
 	if (missingFromApi.length === 0) return false;
-
-	// Dexie `commentCount` ahead of an empty GET means stale maps or a failed prior push.
-	if (remote.length === 0 && typeof remoteCommentCount === 'number' && remoteCommentCount > 0) {
-		return true;
-	}
 
 	const mapForThread = (t: AbyssCommentThread) => {
 		const key = normalizedCommentKey(t.body);
@@ -59,29 +59,20 @@ export function vaultHasUnpushedCommentThreads(
 
 	for (const t of missingFromApi) {
 		const mapped = mapForThread(t);
-		if (!mapped) return true;
-		if (mapped.ticktickCommentId && !remoteIds.has(mapped.ticktickCommentId)) {
-			// Vault-origin stale id → failed POST or never landed; re-push even for a single thread.
-			if (mapped.origin === 'vault') return true;
-			// Several stale maps after mass TT wipe.
-			if (missingFromApi.length > 1) return true;
-		}
+		// No map / no TickTick id → vault still needs a create push.
+		if (!mapped?.ticktickCommentId) return true;
 	}
 
-	// One mapped thread missing while TT still has other comments → wait for pull (TP-COMMENT-TT-DELETE).
-	if (remote.length > 0) return false;
+	// All missing threads are mapped. Count how many mapped ids are absent from the live GET.
+	const mappedIdsGone = missingFromApi.filter(t => {
+		const m = mapForThread(t)!;
+		return !remoteIds.has(m.ticktickCommentId);
+	}).length;
 
-	// Empty Comments API + commentCount 0: one remote-origin mapped miss is a TT delete pending pull;
-	// unmapped or vault-origin threads still need a push.
-	if (remoteCommentCount === 0 && remote.length === 0) {
-		if (missingFromApi.length > 1) return true;
-		if (missingFromApi.length === 1) {
-			const m = mapForThread(missingFromApi[0]);
-			if (!m || m.origin === 'vault') return true;
-			return false;
-		}
-	}
-	return true;
+	if (mappedIdsGone === 0) return false;
+
+	// STALE-MAPS: several mapped ids gone → re-push. Single mapped miss → TT delete, wait for pull.
+	return mappedIdsGone > 1;
 }
 
 import type { CommentSyncMatch, CommentSyncPlan, RemoteCommentRef, VaultCommentThreadRef } from '@/sync/comments/types';
