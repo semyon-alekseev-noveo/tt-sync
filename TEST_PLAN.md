@@ -348,13 +348,13 @@ Implemented from `docs/TICKTICK_DELTA_API.md` §3.2 before the §3.5 pilot, on t
 1. Install a build that contains slice 2–4. Prefer notes whose Dexie `commentCount` is populated (after one full sync or backfill) and matches vault threads with covering maps. Do not edit the vault. Run **Synchronize** twice.
 2. Read the `[perf]` line.
 
-Expected (unit): matched idle + empty-thread tasks → no `getTaskComments` from sync or preparePersist; full-file hash-unchanged does not double-call sync. Expected (live): after slice 4, comment GETs near **0**; idle-zero still needs `getTaskById` = 0. Do **not** mark `TP-IDLE-ZERO` pass while byId probes remain.
+Expected (unit): matched idle + empty-thread tasks → no `getTaskComments` from sync or preparePersist; full-file hash-unchanged does not double-call sync. Expected (live): after slice 4–5, comment GETs **0** and `getTaskById` **0**.
 
 | ID | Pilot status | Evidence |
 |----|----------------|----------|
-| TP-IDLE-ZERO | **fail** (**2.0.81**–**2.0.84**) | Automated still pass. Live quiet ×2 on **2.0.84**: `getTaskComments` **0** / `getTaskById` **44** / `vaultWrites` 0 (`batch/check` 2), `totalMs` ~18 s. Evidence: `docs/pilot/results/PERF-DELTA/84-idle-zero-2.0.84.md` (also 83/82/81). [#85](https://github.com/semyon-alekseev-noveo/tt-sync/issues/85) stays open for byId residual. |
+| TP-IDLE-ZERO | **pass live** (**2.0.85**) | Quiet ×2: `getTaskComments` **0** / `getTaskById` **0** / `vaultWrites` 0 (`batch/check` 2), `totalMs` ~7 s. Evidence: `docs/pilot/results/PERF-DELTA/85-idle-zero-2.0.85.md` (prior fails 81–84). [#85](https://github.com/semyon-alekseev-noveo/tt-sync/issues/85) close. |
 | TP-IDLE-ZERO-SWEEP | not run live (unit pass) | Vitest: `abyssCommentSync.test.ts`, `pull_field_mapping.test.ts`, `preparePersistNetworkIdle.test.ts`. |
-| TP-IDLE-EMPTY-SWEEP | **pass live** (**2.0.84**) | Quiet comments **0** (was 871). Evidence: `PERF-DELTA/84-idle-zero-2.0.84.md`. |
+| TP-IDLE-EMPTY-SWEEP | **pass live** (**2.0.84**+) | Quiet comments **0** (was 871). Evidence: `PERF-DELTA/84-idle-zero-2.0.84.md`, `85-idle-zero-2.0.85.md`. |
 
 ## TP-IDLE-MANUAL-SCOPE — quiet manual does not double-sweep comments
 
@@ -414,24 +414,24 @@ Automated: `abyssCommentSync.test.ts`, `taskModificationCommentSmoke.test.ts` (`
 
 1. Build with slice 5. No vault edits. **Synchronize** twice; read `[perf]`.
 2. Expected: quiet `getTaskById` **0** (or near-zero); `getTaskComments` stays **0**.
-3. Do **not** invent full `TP-IDLE-ZERO` pass until #85 re-pilot after release.
+3. Do **not** invent pass — record live `#85` evidence after release.
 
 Automated: `tpIdleByIdZero.test.ts` (`TP-IDLE-BYID-ZERO`).
 
 | ID | Pilot status | Evidence |
 |----|----------------|----------|
-| TP-IDLE-BYID-ZERO | not run live (unit pass) | Vitest named by ID. Live: #85 after bump/release. `docs/pilot/results/PERF-DELTA/98-slice5-idle-byid.md`. |
+| TP-IDLE-BYID-ZERO | **pass live** (**2.0.85**) | Quiet `getTaskById` **0**. Evidence: `PERF-DELTA/85-idle-zero-2.0.85.md` (unit: `98-slice5-idle-byid.md`). |
 
 ## After §3.5 (`docs/TICKTICK_DELTA_API.md` §3.2)
 
 Items 1 and 2 shipped in **2.0.53** from the §3.2 defaults, before the §3.5 pilot. Treating them as future work is outdated. The four `TP-DELTA-*` rows above are still **not run**, and `skipPushWhenTickTickRenamedVaultLine` is already off in **2.0.53** without that evidence. Items 3–5 are not started. `syncTaskBean.add` is already merged in `getUpdatedTasks`.
 
 1. **Echo. Done in 2.0.53.** `pull.ts` skips a delta row only when `rt.etag === local.task.etag`. `skipPushWhenTickTickRenamedVaultLine` no longer calls `getTaskById`. Still open: persist `id2etag` from `batch/task` without the follow-up `getTaskById` inside `TicktickRestAPI.updateTask`.
-2. **Idle vault. Done in 2.0.53; comment idle cut restored in #62 slice 1; push/persist idle-fast in slice 2; double-sweep cut in slice 3; empty-thread skip + deferCommentSweep in slice 4; slice 5 (#98 / `TP-IDLE-BYID-ZERO`) cuts quiet `getTaskById` (ProjectScheme Dexie + false parentChanged + list-move gate).** `vaultLineBehindTask` compares the line to Dexie. `syncAbyssCommentsToTickTick` / `preparePersistNetwork` skip GET when `commentCount` matches + maps cover (`TP-IDLE-ZERO-SWEEP`) or threads+maps empty (`TP-IDLE-EMPTY-SWEEP` / #94). Pre-pull is edited+active only; `syncFiles` skips already-swept paths (`TP-IDLE-MANUAL-SCOPE` / #83). Pilot **TP-IDLE-ZERO** still **fail** through **2.0.84** (`getTaskById` **44**); **2.0.84** live: comments **0**, wall ~18 s (`PERF-DELTA/84-idle-zero-2.0.84.md`) — #85 open for byId residual; re-pilot after slice 5 release.
+2. **Idle vault. Done in 2.0.53; slices 1–5 delivered live idle-zero on **2.0.85**.** Comment idle cut restored in #62 slice 1; push/persist idle-fast in slice 2; double-sweep cut in slice 3; empty-thread skip + deferCommentSweep in slice 4; slice 5 (#98 / `TP-IDLE-BYID-ZERO`) cuts quiet `getTaskById`. Pilot **TP-IDLE-ZERO** **pass** on **2.0.85** (byId **0**, comments **0**, `totalMs` ~7 s — `PERF-DELTA/85-idle-zero-2.0.85.md`); #85 close.
 3. **Comments. Not started.** A TickTick-only comment that changes neither `etag`, `commentCount`, nor `update[]` is not left to a daily reconcile. Confirm that delay on the §3.5 pilot (#84) before coding it.
 4. **Closed and trash. Not started.** `project/all/closed` and trash pagination are not a daily job.
 5. **Daily job. Not started.** Closed window, trash, comment backfill, and one `batch/check/0` compare are not implemented.
-6. **Tests.** `TP-IDLE-ZERO`, `TP-IDLE-ZERO-SWEEP`, `TP-IDLE-MANUAL-SCOPE`, `TP-IDLE-EMPTY-SWEEP`, `TP-IDLE-BYID-ZERO`, and `TP-ECHO-ETAG` exist and pass in vitest. Live idle / delta pilots still open (#84/#85). `TP1-QUIET-TITLE-ETAG`, `TP-COMMENT-COUNT`, and `TP-DAILY-RECONCILE` are not implemented.
+6. **Tests.** `TP-IDLE-ZERO`, `TP-IDLE-ZERO-SWEEP`, `TP-IDLE-MANUAL-SCOPE`, `TP-IDLE-EMPTY-SWEEP`, `TP-IDLE-BYID-ZERO`, and `TP-ECHO-ETAG` exist and pass in vitest. Live idle-zero **pass** on **2.0.85**; delta pilots still open (#84). `TP1-QUIET-TITLE-ETAG`, `TP-COMMENT-COUNT`, and `TP-DAILY-RECONCILE` are not implemented.
 
 ## PR — mass-deletion / empty-side guard
 

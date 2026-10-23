@@ -139,7 +139,8 @@ Pass only with evidence: the note path, the `ticktick_id`, and either the journa
 | 2026-10-23 | Thinkpad-tts-test | 2.0.83 | agent | TP-IDLE-ZERO / TP-IDLE-MANUAL-SCOPE | fail / partial | Quiet ×2: comments **871** (~½ of 1741), `totalMs` ~250–276 s, `push` ~30 ms. Evidence: `PERF-DELTA/83-idle-zero-2.0.83.md`. #85 open. |
 | 2026-10-23 | unit | tip (#94) | agent | TP-IDLE-EMPTY-SWEEP | pass (unit) | Empty-thread skip + deferCommentSweep. |
 | 2026-10-23 | Thinkpad-tts-test | 2.0.84 | agent | TP-IDLE-ZERO / TP-IDLE-EMPTY-SWEEP | fail / pass | Quiet ×2: comments **0**, byId **44**, `totalMs` ~18 s. Evidence: `PERF-DELTA/84-idle-zero-2.0.84.md`. #85 open (byId). |
-| 2026-10-23 | unit | tip (#98) | agent | TP-IDLE-BYID-ZERO | pass (unit) | ProjectScheme Dexie + parentChanged + list-move gate; live re-pilot **not run** (#85). |
+| 2026-10-23 | unit | tip (#98) | agent | TP-IDLE-BYID-ZERO | pass (unit) | ProjectScheme Dexie + parentChanged + list-move gate. |
+| 2026-10-23 | Thinkpad-tts-test | 2.0.85 | agent | TP-IDLE-ZERO / TP-IDLE-BYID-ZERO | pass / pass | Quiet ×2: byId **0**, comments **0**, `totalMs` ~7 s. Evidence: `PERF-DELTA/85-idle-zero-2.0.85.md`. #85 close. |
 | | `<live-vault>` | | | Step 8 | not run | Blocked until the four rows above are pass. |
 
 This branch did not run the gate. Leave the result column as **not run** until you do.

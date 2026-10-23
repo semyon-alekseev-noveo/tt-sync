@@ -27,13 +27,13 @@ Tracker issues live on [`semyon-alekseev-noveo/tt-sync`](https://github.com/semy
 | └ PR1–PR7 | [#41](https://github.com/semyon-alekseev-noveo/tt-sync/issues/41)–[#48](https://github.com/semyon-alekseev-noveo/tt-sync/issues/48) | P1 | **closed** → PRs #34–#40 | keep closed |
 | SEC-CREDS-1 | [#32](https://github.com/semyon-alekseev-noveo/tt-sync/issues/32) | P1 | **open** — owner revoke + autologin decision | **keep** (pre–Step 8) |
 | Repo hygiene backlog | [#33](https://github.com/semyon-alekseev-noveo/tt-sync/issues/33) | P3 | **open** / backlog | **keep** — do not pick up before #15/#20 |
-| **PERF/DELTA** (wall-time + delta path) | [#62](https://github.com/semyon-alekseev-noveo/tt-sync/issues/62) | **P0** | **open** — live `TP-IDLE-ZERO` **fail** on **2.0.84** (comments **0**, byId **44**); evidence `PERF-DELTA/84-idle-zero-2.0.84.md` | **active** 2026-10-23 |
+| **PERF/DELTA** (wall-time + delta path) | [#62](https://github.com/semyon-alekseev-noveo/tt-sync/issues/62) | **P0** | **open** — idle-zero **pass** on **2.0.85**; remaining `#84` `TP-DELTA-*` / P2; evidence `PERF-DELTA/85-idle-zero-2.0.85.md` | **active** 2026-10-23 |
 | └ Slice 2 commentCount / idle-fast / preparePersist | [#82](https://github.com/semyon-alekseev-noveo/tt-sync/issues/82) | P0 | **closed** — **2.0.82** | keep closed |
 | └ Slice 3 stop double-sweep | [#83](https://github.com/semyon-alekseev-noveo/tt-sync/issues/83) | P0 | **closed** — **2.0.83**; live partial (~½ GETs) | keep closed if GH closed |
 | └ Slice 4 empty-thread skip | [#94](https://github.com/semyon-alekseev-noveo/tt-sync/issues/94) | P0 | **closed** — **2.0.84**; live comments **0** | keep closed |
-| └ Slice 5 cut quiet `getTaskById` | [#98](https://github.com/semyon-alekseev-noveo/tt-sync/issues/98) | P0 | **open** — 20 ProjectScheme + 24 false parentChanged | **new** 2026-10-23 |
+| └ Slice 5 cut quiet `getTaskById` | [#98](https://github.com/semyon-alekseev-noveo/tt-sync/issues/98) | P0 | **closed** — **2.0.85** live byId **0** | keep closed |
 | └ Pilot TP-DELTA-* | [#84](https://github.com/semyon-alekseev-noveo/tt-sync/issues/84) | P1 | **open** | **new** 2026-10-23 |
-| └ Re-pilot TP-IDLE-ZERO | [#85](https://github.com/semyon-alekseev-noveo/tt-sync/issues/85) | P0 | **open** — **fail** on **2.0.84** (byId **44**); comments **0** | **active** 2026-10-23 |
+| └ Re-pilot TP-IDLE-ZERO | [#85](https://github.com/semyon-alekseev-noveo/tt-sync/issues/85) | P0 | **pass** on **2.0.85** — close | **done** 2026-10-23 |
 | └ TECH-START-1 / register scan | [#86](https://github.com/semyon-alekseev-noveo/tt-sync/issues/86) | P2 | **open** | **new** 2026-10-23 |
 | └ Per-phase `[perf]` comment counters | [#87](https://github.com/semyon-alekseev-noveo/tt-sync/issues/87) | P2 | **open** | **new** 2026-10-23 |
 | Sync product risks cluster | [#63](https://github.com/semyon-alekseev-noveo/tt-sync/issues/63) | P1 | **open** — GAP-COMMENT-EDIT, RISK-PULL-WINS-LOCAL, RISK-DUAL-STORE, BUG-TICKTICK-ID-LEAK | **new** 2026-10-22 |
