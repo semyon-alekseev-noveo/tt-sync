@@ -126,7 +126,8 @@ Pass only with evidence: the note path, the `ticktick_id`, and either the journa
 | 2026-10-22 | Thinkpad-tts-test | 2.0.79 | agent | release Synchronize smoke | pass | Deploy/reload/`tts-sync`; CP advanced; release https://github.com/semyon-alekseev-noveo/tt-sync/releases/tag/2.0.79. |
 | 2026-10-22 | Thinkpad-tts-test | 2.0.79 | agent | BUG-COMMENT-VAULT-DUP-KEY | fail | `task-11-16` still ~21 Abyss lines after Synchronize (unit pass only). Evidence: `58-release-2.0.79-smoke.md`. Issue #27. |
 | 2026-10-22 | unit | 2.0.80 | agent | BUG-COMMENT-VAULT-DUP-KEY | pass (unit) | Quiet sync marks `vault-comment-dup-keys`; vitest **701**. Issue #27. |
-| 2026-10-22 | Thinkpad-tts-test | 2.0.80 (PR tip) | agent | BUG-COMMENT-VAULT-DUP-KEY | pass | Local deploy PR #60; `tts-sync` → `vault-comment-dup-keys`; `task-11-16` 20→4 bullets, no ISO. Evidence: `27-vault-dup-key-2.0.80-unit.md`. Release still pending merge. |
+| 2026-10-22 | Thinkpad-tts-test | 2.0.80 (PR tip) | agent | BUG-COMMENT-VAULT-DUP-KEY | pass | Local deploy PR #60; `tts-sync` → `vault-comment-dup-keys`; `task-11-16` 20→4 bullets, no ISO. Evidence: `27-vault-dup-key-2.0.80-unit.md`. |
+| 2026-10-22 | Thinkpad-tts-test | 2.0.80 (release) | agent | BUG-COMMENT-VAULT-DUP-KEY | pass | GitHub release assets deploy + Synchronize; `task-11-16` stays **4** wall-clock, no ISO. Evidence: `60-release-2.0.80-smoke.md`. Issue #27 closed. |
 | | `<live-vault>` | | | Step 8 | not run | Blocked until the four rows above are pass. |
 
 This branch did not run the gate. Leave the result column as **not run** until you do.
