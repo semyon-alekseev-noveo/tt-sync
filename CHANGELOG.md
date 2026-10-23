@@ -5,7 +5,7 @@
 - Context: Dual-analyst consensus after **2.0.81** `TP-IDLE-ZERO` fail (1757 comment GETs); epic #62 needs slice 2 + child trackers.
 - Target: Brief + children under #62; implement slice 2 (`commentCount` backfill, idle-fast sync, preparePersist gate); PR into `abyss-mapping` (no bump/merge/release/close #62).
 - Actions log: Wrote `PERF-DELTA/62-analyst-dual-brief.md` + INDEX; filed #82–#87 and commented on #62; `canSkipAbyssCommentNetwork` + pull echo-skip backfill; gate `preparePersistNetwork`; cases `TP-IDLE-ZERO-SWEEP`; docs INDEX/TEST_PLAN/PROJECT_STATE.
-- Validation: `npx vitest run` + `npm run build` (see PR); focused tests for sweep/backfill/preparePersist pass.
+- Validation: `npx vitest run` → **101** files, **708** passed; `npm run build` → ok; PR https://github.com/semyon-alekseev-noveo/tt-sync/pull/88.
 - Problems: Live idle still **fail** until re-pilot #85; double-sweep deferred to #83 (`open`).
 - To Be Done: Owner merges this PR; slice 3 #83; pilots #84/#85; no invented pass rows.
 - References: https://github.com/semyon-alekseev-noveo/tt-sync/issues/62, #82–#87, `docs/pilot/results/PERF-DELTA/62-analyst-dual-brief.md`, `CHANGELOG.md`
