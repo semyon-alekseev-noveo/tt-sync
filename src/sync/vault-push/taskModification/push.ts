@@ -51,10 +51,15 @@ export class TaskModificationPush {
 			await this.plugin.taskRepository.upsertTask(lineTask, filepath, Date.now());
 		}
 
-		// A GTD stage tag is stripped before the tag compare, and a failed move can
-		// leave the local projectId already equal to the destination. Ask TickTick
-		// where the task is, and move from there.
-		if (!modifications.projectMoved && lineTask.projectId) {
+		// List move: probe TickTick only when the line and Dexie disagree on list
+		// (TP-IDLE-BYID-ZERO). Same projectId → no getTaskById on quiet applyModifications.
+		// Residual: local already updated to destination while TT still has the old list
+		// (failed prior move) is not covered until another field edit — see #98.
+		if (
+			!modifications.projectMoved
+			&& lineTask.projectId
+			&& lineTask.projectId !== savedTask.projectId
+		) {
 			let remoteProject: string | undefined;
 			try {
 				const remote = await this.plugin.tickTickRestAPI?.getTaskById(taskId, undefined);

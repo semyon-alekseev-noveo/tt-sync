@@ -148,9 +148,18 @@ export class ProjectSchemeService {
 		const notes: NoteSide[] = [];
 		const parents: ParentSide[] = [];
 		const titles = new Map<string, string>();
+		// TP-IDLE-BYID-ZERO: prefer Dexie/`updated` batch — quiet vaultReconcile already
+		// passes every local task. GET only when the parent id is missing from that batch.
+		const localById = new Map<string, ITask>();
+		for (const t of updated) {
+			if (t?.id) localById.set(t.id, t);
+		}
 		for (const n of allNotes) {
 			if (!n.id) { notes.push(n); continue; }
-			const t = await api?.getTaskById(n.id, this.listId);
+			let t: ITask | null | undefined = localById.get(n.id);
+			if (!t) {
+				t = await api?.getTaskById(n.id, this.listId);
+			}
 			if (!t || t.projectId !== this.listId || !isSchemeParentTask(t, this.listId, this.parentLimit)) {
 				log.debug(`ProjectScheme: skip linked note ${n.path} (parent missing or out of sync scope)`);
 				continue;

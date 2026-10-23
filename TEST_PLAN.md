@@ -400,18 +400,38 @@ Automated: `abyssCommentSync.test.ts`, `taskModificationCommentSmoke.test.ts` (`
 
 | ID | Pilot status | Evidence |
 |----|----------------|----------|
-| TP-IDLE-EMPTY-SWEEP | not run live (unit pass) | Vitest named by ID. Live: #85 after bump/release. |
+| TP-IDLE-EMPTY-SWEEP | **pass live** (**2.0.84**) | Quiet comments **0**. Evidence: `PERF-DELTA/84-idle-zero-2.0.84.md` (docs PR / tip). |
+
+## TP-IDLE-BYID-ZERO — quiet sync skips avoidable getTaskById
+
+**#62 slice 5 / [#98](https://github.com/semyon-alekseev-noveo/tt-sync/issues/98).** After **2.0.84**, quiet still **44** `getTaskById` (20 ProjectScheme + 24 false `parentChanged` → list-move). Policy:
+
+1. `ProjectScheme.run` uses Dexie/`updated` parents; GET only when the parent id is missing from that batch.
+2. Empty vault `parentId` vs Dexie scheme parent for that file is **not** `parentChanged` (`vaultParentMeaningfullyChanged`).
+3. List-move `getTaskById` runs only when line `projectId` ≠ Dexie `projectId`.
+
+### Steps (manual)
+
+1. Build with slice 5. No vault edits. **Synchronize** twice; read `[perf]`.
+2. Expected: quiet `getTaskById` **0** (or near-zero); `getTaskComments` stays **0**.
+3. Do **not** invent full `TP-IDLE-ZERO` pass until #85 re-pilot after release.
+
+Automated: `tpIdleByIdZero.test.ts` (`TP-IDLE-BYID-ZERO`).
+
+| ID | Pilot status | Evidence |
+|----|----------------|----------|
+| TP-IDLE-BYID-ZERO | not run live (unit pass) | Vitest named by ID. Live: #85 after bump/release. `docs/pilot/results/PERF-DELTA/98-slice5-idle-byid.md`. |
 
 ## After §3.5 (`docs/TICKTICK_DELTA_API.md` §3.2)
 
 Items 1 and 2 shipped in **2.0.53** from the §3.2 defaults, before the §3.5 pilot. Treating them as future work is outdated. The four `TP-DELTA-*` rows above are still **not run**, and `skipPushWhenTickTickRenamedVaultLine` is already off in **2.0.53** without that evidence. Items 3–5 are not started. `syncTaskBean.add` is already merged in `getUpdatedTasks`.
 
 1. **Echo. Done in 2.0.53.** `pull.ts` skips a delta row only when `rt.etag === local.task.etag`. `skipPushWhenTickTickRenamedVaultLine` no longer calls `getTaskById`. Still open: persist `id2etag` from `batch/task` without the follow-up `getTaskById` inside `TicktickRestAPI.updateTask`.
-2. **Idle vault. Done in 2.0.53; comment idle cut restored in #62 slice 1; push/persist idle-fast in slice 2; double-sweep cut in slice 3; empty-thread skip + deferCommentSweep in slice 4.** `vaultLineBehindTask` compares the line to Dexie. `syncAbyssCommentsToTickTick` / `preparePersistNetwork` skip GET when `commentCount` matches + maps cover (`TP-IDLE-ZERO-SWEEP`) or threads+maps empty (`TP-IDLE-EMPTY-SWEEP` / #94). Pre-pull is edited+active only; `syncFiles` skips already-swept paths (`TP-IDLE-MANUAL-SCOPE` / #83). Pilot **TP-IDLE-ZERO** on **2.0.81**/**2.0.82**/**2.0.83** = **fail**; **2.0.83** live: comments **871** (~½ of 1741), wall ~½ — re-pilot #85 after slice 4 release.
+2. **Idle vault. Done in 2.0.53; slices 1–4 cut comment GETs; slice 5 (#98 / `TP-IDLE-BYID-ZERO`) cuts quiet `getTaskById` (ProjectScheme Dexie + false parentChanged + list-move gate).** Pilot **TP-IDLE-ZERO** still **fail** through **2.0.84** (comments **0**, byId **44**); re-pilot #85 after slice 5 release.
 3. **Comments. Not started.** A TickTick-only comment that changes neither `etag`, `commentCount`, nor `update[]` is not left to a daily reconcile. Confirm that delay on the §3.5 pilot (#84) before coding it.
 4. **Closed and trash. Not started.** `project/all/closed` and trash pagination are not a daily job.
 5. **Daily job. Not started.** Closed window, trash, comment backfill, and one `batch/check/0` compare are not implemented.
-6. **Tests.** `TP-IDLE-ZERO`, `TP-IDLE-ZERO-SWEEP`, `TP-IDLE-MANUAL-SCOPE`, and `TP-ECHO-ETAG` exist and pass in vitest. Live idle / delta pilots still open (#84/#85). `TP1-QUIET-TITLE-ETAG`, `TP-COMMENT-COUNT`, and `TP-DAILY-RECONCILE` are not implemented.
+6. **Tests.** `TP-IDLE-ZERO`, `TP-IDLE-ZERO-SWEEP`, `TP-IDLE-MANUAL-SCOPE`, `TP-IDLE-EMPTY-SWEEP`, `TP-IDLE-BYID-ZERO`, and `TP-ECHO-ETAG` exist and pass in vitest. Live idle / delta pilots still open (#84/#85). `TP1-QUIET-TITLE-ETAG`, `TP-COMMENT-COUNT`, and `TP-DAILY-RECONCILE` are not implemented.
 
 ## PR — mass-deletion / empty-side guard
 

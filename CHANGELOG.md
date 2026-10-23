@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-23 08:17 UTC
+
+- Context: Live **2.0.84** quiet still **44** `getTaskById` (20 ProjectScheme + 24 false parentChanged → list-move); comments already **0** (#98).
+- Target: Cut quiet byId probes (`TP-IDLE-BYID-ZERO`); no version bump; leave #85/#62 open.
+- Actions log: Dexie/`updated` in `ProjectScheme.run`; `vaultParentMeaningfullyChanged`; list-move GET only when projectIds differ; tests `tpIdleByIdZero.test.ts`; evidence `PERF-DELTA/98-slice5-idle-byid.md`.
+- Validation: `npx vitest run` → **102** files, **715** passed; `npm run build` → ok.
+- Problems: Live byId still open until #85 after release (`open`); failed-move with local already at destination remains a residual edge.
+- To Be Done: Owner merges; bump/release; #85 re-pilot; leave #62 open.
+- References: https://github.com/semyon-alekseev-noveo/tt-sync/issues/98, #62, #85, `CHANGELOG.md`
+
 ### Iteration 2026-10-23 07:39 UTC
 
 - Context: Owner merged [#95](https://github.com/semyon-alekseev-noveo/tt-sync/pull/95) (PERF/DELTA slice 4 empty-sweep / #94); tip still **2.0.83** — need bump before tag (PROC-RELEASE-GATE #30).

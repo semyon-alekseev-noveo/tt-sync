@@ -6,7 +6,7 @@ import { NewFileMap } from '@/services/NewFileMap';
 import { readNoteForWrite } from '@/sync/vault-io';
 import { getSettings } from '@/settings';
 import { getAllProjects } from '@/db/projects';
-import { isPathInPushScope, normalizeSyncTag, resolveSyncedListIds, tickTickTaskEntersVault, type TaskSyncLimitOptions } from '@/syncScope';
+import { isPathInPushScope, normalizeSyncTag, resolveSyncedListIds, tickTickTaskEntersVault, vaultParentMeaningfullyChanged, type TaskSyncLimitOptions } from '@/syncScope';
 import log from '@/utils/logger';
 import type { TaskModificationDetector } from '@/sync/vault-push/taskModification/TaskModificationDetector';
 import type { PendingTickTickDeletion } from '@/sync/vault-push/taskModification/types';
@@ -122,7 +122,15 @@ export class TaskModificationScan {
 		if (savedTask.lineHash && newHash === savedTask.lineHash) {
 			// Check for moves
 			const moveCheck = await this.checkForTaskMove(taskId, filepath!);
-			const parentChanged = (taskRecord.parentId || '') !== (savedTask.parentId || '');
+			// TP-IDLE-BYID-ZERO: empty vault parent vs Dexie scheme parent is not a real edit.
+			const schemeParentForFile = filepath
+				? this.plugin.projectScheme?.resolveForFile?.(filepath)?.parentId
+				: undefined;
+			const parentChanged = vaultParentMeaningfullyChanged(
+				taskRecord.parentId,
+				savedTask.parentId,
+				{ schemeParentForFile },
+			);
 
 			if (!moveCheck.moved && !parentChanged) {
 				const lineTask = await this.plugin.taskParser?.convertLineToTask(

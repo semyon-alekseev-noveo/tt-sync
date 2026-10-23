@@ -84,6 +84,25 @@ export function listMoveSource(
 }
 
 /**
+ * TP-IDLE-BYID-ZERO: NewFileMap often leaves `parentId` empty on project-note
+ * children while Dexie still stores the scheme parent. That is not a user parent
+ * edit — do not force `applyModifications` (and its list-move `getTaskById`).
+ *
+ * `schemeParentForFile` is `projectScheme.resolveForFile(path).parentId`.
+ */
+export function vaultParentMeaningfullyChanged(
+	vaultParentId: string | undefined | null,
+	savedParentId: string | undefined | null,
+	opts?: { schemeParentForFile?: string },
+): boolean {
+	const v = vaultParentId || '';
+	const s = savedParentId || '';
+	if (v === s) return false;
+	if (!v && s && opts?.schemeParentForFile === s) return false;
+	return true;
+}
+
+/**
  * TickTick → Obsidian, two ways (OR, not AND):
  * the task sits on an allow-listed list, or it carries SyncTag.
  * Either one is enough. A task with neither stays out.
