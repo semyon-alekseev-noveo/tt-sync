@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-23 13:54 UTC
+
+- Context: Owner merged #105; asked to finish [#102](https://github.com/semyon-alekseev-noveo/tt-sync/issues/102) remainder on **2.0.85**.
+- Target: Fill every checklist row pass/fail/not run; close #102; leave #104 open.
+- Actions log: Quiet line-stable + checkpoint; open-note ACTIVE push; type-during-sync CLI approx; QUIET-TITLE/guard/fence deferred with reason; evidence + TEST_PLAN.
+- Validation: TT title `post102-active-135332` via MCP; markers survived sync; `checkPoint` advanced; TT-DELETE still fail (#104).
+- Problems: TT-DELETE (`open` #104); several not-run (modal/fixtures/no-mtime) — documented.
+- To Be Done: Owner merges this PR; close #102; next #104 or #84.
+- References: https://github.com/semyon-alekseev-noveo/tt-sync/issues/102, #104, `docs/pilot/results/POST-PERF-REGRESSION/102-post-perf-regression.md`, `CHANGELOG.md`
+
 ### Iteration 2026-10-23 12:36 UTC
 
 - Context: After GitHub close of [#62](https://github.com/semyon-alekseev-noveo/tt-sync/issues/62), start [#102](https://github.com/semyon-alekseev-noveo/tt-sync/issues/102) post-PERF regression on **2.0.85**.
