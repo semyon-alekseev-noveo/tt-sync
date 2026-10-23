@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-23 12:36 UTC
+
+- Context: After GitHub close of [#62](https://github.com/semyon-alekseev-noveo/tt-sync/issues/62), start [#102](https://github.com/semyon-alekseev-noveo/tt-sync/issues/102) post-PERF regression on **2.0.85**.
+- Target: Idle reconfirm + comments smoke + vitest; record honest fails; leave editor rows not run if not executed.
+- Actions log: Quiet ×2 (byId/comments 0); `TP-BUG-COMMENT-NO-PUSH` pass; `TP-COMMENT-TT-DELETE` fail → [#104](https://github.com/semyon-alekseev-noveo/tt-sync/issues/104); evidence `POST-PERF-REGRESSION/`; vitest **715**.
+- Validation: Quiet2 ~6.6 s / probes 0; NO-PUSH marker in TT Comments; TT-DELETE re-pushed; `npx vitest run` → **715** passed.
+- Problems: TT-DELETE live fail (`open` #104); editor/guard/quiet-title still **not run**.
+- To Be Done: Finish remaining #102 rows or defer; merge this PR after #103 epic-close docs on tip.
+- References: https://github.com/semyon-alekseev-noveo/tt-sync/issues/102, #104, #62, `docs/pilot/results/POST-PERF-REGRESSION/102-post-perf-regression.md`, `CHANGELOG.md`
+
 ### Iteration 2026-10-23 12:30 UTC
 
 - Context: Idle path done on **2.0.85**; user asked to close epic [#62](https://github.com/semyon-alekseev-noveo/tt-sync/issues/62) then start [#102](https://github.com/semyon-alekseev-noveo/tt-sync/issues/102).
