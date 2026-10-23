@@ -27,8 +27,15 @@ Tracker issues live on [`semyon-alekseev-noveo/tt-sync`](https://github.com/semy
 | └ PR1–PR7 | [#41](https://github.com/semyon-alekseev-noveo/tt-sync/issues/41)–[#48](https://github.com/semyon-alekseev-noveo/tt-sync/issues/48) | P1 | **closed** → PRs #34–#40 | keep closed |
 | SEC-CREDS-1 | [#32](https://github.com/semyon-alekseev-noveo/tt-sync/issues/32) | P1 | **open** — owner revoke + autologin decision | **keep** (pre–Step 8) |
 | Repo hygiene backlog | [#33](https://github.com/semyon-alekseev-noveo/tt-sync/issues/33) | P3 | **open** / backlog | **keep** — do not pick up before #15/#20 |
+| **PERF/DELTA** (wall-time + delta path) | [#62](https://github.com/semyon-alekseev-noveo/tt-sync/issues/62) | **P0** | **open** — measure + cut sync duration; `TP-PERF-*` / `TP-DELTA-*` / `TP-IDLE-ZERO`; folds TECH-START-1 + RISK-LARGE-VAULT remainder | **new** 2026-10-22 |
+| Sync product risks cluster | [#63](https://github.com/semyon-alekseev-noveo/tt-sync/issues/63) | P1 | **open** — GAP-COMMENT-EDIT, RISK-PULL-WINS-LOCAL, RISK-DUAL-STORE, BUG-TICKTICK-ID-LEAK | **new** 2026-10-22 |
+| Pilot vault config | [#64](https://github.com/semyon-alekseev-noveo/tt-sync/issues/64) | P1 | **open** — Abyss Inbox `#inbox`; test-vault `data.json` drift | **new** 2026-10-22 |
+| NOTE-L3b / BUG-COMMENT-NO-PUSH recheck | [#65](https://github.com/semyon-alekseev-noveo/tt-sync/issues/65) | P1 | **open** — residual soak on tip (not #14 duplicate) | **new** 2026-10-22 |
+| Post-#31 modularization follow-on | [#66](https://github.com/semyon-alekseev-noveo/tt-sync/issues/66) | P2 | **open** — timed `vaultDeletion` / TickTickService extract; TECH-API-1 note | **new** 2026-10-22 |
 
 **Closed this audit:** none (nothing newly obsolete after #55).
+
+**Filed 2026-10-22 (backlog gaps):** #62–#66. Intentionally **not** filed: DEL-3 / CTX-D2 (stay under Step 7 / #20); items already on #15/#17–#20/#28–#33.
 
 ## Templates
 
