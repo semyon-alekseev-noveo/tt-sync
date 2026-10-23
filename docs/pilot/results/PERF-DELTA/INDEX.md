@@ -13,8 +13,9 @@ Gate for GitHub epic [#62](https://github.com/semyon-alekseev-noveo/tt-sync/issu
 | Live `[perf]` + `TP-IDLE-ZERO` on **2.0.83** | [83-idle-zero-2.0.83.md](83-idle-zero-2.0.83.md) / [#85](https://github.com/semyon-alekseev-noveo/tt-sync/issues/85) | **fail** idle-zero; **partial** — comments **871** (~½ of 1741), `totalMs` ~250–276 s |
 | Slice 4 — empty-thread skip + `deferCommentSweep` / `TP-IDLE-EMPTY-SWEEP` | [94-slice4-empty-sweep.md](94-slice4-empty-sweep.md) / [#94](https://github.com/semyon-alekseev-noveo/tt-sync/issues/94) | **unit locked**; live = [84-idle-zero-2.0.84.md](84-idle-zero-2.0.84.md) |
 | Live `[perf]` + `TP-IDLE-ZERO` on **2.0.84** | [84-idle-zero-2.0.84.md](84-idle-zero-2.0.84.md) / [#85](https://github.com/semyon-alekseev-noveo/tt-sync/issues/85) | **fail** idle-zero (`getTaskById` **44**); **comments 0** (was 871) |
-| Slice 5 — cut quiet `getTaskById` / `TP-IDLE-BYID-ZERO` | [98-slice5-idle-byid.md](98-slice5-idle-byid.md) / [#98](https://github.com/semyon-alekseev-noveo/tt-sync/issues/98) | **unit locked** — live re-pilot #85 after release |
+| Slice 5 — cut quiet `getTaskById` / `TP-IDLE-BYID-ZERO` | [98-slice5-idle-byid.md](98-slice5-idle-byid.md) / [#98](https://github.com/semyon-alekseev-noveo/tt-sync/issues/98) | **unit locked**; live = [85-idle-zero-2.0.85.md](85-idle-zero-2.0.85.md) |
+| Live `[perf]` + `TP-IDLE-ZERO` on **2.0.85** | [85-idle-zero-2.0.85.md](85-idle-zero-2.0.85.md) / [#85](https://github.com/semyon-alekseev-noveo/tt-sync/issues/85) | **pass** — byId **0**, comments **0**, `totalMs` ~7 s |
 | `TP-DELTA-*` §3.5 pilot | issue [#84](https://github.com/semyon-alekseev-noveo/tt-sync/issues/84) | not started |
-| Re-pilot `TP-IDLE-ZERO` after slice 2–5 | issue [#85](https://github.com/semyon-alekseev-noveo/tt-sync/issues/85) | **fail** on 2.0.84 (byId **44**); leave open for slice 5 + re-measure |
+| Re-pilot `TP-IDLE-ZERO` after slice 2–5 | issue [#85](https://github.com/semyon-alekseev-noveo/tt-sync/issues/85) | **pass** on **2.0.85** — close |
 | TECH-START-1 / register scan | issue [#86](https://github.com/semyon-alekseev-noveo/tt-sync/issues/86) | not started (P2) |
 | Per-phase `[perf]` comment counters | issue [#87](https://github.com/semyon-alekseev-noveo/tt-sync/issues/87) | not started (P2) |

@@ -25,7 +25,7 @@
 
 ## Validation
 
-- Релиз **2.0.85** (2026-10-23): PERF/DELTA slice 5 from [#99](https://github.com/semyon-alekseev-noveo/tt-sync/pull/99) (#98) — cut quiet `getTaskById` / `TP-IDLE-BYID-ZERO` (ProjectScheme Dexie + parentChanged + list-move gate). Live `#85` re-pilot after tag. Epic [#62](https://github.com/semyon-alekseev-noveo/tt-sync/issues/62) / [#85](https://github.com/semyon-alekseev-noveo/tt-sync/issues/85) stay open until measured.
+- Релиз **2.0.85** (2026-10-23): PERF/DELTA slice 5 from [#99](https://github.com/semyon-alekseev-noveo/tt-sync/pull/99) (#98) — cut quiet `getTaskById` / `TP-IDLE-BYID-ZERO`. Live `#85` **pass**: byId **0**, comments **0**, `totalMs` ~7 s (`PERF-DELTA/85-idle-zero-2.0.85.md`). Epic [#62](https://github.com/semyon-alekseev-noveo/tt-sync/issues/62) stays open for `#84` `TP-DELTA-*`.
 - Релиз **2.0.84** (2026-10-23): PERF/DELTA slice 4 from [#95](https://github.com/semyon-alekseev-noveo/tt-sync/pull/95) (#94) — empty-thread skip + `deferCommentSweep` / `TP-IDLE-EMPTY-SWEEP`. Live quiet: comments **0**, byId **44**, `totalMs` ~18 s (`PERF-DELTA/84-idle-zero-2.0.84.md`); idle-zero still fail on byId.
 - Релиз **2.0.83** (2026-10-23): PERF/DELTA slice 3 from [#91](https://github.com/semyon-alekseev-noveo/tt-sync/pull/91) (#83) — stop double comment-sweep / `TP-IDLE-MANUAL-SCOPE`. Live quiet comments **871** (`PERF-DELTA/83-idle-zero-2.0.83.md`).
 - Релиз **2.0.82** (2026-10-23): PERF/DELTA slice 2 from [#88](https://github.com/semyon-alekseev-noveo/tt-sync/pull/88) (#82) — `commentCount` backfill + idle-fast sync / `preparePersistNetwork` gate. Live `TP-IDLE-ZERO` **fail** (`getTaskComments` **1741**; `PERF-DELTA/82-idle-zero-2.0.82.md`).
