@@ -7,8 +7,18 @@
 - Actions log: Quiet ×2 (byId/comments 0); `TP-BUG-COMMENT-NO-PUSH` pass; `TP-COMMENT-TT-DELETE` fail → [#104](https://github.com/semyon-alekseev-noveo/tt-sync/issues/104); evidence `POST-PERF-REGRESSION/`; vitest **715**.
 - Validation: Quiet2 ~6.6 s / probes 0; NO-PUSH marker in TT Comments; TT-DELETE re-pushed; `npx vitest run` → **715** passed.
 - Problems: TT-DELETE live fail (`open` #104); editor/guard/quiet-title still **not run**.
-- To Be Done: Finish remaining #102 rows or defer; merge [#103](https://github.com/semyon-alekseev-noveo/tt-sync/pull/103) epic-close docs + this PR.
+- To Be Done: Finish remaining #102 rows or defer; merge this PR after #103 epic-close docs on tip.
 - References: https://github.com/semyon-alekseev-noveo/tt-sync/issues/102, #104, #62, `docs/pilot/results/POST-PERF-REGRESSION/102-post-perf-regression.md`, `CHANGELOG.md`
+
+### Iteration 2026-10-23 12:30 UTC
+
+- Context: Idle path done on **2.0.85**; user asked to close epic [#62](https://github.com/semyon-alekseev-noveo/tt-sync/issues/62) then start [#102](https://github.com/semyon-alekseev-noveo/tt-sync/issues/102).
+- Target: Close #62 with honest deferral of `TP-DELTA-*` to #84; no invented delta pass; unlock #102.
+- Actions log: Wrote `PERF-DELTA/62-epic-close.md` + INDEX; `TEST_PLAN` delta rows stay **not run** → #84; PROJECT_STATE / PO_STATUS / issues INDEX.
+- Validation: Done-when: idle-zero **pass**, probes/wall-time down; `TP-DELTA-*` **not run** (allowed); tip has #101 evidence.
+- Problems: None for epic close (`resolved`); #84/#86/#87 remain open follow-ons.
+- To Be Done: Owner merges; close #62; run #102 post-PERF regression on Thinkpad-tts-test.
+- References: https://github.com/semyon-alekseev-noveo/tt-sync/issues/62, #84, #102, `docs/pilot/results/PERF-DELTA/62-epic-close.md`, `CHANGELOG.md`
 
 ### Iteration 2026-10-23 08:49 UTC
 

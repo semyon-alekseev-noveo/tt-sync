@@ -27,7 +27,7 @@ Tracker issues live on [`semyon-alekseev-noveo/tt-sync`](https://github.com/semy
 | └ PR1–PR7 | [#41](https://github.com/semyon-alekseev-noveo/tt-sync/issues/41)–[#48](https://github.com/semyon-alekseev-noveo/tt-sync/issues/48) | P1 | **closed** → PRs #34–#40 | keep closed |
 | SEC-CREDS-1 | [#32](https://github.com/semyon-alekseev-noveo/tt-sync/issues/32) | P1 | **open** — owner revoke + autologin decision | **keep** (pre–Step 8) |
 | Repo hygiene backlog | [#33](https://github.com/semyon-alekseev-noveo/tt-sync/issues/33) | P3 | **open** / backlog | **keep** — do not pick up before #15/#20 |
-| **PERF/DELTA** (wall-time + delta path) | [#62](https://github.com/semyon-alekseev-noveo/tt-sync/issues/62) | **P0** | **closed** on GitHub (idle/wall-time); close docs [#103](https://github.com/semyon-alekseev-noveo/tt-sync/pull/103); `TP-DELTA-*` → #84 | **done** 2026-10-23 |
+| **PERF/DELTA** (wall-time + delta path) | [#62](https://github.com/semyon-alekseev-noveo/tt-sync/issues/62) | **P0** | **closed** — idle/wall-time on **2.0.85**; `TP-DELTA-*` → #84; evidence `PERF-DELTA/62-epic-close.md` | **done** 2026-10-23 |
 | Post-PERF regression | [#102](https://github.com/semyon-alekseev-noveo/tt-sync/issues/102) | P1 | **partial** — idle/NO-PUSH/vitest pass; TT-DELETE fail [#104](https://github.com/semyon-alekseev-noveo/tt-sync/issues/104) | **active** 2026-10-23 |
 | └ TP-COMMENT-TT-DELETE fail on 2.0.85 | [#104](https://github.com/semyon-alekseev-noveo/tt-sync/issues/104) | P1 | **open** — vault re-push after TT delete | **new** 2026-10-23 |
 | └ Slice 2 commentCount / idle-fast / preparePersist | [#82](https://github.com/semyon-alekseev-noveo/tt-sync/issues/82) | P0 | **closed** — **2.0.82** | keep closed |
