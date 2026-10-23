@@ -25,7 +25,7 @@
 
 ## Validation
 
-- Релиз **2.0.85** (2026-10-23): PERF/DELTA slice 5 from [#99](https://github.com/semyon-alekseev-noveo/tt-sync/pull/99) (#98) — cut quiet `getTaskById` / `TP-IDLE-BYID-ZERO`. Live `#85` **pass**: byId **0**, comments **0**, `totalMs` ~7 s (`PERF-DELTA/85-idle-zero-2.0.85.md`). Epic [#62](https://github.com/semyon-alekseev-noveo/tt-sync/issues/62) stays open for `#84` `TP-DELTA-*`.
+- Релиз **2.0.85** (2026-10-23): PERF/DELTA slice 5 from [#99](https://github.com/semyon-alekseev-noveo/tt-sync/pull/99) (#98) — cut quiet `getTaskById` / `TP-IDLE-BYID-ZERO`. Live `#85` **pass**: byId **0**, comments **0**, `totalMs` ~7 s (`PERF-DELTA/85-idle-zero-2.0.85.md`). Epic [#62](https://github.com/semyon-alekseev-noveo/tt-sync/issues/62) **closed** (idle/wall-time; `TP-DELTA-*` → [#84](https://github.com/semyon-alekseev-noveo/tt-sync/issues/84)); evidence `PERF-DELTA/62-epic-close.md`. Next: [#102](https://github.com/semyon-alekseev-noveo/tt-sync/issues/102) post-PERF regression.
 - Релиз **2.0.84** (2026-10-23): PERF/DELTA slice 4 from [#95](https://github.com/semyon-alekseev-noveo/tt-sync/pull/95) (#94) — empty-thread skip + `deferCommentSweep` / `TP-IDLE-EMPTY-SWEEP`. Live quiet: comments **0**, byId **44**, `totalMs` ~18 s (`PERF-DELTA/84-idle-zero-2.0.84.md`); idle-zero still fail on byId.
 - Релиз **2.0.83** (2026-10-23): PERF/DELTA slice 3 from [#91](https://github.com/semyon-alekseev-noveo/tt-sync/pull/91) (#83) — stop double comment-sweep / `TP-IDLE-MANUAL-SCOPE`. Live quiet comments **871** (`PERF-DELTA/83-idle-zero-2.0.83.md`).
 - Релиз **2.0.82** (2026-10-23): PERF/DELTA slice 2 from [#88](https://github.com/semyon-alekseev-noveo/tt-sync/pull/88) (#82) — `commentCount` backfill + idle-fast sync / `preparePersistNetwork` gate. Live `TP-IDLE-ZERO` **fail** (`getTaskComments` **1741**; `PERF-DELTA/82-idle-zero-2.0.82.md`).
@@ -97,7 +97,7 @@
 ## To Be Done
 
 1. Пилот **2.0.56** **BUG-EMPTY-EDITOR-DISK** (`TP-EMPTY-EDITOR-DISK`); пилот **2.0.55** **BUG-OPEN-NOTE-BUFFER** и hotfix **2.0.54** **BUG-STALE-EDITOR-WRITE**: `TP-EDITOR-*`, `TP-COMMENT-TT-DELETE`, `TP-NO-SELF-REPUSH`, `TP-COMPLETE-DURING-TYPE`, `TP-UNCOMPLETE-DURING-TYPE`, `TP-JOURNAL-EDITOR-PATCH`, `TP-UNDO-EDITOR-PATCH`, `TP-NO-CARET-REWRITE`, `TP-ACTIVE-PUSH-DURING-SYNC`, `TP-NO-STALE-VIEW-READ`, `TP-ABYSS-LOCAL-CHILD-KEEP`, `TP-TWO-LEAVES`; пилот `TP-EMPTY-SIDE-GUARD` (`TEST_PLAN.md`).
-2. Пилот `TP-IDLE-ZERO` / **TP-DELTA-*** / `[perf]` baseline on tip ([#62](https://github.com/semyon-alekseev-noveo/tt-sync/issues/62)). Idle: no `getTaskById`; no `getTaskComments` when counts match. Суточная сверка, closed и trash ещё не сделаны.
+2. Post-PERF regression [#102](https://github.com/semyon-alekseev-noveo/tt-sync/issues/102); `TP-DELTA-*` still **not run** → [#84](https://github.com/semyon-alekseev-noveo/tt-sync/issues/84). Idle-zero **pass** on **2.0.85**. Суточная сверка, closed и trash ещё не сделаны.
 3. **BUG-COMMENT-NO-PUSH** — на **2.0.52** буллеты `task-13-43-vault-r3` в vault остались, в TT Comments пусто, прежние TT-комментарии стёрты (карта fingerprint → delete). Не блокирует пункт 1.
 4. **BUG-ACTIVEZONE-COMMENT-SHUFFLE** — failing test + fix (`pullSubtaskOrder` / `mergeAbyssBlock`).
 5. Gate: AF-5 в **Inbox**, DEL-3, CTX-D2 на грязных тегах.

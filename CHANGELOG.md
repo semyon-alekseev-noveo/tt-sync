@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-23 12:30 UTC
+
+- Context: Idle path done on **2.0.85**; user asked to close epic [#62](https://github.com/semyon-alekseev-noveo/tt-sync/issues/62) then start [#102](https://github.com/semyon-alekseev-noveo/tt-sync/issues/102).
+- Target: Close #62 with honest deferral of `TP-DELTA-*` to #84; no invented delta pass; unlock #102.
+- Actions log: Wrote `PERF-DELTA/62-epic-close.md` + INDEX; `TEST_PLAN` delta rows stay **not run** → #84; PROJECT_STATE / PO_STATUS / issues INDEX.
+- Validation: Done-when: idle-zero **pass**, probes/wall-time down; `TP-DELTA-*` **not run** (allowed); tip has #101 evidence.
+- Problems: None for epic close (`resolved`); #84/#86/#87 remain open follow-ons.
+- To Be Done: Owner merges; close #62; run #102 post-PERF regression on Thinkpad-tts-test.
+- References: https://github.com/semyon-alekseev-noveo/tt-sync/issues/62, #84, #102, `docs/pilot/results/PERF-DELTA/62-epic-close.md`, `CHANGELOG.md`
+
 ### Iteration 2026-10-23 08:49 UTC
 
 - Context: Owner installed **2.0.85**; #85 asked for live `TP-IDLE-ZERO` after slice 5 byId cut.
