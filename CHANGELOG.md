@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-23 03:17 UTC
+
+- Context: Owner installed **2.0.81** on pilot; #62 still needed live `[perf]` / `TP-IDLE-ZERO` (unit-only after slice 1).
+- Target: Quiet sync ×2 on Thinkpad-tts-test; record real `[perf]` under `PERF-DELTA/`; update `TEST_PLAN` honestly; PR into `abyss-mapping` (no merge/release/close #62).
+- Actions log: Obsidian CLI `tts-sync` ×2 after reload; hooked `[perf]` into `.tickticksync/perf-pilot.log`; wrote `81-idle-zero-2.0.81.md` + INDEX; `TEST_PLAN` TP-IDLE-ZERO → fail.
+- Validation: Quiet1/Quiet2 `[perf]`: `getTaskComments` **1757**, `getTaskById` **68**, `vaultWrites` 0, `totalMs` ~468–472 s; startup same session comments **879** / byId **44**.
+- Problems: Live idle still far from zero comment GETs (`open` for next #62 slice); Obsidian hybrid-search MCP unavailable (`mitigated` via CLI).
+- To Be Done: Owner merges docs PR; comment #62 with evidence link; next slice find remaining comment GET sites / unknown `commentCount`.
+- References: https://github.com/semyon-alekseev-noveo/tt-sync/issues/62, `docs/pilot/results/PERF-DELTA/81-idle-zero-2.0.81.md`, `CHANGELOG.md`
+
 ### Iteration 2026-10-23 01:54 UTC
 
 - Context: Owner merged [#79](https://github.com/semyon-alekseev-noveo/tt-sync/pull/79) (PERF/DELTA slice 1 idle comment-probe cut); tip still **2.0.80** — need a bump before tag (PROC-RELEASE-GATE #30).
