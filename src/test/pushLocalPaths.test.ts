@@ -31,7 +31,7 @@ describe('BUG-COMMENT-ACTIVE-NOTE pathsForPrePullPush', () => {
 		expect(paths).toEqual([path]);
 	});
 
-	it('manual sync includes every registered in-scope path', () => {
+	it('TP-IDLE-MANUAL-SCOPE: quiet manual does not expand to every registered path', () => {
 		const a = '00 Inbox/a.md';
 		const b = '00 Inbox/b.md';
 		const outScope = '20 Archive/x.md';
@@ -42,10 +42,34 @@ describe('BUG-COMMENT-ACTIVE-NOTE pathsForPrePullPush', () => {
 			},
 			workspace: { getActiveFile: () => null, activeEditor: undefined },
 		};
+		// since far in the future → no mtime edits; no active leaf → empty set (not all registered).
 		const paths = pathsForPrePullPush(app as never, [a, b, outScope], 999_999, { manualSync: true });
-		expect(paths).toContain(a);
-		expect(paths).toContain(b);
+		expect(paths).not.toContain(a);
+		expect(paths).not.toContain(b);
 		expect(paths).not.toContain(outScope);
+		expect(paths).toEqual([]);
+	});
+
+	it('TP-IDLE-MANUAL-SCOPE: manual still includes mtime-edited and active note', () => {
+		const edited = '00 Inbox/edited.md';
+		const quiet = '00 Inbox/quiet.md';
+		const active = '00 Inbox/active.md';
+		const editedFile = Object.assign(new TFile(), { path: edited, extension: 'md', stat: { mtime: 10_000 } });
+		const activeFile = Object.assign(new TFile(), { path: active, extension: 'md', stat: { mtime: 100 } });
+		const quietFile = Object.assign(new TFile(), { path: quiet, extension: 'md', stat: { mtime: 100 } });
+		const byPath: Record<string, TFile> = {
+			[edited]: editedFile,
+			[active]: activeFile,
+			[quiet]: quietFile,
+		};
+		const app = {
+			vault: { getAbstractFileByPath: (p: string) => byPath[p] ?? null },
+			workspace: { getActiveFile: () => activeFile, activeEditor: { file: activeFile } },
+		};
+		const paths = pathsForPrePullPush(app as never, [edited, quiet, active], 5_000, { manualSync: true });
+		expect(paths).toContain(edited);
+		expect(paths).toContain(active);
+		expect(paths).not.toContain(quiet);
 	});
 
 	it('does not include active note when mtime qualifies it as a plugin-only write', () => {

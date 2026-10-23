@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 import { TickTickService } from '@/services/index';
+import { createSyncRunContext } from '@/sync/SyncRunContext';
 import { getSettings, getDefaultFolder } from '@/settings';
 import { getAllProjects } from '@/db/projects';
 import { getFile, upsertFile, deleteFile } from '@/db/files';
@@ -412,6 +413,33 @@ describe('TickTickService', () => {
 				['Projects/ProjectA.md', 'Projects/ProjectB.md'],
 				expect.objectContaining({ isPendingMarker: expect.any(Function) }),
 			);
+		});
+	});
+
+	describe('TP-IDLE-MANUAL-SCOPE syncFiles skip already-swept', () => {
+		it('skips checkFileForModifications for paths in ctx.locallyEdited', async () => {
+			const filesToSync: Record<string, unknown> = {
+				'Projects/swept.md': { defaultProjectId: 'proj-a' },
+				'Projects/other.md': { defaultProjectId: 'proj-b' },
+			};
+			(mockPlugin as Record<string, unknown>).fileMetadataService = {
+				getAllFileMetadata: vi.fn().mockResolvedValue(filesToSync),
+				checkForDuplicates: vi.fn().mockResolvedValue({ duplicates: {} }),
+				deleteFileMetadata: vi.fn(),
+			};
+			const modDetector = (mockPlugin as { taskModificationDetector: { checkFileForModifications: Mock; checkFileForNewTasks: Mock } }).taskModificationDetector;
+			modDetector.checkFileForModifications.mockClear();
+			modDetector.checkFileForNewTasks.mockClear();
+
+			const ctx = createSyncRunContext({ trigger: 'manual', fullSync: false });
+			ctx.locallyEdited.add('Projects/swept.md');
+
+			await service.syncFiles(false, ctx);
+
+			const modPaths = modDetector.checkFileForModifications.mock.calls.map((c: unknown[]) => c[0]);
+			expect(modPaths).toEqual(['Projects/other.md']);
+			expect(modDetector.checkFileForNewTasks).toHaveBeenCalledWith('Projects/swept.md');
+			expect(modDetector.checkFileForNewTasks).toHaveBeenCalledWith('Projects/other.md');
 		});
 	});
 

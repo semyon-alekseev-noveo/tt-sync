@@ -1114,6 +1114,12 @@ export class TickTickService {
 					log.error('An error occurred in fullTextNewTaskCheck:', error);
 				}
 
+				// TP-IDLE-MANUAL-SCOPE: pre-pull already ran checkFileForModifications
+				// (+ comment sweep) for ctx.locallyEdited — skip the second pass.
+				if (syncCtx.locallyEdited.has(fileKey)) {
+					continue;
+				}
+
 				try {
 					await this.plugin.taskModificationDetector.checkFileForModifications(fileKey, pendingTickTickDeletions);
 				} catch (error) {

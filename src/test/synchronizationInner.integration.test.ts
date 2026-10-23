@@ -670,10 +670,11 @@ describe('synchronizationInner integration', () => {
 		plugin.taskModificationDetector.checkFileForModifications.mockClear();
 		const second = await world.service.synchronizationInner(false, 'manual');
 		expect(second.ok).toBe(true);
-		// Manual sync pre-pull re-scans every in-scope registered note (BUG-COMMENT-MANUAL-PRE-PULL).
+		// TP-IDLE-MANUAL-SCOPE: quiet pre-pull is edited+active only; plugin write is
+		// excluded by editedSince, so the second run must not pre-pull-rescan wrote.md.
 		const pushCalls = plugin.taskModificationDetector.checkFileForModifications.mock.calls
 			.filter((call: unknown[]) => call.length === 1);
-		expect(pushCalls.map((c: unknown[]) => c[0])).toEqual(['notes/wrote.md']);
+		expect(pushCalls.map((c: unknown[]) => c[0])).not.toContain('notes/wrote.md');
 	});
 
 	it('TP-COMMENT-TT-DELETE removes a TickTick-deleted comment and the next sync writes nothing', async () => {
