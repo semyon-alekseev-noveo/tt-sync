@@ -130,7 +130,8 @@ Pass only with evidence: the note path, the `ticktick_id`, and either the journa
 | 2026-10-22 | Thinkpad-tts-test | 2.0.80 (PR tip) | agent | BUG-COMMENT-VAULT-DUP-KEY | pass | Local deploy PR #60; `tts-sync` → `vault-comment-dup-keys`; `task-11-16` 20→4 bullets, no ISO. Evidence: `27-vault-dup-key-2.0.80-unit.md`. |
 | 2026-10-22 | Thinkpad-tts-test | 2.0.80 (release) | agent | BUG-COMMENT-VAULT-DUP-KEY | pass | GitHub release assets deploy + Synchronize; `task-11-16` stays **4** wall-clock, no ISO. Evidence: `60-release-2.0.80-smoke.md`. Issue #27 closed. |
 | 2026-10-23 | Thinkpad-tts-test | 2.0.81 | agent | TP-IDLE-ZERO | fail | Quiet ×2: `getTaskComments` **1757** / `getTaskById` **68**. Evidence: `docs/pilot/results/PERF-DELTA/81-idle-zero-2.0.81.md`. |
-| 2026-10-23 | unit | tip (#82) | agent | TP-IDLE-ZERO-SWEEP | pass (unit) | commentCount backfill + idle-fast sync/preparePersist; live re-pilot **not run** (#85). |
+| 2026-10-23 | unit | tip (#82) | agent | TP-IDLE-ZERO-SWEEP | pass (unit) | commentCount backfill + idle-fast sync/preparePersist; live still fail on 2.0.82. |
+| 2026-10-23 | Thinkpad-tts-test | 2.0.82 | agent | TP-IDLE-ZERO | fail | Quiet ×2: `getTaskComments` **1741** / `getTaskById` **68** (−16 vs 81). Evidence: `docs/pilot/results/PERF-DELTA/82-idle-zero-2.0.82.md`. #85 open; next #83. |
 | | `<live-vault>` | | | Step 8 | not run | Blocked until the four rows above are pass. |
 
 This branch did not run the gate. Leave the result column as **not run** until you do.

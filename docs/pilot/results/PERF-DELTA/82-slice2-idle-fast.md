@@ -9,7 +9,7 @@
 | Case | `TP-IDLE-ZERO-SWEEP` |
 | Recorded | 2026-10-23 UTC (agent) |
 | Build | tip of `feat/62-perf-delta-slice2` (no version bump) |
-| Status | **open** — unit locked; live re-pilot **not run** (#85) |
+| Status | **unit locked**; live re-pilot on **2.0.82** = **fail** ([82-idle-zero-2.0.82.md](82-idle-zero-2.0.82.md) / #85) |
 
 ## Inputs
 
@@ -33,15 +33,15 @@
 - `pull_field_mapping.test.ts` — echo-skip commentCount backfill
 - `preparePersistNetworkIdle.test.ts` — preparePersist skip / unknown still GET
 
-Live `[perf]` on `<pilot-vault>`: **not run** this session.
+Live `[perf]` on `<pilot-vault>`: see [82-idle-zero-2.0.82.md](82-idle-zero-2.0.82.md) — quiet `getTaskComments` **1741** (vs 1757 on 2.0.81).
 
 ## Conclusion
 
-Slice 2 locks the highest-leverage safe cut in vitest. Do not mark `TP-IDLE-ZERO` pass until #85 re-measures after merge/release. Remaining quiet cost likely includes double-sweep (#83).
+Slice 2 locks the highest-leverage safe cut in vitest. Live **2.0.82** re-pilot still **fail** (not a sharp drop). Remaining quiet cost likely includes double-sweep (#83).
 
 ## Checklist
 
 - [x] Dual-analyst brief published
 - [x] Unit tests for `TP-IDLE-ZERO-SWEEP`
-- [ ] Live re-pilot after release (#85)
+- [x] Live re-pilot after release (#85) — **fail** on 2.0.82
 - [ ] Slice 3 double-sweep (#83)
