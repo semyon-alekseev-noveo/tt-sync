@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-23 01:43 UTC
+
+- Context: Epic [#62](https://github.com/semyon-alekseev-noveo/tt-sync/issues/62) PERF/DELTA first slice; quiet sync still GETed Comments for every task with Abyss threads (`vaultThreads > 0`), against TP-IDLE-ZERO / `TICKTICK_DELTA_API.md` §3.2.
+- Target: Cut avoidable `getTaskComments` on idle when `commentCount` already matches vault threads; lock with vitest; scaffold `docs/pilot/results/PERF-DELTA/`; PR into `abyss-mapping` (no release).
+- Actions log: Restored count/unknown/dup-only probe gate in `VaultSyncCoordinator.vaultLineBehindTask`; tests `TP-IDLE-ZERO` matched-count skip; `TEST_PLAN` / `ABYSS_FIRST_CASES` / `PROJECT_STATE` / PO pointers; issue label P0; baseline note under `PERF-DELTA/`.
+- Validation: `npx vitest run` → **100** files, **703** passed; `npm run build` → ok.
+- Problems: Live pilot `[perf]` / `TP-DELTA-*` / `TP-IDLE-ZERO` still **not run** (`open`); TECH-START-1 and `ensureVaultFilesRegistered` scan deferred.
+- To Be Done: Pilot `[perf]` baseline on tip after merge; next slices TECH-START-1 soften, full-vault register scan, §3.5 delta pilot.
+- References: https://github.com/semyon-alekseev-noveo/tt-sync/issues/62, `docs/pilot/results/PERF-DELTA/`, `CHANGELOG.md`
+
 ### Iteration 2026-10-22 12:05 UTC
 
 - Context: Documented backlog gaps had no GitHub trackers; owner asked to file issues with **perf/delta as P0**.

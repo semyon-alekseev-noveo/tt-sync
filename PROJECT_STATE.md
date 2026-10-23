@@ -46,7 +46,7 @@
 
 ## To Be Done
 
-1. **[P0] PERF/DELTA [#62](https://github.com/semyon-alekseev-noveo/tt-sync/issues/62):** measure + cut sync wall-time; `docs/TICKTICK_DELTA_API.md` §3; pilot `TP-DELTA-*` / `TP-IDLE-ZERO` / remaining `TP-PERF-*`. Folds TECH-START-1 + RISK-LARGE-VAULT remainder (`getTaskById` / full `.md` scan). Historical: **2.0.52** startup ~455 probes / ~229 comment fetches.
+1. **[P0] PERF/DELTA [#62](https://github.com/semyon-alekseev-noveo/tt-sync/issues/62):** measure + cut sync wall-time; `docs/TICKTICK_DELTA_API.md` §3; pilot `TP-DELTA-*` / `TP-IDLE-ZERO` / remaining `TP-PERF-*`. **Slice 1 (this tip):** idle skips `getTaskComments` when vault threads already match `commentCount` (no `vaultThreads > 0` always-probe). Still open: live `[perf]` baseline, TECH-START-1, `ensureVaultFilesRegistered` full `.md` scan, §3.5 delta pilot. Historical: **2.0.52** startup ~455 probes / ~229 comment fetches.
 2. Revoke the exposed `tp_…` token if it is still valid — [#32](https://github.com/semyon-alekseev-noveo/tt-sync/issues/32).
 3. Pilot vault config — [#64](https://github.com/semyon-alekseev-noveo/tt-sync/issues/64): Abyss Inbox **With inbox tag** `#inbox`; fix test-vault `data.json` drift before Sync.
 4. Product risks — [#63](https://github.com/semyon-alekseev-noveo/tt-sync/issues/63): GAP-COMMENT-EDIT, RISK-PULL-WINS-LOCAL, RISK-DUAL-STORE, BUG-TICKTICK-ID-LEAK.

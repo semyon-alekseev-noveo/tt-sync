@@ -108,6 +108,84 @@ describe('BUG-PULL-COMMENT-STALE', () => {
 		expect(getTaskById).not.toHaveBeenCalled();
 	});
 
+	it('TP-IDLE-ZERO does not getTaskComments when vault threads already match commentCount', async () => {
+		updateSettings({
+			syncNotes: true,
+			abyssTasksFormat: true,
+			syncAbyssCommentsViaApi: true,
+			syncScopeFolders: ['notes/'],
+			tagMappings: [],
+			tagListMappings: [],
+		}, { persist: false });
+
+		const taskId = 'abcdefabcdefabcdefabcdef';
+		const file = new NoteFile('notes/idle-comments.md');
+		const text = [
+			`- [ ] same title %%[ticktick_id:: ${taskId}]%%`,
+			'\t- 2026-10-21T11:25:21+07:00: comment 1',
+			'\t- 2026-10-21T12:09:07+07:00: comment 2',
+		].join('\n');
+		const getTaskById = vi.fn();
+		const getTaskComments = vi.fn().mockResolvedValue([
+			{ id: 'c1', title: 'comment 1' },
+			{ id: 'c2', title: 'comment 2' },
+		]);
+		const { TaskParser } = await import('@/taskParser');
+		const { abyssLinesToNote } = await import('@/abyssFormat');
+		const parser = new TaskParser({} as never, {} as never);
+		const taskLine = text.split('\n')[0];
+		const childLines = text.split('\n').slice(1);
+		const lineHash = await parser.getLineHash(taskLine + abyssLinesToNote(childLines));
+		const plugin = {
+			tickTickRestAPI: { getTaskById, getTaskComments },
+			taskParser: parser,
+			projectScheme: { isParentTask: () => false },
+			fileOperation: { readFileContent: async () => text },
+			dateMan: {
+				parseDates: () => ({}),
+				stripDatesFromLine: (s: string) => s,
+				formatDateToISO: () => '',
+				addDatesToLine: (s: string) => s,
+				areDatesChanged: () => false,
+				addDateHolderToTask: () => undefined,
+			},
+			fileTaskQueries: { getDefaultProjectIdForFilepath: async () => 'proj-1' },
+			taskRepository: {
+				loadTaskById: async () => ({
+					id: taskId,
+					projectId: 'proj-1',
+					title: 'same title',
+					content: '',
+					lineHash,
+				}),
+			},
+		};
+		parser.plugin = plugin as never;
+		const app = {
+			metadataCache: { getFileCache: () => ({ listItems: [] }) },
+			vault: { getAbstractFileByPath: () => file, read: async () => text },
+		};
+		const coordinator = new VaultSyncCoordinator(app as never, plugin as never);
+		const behind = (coordinator as unknown as {
+			vaultLineBehindTask(task: unknown, path: string): Promise<{ behind: boolean; reason: string }>;
+		}).vaultLineBehindTask.bind(coordinator);
+
+		const result = await behind({
+			id: taskId,
+			projectId: 'proj-1',
+			title: 'same title',
+			content: '',
+			desc: '',
+			status: 0,
+			commentCount: 2,
+			lineHash,
+		}, file.path);
+		expect(result.behind).toBe(false);
+		expect(result.reason).toBe('in-sync');
+		expect(getTaskById).not.toHaveBeenCalled();
+		expect(getTaskComments).not.toHaveBeenCalled();
+	});
+
 	it('BUG-COMMENT-RECONCILE-UPDATE runs comment probe when Dexie marks task update', async () => {
 		updateSettings({
 			syncNotes: true,

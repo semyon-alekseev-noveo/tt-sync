@@ -78,7 +78,7 @@
 | **BUG-TICKTICK-ID-LEAK** | P1 | mitigated on branch | Канонический `%%[ticktick_id:: <24hex>]%%`, strip loose fragment из title; тест `bugTicktickIdLeak.test.ts`. Почистить дубли в TT вручную. |
 | **GAP-COMMENT-EDIT** | P2 | open | Правка комментария = delete + add (новые ID, шум в ленте TT) |
 | **RISK-DUAL-STORE** | P2 | open | Две «истины»: Dexie `tasks` и `fileMetadata`/`syncFiles` → возможен дрейф |
-| **RISK-LARGE-VAULT** | P2 | partial on this branch | `idsPresentInVault` — один проход и кэш id→path на время синка; текст файла и NewFileMap читаются один раз за прогон. N+1 `getTaskById` в `vaultLineBehindTask` не менялся. `ensureVaultFilesRegistered` по-прежнему обходит все `.md` |
+| **RISK-LARGE-VAULT** | P2 | partial (#62 slice 1) | `idsPresentInVault` + file cache; idle `getTaskById` already 0; idle `getTaskComments` only on count mismatch / unknown count / stamp twins (not every vault thread). `ensureVaultFilesRegistered` still walks all `.md` |
 | **TECH-START-1** | P2 | open | Полный pull на старте блокирует инициализацию |
 | **TECH-API-1** | P1 | open (риск) | Неофициальный клиент `Tick`: изменения TT ломают sync, покрытие тестами минимальное |
 | **TECH-CIRC-1 / GOD-1/2** | P2 | partial | Цикл `main` ↔ `services` снят (`PluginContext`, PR 4 / #31); god-классы `TickTickService`, `TaskModificationDetector` ещё open |
@@ -92,7 +92,7 @@
 ## To Be Done
 
 1. Пилот **2.0.56** **BUG-EMPTY-EDITOR-DISK** (`TP-EMPTY-EDITOR-DISK`); пилот **2.0.55** **BUG-OPEN-NOTE-BUFFER** и hotfix **2.0.54** **BUG-STALE-EDITOR-WRITE**: `TP-EDITOR-*`, `TP-COMMENT-TT-DELETE`, `TP-NO-SELF-REPUSH`, `TP-COMPLETE-DURING-TYPE`, `TP-UNCOMPLETE-DURING-TYPE`, `TP-JOURNAL-EDITOR-PATCH`, `TP-UNDO-EDITOR-PATCH`, `TP-NO-CARET-REWRITE`, `TP-ACTIVE-PUSH-DURING-SYNC`, `TP-NO-STALE-VIEW-READ`, `TP-ABYSS-LOCAL-CHILD-KEEP`, `TP-TWO-LEAVES`; пилот `TP-EMPTY-SIDE-GUARD` (`TEST_PLAN.md`).
-2. Пилот **2.0.53** `TP-IDLE-ZERO` и **TP-DELTA-*** (`docs/TICKTICK_DELTA_API.md` §3.5). В **2.0.53** тихий синк не вызывает `getTaskById`; суточная сверка, closed и trash ещё не сделаны.
+2. Пилот `TP-IDLE-ZERO` / **TP-DELTA-*** / `[perf]` baseline on tip ([#62](https://github.com/semyon-alekseev-noveo/tt-sync/issues/62)). Idle: no `getTaskById`; no `getTaskComments` when counts match. Суточная сверка, closed и trash ещё не сделаны.
 3. **BUG-COMMENT-NO-PUSH** — на **2.0.52** буллеты `task-13-43-vault-r3` в vault остались, в TT Comments пусто, прежние TT-комментарии стёрты (карта fingerprint → delete). Не блокирует пункт 1.
 4. **BUG-ACTIVEZONE-COMMENT-SHUFFLE** — failing test + fix (`pullSubtaskOrder` / `mergeAbyssBlock`).
 5. Gate: AF-5 в **Inbox**, DEL-3, CTX-D2 на грязных тегах.

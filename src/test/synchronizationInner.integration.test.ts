@@ -482,6 +482,46 @@ describe('synchronizationInner integration', () => {
 		expect(world.api.getTaskComments).not.toHaveBeenCalled();
 	});
 
+	it('TP-IDLE-ZERO matched commentCount with vault threads does not getTaskComments', async () => {
+		const world = await makeWorld();
+		const id = 'aaaaaaaaaaaaaaaaaaaaaaaa';
+		const lines = [
+			`- [ ] same title %%[ticktick_id:: ${id}]%%`,
+			'\t- 2026-10-21T11:25:21+07:00: comment 1',
+			'\t- 2026-10-21T12:09:07+07:00: comment 2',
+		].join('\n') + '\n';
+		putFile(world, 'notes/quiet-comments.md', lines, 0);
+		world.metadata['notes/quiet-comments.md'] = { TickTickTasks: [{ taskId: id }], defaultProjectId: 'proj-1' };
+		const { TaskParser } = await import('@/taskParser');
+		const { abyssLinesToNote } = await import('@/abyssFormat');
+		const parser = new TaskParser({} as never, world.service.plugin as never);
+		const taskLine = lines.split('\n')[0];
+		const childLines = lines.split('\n').slice(1).filter(Boolean);
+		const lineHash = await parser.getLineHash(taskLine + abyssLinesToNote(childLines));
+		await db.tasks.put({
+			localId: `tt:${id}`,
+			taskId: id,
+			task: {
+				id, projectId: 'proj-1', title: 'same title', content: '', desc: '', status: 0,
+				modifiedTime: '2026-10-18T00:00:00.000+0000', tags: [], commentCount: 2, lineHash,
+			} as never,
+			updatedAt: 1000,
+			lastVaultSync: 5000,
+			file: 'notes/quiet-comments.md',
+			source: 'ticktick',
+			deleted: false,
+		});
+		const writes = vaultWriteCount(world);
+		const result = await world.service.synchronizationInner(false, 'manual');
+		expect(result.ok).toBe(true);
+		expect(writes.count()).toBe(0);
+		expect(world.api.getTaskById).not.toHaveBeenCalled();
+		expect(world.api.getTaskComments).not.toHaveBeenCalled();
+		const perf = lastSyncPerf();
+		expect(perf?.counts.commentsFetched).toBe(0);
+		expect(perf?.counts.tasksProbedById).toBe(0);
+	});
+
 	it('TP-NO-CARET-REWRITE does not roll the open line back to the copy just pushed', async () => {
 		vi.useFakeTimers({ toFake: ['Date'] });
 		try {
