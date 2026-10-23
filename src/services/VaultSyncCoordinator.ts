@@ -457,6 +457,7 @@ export class VaultSyncCoordinator {
 									remote.projectId,
 									taskLines,
 									remote.content,
+									{ remoteCommentCount: commentCount },
 								);
 							} catch (e) {
 								log.warn('vault-ahead comment push failed', task.id, e);

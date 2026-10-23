@@ -68,6 +68,19 @@ export async function pullFromTickTick(
 		// already stored that etag. Missing etag is not an echo: apply the delta row.
 		const remoteEtag = rt.etag;
 		if (local && remoteEtag && local.task.etag === remoteEtag) {
+			// TP-IDLE-ZERO-SWEEP / #62 slice 2: echo-skip must still backfill missing
+			// commentCount (and etag is already present) so idle paths can skip GET.
+			// Do not treat this as an applied content change.
+			const remoteCount = (rt as ITask).commentCount;
+			if (
+				typeof local.task.commentCount !== 'number'
+				&& typeof remoteCount === 'number'
+			) {
+				toPut.push({
+					...local,
+					task: { ...local.task, commentCount: remoteCount },
+				});
+			}
 			continue;
 		}
 

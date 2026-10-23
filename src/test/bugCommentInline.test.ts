@@ -129,6 +129,7 @@ describe('BUG-COMMENT-INLINE', () => {
 			'in',
 			taskLines,
 			'',
+			{ remoteCommentCount: undefined },
 		);
 	});
 

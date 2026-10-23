@@ -187,7 +187,7 @@ export class TaskModificationPush {
 						projectId,
 						taskRecord.taskLines ?? [],
 						savedTask.content,
-						commentOpts,
+						{ ...commentOpts, remoteCommentCount: savedTask.commentCount },
 					);
 					if (commentPushed) modified = true;
 				} catch (e) {

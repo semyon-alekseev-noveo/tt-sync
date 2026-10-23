@@ -136,6 +136,47 @@ describe('pullFromTickTick field mapping and echo detection', () => {
 		expect((db.tasks as unknown as Record<string, Mock>).bulkPut).not.toHaveBeenCalled();
 	});
 
+	it('TP-IDLE-ZERO-SWEEP: echo-skip backfills missing commentCount from delta', async () => {
+		const now = new Date();
+		const modifiedTimeString = now.toISOString();
+
+		const remoteTask = {
+			id: 'remote-task-id',
+			etag: 'same',
+			commentCount: 2,
+			modifiedTime: modifiedTimeString,
+			deleted: 0,
+		};
+
+		mockApi.getUpdatedTasks.mockResolvedValue({ update: [remoteTask], delete: [] });
+
+		const localTask = {
+			localId: 'local-uuid',
+			taskId: 'remote-task-id',
+			updatedAt: now.getTime(),
+			lastModifiedByDeviceId: 'test-device',
+			file: 'note.md',
+			source: 'ticktick' as const,
+			task: { id: 'remote-task-id', etag: 'same', modifiedTime: modifiedTimeString },
+		};
+
+		const anyOfToArray = vi.fn().mockResolvedValue([localTask]);
+		const anyOf = vi.fn(() => ({ toArray: anyOfToArray }));
+		const first = vi.fn().mockResolvedValue(localTask);
+		const equals = vi.fn(() => ({ first }));
+		(db.tasks.where as unknown as Mock) = vi.fn(() => ({ anyOf, equals, first: vi.fn(), toArray: vi.fn() }));
+
+		const applied = await pullFromTickTick(mockApi, mockMeta, false);
+
+		expect(applied).toBe(0);
+		expect((db.tasks as unknown as Record<string, Mock>).bulkPut).toHaveBeenCalledWith([
+			expect.objectContaining({
+				taskId: 'remote-task-id',
+				task: expect.objectContaining({ etag: 'same', commentCount: 2 }),
+			}),
+		]);
+	});
+
 	it('should persist checkpoint to data.json after pull', async () => {
 		const { updateSettings } = await import('../settings');
 

@@ -24,6 +24,7 @@ import {
 	normalizedKeysFromVaultLines,
 	planCommentSync,
 	remoteCommentKeysAheadOfVault,
+	vaultHasDuplicateCommentKeys,
 } from '@/sync/comments';
 import { deletionConfirmMode } from '@/sync/massDeleteGuard';
 import log from '@/utils/logger';
@@ -95,11 +96,42 @@ export function migrateLegacyCommentsInContent(content: string): { description: 
 export type AbyssCommentSyncOptions = {
 	/** User removed all Abyss comment bullets (line hash changed, Dexie maps still present). */
 	obsidianRemovedCommentBullets?: boolean;
+	/**
+	 * Dexie / delta `commentCount` for this task. When known and idle-safe
+	 * (`canSkipAbyssCommentNetwork`), `syncAbyssCommentsToTickTick` skips GET.
+	 */
+	remoteCommentCount?: number;
 };
 
 /** Dexie maps that came from vault pushes (not TT-only `remote` origin). */
 export function vaultHadSyncedCommentBullets(maps: readonly TaskCommentMap[]): boolean {
 	return maps.some(m => m.origin !== 'remote');
+}
+
+/**
+ * TP-IDLE-ZERO-SWEEP / #62 slice 2: skip Comments API when Dexie `commentCount`
+ * matches vault threads, maps bijectively cover those threads, and no wipe /
+ * stamp-twin repair is needed. Unknown count → must GET.
+ */
+export function canSkipAbyssCommentNetwork(
+	taskLines: string[],
+	maps: readonly TaskCommentMap[],
+	remoteCommentCount: number | undefined,
+	opts?: AbyssCommentSyncOptions,
+): boolean {
+	if (opts?.obsidianRemovedCommentBullets) return false;
+	if (typeof remoteCommentCount !== 'number') return false;
+	if (vaultHasDuplicateCommentKeys(taskLines)) return false;
+	const threads = extractAbyssCommentThreads(taskLines);
+	if (threads.length !== remoteCommentCount) return false;
+	if (maps.length !== threads.length) return false;
+	for (const t of threads) {
+		if (!maps.some(m => vaultStillHasMappedComment(m, [t]))) return false;
+	}
+	for (const m of maps) {
+		if (!vaultStillHasMappedComment(m, threads)) return false;
+	}
+	return true;
 }
 
 /**
@@ -135,6 +167,11 @@ export async function syncAbyssCommentsToTickTick(
 
 	const threads = extractAbyssCommentThreads(taskLines);
 	let maps = await listCommentMapsForTask(taskId);
+
+	// TP-IDLE-ZERO-SWEEP: matched commentCount + covering maps → no getTaskComments.
+	if (canSkipAbyssCommentNetwork(taskLines, maps, opts?.remoteCommentCount, opts)) {
+		return false;
+	}
 
 	if (shouldWipeRemoteCommentsForEmptyVault(threads, maps, opts) && deletionConfirmMode() !== 'skip') {
 		const remote = await api.getTaskComments(projectId, taskId);
