@@ -42,6 +42,7 @@ Tracker issues live on [`semyon-alekseev-noveo/tt-sync`](https://github.com/semy
 | Pilot vault config | [#64](https://github.com/semyon-alekseev-noveo/tt-sync/issues/64) | P1 | **open** — Abyss Inbox `#inbox`; test-vault `data.json` drift | **new** 2026-10-22 |
 | NOTE-L3b / BUG-COMMENT-NO-PUSH recheck | [#65](https://github.com/semyon-alekseev-noveo/tt-sync/issues/65) | P1 | **open** — residual soak on tip (not #14 duplicate) | **new** 2026-10-22 |
 | Post-#31 modularization follow-on | [#66](https://github.com/semyon-alekseev-noveo/tt-sync/issues/66) | P2 | **open** — timed `vaultDeletion` / TickTickService extract; TECH-API-1 note | **new** 2026-10-22 |
+| DOC-SYNC tip alignment | [#77](https://github.com/semyon-alekseev-noveo/tt-sync/issues/77) | P1 | **docs PR** — version pointers + Steps 4–6 + editor-safety rows | **in progress** 2026-10-23 |
 
 **Closed this audit:** none (nothing newly obsolete after #55).
 

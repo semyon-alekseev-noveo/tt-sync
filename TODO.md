@@ -2,7 +2,7 @@
 
 Process: `DEV_FLOW.md`. Status: `PO_STATUS.md`. Plan: `ABYSS_FIRST_PLAN.md` (Steps 1–8). Cases: `ABYSS_FIRST_CASES.md`.
 
-Release in git is **2.0.47**. This branch does not bump the version. The owner merges and tags.
+Latest release: track GitHub Releases for `tt-sync` / `manifest.json` on `abyss-mapping` (do not hard-code an old version here). Feature branches do not bump unless the PR is a release bump. The owner merges and tags.
 
 ## Done on this branch (not a release)
 
@@ -24,7 +24,7 @@ Release in git is **2.0.47**. This branch does not bump the version. The owner m
 - [ ] GAP-COMMENT-EDIT: editing a comment deletes and recreates it.
 - [ ] RISK-PULL-WINS-LOCAL: a local LWW win can leave the vault line old.
 - [ ] RISK-DUAL-STORE, RISK-LARGE-VAULT (id index landed; N+1 `getTaskById` and `ensureVaultFilesRegistered` remain), TECH-START-1 (startup full pull blocks load).
-- [ ] Break the `main` ↔ `services` cycle. Do not start that until the live gate has a recorded result.
+- [x] Break the `main` ↔ `services` cycle via `PluginContext` (PR #37 / **2.0.77** / epic #31). Remaining extract work → [#66](https://github.com/semyon-alekseev-noveo/tt-sync/issues/66).
 - [ ] Redo journal is in the product (`Undo last sync`) and is not soaked on a vault in this branch.
 
 ## Archive
