@@ -172,7 +172,7 @@ Release **2.0.48** (`8f4c524`, tag pushed 2026-10-20). Pilot plugin on `Thinkpad
 | TP1-LOAD-NOTICE | not run | Needs two Obsidian reloads + notice read. |
 | TP1-STALE-COMMENT | not run | |
 | TP1-COMMENT-MAP | not run | Needs deletion confirm modal. |
-| TP1-QUIET-TITLE | not run | |
+| TP1-QUIET-TITLE | not run | #102: cannot force TT title change without `modifiedTime` bump via MCP. |
 | TP1-R-SYNC-OK | pass | CLI sync + journal `commit` lines; pilot vault updated. |
 | TP1-R-CHECKPOINT | pass | `checkPoint` unchanged on no-delta sync (`1792465263108`); advances on pull when TT changes. |
 | TP1-R-TITLE | pass (UI) | Sam: title change in editor behaves like debounce path. CLI disk-only rename still fails (journal `mvg3m29s`). |
@@ -240,13 +240,13 @@ Expected: TickTick shows the edit, same as on PR #1. One `[perf]` line has `"tri
 |----|----------------|----------|
 | TP-PERF-LOG | partial | CLI hook on `console.info` did not persist across `obsidian` invocations; no `[perf]` JSON file captured. **Manual:** DevTools → filter `[perf]` on one **Synchronize** — expect one JSON line with `trigger:"manual"`, `phaseMs`, `counts`. |
 | TP-PERF-UI | pass | After **Synchronize** (hooks in same Obsidian session): notice detail `api 254 · probe 126 · read 735 · write 0` (quiet-ish run); second run same session `api 721 · probe 716 · read 737 · write 1`. Matches `formatSyncPerfShort`. |
-| TP-PERF-SAME | pass | Task `6ad5bb47…` in `00 Inbox/abyss-active.md`: line md5 unchanged across sync; `probe` ≥ 126 on first captured run (vault ~719 `.md` files). |
-| TP-PERF-ACTIVE | not run | Needs editor open + 5 s debounce; not automated this session. |
-| TP-PERF-R-PROBE | partial | Same as TP-PERF-SAME (`probe` 126 / 716 logged); no per-task TT API audit. |
-| TP-PERF-R-FENCE | not run | No dedicated fence fixture exercised. |
-| TP-PERF-R-DUP | not run | No duplicate-id fixture run. |
+| TP-PERF-SAME | **pass** (**2.0.85** #102) | `6ad5c3c3…` line md5 unchanged on quiet sync. Probe≥1 expectation from older tip superseded by idle-zero (quiet byId **0**). Evidence: `POST-PERF-REGRESSION/102-post-perf-regression.md`. |
+| TP-PERF-ACTIVE | **pass** (**2.0.85** #102) | Open-note edit `post102-active-135332` → TT title via debounce; journal `obs→tt`. |
+| TP-PERF-R-PROBE | not run (#102) | Conflicts with tip idle-zero; left not run. |
+| TP-PERF-R-FENCE | not run | No dedicated fence fixture. |
+| TP-PERF-R-DUP | not run | No duplicate-id fixture. |
 | TP-PERF-R-MOVE | not run | |
-| TP-PERF-R-SYNC-OK | pass | **Synchronize** completed; `checkPoint` `1792472586718` → `1792472716421` on one run; unchanged on no-delta run. Vault line stable when quiet. |
+| TP-PERF-R-SYNC-OK | **pass** (**2.0.85** #102) | `checkPoint` `1792757115273` → `1792761799724`. |
 
 Pilot **2026-10-20** (agent, **2.0.50**): Obsidian CLI `tts-sync`; avoid polling with repeated `obsidian eval` during sync (reload drops hooks). CI: `syncPerf.test.ts`, `vaultIdScan.equivalence.test.ts`, `syncFileCache.test.ts`, `vaultIdScan.bench.test.ts` — pass on `abyss-mapping`.
 
@@ -511,7 +511,7 @@ Pilot status for each: **not run**.
 | TP-UNREADABLE-FILE-NO-DELETE | not run | |
 | TP-STARTUP-OBSIDIAN-SYNC | not run | |
 | TP-EMPTY-DEXIE-BOOTSTRAP | not run | |
-| TP-GUARD-R-ONE-DELETE | not run | |
+| TP-GUARD-R-ONE-DELETE | not run | #102: needs confirm/cancel modal — not CLI-automated. |
 | TP-GUARD-R-OFF | not run | |
 | TP-GUARD-R-SYNC-OK | not run | |
 
@@ -614,15 +614,15 @@ These already have automated tests. Re-run them with the suite. Do not mark a li
 
 | ID | Pilot status | Evidence |
 |----|----------------|----------|
-| TP-EDITOR-TYPE-DURING-SYNC | not run | |
-| TP-EDITOR-TYPE-DURING-PUSH | not run | |
+| TP-EDITOR-TYPE-DURING-SYNC | **pass (CLI approx)** (**2.0.85** #102) | Marker `post102-type-sync-*` survived Synchronize in editor+disk. Evidence: `POST-PERF-REGRESSION/102-post-perf-regression.md`. |
+| TP-EDITOR-TYPE-DURING-PUSH | not run | #102 deferred — covered partly by TP-PERF-ACTIVE. |
 | TP-EDITOR-OTHER-LEAF | not run | |
 | TP-COMMENT-TT-DELETE | **fail** (**2.0.85** #102) | TT delete → Synchronize re-pushed comment + stamped vault line. [#104](https://github.com/semyon-alekseev-noveo/tt-sync/issues/104). Evidence: `POST-PERF-REGRESSION/102-post-perf-regression.md`. Automated still: `abyssStep3.test.ts`, `synchronizationInner.integration.test.ts`. |
 | TP-NO-SELF-REPUSH | not run | Automated: `bugCommentNoPush.test.ts`, `synchronizationInner.integration.test.ts`. |
 | TP-STALE-FILE-WRITE | not run | Automated only: `staleFileWrite.test.ts`. No vault run. |
 | TP-COMPLETE-DURING-TYPE | not run | Automated: `completeDuringType.test.ts`. No vault run. |
 | TP-UNCOMPLETE-DURING-TYPE | not run | Automated: `completeDuringType.test.ts`. No vault run. |
-| TP-JOURNAL-EDITOR-PATCH | not run | Automated: `journalEditorPatch.test.ts`. No vault run. |
+| TP-JOURNAL-EDITOR-PATCH | **pass (partial)** (**2.0.85** #102) | Journal pending→commit for `abyss-active.md` / ACTIVE push. Undo soak not run. Automated: `journalEditorPatch.test.ts`. |
 | TP-UNDO-EDITOR-PATCH | not run | Automated: `journalEditorPatch.test.ts`. No vault run. |
 | Recurring roll, detach, duplicate strip, subtask reorder, tag/link/rename/repair/merge/force update/undo | not run | Automated guard: `noWholeNoteWrite.test.ts` (no direct whole-note write outside `commitVaultText`). |
 
