@@ -142,6 +142,7 @@ Pass only with evidence: the note path, the `ticktick_id`, and either the journa
 | 2026-10-23 | unit | tip (#98) | agent | TP-IDLE-BYID-ZERO | pass (unit) | ProjectScheme Dexie + parentChanged + list-move gate. |
 | 2026-10-23 | Thinkpad-tts-test | 2.0.85 | agent | TP-IDLE-ZERO / TP-IDLE-BYID-ZERO | pass / pass | Quiet ×2: byId **0**, comments **0**, `totalMs` ~7 s. Evidence: `PERF-DELTA/85-idle-zero-2.0.85.md`. #85 close. |
 | 2026-10-23 | unit | tip (#104) | agent | TP-COMMENT-TT-DELETE | pass (unit) | Single mapped miss + empty GET (any origin / stale count) → no re-push. Live **not run**. Evidence: `TP-COMMENT-TT-DELETE/104-unit-fix.md`. |
+| 2026-10-23 | Thinkpad-tts-test | 2.0.85 | agent | TP-DELTA-MCP-RENAME / COMMENT / CLOSE-DELETE | pass / pass(MCP) / pass | App rename/comment **not run**. Evidence: `PERF-DELTA/84-tp-delta-pilot.md`. #84. |
 | | `<live-vault>` | | | Step 8 | not run | Blocked until the four rows above are pass. |
 
 This branch did not run the gate. Leave the result column as **not run** until you do.

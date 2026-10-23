@@ -10,6 +10,16 @@
 - To Be Done: Owner merges PR; bump/release when ready; re-run TT-DELETE on Thinkpad-tts-test.
 - References: https://github.com/semyon-alekseev-noveo/tt-sync/issues/104, `docs/pilot/results/TP-COMMENT-TT-DELETE/104-unit-fix.md`, `CHANGELOG.md`
 
+### Iteration 2026-10-23 14:02 UTC
+
+- Context: Owner asked for [#84](https://github.com/semyon-alekseev-noveo/tt-sync/issues/84) `TP-DELTA-*` §3.5 after #102.
+- Target: Run MCP rename / comment / close-delete against `batch/check`; record honest app-UI not-run; no invented pass.
+- Actions log: Disposable tasks + MCP mutate; `getUpdatedTasks(since)` via plugin; evidence `PERF-DELTA/84-tp-delta-pilot.md`; TEST_PLAN / INDEX.
+- Validation: MCP rename in `update[]` (etag↑, mtime flat); MCP comment bumps count/etag/mtime; complete `status` 2; delete in `delete[]`.
+- Problems: App rename/comment **not run** (`open` if product needs UI proof).
+- To Be Done: Owner merges; close #84; optional app-UI follow-up; #104 still open.
+- References: https://github.com/semyon-alekseev-noveo/tt-sync/issues/84, #62, `docs/pilot/results/PERF-DELTA/84-tp-delta-pilot.md`, `CHANGELOG.md`
+
 ### Iteration 2026-10-23 13:54 UTC
 
 - Context: Owner merged #105; asked to finish [#102](https://github.com/semyon-alekseev-noveo/tt-sync/issues/102) remainder on **2.0.85**.
