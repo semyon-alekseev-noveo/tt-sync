@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-23 07:05 UTC
+
+- Context: After **2.0.83** (slice 3), quiet sync still ~**871** `getTaskComments`; many are empty Abyss threads / double hash-unchanged+file-sweep calls (#94).
+- Target: Skip Comments GET when threads+maps empty; defer per-line comment sync on full-file checks to `sweepAbyssCommentsInFile`; no version bump.
+- Actions log: `canSkipAbyssCommentNetwork` empty-fast; `deferCommentSweep` in `scan.ts`; cases `TP-IDLE-EMPTY-SWEEP`; evidence `PERF-DELTA/94-slice4-empty-sweep.md`; TEST_PLAN / ABYSS / INDEX / PROJECT_STATE.
+- Validation: `npx vitest run` → **101** files, **712** passed; `npm run build` → ok.
+- Problems: Live idle still open (#85) — do not invent pass; leave epic #62 open.
+- To Be Done: Owner merges this PR; bump/release; #85 re-pilot; leave #62 open.
+- References: https://github.com/semyon-alekseev-noveo/tt-sync/issues/94, #62, #85, `docs/pilot/results/PERF-DELTA/94-slice4-empty-sweep.md`, `CHANGELOG.md`
+
 ### Iteration 2026-10-23 06:04 UTC
 
 - Context: Owner merged [#91](https://github.com/semyon-alekseev-noveo/tt-sync/pull/91) (PERF/DELTA slice 3 stop double-sweep / #83); tip still **2.0.82** — need bump before tag (PROC-RELEASE-GATE #30).

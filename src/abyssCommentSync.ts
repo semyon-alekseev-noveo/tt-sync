@@ -109,9 +109,12 @@ export function vaultHadSyncedCommentBullets(maps: readonly TaskCommentMap[]): b
 }
 
 /**
- * TP-IDLE-ZERO-SWEEP / #62 slice 2: skip Comments API when Dexie `commentCount`
- * matches vault threads, maps bijectively cover those threads, and no wipe /
- * stamp-twin repair is needed. Unknown count → must GET.
+ * TP-IDLE-ZERO-SWEEP / #62 slice 2+4: skip Comments API when safe.
+ *
+ * - Empty vault threads + empty maps → nothing to push/GET (slice 4; quiet
+ *   `syncFiles` was GETting every task without Abyss bullets).
+ * - Matched Dexie/`commentCount` + maps bijectively cover threads (slice 2).
+ * Unknown count with vault threads still must GET (vault-ahead / remote drift).
  */
 export function canSkipAbyssCommentNetwork(
 	taskLines: string[],
@@ -120,9 +123,10 @@ export function canSkipAbyssCommentNetwork(
 	opts?: AbyssCommentSyncOptions,
 ): boolean {
 	if (opts?.obsidianRemovedCommentBullets) return false;
-	if (typeof remoteCommentCount !== 'number') return false;
 	if (vaultHasDuplicateCommentKeys(taskLines)) return false;
 	const threads = extractAbyssCommentThreads(taskLines);
+	if (threads.length === 0 && maps.length === 0) return true;
+	if (typeof remoteCommentCount !== 'number') return false;
 	if (threads.length !== remoteCommentCount) return false;
 	if (maps.length !== threads.length) return false;
 	for (const t of threads) {

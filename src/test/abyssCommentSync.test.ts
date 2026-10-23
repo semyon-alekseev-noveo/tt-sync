@@ -100,6 +100,24 @@ describe('abyssCommentSync', () => {
 		expect(canSkipAbyssCommentNetwork(lines, maps, 2)).toBe(false);
 		expect(canSkipAbyssCommentNetwork(lines, [], 1)).toBe(false);
 		expect(canSkipAbyssCommentNetwork(lines, maps, 1, { obsidianRemovedCommentBullets: true })).toBe(false);
+		// Slice 4: no Abyss bullets and no maps → no Comments GET on quiet sweep.
+		expect(canSkipAbyssCommentNetwork([], [], undefined)).toBe(true);
+		expect(canSkipAbyssCommentNetwork(['\t- > description only'], [], undefined)).toBe(true);
+	});
+
+	it('TP-IDLE-EMPTY-SWEEP: syncAbyssCommentsToTickTick skips GET when no threads and no maps', async () => {
+		const S = getSettings() as Record<string, unknown>;
+		Object.assign(S, { syncNotes: true, abyssTasksFormat: true, syncAbyssCommentsViaApi: true });
+		listMaps.mockResolvedValue([]);
+		const getTaskComments = vi.fn().mockResolvedValue([]);
+		const api = {
+			getTaskComments,
+			addTaskComment: vi.fn(),
+			deleteTaskComment: vi.fn(),
+		} as unknown as TickTickRestAPI;
+		const ok = await syncAbyssCommentsToTickTick(api, 'task1', 'proj1', ['\t- > description only']);
+		expect(ok).toBe(false);
+		expect(getTaskComments).not.toHaveBeenCalled();
 	});
 
 	it('TP-IDLE-ZERO-SWEEP: syncAbyssCommentsToTickTick skips getTaskComments when idle-safe', async () => {

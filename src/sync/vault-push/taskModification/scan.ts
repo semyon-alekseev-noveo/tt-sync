@@ -1,5 +1,5 @@
 import { fencedLines } from '@/utils/vaultIdScan';
-import { abyssLinesToNote, extractAbyssCommentThreads, isAbyssNoteLine } from '@/abyssFormat';
+import { abyssLinesToNote, isAbyssNoteLine } from '@/abyssFormat';
 import { syncAbyssCommentsToTickTick, useAbyssCommentsApi } from '@/abyssCommentSync';
 import { Notice, TFile } from 'obsidian';
 import { NewFileMap } from '@/services/NewFileMap';
@@ -24,7 +24,7 @@ export class TaskModificationScan {
 		fileMap: NewFileMap,
 		pendingDeletions?: PendingTickTickDeletion[],
 		pushLimit?: TaskSyncLimitOptions,
-		options?: { identifiedOnly?: boolean; pushSnapshot?: string },
+		options?: { identifiedOnly?: boolean; pushSnapshot?: string; deferCommentSweep?: boolean },
 	): Promise<boolean> {
 		// Outside syncScopeFolders: no update, no completion, no deletion push.
 		if (!isPathInPushScope(filepath)) {
@@ -131,13 +131,20 @@ export class TaskModificationScan {
 				if (lineTask && await this.skipPushWhenTickTickRenamedVaultLine(lineTask, savedTask, taskId, filepath!)) {
 					return false;
 				}
-				// The 5s open-note push (identifiedOnly) calls the Comments API only when a comment line changed the hash.
-				if (useAbyssCommentsApi() && savedTask.projectId) {
+				// Comments API on hash-unchanged:
+				// - identifiedOnly (open-note debounce): only when a comment line
+				//   changed the hash (hash-mismatch path) — skip here.
+				// - Full-file check with deferCommentSweep: `sweepAbyssCommentsInFile`
+				//   owns BUG-COMMENT-NO-PUSH (slice 4 — avoid double GET).
+				// - Single-line / inline parent walk: sync here (no file sweep follows).
+				if (
+					useAbyssCommentsApi()
+					&& savedTask.projectId
+					&& !options?.identifiedOnly
+					&& !options?.deferCommentSweep
+				) {
 					const lines = taskRecord.taskLines ?? [];
-					const threads = extractAbyssCommentThreads(lines);
-					const runCommentSync = threads.length > 0
-						? !options?.identifiedOnly
-						: true;
+					const runCommentSync = true;
 					if (runCommentSync) {
 						try {
 							await syncAbyssCommentsToTickTick(
@@ -153,6 +160,7 @@ export class TaskModificationScan {
 						}
 					}
 				}
+
 				// Task hasn't changed, ensure sync timestamps are current
 				const localTask = await this.plugin.taskRepository.loadLocalTaskById(taskId);
 				if (localTask && (!localTask.lastVaultSync || localTask.lastVaultSync < localTask.updatedAt || !localTask.file)) {
@@ -209,7 +217,13 @@ export class TaskModificationScan {
 		} catch (error) {
 			log.debug('push snapshot failed', filepath, error);
 		}
-		const lineOptions = { ...options, pushSnapshot };
+		// Slice 4: when we will sweep the whole file, skip per-line comment sync
+		// on the hash-unchanged path (avoids 2× getTaskComments per task).
+		const lineOptions = {
+			...options,
+			pushSnapshot,
+			deferCommentSweep: !options?.identifiedOnly,
+		};
 
 		await this.plugin.projectScheme?.ensurePushContext?.();
 

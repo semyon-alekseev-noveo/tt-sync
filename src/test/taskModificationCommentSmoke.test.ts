@@ -45,7 +45,7 @@ describe('NOTE-C2 — comment sync when line hash unchanged (BUG-COMMENT-1)', ()
 		});
 	});
 
-	it('calls syncAbyssCommentsToTickTick on early-exit path when hash matches', async () => {
+	it('calls syncAbyssCommentsToTickTick on early-exit path when hash matches (single-line)', async () => {
 		const lineText = `- [ ] hash unchanged #tts-test %%[ticktick_id:: ${taskId}]%%`;
 		const taskLines = ['\t- 2026-10-19 20:00: comment only on vault'];
 		const fileContent = `${lineText}\n${taskLines[0]}\n`;
@@ -113,5 +113,76 @@ describe('NOTE-C2 — comment sync when line hash unchanged (BUG-COMMENT-1)', ()
 			'',
 			{ remoteCommentCount: undefined },
 		);
+	});
+
+	it('TP-IDLE-EMPTY-SWEEP / slice 4: deferCommentSweep skips hash-unchanged comment sync', async () => {
+		const lineText = `- [ ] hash unchanged #tts-test %%[ticktick_id:: ${taskId}]%%`;
+		const taskLines = ['\t- 2026-10-19 20:00: comment only on vault'];
+		const fileContent = `${lineText}\n${taskLines[0]}\n`;
+
+		const parser = new TaskParser({} as unknown, {} as unknown);
+		const lineHash = await parser.getLineHash(lineText + abyssLinesToNote(taskLines));
+		parser.plugin = {
+			taskParser: parser,
+			fileMetadataService: { getFilepathForTask: () => filepath },
+			dateMan: {
+				parseDates: () => ({}),
+				stripDatesFromLine: (s: string) => s,
+				formatDateToISO: () => '',
+				addDatesToLine: (s: string) => s,
+			},
+			app: { vault: { getName: () => 'V', getAbstractFileByPath: () => ({ path: filepath }) } },
+			projectScheme: { ensurePushContext: vi.fn(), isParentTask: () => false },
+			taskRepository: {
+				loadTaskById: vi.fn().mockResolvedValue({
+					id: taskId,
+					title: 'hash unchanged',
+					projectId: 'in',
+					lineHash,
+					parentId: '',
+					content: '',
+					tags: [],
+					status: 0,
+				}),
+				loadLocalTaskById: vi.fn().mockResolvedValue(null),
+				upsertTask: vi.fn().mockResolvedValue(undefined),
+			},
+			tickTickRestAPI: {},
+		} as unknown as typeof parser.plugin;
+
+		const plugin = {
+			taskParser: parser,
+			projectScheme: parser.plugin.projectScheme,
+			taskRepository: parser.plugin.taskRepository,
+			tickTickRestAPI: parser.plugin.tickTickRestAPI,
+			dateMan: parser.plugin.dateMan,
+			fileMetadataService: { getFilepathForTask: async () => filepath },
+			fileOperation: undefined,
+			saveSettings: vi.fn(),
+		};
+
+		const app = {
+			metadataCache: { getFileCache: () => ({ listItems: [] }) },
+			vault: {
+				getAbstractFileByPath: () => ({ path: filepath }),
+			},
+		};
+
+		const fileMap = new NewFileMap(app as never, plugin as never, { path: filepath } as never);
+		await fileMap.init(fileContent);
+
+		const detector = new TaskModificationDetector(app as never, plugin as never);
+		syncMock.mockClear();
+		const modified = await detector.checkLineForModifications(
+			filepath,
+			lineText,
+			0,
+			fileMap,
+			undefined,
+			undefined,
+			{ deferCommentSweep: true },
+		);
+		expect(modified).toBe(false);
+		expect(syncMock).not.toHaveBeenCalled();
 	});
 });
