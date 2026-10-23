@@ -267,7 +267,7 @@ Automated: `bugCommentNoPush.test.ts`, `synchronizationInner.integration.test.ts
 
 | ID | Pilot status | Evidence |
 |----|----------------|----------|
-| TP-BUG-COMMENT-NO-PUSH | fail | **2.0.51** Thinkpad-tts-test: `00 Inbox/abyss-active.md` `6ad6f43a…`; journal `sync-mvgaaegu` / `sync-mvg8smb7` **tt→obs** removed `gate-251-l3b-agent` / `gate-251-retest-b`; TickTick Comments empty (MCP). Plugin version via eval `2.0.51`. |
+| TP-BUG-COMMENT-NO-PUSH | **pass** (**2.0.85**); prior fail **2.0.51** | **2.0.85** #102: `post102-nopush-123356` under `gate-comment-249` → TT Comments. Evidence: `POST-PERF-REGRESSION/102-post-perf-regression.md`. Older fail: **2.0.51** journals removed gate markers; Comments empty. |
 
 ## Release 2.0.52 — vault comments survive a line rewrite
 
@@ -617,7 +617,7 @@ These already have automated tests. Re-run them with the suite. Do not mark a li
 | TP-EDITOR-TYPE-DURING-SYNC | not run | |
 | TP-EDITOR-TYPE-DURING-PUSH | not run | |
 | TP-EDITOR-OTHER-LEAF | not run | |
-| TP-COMMENT-TT-DELETE | not run | Automated: `abyssStep3.test.ts`, `synchronizationInner.integration.test.ts`. |
+| TP-COMMENT-TT-DELETE | **fail** (**2.0.85** #102) | TT delete → Synchronize re-pushed comment + stamped vault line. [#104](https://github.com/semyon-alekseev-noveo/tt-sync/issues/104). Evidence: `POST-PERF-REGRESSION/102-post-perf-regression.md`. Automated still: `abyssStep3.test.ts`, `synchronizationInner.integration.test.ts`. |
 | TP-NO-SELF-REPUSH | not run | Automated: `bugCommentNoPush.test.ts`, `synchronizationInner.integration.test.ts`. |
 | TP-STALE-FILE-WRITE | not run | Automated only: `staleFileWrite.test.ts`. No vault run. |
 | TP-COMPLETE-DURING-TYPE | not run | Automated: `completeDuringType.test.ts`. No vault run. |
