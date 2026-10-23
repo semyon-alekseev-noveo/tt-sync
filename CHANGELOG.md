@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-23 15:47 UTC
+
+- Context: Owner merged [#109](https://github.com/semyon-alekseev-noveo/tt-sync/pull/109); tagged **2.0.86**; live TP-COMMENT-TT-DELETE on Thinkpad-tts-test.
+- Target: Honest live result; no invented pass.
+- Actions log: Tag `2.0.86` on `be065de`; deploy assets; vault comment → sync → TT delete → sync; evidence `104-live-2.0.86.md`.
+- Validation: Release assets OK; live **fail** — `behindComments` then `push-abyss-or-background` re-POST.
+- Problems: Residual re-push via `flushActiveFilePush` (`open`); unit-only #108 insufficient for live.
+- To Be Done: Follow-up fix for active-file comment flush vs TT delete; re-pilot.
+- References: https://github.com/semyon-alekseev-noveo/tt-sync/releases/tag/2.0.86, `docs/pilot/results/TP-COMMENT-TT-DELETE/104-live-2.0.86.md`, `CHANGELOG.md`
+
 ### Iteration 2026-10-23 15:37 UTC
 
 - Context: [#108](https://github.com/semyon-alekseev-noveo/tt-sync/pull/108) merged (#104 unit fix); tip still **2.0.85** — bump before tag (PROC-RELEASE-GATE #30).
