@@ -46,7 +46,7 @@
 
 ## To Be Done
 
-1. **[P1] BUG-COMMENT-DELETE-REPOST / TP-COMMENT-TT-DELETE residual on 2.0.86:** Live **fail** — `behindComments` OK then `push-abyss-or-background` re-POST (`104-live-2.0.86.md`). Fix push paths that ignore single-mapped-miss guard; do not weaken STALE-MAPS.
+1. **[P1] TP-COMMENT-TT-DELETE live re-pilot:** Unit **BUG-COMMENT-DELETE-REPOST** fixed on tip; re-pilot after release (live **fail** on **2.0.86** — `104-live-2.0.86.md`).
 2. **[P1] TP-DELTA app-UI (optional):** #84 MCP rows done (`PERF-DELTA/84-tp-delta-pilot.md`); TickTick **app** rename/comment still **not run** if needed.
 3. Revoke the exposed `tp_…` token if it is still valid — [#32](https://github.com/semyon-alekseev-noveo/tt-sync/issues/32).
 4. Pilot vault config — [#64](https://github.com/semyon-alekseev-noveo/tt-sync/issues/64): Abyss Inbox **With inbox tag** `#inbox`; fix test-vault `data.json` drift before Sync.

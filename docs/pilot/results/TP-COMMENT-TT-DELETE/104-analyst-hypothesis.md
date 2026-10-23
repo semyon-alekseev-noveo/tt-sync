@@ -26,7 +26,15 @@ Full ranked H1–H4: see agent analyst pass / `ABYSS_FIRST_CASES` **BUG-COMMENT-
 
 Note: H1 with `remoteCommentCount: 1` **false-passes** via `canSkipAbyssCommentNetwork` (no GET, no POST) — that is idle skip, not delete-repost policy. Live re-POST needs a path that actually GETs (count 0 / mismatch / undefined).
 
-## Next (developer)
+## Developer (2026-10-23 16:13 UTC)
 
-1. Keep H1+H2 red; fix create policy in `syncAbyssCommentsToTickTick` (and/or merge strip when live GET empty despite stale Dexie count) without weakening STALE-MAPS / GET-FAIL-OPEN.
-2. Then H3/H4 if still needed; live re-pilot on tip.
+| ID | After fix |
+|----|-----------|
+| **H1** | **green** — skip POST when `mappedIdsGone <= 1` |
+| **H2** | **green** — strip when `remoteCommentCount` is numeric (omit still = no-strip) |
+| **H3** | **green** — integration asserts `addTaskComment` not called |
+| **H4** | covered by H1 on shared create path; live re-pilot still needed |
+
+## Next
+
+Live re-pilot after release; do not invent pass.

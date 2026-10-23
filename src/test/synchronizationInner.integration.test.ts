@@ -724,6 +724,7 @@ describe('synchronizationInner integration', () => {
 			deleted: false,
 		});
 		world.api.getTaskComments.mockResolvedValue([]);
+		world.api.addTaskComment.mockClear();
 		const writes = vaultWriteCount(world);
 		const first = await world.service.synchronizationInner(false, 'manual');
 		expect(first.ok).toBe(true);
@@ -733,12 +734,16 @@ describe('synchronizationInner integration', () => {
 			throw new Error(`writes=${writes.count()} err=${JSON.stringify(log.error.mock.calls).slice(0, 2500)}`);
 		}
 		expect(after).not.toContain('deleted-in-ticktick');
+		// BUG-COMMENT-DELETE-REPOST / H3: persist/flush must not recreate the deleted comment.
+		expect(world.api.addTaskComment).not.toHaveBeenCalled();
 		expect(writes.count()).toBeGreaterThan(0);
 		const afterFirst = writes.count();
 		world.api.getTaskComments.mockClear();
+		world.api.addTaskComment.mockClear();
 		const second = await world.service.synchronizationInner(false, 'manual');
 		expect(second.ok).toBe(true);
 		expect(writes.count()).toBe(afterFirst);
 		expect(world.api.getTaskComments).not.toHaveBeenCalled();
+		expect(world.api.addTaskComment).not.toHaveBeenCalled();
 	}, 20_000);
 });
