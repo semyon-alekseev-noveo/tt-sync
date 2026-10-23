@@ -46,7 +46,7 @@
 
 ## To Be Done
 
-1. **[P1] TP-COMMENT-TT-DELETE [#104](https://github.com/semyon-alekseev-noveo/tt-sync/issues/104):** Vault re-push after TT comment delete (found in #102). Confirm bug vs vault-ahead policy.
+1. **[P1] TP-COMMENT-TT-DELETE [#104](https://github.com/semyon-alekseev-noveo/tt-sync/issues/104):** Unit fix on tip (single mapped miss waits for pull). Live re-pilot still **not run** — evidence `TP-COMMENT-TT-DELETE/104-unit-fix.md`.
 2. **[P1] TP-DELTA-* [#84](https://github.com/semyon-alekseev-noveo/tt-sync/issues/84):** §3.5 pilot (deferred from #62). Do not invent pass.
 3. Revoke the exposed `tp_…` token if it is still valid — [#32](https://github.com/semyon-alekseev-noveo/tt-sync/issues/32).
 4. Pilot vault config — [#64](https://github.com/semyon-alekseev-noveo/tt-sync/issues/64): Abyss Inbox **With inbox tag** `#inbox`; fix test-vault `data.json` drift before Sync.

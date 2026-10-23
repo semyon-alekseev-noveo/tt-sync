@@ -617,7 +617,7 @@ These already have automated tests. Re-run them with the suite. Do not mark a li
 | TP-EDITOR-TYPE-DURING-SYNC | **pass (CLI approx)** (**2.0.85** #102) | Marker `post102-type-sync-*` survived Synchronize in editor+disk. Evidence: `POST-PERF-REGRESSION/102-post-perf-regression.md`. |
 | TP-EDITOR-TYPE-DURING-PUSH | not run | #102 deferred — covered partly by TP-PERF-ACTIVE. |
 | TP-EDITOR-OTHER-LEAF | not run | |
-| TP-COMMENT-TT-DELETE | **fail** (**2.0.85** #102) | TT delete → Synchronize re-pushed comment + stamped vault line. [#104](https://github.com/semyon-alekseev-noveo/tt-sync/issues/104). Evidence: `POST-PERF-REGRESSION/102-post-perf-regression.md`. Automated still: `abyssStep3.test.ts`, `synchronizationInner.integration.test.ts`. |
+| TP-COMMENT-TT-DELETE | **pass (unit)** / live **not run** (#104) | Unit: single mapped miss + empty GET (any origin, stale `commentCount`) waits for pull — `commentSyncMatch.test.ts`. Live fail on **2.0.85** still needs re-pilot after merge. Evidence: `TP-COMMENT-TT-DELETE/104-unit-fix.md`. Also: `abyssStep3.test.ts`, `synchronizationInner.integration.test.ts`. |
 | TP-NO-SELF-REPUSH | not run | Automated: `bugCommentNoPush.test.ts`, `synchronizationInner.integration.test.ts`. |
 | TP-STALE-FILE-WRITE | not run | Automated only: `staleFileWrite.test.ts`. No vault run. |
 | TP-COMPLETE-DURING-TYPE | not run | Automated: `completeDuringType.test.ts`. No vault run. |
