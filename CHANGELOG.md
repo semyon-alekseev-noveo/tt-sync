@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-23 06:54 UTC
+
+- Context: Owner installed **2.0.83**; #85 asked for live `TP-IDLE-ZERO` after slice 3 double-sweep.
+- Target: Quiet sync ×2 on Thinkpad-tts-test; record real `[perf]`; update `TEST_PLAN` honestly; PR into `abyss-mapping`.
+- Actions log: Obsidian CLI reload + `tts-sync` ×2; `[perf]` hook; wrote `PERF-DELTA/83-idle-zero-2.0.83.md` + INDEX; updated `TEST_PLAN` / `ABYSS_FIRST_CASES` / PROJECT_STATE / issues INDEX.
+- Validation: Quiet1/Quiet2: `getTaskComments` **871**, `getTaskById` **44**, `vaultWrites` 0, `batch/check` 2, `totalMs` ~250–276 s (`phaseMs.push` ~30 ms); vs 2.0.82 quiet **1741** / ~475 s.
+- Problems: Idle-zero still **fail** (871≠0) — remaining `syncFiles` sweep (`open` on #85/#62); do not invent pass.
+- To Be Done: Owner merges docs PR; next idle cuts / #84; leave epic #62 open.
+- References: https://github.com/semyon-alekseev-noveo/tt-sync/issues/85, #62, #83, `docs/pilot/results/PERF-DELTA/83-idle-zero-2.0.83.md`, `CHANGELOG.md`
+
 ### Iteration 2026-10-23 06:04 UTC
 
 - Context: Owner merged [#91](https://github.com/semyon-alekseev-noveo/tt-sync/pull/91) (PERF/DELTA slice 3 stop double-sweep / #83); tip still **2.0.82** — need bump before tag (PROC-RELEASE-GATE #30).
