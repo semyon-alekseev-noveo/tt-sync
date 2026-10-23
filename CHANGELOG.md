@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-23 15:56 UTC
+
+- Context: Analyst pass on residual live **TP-COMMENT-TT-DELETE** fail on **2.0.86** (`104-live-2.0.86.md`).
+- Target: Ranked hypotheses + case handoff; no production fix.
+- Actions log: Traced `flushActiveFilePush` → `sweepAbyssCommentsInFile` / `preparePersistNetwork` → `syncAbyssCommentsToTickTick` vs `vaultHasUnpushedCommentThreads`; extended `ABYSS_FIRST_CASES` + **BUG-COMMENT-DELETE-REPOST**.
+- Validation: Code-path review only (no vitest this iteration).
+- Problems: #108 gates reconcile only; push still POSTs single mapped miss (`open`).
+- To Be Done: Developer — failing tests listed in analyst brief, then fix; re-pilot live.
+- References: `ABYSS_FIRST_CASES.md`, `docs/pilot/results/TP-COMMENT-TT-DELETE/104-live-2.0.86.md`, `CHANGELOG.md`
+
 ### Iteration 2026-10-23 15:47 UTC
 
 - Context: Owner merged [#109](https://github.com/semyon-alekseev-noveo/tt-sync/pull/109); tagged **2.0.86**; live TP-COMMENT-TT-DELETE on Thinkpad-tts-test.
