@@ -12,5 +12,5 @@ Plugin under test: tip **2.0.89** (comment case pilots); earlier rows on **2.0.7
 | #58 release 2.0.79 smoke | [58-release-2.0.79-smoke.md](58-release-2.0.79-smoke.md) | **smoke pass**; #27 twins still on disk |
 | #27 quiet-sync collapse | [27-vault-dup-key-2.0.80-unit.md](27-vault-dup-key-2.0.80-unit.md) | **unit + pilot pass** on PR tip **2.0.80** |
 | #60 release 2.0.80 smoke | [60-release-2.0.80-smoke.md](60-release-2.0.80-smoke.md) | **pass**; #27 twins stay collapsed |
-| #17 EMPTY-SIDE-GUARD | — | not started |
-| #18 deferred-id | — | not started |
+| #17 EMPTY-SIDE-GUARD | [17-empty-side-guard-2.0.89.md](17-empty-side-guard-2.0.89.md) | **pass** empty-vault on **2.0.89** (empty-ticktick **not run**) |
+| #18 deferred-id | [18-deferred-id-2.0.89.md](18-deferred-id-2.0.89.md) | **pass** on **2.0.89** |
