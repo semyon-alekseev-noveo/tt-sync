@@ -267,7 +267,7 @@ Automated: `bugCommentNoPush.test.ts`, `synchronizationInner.integration.test.ts
 
 | ID | Pilot status | Evidence |
 |----|----------------|----------|
-| TP-BUG-COMMENT-NO-PUSH | **pass** (**2.0.85**); prior fail **2.0.51** | **2.0.85** #102: `post102-nopush-123356` under `gate-comment-249` → TT Comments. Evidence: `POST-PERF-REGRESSION/102-post-perf-regression.md`. Older fail: **2.0.51** journals removed gate markers; Comments empty. |
+| TP-BUG-COMMENT-NO-PUSH | **pass** (**2.0.89** ×2); also **2.0.85**; prior fail **2.0.51** | **2.0.89** #65: `note-l3b-289-125855` / `note-l3b-289b-125921` → TT Comments (`NOTE-L3B-RECHECK/65-note-l3b-2.0.89.md`). **2.0.85** #102: `post102-nopush-123356`. Older fail: **2.0.51**. |
 
 ## Release 2.0.52 — vault comments survive a line rewrite
 
@@ -291,7 +291,7 @@ Expected: the text is in the TickTick Comments panel, and the bullet is still in
 | ID | Pilot status | Evidence |
 |----|----------------|----------|
 | TP-252-KEEP-ON-REWRITE | not run | |
-| TP-252-PUSH-BEFORE-REWRITE | not run | NOTE-L3b was not re-run on **2.0.52**. The **2.0.51** fail above is not a 2.0.52 result. |
+| TP-252-PUSH-BEFORE-REWRITE | **superseded pass** on later tip | Same behavior as **TP-BUG-COMMENT-NO-PUSH**; re-proved on **2.0.89** (#65). Historical **2.0.52**-tagged row was never run. |
 
 ## Delta API pilot (`docs/TICKTICK_DELTA_API.md` §3.5)
 
@@ -376,7 +376,7 @@ Automated: `pushLocalPaths.test.ts`, `TickTickService.test.ts` (`TP-IDLE-MANUAL-
 | ID | Pilot status | Evidence |
 |----|----------------|----------|
 | TP-IDLE-MANUAL-SCOPE | **pass live** (**2.0.83**+) | Quiet not ~2×; on **2.0.84** comments **0** / `push` ~30 ms. Evidence: `PERF-DELTA/83-idle-zero-2.0.83.md`, `84-idle-zero-2.0.84.md`. |
-| BUG-COMMENT-NO-PUSH | residual soak | Must not regress; #65 soak on tip after release. |
+| BUG-COMMENT-NO-PUSH | **pass** (**2.0.89** #65) | Must not regress; evidence `NOTE-L3B-RECHECK/65-note-l3b-2.0.89.md`. |
 
 ## TP-IDLE-EMPTY-SWEEP — quiet sweep skips empty Abyss threads
 
@@ -610,7 +610,7 @@ These already have automated tests. Re-run them with the suite. Do not mark a li
 | TP-BUG-COMMENT-NO-PUSH | A vault comment with no previous map entry is still kept and pushed. |
 | BUG-PULL-COMMENT-STALE | A TickTick comment the note lacks is still written into the note. |
 | TP1-DEBOUNCE | The open note still pushes about 5 seconds after the last keystroke. |
-| NOTE-L3b | A child comment still reaches TickTick Comments. Live status stays the **2.0.51** fail until someone re-runs it. |
+| NOTE-L3b | A child comment still reaches TickTick Comments. Live **pass** on **2.0.89** (#65) and **2.0.85** (#102); **2.0.51** fail is historical. |
 
 | ID | Pilot status | Evidence |
 |----|----------------|----------|
@@ -793,7 +793,7 @@ Automated: `pendingMarkerDeletion.test.ts` (`BUG-DEFERRED-ID-PHASE2-DELETE`).
 | TP-NO-SELF-REPUSH | A file the plugin just wrote, with no later user save, is not a local edit on the next sync. |
 | TP-COMMENT-TT-DELETE | A TickTick-deleted comment is not re-POSTed. The bullet is removed when that task's list is in `syncedLists`. See the #104 section at the end of this file. |
 | TP1-DEBOUNCE | The open note still pushes about 5 seconds after the last keystroke. |
-| NOTE-L3b | A child comment still reaches TickTick Comments. Live status stays the **2.0.51** fail until someone re-runs it. |
+| NOTE-L3b | A child comment still reaches TickTick Comments. Live **pass** on **2.0.89** (#65). |
 
 | ID | Pilot status | Evidence |
 |----|----------------|----------|

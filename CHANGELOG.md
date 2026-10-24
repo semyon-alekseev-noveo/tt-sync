@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-24 12:59 UTC
+
+- Context: Next backlog after #104 / **2.0.89** — [#64](https://github.com/semyon-alekseev-noveo/tt-sync/issues/64) pilot config + [#65](https://github.com/semyon-alekseev-noveo/tt-sync/issues/65) NOTE-L3b residual soak.
+- Target: Record pilot verify; close both when evidence lands (no behavior change).
+- Actions log: Obsidian CLI on Thinkpad-tts-test; Abyss Inbox tag mode + hardened `data.json`; NOTE-L3b ×2 → TT Comments.
+- Validation: #64 **pass** (`PILOT-VAULT-CONFIG/64-pilot-config-2.0.89.md`); #65 **pass** ×2 (`NOTE-L3B-RECHECK/65-note-l3b-2.0.89.md`).
+- Problems: None for these gates (`resolved`).
+- To Be Done: Owner merges; close #64/#65; next #28/#29 case pilots or editor-safety #15.
+- References: #64, #65, `docs/pilot/results/PILOT-VAULT-CONFIG/`, `docs/pilot/results/NOTE-L3B-RECHECK/`, `CHANGELOG.md`
+
 ### Iteration 2026-10-24 07:25 UTC
 
 - Context: [#120](https://github.com/semyon-alekseev-noveo/tt-sync/pull/120) merged (#104 API-seed comment map upsert); tip still **2.0.88** — bump before tag (PROC-RELEASE-GATE #30).
