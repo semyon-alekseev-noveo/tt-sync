@@ -39,21 +39,20 @@
 - **BUG-COMMENT-GET-FAIL-OPEN** ([#29](https://github.com/semyon-alekseev-noveo/tt-sync/issues/29)): unit fixed **2.0.79**; case pilot **not run** — **keep open**.
 - BRAT missing settings gear when `addSettingTab` ran after async `loadSettings` or layout/sync (`resolved` in 2.0.17 — sync `addSettingTab` in `onload`, command `open-settings` fallback).
 - Stub `.md` files for every TickTick list and no multi-list/folder scope (`mitigated` in code 2026-10-16; verify in Obsidian soak).
-- Test vault `data.json` drifted from `PO_STATUS.md` §2 (empty Sync Tag/Project) — do not Sync now (`open`).
+- Test vault `data.json` drift vs §2 — **resolved** on Thinkpad-tts-test **2.0.89** ([#64](https://github.com/semyon-alekseev-noveo/tt-sync/issues/64); SyncTag `tts-test`, TTS-* `syncedLists`).
 - First sync used unlimited defaults and polluted live TT titles/tags (`resolved` via MCP cleanup).
 - Plugin session auth ≠ MCP/Open API (`mitigated` — use MCP for account ops; plugin for vault sync).
 - Exposed `tp_…` token in chat — revoke if not already (`open`).
 
 ## To Be Done
 
-1. **[P1] BRAT install 2.0.89:** Tag once after this release PR merges. #104 closed after tip prove×2 (API-seed + vault-first) on [#120](https://github.com/semyon-alekseev-noveo/tt-sync/pull/120). Do not retag **2.0.88**.
-2. **[P1] TP-DELTA app-UI (optional):** #84 MCP rows done (`PERF-DELTA/84-tp-delta-pilot.md`); TickTick **app** rename/comment still **not run** if needed.
-3. Revoke the exposed `tp_…` token if it is still valid — [#32](https://github.com/semyon-alekseev-noveo/tt-sync/issues/32).
-4. Pilot vault config — [#64](https://github.com/semyon-alekseev-noveo/tt-sync/issues/64): Abyss Inbox **With inbox tag** `#inbox`; fix test-vault `data.json` drift before Sync.
-5. Product risks — [#63](https://github.com/semyon-alekseev-noveo/tt-sync/issues/63): GAP-COMMENT-EDIT, RISK-PULL-WINS-LOCAL, RISK-DUAL-STORE, BUG-TICKTICK-ID-LEAK.
-6. Residual comment soak — [#65](https://github.com/semyon-alekseev-noveo/tt-sync/issues/65): re-run NOTE-L3b / BUG-COMMENT-NO-PUSH on tip (not a re-open of #14).
-7. Post-#31 modularization — [#66](https://github.com/semyon-alekseev-noveo/tt-sync/issues/66); P2 leftover from #62: [#86](https://github.com/semyon-alekseev-noveo/tt-sync/issues/86)/[#87](https://github.com/semyon-alekseev-noveo/tt-sync/issues/87).
-8. Editor-safety / Step 7 pilots still open: [#15](https://github.com/semyon-alekseev-noveo/tt-sync/issues/15) (#17/#18), [#20](https://github.com/semyon-alekseev-noveo/tt-sync/issues/20); #28/#29 case pilots.
+1. **[P0] Comment case pilots:** [#28](https://github.com/semyon-alekseev-noveo/tt-sync/issues/28) EMPTY-VAULT-WIPE / [#29](https://github.com/semyon-alekseev-noveo/tt-sync/issues/29) GET-FAIL-OPEN (unit done **2.0.79**; case pilot not run).
+2. **[P0/P1] Editor-safety / Step 7:** [#15](https://github.com/semyon-alekseev-noveo/tt-sync/issues/15) (#17/#18), [#20](https://github.com/semyon-alekseev-noveo/tt-sync/issues/20) AF soak, [#19](https://github.com/semyon-alekseev-noveo/tt-sync/issues/19) Active Zone shuffle.
+3. Revoke the exposed `tp_…` token if still valid — [#32](https://github.com/semyon-alekseev-noveo/tt-sync/issues/32).
+4. Product risks — [#63](https://github.com/semyon-alekseev-noveo/tt-sync/issues/63): GAP-COMMENT-EDIT, RISK-PULL-WINS-LOCAL, RISK-DUAL-STORE, BUG-TICKTICK-ID-LEAK.
+5. TP-DELTA app-UI (optional) — [#84](https://github.com/semyon-alekseev-noveo/tt-sync/issues/84).
+6. Post-#31 modularization — [#66](https://github.com/semyon-alekseev-noveo/tt-sync/issues/66); [#86](https://github.com/semyon-alekseev-noveo/tt-sync/issues/86).
+7. [#64](https://github.com/semyon-alekseev-noveo/tt-sync/issues/64) / [#65](https://github.com/semyon-alekseev-noveo/tt-sync/issues/65) **pass** on **2.0.89** — close after evidence PR. #104 closed; tip **2.0.89**.
 
 ## References
 

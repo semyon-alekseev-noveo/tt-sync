@@ -78,7 +78,7 @@
 | **RISK-PULL-WINS-LOCAL** | P2 | open | При победе локальной версии в LWW строка в vault может остаться устаревшей |
 | **BUG-COMMENT-MAP-ORPHAN** | P2 | fixed on this branch | `deleteCommentMapsForTask` вызывается из `TaskRepository` (delete/hard delete/purge), `markTaskDeleted` и pull при удалённой на TT задаче |
 | **PILOT-GATE-TEST-11-12** | P0 | **pass** (**2.0.74**) | `test-11-12` → TT Comments `comment 1` + `test-new-verision`. Evidence: `docs/pilot/results/PILOT-GATE-TEST-11-12/16-phase-3b-verify.md`. Корневой фикс **BUG-COMMENT-API-POST-500** (#21). Issues #10–#14/#21 closed. |
-| **BUG-COMMENT-NO-PUSH** | P0 | fix on branch (pilot **2.0.51** fail) | Перерисовка строки больше не снимает vault-комментарии, которых нет в `Comments:` базе; перед записью файла они пушатся в Comments API. NOTE-L3b на пилоте ещё не перегнан. |
+| **BUG-COMMENT-NO-PUSH** | P0 | **resolved** on **2.0.89** (also **2.0.85**) | Child comment → TT Comments; vault bullet kept. Evidence: `NOTE-L3B-RECHECK/65-note-l3b-2.0.89.md` (#65). Historical **2.0.51** fail. |
 | **BUG-STALE-EDITOR-WRITE** | P0 | **resolved** (**2.0.54** code; pilot cluster **pass** on **2.0.76** / [#16](https://github.com/semyon-alekseev-noveo/tt-sync/issues/16)) | Открытая заметка переписывалась из снимка до Comments API. |
 | **BUG-OPEN-NOTE-BUFFER** | P0 | **resolved** (**2.0.55** code; same #16 pilot **pass**) | Буфер открытой заметки откатывался при sync/push. |
 | **BUG-EMPTY-EDITOR-DISK** | P0 | fixed в **2.0.56** (pilot **pass** on **2.0.76**) | Диск с текстом, markdown view пустой после reopen. **TP-EMPTY-EDITOR-DISK** pilot pass `#16`. |
@@ -92,7 +92,7 @@
 | **TECH-API-1** | P1 | open (риск) | Неофициальный клиент `Tick`: изменения TT ломают sync, покрытие тестами минимальное |
 | **TECH-CIRC-1 / GOD-1/2** | P2 | cycle **resolved** (**2.0.77**); god extract → [#66](https://github.com/semyon-alekseev-noveo/tt-sync/issues/66) | Цикл `main` ↔ `services` снят (`PluginContext`); further extract open. |
 | **DOC-STALE-1** | P3 | mitigated on this branch | Канон: `DEV_FLOW.md`, `PO_STATUS.md`, `ABYSS_FIRST_PLAN.md`. `GTD_SYNC_*`, `TT_ABYSS_ROADMAP.md`, `SYNC_PROJECTS_AND_SUBTASKS.md` — архив. Comments API описан в `ABYSS_NOTES_ALIGNMENT.md` |
-| Прежние | — | open | Токен `tp_…` из чата — отозвать; `data.json` тест-vault дрейфует от §2 — не синкать вслепую |
+| Прежние | — | open / mitigated | Токен `tp_…` из чата — отозвать ([#32](https://github.com/semyon-alekseev-noveo/tt-sync/issues/32)). Pilot `data.json` drift **resolved** on Thinkpad-tts-test **2.0.89** ([#64](https://github.com/semyon-alekseev-noveo/tt-sync/issues/64)). |
 
 ## Redo journal
 
@@ -100,12 +100,12 @@
 
 ## To Be Done
 
-1. Editor-safety cluster (#16): **BUG-STALE-EDITOR-WRITE** / **BUG-OPEN-NOTE-BUFFER** pilot **pass** on **2.0.76** — keep residual `TP-EMPTY-SIDE-GUARD` / undo soak as **not run** until executed (`TEST_PLAN.md`). **TP-COMMENT-TT-DELETE** (#104) **closed** after tip prove×2 on [#120](https://github.com/semyon-alekseev-noveo/tt-sync/pull/120). **[P1] BRAT install 2.0.89** after the release PR merges (tag once; do not retag **2.0.88**).
-2. Post-PERF regression [#102](https://github.com/semyon-alekseev-noveo/tt-sync/issues/102); `TP-DELTA-*` still **not run** → [#84](https://github.com/semyon-alekseev-noveo/tt-sync/issues/84). Idle-zero **pass** on **2.0.85**. Суточная сверка, closed и trash ещё не сделаны.
-3. **BUG-COMMENT-NO-PUSH** — на **2.0.52** буллеты `task-13-43-vault-r3` в vault остались, в TT Comments пусто, прежние TT-комментарии стёрты (карта fingerprint → delete). Не блокирует пункт 1.
-4. **BUG-ACTIVEZONE-COMMENT-SHUFFLE** — failing test + fix (`pullSubtaskOrder` / `mergeAbyssBlock`).
-5. Gate: AF-5 в **Inbox**, DEL-3, CTX-D2 на грязных тегах.
-6. Открыто: GAP-COMMENT-EDIT, RISK-PULL-WINS-LOCAL, RISK-DUAL-STORE, RISK-LARGE-VAULT (частично в **2.0.50**), TECH-START-1; TECH-CIRC-1 цикл mitigated (god-классы remain). В delta теперь учитывается `syncTaskBean.add` (тест `getUpdatedTasks.deltaAdd.test.ts`).
+1. Editor-safety cluster (#16): **BUG-STALE-EDITOR-WRITE** / **BUG-OPEN-NOTE-BUFFER** pilot **pass** on **2.0.76** — residual `TP-EMPTY-SIDE-GUARD` / undo soak **not run**. Next: [#15](https://github.com/semyon-alekseev-noveo/tt-sync/issues/15) (#17/#18) or [#28](https://github.com/semyon-alekseev-noveo/tt-sync/issues/28)/[#29](https://github.com/semyon-alekseev-noveo/tt-sync/issues/29) case pilots.
+2. [#64](https://github.com/semyon-alekseev-noveo/tt-sync/issues/64) / [#65](https://github.com/semyon-alekseev-noveo/tt-sync/issues/65) **pass** on **2.0.89** — close after docs PR. #104 closed; BRAT **2.0.89** installed on pilot.
+3. `TP-DELTA-*` app UI still **not run** → [#84](https://github.com/semyon-alekseev-noveo/tt-sync/issues/84). Idle-zero **pass** on **2.0.85**.
+4. **BUG-ACTIVEZONE-COMMENT-SHUFFLE** — failing test + fix (`pullSubtaskOrder` / `mergeAbyssBlock`) → [#19](https://github.com/semyon-alekseev-noveo/tt-sync/issues/19).
+5. Gate: AF-5 в **Inbox**, DEL-3, CTX-D2 → [#76](https://github.com/semyon-alekseev-noveo/tt-sync/issues/76) / [#20](https://github.com/semyon-alekseev-noveo/tt-sync/issues/20).
+6. Открыто: GAP-COMMENT-EDIT, RISK-PULL-WINS-LOCAL, RISK-DUAL-STORE ([#63](https://github.com/semyon-alekseev-noveo/tt-sync/issues/63)); TECH-START-1; [#66](https://github.com/semyon-alekseev-noveo/tt-sync/issues/66); [#32](https://github.com/semyon-alekseev-noveo/tt-sync/issues/32) token revoke.
 
 ## Аналитический мит 2026-10-19
 

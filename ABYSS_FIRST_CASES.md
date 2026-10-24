@@ -112,6 +112,8 @@ Pass only with evidence: the note path, the `ticktick_id`, and either the journa
 | Date (UTC) | Vault | Build | Runner | Item | Result | Evidence |
 |------------|-------|-------|--------|------|--------|----------|
 | 2026-10-20 | Thinkpad-tts-test | 2.0.48 | Sam (manual) | AF-5 | partial | Checkbox in **project** (dishwasher / Active Zone): task on TTS-Projects, `#type/next` on line — not the plain-inbox AF-5 recipe; line stayed in vault. |
+| 2026-10-24 | Thinkpad-tts-test | 2.0.89 | agent (Obsidian CLI) | NOTE-L3b / BUG-COMMENT-NO-PUSH | pass ×2 | `note-l3b-289-125855` / `note-l3b-289b-125921` → TT Comments. Evidence: `NOTE-L3B-RECHECK/65-note-l3b-2.0.89.md`. #65. |
+| 2026-10-24 | Thinkpad-tts-test | 2.0.89 | agent (Obsidian CLI) | Pilot vault config (#64) | pass | Abyss Inbox tag `#inbox`; SyncTag `tts-test` + TTS-* `syncedLists`. Evidence: `PILOT-VAULT-CONFIG/64-pilot-config-2.0.89.md`. |
 | 2026-10-20 | Thinkpad-tts-test | 2.0.51 | agent (Obsidian CLI) | NOTE-L3b | fail | `00 Inbox/abyss-active.md` `6ad6f43a…`: added `gate-251-retest-b`; **Synchronize** (`tickticksync-abyss:tts-sync`); journal strips comment line; MCP Comments empty. |
 | 2026-10-20 | Thinkpad-tts-test | 2.0.51 | agent (Obsidian CLI) | BUG-COMMENT-NO-PUSH | fail | Same as NOTE-L3b row; `lastVaultPushWallMs` release did not reach TT Comments API on pilot. |
 | 2026-10-20 | Thinkpad-tts-test | 2.0.48 | Sam (manual) | NOTE-L3b | fail | `00 Inbox/manual-test.md` `6ad6e474…`: comment bullets in vault, not in TT Comments; Active Zone tasks reordered / comment moved between tasks. |
