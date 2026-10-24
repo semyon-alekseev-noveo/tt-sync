@@ -35,8 +35,8 @@
 
 - **BUG-COMMENT-DUP-STAMP** ([#25](https://github.com/semyon-alekseev-noveo/tt-sync/issues/25)): **resolved** on **2.0.76** (unit + pilot; 4 plain Comments on `task-11-16`).
 - **BUG-COMMENT-VAULT-DUP-KEY** ([#27](https://github.com/semyon-alekseev-noveo/tt-sync/issues/27)): **resolved** on **2.0.80** (unit + pilot; twins stay collapsed after release smoke).
-- **BUG-COMMENT-EMPTY-VAULT-WIPE** ([#28](https://github.com/semyon-alekseev-noveo/tt-sync/issues/28)): unit fixed **2.0.79**; case pilot **not run** — **keep open**.
-- **BUG-COMMENT-GET-FAIL-OPEN** ([#29](https://github.com/semyon-alekseev-noveo/tt-sync/issues/29)): unit fixed **2.0.79**; case pilot **not run** — **keep open**.
+- **BUG-COMMENT-EMPTY-VAULT-WIPE** ([#28](https://github.com/semyon-alekseev-noveo/tt-sync/issues/28)): **resolved** — unit **2.0.79** + case **pass** on **2.0.89** (`28-empty-vault-wipe-2.0.89.md`).
+- **BUG-COMMENT-GET-FAIL-OPEN** ([#29](https://github.com/semyon-alekseev-noveo/tt-sync/issues/29)): **resolved** — unit **2.0.79** + case **pass** ×2 on **2.0.89** (`29-get-fail-open-2.0.89.md`).
 - BRAT missing settings gear when `addSettingTab` ran after async `loadSettings` or layout/sync (`resolved` in 2.0.17 — sync `addSettingTab` in `onload`, command `open-settings` fallback).
 - Stub `.md` files for every TickTick list and no multi-list/folder scope (`mitigated` in code 2026-10-16; verify in Obsidian soak).
 - Test vault `data.json` drift vs §2 — **resolved** on Thinkpad-tts-test **2.0.89** ([#64](https://github.com/semyon-alekseev-noveo/tt-sync/issues/64); SyncTag `tts-test`, TTS-* `syncedLists`).
@@ -46,13 +46,13 @@
 
 ## To Be Done
 
-1. **[P0] Comment case pilots:** [#28](https://github.com/semyon-alekseev-noveo/tt-sync/issues/28) EMPTY-VAULT-WIPE / [#29](https://github.com/semyon-alekseev-noveo/tt-sync/issues/29) GET-FAIL-OPEN (unit done **2.0.79**; case pilot not run).
-2. **[P0/P1] Editor-safety / Step 7:** [#15](https://github.com/semyon-alekseev-noveo/tt-sync/issues/15) (#17/#18), [#20](https://github.com/semyon-alekseev-noveo/tt-sync/issues/20) AF soak, [#19](https://github.com/semyon-alekseev-noveo/tt-sync/issues/19) Active Zone shuffle.
+1. **[P0/P1] Editor-safety / Step 7:** [#15](https://github.com/semyon-alekseev-noveo/tt-sync/issues/15) — remaining [#17](https://github.com/semyon-alekseev-noveo/tt-sync/issues/17) EMPTY-SIDE-GUARD / [#18](https://github.com/semyon-alekseev-noveo/tt-sync/issues/18) deferred-id; then [#20](https://github.com/semyon-alekseev-noveo/tt-sync/issues/20) AF soak; [#19](https://github.com/semyon-alekseev-noveo/tt-sync/issues/19) Active Zone shuffle.
+2. **[done] Comment case pilots:** [#28](https://github.com/semyon-alekseev-noveo/tt-sync/issues/28) / [#29](https://github.com/semyon-alekseev-noveo/tt-sync/issues/29) **pass** on **2.0.89**.
 3. Revoke the exposed `tp_…` token if still valid — [#32](https://github.com/semyon-alekseev-noveo/tt-sync/issues/32).
 4. Product risks — [#63](https://github.com/semyon-alekseev-noveo/tt-sync/issues/63): GAP-COMMENT-EDIT, RISK-PULL-WINS-LOCAL, RISK-DUAL-STORE, BUG-TICKTICK-ID-LEAK.
 5. TP-DELTA app-UI (optional) — [#84](https://github.com/semyon-alekseev-noveo/tt-sync/issues/84).
 6. Post-#31 modularization — [#66](https://github.com/semyon-alekseev-noveo/tt-sync/issues/66); [#86](https://github.com/semyon-alekseev-noveo/tt-sync/issues/86).
-7. [#64](https://github.com/semyon-alekseev-noveo/tt-sync/issues/64) / [#65](https://github.com/semyon-alekseev-noveo/tt-sync/issues/65) **pass** on **2.0.89** — close after evidence PR. #104 closed; tip **2.0.89**.
+7. [#64](https://github.com/semyon-alekseev-noveo/tt-sync/issues/64) / [#65](https://github.com/semyon-alekseev-noveo/tt-sync/issues/65) / #104 **closed**; tip **2.0.89**.
 
 ## References
 

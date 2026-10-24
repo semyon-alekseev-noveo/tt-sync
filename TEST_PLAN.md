@@ -720,8 +720,8 @@ Automated: `pushLocalPaths.test.ts` (`BUG-COMMENT-ACTIVE-NOTE`).
 | BUG-COMMENT-ABYSS-VIEW | pass | **2.0.75**: Abyss/`vault.modify` schedules 5s push; flush `push-abyss-or-background`. Pilot `task-11-16` / `2026-10-19.md` → TT Comments include user `comment 1` / `коммент 2` + verify bullets. Evidence: `docs/pilot/results/BUG-COMMENT-ABYSS-VIEW/`. Automated: `activeFilePush.test.ts`. |
 | BUG-COMMENT-DUP-STAMP | pass | **2.0.76**: stamped+plain TT pairs collapsed by `normalizedCommentKey`; creates always plain; no second POST when key present. Automated: `abyssCommentSync.test.ts`. Pilot: `task-11-16` → **4** plain Comments (no stamped twins). Evidence: `docs/pilot/results/BUG-COMMENT-DUP-STAMP/`. |
 | BUG-COMMENT-VAULT-DUP-KEY | **pass** (**2.0.80** release) | **2.0.80**: quiet sync marks `vault-comment-dup-keys` → vault rewrite. Automated: `vaultCommentBehind.test.ts`, `abyssStep3.test.ts`. Pilot: `task-11-16` 20→4 then stay 4 after GitHub release deploy; evidence `27-vault-dup-key-2.0.80-unit.md`, `60-release-2.0.80-smoke.md`. **2.0.79** smoke: 21 Abyss lines (`58-release-2.0.79-smoke.md`). Issue #27 closed. |
-| BUG-COMMENT-EMPTY-VAULT-WIPE | not run (unit pass) | **2.0.79**: wipe only with `obsidianRemovedCommentBullets`; delete vault-origin only; coordinator probe does not wipe. Automated: `abyssCommentSync.test.ts`, `vaultCommentBehind.test.ts`. Issue #28. |
-| BUG-COMMENT-GET-FAIL-OPEN | not run (unit pass) | **2.0.79**: `getTaskComments` → `null` on failure; push skips creates/deletes. Automated: `abyssCommentSync.test.ts`. Issue #29. |
+| BUG-COMMENT-EMPTY-VAULT-WIPE | **pass** (**2.0.89**); unit since **2.0.79** | Case: `wipe-28-fixture` — vault-origin deleted, TT-only kept; quiet sync keeps TT-only. Evidence: `PILOT-BATCH-EDITOR-SAFETY/28-empty-vault-wipe-2.0.89.md`. Issue #28. |
+| BUG-COMMENT-GET-FAIL-OPEN | **pass** ×2 (**2.0.89**); unit since **2.0.79** | Injected `getTaskComments → null` during Synchronize; 0 add/delete; ids unchanged. Evidence: `PILOT-BATCH-EDITOR-SAFETY/29-get-fail-open-2.0.89.md`. Issue #29. |
 
 ### BUG-COMMENT-VAULT-DUP-KEY — vault wall-clock + ISO twins
 

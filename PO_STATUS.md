@@ -100,8 +100,8 @@
 
 ## To Be Done
 
-1. Editor-safety cluster (#16): **BUG-STALE-EDITOR-WRITE** / **BUG-OPEN-NOTE-BUFFER** pilot **pass** on **2.0.76** — residual `TP-EMPTY-SIDE-GUARD` / undo soak **not run**. Next: [#15](https://github.com/semyon-alekseev-noveo/tt-sync/issues/15) (#17/#18) or [#28](https://github.com/semyon-alekseev-noveo/tt-sync/issues/28)/[#29](https://github.com/semyon-alekseev-noveo/tt-sync/issues/29) case pilots.
-2. [#64](https://github.com/semyon-alekseev-noveo/tt-sync/issues/64) / [#65](https://github.com/semyon-alekseev-noveo/tt-sync/issues/65) **pass** on **2.0.89** — close after docs PR. #104 closed; BRAT **2.0.89** installed on pilot.
+1. Editor-safety epic [#15](https://github.com/semyon-alekseev-noveo/tt-sync/issues/15): #16 partial pass; next [#17](https://github.com/semyon-alekseev-noveo/tt-sync/issues/17) EMPTY-SIDE-GUARD / [#18](https://github.com/semyon-alekseev-noveo/tt-sync/issues/18) deferred-id. [#28](https://github.com/semyon-alekseev-noveo/tt-sync/issues/28)/[#29](https://github.com/semyon-alekseev-noveo/tt-sync/issues/29) case **pass** on **2.0.89**.
+2. [#64](https://github.com/semyon-alekseev-noveo/tt-sync/issues/64) / [#65](https://github.com/semyon-alekseev-noveo/tt-sync/issues/65) **closed** (pass on **2.0.89**). #104 closed; BRAT **2.0.89** on pilot.
 3. `TP-DELTA-*` app UI still **not run** → [#84](https://github.com/semyon-alekseev-noveo/tt-sync/issues/84). Idle-zero **pass** on **2.0.85**.
 4. **BUG-ACTIVEZONE-COMMENT-SHUFFLE** — failing test + fix (`pullSubtaskOrder` / `mergeAbyssBlock`) → [#19](https://github.com/semyon-alekseev-noveo/tt-sync/issues/19).
 5. Gate: AF-5 в **Inbox**, DEL-3, CTX-D2 → [#76](https://github.com/semyon-alekseev-noveo/tt-sync/issues/76) / [#20](https://github.com/semyon-alekseev-noveo/tt-sync/issues/20).

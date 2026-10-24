@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-24 13:12 UTC
+
+- Context: Case pilots for [#28](https://github.com/semyon-alekseev-noveo/tt-sync/issues/28) / [#29](https://github.com/semyon-alekseev-noveo/tt-sync/issues/29) (unit since **2.0.79**; case was **not run**).
+- Target: Honest live evidence on **2.0.89**; close both when PR merges.
+- Actions log: Dedicated `wipe-28-fixture` wipe + TT-only; inject `getTaskComments → null` ×2; docs under `PILOT-BATCH-EDITOR-SAFETY/`.
+- Validation: #28 **pass** (vault-origin gone, TT-only kept); #29 **pass** ×2 (0 add/delete).
+- Problems: None (`resolved`).
+- To Be Done: Owner merges; close #28/#29; continue #15 → #17/#18.
+- References: `28-empty-vault-wipe-2.0.89.md`, `29-get-fail-open-2.0.89.md`, `CHANGELOG.md`
+
 ### Iteration 2026-10-24 12:59 UTC
 
 - Context: Next backlog after #104 / **2.0.89** — [#64](https://github.com/semyon-alekseev-noveo/tt-sync/issues/64) pilot config + [#65](https://github.com/semyon-alekseev-noveo/tt-sync/issues/65) NOTE-L3b residual soak.
