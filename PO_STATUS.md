@@ -77,8 +77,8 @@
 | **BUG-COMMENT-MAP-ORPHAN** | P2 | fixed on this branch | `deleteCommentMapsForTask` вызывается из `TaskRepository` (delete/hard delete/purge), `markTaskDeleted` и pull при удалённой на TT задаче |
 | **PILOT-GATE-TEST-11-12** | P0 | **pass** (**2.0.74**) | `test-11-12` → TT Comments `comment 1` + `test-new-verision`. Evidence: `docs/pilot/results/PILOT-GATE-TEST-11-12/16-phase-3b-verify.md`. Корневой фикс **BUG-COMMENT-API-POST-500** (#21). Issues #10–#14/#21 closed. |
 | **BUG-COMMENT-NO-PUSH** | P0 | fix on branch (pilot **2.0.51** fail) | Перерисовка строки больше не снимает vault-комментарии, которых нет в `Comments:` базе; перед записью файла они пушатся в Comments API. NOTE-L3b на пилоте ещё не перегнан. |
-| **BUG-STALE-EDITOR-WRITE** | P0 | fixed в **2.0.54** (pilot **not run**) | Открытая заметка переписывалась из снимка, снятого до Comments API. Нажатия за это окно пропадали из редактора, файл на диске оставался новее. Комментарий, удалённый в TickTick, оставался в заметке, поэтому перезапись шла на каждом sync. |
-| **BUG-OPEN-NOTE-BUFFER** | P0 | fixed в **2.0.55** (pilot **not run**) | На 2.0.54 буфер открытой заметки откатывался, файл на диске оставался новым. Пуш без `lastVaultSync`, строка под курсором как vault-behind, `syncRead` / `syncCachedRead`, merge детей из Dexie. Кейсы TP-NO-CARET-REWRITE, TP-ACTIVE-PUSH-DURING-SYNC, TP-NO-STALE-VIEW-READ, TP-ABYSS-LOCAL-CHILD-KEEP, TP-TWO-LEAVES. |
+| **BUG-STALE-EDITOR-WRITE** | P0 | **resolved** (**2.0.54** code; pilot cluster **pass** on **2.0.76** / [#16](https://github.com/semyon-alekseev-noveo/tt-sync/issues/16)) | Открытая заметка переписывалась из снимка до Comments API. |
+| **BUG-OPEN-NOTE-BUFFER** | P0 | **resolved** (**2.0.55** code; same #16 pilot **pass**) | Буфер открытой заметки откатывался при sync/push. |
 | **BUG-EMPTY-EDITOR-DISK** | P0 | fixed в **2.0.56** (pilot **pass** on **2.0.76**) | Диск с текстом, markdown view пустой после reopen. **TP-EMPTY-EDITOR-DISK** pilot pass `#16`. |
 | **BUG-DEFERRED-ID-PHASE2-DELETE** | P0 | fixed в **2.0.57** (pilot **not run**) | Создание в TT при открытой daily note: id в файл отложен (`commitVaultText` caret), Dexie уже знает задачу → ложный «удалена из Obsidian»; в строке нет `%%[ticktick_id:: …]%%`, Abyss view пусто. Guard: `registerPendingMarkerTaskId`, skip Phase 2 delete, `prunePendingMarkerTaskIds` at sync start. |
 | **BUG-ACTIVEZONE-COMMENT-SHUFFLE** | P1 | open | При sync в project note (Active Zone): сортировка соседних задач и перенос comment-буллета с одной задачи на другую. Кейс в `ABYSS_FIRST_CASES.md`. |
@@ -88,7 +88,7 @@
 | **RISK-LARGE-VAULT** | P2 | partial (#62 slice 1) | `idsPresentInVault` + file cache; idle `getTaskById` already 0; idle `getTaskComments` only on count mismatch / unknown count / stamp twins (not every vault thread). `ensureVaultFilesRegistered` still walks all `.md` |
 | **TECH-START-1** | P2 | open | Полный pull на старте блокирует инициализацию |
 | **TECH-API-1** | P1 | open (риск) | Неофициальный клиент `Tick`: изменения TT ломают sync, покрытие тестами минимальное |
-| **TECH-CIRC-1 / GOD-1/2** | P2 | partial | Цикл `main` ↔ `services` снят (`PluginContext`, PR 4 / #31); god-классы `TickTickService`, `TaskModificationDetector` ещё open |
+| **TECH-CIRC-1 / GOD-1/2** | P2 | cycle **resolved** (**2.0.77**); god extract → [#66](https://github.com/semyon-alekseev-noveo/tt-sync/issues/66) | Цикл `main` ↔ `services` снят (`PluginContext`); further extract open. |
 | **DOC-STALE-1** | P3 | mitigated on this branch | Канон: `DEV_FLOW.md`, `PO_STATUS.md`, `ABYSS_FIRST_PLAN.md`. `GTD_SYNC_*`, `TT_ABYSS_ROADMAP.md`, `SYNC_PROJECTS_AND_SUBTASKS.md` — архив. Comments API описан в `ABYSS_NOTES_ALIGNMENT.md` |
 | Прежние | — | open | Токен `tp_…` из чата — отозвать; `data.json` тест-vault дрейфует от §2 — не синкать вслепую |
 
@@ -98,7 +98,7 @@
 
 ## To Be Done
 
-1. Пилот **2.0.56** **BUG-EMPTY-EDITOR-DISK** (`TP-EMPTY-EDITOR-DISK`); пилот **2.0.55** **BUG-OPEN-NOTE-BUFFER** и hotfix **2.0.54** **BUG-STALE-EDITOR-WRITE**: `TP-EDITOR-*`, `TP-COMMENT-TT-DELETE`, `TP-NO-SELF-REPUSH`, `TP-COMPLETE-DURING-TYPE`, `TP-UNCOMPLETE-DURING-TYPE`, `TP-JOURNAL-EDITOR-PATCH`, `TP-UNDO-EDITOR-PATCH`, `TP-NO-CARET-REWRITE`, `TP-ACTIVE-PUSH-DURING-SYNC`, `TP-NO-STALE-VIEW-READ`, `TP-ABYSS-LOCAL-CHILD-KEEP`, `TP-TWO-LEAVES`; пилот `TP-EMPTY-SIDE-GUARD` (`TEST_PLAN.md`).
+1. Editor-safety cluster (#16): **BUG-STALE-EDITOR-WRITE** / **BUG-OPEN-NOTE-BUFFER** pilot **pass** on **2.0.76** — keep residual `TP-EMPTY-SIDE-GUARD` / undo soak as **not run** until executed (`TEST_PLAN.md`). **TP-COMMENT-TT-DELETE** live re-pilot after tip fix (#104).
 2. Post-PERF regression [#102](https://github.com/semyon-alekseev-noveo/tt-sync/issues/102); `TP-DELTA-*` still **not run** → [#84](https://github.com/semyon-alekseev-noveo/tt-sync/issues/84). Idle-zero **pass** on **2.0.85**. Суточная сверка, closed и trash ещё не сделаны.
 3. **BUG-COMMENT-NO-PUSH** — на **2.0.52** буллеты `task-13-43-vault-r3` в vault остались, в TT Comments пусто, прежние TT-комментарии стёрты (карта fingerprint → delete). Не блокирует пункт 1.
 4. **BUG-ACTIVEZONE-COMMENT-SHUFFLE** — failing test + fix (`pullSubtaskOrder` / `mergeAbyssBlock`).

@@ -1,7 +1,7 @@
 # Plan — align TickTick sync with Abyss Tasks logic
 
 **Date:** 2026-10-16  
-**Status:** P1–P6 **confirmed by owner** 2026-10-16; Steps 1–2 done. **Step 3:** plugin uses `#inbox` as the inbox stage tag (see §3.1). Option B (2026-10-16) is an Abyss setting and does not match the plugin.  
+**Status:** P1–P6 **confirmed by owner** 2026-10-16; Steps 1–2 done. **Step 3:** plugin uses `#inbox` as the inbox stage tag (see §3.1). **Step 4:** code **done** (scope sync / no relocate — `step4ScopeSync.test.ts`); live Phase D verify still open. **Step 5:** partial (settings/docs; membershipQuery runtime not required). **Step 6:** AF-* case set in `ABYSS_FIRST_CASES.md` / `TEST_PLAN.md`; pilots under [#20](https://github.com/semyon-alekseev-noveo/tt-sync/issues/20). Option B (2026-10-16) is an Abyss setting and does not match the plugin.  
 **Audience:** you (PO), implementers  
 **Replaces as north star:** topology **R** (“canonical line must live in `30 Tasks/TickTick/<List>.md`”) — **parked**, not deleted from history (`GTD_SYNC_RESEARCH.md`, `GTD_SYNC_CASES.md` CASE-T4).
 
@@ -220,6 +220,8 @@ Today `TTS-data-preset.json` includes **`00 Inbox/`** in `syncScopeFolders`. Opt
 
 ## Step 4 — Plugin behavior: lines stay put (engineering)
 
+**Status (2026-10-23):** **done** in code on tip; owner Phase D verify still optional.
+
 **Goal:** Remove the need for CASE-T4; align pull/push with P2.
 
 | Action | Code / config area | Change |
@@ -250,6 +252,8 @@ Today `TTS-data-preset.json` includes **`00 Inbox/`** in `syncScopeFolders`. Opt
 
 ## Step 5 — One project definition (engineering + settings)
 
+**Status (2026-10-23):** **partial** — folder/tag project notes + scheme in use; optional Abyss `membershipQuery` runtime still future.
+
 **Goal:** Stop maintaining two mental models (`membershipQuery` vs `system/project` + scheme).
 
 | Action | Detail |
@@ -264,6 +268,8 @@ Today `TTS-data-preset.json` includes **`00 Inbox/`** in `syncScopeFolders`. Opt
 ---
 
 ## Step 6 — Simpler acceptance cases (QA)
+
+**Status (2026-10-23):** **done** as case catalog (`ABYSS_FIRST_CASES` AF-*); live AF-* pilots tracked under [#20](https://github.com/semyon-alekseev-noveo/tt-sync/issues/20).
 
 **Goal:** Replace overwhelm with **~8** Abyss-shaped cases (keep old catalog as archive).
 

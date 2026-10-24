@@ -7,9 +7,28 @@
 - Actions log: Branch `chore/release-2.0.87` from tip `d9b23e9`; `npm version 2.0.87`; PO/PROJECT_STATE/INDEX install pointers.
 - Validation: `npx vitest run` → **717** passed; `npm run build` → ok (`manifest.json` **2.0.87**).
 - Problems: Live TP-COMMENT-TT-DELETE re-pilot still **not run** until BRAT install (`open`).
-- To Be Done: Owner merges; tag **2.0.87** once on `abyss-mapping` tip; install; live TT-DELETE; then merge #114/#115 (#113 already on tip).
+- To Be Done: Owner merges; tag **2.0.87** once on `abyss-mapping` tip; install; live TT-DELETE (#113–#115 already on tip).
 - References: https://github.com/semyon-alekseev-noveo/tt-sync/pull/112, #104, `CHANGELOG.md`
 
+### Iteration 2026-10-23 16:22 UTC
+
+- Context: [#33](https://github.com/semyon-alekseev-noveo/tt-sync/issues/33) hygiene item 1 — personal absolute path in `vault-gtd-smoke.mjs`.
+- Target: Require `data.json` path via argv or `TTS_VAULT_DATA` (no `/home/sam/...` default).
+- Actions log: Rewrote script usage; exit 2 when path missing.
+- Validation: `node scripts/vault-gtd-smoke.mjs` → exit **2** + usage.
+- Problems: Remaining #33 items (deps/metadata/archive) still open.
+- To Be Done: Owner merges; leave #33 open for leftover checklist.
+- References: https://github.com/semyon-alekseev-noveo/tt-sync/issues/33, `scripts/vault-gtd-smoke.mjs`, `CHANGELOG.md`
+
+### Iteration 2026-10-23 16:20 UTC
+
+- Context: [#77](https://github.com/semyon-alekseev-noveo/tt-sync/issues/77) DOC-SYNC — canonical docs lagged tip releases.
+- Target: Align DEV_FLOW/TODO version pointers, PO editor-safety rows, Steps 4–6 status, TECH-CIRC retire note — no behavior change.
+- Actions log: Updated `DEV_FLOW.md`, `TODO.md`, `PO_STATUS.md`, `ABYSS_FIRST_PLAN.md`.
+- Validation: Docs-only review against #77 checklist (subset; INDEX already current for #62–#104).
+- Problems: Full PO table for every historical release not rewritten (`mitigated`).
+- To Be Done: Owner merges; close #77.
+- References: https://github.com/semyon-alekseev-noveo/tt-sync/issues/77, `CHANGELOG.md`
 
 ### Iteration 2026-10-23 16:16 UTC
 
@@ -20,6 +39,7 @@
 - Problems: None (`resolved` for #87 unit).
 - To Be Done: Owner merges; close #87.
 - References: https://github.com/semyon-alekseev-noveo/tt-sync/issues/87, `src/sync/perf.ts`, `CHANGELOG.md`
+
 ### Iteration 2026-10-23 16:13 UTC
 
 - Context: Developer fix for **BUG-COMMENT-DELETE-REPOST** after analyst H1/H2 red tests (#104 / 2.0.86 live fail).
