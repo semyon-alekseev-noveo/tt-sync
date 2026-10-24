@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-24 13:56 UTC
+
+- Context: [#124](https://github.com/semyon-alekseev-noveo/tt-sync/pull/124) merged; epic [#15](https://github.com/semyon-alekseev-noveo/tt-sync/issues/15) closed; start Step 7 AF soak [#20](https://github.com/semyon-alekseev-noveo/tt-sync/issues/20).
+- Target: Pilot **AF-1** on tip **2.0.89** — empty `syncedLists` writes no TickTick tasks into the vault.
+- Actions log: Emptied pilot `syncedLists`; Synchronize; compared markers/journal; restored TTS-* lists; evidence under `STEP7-AF-PILOT-SOAK/`.
+- Validation: 0 new ids; md **730** held; 0 `tt->obs` for sync `sync-mvmgnuva-…`; TTS-Inbox still had undone tasks.
+- Problems: Sync also logged some `obs->tt` moves (`mitigated` — out of AF-1 scope).
+- To Be Done: Merge evidence PR; close #68; continue AF-2 (#69).
+- References: `docs/pilot/results/STEP7-AF-PILOT-SOAK/68-af1-empty-syncedlists-2.0.89.md`, `CHANGELOG.md`
+
 ### Iteration 2026-10-24 13:45 UTC
 
 - Context: [#18](https://github.com/semyon-alekseev-noveo/tt-sync/issues/18) deferred-id case pilot after #17 empty-vault pass.
