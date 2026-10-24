@@ -887,3 +887,19 @@ If `syncedLists` is empty, the acceptable result is narrower: no re-POST, bullet
 | TP-COMMENT-TT-DELETE re-prove A (vault-first) | **not run** | After this fix is merged. |
 | TP-COMMENT-TT-DELETE re-prove B (API-seed, list in `syncedLists`) | **not run** | After this fix is merged. |
 | Unit: key-match without map, then no re-POST | **pass (unit)** | `abyssCommentSync.test.ts`, `synchronizationInner.integration.test.ts`. Not a live pass. |
+
+## PR — AF-1 empty syncedLists pilot (#68 / #20)
+
+No code change. Tip **2.0.89**. Case **AF-1** in `ABYSS_FIRST_CASES.md`.
+
+### AF-1 — empty `syncedLists` does not write TickTick tasks into the vault
+
+1. On `<pilot-vault>`, set `syncedLists` to `[]` (keep SyncTag / scope). Confirm at least one TTS-* list still has tasks in TickTick.
+2. Run **Synchronize**.
+3. Restore the pilot `syncedLists` set afterward.
+
+Expected: no new `%%[ticktick_id:: …]%%` lines, no stub list files, no journal `tt->obs` creates for that sync.
+
+| ID | Pilot status | Evidence |
+|----|----------------|----------|
+| AF-1 | **pass** | **2.0.89** CLI: 0 new ids; md count held; 0 `tt->obs` for sync `sync-mvmgnuva-…`. `docs/pilot/results/STEP7-AF-PILOT-SOAK/68-af1-empty-syncedlists-2.0.89.md`. #68. |
