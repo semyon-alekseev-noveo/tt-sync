@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-24 14:22 UTC
+
+- Context: [#126](https://github.com/semyon-alekseev-noveo/tt-sync/pull/126) merged (AF-2); continue [#20](https://github.com/semyon-alekseev-noveo/tt-sync/issues/20) with AF-3.
+- Target: Pilot **AF-3** on tip **2.0.89** — new `10 Projects/` note with `system/project` → one TTS-Projects parent.
+- Actions log: Created `AF-3 pilot obs parent 142000.md`; Synchronize ×2; MCP `get_task_by_id`; evidence under `STEP7-AF-PILOT-SOAK/`.
+- Validation: Id `6adcbea8…` on TTS-Projects; tags `obsidian`/`project` only; one journal create; 2nd sync idle.
+- Problems: None (`resolved`).
+- To Be Done: Merge evidence PR; close #70; continue AF-4 (#71).
+- References: `docs/pilot/results/STEP7-AF-PILOT-SOAK/70-af3-obs-project-note-2.0.89.md`, `CHANGELOG.md`
+
 ### Iteration 2026-10-24 14:01 UTC
 
 - Context: [#125](https://github.com/semyon-alekseev-noveo/tt-sync/pull/125) merged (AF-1); continue [#20](https://github.com/semyon-alekseev-noveo/tt-sync/issues/20) with AF-2.

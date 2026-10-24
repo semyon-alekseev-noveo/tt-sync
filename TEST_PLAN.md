@@ -918,3 +918,18 @@ Expected: a note under `10 Projects/` with `system/project` and `## Active Zone`
 | ID | Pilot status | Evidence |
 |----|----------------|----------|
 | AF-2 | **pass** | **2.0.89**: note `10 Projects/AF-2 pilot parent 135930.md`, id `6adcb9f5…`, 0 checkboxes. `docs/pilot/results/STEP7-AF-PILOT-SOAK/69-af2-project-parent-2.0.89.md`. #69. |
+
+## PR — AF-3 Obs project note → TT parent (#70 / #20)
+
+No code change. Tip **2.0.89**. Case **AF-3** in `ABYSS_FIRST_CASES.md`.
+
+### AF-3 — new project note creates the projects-list parent
+
+1. Create a note under `10 Projects/` with tag `system/project` and no `ticktick_id`.
+2. Run **Synchronize**, then Synchronize again.
+
+Expected: exactly one parent on TTS-Projects with the note title; no injected `ticktick` tag / file link; second sync creates nothing new.
+
+| ID | Pilot status | Evidence |
+|----|----------------|----------|
+| AF-3 | **pass** | **2.0.89**: id `6adcbea8…`, tags `obsidian`/`project`, 1 create then idle. `docs/pilot/results/STEP7-AF-PILOT-SOAK/70-af3-obs-project-note-2.0.89.md`. #70. |
