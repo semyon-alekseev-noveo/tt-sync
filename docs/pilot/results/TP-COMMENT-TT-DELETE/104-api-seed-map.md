@@ -6,9 +6,9 @@
 |-------|--------|
 | Date (UTC) | 2026-10-24 |
 | Build | Branch off `abyss-mapping` at **2.0.88** (`2a78ea3`). No version bump. |
-| Issue | [#104](https://github.com/semyon-alekseev-noveo/tt-sync/issues/104) stays **open** |
+| Issue | [#104](https://github.com/semyon-alekseev-noveo/tt-sync/issues/104) **closed** 2026-10-24 after tip prove×2 |
 | Case | **TP-COMMENT-TT-DELETE** |
-| Status | **pass (unit)** / live re-prove **not run** |
+| Status | **pass (unit)**; live prove×2 recorded on [#120](https://github.com/semyon-alekseev-noveo/tt-sync/pull/120) before merge |
 
 ## Inputs
 
@@ -29,7 +29,7 @@ Unit (red before the upsert, green after):
 
 ## Conclusion
 
-The code fix is map bookkeeping on the equal-key link (`origin: 'remote'`, no `changed` flag). Live re-prove is **not run**. #104 stays open until the owner records two passes: vault-first and API-seed, each with the task's list in `syncedLists`.
+The code fix is map bookkeeping on the equal-key link (`origin: 'remote'`, no `changed` flag). Owner later recorded two live passes on the #120 tip (API-seed `post120-ttdelete-seed`, vault-first `post120-vaultfirst-seed`, `syncedLists: ["Inbox"]`) and closed #104. This release bump does not add a new live run.
 
 ## Checklist
 
@@ -37,5 +37,6 @@ The code fix is map bookkeeping on the equal-key link (`origin: 'remote'`, no `c
 - [x] Delete does not `addTaskComment` when the link was stored
 - [x] Bullet removed in the integration fixture when the list is in scope
 - [x] `TEST_PLAN` records the 2.0.88 fail and the re-prove steps
-- [ ] Live re-prove (vault-first + API-seed) — **not run**
-- [ ] Close #104 — owner, after those passes
+- [x] Live re-prove (vault-first + API-seed) — owner on #120 tip before merge (PR comments; `syncedLists: ["Inbox"]`)
+- [x] Close #104 — owner, 2026-10-24
+- [x] Release bump **2.0.89** after #120 merge (PROC-RELEASE-GATE)

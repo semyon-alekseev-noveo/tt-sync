@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-24 07:25 UTC
+
+- Context: [#120](https://github.com/semyon-alekseev-noveo/tt-sync/pull/120) merged (#104 API-seed comment map upsert); tip still **2.0.88** — bump before tag (PROC-RELEASE-GATE #30).
+- Target: Bump **2.0.89** on a release PR into `abyss-mapping`; tag/release only after owner merges.
+- Actions log: Branch `cursor/release-2.0.89-3883` from tip `e167e5b`; `npm version 2.0.89 --no-git-tag-version`; PO/PROJECT_STATE/INDEX install pointers.
+- Validation: `npx vitest run` → **724** passed; `npm run build` → ok (`manifest.json` **2.0.89**).
+- Problems: Live on tagged **2.0.89** still pending BRAT install (`open`); tip prove×2 (API-seed + vault-first) already green on #120 before merge.
+- To Be Done: Owner merges; tag **2.0.89** once on `abyss-mapping` tip; BRAT install. Do not retag **2.0.88**.
+- References: https://github.com/semyon-alekseev-noveo/tt-sync/pull/120, #104, `CHANGELOG.md`
+
 ### Iteration 2026-10-24 05:50 UTC
 
 - Context: [#104](https://github.com/semyon-alekseev-noveo/tt-sync/issues/104) reopened. Release **2.0.88** box **fail** for **TP-COMMENT-TT-DELETE**: API-seeded comment `post288-ttdelete-seed` was re-POSTed (`6adc431e…`) and the vault bullet stayed. `syncedLists` was empty (`commentsByPhase.push` only).
