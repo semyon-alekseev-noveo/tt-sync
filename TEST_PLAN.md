@@ -783,7 +783,7 @@ Automated: `pendingMarkerDeletion.test.ts` (`BUG-DEFERRED-ID-PHASE2-DELETE`).
 
 | ID | Pilot status | Evidence |
 |----|----------------|----------|
-| BUG-DEFERRED-ID-PHASE2-DELETE | not run | Pilot 2026-10-21 `00 Inbox/2026-10-21.md` `test-10-35`: TT create + false delete modal, no id in file (`write-trace` defer caret). |
+| BUG-DEFERRED-ID-PHASE2-DELETE | **pass** (**2.0.89**) | `defer-18-134433` → id `6adcb651…`, TT task present, 0 deletes. Evidence: `PILOT-BATCH-EDITOR-SAFETY/18-deferred-id-2.0.89.md`. Historical fail 2026-10-21 caret race. Issue #18. |
 
 ### Regressions that must still hold
 

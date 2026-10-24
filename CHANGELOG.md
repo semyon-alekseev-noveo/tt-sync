@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-24 13:45 UTC
+
+- Context: [#18](https://github.com/semyon-alekseev-noveo/tt-sync/issues/18) deferred-id case pilot after #17 empty-vault pass.
+- Target: New checkbox without id → Synchronize → TT task + vault marker; no Phase 2 delete of that id.
+- Actions log: Fixture `defer-18-134433` on `abyss-active.md`; Synchronize; MCP `get_task_by_id`.
+- Validation: Id `6adcb651…` on line; TT task present; `deleteTask` **0**.
+- Problems: Exact caret-defer race from 2026-10-21 not re-forced (`mitigated` — unit covers pending marker).
+- To Be Done: Owner merges; close #17/#18; revisit #15 epic checklist.
+- References: `docs/pilot/results/PILOT-BATCH-EDITOR-SAFETY/18-deferred-id-2.0.89.md`, `CHANGELOG.md`
+
 ### Iteration 2026-10-24 13:43 UTC
 
 - Context: [#17](https://github.com/semyon-alekseev-noveo/tt-sync/issues/17) EMPTY-SIDE-GUARD case pilot after #28/#29 closed; prior folder-park attempt aborted.

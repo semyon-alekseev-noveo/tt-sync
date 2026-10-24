@@ -112,6 +112,7 @@ Pass only with evidence: the note path, the `ticktick_id`, and either the journa
 | Date (UTC) | Vault | Build | Runner | Item | Result | Evidence |
 |------------|-------|-------|--------|------|--------|----------|
 | 2026-10-20 | Thinkpad-tts-test | 2.0.48 | Sam (manual) | AF-5 | partial | Checkbox in **project** (dishwasher / Active Zone): task on TTS-Projects, `#type/next` on line — not the plain-inbox AF-5 recipe; line stayed in vault. |
+| 2026-10-24 | Thinkpad-tts-test | 2.0.89 | agent (Obsidian CLI) | BUG-DEFERRED-ID-PHASE2-DELETE | pass | `defer-18-134433` → TT + vault id; 0 deletes. Evidence: `PILOT-BATCH-EDITOR-SAFETY/18-deferred-id-2.0.89.md`. #18. |
 | 2026-10-24 | Thinkpad-tts-test | 2.0.89 | agent (Obsidian CLI) | TP-EMPTY-SIDE-GUARD (empty-vault) | pass | Guard `empty-vault`, skip, checkpoint held, 0 deletes. Evidence: `PILOT-BATCH-EDITOR-SAFETY/17-empty-side-guard-2.0.89.md`. #17. |
 | 2026-10-24 | Thinkpad-tts-test | 2.0.89 | agent (Obsidian CLI) | BUG-COMMENT-EMPTY-VAULT-WIPE | pass | `wipe-28-fixture`: vault-origin deleted; TT-only kept; quiet sync keeps it. Evidence: `PILOT-BATCH-EDITOR-SAFETY/28-empty-vault-wipe-2.0.89.md`. #28. |
 | 2026-10-24 | Thinkpad-tts-test | 2.0.89 | agent (Obsidian CLI) | BUG-COMMENT-GET-FAIL-OPEN | pass ×2 | Injected null GET; 0 add/delete on `gate-comment-249` + `wipe-28-fixture`. Evidence: `PILOT-BATCH-EDITOR-SAFETY/29-get-fail-open-2.0.89.md`. #29. |
