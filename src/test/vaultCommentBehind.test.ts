@@ -858,4 +858,147 @@ describe('BUG-PULL-COMMENT-STALE', () => {
 			{ id: 'c2', title: 'pilot-tt-second-comment' },
 		]);
 	});
+
+	it('BUG-COMMENT-DELETE-REPOST H5: behindComments attaches __ticktickComments for merge strip', async () => {
+		updateSettings({
+			syncNotes: true,
+			abyssTasksFormat: true,
+			syncAbyssCommentsViaApi: true,
+			syncScopeFolders: ['00 Inbox/'],
+			tagMappings: [],
+			tagListMappings: [],
+		}, { persist: false });
+
+		const taskId = '6ad97afa24006c1f88d0aa13';
+		const file = new NoteFile('00 Inbox/abyss-active.md');
+		const text = [
+			`- [ ] тест-абис-таск #obsidian #inbox %%[ticktick_id:: ${taskId}]%%`,
+			'\t- > ',
+			'\t- commetn 1',
+		].join('\n');
+		const getTaskComments = vi.fn().mockResolvedValue([]);
+		const addTaskComment = vi.fn();
+		vi.mocked(listCommentMapsForTask).mockResolvedValue([
+			{
+				id: `${taskId}:commetn 1`,
+				taskId,
+				projectId: 'proj-1',
+				fingerprint: 'commetn 1',
+				ticktickCommentId: 'c-deleted',
+				body: 'commetn 1',
+				origin: 'vault' as const,
+			},
+		]);
+		const { TaskParser } = await import('@/taskParser');
+		const { abyssLinesToNote } = await import('@/abyssFormat');
+		const parser = new TaskParser({} as never, {} as never);
+		const taskLine = text.split('\n')[0];
+		const childLines = text.split('\n').slice(1);
+		const lineHash = await parser.getLineHash(taskLine + abyssLinesToNote(childLines));
+		const plugin = {
+			tickTickRestAPI: { getTaskComments, addTaskComment, deleteTaskComment: vi.fn() },
+			taskParser: parser,
+			projectScheme: { isParentTask: () => false },
+			fileOperation: { readFileContent: async () => text },
+			dateMan: {
+				parseDates: () => ({}),
+				stripDatesFromLine: (s: string) => s,
+				formatDateToISO: () => '',
+				addDatesToLine: (s: string) => s,
+				areDatesChanged: () => false,
+				addDateHolderToTask: () => undefined,
+			},
+			fileTaskQueries: { getDefaultProjectIdForFilepath: async () => 'proj-1' },
+			taskRepository: {
+				loadTaskById: async () => ({
+					id: taskId,
+					projectId: 'proj-1',
+					title: 'тест-абис-таск',
+					content: '',
+					lineHash,
+				}),
+			},
+		};
+		parser.plugin = plugin as never;
+		const app = {
+			metadataCache: { getFileCache: () => ({ listItems: [] }) },
+			vault: { getAbstractFileByPath: () => file, read: async () => text },
+		};
+		const coordinator = new VaultSyncCoordinator(app as never, plugin as never);
+		const behind = (coordinator as unknown as {
+			vaultLineBehindTask(task: unknown, path: string): Promise<{
+				behind: boolean;
+				localEdit: boolean;
+				reason: string;
+				task: {
+					_apiComments?: unknown[];
+					__ticktickComments?: {
+						knownBodies: string[];
+						apiBodies: string[];
+						remoteCommentCount?: number;
+					};
+				};
+			}>;
+		}).vaultLineBehindTask.bind(coordinator);
+
+		// Dexie count already 0 after TT delete while vault still has the mapped bullet
+		// (count mismatch forces comment probe; matched count would idle-skip GET).
+		const result = await behind({
+			id: taskId,
+			projectId: 'proj-1',
+			title: 'тест-абис-таск',
+			content: '',
+			desc: '',
+			status: 0,
+			commentCount: 0,
+			lineHash,
+		}, file.path);
+
+		expect(addTaskComment).not.toHaveBeenCalled();
+		expect(result.behind).toBe(true);
+		expect(result.reason).toBe('behindComments');
+		expect(result.task._apiComments).toEqual([]);
+		expect(result.task.__ticktickComments).toEqual({
+			knownBodies: ['commetn 1'],
+			apiBodies: [],
+			remoteCommentCount: 0,
+		});
+	});
+
+	it('BUG-COMMENT-DELETE-REPOST H6: hint from behindComments strips vault bullet before flush', async () => {
+		const { mergeAbyssBlock } = await import('@/abyssFormat');
+		const gen = '- [ ] T %%[ticktick_id:: abcdefabcdefabcdefabcdef]%%\n\t- > ';
+		const old = ['\t- > ', '\t- commetn 1'];
+		const hint = {
+			knownBodies: ['commetn 1'],
+			apiBodies: [] as string[],
+			remoteCommentCount: 0,
+		};
+		const out = mergeAbyssBlock(gen, old, undefined, hint);
+		expect(out).not.toContain('commetn 1');
+	});
+
+	it('BUG-COMMENT-DELETE-REPOST H5b: tag rewrite copy keeps __ticktickComments (dropStaleStageTags spread)', () => {
+		const coordinator = new VaultSyncCoordinator({} as never, {} as never);
+		const copy = (coordinator as unknown as {
+			copyCommentPullState(from: object, to: object): void;
+		}).copyCommentPullState.bind(coordinator);
+
+		const from = { id: 't1', tags: ['obsidian'] };
+		Object.defineProperty(from, '_apiComments', { value: [], enumerable: false, configurable: true });
+		Object.defineProperty(from, '__ticktickComments', {
+			value: { knownBodies: ['gone'], apiBodies: [], remoteCommentCount: 0 },
+			enumerable: false,
+			configurable: true,
+		});
+		const to = { ...from, tags: ['inbox'] };
+		expect((to as { __ticktickComments?: unknown }).__ticktickComments).toBeUndefined();
+		copy(from, to);
+		expect((to as { __ticktickComments?: unknown }).__ticktickComments).toEqual({
+			knownBodies: ['gone'],
+			apiBodies: [],
+			remoteCommentCount: 0,
+		});
+		expect((to as { _apiComments?: unknown })._apiComments).toEqual([]);
+	});
 });

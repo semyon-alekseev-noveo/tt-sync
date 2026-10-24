@@ -8,7 +8,7 @@ import {
 	syncAbyssCommentsToTickTick,
 	useAbyssCommentsApi,
 } from '@/abyssCommentSync';
-import { stripLegacyCommentsBlock, type TickTickCommentSync } from '@/abyssFormat';
+import { stripLegacyCommentsBlock, tickTickCommentMergeHint } from '@/abyssFormat';
 import type { ITaskComment } from '@/api/types/TaskComment';
 import { listCommentMapsForTask } from '@/db/taskCommentMaps';
 import { NewFileMap } from '@/services/NewFileMap';
@@ -507,13 +507,11 @@ export class FileOperation {
 				Object.defineProperty(task, '_apiComments', { value: comments, enumerable: false, configurable: true });
 			}
 			const maps = await listCommentMapsForTask(task.id);
-			const hint: TickTickCommentSync = {
-				knownBodies: maps.map(m => m.body),
-				apiBodies: comments === null ? [] : comments.map(c => c.title ?? ''),
-				// Omit remoteCommentCount when GET failed so merge does not strip on empty apiBodies.
-				...(comments !== null ? { remoteCommentCount: commentCount } : {}),
-			};
-			Object.defineProperty(task, '__ticktickComments', { value: hint, enumerable: false, configurable: true });
+			Object.defineProperty(task, '__ticktickComments', {
+				value: tickTickCommentMergeHint(maps, comments, commentCount),
+				enumerable: false,
+				configurable: true,
+			});
 			task.content = stripLegacyCommentsBlock(task.content ?? '');
 			task.desc = stripLegacyCommentsBlock(task.desc ?? '');
 		}

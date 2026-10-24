@@ -194,6 +194,23 @@ export interface TickTickCommentSync {
 	remoteCommentCount?: number;
 }
 
+/**
+ * Merge hint for `mergeAbyssBlock` / `NewFileMap.updateTask`.
+ * Build on every path that sets `_apiComments` (reconcile `behindComments` and `preparePersistNetwork`).
+ * Omit `remoteCommentCount` when GET failed (`comments === null`) so empty `apiBodies` does not strip.
+ */
+export function tickTickCommentMergeHint(
+	maps: ReadonlyArray<{ body: string }>,
+	comments: ReadonlyArray<{ title?: string }> | null,
+	commentCount: number | undefined,
+): TickTickCommentSync {
+	return {
+		knownBodies: maps.map(m => m.body),
+		apiBodies: comments === null ? [] : comments.map(c => c.title ?? ''),
+		...(comments !== null ? { remoteCommentCount: commentCount } : {}),
+	};
+}
+
 /** Line indexes of vault comment threads deleted in TickTick since the previous sync. */
 function commentLinesDeletedInTickTick(oldChild: string[], generatedComments: string[], ticktick: TickTickCommentSync): Set<number> {
 	const known = new Set(ticktick.knownBodies.map(normalizedCommentKey).filter(fp => fp.length > 0));

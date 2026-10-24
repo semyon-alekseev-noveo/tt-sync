@@ -9,3 +9,5 @@ Every PR that changes behavior updates [`TEST_PLAN.md`](TEST_PLAN.md) in that sa
 Do not push `abyss-mapping` or `master`, do not merge, and do not create tags or releases. Open a pull request into `abyss-mapping`. The owner merges.
 
 Pilot vault only. No secrets and no personal filesystem paths in the repo. Do not mark a live-vault case as passed unless it was run.
+
+Bug fixes: prove the fixed behavior **at least twice** (two independent live/pilot runs, preferably different fixtures) before closing the issue or writing live **pass** — see [`.cursor/rules/bug-prove-twice.mdc`](.cursor/rules/bug-prove-twice.mdc).

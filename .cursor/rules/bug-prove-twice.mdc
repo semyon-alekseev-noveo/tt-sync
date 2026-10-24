@@ -1,0 +1,18 @@
+---
+description: Bug fixes need two independent proofs before calling the bug fixed or closing the issue.
+alwaysApply: true
+---
+
+# Prove a bug fix at least twice
+
+When working on a **bug** (`BUG-*`, live fail, residual after a “fix” release):
+
+1. **Do not** mark the bug fixed, close the GitHub issue, or set `TEST_PLAN` / `ABYSS_FIRST_CASES` / pilot results to live **pass** after a **single** successful check.
+2. **Require two independent proofs** of the fixed behavior before those claims. Prefer:
+   - two separate live/pilot runs on the pilot vault, **or**
+   - one live/pilot run **plus** a second run on a **different** task/note/fixture (not the same marker reused once).
+3. Unit/integration green counts as engineering evidence only. It does **not** replace the second live/pilot proof when the bug was found or last failed on a live vault.
+4. If a second proof **fails**, the first “pass” is void: record an honest **fail**, reopen or keep the issue open, and correct any docs/PR that claimed pass.
+5. Evidence for both proofs goes under `docs/pilot/results/` (see `pilot-results.mdc`); link both in the issue comment before close.
+
+Triggered by #104: one agent live “pass” on **2.0.87** was followed by an owner re-prove **fail** on another task — one pass is not enough.

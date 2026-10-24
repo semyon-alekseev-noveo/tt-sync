@@ -31,6 +31,7 @@ A change is ready to code when all of these are true:
 - If behavior changed, [`TEST_PLAN.md`](TEST_PLAN.md) gained a section in this PR (steps, expected result, pilot status). A reviewer or a tester agent rejects the PR when that section is missing.
 - The PR targets `abyss-mapping`. The owner merges.
 - The report says what was run and what was not run. A case that was not executed is **not run**, never “pass”.
+- **Bug fixes — prove twice:** before closing a bug issue or marking a live/pilot case **pass**, record **two independent** successful proofs of the fixed behavior (two separate runs; prefer a different task/note/fixture for the second). One green unit suite or one lucky live pass is not enough. If the second proof fails, the first pass is void — keep the issue open and correct any docs that claimed pass. (Cursor rule: `.cursor/rules/bug-prove-twice.mdc`.)
 
 ## Regression gate
 
