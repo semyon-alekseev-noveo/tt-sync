@@ -17,7 +17,7 @@
 
 - **Direction (2026-10-16):** **Abyss-first** — tasks stay where Abyss puts them; TickTick mirrors tags/lists and project parents. See `ABYSS_FIRST_PLAN.md` (topology R / CASE-T4 parked).
 - **Still valid:** TT **Projects** ↔ project notes under `10 Projects/`; safety: `syncedLists`, `syncScopeFolders`, manual sync.
-- **Next execution order:** Steps 1–8 in `ABYSS_FIRST_PLAN.md`. Comment gate **pass** through **2.0.76**. Editor-safety epic [#15](https://github.com/semyon-alekseev-noveo/tt-sync/issues/15) **closed**. Step 7 AF soak [#20](https://github.com/semyon-alekseev-noveo/tt-sync/issues/20): AF-1/#68 + AF-2/#69 **pass** on **2.0.89**; AF-3…AF-8 open. Then [#19](https://github.com/semyon-alekseev-noveo/tt-sync/issues/19) Active Zone shuffle. Abyss Inbox stage tag `#inbox` (§3.1); untagged Inbox still open. Birth tag `#obsidian` stays.
+- **Next execution order:** Steps 1–8 in `ABYSS_FIRST_PLAN.md`. Comment gate **pass** through **2.0.76**. Editor-safety epic [#15](https://github.com/semyon-alekseev-noveo/tt-sync/issues/15) **closed**. Step 7 AF soak [#20](https://github.com/semyon-alekseev-noveo/tt-sync/issues/20): AF-1…AF-3 (#68–#70) **pass** on **2.0.89**; AF-4…AF-8 open. Then [#19](https://github.com/semyon-alekseev-noveo/tt-sync/issues/19) Active Zone shuffle. Abyss Inbox stage tag `#inbox` (§3.1); untagged Inbox still open. Birth tag `#obsidian` stays.
 - **Sync research (2026-10-20):** `docs/TICKTICK_DELTA_API.md` — delta has no comments; echo suppression in `pull.ts` uses `etag`; idle sync does not call `getTaskById` per quiet task.
 - **Deletion guard (2026-10-20):** over-threshold or empty-side deletions are held and the checkpoint stays. Defaults: guard on, more than 10 tasks and more than 20%, startup delay 30s. Pilot cases in `TEST_PLAN.md` are not run.
 - **Redo:** journal `<vault>/.tickticksync/journal/`; palette undo previews then applies `planUndo`. Not soaked on the live vault.
@@ -46,7 +46,7 @@
 
 ## To Be Done
 
-1. **[P1] Step 7 AF soak:** [#20](https://github.com/semyon-alekseev-noveo/tt-sync/issues/20) — AF-1/#68 + AF-2/#69 **pass** on **2.0.89**; next AF-3 (#70) … AF-8; then [#19](https://github.com/semyon-alekseev-noveo/tt-sync/issues/19) Active Zone shuffle. Epic [#15](https://github.com/semyon-alekseev-noveo/tt-sync/issues/15) **closed**.
+1. **[P1] Step 7 AF soak:** [#20](https://github.com/semyon-alekseev-noveo/tt-sync/issues/20) — AF-1…AF-3 (#68–#70) **pass** on **2.0.89**; next AF-4 (#71) … AF-8; then [#19](https://github.com/semyon-alekseev-noveo/tt-sync/issues/19) Active Zone shuffle. Epic [#15](https://github.com/semyon-alekseev-noveo/tt-sync/issues/15) **closed**.
 2. **[done] Comment case pilots:** [#28](https://github.com/semyon-alekseev-noveo/tt-sync/issues/28) / [#29](https://github.com/semyon-alekseev-noveo/tt-sync/issues/29) **pass** on **2.0.89**.
 3. Revoke the exposed `tp_…` token if still valid — [#32](https://github.com/semyon-alekseev-noveo/tt-sync/issues/32).
 4. Product risks — [#63](https://github.com/semyon-alekseev-noveo/tt-sync/issues/63): GAP-COMMENT-EDIT, RISK-PULL-WINS-LOCAL, RISK-DUAL-STORE, BUG-TICKTICK-ID-LEAK.
