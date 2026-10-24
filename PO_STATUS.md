@@ -25,7 +25,7 @@
 
 ## Validation
 
-- Релиз **2.0.88** (2026-10-24): **F1/F1b** from [#118](https://github.com/semyon-alekseev-noveo/tt-sync/pull/118) (#104) — attach/keep `__ticktickComments` on `behindComments` so merge strips after TT delete. Tip prove×2 pass (`104-live-f1-prove-twice.md`); BRAT install after tag.
+- Релиз **2.0.88** (2026-10-24): **F1/F1b** from [#118](https://github.com/semyon-alekseev-noveo/tt-sync/pull/118) (#104). Box re-prove **fail**: API-seed comment re-POSTed, bullet kept, `syncedLists` empty (`104-live-2.0.88-box.md`). #104 **reopened**. Vault-first tip prove×2 does not cover that path.
 - Релиз **2.0.87** (2026-10-24): **BUG-COMMENT-DELETE-REPOST** from [#112](https://github.com/semyon-alekseev-noveo/tt-sync/pull/112) (#104) — no create on single mapped miss; strip when live GET empty despite stale Dexie count. Owner re-prove on **2.0.87** still **fail** (F1).
 - Релиз **2.0.86** (2026-10-23): **TP-COMMENT-TT-DELETE** unit fix from [#108](https://github.com/semyon-alekseev-noveo/tt-sync/pull/108) (#104) — single mapped miss waits for pull. Live **fail** (`104-live-2.0.86.md`).
 - Релиз **2.0.85** (2026-10-23): PERF/DELTA slice 5 from [#99](https://github.com/semyon-alekseev-noveo/tt-sync/pull/99) (#98) — cut quiet `getTaskById` / `TP-IDLE-BYID-ZERO`. Live `#85` **pass**: byId **0**, comments **0**, `totalMs` ~7 s (`PERF-DELTA/85-idle-zero-2.0.85.md`). Epic [#62](https://github.com/semyon-alekseev-noveo/tt-sync/issues/62) **closed** (idle/wall-time; `TP-DELTA-*` → [#84](https://github.com/semyon-alekseev-noveo/tt-sync/issues/84)); evidence `PERF-DELTA/62-epic-close.md`. Post-PERF [#102](https://github.com/semyon-alekseev-noveo/tt-sync/issues/102) done; #104 unit on tip.
@@ -99,7 +99,7 @@
 
 ## To Be Done
 
-1. Editor-safety cluster (#16): **BUG-STALE-EDITOR-WRITE** / **BUG-OPEN-NOTE-BUFFER** pilot **pass** on **2.0.76** — keep residual `TP-EMPTY-SIDE-GUARD` / undo soak as **not run** until executed (`TEST_PLAN.md`). **TP-COMMENT-TT-DELETE** live re-pilot after tip fix (#104).
+1. Editor-safety cluster (#16): **BUG-STALE-EDITOR-WRITE** / **BUG-OPEN-NOTE-BUFFER** pilot **pass** on **2.0.76** — keep residual `TP-EMPTY-SIDE-GUARD` / undo soak as **not run** until executed (`TEST_PLAN.md`). **TP-COMMENT-TT-DELETE** (#104) live **fail** on **2.0.88** box. Re-prove after the map fix (vault-first + API-seed, list in `syncedLists`). Do not close #104 from unit results.
 2. Post-PERF regression [#102](https://github.com/semyon-alekseev-noveo/tt-sync/issues/102); `TP-DELTA-*` still **not run** → [#84](https://github.com/semyon-alekseev-noveo/tt-sync/issues/84). Idle-zero **pass** on **2.0.85**. Суточная сверка, closed и trash ещё не сделаны.
 3. **BUG-COMMENT-NO-PUSH** — на **2.0.52** буллеты `task-13-43-vault-r3` в vault остались, в TT Comments пусто, прежние TT-комментарии стёрты (карта fingerprint → delete). Не блокирует пункт 1.
 4. **BUG-ACTIVEZONE-COMMENT-SHUFFLE** — failing test + fix (`pullSubtaskOrder` / `mergeAbyssBlock`).

@@ -746,4 +746,81 @@ describe('synchronizationInner integration', () => {
 		expect(world.api.getTaskComments).not.toHaveBeenCalled();
 		expect(world.api.addTaskComment).not.toHaveBeenCalled();
 	}, 20_000);
+
+	it('TP-COMMENT-TT-DELETE #104: API-seed key match without a map does not re-POST and strips when the list is in scope', async () => {
+		const world = await makeWorld({ realDetector: true });
+		const plugin = world.service.plugin as {
+			app: unknown;
+			lastLines?: Map<string, number>;
+			fileOperation: unknown;
+			fileTaskQueries: { filepathHasDefaultProjectID?: () => Promise<boolean> };
+		};
+		plugin.lastLines = new Map();
+		plugin.fileTaskQueries.filepathHasDefaultProjectID = async () => true;
+		const tagged = plugin as { tagService?: Record<string, unknown> };
+		tagged.tagService = {
+			...(tagged.tagService ?? {}),
+			resolveHierarchicalLabel: () => null,
+			getLabel: (name: string) => name,
+			getParent: () => null,
+			isKnownTag: () => true,
+			resolveToName: (raw: string) => raw,
+			addTag: async () => undefined,
+		};
+		plugin.fileOperation = new FileOperation(plugin.app as never, plugin as never);
+		const body = 'post288-ttdelete-seed';
+		const commentId = '432b67b390c34e8db8d29585';
+		const text = `- [ ] same title %%[ticktick_id:: ${TASK}]%%\n\t- ${body}\n`;
+		putFile(world, 'notes/a.md', text, 0);
+		world.metadata['notes/a.md'] = { TickTickTasks: [{ taskId: TASK }], defaultProjectId: 'proj-1' };
+		await db.tasks.put({
+			localId: `tt:${TASK}`,
+			taskId: TASK,
+			task: {
+				id: TASK, projectId: 'proj-1', title: 'same title', content: '', desc: '', status: 0,
+				modifiedTime: '2026-10-18T00:00:00.000+0000', tags: [], commentCount: 1,
+			} as never,
+			updatedAt: 1000,
+			lastVaultSync: 5000,
+			file: 'notes/a.md',
+			source: 'ticktick',
+			deleted: false,
+		});
+		// No taskCommentMap: the comment was seeded on TickTick and mirrored as a vault bullet.
+		world.api.getTaskComments.mockResolvedValue([{ id: commentId, title: body }]);
+		world.api.addTaskComment.mockClear();
+		const first = await world.service.synchronizationInner(false, 'manual');
+		expect(first.ok).toBe(true);
+		expect(world.api.addTaskComment).not.toHaveBeenCalled();
+		const linked = await listCommentMapsForTask(TASK);
+		expect(linked.map(m => m.ticktickCommentId)).toContain(commentId);
+
+		// Push can rewrite tags on the parent line. Restore a quiet note and run
+		// reconcile only, with the map the push just stored and commentCount 0
+		// (the task pull after a TickTick delete). syncedLists includes proj-1.
+		(plugin as { taskModificationDetector: { checkFileForModifications: ReturnType<typeof vi.fn>; checkFileForNewTasks: ReturnType<typeof vi.fn> } }).taskModificationDetector = {
+			checkFileForModifications: vi.fn(async () => undefined),
+			checkFileForNewTasks: vi.fn(async () => undefined),
+		};
+		putFile(world, 'notes/a.md', text, 0);
+		await db.tasks.put({
+			localId: `tt:${TASK}`,
+			taskId: TASK,
+			task: {
+				id: TASK, projectId: 'proj-1', title: 'same title', content: '', desc: '', status: 0,
+				modifiedTime: '2026-10-18T00:00:00.000+0000', tags: [], commentCount: 0,
+			} as never,
+			updatedAt: 1000,
+			lastVaultSync: 5000,
+			file: 'notes/a.md',
+			source: 'ticktick',
+			deleted: false,
+		});
+		world.api.getTaskComments.mockResolvedValue([]);
+		world.api.addTaskComment.mockClear();
+		const second = await world.service.synchronizationInner(false, 'manual');
+		expect(second.ok).toBe(true);
+		expect(world.api.addTaskComment).not.toHaveBeenCalled();
+		expect(world.files.get('notes/a.md')?.text ?? '').not.toContain(body);
+	}, 20_000);
 });

@@ -20,6 +20,8 @@ Stamps are **display metadata**; they must not be the only match key.
 2. **Content:** `normalizedCommentKey(text)` = `commentFingerprint(commentBodyWithoutStamp(text))`
 3. **Aliases:** full-line fingerprint + plain key (`aliasKeysForBody`, `commentFingerprintsForThread`)
 
+A content match with no Dexie row (API-seeded comment, vault bullet already present) must `upsertCommentMap` that TickTick id and must not POST (**TP-COMMENT-TT-DELETE**, #104). The row is what makes a later delete a mapped miss. `origin` is `remote` because this sync did not create the comment. Vault reconcile strips the bullet only when the task's list is in `syncedLists`. Empty `syncedLists` skips that reconcile; the comment sweep can still run.
+
 ## API
 
 - `normalizedCommentKey`, `planCommentSync`, `commentSetsEquivalentByNormalizedKey` — `src/sync/comments/`

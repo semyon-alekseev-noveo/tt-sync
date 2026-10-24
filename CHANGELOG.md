@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-24 05:50 UTC
+
+- Context: [#104](https://github.com/semyon-alekseev-noveo/tt-sync/issues/104) reopened. Release **2.0.88** box **fail** for **TP-COMMENT-TT-DELETE**: API-seeded comment `post288-ttdelete-seed` was re-POSTed (`6adc431e…`) and the vault bullet stayed. `syncedLists` was empty (`commentsByPhase.push` only).
+- Target: After a known TickTick comment is deleted, do not `addTaskComment`. Remove the vault bullet when reconcile is in scope. No version bump.
+- Actions log: Equal-key link with no `taskCommentMap` now `upsertCommentMap` (`origin: remote`) and does not POST. Documented the empty-`syncedLists` reconcile skip. Tests named **TP-COMMENT-TT-DELETE #104**.
+- Validation: New tests were red before the upsert (0 `upsertCommentMap` calls). `npx vitest run` → **724** passed; `npm run build` → ok. Live re-prove **not run**.
+- Problems: #104 stays open. Vault-first tip prove×2 does not cover API-seed. Empty `syncedLists` still will not strip the bullet.
+- To Be Done: Owner merges. Re-prove vault-first and API-seed with the list in `syncedLists` (two passes) before close. Do not tag from this branch.
+- References: `docs/pilot/results/TP-COMMENT-TT-DELETE/104-live-2.0.88-box.md`, `104-api-seed-map.md`, #104, `CHANGELOG.md`
+
 ### Iteration 2026-10-24 04:18 UTC
 
 - Context: [#118](https://github.com/semyon-alekseev-noveo/tt-sync/pull/118) merged (#104 F1/F1b behindComments merge hint); tip still **2.0.87** — bump before tag (PROC-RELEASE-GATE #30).

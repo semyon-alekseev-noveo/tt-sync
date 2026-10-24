@@ -617,7 +617,7 @@ These already have automated tests. Re-run them with the suite. Do not mark a li
 | TP-EDITOR-TYPE-DURING-SYNC | **pass (CLI approx)** (**2.0.85** #102) | Marker `post102-type-sync-*` survived Synchronize in editor+disk. Evidence: `POST-PERF-REGRESSION/102-post-perf-regression.md`. |
 | TP-EDITOR-TYPE-DURING-PUSH | not run | #102 deferred — covered partly by TP-PERF-ACTIVE. |
 | TP-EDITOR-OTHER-LEAF | not run | |
-| TP-COMMENT-TT-DELETE | **pass (unit H5/H5b/H6)** / live **pass** ×2 (tip F1+F1b) | Evidence `104-live-f1-prove-twice.md`. Release bump still needed for BRAT tip. |
+| TP-COMMENT-TT-DELETE | **pass (unit H5/H5b/H6)** / vault-first live **pass** ×2 | Evidence `104-live-f1-prove-twice.md`. Does not cover API-seed. **2.0.88** box **fail** — see the section at the end of this file. |
 | TP-NO-SELF-REPUSH | not run | Automated: `bugCommentNoPush.test.ts`, `synchronizationInner.integration.test.ts`. |
 | TP-STALE-FILE-WRITE | not run | Automated only: `staleFileWrite.test.ts`. No vault run. |
 | TP-COMPLETE-DURING-TYPE | not run | Automated: `completeDuringType.test.ts`. No vault run. |
@@ -791,7 +791,7 @@ Automated: `pendingMarkerDeletion.test.ts` (`BUG-DEFERRED-ID-PHASE2-DELETE`).
 |----|----------------------|
 | TP-IDLE-ZERO | A quiet sync does not probe each task. The shared plugin read is one per note; a closed detach reads that file from disk once more. `vault.read` itself is not cached. |
 | TP-NO-SELF-REPUSH | A file the plugin just wrote, with no later user save, is not a local edit on the next sync. |
-| TP-COMMENT-TT-DELETE | A comment deleted in TickTick still leaves the note. |
+| TP-COMMENT-TT-DELETE | A TickTick-deleted comment is not re-POSTed. The bullet is removed when that task's list is in `syncedLists`. See the #104 section at the end of this file. |
 | TP1-DEBOUNCE | The open note still pushes about 5 seconds after the last keystroke. |
 | NOTE-L3b | A child comment still reaches TickTick Comments. Live status stays the **2.0.51** fail until someone re-runs it. |
 
@@ -838,3 +838,52 @@ Expected: sync finishes; plugin version **2.0.78**. Smoke only — do not invent
 | ID | Pilot status | Evidence |
 |----|----------------|----------|
 | TP-COMMENT-FIXES-ON-MOD | **pass** | Deploy **2.0.78**; CLI reload + `tts-sync` (after clearing stuck `syncRunning`); `checkPoint` advanced; evidence `docs/pilot/results/COMMENT-FIXES-2.0.78/55-release-smoke.md` |
+
+## #104 — API-seeded TickTick comment must not be re-POSTed after delete
+
+Branch off `abyss-mapping` (manifest stays **2.0.88**; no release). Case **TP-COMMENT-TT-DELETE** in `ABYSS_FIRST_CASES.md`.
+
+What changed: when a vault comment bullet and a TickTick comment match by normalized key and Dexie has no `taskCommentMap`, sync stores that TickTick id (`origin: remote`) and does not call `addTaskComment`. After the comment is deleted in TickTick, that stored id is a single mapped miss, so sync does not create a new comment with the same title. The vault bullet is removed only when vault reconcile runs.
+
+**`syncedLists` precondition.** Empty `syncedLists` skips vault reconcile (`behindComments` does not run), so the bullet stays. The comment sweep can still run — the box log showed `commentsByPhase.push` and `vaultWrites: 0` plus the warn `syncedLists` empty. Put the task's list in `syncedLists` before expecting the bullet to disappear. A comment-count match can also skip the probe; after a TickTick delete the task `commentCount` has to differ from the vault thread count (or be unknown) for the strip to run.
+
+### Live fail already recorded — do not mark pass
+
+Box, release **2.0.88**, 2026-10-24. Task `gate-comment-287-box` (`6adb91418f08640fc34e86f5`), project `inbox133906430`.
+
+1. API POST `post288-ttdelete-seed` (`432b67b390c34e8db8d29585`) and the same indented bullet in the note.
+2. **Synchronize** ×2 while the comment still existed. `commentsFetched: 4`, `commentsByPhase.push: 4`, `vaultWrites: 0`, warn `syncedLists` empty.
+3. API DELETE → `[]`. **Synchronize** again.
+
+Expected was: bullet gone, no new TickTick comment. Actual: **fail**. New comment `6adc431e0ab39382ed69db12` at `2026-10-24T05:33:18Z`. Bullet remained. Evidence: `docs/pilot/results/TP-COMMENT-TT-DELETE/104-live-2.0.88-box.md`.
+
+### TP-COMMENT-TT-DELETE — re-prove after this fix (not run)
+
+Run both fixtures on a build that contains this change. Two passes are required before live **pass** or closing #104. This PR did not run them.
+
+**A. Vault-first** (the path tip prove×2 already covered; repeat on the new build)
+
+1. Task's list is in `syncedLists`. `syncNotes`, `abyssTasksFormat`, and `syncAbyssCommentsViaApi` are on.
+2. On a synced task, add a comment bullet in the note. **Synchronize** so TickTick Comments gains it (this creates the map).
+3. Delete that comment in TickTick. **Synchronize**.
+4. **Synchronize** again without editing the note.
+
+Expected: the bullet is gone after step 3. Step 4 does not create a TickTick comment and does not rewrite the note.
+
+**B. API-seed** (the **2.0.88** box miss)
+
+1. Same settings, and the task's list is in `syncedLists`. Confirm the list is selected before the run — empty `syncedLists` will keep the bullet even when no new comment is posted.
+2. Create the comment with the TickTick API (or the TickTick UI), and put a matching indented bullet under the task. Do not push that bullet from the vault first.
+3. **Synchronize** once while the TickTick comment still exists. TickTick must not gain a second comment with that title.
+4. Delete the TickTick comment. **Synchronize**.
+
+Expected: no new TickTick comment id. The vault bullet is removed. A second **Synchronize** does not POST and does not rewrite the note.
+
+If `syncedLists` is empty, the acceptable result is narrower: no re-POST, bullet may remain. Do not call that a strip pass.
+
+| ID | Pilot status | Evidence |
+|----|----------------|----------|
+| TP-COMMENT-TT-DELETE on **2.0.88** box | **fail** | API-seed re-POST `6adc431e…`; bullet kept; `syncedLists` empty. `104-live-2.0.88-box.md`. |
+| TP-COMMENT-TT-DELETE re-prove A (vault-first) | **not run** | After this fix is merged. |
+| TP-COMMENT-TT-DELETE re-prove B (API-seed, list in `syncedLists`) | **not run** | After this fix is merged. |
+| Unit: key-match without map, then no re-POST | **pass (unit)** | `abyssCommentSync.test.ts`, `synchronizationInner.integration.test.ts`. Not a live pass. |
