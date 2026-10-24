@@ -14,8 +14,8 @@ Tracker issues live on [`semyon-alekseev-noveo/tt-sync`](https://github.com/semy
 | BUG-COMMENT-ABYSS-VIEW | [#23](https://github.com/semyon-alekseev-noveo/tt-sync/issues/23) | P0 | **closed / pass** (**2.0.75**); on tip via **2.0.78** | keep closed |
 | BUG-COMMENT-DUP-STAMP | [#25](https://github.com/semyon-alekseev-noveo/tt-sync/issues/25) | P0 | **closed / pass** (**2.0.76**); on tip via **2.0.78** | keep closed |
 | BUG-COMMENT-VAULT-DUP-KEY | [#27](https://github.com/semyon-alekseev-noveo/tt-sync/issues/27) | P0 | **closed / pass** (**2.0.80**) | keep closed |
-| BUG-COMMENT-EMPTY-VAULT-WIPE | [#28](https://github.com/semyon-alekseev-noveo/tt-sync/issues/28) | P0 | **fix in 2.0.79** (unit); case pilot not run | **keep open** |
-| BUG-COMMENT-GET-FAIL-OPEN | [#29](https://github.com/semyon-alekseev-noveo/tt-sync/issues/29) | P0 | **fix in 2.0.79** (unit); case pilot not run | **keep open** |
+| BUG-COMMENT-EMPTY-VAULT-WIPE | [#28](https://github.com/semyon-alekseev-noveo/tt-sync/issues/28) | P0 | **pass** case on **2.0.89** (unit **2.0.79**) | **done** 2026-10-24 |
+| BUG-COMMENT-GET-FAIL-OPEN | [#29](https://github.com/semyon-alekseev-noveo/tt-sync/issues/29) | P0 | **pass** ×2 case on **2.0.89** (unit **2.0.79**) | **done** 2026-10-24 |
 | PILOT-BATCH-EDITOR-SAFETY | [#15](https://github.com/semyon-alekseev-noveo/tt-sync/issues/15) | P0 | **open** (#17/#18/#28/#29 left) | **keep** — install tip **2.0.80** |
 | └ open-note / editor | [#16](https://github.com/semyon-alekseev-noveo/tt-sync/issues/16) | P0 | **closed / pass** (**2.0.76**) | keep closed |
 | └ EMPTY-SIDE-GUARD | [#17](https://github.com/semyon-alekseev-noveo/tt-sync/issues/17) | P0 | **open** — pilot not run | **keep** |
