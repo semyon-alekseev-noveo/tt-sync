@@ -10,6 +10,16 @@
 - To Be Done: Owner merges; tag **2.0.87** once on `abyss-mapping` tip; install; live TT-DELETE; then merge conflict-fixed #113–#115.
 - References: https://github.com/semyon-alekseev-noveo/tt-sync/pull/112, #104, `CHANGELOG.md`
 
+
+### Iteration 2026-10-23 16:16 UTC
+
+- Context: [#87](https://github.com/semyon-alekseev-noveo/tt-sync/issues/87) P2 — per-phase `[perf]` comment counters after PERF/DELTA.
+- Target: Attribute `getTaskComments` to innermost `timePhase` in `commentsByPhase` (no behavior change).
+- Actions log: Extend `SyncPerfCounts` + `observeSyncApi`; unit in `syncPerf.test.ts`.
+- Validation: `npx vitest run src/test/syncPerf.test.ts` → **5** passed.
+- Problems: None (`resolved` for #87 unit).
+- To Be Done: Owner merges; close #87.
+- References: https://github.com/semyon-alekseev-noveo/tt-sync/issues/87, `src/sync/perf.ts`, `CHANGELOG.md`
 ### Iteration 2026-10-23 16:13 UTC
 
 - Context: Developer fix for **BUG-COMMENT-DELETE-REPOST** after analyst H1/H2 red tests (#104 / 2.0.86 live fail).
