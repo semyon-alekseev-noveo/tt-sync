@@ -2,7 +2,7 @@
 
 One process for analyst, developer, and tester work on this fork. The point is to stop a fix from shipping without a case, a failing test, and a regression run.
 
-Release in the tree when this was written: **2.0.47**. The owner merges. Agents do not push `abyss-mapping` or `master`, do not merge, and do not create tags or releases.
+Latest published release: see GitHub Releases / `manifest.json` on `abyss-mapping` (was **2.0.47** when this sentence was first written; do not treat that number as current). The owner merges. Agents do not push `abyss-mapping` or `master`, do not merge, and do not create tags or releases.
 
 ## Roles
 

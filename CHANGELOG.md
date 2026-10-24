@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-23 16:20 UTC
+
+- Context: [#77](https://github.com/semyon-alekseev-noveo/tt-sync/issues/77) DOC-SYNC — canonical docs lagged tip releases.
+- Target: Align DEV_FLOW/TODO version pointers, PO editor-safety rows, Steps 4–6 status, TECH-CIRC retire note — no behavior change.
+- Actions log: Updated `DEV_FLOW.md`, `TODO.md`, `PO_STATUS.md`, `ABYSS_FIRST_PLAN.md`.
+- Validation: Docs-only review against #77 checklist (subset; INDEX already current for #62–#104).
+- Problems: Full PO table for every historical release not rewritten (`mitigated`).
+- To Be Done: Owner merges; close #77.
+- References: https://github.com/semyon-alekseev-noveo/tt-sync/issues/77, `CHANGELOG.md`
+
 ### Iteration 2026-10-23 16:16 UTC
 
 - Context: [#87](https://github.com/semyon-alekseev-noveo/tt-sync/issues/87) P2 — per-phase `[perf]` comment counters after PERF/DELTA.
