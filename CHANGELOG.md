@@ -10,6 +10,26 @@
 - To Be Done: Owner merges; close #77.
 - References: https://github.com/semyon-alekseev-noveo/tt-sync/issues/77, `CHANGELOG.md`
 
+### Iteration 2026-10-23 16:13 UTC
+
+- Context: Developer fix for **BUG-COMMENT-DELETE-REPOST** after analyst H1/H2 red tests (#104 / 2.0.86 live fail).
+- Target: No POST on single mapped miss; merge strips when live GET empty even if Dexie `commentCount` stale; keep STALE-MAPS multi re-push.
+- Actions log: Gate create in `syncAbyssCommentsToTickTick`; strip when `remoteCommentCount` is numeric; fix test-11-12 fixture to two stale maps; strengthen integration no-`addTaskComment`.
+- Validation: `npx vitest run` → **717** passed; `npm run build` → ok.
+- Problems: Live re-pilot still **not run** on tip (`open` until 2.0.87 + vault).
+- To Be Done: PR → merge → bump/release → live TT-DELETE; then next backlog items.
+- References: https://github.com/semyon-alekseev-noveo/tt-sync/issues/104, `docs/pilot/results/TP-COMMENT-TT-DELETE/104-analyst-hypothesis.md`, `CHANGELOG.md`
+
+### Iteration 2026-10-23 15:56 UTC
+
+- Context: Analyst pass on residual live **TP-COMMENT-TT-DELETE** fail on **2.0.86** (`104-live-2.0.86.md`).
+- Target: Ranked hypotheses + case handoff; no production fix.
+- Actions log: Traced `flushActiveFilePush` → `sweepAbyssCommentsInFile` / `preparePersistNetwork` → `syncAbyssCommentsToTickTick` vs `vaultHasUnpushedCommentThreads`; extended `ABYSS_FIRST_CASES` + **BUG-COMMENT-DELETE-REPOST**.
+- Validation: Code-path review only (no vitest this iteration).
+- Problems: #108 gates reconcile only; push still POSTs single mapped miss (`open`).
+- To Be Done: Developer — failing tests listed in analyst brief, then fix; re-pilot live.
+- References: `ABYSS_FIRST_CASES.md`, `docs/pilot/results/TP-COMMENT-TT-DELETE/104-live-2.0.86.md`, `CHANGELOG.md`
+
 ### Iteration 2026-10-23 15:47 UTC
 
 - Context: Owner merged [#109](https://github.com/semyon-alekseev-noveo/tt-sync/pull/109); tagged **2.0.86**; live TP-COMMENT-TT-DELETE on Thinkpad-tts-test.

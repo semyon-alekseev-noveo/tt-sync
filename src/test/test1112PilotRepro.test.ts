@@ -56,6 +56,7 @@ describe('test-11-12 pilot repro', () => {
 	it('syncAbyssCommentsToTickTick pushes both vault threads when API empty and maps stale', async () => {
 		const S = getSettings() as Record<string, unknown>;
 		Object.assign(S, { syncNotes: true, abyssTasksFormat: true, syncAbyssCommentsViaApi: true });
+		// BUG-COMMENT-STALE-MAPS: several mapped ids gone → re-push both (not single-miss TT-DELETE).
 		vi.mocked(listCommentMapsForTask).mockResolvedValue([
 			{
 				id: `${taskId}:c1`,
@@ -64,6 +65,15 @@ describe('test-11-12 pilot repro', () => {
 				fingerprint: 'comment 1',
 				ticktickCommentId: 'dead-1',
 				body: 'comment 1',
+				origin: 'remote',
+			},
+			{
+				id: `${taskId}:c2`,
+				taskId,
+				projectId,
+				fingerprint: 'test-new-verision',
+				ticktickCommentId: 'dead-2',
+				body: 'test-new-verision',
 				origin: 'remote',
 			},
 		]);
