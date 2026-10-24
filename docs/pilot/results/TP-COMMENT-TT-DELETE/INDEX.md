@@ -6,6 +6,7 @@ Gate for GitHub [#104](https://github.com/semyon-alekseev-noveo/tt-sync/issues/1
 |-------|------|--------|
 | Unit fix + policy | [104-unit-fix.md](104-unit-fix.md) | **pass (unit)** |
 | Live on **2.0.86** | [104-live-2.0.86.md](104-live-2.0.86.md) | **fail** — `flushActiveFilePush` re-POST after `behindComments` |
-| Analyst residual | [104-analyst-hypothesis.md](104-analyst-hypothesis.md) | H1–H3 **unit green**; live re-pilot pending release |
+| Analyst residual | [104-analyst-hypothesis.md](104-analyst-hypothesis.md) | H1–H3 **unit green** |
+| Live on **2.0.87** | [104-live-2.0.87.md](104-live-2.0.87.md) | **pass** — strip + no re-POST (incl. flush) |
 
-Do not mark `TEST_PLAN` / `ABYSS_FIRST_CASES` live **pass** until a Thinkpad-tts-test run is **pass**.
+Live **pass** on Thinkpad-tts-test (**2.0.87**). Close [#104](https://github.com/semyon-alekseev-noveo/tt-sync/issues/104) after docs PR merges.

@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-24 03:53 UTC
+
+- Context: Owner installed **2.0.87**; live `TP-COMMENT-TT-DELETE` re-pilot on Thinkpad-tts-test.
+- Target: Honest live result for #104 residual after [#112](https://github.com/semyon-alekseev-noveo/tt-sync/pull/112).
+- Actions log: Vault bullet → sync → MCP delete → sync×2; evidence `104-live-2.0.87.md`; update INDEX/TEST_PLAN/ABYSS.
+- Validation: Live **pass** — vault strip + TT empty after `flushActiveFilePush`.
+- Problems: None for #104 (`resolved`).
+- To Be Done: Owner merges docs PR; close #104.
+- References: https://github.com/semyon-alekseev-noveo/tt-sync/releases/tag/2.0.87, `docs/pilot/results/TP-COMMENT-TT-DELETE/104-live-2.0.87.md`, `CHANGELOG.md`
+
 ### Iteration 2026-10-24 03:12 UTC
 
 - Context: [#112](https://github.com/semyon-alekseev-noveo/tt-sync/pull/112) merged (#104 BUG-COMMENT-DELETE-REPOST); tip still **2.0.86** — bump before tag (PROC-RELEASE-GATE #30).

@@ -617,7 +617,7 @@ These already have automated tests. Re-run them with the suite. Do not mark a li
 | TP-EDITOR-TYPE-DURING-SYNC | **pass (CLI approx)** (**2.0.85** #102) | Marker `post102-type-sync-*` survived Synchronize in editor+disk. Evidence: `POST-PERF-REGRESSION/102-post-perf-regression.md`. |
 | TP-EDITOR-TYPE-DURING-PUSH | not run | #102 deferred — covered partly by TP-PERF-ACTIVE. |
 | TP-EDITOR-OTHER-LEAF | not run | |
-| TP-COMMENT-TT-DELETE | **pass (unit)** / live **fail** (**2.0.86**); tip fix pending release | Unit: H1/H2 + integration no-`addTaskComment` (BUG-COMMENT-DELETE-REPOST). Live fail evidence `104-live-2.0.86.md`. Re-pilot after next release. |
+| TP-COMMENT-TT-DELETE | **pass (unit)** / live **pass** (**2.0.87**) | Unit: H1/H2 + integration. Live fail on **2.0.86** (`104-live-2.0.86.md`); live **pass** on **2.0.87** (`104-live-2.0.87.md`) — strip + no re-POST after flush. |
 | TP-NO-SELF-REPUSH | not run | Automated: `bugCommentNoPush.test.ts`, `synchronizationInner.integration.test.ts`. |
 | TP-STALE-FILE-WRITE | not run | Automated only: `staleFileWrite.test.ts`. No vault run. |
 | TP-COMPLETE-DURING-TYPE | not run | Automated: `completeDuringType.test.ts`. No vault run. |

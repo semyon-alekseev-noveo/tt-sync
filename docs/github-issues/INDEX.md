@@ -2,7 +2,7 @@
 
 Tracker issues live on [`semyon-alekseev-noveo/tt-sync`](https://github.com/semyon-alekseev-noveo/tt-sync/issues). Long evidence lives under [`docs/pilot/results/`](../pilot/results/) — not in issue comments.
 
-**Release tip (2026-10-24):** track **2.0.87** after release PR merges (ships [#112](https://github.com/semyon-alekseev-noveo/tt-sync/pull/112) BUG-COMMENT-DELETE-REPOST). Prior: **[2.0.86](https://github.com/semyon-alekseev-noveo/tt-sync/releases/tag/2.0.86)**.
+**Release tip (2026-10-24):** **[2.0.87](https://github.com/semyon-alekseev-noveo/tt-sync/releases/tag/2.0.87)** (ships [#112](https://github.com/semyon-alekseev-noveo/tt-sync/pull/112); live TT-DELETE **pass**). Prior: **[2.0.86](https://github.com/semyon-alekseev-noveo/tt-sync/releases/tag/2.0.86)**.
 
 ## Status table (audit 2026-10-22)
 
@@ -29,7 +29,7 @@ Tracker issues live on [`semyon-alekseev-noveo/tt-sync`](https://github.com/semy
 | Repo hygiene backlog | [#33](https://github.com/semyon-alekseev-noveo/tt-sync/issues/33) | P3 | **open** / backlog | **keep** — do not pick up before #15/#20 |
 | **PERF/DELTA** (wall-time + delta path) | [#62](https://github.com/semyon-alekseev-noveo/tt-sync/issues/62) | **P0** | **closed** — idle/wall-time on **2.0.85**; `TP-DELTA-*` → #84; evidence `PERF-DELTA/62-epic-close.md` | **done** 2026-10-23 |
 | Post-PERF regression | [#102](https://github.com/semyon-alekseev-noveo/tt-sync/issues/102) | P1 | **complete (honest)** — checklist filled; TT-DELETE fail → #104; close after docs PR | **done** 2026-10-23 |
-| └ TP-COMMENT-TT-DELETE fail on 2.0.85 | [#104](https://github.com/semyon-alekseev-noveo/tt-sync/issues/104) | P1 | GH closed early; live **fail** on **2.0.86** (`flushActiveFilePush`) — reopen or follow-up | **live fail** 2026-10-23 |
+| └ TP-COMMENT-TT-DELETE fail on 2.0.85 | [#104](https://github.com/semyon-alekseev-noveo/tt-sync/issues/104) | P1 | live **pass** on **2.0.87** (`104-live-2.0.87.md`); close after docs PR | **live pass** 2026-10-24 |
 | └ Slice 2 commentCount / idle-fast / preparePersist | [#82](https://github.com/semyon-alekseev-noveo/tt-sync/issues/82) | P0 | **closed** — **2.0.82** | keep closed |
 | └ Slice 3 stop double-sweep | [#83](https://github.com/semyon-alekseev-noveo/tt-sync/issues/83) | P0 | **closed** — **2.0.83**; live partial (~½ GETs) | keep closed if GH closed |
 | └ Slice 4 empty-thread skip | [#94](https://github.com/semyon-alekseev-noveo/tt-sync/issues/94) | P0 | **closed** — **2.0.84**; live comments **0** | keep closed |
