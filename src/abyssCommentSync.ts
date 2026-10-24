@@ -306,6 +306,22 @@ export async function syncAbyssCommentsToTickTick(
 		remote.map(c => normalizedCommentKey(c.title ?? '')).filter(k => k.length > 0),
 	);
 
+	const mapForVaultThread = (t: AbyssCommentThread) => {
+		const key = normalizedCommentKey(t.body);
+		const fp = mapFingerprintForThread(t);
+		return maps.find(m => {
+			const mk = normalizedCommentKey(m.body);
+			return mk === key || m.fingerprint === fp || m.fingerprint === commentFingerprint(t.body);
+		});
+	};
+	// BUG-COMMENT-DELETE-REPOST / TP-COMMENT-TT-DELETE: count mapped ids absent from live GET.
+	// One mapped miss → wait for pull (do not POST). Several → STALE-MAPS re-push OK.
+	const vaultThreadsForMiss = extractAbyssCommentThreads(taskLines);
+	const mappedIdsGone = vaultThreadsForMiss.filter(t => {
+		const m = mapForVaultThread(t);
+		return !!(m?.ticktickCommentId && !remoteIds.has(m.ticktickCommentId));
+	}).length;
+
 	for (const v of plan.vaultOnly) {
 		const thread = v.thread;
 		const fp = mapFingerprintForThread(thread);
@@ -324,6 +340,10 @@ export async function syncAbyssCommentsToTickTick(
 					origin: 'vault',
 				});
 			}
+			continue;
+		}
+		const mapped = mapForVaultThread(thread);
+		if (mapped?.ticktickCommentId && !remoteIds.has(mapped.ticktickCommentId) && mappedIdsGone <= 1) {
 			continue;
 		}
 		const created = await api.addTaskComment(projectId, taskId, tickTickCommentTitle(thread.body));

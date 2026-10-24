@@ -516,4 +516,33 @@ describe('abyssCommentSync', () => {
 		expect(add).toHaveBeenCalledWith('proj1', 'task1', 'updated');
 		expect(add.mock.calls.some((c: unknown[]) => String(c[2]).includes('2026-10-21'))).toBe(false);
 	});
+
+	it('BUG-COMMENT-DELETE-REPOST: syncAbyssCommentsToTickTick does not POST single mapped miss + empty GET', async () => {
+		const S = getSettings() as Record<string, unknown>;
+		Object.assign(S, { syncNotes: true, abyssTasksFormat: true, syncAbyssCommentsViaApi: true });
+		listMaps.mockResolvedValue([
+			{
+				id: 'task1:post104',
+				taskId: 'task1',
+				projectId: 'proj1',
+				fingerprint: 'post104-ttdelete',
+				ticktickCommentId: 'c-deleted',
+				body: 'post104-ttdelete',
+				origin: 'vault',
+			},
+		]);
+		const add = vi.fn().mockResolvedValue({ id: 'c-new', title: 'post104-ttdelete' });
+		const getTaskComments = vi.fn().mockResolvedValue([]);
+		const api = {
+			getTaskComments,
+			addTaskComment: add,
+			deleteTaskComment: vi.fn(),
+		} as unknown as TickTickRestAPI;
+		const lines = ['\t- post104-ttdelete'];
+		// Force network path: count 0 (after TT delete) so canSkip does not short-circuit.
+		// Empty GET + one map → must not treat as vaultOnly create (live 2.0.86 re-POST).
+		await syncAbyssCommentsToTickTick(api, 'task1', 'proj1', lines, undefined, { remoteCommentCount: 0 });
+		expect(getTaskComments).toHaveBeenCalled();
+		expect(add).not.toHaveBeenCalled();
+	});
 });
