@@ -214,8 +214,11 @@ sequenceDiagram
 |--------------|------------|--------|
 | `_apiComments` | reconcile / `preparePersistNetwork` | `convertTaskToLine` → gen comment lines from TT |
 | `__ticktickComments` | **must** on same paths | `mergeAbyssBlock` strip / keep (TT-DELETE) |
+| `taskCommentMaps` row | equal-key link in `syncAbyssCommentsToTickTick`, even when no POST | Without it, API-seed + matching bullet is `vaultOnly` after TT DELETE and the sweep re-POSTs (#104 on **2.0.88**) |
 
-Evidence: `docs/pilot/results/TP-COMMENT-TT-DELETE/104-analyst-f1-merge-hint.md`.
+Empty `syncedLists` skips reconcile (`allowVaultUpdate`), so the bullet is not stripped. The comment sweep still runs. Strip needs the task's list on `syncedLists`.
+
+Evidence: `docs/pilot/results/TP-COMMENT-TT-DELETE/104-analyst-f1-merge-hint.md`, `104-live-2.0.88-box.md`, `104-api-seed-map.md`.
 
 ---
 

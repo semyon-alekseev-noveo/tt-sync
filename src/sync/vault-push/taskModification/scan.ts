@@ -290,6 +290,9 @@ export class TaskModificationScan {
 			if (!taskRecord) continue;
 			const savedTask = await this.plugin.taskRepository.loadTaskById(taskId);
 			if (!savedTask?.projectId) continue;
+			// Empty syncedLists → allowedListIds size 0, so this does not skip.
+			// Vault reconcile still skips (allowVaultUpdate): TT-delete strip needs the
+			// list on syncedLists. Push must not re-POST a comment already linked (#104).
 			if (pushLimit.allowedListIds?.size && !tickTickTaskEntersVault(savedTask, pushLimit)) continue;
 			let taskNotes = '';
 			if (getSettings().syncNotes && taskRecord.taskLines?.length) {

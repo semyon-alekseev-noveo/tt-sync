@@ -366,8 +366,27 @@ export async function syncAbyssCommentsToTickTick(
 		if (!link.vault || !link.remote) continue;
 		const vaultBody = link.vault.thread.body;
 		const remoteTitle = link.remote.comment.title ?? '';
-		if (normalizedCommentKey(vaultBody) === normalizedCommentKey(remoteTitle)) continue;
-		if (vaultBody === remoteTitle) continue;
+		const keysMatch = normalizedCommentKey(vaultBody) === normalizedCommentKey(remoteTitle)
+			|| vaultBody === remoteTitle;
+		if (keysMatch) {
+			// #104 / TP-COMMENT-TT-DELETE: API-seeded comment + matching vault bullet is
+			// linked by key with no Dexie row. Persist the TickTick id so a later delete is
+			// a single mapped miss (do not POST). Map-only bookkeeping must not set `changed`
+			// — a true return looks like a vault→TT push and skips the behindComments strip.
+			if (!link.map?.ticktickCommentId && link.remote.comment.id) {
+				const fp = mapFingerprintForThread(link.vault.thread);
+				await upsertCommentMap({
+					id: commentMapId(taskId, fp),
+					taskId,
+					projectId,
+					fingerprint: fp,
+					ticktickCommentId: link.remote.comment.id,
+					body: vaultBody,
+					origin: 'remote',
+				});
+			}
+			continue;
+		}
 		const existing = link.map;
 		if (!existing) continue;
 		if (deletionConfirmMode() === 'skip') continue;

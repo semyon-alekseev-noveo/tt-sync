@@ -19,6 +19,7 @@ import {
 	migrateLegacyCommentsInContent,
 	syncAbyssCommentsToTickTick,
 } from '@/abyssCommentSync';
+import { upsertCommentMap } from '@/db/taskCommentMaps';
 import type { TickTickRestAPI } from '@/services/TicktickRestAPI';
 import { getSettings } from '@/settings';
 
@@ -542,6 +543,73 @@ describe('abyssCommentSync', () => {
 		// Force network path: count 0 (after TT delete) so canSkip does not short-circuit.
 		// Empty GET + one map → must not treat as vaultOnly create (live 2.0.86 re-POST).
 		await syncAbyssCommentsToTickTick(api, 'task1', 'proj1', lines, undefined, { remoteCommentCount: 0 });
+		expect(getTaskComments).toHaveBeenCalled();
+		expect(add).not.toHaveBeenCalled();
+	});
+
+	it('TP-COMMENT-TT-DELETE #104: API-seed key-match without taskCommentMap upserts the TickTick id and does not POST', async () => {
+		const S = getSettings() as Record<string, unknown>;
+		Object.assign(S, { syncNotes: true, abyssTasksFormat: true, syncAbyssCommentsViaApi: true });
+		listMaps.mockResolvedValue([]);
+		const upsert = upsertCommentMap as unknown as ReturnType<typeof vi.fn>;
+		upsert.mockClear();
+		const add = vi.fn().mockResolvedValue({ id: 'c-repost', title: 'post288-ttdelete-seed' });
+		const api = {
+			getTaskComments: vi.fn().mockResolvedValue([
+				{ id: '432b67b390c34e8db8d29585', title: 'post288-ttdelete-seed' },
+			]),
+			addTaskComment: add,
+			deleteTaskComment: vi.fn(),
+		} as unknown as TickTickRestAPI;
+		// Live 2.0.88 box: API POST seed + matching vault bullet, no Dexie row.
+		// Equal-key link must remember the TickTick id. It must not create another comment.
+		await syncAbyssCommentsToTickTick(
+			api,
+			'6adb91418f08640fc34e86f5',
+			'inbox133906430',
+			['\t- post288-ttdelete-seed'],
+			undefined,
+			{ remoteCommentCount: 1 },
+		);
+		expect(add).not.toHaveBeenCalled();
+		expect(upsert).toHaveBeenCalledWith(expect.objectContaining({
+			taskId: '6adb91418f08640fc34e86f5',
+			projectId: 'inbox133906430',
+			ticktickCommentId: '432b67b390c34e8db8d29585',
+			origin: 'remote',
+		}));
+	});
+
+	it('TP-COMMENT-TT-DELETE #104: after that link, TT delete does not re-POST the vault bullet', async () => {
+		const S = getSettings() as Record<string, unknown>;
+		Object.assign(S, { syncNotes: true, abyssTasksFormat: true, syncAbyssCommentsViaApi: true });
+		const taskId = '6adb91418f08640fc34e86f5';
+		const projectId = 'inbox133906430';
+		const title = 'post288-ttdelete-seed';
+		const lines = [`\t- ${title}`];
+		listMaps.mockResolvedValue([]);
+		const upsert = upsertCommentMap as unknown as ReturnType<typeof vi.fn>;
+		upsert.mockClear();
+		const add = vi.fn().mockResolvedValue({ id: '6adc431e0ab39382ed69db12', title });
+		const getTaskComments = vi.fn()
+			.mockResolvedValueOnce([{ id: '432b67b390c34e8db8d29585', title }])
+			.mockResolvedValueOnce([{ id: '432b67b390c34e8db8d29585', title }]);
+		const api = {
+			getTaskComments,
+			addTaskComment: add,
+			deleteTaskComment: vi.fn(),
+		} as unknown as TickTickRestAPI;
+		await syncAbyssCommentsToTickTick(api, taskId, projectId, lines, undefined, { remoteCommentCount: 1 });
+		expect(add).not.toHaveBeenCalled();
+		const linked = upsert.mock.calls[0]?.[0] as { ticktickCommentId?: string } | undefined;
+		expect(linked?.ticktickCommentId).toBe('432b67b390c34e8db8d29585');
+
+		// API DELETE → []. Count 0 forces the network path (idle skip must not hide a re-POST).
+		listMaps.mockResolvedValue([linked]);
+		getTaskComments.mockReset();
+		getTaskComments.mockResolvedValue([]);
+		add.mockClear();
+		await syncAbyssCommentsToTickTick(api, taskId, projectId, lines, undefined, { remoteCommentCount: 0 });
 		expect(getTaskComments).toHaveBeenCalled();
 		expect(add).not.toHaveBeenCalled();
 	});
