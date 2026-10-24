@@ -903,3 +903,18 @@ Expected: no new `%%[ticktick_id:: …]%%` lines, no stub list files, no journal
 | ID | Pilot status | Evidence |
 |----|----------------|----------|
 | AF-1 | **pass** | **2.0.89** CLI: 0 new ids; md count held; 0 `tt->obs` for sync `sync-mvmgnuva-…`. `docs/pilot/results/STEP7-AF-PILOT-SOAK/68-af1-empty-syncedlists-2.0.89.md`. #68. |
+
+## PR — AF-2 TT project parent → note (#69 / #20)
+
+No code change. Tip **2.0.89**. Case **AF-2** in `ABYSS_FIRST_CASES.md`.
+
+### AF-2 — projects-list parent becomes a project note
+
+1. Create a parent task on TTS-Projects (pilot projects list).
+2. Run **Synchronize**.
+
+Expected: a note under `10 Projects/` with `system/project` and `## Active Zone`; the parent is **not** a checkbox line in that note; TickTick keeps the same parent title/id.
+
+| ID | Pilot status | Evidence |
+|----|----------------|----------|
+| AF-2 | **pass** | **2.0.89**: note `10 Projects/AF-2 pilot parent 135930.md`, id `6adcb9f5…`, 0 checkboxes. `docs/pilot/results/STEP7-AF-PILOT-SOAK/69-af2-project-parent-2.0.89.md`. #69. |

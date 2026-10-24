@@ -111,6 +111,7 @@ Pass only with evidence: the note path, the `ticktick_id`, and either the journa
 
 | Date (UTC) | Vault | Build | Runner | Item | Result | Evidence |
 |------------|-------|-------|--------|------|--------|----------|
+| 2026-10-24 | Thinkpad-tts-test | 2.0.89 | agent (Obsidian CLI) | AF-2 | pass | TT parent `6adcb9f5…` → `10 Projects/AF-2 pilot parent 135930.md` + Active Zone; not a checkbox. Evidence: `STEP7-AF-PILOT-SOAK/69-af2-project-parent-2.0.89.md`. #69. |
 | 2026-10-24 | Thinkpad-tts-test | 2.0.89 | agent (Obsidian CLI) | AF-1 | pass | Empty `syncedLists` → Synchronize; 0 new ids / stubs / `tt->obs` creates. Evidence: `STEP7-AF-PILOT-SOAK/68-af1-empty-syncedlists-2.0.89.md`. #68. |
 | 2026-10-20 | Thinkpad-tts-test | 2.0.48 | Sam (manual) | AF-5 | partial | Checkbox in **project** (dishwasher / Active Zone): task on TTS-Projects, `#type/next` on line — not the plain-inbox AF-5 recipe; line stayed in vault. |
 | 2026-10-24 | Thinkpad-tts-test | 2.0.89 | agent (Obsidian CLI) | BUG-DEFERRED-ID-PHASE2-DELETE | pass | `defer-18-134433` → TT + vault id; 0 deletes. Evidence: `PILOT-BATCH-EDITOR-SAFETY/18-deferred-id-2.0.89.md`. #18. |

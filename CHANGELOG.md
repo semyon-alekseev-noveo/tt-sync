@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-24 14:01 UTC
+
+- Context: [#125](https://github.com/semyon-alekseev-noveo/tt-sync/pull/125) merged (AF-1); continue [#20](https://github.com/semyon-alekseev-noveo/tt-sync/issues/20) with AF-2.
+- Target: Pilot **AF-2** on tip **2.0.89** — TTS-Projects parent → note under `10 Projects/` with `## Active Zone`.
+- Actions log: MCP create `AF-2 pilot parent 135930`; Synchronize; inspect note + TT task; evidence under `STEP7-AF-PILOT-SOAK/`.
+- Validation: Note `10 Projects/AF-2 pilot parent 135930.md` with `ticktick_id` `6adcb9f5…`; Active Zone present; 0 checkboxes in note; TT title unchanged.
+- Problems: None (`resolved`).
+- To Be Done: Merge evidence PR; close #69; continue AF-3 (#70).
+- References: `docs/pilot/results/STEP7-AF-PILOT-SOAK/69-af2-project-parent-2.0.89.md`, `CHANGELOG.md`
+
 ### Iteration 2026-10-24 13:56 UTC
 
 - Context: [#124](https://github.com/semyon-alekseev-noveo/tt-sync/pull/124) merged; epic [#15](https://github.com/semyon-alekseev-noveo/tt-sync/issues/15) closed; start Step 7 AF soak [#20](https://github.com/semyon-alekseev-noveo/tt-sync/issues/20).
