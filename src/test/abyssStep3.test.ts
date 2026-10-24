@@ -107,6 +107,18 @@ describe('Abyss child block anywhere', () => {
 		const out = mergeAbyssBlock(gen, old, 'desc', hint);
 		expect(out).toContain('still here');
 	});
+	it('TP-COMMENT-TT-DELETE: merge strips single mapped miss when live GET empty even if Dexie commentCount is stale', () => {
+		const gen = '- [ ] T %%[ticktick_id:: abcdefabcdefabcdefabcdef]%%\n\t- > desc';
+		const old = ['\t- > desc', '\t- 2026-10-20 12:00: gone'];
+		// Live GET empty (`apiBodies: []`) but Dexie still has commentCount 1 after TT delete (#104 H2).
+		const hint = {
+			knownBodies: ['2026-10-20 12:00: gone'],
+			apiBodies: [] as string[],
+			remoteCommentCount: 1,
+		};
+		const out = mergeAbyssBlock(gen, old, 'Comments:\n2026-10-20 12:00: gone', hint);
+		expect(out).not.toContain('gone');
+	});
 
 	it('BUG-COMMENT-NO-PUSH keeps vault comments when the generated block has none', () => {
 		const gen = '- [ ] gate-comment-249 #obsidian #inbox %%[ticktick_id:: 6ad6f43a0aa12c21f30de04a]%%\n\t- > gate-desc-249';
