@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-23 16:22 UTC
+
+- Context: [#33](https://github.com/semyon-alekseev-noveo/tt-sync/issues/33) hygiene item 1 — personal absolute path in `vault-gtd-smoke.mjs`.
+- Target: Require `data.json` path via argv or `TTS_VAULT_DATA` (no `/home/sam/...` default).
+- Actions log: Rewrote script usage; exit 2 when path missing.
+- Validation: `node scripts/vault-gtd-smoke.mjs` → exit **2** + usage.
+- Problems: Remaining #33 items (deps/metadata/archive) still open.
+- To Be Done: Owner merges; leave #33 open for leftover checklist.
+- References: https://github.com/semyon-alekseev-noveo/tt-sync/issues/33, `scripts/vault-gtd-smoke.mjs`, `CHANGELOG.md`
+
 ### Iteration 2026-10-23 16:20 UTC
 
 - Context: [#77](https://github.com/semyon-alekseev-noveo/tt-sync/issues/77) DOC-SYNC — canonical docs lagged tip releases.
