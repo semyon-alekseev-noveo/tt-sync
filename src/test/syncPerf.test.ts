@@ -8,6 +8,7 @@ import {
 	httpEndpointKey,
 	lastSyncPerf,
 	noteHttpCall,
+	observeSyncApi,
 	resetSyncPerfForTests,
 	startSyncPerf,
 	timePhase,
@@ -65,6 +66,29 @@ describe('PERF-COUNTERS', () => {
 		expect(report.counts.http429).toBe(1);
 		expect(report.counts.httpByEndpoint.getTaskById).toBe(1);
 		expect(report.counts.apiCalls).toBe(1);
+	});
+
+	it('PERF-DELTA #87: commentsByPhase attributes getTaskComments to innermost timePhase', async () => {
+		const api = {
+			getTaskById: vi.fn(async () => null),
+			getTaskComments: vi.fn(async () => []),
+		};
+		const run = startSyncPerf({ trigger: 'manual', fullSync: false });
+		const stop = observeSyncApi(api);
+		await timePhase('vaultReconcile', async () => {
+			await api.getTaskComments('p', 't1');
+		});
+		await timePhase('push', async () => {
+			await api.getTaskComments('p', 't2');
+			await api.getTaskComments('p', 't3');
+		});
+		stop();
+		const report = finishSyncPerf(run, true);
+		expect(report.counts.commentsFetched).toBe(3);
+		expect(report.counts.commentsByPhase).toEqual({
+			vaultReconcile: 1,
+			push: 2,
+		});
 	});
 
 	it('logs one active-file summary around the settled push', async () => {
