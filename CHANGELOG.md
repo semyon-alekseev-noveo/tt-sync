@@ -10,6 +10,25 @@
 - To Be Done: Owner merges; leave #33 open for leftover checklist.
 - References: https://github.com/semyon-alekseev-noveo/tt-sync/issues/33, `scripts/vault-gtd-smoke.mjs`, `CHANGELOG.md`
 
+### Iteration 2026-10-23 16:20 UTC
+
+- Context: [#77](https://github.com/semyon-alekseev-noveo/tt-sync/issues/77) DOC-SYNC — canonical docs lagged tip releases.
+- Target: Align DEV_FLOW/TODO version pointers, PO editor-safety rows, Steps 4–6 status, TECH-CIRC retire note — no behavior change.
+- Actions log: Updated `DEV_FLOW.md`, `TODO.md`, `PO_STATUS.md`, `ABYSS_FIRST_PLAN.md`.
+- Validation: Docs-only review against #77 checklist (subset; INDEX already current for #62–#104).
+- Problems: Full PO table for every historical release not rewritten (`mitigated`).
+- To Be Done: Owner merges; close #77.
+- References: https://github.com/semyon-alekseev-noveo/tt-sync/issues/77, `CHANGELOG.md`
+
+### Iteration 2026-10-23 16:16 UTC
+
+- Context: [#87](https://github.com/semyon-alekseev-noveo/tt-sync/issues/87) P2 — per-phase `[perf]` comment counters after PERF/DELTA.
+- Target: Attribute `getTaskComments` to innermost `timePhase` in `commentsByPhase` (no behavior change).
+- Actions log: Extend `SyncPerfCounts` + `observeSyncApi`; unit in `syncPerf.test.ts`.
+- Validation: `npx vitest run src/test/syncPerf.test.ts` → **5** passed.
+- Problems: None (`resolved` for #87 unit).
+- To Be Done: Owner merges; close #87.
+- References: https://github.com/semyon-alekseev-noveo/tt-sync/issues/87, `src/sync/perf.ts`, `CHANGELOG.md`
 ### Iteration 2026-10-23 16:13 UTC
 
 - Context: Developer fix for **BUG-COMMENT-DELETE-REPOST** after analyst H1/H2 red tests (#104 / 2.0.86 live fail).
