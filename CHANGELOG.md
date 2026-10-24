@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-24 13:43 UTC
+
+- Context: [#17](https://github.com/semyon-alekseev-noveo/tt-sync/issues/17) EMPTY-SIDE-GUARD case pilot after #28/#29 closed; prior folder-park attempt aborted.
+- Target: Prove `empty-vault` hold on **2.0.89** without renaming vault folders.
+- Actions log: Stub empty markdown scan for one Synchronize; Cancel cleanup modal; Skip guard; restore scan; record report excerpt.
+- Validation: Report reason **empty-vault**; decision **skip**; checkpoint held; `deleteTask` **0**; vault md count restored **724**.
+- Problems: `empty-ticktick` half still **not run** (`open`).
+- To Be Done: Owner merges; close #17; run #18 deferred-id.
+- References: `docs/pilot/results/PILOT-BATCH-EDITOR-SAFETY/17-empty-side-guard-2.0.89.md`, `CHANGELOG.md`
+
 ### Iteration 2026-10-24 13:12 UTC
 
 - Context: Case pilots for [#28](https://github.com/semyon-alekseev-noveo/tt-sync/issues/28) / [#29](https://github.com/semyon-alekseev-noveo/tt-sync/issues/29) (unit since **2.0.79**; case was **not run**).

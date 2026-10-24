@@ -46,7 +46,7 @@
 
 ## To Be Done
 
-1. **[P0/P1] Editor-safety / Step 7:** [#15](https://github.com/semyon-alekseev-noveo/tt-sync/issues/15) — remaining [#17](https://github.com/semyon-alekseev-noveo/tt-sync/issues/17) EMPTY-SIDE-GUARD / [#18](https://github.com/semyon-alekseev-noveo/tt-sync/issues/18) deferred-id; then [#20](https://github.com/semyon-alekseev-noveo/tt-sync/issues/20) AF soak; [#19](https://github.com/semyon-alekseev-noveo/tt-sync/issues/19) Active Zone shuffle.
+1. **[P0/P1] Editor-safety / Step 7:** [#15](https://github.com/semyon-alekseev-noveo/tt-sync/issues/15) — [#17](https://github.com/semyon-alekseev-noveo/tt-sync/issues/17) empty-vault **pass** on **2.0.89**; next [#18](https://github.com/semyon-alekseev-noveo/tt-sync/issues/18) deferred-id; then [#20](https://github.com/semyon-alekseev-noveo/tt-sync/issues/20) AF soak; [#19](https://github.com/semyon-alekseev-noveo/tt-sync/issues/19) Active Zone shuffle.
 2. **[done] Comment case pilots:** [#28](https://github.com/semyon-alekseev-noveo/tt-sync/issues/28) / [#29](https://github.com/semyon-alekseev-noveo/tt-sync/issues/29) **pass** on **2.0.89**.
 3. Revoke the exposed `tp_…` token if still valid — [#32](https://github.com/semyon-alekseev-noveo/tt-sync/issues/32).
 4. Product risks — [#63](https://github.com/semyon-alekseev-noveo/tt-sync/issues/63): GAP-COMMENT-EDIT, RISK-PULL-WINS-LOCAL, RISK-DUAL-STORE, BUG-TICKTICK-ID-LEAK.

@@ -505,7 +505,7 @@ Pilot status for each: **not run**.
 
 | ID | Pilot status | Evidence |
 |----|----------------|----------|
-| TP-EMPTY-SIDE-GUARD | not run | |
+| TP-EMPTY-SIDE-GUARD | **pass** empty-vault (**2.0.89**); empty-ticktick **not run** | Evidence: `PILOT-BATCH-EDITOR-SAFETY/17-empty-side-guard-2.0.89.md`. Guard reason `empty-vault`, skip, checkpoint held, 0 deletes. |
 | TP-MASS-DELETE-THRESHOLD | not run | |
 | TP-MASS-DELETE-APPLY-ONCE | not run | |
 | TP-UNREADABLE-FILE-NO-DELETE | not run | |
