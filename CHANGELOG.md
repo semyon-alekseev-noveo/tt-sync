@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-24 04:09 UTC
+
+- Context: Owner re-proved **TP-COMMENT-TT-DELETE** fail on **2.0.87**; analyst F1 — `behindComments` missing `__ticktickComments`.
+- Target: Attach merge hint on reconcile; H5/H6 unit; prove live twice before close #104.
+- Actions log: `tickTickCommentMergeHint` + `attachCommentPullState`; analyst docs §3b; prove-twice rule; H5/H6 tests.
+- Validation: `npx vitest run` → **720** passed; `npm run build` → ok.
+- Problems: Live prove×2 **pass** on tip (`104-live-f1-prove-twice.md`); F1b was required (`dropStaleStageTags` spread).
+- To Be Done: Owner merges PR; bump/release; close #104.
+- References: `docs/pilot/results/TP-COMMENT-TT-DELETE/104-analyst-f1-merge-hint.md`, #104, `CHANGELOG.md`
+
 ### Iteration 2026-10-24 03:12 UTC
 
 - Context: [#112](https://github.com/semyon-alekseev-noveo/tt-sync/pull/112) merged (#104 BUG-COMMENT-DELETE-REPOST); tip still **2.0.86** — bump before tag (PROC-RELEASE-GATE #30).

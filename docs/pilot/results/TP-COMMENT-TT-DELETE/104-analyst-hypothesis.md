@@ -37,4 +37,4 @@ Note: H1 with `remoteCommentCount: 1` **false-passes** via `canSkipAbyssCommentN
 
 ## Next
 
-Live re-pilot after release; do not invent pass.
+Superseded for live root cause by [104-analyst-f1-merge-hint.md](104-analyst-f1-merge-hint.md) (**H5** / **F1**: reconcile never attaches `__ticktickComments`). H1–H3 remain necessary but not sufficient.

@@ -16,3 +16,4 @@ Follow DEV_FLOW.md at the repo root.
 - Do not tag or publish a GitHub release unless the owner asked for that release in this task (and then only on the merged abyss-mapping tip).
 - Epic close (multi-PR): release + regression gate (+ pilot smoke when sync-related) before closing the issue; link release URL and `docs/pilot/results/` evidence. Align with PROC-RELEASE-GATE (#30).
 - Pilot vault only. No secrets or personal absolute paths. Do not invent live-vault results.
+- Bug fixes: prove the fixed behavior **at least twice** (two independent live/pilot checks, preferably different fixtures) before close / live **pass** — see `bug-prove-twice.mdc`.

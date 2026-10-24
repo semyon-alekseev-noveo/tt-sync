@@ -10,6 +10,7 @@ Pilot work and GitHub gate issues (`PILOT-GATE-*`, tt-sync issues #10–#13 styl
 - **Canonical evidence:** `docs/pilot/results/<GATE-ID>/` (see `INDEX.md` + `<issue#>-<slug>.md` per phase).
 - **GitHub issues:** status and checklists only; each issue gets a **short comment** linking the published result file — not long logs in comments or wiki.
 - **Do not** treat issue comments, wiki, or chat as the archive. **Do not** mark `ABYSS_FIRST_CASES.md` / `TEST_PLAN.md` pilot **pass** without evidence in a phase file or linked logs.
+- **Bug / live fail fixes:** two independent successful proofs before live **pass** or issue close (see `bug-prove-twice.mdc`). One phase file that claims pass after a single run is not enough.
 
 ## Before starting a phase issue
 

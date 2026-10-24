@@ -190,6 +190,35 @@ flowchart LR
 
 ---
 
+## 3b. TT comment delete (TP-COMMENT-TT-DELETE) — pull hint vs flush
+
+После удаления комментария в TickTick полный **Synchronize** идёт через reconcile (`behindComments`), не через `preparePersistNetwork`. Merge strip требует **`__ticktickComments`** (`knownBodies` / `apiBodies` / `remoteCommentCount`). Только `_apiComments` недостаточно: `mergeAbyssBlock` без hint **не** помечает `deletedInTickTick` → bullet остаётся → через ~5s `flushActiveFilePush` может снова POST (**F1** / **F2**, #104).
+
+```mermaid
+sequenceDiagram
+  participant VSC as VaultSyncCoordinator
+  participant FO as NewFileMap
+  participant Merge as mergeAbyssBlock
+  participant Flush as flushActiveFilePush
+
+  VSC->>VSC: GET comments empty
+  VSC->>VSC: behindComments
+  Note over VSC: Must set _apiComments AND __ticktickComments
+  VSC->>FO: updateTask
+  FO->>Merge: merge with hint
+  Note over Merge: strip knownBodies missing from apiBodies
+  Flush->>Flush: open-note sweep must not re-POST
+```
+
+| Поле на task | Кто ставит | Зачем |
+|--------------|------------|--------|
+| `_apiComments` | reconcile / `preparePersistNetwork` | `convertTaskToLine` → gen comment lines from TT |
+| `__ticktickComments` | **must** on same paths | `mergeAbyssBlock` strip / keep (TT-DELETE) |
+
+Evidence: `docs/pilot/results/TP-COMMENT-TT-DELETE/104-analyst-f1-merge-hint.md`.
+
+---
+
 ## 4. Матрица «безопасная правка»
 
 1. Найти ID бага в [`PO_STATUS.md`](../PO_STATUS.md) → столбец «суть».

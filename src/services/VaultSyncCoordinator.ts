@@ -43,7 +43,10 @@ import {
 	abyssLinesToNote,
 	extractAbyssCommentThreads,
 	rewriteAbyssChildrenCollapsingCommentKeys,
+	tickTickCommentMergeHint,
 } from '@/abyssFormat';
+import type { ITaskComment } from '@/api/types/TaskComment';
+import type { TaskCommentMap } from '@/db/schema';
 
 export class VaultSyncCoordinator {
 	private app: App;
@@ -466,16 +469,18 @@ export class VaultSyncCoordinator {
 						}
 					}
 					// BUG-COMMENT-BOTH-WAYS: TT-ahead must not skip vault-ahead push when both sides differ.
+					// TP-COMMENT-TT-DELETE F1: behindComments must attach __ticktickComments (not only _apiComments)
+					// so mergeAbyssBlock can strip; same hint as preparePersistNetwork.
 					if (remoteAhead && deletionConfirmMode() !== 'skip') {
 						behind = true;
 						reason = 'behindComments';
-						Object.defineProperty(remote, '_apiComments', { value: comments, enumerable: false, configurable: true });
+						this.attachCommentPullState(remote, comments, mapsForProbe, commentCount);
 					} else if (pushedVaultComments) {
 						return { behind: false, task: remote, localEdit: true, reason: 'vault-comments-ahead' };
 					} else if (vaultAhead && !vaultWantsPush && deletionConfirmMode() !== 'skip') {
 						behind = true;
 						reason = 'behindComments';
-						Object.defineProperty(remote, '_apiComments', { value: comments, enumerable: false, configurable: true });
+						this.attachCommentPullState(remote, comments, mapsForProbe, commentCount);
 					} else if (vaultWantsPush && !pushedVaultComments) {
 						// BUG-COMMENT-RECONCILE-UPDATE: no-op / failed POST must not report in-sync
 						// while vault bullets are still missing from TickTick Comments.
@@ -486,7 +491,7 @@ export class VaultSyncCoordinator {
 						// (BUG-COMMENT-VAULT-DUP-KEY). Do not POST/DELETE on TT.
 						behind = true;
 						reason = 'vault-comment-dup-keys';
-						Object.defineProperty(remote, '_apiComments', { value: comments, enumerable: false, configurable: true });
+						this.attachCommentPullState(remote, comments, mapsForProbe, commentCount);
 					}
 				}
 				}
@@ -499,6 +504,21 @@ export class VaultSyncCoordinator {
 			}
 		}
 		return { behind, task: remote, localEdit: false, reason };
+	}
+
+	/** Attach API list + merge hint for vault write (TP-COMMENT-TT-DELETE F1). */
+	private attachCommentPullState(
+		remote: ITask,
+		comments: ITaskComment[],
+		maps: TaskCommentMap[],
+		commentCount: number | undefined,
+	): void {
+		Object.defineProperty(remote, '_apiComments', { value: comments, enumerable: false, configurable: true });
+		Object.defineProperty(remote, '__ticktickComments', {
+			value: tickTickCommentMergeHint(maps, comments, commentCount),
+			enumerable: false,
+			configurable: true,
+		});
 	}
 
 	private determineActionNeeded(
@@ -686,12 +706,32 @@ export class VaultSyncCoordinator {
 		const same = nextTags.length === (task.tags?.length ?? 0) && nextTags.every((t, i) => t === task.tags?.[i]);
 		if (same) return task;
 		const next = { ...task, tags: nextTags };
+		// Spread drops non-enumerable pull state (TP-COMMENT-TT-DELETE F1): keep merge hint + API list.
+		this.copyCommentPullState(task, next);
 		try {
 			await this.plugin.tickTickRestAPI?.updateTask(next);
 		} catch (e) {
 			log.warn('Could not drop stale stage tag', task.id, e);
 		}
 		return next;
+	}
+
+	private copyCommentPullState(from: ITask, to: ITask): void {
+		const src = from as ITask & { _apiComments?: ITaskComment[]; __ticktickComments?: unknown };
+		if (Object.prototype.hasOwnProperty.call(src, '_apiComments')) {
+			Object.defineProperty(to, '_apiComments', {
+				value: src._apiComments,
+				enumerable: false,
+				configurable: true,
+			});
+		}
+		if (Object.prototype.hasOwnProperty.call(src, '__ticktickComments')) {
+			Object.defineProperty(to, '__ticktickComments', {
+				value: src.__ticktickComments,
+				enumerable: false,
+				configurable: true,
+			});
+		}
 	}
 
 	/**
