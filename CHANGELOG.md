@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-24 04:18 UTC
+
+- Context: [#118](https://github.com/semyon-alekseev-noveo/tt-sync/pull/118) merged (#104 F1/F1b behindComments merge hint); tip still **2.0.87** — bump before tag (PROC-RELEASE-GATE #30).
+- Target: Bump **2.0.88** on a release PR into `abyss-mapping`; tag/release only after owner merges.
+- Actions log: Branch `chore/release-2.0.88` from tip `9b68868`; `npm version 2.0.88`; PO/PROJECT_STATE/INDEX install pointers.
+- Validation: `npx vitest run` → **721** passed; `npm run build` → ok (`manifest.json` **2.0.88**).
+- Problems: Live on tagged **2.0.88** still pending BRAT install (`open`); tip prove×2 already green.
+- To Be Done: Owner merges; tag **2.0.88** once on `abyss-mapping` tip; BRAT install.
+- References: https://github.com/semyon-alekseev-noveo/tt-sync/pull/118, #104, `CHANGELOG.md`
+
 ### Iteration 2026-10-24 04:09 UTC
 
 - Context: Owner re-proved **TP-COMMENT-TT-DELETE** fail on **2.0.87**; analyst F1 — `behindComments` missing `__ticktickComments`.

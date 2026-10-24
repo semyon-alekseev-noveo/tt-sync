@@ -52,4 +52,4 @@
 
 - [x] Prove 1
 - [x] Prove 2 (different task)
-- [ ] Release bump after PR merge (PROC-RELEASE-GATE)
+- [x] Release bump **2.0.88** after #118 merge (PROC-RELEASE-GATE)

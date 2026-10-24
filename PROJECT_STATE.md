@@ -21,7 +21,7 @@
 - **Sync research (2026-10-20):** `docs/TICKTICK_DELTA_API.md` — delta has no comments; echo suppression in `pull.ts` uses `etag`; idle sync does not call `getTaskById` per quiet task.
 - **Deletion guard (2026-10-20):** over-threshold or empty-side deletions are held and the checkpoint stays. Defaults: guard on, more than 10 tasks and more than 20%, startup delay 30s. Pilot cases in `TEST_PLAN.md` are not run.
 - **Redo:** journal `<vault>/.tickticksync/journal/`; palette undo previews then applies `planUndo`. Not soaked on the live vault.
-- **Modularization (2026-10-22):** PR 1–7 landed on `abyss-mapping` (#34–#40); release **2.0.77** closes epic #31. Evidence: `docs/pilot/results/TECH-SYNC-MODULARIZATION/`. **2.0.78** re-cuts comment fixes (**2.0.75**/**2.0.76**) onto that tip. **2.0.79** released (merge #58): #28/#29 unit guards + merge collapse for #27 (twins still on disk). **2.0.80** released (merge #60): quiet-sync `vault-comment-dup-keys` rewrite; #27 closed; #28/#29 stay open unit-only. **2.0.81**–**2.0.85** PERF/DELTA slices 1–5: live **TP-IDLE-ZERO pass** on **2.0.85** (`PERF-DELTA/85-idle-zero-2.0.85.md`). Epic [#62](https://github.com/semyon-alekseev-noveo/tt-sync/issues/62) **closed**. `TP-DELTA-*` §3.5 MCP done (#84). **2.0.86** live TT-DELETE **fail**; **2.0.87** ships [#112](https://github.com/semyon-alekseev-noveo/tt-sync/pull/112) BUG-COMMENT-DELETE-REPOST — live re-pilot after tag.
+- **Modularization (2026-10-22):** PR 1–7 landed on `abyss-mapping` (#34–#40); release **2.0.77** closes epic #31. Evidence: `docs/pilot/results/TECH-SYNC-MODULARIZATION/`. **2.0.78** re-cuts comment fixes (**2.0.75**/**2.0.76**) onto that tip. **2.0.79** released (merge #58): #28/#29 unit guards + merge collapse for #27 (twins still on disk). **2.0.80** released (merge #60): quiet-sync `vault-comment-dup-keys` rewrite; #27 closed; #28/#29 stay open unit-only. **2.0.81**–**2.0.85** PERF/DELTA slices 1–5: live **TP-IDLE-ZERO pass** on **2.0.85** (`PERF-DELTA/85-idle-zero-2.0.85.md`). Epic [#62](https://github.com/semyon-alekseev-noveo/tt-sync/issues/62) **closed**. `TP-DELTA-*` §3.5 MCP done (#84). **2.0.86**/**2.0.87** live TT-DELETE **fail** (flush / F1); **2.0.88** ships [#118](https://github.com/semyon-alekseev-noveo/tt-sync/pull/118) F1/F1b — tip prove×2 pass; #104 closed.
 
 ## Validation
 
@@ -46,7 +46,7 @@
 
 ## To Be Done
 
-1. **[P1] Live TP-COMMENT-TT-DELETE after 2.0.87:** [#112](https://github.com/semyon-alekseev-noveo/tt-sync/pull/112) on tip; re-pilot on Thinkpad-tts-test after BRAT install (live **fail** on **2.0.86** — `104-live-2.0.86.md`).
+1. **[P1] BRAT install 2.0.88:** Tag after release PR merge; optional live smoke on Thinkpad-tts-test (tip prove×2 already green — `104-live-f1-prove-twice.md`).
 2. **[P1] TP-DELTA app-UI (optional):** #84 MCP rows done (`PERF-DELTA/84-tp-delta-pilot.md`); TickTick **app** rename/comment still **not run** if needed.
 3. Revoke the exposed `tp_…` token if it is still valid — [#32](https://github.com/semyon-alekseev-noveo/tt-sync/issues/32).
 4. Pilot vault config — [#64](https://github.com/semyon-alekseev-noveo/tt-sync/issues/64): Abyss Inbox **With inbox tag** `#inbox`; fix test-vault `data.json` drift before Sync.

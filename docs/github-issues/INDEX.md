@@ -2,7 +2,7 @@
 
 Tracker issues live on [`semyon-alekseev-noveo/tt-sync`](https://github.com/semyon-alekseev-noveo/tt-sync/issues). Long evidence lives under [`docs/pilot/results/`](../pilot/results/) — not in issue comments.
 
-**Release tip (2026-10-24):** track **2.0.87** after release PR merges (ships [#112](https://github.com/semyon-alekseev-noveo/tt-sync/pull/112) BUG-COMMENT-DELETE-REPOST). Prior: **[2.0.86](https://github.com/semyon-alekseev-noveo/tt-sync/releases/tag/2.0.86)**.
+**Release tip (2026-10-24):** track **2.0.88** after release PR merges (ships [#118](https://github.com/semyon-alekseev-noveo/tt-sync/pull/118) F1/F1b behindComments merge hint / #104). Prior: **[2.0.87](https://github.com/semyon-alekseev-noveo/tt-sync/releases/tag/2.0.87)**.
 
 ## Status table (audit 2026-10-22)
 
