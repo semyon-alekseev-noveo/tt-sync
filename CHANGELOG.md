@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-24 03:12 UTC
+
+- Context: [#112](https://github.com/semyon-alekseev-noveo/tt-sync/pull/112) merged (#104 BUG-COMMENT-DELETE-REPOST); tip still **2.0.86** — bump before tag (PROC-RELEASE-GATE #30).
+- Target: Bump **2.0.87** on a release PR into `abyss-mapping`; tag/release only after owner merges.
+- Actions log: Branch `chore/release-2.0.87` from tip `d9b23e9`; `npm version 2.0.87`; PO/PROJECT_STATE/INDEX install pointers.
+- Validation: `npx vitest run` → **717** passed; `npm run build` → ok (`manifest.json` **2.0.87**).
+- Problems: Live TP-COMMENT-TT-DELETE re-pilot still **not run** until BRAT install (`open`).
+- To Be Done: Owner merges; tag **2.0.87** once on `abyss-mapping` tip; install; live TT-DELETE; then merge conflict-fixed #113–#115.
+- References: https://github.com/semyon-alekseev-noveo/tt-sync/pull/112, #104, `CHANGELOG.md`
+
 ### Iteration 2026-10-23 16:13 UTC
 
 - Context: Developer fix for **BUG-COMMENT-DELETE-REPOST** after analyst H1/H2 red tests (#104 / 2.0.86 live fail).
