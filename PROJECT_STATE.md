@@ -21,7 +21,7 @@
 - **Sync research (2026-10-20):** `docs/TICKTICK_DELTA_API.md` — delta has no comments; echo suppression in `pull.ts` uses `etag`; idle sync does not call `getTaskById` per quiet task.
 - **Deletion guard (2026-10-20):** over-threshold or empty-side deletions are held and the checkpoint stays. Defaults: guard on, more than 10 tasks and more than 20%, startup delay 30s. Pilot cases in `TEST_PLAN.md` are not run.
 - **Redo:** journal `<vault>/.tickticksync/journal/`; palette undo previews then applies `planUndo`. Not soaked on the live vault.
-- **Modularization (2026-10-22):** PR 1–7 landed on `abyss-mapping` (#34–#40); release **2.0.77** closes epic #31. Evidence: `docs/pilot/results/TECH-SYNC-MODULARIZATION/`. **2.0.78** re-cuts comment fixes (**2.0.75**/**2.0.76**) onto that tip. **2.0.79** released (merge #58): #28/#29 unit guards + merge collapse for #27 (twins still on disk). **2.0.80** released (merge #60): quiet-sync `vault-comment-dup-keys` rewrite; #27 closed; #28/#29 stay open unit-only. **2.0.81**–**2.0.85** PERF/DELTA slices 1–5: live **TP-IDLE-ZERO pass** on **2.0.85** (`PERF-DELTA/85-idle-zero-2.0.85.md`). Epic [#62](https://github.com/semyon-alekseev-noveo/tt-sync/issues/62) **closed**. `TP-DELTA-*` §3.5 MCP done (#84). **2.0.86**/**2.0.87** live TT-DELETE **fail** (flush / F1); **2.0.88** ships [#118](https://github.com/semyon-alekseev-noveo/tt-sync/pull/118) F1/F1b. Box re-prove on **2.0.88** **fail** (API-seed re-POST, empty `syncedLists`; `104-live-2.0.88-box.md`). **2.0.89** ships [#120](https://github.com/semyon-alekseev-noveo/tt-sync/pull/120) API-seed comment map upsert — tip prove×2 (API-seed + vault-first) pass; #104 **closed**.
+- **Modularization (2026-10-22):** PR 1–7 landed on `abyss-mapping` (#34–#40); release **2.0.77** closes epic #31. Evidence: `docs/pilot/results/TECH-SYNC-MODULARIZATION/`. Follow-on [#66](https://github.com/semyon-alekseev-noveo/tt-sync/issues/66) slice A: TECH-API-1 playbook + contract tests, CI import-cycle allowlist, `DateHolder` type extract. Timed `vaultDeletion` / further `TickTickService` extract still open. Later releases **2.0.78**–**2.0.91** (comments, PERF/DELTA, GTD) on that tip — see `CHANGELOG.md`.
 
 ## Validation
 
@@ -51,8 +51,8 @@
 3. **[done]** SEC-CREDS-1 [#32](https://github.com/semyon-alekseev-noveo/tt-sync/issues/32) — token revoke + live auth decision recorded (2026-10-25).
 4. Product risks — [#63](https://github.com/semyon-alekseev-noveo/tt-sync/issues/63): GAP-COMMENT-EDIT, RISK-PULL-WINS-LOCAL, RISK-DUAL-STORE, BUG-TICKTICK-ID-LEAK.
 5. TP-DELTA app-UI (optional) — [#84](https://github.com/semyon-alekseev-noveo/tt-sync/issues/84).
-6. Post-#31 modularization — [#66](https://github.com/semyon-alekseev-noveo/tt-sync/issues/66); [#86](https://github.com/semyon-alekseev-noveo/tt-sync/issues/86).
-7. [#64](https://github.com/semyon-alekseev-noveo/tt-sync/issues/64) / [#65](https://github.com/semyon-alekseev-noveo/tt-sync/issues/65) / #104 / #137 **closed**; release tip **2.0.90** (after tag).
+6. Post-#31 modularization — [#66](https://github.com/semyon-alekseev-noveo/tt-sync/issues/66) (slice A in PR; vaultDeletion/god remain); [#86](https://github.com/semyon-alekseev-noveo/tt-sync/issues/86).
+7. [#64](https://github.com/semyon-alekseev-noveo/tt-sync/issues/64) / [#65](https://github.com/semyon-alekseev-noveo/tt-sync/issues/65) / #104 / #137 **closed**; BRAT tip **2.0.91**.
 
 ## References
 

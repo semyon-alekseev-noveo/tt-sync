@@ -91,8 +91,8 @@
 | **RISK-DUAL-STORE** | P2 | open | Две «истины»: Dexie `tasks` и `fileMetadata`/`syncFiles` → возможен дрейф |
 | **RISK-LARGE-VAULT** | P2 | partial (#62 slice 1) | `idsPresentInVault` + file cache; idle `getTaskById` already 0; idle `getTaskComments` only on count mismatch / unknown count / stamp twins (not every vault thread). `ensureVaultFilesRegistered` still walks all `.md` |
 | **TECH-START-1** | P2 | open | Полный pull на старте блокирует инициализацию |
-| **TECH-API-1** | P1 | open (риск) | Неофициальный клиент `Tick`: изменения TT ломают sync, покрытие тестами минимальное |
-| **TECH-CIRC-1 / GOD-1/2** | P2 | cycle **resolved** (**2.0.77**); god extract → [#66](https://github.com/semyon-alekseev-noveo/tt-sync/issues/66) | Цикл `main` ↔ `services` снят (`PluginContext`); further extract open. |
+| **TECH-API-1** | P1 | partial ([#66](https://github.com/semyon-alekseev-noveo/tt-sync/issues/66) slice A) | Playbook `docs/TECH_API_BREAKAGE.md` + contract tests; live TT breakage risk remains |
+| **TECH-CIRC-1 / GOD-1/2** | P2 | cycle **resolved** (**2.0.77**); #66 slice A: CI allowlist + DateHolder extract | God-class / timed `vaultDeletion` still open on [#66](https://github.com/semyon-alekseev-noveo/tt-sync/issues/66) |
 | **DOC-STALE-1** | P3 | mitigated on this branch | Канон: `DEV_FLOW.md`, `PO_STATUS.md`, `ABYSS_FIRST_PLAN.md`. `GTD_SYNC_*`, `TT_ABYSS_ROADMAP.md`, `SYNC_PROJECTS_AND_SUBTASKS.md` — архив. Comments API описан в `ABYSS_NOTES_ALIGNMENT.md` |
 | **SEC-CREDS-1** | P1 | **resolved** 2026-10-25 | `tp_…` revoke + live auth: session cookie (not Open API); autologin password-in-`data.json` stays opt-in — exclude from vault sync if on. Step 8.0 in `ABYSS_FIRST_PLAN.md`. [#32](https://github.com/semyon-alekseev-noveo/tt-sync/issues/32). |
 | Прежние | — | mitigated | Pilot `data.json` drift **resolved** on Thinkpad-tts-test **2.0.89** ([#64](https://github.com/semyon-alekseev-noveo/tt-sync/issues/64)). |
@@ -110,7 +110,7 @@
 5. Step 7 AF soak [#20](https://github.com/semyon-alekseev-noveo/tt-sync/issues/20) + [#76](https://github.com/semyon-alekseev-noveo/tt-sync/issues/76) **closed** (**pass** on **2.0.89**). Step 8 live vault still closed.
 6. Open: GAP-COMMENT-EDIT / risks ([#63](https://github.com/semyon-alekseev-noveo/tt-sync/issues/63)); TECH-START-1; [#66](https://github.com/semyon-alekseev-noveo/tt-sync/issues/66). [#32](https://github.com/semyon-alekseev-noveo/tt-sync/issues/32) / [#137](https://github.com/semyon-alekseev-noveo/tt-sync/issues/137) **closed**.
 7. AF-NEST-1 nest→TT hierarchy **pass** on pilot — usable; deepen only if Active Zone sibling-nest vs MOC parent matters.
-8. **AF-GTD-PREFIX** + release **2.0.91** — in flight (type→gtd + BRAT bump).
+8. **AF-GTD-PREFIX** + release **2.0.91** shipped; [#66](https://github.com/semyon-alekseev-noveo/tt-sync/issues/66) slice A (TECH-API-1 + cycles CI) in flight.
 
 ## Аналитический мит 2026-10-19
 

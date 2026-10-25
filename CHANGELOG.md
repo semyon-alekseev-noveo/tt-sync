@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-25 16:15 UTC
+
+- Context: Owner assigned [#66](https://github.com/semyon-alekseev-noveo/tt-sync/issues/66) after modularity check (post-#31).
+- Target: Slice A — TECH-API-1 playbook/contract, CI cycle allowlist, record 30 KB exceptions; no sync behavior change.
+- Actions log: `DateHolder` extract; `TECH_API_BREAKAGE.md` + contract tests; `check-import-cycles` + allowlist (134→108); CI step; SYNC_MODULARIZATION / PO / TEST_PLAN.
+- Validation: `npm run check:cycles` OK (108); `npx vitest run` 736 pass; `npm run build` OK.
+- Problems: God-class / timed `vaultDeletion` still open on #66 (`open`).
+- To Be Done: PR into `abyss-mapping`; later PR for vaultDeletion or further extract when a seam is needed.
+- References: `docs/TECH_API_BREAKAGE.md`, `docs/import-cycles.allowlist.json`, `CHANGELOG.md`, #66
+
 ### Iteration 2026-10-25 14:35 UTC
 
 - Context: PO asked to ship `type/*`→`gtd/*` then release.

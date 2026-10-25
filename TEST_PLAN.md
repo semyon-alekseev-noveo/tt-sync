@@ -1129,3 +1129,29 @@ Owner intent: Abyss tag-tree **branch → branch** = replace stage tag. Brief: `
 | ID | Pilot status | Evidence |
 |----|----------------|----------|
 | AF-GTD-PREFIX | **pass** (unit + pilot migrate) | `docs/pilot/results/ABYSS-NEST-GTD/150-af-gtd-prefix-2.0.91.md` |
+
+## PR — #66 slice A (TECH-API-1 + import-cycle CI)
+
+No sync behavior change. Engineering / risk mitigation only.
+
+### TECH-API-1-CONTRACT — unofficial client path/body smoke
+
+1. Run `npx vitest run src/test/api/techApi1.contract.test.ts`.
+2. Optionally skim `docs/TECH_API_BREAKAGE.md` against a real TT HTTP failure (pilot).
+
+Expected: contract tests green; playbook lists detect → mitigate steps. Live TT outage still **not run** here.
+
+| ID | Pilot status | Evidence |
+|----|----------------|----------|
+| TECH-API-1 | **unit** (contract); live playbook **not run** | `src/test/api/techApi1.contract.test.ts`; `docs/TECH_API_BREAKAGE.md` |
+
+### TECH-CIRC-ALLOWLIST — cycles may only shrink
+
+1. Run `npm run check:cycles`.
+2. After intentionally breaking a cycle, regenerate with `node scripts/check-import-cycles.mjs --write` and commit the smaller allowlist.
+
+Expected: CI fails on new cycles; stale allowlist (removed cycles still listed) also fails.
+
+| ID | Pilot status | Evidence |
+|----|----------------|----------|
+| TECH-CIRC-ALLOWLIST | **unit** (CI script) | `docs/import-cycles.allowlist.json`; `.github/workflows/ci.yml` |

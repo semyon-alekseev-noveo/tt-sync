@@ -1,6 +1,6 @@
 # Sync modularization plan
 
-**Status:** **PR 7 landed** — store ports (`FileTaskQueriesPort` / `TaskRepositoryPort` / `SyncMetaPort`); orchestrator phases use `PluginContext` ports, not `@/db/*`. Next: timed `vaultDeletion` phase, or further store extraction from services. Evidence: `docs/pilot/results/TECH-SYNC-MODULARIZATION/`.
+**Status:** **PR 7 landed**; **#66 slice A** — TECH-API-1 playbook + contract tests, CI import-cycle allowlist (`npm run check:cycles`), `date_holder_type` extracted to break `Task`↔`dateMan`. Next: timed `vaultDeletion` phase, and/or further `TickTickService` extract when a bug needs a seam. Evidence: `docs/pilot/results/TECH-SYNC-MODULARIZATION/`; playbook `docs/TECH_API_BREAKAGE.md`.
 
 **Canonical boundaries:** [`ANALYST_REFERENCE_DIAGRAMS.md`](ANALYST_REFERENCE_DIAGRAMS.md). Process: [`DEV_FLOW.md`](../DEV_FLOW.md).
 
@@ -150,7 +150,24 @@ See **`docs/COMMENT_SYNC_MODEL.md`**. PR A: keys + `planCommentSync` + tests (in
 
 **Gate:** same as PR 1; storePorts guard + `synchronizationInner.integration.test.ts` green.
 
-### PR 8+ — next slices
+### PR 8 / #66 slice A — cycles + TECH-API-1 (**this branch**)
+
+- CI: `scripts/check-import-cycles.mjs` + `docs/import-cycles.allowlist.json` (madge; list may only shrink). Wired in `.github/workflows/ci.yml`.
+- Broke `api/types/Task` ↔ `dateMan` by moving `date_holder_type` to `api/types/DateHolder.ts` (allowlist 134 → 108).
+- TECH-API-1: `docs/TECH_API_BREAKAGE.md` + `src/test/api/techApi1.contract.test.ts`.
+
+### Files over 30 KB — exceptions (#66 / #31 DoD)
+
+| File | ~bytes | Exception / plan |
+|------|--------|------------------|
+| `src/services/index.ts` | ~49 KB | **Exception (temporary):** god-class remainder after PR 1–7. Shrink via timed `vaultDeletion` + further extract when a bug needs a seam — not drive-by. |
+| `src/main.ts` | ~40 KB | **Exception:** Obsidian entry wires the service graph; further extract waits on settings/query/redo seams. |
+| `src/fileOperation.ts` | ~38 KB | **Exception:** vault-pull / file ops; split when a concrete pull bug needs a seam. |
+| `src/api/index.ts` | ~36 KB | **Exception:** unofficial `Tick` client; prefer contract tests + playbook (`TECH_API_BREAKAGE.md`) over a big bang split. Optional later: group methods by resource. |
+
+Optional size warn CI: deferred (document-only for now).
+
+### PR 9+ — next slices
 
 - Timed `vaultDeletion` phase (promote `runVaultDeletionPhase` out of `syncFiles` lock body), and/or further store extraction from services / tt-remote.
 
