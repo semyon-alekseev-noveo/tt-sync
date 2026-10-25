@@ -1038,4 +1038,4 @@ Expected: each comment stays under its task; no orphan comment above the first c
 
 | ID | Pilot status | Evidence |
 |----|----------------|----------|
-| BUG-ACTIVEZONE-COMMENT-SHUFFLE | **pass (unit)**; pilot **not run** | Vitest **726**; `projectScheme.test.ts` / `subtaskOrder.test.ts`. #19. |
+| BUG-ACTIVEZONE-COMMENT-SHUFFLE | **pass** ×2 (unit + pilot) | Vitest **726**; pilot tip **2.0.89** AF-3 + AF-2. `docs/pilot/results/BUG-ACTIVEZONE-COMMENT-SHUFFLE/19-prove-2.0.89.md`. #19 / #134. |
