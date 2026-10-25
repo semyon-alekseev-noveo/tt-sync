@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-25 12:05 UTC
+
+- Context: Owner wants tag DnD Inbox↔Next fixed; checkbox-status GTD parked as alternate.
+- Target: **AF-GTD-TAG-ADD** Option A — last mapped stage wins list; vault rewrite to one stage tag (#137).
+- Actions log: `listForTags` / `pickLastStageTag` last-wins; `abyssTagConflicts` keep last; push `__exclusiveStageRewrite` → `synchronizeToVault`; park doc `AF-CHECKBOX-STATUS-GTD.md`.
+- Validation: `npx vitest run` → **728** passed; `npm run build` ok. Pilot prove×2 **not run**.
+- Problems: Live vault rewrite after Abyss DnD still needs pilot (`open`).
+- To Be Done: PR into `abyss-mapping`; pilot prove×2; then close #137.
+- References: `src/listMapping.ts`, `docs/pilot/AF-CHECKBOX-STATUS-GTD.md`, `CHANGELOG.md`, #137
+
 ### Iteration 2026-10-25 06:05 UTC
 
 - Context: Owner asked whether GTD is TT-only; formalize Abyss nest + tag-tree stage cases; pilot on Thinkpad-tts-test (not Step 8 live vault).

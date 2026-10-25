@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { listForTags, tagForList, parseTagListText, isListTag } from '@/listMapping';
+import { listForTags, tagForList, parseTagListText, isListTag, pickLastStageTag, hasMultipleStageTags } from '@/listMapping';
 import { TaskParser } from '@/taskParser';
 import { getSettings } from '@/settings';
 
@@ -19,6 +19,14 @@ describe('tag -> list mapping', () => {
 		expect(tagForList('sd', MAP, PROJECTS)).toBe('type/someday');
 		expect(tagForList('kb', MAP, PROJECTS)).toBeUndefined();
 		expect(isListTag('type-next', MAP)).toBe(true);
+	});
+
+	it('AF-GTD-TAG-ADD: last mapped stage tag wins the list', () => {
+		expect(pickLastStageTag(['type/next', 'type/waiting'], MAP)).toBe('type/waiting');
+		expect(listForTags(['type/next', 'type/waiting'], MAP, PROJECTS)).toBe('wf');
+		expect(listForTags(['type/waiting', 'type/next'], MAP, PROJECTS)).toBe('na');
+		expect(hasMultipleStageTags(['type/next', 'type/waiting'], MAP)).toBe(true);
+		expect(hasMultipleStageTags(['type/next', 'context/work'], MAP)).toBe(false);
 	});
 
 	function mkParser(fileDefault: string) {
@@ -48,6 +56,23 @@ describe('tag -> list mapping', () => {
 		// moved to a non-mapped list: type tag removed
 		const kb = await parser.convertTaskToLine({ ...task, projectId: 'kb', items: [] }, 0);
 		expect(kb).not.toMatch(/#type\//);
+		Object.assign(S, { abyssTasksFormat: false, tagListMappings: [] });
+	});
+
+	it('AF-GTD-TAG-ADD: dual stage tags → last wins list + exclusive rewrite flag', async () => {
+		const S = (getSettings as unknown as () => Record<string, unknown>)();
+		Object.assign(S, { noteDelimiter: '', fileLinksInTickTick: 'noLink', stopInjectingTickTickTag: true,
+			abyssTasksFormat: true, syncNoteContextTags: false, gtdStageVia: 'list', tagMappings: [], tagListMappings: MAP, syncNotes: false });
+		const id = 'abcdefabcdefabcdefabcdef';
+		const line = `- [ ] stage-dnd #type/next #type/waiting %%[ticktick_id:: ${id}]%%`;
+		const parser = mkParser('inbox1');
+		const fm = { getTaskItems: () => [], getTaskRecord: () => ({ task: line, parentId: '', taskLines: [] }) };
+		const task = await parser.convertLineToTask(line, 0, 'p.md', fm as never, null);
+		expect(task.projectId).toBe('wf');
+		expect((task as { __exclusiveStageRewrite?: boolean }).__exclusiveStageRewrite).toBe(true);
+		const back = await parser.convertTaskToLine({ ...task, projectId: 'wf', items: [] }, 0);
+		expect(back).toMatch(/#type\/waiting/);
+		expect(back).not.toMatch(/type\/next/);
 		Object.assign(S, { abyssTasksFormat: false, tagListMappings: [] });
 	});
 

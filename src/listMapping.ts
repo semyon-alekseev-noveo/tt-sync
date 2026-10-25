@@ -1,7 +1,8 @@
 // Abyss tag -> TickTick list (settings.tagListMappings), e.g. type/next = nextAction.
-// Push: first mapped tag on the line decides the list (beats file default); the tag is
-// not sent as a TickTick tag (the list represents it). Pull: the task's list re-creates
-// the tag and drops other mapped tags, so moving lists in TickTick rewrites the type tag.
+// Push: **last** mapped stage tag on the line decides the list (AF-GTD-TAG-ADD / Option A —
+// Abyss tag-tree DnD appends the new stage; rightmost/last wins). The stage tag is not
+// sent as a TickTick tag (the list represents it). Pull: the task's list re-creates the
+// tag and drops other mapped tags, so moving lists in TickTick rewrites the type tag.
 export interface ITagListMapping { tag: string; list: string; listId?: string }
 interface P { id: string; name: string }
 const n = (s: string) => s.replace(/^#/, '').trim().toLowerCase();
@@ -26,12 +27,33 @@ export function healTagListMappings(map: ITagListMapping[] | undefined, projects
 	return changed ? out : undefined;
 }
 
-export function listForTags(tags: string[], map: ITagListMapping[] | undefined, projects: P[]): string | undefined {
+/** Last list-mapped tag on the line (Abyss DnD append order). */
+export function pickLastStageTag(tags: string[] | undefined, map: ITagListMapping[] | undefined): string | undefined {
+	if (!tags?.length || !map?.length) return undefined;
+	let last: string | undefined;
 	for (const t of tags) {
-		const m = map?.find(e => n(e.tag) === n(t));
-		if (m) { const id = (m.listId && projects.some(p => p.id === m.listId)) ? m.listId : listId(m.list, projects); if (id) return id; }
+		if (isListTag(t, map)) last = t.replace(/^#/, '');
 	}
-	return undefined;
+	return last;
+}
+
+export function listForTags(tags: string[], map: ITagListMapping[] | undefined, projects: P[]): string | undefined {
+	const stage = pickLastStageTag(tags, map);
+	if (!stage) return undefined;
+	const m = map?.find(e => n(e.tag) === n(stage));
+	if (!m) return undefined;
+	const id = (m.listId && projects.some(p => p.id === m.listId)) ? m.listId : listId(m.list, projects);
+	return id;
+}
+
+/** True when more than one tagListMappings tag appears on the line (needs vault rewrite). */
+export function hasMultipleStageTags(tags: string[] | undefined, map: ITagListMapping[] | undefined): boolean {
+	if (!tags?.length || !map?.length) return false;
+	let nStage = 0;
+	for (const t of tags) {
+		if (isListTag(t, map) && ++nStage > 1) return true;
+	}
+	return false;
 }
 
 export function tagForList(projectId: string, map: ITagListMapping[] | undefined, projects: P[]): string | undefined {

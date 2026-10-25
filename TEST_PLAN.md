@@ -1064,4 +1064,21 @@ Observed gap: both tags remain; list stays nextAction (`listForTags` first match
 | ID | Pilot status | Evidence |
 |----|----------------|----------|
 | AF-NEST-1 | **pass** | `docs/pilot/results/ABYSS-NEST-GTD/137-af-nest-gtd-pilot.md` |
-| AF-GTD-TAG-ADD | **fail** (vs desired) | same file — product UX gap |
+| AF-GTD-TAG-ADD | **fail** on 2.0.89 discovery; **unit pass** Option A tip | same file — pre-fix; tip: `listMapping.test.ts` AF-GTD-TAG-ADD |
+
+## PR — AF-GTD-TAG-ADD Option A (exclusive stage)
+
+Branch into `abyss-mapping`. [#137](https://github.com/semyon-alekseev-noveo/tt-sync/issues/137).
+
+### Behavior
+
+1. Line has `#type/next` then Abyss adds `#type/waiting` (tag-tree DnD).
+2. Synchronize.
+3. TickTick list = **waitingFor** (last mapped stage).
+4. Vault line rewritten to a **single** stage tag `#type/waiting`.
+
+Checkbox-status GTD alternate: parked in `docs/pilot/AF-CHECKBOX-STATUS-GTD.md` (not this PR).
+
+| ID | Pilot status | Evidence |
+|----|----------------|----------|
+| AF-GTD-TAG-ADD | **pass** (unit); live **not run** | `src/test/listMapping.test.ts`; prove×2 on pilot after merge |

@@ -3,7 +3,7 @@ import type { ITask, ITaskItem } from '@/api/types/Task';
 import type { NewFileMap, ITaskRecord } from '@/services/NewFileMap';
 import { Notice } from 'obsidian';
 import { mapObsidianTag } from '@/tagMapping';
-import { isListTag, isStageToken, listForTags, tickTickTagForStage, tagsForCurrentList } from '@/listMapping';
+import { hasMultipleStageTags, isListTag, isStageToken, listForTags, pickLastStageTag, tickTickTagForStage, tagsForCurrentList } from '@/listMapping';
 import { checkboxChar, tagForStatusChar, isStatusTag } from '@/statusMapping';
 import { getSettings, updateSettings } from '@/settings';
 import { getAllProjects } from '@/db/projects';
@@ -241,7 +241,7 @@ export class TaskParserConvertToTask {
 			const hasSource = tags.some(t => t === 'obsidian' || t === 'ticktick' || t === markerName());
 			if (!hasSource) tags = [...tags, 'obsidian'];
 		} else if (getSettings().tagListMappings?.length && (getSettings().gtdStageVia ?? 'list') === 'tag') {
-			const stageRaw = rawTags.find(t => isListTag(t, getSettings().tagListMappings));
+			const stageRaw = pickLastStageTag(rawTags, getSettings().tagListMappings);
 			const tt = stageRaw ? tickTickTagForStage(stageRaw, getSettings().tagListMappings) : undefined;
 			tags = tags.filter((t, i) => !isStageToken(rawTags[i], getSettings().tagListMappings) && !isStageToken(t, getSettings().tagListMappings));
 			if (tt) tags = [...tags.filter(x => x !== tt), tt];
@@ -345,6 +345,15 @@ export class TaskParserConvertToTask {
 			repeatFrom: recurrenceResult?.repeatFrom,
 			dateHolder: allDatesStruct //Assume that there's a dateStruct of some kind
 		};
+
+		// AF-GTD-TAG-ADD: Abyss tag-tree may leave several stage tags; push rewrites the vault line.
+		if (hasMultipleStageTags(rawTags, getSettings().tagListMappings)) {
+			Object.defineProperty(task, '__exclusiveStageRewrite', {
+				value: true,
+				enumerable: false,
+				configurable: true,
+			});
+		}
 	
 		return task;
 	
