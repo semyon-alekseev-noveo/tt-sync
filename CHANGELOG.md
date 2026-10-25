@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-25 04:18 UTC
+
+- Context: [#134](https://github.com/semyon-alekseev-noveo/tt-sync/pull/134) merged; post-merge pilot for [#19](https://github.com/semyon-alekseev-noveo/tt-sync/issues/19).
+- Target: Prove×2 that Active Zone repair keeps comments with sibling tasks on tip **2.0.89**.
+- Actions log: Deploy tip; `repairAllProjectNotes` on AF-3 (siblings) and AF-2 (Overview→AZ hoist); evidence under `BUG-ACTIVEZONE-COMMENT-SHUFFLE/`; update `TEST_PLAN` / `ABYSS` / `PO_STATUS`.
+- Validation: Prove1 pass (comment under each sibling); Prove2 pass (nested hoist keeps comments; not left in Overview).
+- Problems: None (`resolved`).
+- To Be Done: Merge evidence PR; Step 8 live vault remains closed / owner call.
+- References: `docs/pilot/results/BUG-ACTIVEZONE-COMMENT-SHUFFLE/19-prove-2.0.89.md`, `CHANGELOG.md`
+
 ### Iteration 2026-10-25 04:07 UTC
 
 - Context: [#133](https://github.com/semyon-alekseev-noveo/tt-sync/pull/133) merged; epic #20 closed; start [#19](https://github.com/semyon-alekseev-noveo/tt-sync/issues/19) Active Zone comment shuffle.
