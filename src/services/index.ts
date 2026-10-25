@@ -1,8 +1,8 @@
 import { childBlocks, sortOrdersFromLines, reorderLinesBySortOrder } from '@/subtaskOrder';
-import { beginFileRun, commitVaultText, editorsForFile, readNoteForWrite, syncCachedRead, syncRead } from '@/sync/vault-io';
+import { beginFileRun, editorsForFile, readNoteForWrite, syncRead } from '@/sync/vault-io';
 import { deferActiveFilePush, releaseDeferredActiveFilePushes } from '@/services/activeFilePush';
 import { loadPluginWrites, pluginWriteMtimes } from '@/utils/editedSince';
-import { idsPresentInVault, dedupeTaskIds } from '@/utils/vaultIdScan';
+import { idsPresentInVault } from '@/utils/vaultIdScan';
 import { shouldBackupToday } from '@/backupPolicy';
 import type { PluginContext } from '@/pluginContext';
 import { Tick } from '@/api';
@@ -14,13 +14,8 @@ import { FileOperation } from '@/fileOperation';
 import { NewFileMap } from '@/services/NewFileMap';
 //Logging
 import log from '@/utils/logger';
-import { FoundDuplicateTasksModal } from '@/modals/FoundDuplicateTasksModal';
-import { CleanupDatabaseModal } from '@/modals/CleanupDatabaseModal';
-import { TaskDeletionModal, type DeletionItem } from '@/modals/TaskDeletionModal';
-import { runVaultDeletionPhase } from '@/sync/lifecycle/runVaultDeletionPhase';
 import { OrphanTaskModal, type OrphanItem } from '@/modals/OrphanTaskModal';
 import type { SyncTrigger } from '@/services/SyncActivityIndicator';
-import type { PendingTickTickDeletion } from '@/services/TaskModificationDetector';
 import type { ITask } from '@/api/types/Task';
 import { getTick } from '@/api/tick_singleton_factory'
 import { clearGuardRun } from '@/sync/massDeleteGuard';
@@ -36,6 +31,7 @@ import {
 	runSyncFilesPhase,
 	runVaultReconcilePhase,
 } from '@/sync/phases';
+import { runSyncFilesPass } from '@/sync/phases/syncFilesPass';
 import { pathsForPrePullPush } from '@/sync/vault-push/pushLocalPaths';
 import type { SyncRunResult } from '@/sync/result';
 import { db, initDB } from "@/db/dexie";
@@ -282,7 +278,8 @@ export class TickTickService {
 					await timePhase('subtasks', () => runSubtasksPhase(lockedDeps));
 				}
 			});
-			await timePhase('syncFiles', () => runSyncFilesPhase(phaseDeps));
+			// syncFilesPass times `syncFiles` + `vaultDeletion` under one LOCK_TASKS (#66).
+			await runSyncFilesPhase(phaseDeps);
 		} catch (error) {
 			syncOk = false;
 			errorMessage = error instanceof Error ? error.message : String(error);
@@ -945,220 +942,14 @@ export class TickTickService {
 	// }
 
 	/**
-	 * Project-note file pass (Phase 1). Vault→TT deletion (Phase 2) runs via
-	 * `runVaultDeletionPhase` inside the same LOCK_TASKS acquisition.
-	 * @param bForceUpdate
-	 * @param ctx Sync run context for pending-marker checks; created when omitted (direct callers).
+	 * Project-note file pass + vault→TT deletion. Body lives in
+	 * `sync/phases/syncFilesPass` (#66); Phase 1→2 stay under one LOCK_TASKS.
 	 */
 	async syncFiles(bForceUpdate: boolean, ctx?: SyncRunContext) {
 		const syncCtx = ctx ?? createSyncRunContext({ trigger: 'manual', fullSync: false });
-		const filesToSync = await this.plugin.fileMetadataService?.getAllFileMetadata();
-		if (!filesToSync) {
-			log.warn('No sync files found.');
-			return;
-		}
-		let newFilesToSync = filesToSync;
-		//If one project is to be synced, don't look at it's other files.
-
-		if (getSettings().SyncProject) {
-			newFilesToSync = Object.fromEntries(Object.entries(filesToSync).filter(([key, value]) =>
-				value.defaultProjectId === getSettings().SyncProject));
-		}
-
-		// Duplicated task lines (copy-pasted marker): keep the original, the copy becomes a new task.
-		try {
-			const mdFiles = this.plugin.app.vault.getMarkdownFiles();
-			const texts: { path: string; text: string }[] = [];
-			for (const f of mdFiles) { const text = await syncCachedRead(this.plugin.app.vault, f); if (text.includes('ticktick_id::')) texts.push({ path: f.path, text }); }
-			const owners = new Map<string, string>();
-			for (const lt of await db.tasks.toArray()) if (lt.file && !lt.deleted) owners.set(lt.task?.id ?? lt.taskId, lt.file);
-			for (const c of dedupeTaskIds(texts, id => owners.get(id))) {
-				const f = this.plugin.app.vault.getAbstractFileByPath(c.path);
-				if (f instanceof TFile) {
-					const original = texts.find(t => t.path === c.path)?.text;
-					if (original != null) await commitVaultText(this.plugin.app, f, original, c.text);
-					const msg = `TickTickSync: duplicated task line(s) in ${c.path} detached from ${c.ids.join(', ')} — they will sync as new tasks.`;
-					log.warn(msg); new Notice(msg, 8000);
-				}
-			}
-		} catch (e) { log.error('dedupe failed', e); }
-
-		//Check for duplicates before we do anything
-		try {
-			// Build task ID list from metadata for file-level duplicate scan
-			const taskList: Record<string, string> = {};
-			for (const [, metadata] of Object.entries(newFilesToSync)) {
-				if (!metadata.TickTickTasks) continue;
-				for (const taskDetail of metadata.TickTickTasks) {
-					taskList[taskDetail.taskId] = taskDetail.taskId;
-				}
-			}
-
-			const [dbResult, fileResult] = await Promise.all([
-				this.plugin.fileMetadataService?.checkForDuplicates(newFilesToSync),
-				this.plugin.fileOperation?.checkForDuplicates(newFilesToSync, taskList)
-			]);
-
-			// Merge both results into the format FoundDuplicateTasksModal expects
-			const duplicates: Record<string, string[]> = {};
-			const taskIds: Record<string, string> = {};
-
-			if (dbResult?.duplicates) {
-				for (const [taskId, files] of Object.entries(dbResult.duplicates)) {
-					duplicates[taskId] = files;
-					taskIds[taskId] = dbResult.taskIds[taskId];
-				}
-			}
-
-			if (fileResult?.duplicates) {
-				for (const [taskId, files] of Object.entries(fileResult.duplicates)) {
-					const fileList = files;
-					if (fileList.length > 1) {
-						const extraFiles = fileList.slice(1);
-						if (duplicates[taskId]) {
-							const existing = new Set(duplicates[taskId]);
-							for (const f of extraFiles) {
-								if (!existing.has(f)) {
-									duplicates[taskId].push(f);
-								}
-							}
-						} else {
-							duplicates[taskId] = extraFiles;
-							taskIds[taskId] = fileList[0];
-						}
-					}
-				}
-			}
-
-			// Metadata-only "duplicates" whose line really exists in just one note are stale bookkeeping
-			// (e.g. after a parallel sync); don't block sync on them.
-			for (const taskId of Object.keys(duplicates)) {
-				if (fileResult?.duplicates?.[taskId] && fileResult.duplicates[taskId].length > 1) continue;
-				const where = await idsPresentInVault(this.plugin.app, [taskId]);
-				if (where.size === 1) { log.warn('Ignoring stale metadata duplicate', taskId, duplicates[taskId]); delete duplicates[taskId]; }
-			}
-			const hasDuplicates = Object.keys(duplicates).length > 0;
-			if (hasDuplicates) {
-				const modal = new FoundDuplicateTasksModal(this.plugin.app, this.plugin, duplicates, taskIds);
-				const resolved = await modal.showModal();
-
-				if (!resolved) {
-					log.warn('User cancelled duplicate resolution. Sync aborted.');
-					new Notice('Sync aborted. Please fix duplicates manually in metadata to prevent data corruption.', 10000);
-					return;
-				}
-
-				// Re-fetch metadata after deletions if user chose to proceed
-				newFilesToSync = await this.plugin.fileMetadataService?.getAllFileMetadata();
-				if (!newFilesToSync) return;
-			}
-
-		} catch (error) {
-			log.error(error);
-			new Notice(`Duplicate check failed: ${error instanceof Error ? error.message : String(error)}`, 5000);
-			return;
-		}
-
-
-		//let's see if any files got killed while we weren't watching
-		//TODO: Files deleted while we weren't looking is not handled right.
-		const filesMissingFromVault: string[] = [];
-		for (const fileKey in newFilesToSync) {
-			const file = this.plugin.app.vault.getAbstractFileByPath(fileKey);
-			if (!file) {
-				filesMissingFromVault.push(fileKey);
-			}
-		}
-
-		if (filesMissingFromVault.length > 0) {
-			const shouldCleanup = getSettings().autoCleanupDatabase
-				|| await new CleanupDatabaseModal(this.plugin.app, filesMissingFromVault).showModal();
-
-			for (const fileKey of filesMissingFromVault) {
-				if (shouldCleanup) {
-					log.debug('File ', fileKey, ' was deleted before last sync. Cleaning up database.');
-					await this.plugin.fileMetadataService?.deleteFileMetadata(fileKey);
-				} else {
-					log.debug('File ', fileKey, ' was deleted before last sync. Skipped database cleanup.');
-				}
-				delete newFilesToSync[fileKey];
-			}
-		}
-
-		if (bForceUpdate && this.plugin.projectScheme?.enabled()) {
-			try {
-				await this.plugin.projectScheme.repairAllProjectNotes();
-			} catch (e) {
-				log.error('Project note repair before reset failed', e);
-			}
-		}
-
-		//Now do the task checking.
-		await doWithLock(LOCK_TASKS, async () => {
-			// Phase 1: Process new tasks and modifications for all files first.
-			// This detects and handles task moves (updating the DB file field),
-			// so deletions in Phase 2 won't see moved tasks as "missing".
-			const pendingTickTickDeletions: PendingTickTickDeletion[] = [];
-			for (const fileKey in newFilesToSync) {
-				if (bForceUpdate) {
-					try {
-						await this.tickTickSync?.forceUpdates(fileKey);
-					} catch (error) {
-						log.error('An error occurred in forceUpdates:', error);
-					}
-				}
-
-				try {
-					await this.plugin.taskModificationDetector.checkFileForNewTasks(fileKey);
-				} catch (error) {
-					log.error('An error occurred in fullTextNewTaskCheck:', error);
-				}
-
-				// TP-IDLE-MANUAL-SCOPE: pre-pull already ran checkFileForModifications
-				// (+ comment sweep) for ctx.locallyEdited — skip the second pass.
-				if (syncCtx.locallyEdited.has(fileKey)) {
-					continue;
-				}
-
-				try {
-					await this.plugin.taskModificationDetector.checkFileForModifications(fileKey, pendingTickTickDeletions);
-				} catch (error) {
-					log.error('An error occurred in fullTextModifiedTaskCheck:', error);
-				}
-			}
-
-			// Tasks whose ticktick id exists in a vault file but are neither in
-			// the local cache nor on TickTick were collected during Phase 1.
-			// Present a single confirmation dialog covering all affected files
-			// before deleting any of them.
-			if (pendingTickTickDeletions.length > 0) {
-				const items: DeletionItem[] = pendingTickTickDeletions.map(d => ({
-					title: this.plugin.taskParser.stripOBSUrl(d.lineTask.title),
-					filePath: d.filepath
-				}));
-				const modal = new TaskDeletionModal(this.plugin.app, items, 'task(s) not found on TickTick', () => { });
-				const prompt = await modal.showModal();
-				if (prompt.confirmed) {
-					for (const d of pendingTickTickDeletions) {
-						try {
-							log.info(`Deleting task ${d.lineTask.id} from ${d.filepath}`);
-							await this.plugin.fileOperation?.deleteTaskFromSpecificFile(d.file, d.lineTask, false);
-						} catch (error) {
-							log.error(`Error deleting task ${d.lineTask.id} from ${d.filepath}:`, error);
-						}
-					}
-				} else {
-					new Notice('Tasks not found on TickTick will not be deleted.', 5000);
-				}
-			}
-
-			// Phase 2: Process deletions for all files (lifecycle module).
-			// Moved tasks already have updated file paths, so they won't be
-			// detected as deleted from their old file.
-			await runVaultDeletionPhase(
-				{ plugin: this.plugin, ctx: syncCtx },
-				Object.keys(newFilesToSync),
-			);
-		});
+		await runSyncFilesPass(
+			{ plugin: this.plugin, service: this, ctx: syncCtx },
+			bForceUpdate,
+		);
 	}
 }

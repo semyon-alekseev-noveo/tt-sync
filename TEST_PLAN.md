@@ -1155,3 +1155,18 @@ Expected: CI fails on new cycles; stale allowlist (removed cycles still listed) 
 | ID | Pilot status | Evidence |
 |----|----------------|----------|
 | TECH-CIRC-ALLOWLIST | **unit** (CI script) | `docs/import-cycles.allowlist.json`; `.github/workflows/ci.yml` |
+
+## PR — #66 slice B (timed vaultDeletion)
+
+Extract-only: Phase 1→2 order and lock unchanged; perf now reports `vaultDeletion` separately.
+
+### TECH-VAULT-DELETION-TIMED
+
+1. Run `npx vitest run src/test/syncFilesPass.vaultDeletion.test.ts src/test/services/TickTickService.test.ts`.
+2. Optional pilot: Synchronize; confirm deletion prompts / Phase 2 still behave (no behavior change expected).
+
+Expected: unit green; `[perf]` may list `vaultDeletion` beside `syncFiles`. Live deletion smokes **not run** in this PR.
+
+| ID | Pilot status | Evidence |
+|----|----------------|----------|
+| TECH-VAULT-DELETION-TIMED | **unit**; pilot **not run** | `66-slice-b-vault-deletion.md` |

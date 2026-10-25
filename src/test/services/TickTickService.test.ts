@@ -157,7 +157,11 @@ describe('TickTickService', () => {
 				getFilePathForProject: vi.fn().mockResolvedValue('Projects/ProjectA.md'),
 				resolveFileLocationConflict: vi.fn().mockResolvedValue(undefined),
 			},
-			taskRepository: { loadTaskById: vi.fn(), upsertTask: vi.fn() },
+			taskRepository: {
+				loadTaskById: vi.fn(),
+				upsertTask: vi.fn(),
+				loadAllLocalTasks: vi.fn().mockResolvedValue([]),
+			},
 		};
 		service = new TickTickService(mockPlugin);
 		service.api = {} as unknown;

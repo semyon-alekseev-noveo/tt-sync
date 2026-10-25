@@ -53,10 +53,21 @@ describe('sync phases (PR 1 extract smoke)', () => {
 		expect(deps.plugin.vaultSyncCoordinator.syncVaultWithDatabase).toHaveBeenCalled();
 	});
 
-	it('runSyncFilesPhase calls service.syncFiles(false, ctx)', async () => {
-		const deps = mockDeps();
+	it('runSyncFilesPhase sets UI step then runs the file pass', async () => {
+		const deps = mockDeps({
+			plugin: {
+				applyExternalSettings: vi.fn(),
+				checkSettingsMigration: vi.fn(),
+				taskCache: { fill: vi.fn() },
+				vaultSyncCoordinator: { syncVaultWithDatabase: vi.fn() },
+				fileMetadataService: {
+					getAllFileMetadata: vi.fn(async () => null),
+				},
+				app: { vault: { getMarkdownFiles: () => [] } },
+			} as never,
+		});
 		await runSyncFilesPhase(deps);
-		expect(deps.service.syncFiles).toHaveBeenCalledWith(false, deps.ctx);
+		expect(deps.ui.setFullStep).toHaveBeenCalledWith('Syncing project notes…');
 	});
 
 	it('runSubtasksPhase uses ctx.locallyEdited', async () => {

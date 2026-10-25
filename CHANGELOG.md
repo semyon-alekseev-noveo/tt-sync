@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-25 16:25 UTC
+
+- Context: Continue #66 after slice A (timed `vaultDeletion` / syncFiles extract).
+- Target: Phase 1→2 same lock; separate `timePhase('vaultDeletion')`; shrink `TickTickService`.
+- Actions log: `syncFilesPass.ts`; thin `syncFiles`; store-port dedupe; guard test; docs/TEST_PLAN.
+- Validation: `npx vitest run` 737 pass; `npm run build`; `check:cycles` OK.
+- Problems: `services/index.ts` still ~41 KB (`open` — further extract later).
+- To Be Done: Push onto PR #154; owner merge.
+- References: `src/sync/phases/syncFilesPass.ts`, `docs/pilot/results/TECH-SYNC-MODULARIZATION/66-slice-b-vault-deletion.md`, #66
+
 ### Iteration 2026-10-25 16:15 UTC
 
 - Context: Owner assigned [#66](https://github.com/semyon-alekseev-noveo/tt-sync/issues/66) after modularity check (post-#31).

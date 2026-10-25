@@ -25,6 +25,7 @@ export type SyncPhaseName =
 	| 'vaultReconcile'
 	| 'subtasks'
 	| 'syncFiles'
+	| 'vaultDeletion'
 	| 'activeFile';
 
 export interface CreateSyncRunContextOptions {
