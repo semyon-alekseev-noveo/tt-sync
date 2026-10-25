@@ -111,6 +111,7 @@ Pass only with evidence: the note path, the `ticktick_id`, and either the journa
 
 | Date (UTC) | Vault | Build | Runner | Item | Result | Evidence |
 |------------|-------|-------|--------|------|--------|----------|
+| 2026-10-25 | Thinkpad-tts-test | 2.0.89 | agent (Obsidian CLI) | AF-6 | pass | Vault `[x]`→TT status 2 (`6add7356…4c`); TT complete→vault `[x]` (`…4d`). Recurring not run. Evidence: `STEP7-AF-PILOT-SOAK/73-af6-complete-both-ways-2.0.89.md`. #73. |
 | 2026-10-25 | Thinkpad-tts-test | 2.0.89 | agent (Obsidian CLI) | AF-5 | pass | Inbox `#type/next` → TTS-nextAction `6add71c5…`; line stayed in `abyss-active.md`. Evidence: `STEP7-AF-PILOT-SOAK/72-af5-type-next-2.0.89.md`. #72. |
 | 2026-10-25 | Thinkpad-tts-test | 2.0.89 | agent (Obsidian CLI) | AF-4 | pass | Active Zone `AF-4 az-subtask 025900` → subtask `6add70a0…` of parent `6adcbea8…`; line stayed. Evidence: `STEP7-AF-PILOT-SOAK/71-af4-active-zone-subtask-2.0.89.md`. #71. |
 | 2026-10-24 | Thinkpad-tts-test | 2.0.89 | agent (Obsidian CLI) | AF-3 | pass | Obs note → TT parent `6adcbea8…` on TTS-Projects; no `ticktick` tag; 2nd sync idle. Evidence: `STEP7-AF-PILOT-SOAK/70-af3-obs-project-note-2.0.89.md`. #70. |

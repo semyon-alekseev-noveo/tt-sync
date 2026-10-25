@@ -10,6 +10,6 @@ Plugin under test: tip **2.0.89**
 | #70 AF-3 Obs note → TT parent | [70-af3-obs-project-note-2.0.89.md](70-af3-obs-project-note-2.0.89.md) | **pass** on **2.0.89** |
 | #71 AF-4 Active Zone → subtask | [71-af4-active-zone-subtask-2.0.89.md](71-af4-active-zone-subtask-2.0.89.md) | **pass** on **2.0.89** |
 | #72 AF-5 `#type/next` → nextAction | [72-af5-type-next-2.0.89.md](72-af5-type-next-2.0.89.md) | **pass** on **2.0.89** |
-| #73 AF-6 | — | not run |
+| #73 AF-6 Complete ↔ complete | [73-af6-complete-both-ways-2.0.89.md](73-af6-complete-both-ways-2.0.89.md) | **pass** on **2.0.89** (recurring **not run**) |
 | #74 AF-7 | — | not run |
 | #75 AF-8 | — | not run |

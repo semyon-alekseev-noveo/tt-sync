@@ -963,3 +963,16 @@ Expected: TickTick task on TTS-nextAction; the line remains in the same note.
 | ID | Pilot status | Evidence |
 |----|----------------|----------|
 | AF-5 | **pass** | **2.0.89**: Inbox → `6add71c5…` on TTS-nextAction; line stayed. `docs/pilot/results/STEP7-AF-PILOT-SOAK/72-af5-type-next-2.0.89.md`. #72. |
+
+## PR — AF-6 Complete ↔ complete (#73 / #20)
+
+No code change. Tip **2.0.89**. Case **AF-6** in `ABYSS_FIRST_CASES.md`.
+
+### AF-6 — completion both ways on the same line
+
+1. Check a synced checkbox in the vault → **Synchronize** → TickTick task completed.
+2. Complete another synced task in TickTick → **Synchronize** → the same vault line is checked (no move/duplicate).
+
+| ID | Pilot status | Evidence |
+|----|----------------|----------|
+| AF-6 | **pass** | **2.0.89**: vault→TT + TT→vault on `abyss-active.md`. Recurring not run. `docs/pilot/results/STEP7-AF-PILOT-SOAK/73-af6-complete-both-ways-2.0.89.md`. #73. |

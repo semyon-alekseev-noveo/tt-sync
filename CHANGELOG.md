@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-25 03:14 UTC
+
+- Context: [#129](https://github.com/semyon-alekseev-noveo/tt-sync/pull/129) merged (AF-5); continue [#20](https://github.com/semyon-alekseev-noveo/tt-sync/issues/20) with AF-6.
+- Target: Pilot **AF-6** on tip **2.0.89** — vault check ↔ TT complete on the same line.
+- Actions log: Two throwaway Inbox tasks; vault→TT then TT→vault; MCP complete + Synchronize; evidence under `STEP7-AF-PILOT-SOAK/`.
+- Validation: `6add7356…4c` status 2 after vault `[x]`; `…4d` vault `[x]` after TT complete; no duplicate line.
+- Problems: Recurring sub-criterion **not run** (`open` optional soak).
+- To Be Done: Merge evidence PR; close #73; continue AF-7 (#74).
+- References: `docs/pilot/results/STEP7-AF-PILOT-SOAK/73-af6-complete-both-ways-2.0.89.md`, `CHANGELOG.md`
+
 ### Iteration 2026-10-25 03:05 UTC
 
 - Context: [#128](https://github.com/semyon-alekseev-noveo/tt-sync/pull/128) merged (AF-4); continue [#20](https://github.com/semyon-alekseev-noveo/tt-sync/issues/20) with AF-5.
