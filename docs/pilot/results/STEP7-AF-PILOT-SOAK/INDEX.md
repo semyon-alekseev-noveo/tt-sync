@@ -13,3 +13,4 @@ Plugin under test: tip **2.0.89**
 | #73 AF-6 Complete ↔ complete | [73-af6-complete-both-ways-2.0.89.md](73-af6-complete-both-ways-2.0.89.md) | **pass** on **2.0.89** (recurring **not run**) |
 | #74 AF-7 list move → stage tag | [74-af7-list-move-tag-2.0.89.md](74-af7-list-move-tag-2.0.89.md) | **pass** on **2.0.89** |
 | #75 AF-8 out of syncScopeFolders | [75-af8-out-of-scope-2.0.89.md](75-af8-out-of-scope-2.0.89.md) | **pass** on **2.0.89** |
+| #76 gate DEL-3 / CTX-D2 / AF-5 Inbox | [76-gate-del3-ctxd2-af5-inbox-2.0.89.md](76-gate-del3-ctxd2-af5-inbox-2.0.89.md) | **pass** on **2.0.89** |
