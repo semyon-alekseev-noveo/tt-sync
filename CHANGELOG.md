@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-25 14:28 UTC
+
+- Context: PO: keep Option A; independence from Abyss; plan stage prefix `type/*`→`gtd/*`.
+- Target: Record decisions; Tasks-plugin note; backlog AF-GTD-PREFIX; close #147.
+- Actions log: STAGE-REPLACE §4/§7; `AF-GTD-PREFIX.md`; catalog + PO_STATUS; PR #149.
+- Validation: docs-only.
+- Problems: None.
+- To Be Done: Optional 2.0.91; schedule prefix migration when owner wants.
+- References: `docs/pilot/AF-GTD-PREFIX.md`, `CHANGELOG.md`, #147, #149
+
 ### Iteration 2026-10-25 14:06 UTC
 
 - Context: Owner asked whether the dual-stage conflict toast can apply only for DnD; toast was scary noise on expected Option A rewrite.
