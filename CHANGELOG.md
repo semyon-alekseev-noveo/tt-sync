@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-25 03:05 UTC
+
+- Context: [#128](https://github.com/semyon-alekseev-noveo/tt-sync/pull/128) merged (AF-4); continue [#20](https://github.com/semyon-alekseev-noveo/tt-sync/issues/20) with AF-5.
+- Target: Pilot **AF-5** on tip **2.0.89** — Inbox `#type/next` → TTS-nextAction; line stays put.
+- Actions log: Checkbox on `abyss-active.md`; Synchronize; MCP `get_task_by_id`; evidence under `STEP7-AF-PILOT-SOAK/`.
+- Validation: Id `6add71c5…` on TTS-nextAction; only path `00 Inbox/abyss-active.md`.
+- Problems: None (`resolved`). Prior 2.0.48 project-note partial superseded.
+- To Be Done: Merge evidence PR; close #72; continue AF-6 (#73).
+- References: `docs/pilot/results/STEP7-AF-PILOT-SOAK/72-af5-type-next-2.0.89.md`, `CHANGELOG.md`
+
 ### Iteration 2026-10-25 03:00 UTC
 
 - Context: [#127](https://github.com/semyon-alekseev-noveo/tt-sync/pull/127) merged (AF-3); continue [#20](https://github.com/semyon-alekseev-noveo/tt-sync/issues/20) with AF-4.
