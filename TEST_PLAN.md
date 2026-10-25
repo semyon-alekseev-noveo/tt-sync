@@ -1129,3 +1129,12 @@ Owner intent: Abyss tag-tree **branch → branch** = replace stage tag. Brief: `
 | ID | Pilot status | Evidence |
 |----|----------------|----------|
 | AF-GTD-PREFIX | **pass** (unit + pilot migrate) | `docs/pilot/results/ABYSS-NEST-GTD/150-af-gtd-prefix-2.0.91.md` |
+
+## PR — NOTE-BODY analyst case (docs only)
+
+Upstream TickTickSync **note under task** (`syncNotes` / delimiter) vs Abyss Comments / GTD. Spec: `docs/pilot/NOTE-BODY.md`.
+
+| ID | Pilot status | Evidence |
+|----|----------------|----------|
+| NOTE-BODY-1 | **not run** | catalog + brief |
+| NOTE-BODY-2 | **not run** | catalog + brief |

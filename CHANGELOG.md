@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-25 16:12 UTC
+
+- Context: Owner greenlit separate analyst case for upstream task notes (not GTD / not Comments).
+- Target: Catalog **NOTE-BODY-1/2** + brief; no code.
+- Actions log: `docs/pilot/NOTE-BODY.md`; ABYSS/PO/TEST_PLAN; GH issue for discovery.
+- Validation: docs-only.
+- Problems: None.
+- To Be Done: PO §5 answers; live BODY-1 then BODY-2 on pilot.
+- References: `docs/pilot/NOTE-BODY.md`, `CHANGELOG.md`, #152, #153
+
 ### Iteration 2026-10-25 14:35 UTC
 
 - Context: PO asked to ship `type/*`→`gtd/*` then release.
