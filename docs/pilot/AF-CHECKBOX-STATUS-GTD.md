@@ -1,6 +1,6 @@
 # Alternate path: GTD stage via Abyss checkbox statuses
 
-**Status:** parked design — not the active plan. Active fix for Abyss tag-tree DnD is **exclusive stage tags** (Option A / [#137](https://github.com/semyon-alekseev-noveo/tt-sync/issues/137)).
+**Status:** parked design — not the active plan. Active path for Abyss tag-tree stage **move** is **replace intent** (`docs/pilot/AF-GTD-STAGE-REPLACE.md`) with Option A sync compensation ([#137](https://github.com/semyon-alekseev-noveo/tt-sync/issues/137) / #144).
 
 ## Why this doc exists
 
