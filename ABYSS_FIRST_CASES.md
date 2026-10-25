@@ -115,6 +115,7 @@ Pass only with evidence: the note path, the `ticktick_id`, and either the journa
 
 | Date (UTC) | Vault | Build | Runner | Item | Result | Evidence |
 |------------|-------|-------|--------|------|--------|----------|
+| 2026-10-25 | Thinkpad-tts-test | **2.0.91** | agent (CLI+MCP) | AF-5 / NOTE-L3b×2 / AF-GTD-STAGE-MOVE / AF-6 / AF-7 | **pass** | Live regression; DEL-1/3 **not run**. `REGRESSION-2.0.91/01-…`. |
 | 2026-10-25 | Thinkpad-tts-test | 2.0.89 | agent (Obsidian CLI + MCP) | AF-NEST-1 | **pass** | Child `…439` `parentId`=`…438`; same TTS-Inbox. `ABYSS-NEST-GTD/137-af-nest-gtd-pilot.md`. |
 | 2026-10-25 | Thinkpad-tts-test | 2.0.89 | agent (Obsidian CLI + MCP) | AF-GTD-TAG-ADD | **fail** (vs desired) | Dual `#type/next`+`#type/waiting` stayed on vault; TT stayed TTS-nextAction (`…43a`). Evidence `ABYSS-NEST-GTD/137-…`. Pre–Option A. |
 | 2026-10-25 | unit | tip (#137 Option A) | agent | AF-GTD-TAG-ADD | **pass** (unit) | Last stage → list; exclusive rewrite flag. |
