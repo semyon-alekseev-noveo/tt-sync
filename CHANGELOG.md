@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-25 12:35 UTC
+
+- Context: [#141](https://github.com/semyon-alekseev-noveo/tt-sync/pull/141) merged; [#137](https://github.com/semyon-alekseev-noveo/tt-sync/issues/137) closed.
+- Target: Mark AF-GTD-TAG-ADD resolved in PO snapshot after Option A + hash-stuck + prove×2.
+- Actions log: Update `PO_STATUS.md` / `PROJECT_STATE.md`; comment on #137 with merge tip `bd5f6c1`.
+- Validation: Docs-only; evidence already in `ABYSS-NEST-GTD/140-…`.
+- Problems: None (`resolved`).
+- To Be Done: Optional BRAT release bump when owner wants #140+#141 on releases.
+- References: `PO_STATUS.md`, `CHANGELOG.md`, #137, #141
+
 ### Iteration 2026-10-25 12:25 UTC
 
 - Context: After #140 merge, pilot dual-stage line stuck: `lineHash` matched but TT list stayed nextAction.
