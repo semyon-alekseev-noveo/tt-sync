@@ -1006,3 +1006,17 @@ Expected: no TickTick task; no `ticktick_id` on the line; no journal `obs->tt` c
 | ID | Pilot status | Evidence |
 |----|----------------|----------|
 | AF-8 | **pass** | **2.0.89**: `80 Sandbox/AF-8 out-of-scope 035100.md` not pushed. `docs/pilot/results/STEP7-AF-PILOT-SOAK/75-af8-out-of-scope-2.0.89.md`. #75. |
+
+## PR — STEP7-GATE DEL-3 / CTX-D2 / AF-5 Inbox (#76 / #20)
+
+No code change. Tip **2.0.89**. Cases **DEL-3**, **CTX-D2**, **AF-5** (Inbox) per issue #76.
+
+### Gate session
+
+1. AF-5: `#type/next` checkbox in `abyss-active.md` → Synchronize → TTS-nextAction; line stays.
+2. CTX-D2: double `#note/abyss-active` → Synchronize → single hashtag; second sync idle.
+3. DEL-3: delete synced line → Synchronize → **Cancel** → TT task remains; no `deleteTask`.
+
+| ID | Pilot status | Evidence |
+|----|----------------|----------|
+| DEL-3 / CTX-D2 / AF-5 Inbox | **pass** | **2.0.89** one session. `docs/pilot/results/STEP7-AF-PILOT-SOAK/76-gate-del3-ctxd2-af5-inbox-2.0.89.md`. #76. |

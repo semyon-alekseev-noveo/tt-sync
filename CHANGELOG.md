@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-25 04:00 UTC
+
+- Context: [#132](https://github.com/semyon-alekseev-noveo/tt-sync/pull/132) merged (AF-8); run [#76](https://github.com/semyon-alekseev-noveo/tt-sync/issues/76) pre–Step 8 gate rows.
+- Target: DEL-3 Cancel, CTX-D2 dirty-tag cleanup, AF-5 Inbox `#type/next` on tip **2.0.89**.
+- Actions log: One-session fixtures on `abyss-active.md`; Cancel hook on TaskDeletionModal; MCP verifies; evidence under `STEP7-AF-PILOT-SOAK/`.
+- Validation: DEL-3 TT `…4f` status 0, 0 deletes; CTX-D2 one hashtag; AF-5 on TTS-nextAction.
+- Problems: `#inbox` not retained on AF-5 line with `#type/next` (`mitigated` — same as #72; noted in evidence).
+- To Be Done: Merge evidence PR; close #76 / consider #20; next [#19](https://github.com/semyon-alekseev-noveo/tt-sync/issues/19).
+- References: `docs/pilot/results/STEP7-AF-PILOT-SOAK/76-gate-del3-ctxd2-af5-inbox-2.0.89.md`, `CHANGELOG.md`
+
 ### Iteration 2026-10-25 03:52 UTC
 
 - Context: [#131](https://github.com/semyon-alekseev-noveo/tt-sync/pull/131) merged (AF-7); finish AF rows with AF-8.

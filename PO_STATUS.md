@@ -100,12 +100,12 @@
 
 ## To Be Done
 
-1. Editor-safety epic [#15](https://github.com/semyon-alekseev-noveo/tt-sync/issues/15): #16 partial pass; next [#17](https://github.com/semyon-alekseev-noveo/tt-sync/issues/17) EMPTY-SIDE-GUARD / [#18](https://github.com/semyon-alekseev-noveo/tt-sync/issues/18) deferred-id. [#28](https://github.com/semyon-alekseev-noveo/tt-sync/issues/28)/[#29](https://github.com/semyon-alekseev-noveo/tt-sync/issues/29) case **pass** on **2.0.89**.
+1. Editor-safety epic [#15](https://github.com/semyon-alekseev-noveo/tt-sync/issues/15) **closed** (#16 partial; #17/#18/#28/#29 **pass** on **2.0.89**).
 2. [#64](https://github.com/semyon-alekseev-noveo/tt-sync/issues/64) / [#65](https://github.com/semyon-alekseev-noveo/tt-sync/issues/65) **closed** (pass on **2.0.89**). #104 closed; BRAT **2.0.89** on pilot.
 3. `TP-DELTA-*` app UI still **not run** → [#84](https://github.com/semyon-alekseev-noveo/tt-sync/issues/84). Idle-zero **pass** on **2.0.85**.
 4. **BUG-ACTIVEZONE-COMMENT-SHUFFLE** — failing test + fix (`pullSubtaskOrder` / `mergeAbyssBlock`) → [#19](https://github.com/semyon-alekseev-noveo/tt-sync/issues/19).
-5. Gate: AF-5 в **Inbox**, DEL-3, CTX-D2 → [#76](https://github.com/semyon-alekseev-noveo/tt-sync/issues/76) / [#20](https://github.com/semyon-alekseev-noveo/tt-sync/issues/20).
-6. Открыто: GAP-COMMENT-EDIT, RISK-PULL-WINS-LOCAL, RISK-DUAL-STORE ([#63](https://github.com/semyon-alekseev-noveo/tt-sync/issues/63)); TECH-START-1; [#66](https://github.com/semyon-alekseev-noveo/tt-sync/issues/66); [#32](https://github.com/semyon-alekseev-noveo/tt-sync/issues/32) token revoke.
+5. Step 7 AF soak [#20](https://github.com/semyon-alekseev-noveo/tt-sync/issues/20) + gate [#76](https://github.com/semyon-alekseev-noveo/tt-sync/issues/76): AF-1…AF-8 + DEL-3/CTX-D2/AF-5 Inbox **pass** on **2.0.89** (close after evidence PR). Step 8 live vault still closed.
+6. Next P1 code: [#19](https://github.com/semyon-alekseev-noveo/tt-sync/issues/19) Active Zone shuffle. Also open: GAP-COMMENT-EDIT / risks ([#63](https://github.com/semyon-alekseev-noveo/tt-sync/issues/63)); TECH-START-1; [#66](https://github.com/semyon-alekseev-noveo/tt-sync/issues/66); [#32](https://github.com/semyon-alekseev-noveo/tt-sync/issues/32) token revoke.
 
 ## Аналитический мит 2026-10-19
 
