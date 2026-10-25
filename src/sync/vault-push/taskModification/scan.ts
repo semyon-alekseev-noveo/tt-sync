@@ -6,6 +6,7 @@ import { NewFileMap } from '@/services/NewFileMap';
 import { readNoteForWrite } from '@/sync/vault-io';
 import { getSettings } from '@/settings';
 import { getAllProjects } from '@/db/projects';
+import { stageNeedsPushDespiteHash } from '@/listMapping';
 import { isPathInPushScope, normalizeSyncTag, resolveSyncedListIds, tickTickTaskEntersVault, vaultParentMeaningfullyChanged, type TaskSyncLimitOptions } from '@/syncScope';
 import log from '@/utils/logger';
 import type { TaskModificationDetector } from '@/sync/vault-push/taskModification/TaskModificationDetector';
@@ -139,42 +140,53 @@ export class TaskModificationScan {
 				if (lineTask && await this.skipPushWhenTickTickRenamedVaultLine(lineTask, savedTask, taskId, filepath!)) {
 					return false;
 				}
-				// Comments API on hash-unchanged:
-				// - identifiedOnly (open-note debounce): only when a comment line
-				//   changed the hash (hash-mismatch path) — skip here.
-				// - Full-file check with deferCommentSweep: `sweepAbyssCommentsInFile`
-				//   owns BUG-COMMENT-NO-PUSH (slice 4 — avoid double GET).
-				// - Single-line / inline parent walk: sync here (no file sweep follows).
-				if (
-					useAbyssCommentsApi()
-					&& savedTask.projectId
-					&& !options?.identifiedOnly
-					&& !options?.deferCommentSweep
-				) {
-					const lines = taskRecord.taskLines ?? [];
-					const runCommentSync = true;
-					if (runCommentSync) {
-						try {
-							await syncAbyssCommentsToTickTick(
-								this.plugin.tickTickRestAPI,
-								taskId,
-								savedTask.projectId,
-								lines,
-								savedTask.content,
-								{ remoteCommentCount: savedTask.commentCount },
-							);
-						} catch (e) {
-							log.warn('Abyss comment API sync failed (hash unchanged)', taskId, e);
+				// AF-GTD-TAG-ADD: lineHash can match while dual stage tags still need a list
+				// move / vault rewrite (e.g. hash updated after a skipped move).
+				const stageTags = this.plugin.taskParser?.getAllTagsFromLineText(lineText) ?? [];
+				const stageStuck = stageNeedsPushDespiteHash(
+					stageTags,
+					getSettings().tagListMappings,
+					lineTask?.projectId,
+					savedTask.projectId,
+				);
+				if (!stageStuck) {
+					// Comments API on hash-unchanged:
+					// - identifiedOnly (open-note debounce): only when a comment line
+					//   changed the hash (hash-mismatch path) — skip here.
+					// - Full-file check with deferCommentSweep: `sweepAbyssCommentsInFile`
+					//   owns BUG-COMMENT-NO-PUSH (slice 4 — avoid double GET).
+					// - Single-line / inline parent walk: sync here (no file sweep follows).
+					if (
+						useAbyssCommentsApi()
+						&& savedTask.projectId
+						&& !options?.identifiedOnly
+						&& !options?.deferCommentSweep
+					) {
+						const lines = taskRecord.taskLines ?? [];
+						const runCommentSync = true;
+						if (runCommentSync) {
+							try {
+								await syncAbyssCommentsToTickTick(
+									this.plugin.tickTickRestAPI,
+									taskId,
+									savedTask.projectId,
+									lines,
+									savedTask.content,
+									{ remoteCommentCount: savedTask.commentCount },
+								);
+							} catch (e) {
+								log.warn('Abyss comment API sync failed (hash unchanged)', taskId, e);
+							}
 						}
 					}
-				}
 
-				// Task hasn't changed, ensure sync timestamps are current
-				const localTask = await this.plugin.taskRepository.loadLocalTaskById(taskId);
-				if (localTask && (!localTask.lastVaultSync || localTask.lastVaultSync < localTask.updatedAt || !localTask.file)) {
-					await this.plugin.taskRepository.upsertTask(localTask.task, filepath, Date.now());
+					// Task hasn't changed, ensure sync timestamps are current
+					const localTask = await this.plugin.taskRepository.loadLocalTaskById(taskId);
+					if (localTask && (!localTask.lastVaultSync || localTask.lastVaultSync < localTask.updatedAt || !localTask.file)) {
+						await this.plugin.taskRepository.upsertTask(localTask.task, filepath, Date.now());
+					}
+					return false;
 				}
-				return false;
 			}
 		}
 

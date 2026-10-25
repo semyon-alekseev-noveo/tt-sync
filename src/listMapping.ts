@@ -56,6 +56,17 @@ export function hasMultipleStageTags(tags: string[] | undefined, map: ITagListMa
 	return false;
 }
 
+/** Hash-unchanged lines can still need a stage list move / exclusive rewrite (AF-GTD-TAG-ADD). */
+export function stageNeedsPushDespiteHash(
+	tags: string[] | undefined,
+	map: ITagListMapping[] | undefined,
+	lineProjectId: string | undefined,
+	savedProjectId: string | undefined,
+): boolean {
+	return hasMultipleStageTags(tags, map)
+		|| !!(lineProjectId && savedProjectId && lineProjectId !== savedProjectId);
+}
+
 export function tagForList(projectId: string, map: ITagListMapping[] | undefined, projects: P[]): string | undefined {
 	return map?.find(e => e.listId === projectId || listId(e.list, projects) === projectId)?.tag.replace(/^#/, '');
 }

@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { listForTags, tagForList, parseTagListText, isListTag, pickLastStageTag, hasMultipleStageTags } from '@/listMapping';
+import { listForTags, tagForList, parseTagListText, isListTag, pickLastStageTag, hasMultipleStageTags, stageNeedsPushDespiteHash } from '@/listMapping';
 import { TaskParser } from '@/taskParser';
 import { getSettings } from '@/settings';
 
@@ -27,6 +27,8 @@ describe('tag -> list mapping', () => {
 		expect(listForTags(['type/waiting', 'type/next'], MAP, PROJECTS)).toBe('na');
 		expect(hasMultipleStageTags(['type/next', 'type/waiting'], MAP)).toBe(true);
 		expect(hasMultipleStageTags(['type/next', 'context/work'], MAP)).toBe(false);
+		expect(stageNeedsPushDespiteHash(['type/next', 'type/waiting'], MAP, 'wf', 'na')).toBe(true);
+		expect(stageNeedsPushDespiteHash(['type/next'], MAP, 'na', 'na')).toBe(false);
 	});
 
 	function mkParser(fileDefault: string) {

@@ -115,7 +115,8 @@ Pass only with evidence: the note path, the `ticktick_id`, and either the journa
 |------------|-------|-------|--------|------|--------|----------|
 | 2026-10-25 | Thinkpad-tts-test | 2.0.89 | agent (Obsidian CLI + MCP) | AF-NEST-1 | **pass** | Child `…439` `parentId`=`…438`; same TTS-Inbox. `ABYSS-NEST-GTD/137-af-nest-gtd-pilot.md`. |
 | 2026-10-25 | Thinkpad-tts-test | 2.0.89 | agent (Obsidian CLI + MCP) | AF-GTD-TAG-ADD | **fail** (vs desired) | Dual `#type/next`+`#type/waiting` stayed on vault; TT stayed TTS-nextAction (`…43a`). Evidence `ABYSS-NEST-GTD/137-…`. Pre–Option A. |
-| 2026-10-25 | unit | tip (#137 Option A) | agent | AF-GTD-TAG-ADD | **pass** (unit) | Last stage → list; convertTaskToLine exclusive; `__exclusiveStageRewrite`. Pilot re-prove **not run**. |
+| 2026-10-25 | unit | tip (#137 Option A) | agent | AF-GTD-TAG-ADD | **pass** (unit) | Last stage → list; exclusive rewrite flag. |
+| 2026-10-25 | Thinkpad-tts-test | tip #140 + hash-stuck fix | agent | AF-GTD-TAG-ADD | **pass** ×2 | P1 `…65b2` / P2 `…7c37` → waitingFor + single `#type/waiting`. `ABYSS-NEST-GTD/140-af-gtd-tag-add-option-a.md`. |
 | 2026-10-25 | Thinkpad-tts-test | 2.0.89 tip (#134) | agent (Obsidian CLI) | BUG-ACTIVEZONE-COMMENT-SHUFFLE | pass ×2 | AF-3 siblings + AF-2 Overview→AZ hoist; comments stayed under tasks. `BUG-ACTIVEZONE-COMMENT-SHUFFLE/19-prove-2.0.89.md`. #19. |
 | 2026-10-25 | unit | tip (#19) | agent | BUG-ACTIVEZONE-COMMENT-SHUFFLE | pass (unit) | `repairProjectNoteTasks` keeps comments with siblings; reorder subtrees. #19. |
 | 2026-10-25 | Thinkpad-tts-test | 2.0.89 | agent (Obsidian CLI) | DEL-3 / CTX-D2 / AF-5 Inbox (#76 gate) | pass | Cancel keeps TT `…4f`; CTX-D2 single `#note/…`; AF-5 Inbox→nextAction `…51`. Evidence: `STEP7-AF-PILOT-SOAK/76-gate-del3-ctxd2-af5-inbox-2.0.89.md`. #76. |
