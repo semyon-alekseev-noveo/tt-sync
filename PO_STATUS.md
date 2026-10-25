@@ -4,7 +4,7 @@
 **Audience:** Product owner / decision maker  
 **Repo:** `tickticksync` branch `abyss-mapping`  
 **Test vault:** `<pilot-vault>` (copy only; live vault `<live-vault>` untouched)  
-**Install:** BRAT → `https://github.com/semyon-alekseev-noveo/tt-sync` track **latest release** (**2.0.89**); plugin id **`tickticksync-abyss`** — `docs/BRAT_INSTALL.md`. Preset: `00 Inbox/TTS-data-preset.json`.
+**Install:** BRAT → `https://github.com/semyon-alekseev-noveo/tt-sync` track **latest release** (**2.0.90** after tag); plugin id **`tickticksync-abyss`** — `docs/BRAT_INSTALL.md`. Preset: `00 Inbox/TTS-data-preset.json`.
 
 История изменений — только в `CHANGELOG.md`; здесь — снимок для PO.
 
@@ -25,6 +25,7 @@
 
 ## Validation
 
+- Релиз **2.0.90** (2026-10-25): **AF-GTD-TAG-ADD** Option A + hash-stuck (#140/#141) — last stage tag wins list; vault rewrite; prove×2 pass. Also ships nest/GTD pilot docs. Tag after bump PR merges.
 - Релиз **2.0.89** (2026-10-24): **API-seed comment map** from [#120](https://github.com/semyon-alekseev-noveo/tt-sync/pull/120) (#104) — equal-key link upserts the TickTick id so a later TT delete is a mapped miss (no re-POST). Tip prove×2 (API-seed + vault-first) pass before merge; #104 **closed**. BRAT install after tag.
 - Релиз **2.0.88** (2026-10-24): **F1/F1b** from [#118](https://github.com/semyon-alekseev-noveo/tt-sync/pull/118) (#104). Box re-prove **fail**: API-seed comment re-POSTed, bullet kept, `syncedLists` empty (`104-live-2.0.88-box.md`). #104 **reopened** until [#120](https://github.com/semyon-alekseev-noveo/tt-sync/pull/120). Vault-first tip prove×2 does not cover that path.
 - Релиз **2.0.87** (2026-10-24): **BUG-COMMENT-DELETE-REPOST** from [#112](https://github.com/semyon-alekseev-noveo/tt-sync/pull/112) (#104) — no create on single mapped miss; strip when live GET empty despite stale Dexie count. Owner re-prove on **2.0.87** still **fail** (F1).
