@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-25 14:06 UTC
+
+- Context: Owner asked whether the dual-stage conflict toast can apply only for DnD; toast was scary noise on expected Option A rewrite.
+- Target: No Notice for rival `#type/*` stages; keep Notice for checkbox↔status mismatches.
+- Actions log: `convertToTask` filters `statusLost` for Notice; stage exclusivity → `log.debug` only.
+- Validation: `npx vitest run` on fix branch.
+- Problems: None.
+- To Be Done: PR into `abyss-mapping`; optional tip redeploy (no BRAT bump required for toast-only).
+- References: `src/taskParser/convertToTask.ts`, `CHANGELOG.md`, #144
+
 ### Iteration 2026-10-25 13:47 UTC
 
 - Context: On **2.0.90** pilot, GTD stage DnD needed full Synchronize; after check the new stage chip was dropped (Abyss tag order ≠ “last wins”).
