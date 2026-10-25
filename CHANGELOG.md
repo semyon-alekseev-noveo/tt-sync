@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-25 03:00 UTC
+
+- Context: [#127](https://github.com/semyon-alekseev-noveo/tt-sync/pull/127) merged (AF-3); continue [#20](https://github.com/semyon-alekseev-noveo/tt-sync/issues/20) with AF-4.
+- Target: Pilot **AF-4** on tip **2.0.89** — Active Zone checkbox → TT subtask of the note parent; line stays.
+- Actions log: Checkbox on AF-3 project note; sync; MCP `get_task_by_id`; evidence under `STEP7-AF-PILOT-SOAK/`.
+- Validation: Task `6add70a0…` `parentId`=`6adcbea8…`; line remains under Active Zone in same note.
+- Problems: None (`resolved`).
+- To Be Done: Merge evidence PR; close #71; continue AF-5 (#72).
+- References: `docs/pilot/results/STEP7-AF-PILOT-SOAK/71-af4-active-zone-subtask-2.0.89.md`, `CHANGELOG.md`
+
 ### Iteration 2026-10-24 14:22 UTC
 
 - Context: [#126](https://github.com/semyon-alekseev-noveo/tt-sync/pull/126) merged (AF-2); continue [#20](https://github.com/semyon-alekseev-noveo/tt-sync/issues/20) with AF-3.
