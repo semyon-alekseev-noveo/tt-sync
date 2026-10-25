@@ -120,9 +120,14 @@ export class TaskParserConvertToTask {
 			const lost = abyssTagConflicts(
 				rawTags, stCh, smap, getSettings().tagListMappings, stageProjects, savedForStage?.projectId,
 			);
-			if (lost.length) {
-				const msg = `TickTickSync: "${this.getTaskContentFromLineText(textWithoutIndentation).slice(0, 40)}" — tag(s) ${lost.map(t => '#' + t).join(', ')} conflict with the checkbox / winning stage and will be dropped.`;
+			// Status↔checkbox mismatch is surprising → Notice. Rival stage tags after Abyss DnD
+			// are expected (AF-GTD-TAG-ADD); exclusive rewrite handles them without a toast.
+			const statusLost = lost.filter(t => isStatusTag(t, smap));
+			if (statusLost.length) {
+				const msg = `TickTickSync: "${this.getTaskContentFromLineText(textWithoutIndentation).slice(0, 40)}" — tag(s) ${statusLost.map(t => '#' + t).join(', ')} conflict with the checkbox and will be dropped.`;
 				if (!warnedConflicts.has(msg)) { warnedConflicts.add(msg); log.warn(msg); new Notice(msg, 8000); }
+			} else if (lost.length) {
+				log.debug(`stage exclusivity: dropping ${lost.map(t => '#' + t).join(', ')} (DnD / dual stage)`);
 			}
 			rawTags.length = 0;
 			rawTags.push(...kept);
