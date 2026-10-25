@@ -86,8 +86,10 @@ AF-GTD-STAGE-MOVE is the **acceptance story** analysts use with PO (“did we de
 
 - See `docs/pilot/AF-CHECKBOX-STATUS-GTD.md`. Not active while tag-tree remains the owner’s stage control.
 
-**Analyst recommendation to record for PO:**  
-Intent = **replace** (AF-GTD-STAGE-MOVE). Stay on **Option A** until Abyss exclusive groups (B) exist; do not invent a second sync policy. Document that dual tags are an Abyss artifact, not a supported “two stages at once” model.
+**PO decision (2026-10-25):**  
+Keep **Option A** while it works. **Do not chase Option B** as a product dependency — goal is **independence from Abyss** (tag-tree DnD is one UX, not a required plugin). Stage exclusivity stays in TTS. Intent case remains **AF-GTD-STAGE-MOVE**. Dual tags mid-flight = Abyss (or any multi-tag writer) artifact.
+
+**Prefix:** migrate stage namespace `type/*` → `gtd/*` when ready — see `docs/pilot/AF-GTD-PREFIX.md` (separate PR).
 
 ---
 
@@ -115,12 +117,26 @@ Intent = **replace** (AF-GTD-STAGE-MOVE). Stay on **Option A** until Abyss exclu
 
 ---
 
-## 7. Hand-off
+## 7. Independence from Abyss / plain Tasks plugin
+
+**PO goal:** sync must not require Abyss.
+
+| Surface | Needs Abyss? |
+|---------|----------------|
+| Checkbox ↔ TickTick task, dates/priority emojis, `#tags`, `tagListMappings` → list | **No** — works with markdown Tasks-style lines (`- [ ] …`) and the Obsidian **Tasks** plugin as editor |
+| Option A exclusive stage + open-note push on `vault.modify` | **No** — any writer that changes the file |
+| Abyss custom checkbox chars → `statusMappings` | Only if you use those chars (`abyssTasksFormat`) |
+| Abyss comment threads / Comments API | Only if `syncAbyssCommentsViaApi` / Abyss note shape |
+| Abyss View nest DnD / tag-tree DnD | UX nicety; nest also via indent; stage also via typing `#gtd/…` or TT list move (AF-7) |
+
+`abyssTasksFormat` is a **settings toggle**, not a hard dependency. Pilot often runs it on; a Tasks-only vault can leave it off and still sync GTD via tags→lists.
+
+## 8. Hand-off
 
 | Role | Next |
 |------|------|
-| Analyst | PO sign-off on §4 recommendation; keep AF-GTD-STAGE-MOVE in catalog; link this brief from `PO_STATUS` / results INDEX |
-| Developer | No new algorithm unless PO picks C or Abyss gains B; Option A + quiet Notice are the compensation layer |
-| Tester | Smoke AF-GTD-STAGE-MOVE on tip = same steps as AF-GTD-TAG-ADD prove, framed as “move”, not “add” |
+| Analyst | §4 **signed** (keep A); schedule **AF-GTD-PREFIX** when ready |
+| Developer | No new exclusivity algorithm; prefix rename = settings + docs + prove |
+| Tester | AF-GTD-STAGE-MOVE smoke = AF-GTD-TAG-ADD framed as move |
 
-**References:** `ABYSS_FIRST_CASES.md` (AF-GTD-TAG-ADD, AF-GTD-STAGE-MOVE), `docs/pilot/results/ABYSS-NEST-GTD/137-…` options A–D, `#137` / `#144` / `#146`, `docs/pilot/AF-CHECKBOX-STATUS-GTD.md` (parked).
+**References:** `ABYSS_FIRST_CASES.md`, `docs/pilot/AF-GTD-PREFIX.md`, `#137` / `#144` / `#146` / `#147`, `docs/pilot/AF-CHECKBOX-STATUS-GTD.md` (parked).

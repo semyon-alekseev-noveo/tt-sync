@@ -1109,4 +1109,10 @@ Owner intent: Abyss tag-tree **branch → branch** = replace stage tag. Brief: `
 
 | ID | Pilot status | Evidence |
 |----|----------------|----------|
-| AF-GTD-STAGE-MOVE | **spec** — not run as separate live row | same prove as AF-GTD-TAG-ADD framed as move; PO sign-off §4 |
+| AF-GTD-STAGE-MOVE | **spec** — PO signed keep Option A | `AF-GTD-STAGE-REPLACE.md`; prove = AF-GTD-TAG-ADD framed as move |
+
+## PR — PO: keep A + gtd/ prefix backlog (docs)
+
+| ID | Pilot status | Evidence |
+|----|----------------|----------|
+| AF-GTD-PREFIX | **backlog** — not run | `docs/pilot/AF-GTD-PREFIX.md` |
