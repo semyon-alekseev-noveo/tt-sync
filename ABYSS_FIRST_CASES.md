@@ -29,6 +29,8 @@ Preconditions for every AF row: plugin `tickticksync-abyss`, manual sync, `fileL
 | AF-GTD-STAGE-MOVE | Moving stage A → B means **replace**. After sync: one list-mapped stage tag (B); TT list = B. Spec: `docs/pilot/AF-GTD-STAGE-REPLACE.md`. **PO:** keep Option A. |
 | AF-GTD-PREFIX | On load, `tagListMappings` / `tagMappings` LHS `type/…` → `gtd/…`; synced lines (`ticktick_id`) rewrite. New tasks use `#gtd/next` etc. Spec: `docs/pilot/AF-GTD-PREFIX.md`. |
 | NOTE-L3b | A child comment line, title unchanged, Synchronize. The text shows in the TickTick Comments panel. The description stays in the task body. |
+| NOTE-BODY-1 | Synced task; `syncNotes` on. Add an **upstream-style note** under the checkbox (indented block; optional `noteDelimiter`). Synchronize. TickTick task **body** (`content`/`desc`) contains that text; **Comments** panel does not gain a new comment for it; title unchanged. Spec: `docs/pilot/NOTE-BODY.md`. **not run**. |
+| NOTE-BODY-2 | Edit the same task’s note/body in TickTick. Synchronize. Vault note block under the checkbox updates; Abyss comment bullets (if any) stay as comments. Spec: `docs/pilot/NOTE-BODY.md`. **not run**. |
 | BUG-COMMENT-NO-PUSH | Same as NOTE-L3b; regression when only comment bullets change or hash path skips API (`PO_STATUS.md`). |
 | BUG-TICKTICK-ID-LEAK | Title must not contain loose `ticktick_id::` outside `%%[ticktick_id:: <24hex>]%%`; canonical id wins if both present. |
 | BUG-ACTIVEZONE-COMMENT-SHUFFLE | Sync in a project Active Zone note must not move comment bullets between sibling tasks or reorder tasks without user edit. |
