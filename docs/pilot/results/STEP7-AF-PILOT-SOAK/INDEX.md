@@ -11,5 +11,5 @@ Plugin under test: tip **2.0.89**
 | #71 AF-4 Active Zone → subtask | [71-af4-active-zone-subtask-2.0.89.md](71-af4-active-zone-subtask-2.0.89.md) | **pass** on **2.0.89** |
 | #72 AF-5 `#type/next` → nextAction | [72-af5-type-next-2.0.89.md](72-af5-type-next-2.0.89.md) | **pass** on **2.0.89** |
 | #73 AF-6 Complete ↔ complete | [73-af6-complete-both-ways-2.0.89.md](73-af6-complete-both-ways-2.0.89.md) | **pass** on **2.0.89** (recurring **not run**) |
-| #74 AF-7 | — | not run |
+| #74 AF-7 list move → stage tag | [74-af7-list-move-tag-2.0.89.md](74-af7-list-move-tag-2.0.89.md) | **pass** on **2.0.89** |
 | #75 AF-8 | — | not run |

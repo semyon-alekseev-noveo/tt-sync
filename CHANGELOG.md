@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-25 03:49 UTC
+
+- Context: [#130](https://github.com/semyon-alekseev-noveo/tt-sync/pull/130) merged (AF-6); continue [#20](https://github.com/semyon-alekseev-noveo/tt-sync/issues/20) with AF-7.
+- Target: Pilot **AF-7** on tip **2.0.89** — TT list move rewrites stage tag on the same vault line.
+- Actions log: `#type/next` seed → move to TTS-waitingFor → Synchronize; evidence under `STEP7-AF-PILOT-SOAK/`.
+- Validation: Id `6add7baf…`; vault `#type/waiting`; line stayed in `abyss-active.md`.
+- Problems: None (`resolved`).
+- To Be Done: Merge evidence PR; close #74; continue AF-8 (#75).
+- References: `docs/pilot/results/STEP7-AF-PILOT-SOAK/74-af7-list-move-tag-2.0.89.md`, `CHANGELOG.md`
+
 ### Iteration 2026-10-25 03:14 UTC
 
 - Context: [#129](https://github.com/semyon-alekseev-noveo/tt-sync/pull/129) merged (AF-5); continue [#20](https://github.com/semyon-alekseev-noveo/tt-sync/issues/20) with AF-6.
