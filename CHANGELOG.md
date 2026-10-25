@@ -1,14 +1,14 @@
 # Changelog
 
-### Iteration 2026-10-25 14:17 UTC
+### Iteration 2026-10-25 14:06 UTC
 
-- Context: Owner: Abyss tag-tree branch move = **replace** stage (drop one tag, set another), not accumulate.
-- Target: Analyst brief + case **AF-GTD-STAGE-MOVE**; Option A framed as compensation until Abyss exclusive groups.
-- Actions log: `docs/pilot/AF-GTD-STAGE-REPLACE.md`; catalog + PO_STATUS + INDEX; no code.
-- Validation: docs-only review against Option A–E in brief §4.
-- Problems: Abyss still writes add (`open` external).
-- To Be Done: PO/analyst sign-off §4; chase Abyss Option B or keep A.
-- References: `docs/pilot/AF-GTD-STAGE-REPLACE.md`, `ABYSS_FIRST_CASES.md`, `CHANGELOG.md`
+- Context: Owner asked whether the dual-stage conflict toast can apply only for DnD; toast was scary noise on expected Option A rewrite.
+- Target: No Notice for rival `#type/*` stages; keep Notice for checkbox↔status mismatches.
+- Actions log: `convertToTask` filters `statusLost` for Notice; stage exclusivity → `log.debug` only.
+- Validation: `npx vitest run` on fix branch.
+- Problems: None.
+- To Be Done: PR into `abyss-mapping`; optional tip redeploy (no BRAT bump required for toast-only).
+- References: `src/taskParser/convertToTask.ts`, `CHANGELOG.md`, #144
 
 ### Iteration 2026-10-25 13:47 UTC
 

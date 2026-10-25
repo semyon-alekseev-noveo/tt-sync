@@ -8,7 +8,11 @@ export const flatTagName = (raw: string) => raw.toLowerCase().replace(/[/s]+/g, 
 
 type Proj = { id: string; name: string };
 
-/** Tags that lose a conflict: status tags disagreeing with the checkbox, and every list-mapped stage except the DnD winner (AF-GTD-TAG-ADD). */
+/**
+ * Tags that lose a conflict: status tags disagreeing with the checkbox, and every
+ * list-mapped stage except the DnD winner (AF-GTD-TAG-ADD). Callers should Notice
+ * only status losses — stage exclusivity is expected after tag-tree DnD.
+ */
 export function abyssTagConflicts(
 	tags: string[],
 	ch: string | undefined,
