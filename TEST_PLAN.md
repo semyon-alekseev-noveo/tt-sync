@@ -1101,12 +1101,4 @@ Branch into `abyss-mapping`. Residual on **2.0.90**: full Synchronize required; 
 
 | ID | Pilot status | Evidence |
 |----|----------------|----------|
-| AF-GTD-TAG-ADD | **pass** ×2 (tip deploy, open-note) | `docs/pilot/results/ABYSS-NEST-GTD/144-af-gtd-mover-wins-live.md` (docs PR #145) |
-
-## PR — quiet stage exclusivity Notice
-
-Dual `#type/*` after Abyss DnD must **not** show a conflict toast (rewrite is expected Option A). Checkbox↔`status/*` mismatch still Notices.
-
-| ID | Pilot status | Evidence |
-|----|----------------|----------|
-| AF-GTD-TAG-ADD | toast only for status conflicts | `convertToTask.ts` — stage → `log.debug` |
+| AF-GTD-TAG-ADD | **pass** ×2 (tip deploy, open-note) | `docs/pilot/results/ABYSS-NEST-GTD/144-af-gtd-mover-wins-live.md` — BRAT 2.0.90 alone is pre-#144 |
