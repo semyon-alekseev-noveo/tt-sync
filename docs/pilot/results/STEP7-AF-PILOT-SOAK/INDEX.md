@@ -7,7 +7,7 @@ Plugin under test: tip **2.0.89**
 |---------------|-------------|--------|
 | #68 AF-1 Empty syncedLists | [68-af1-empty-syncedlists-2.0.89.md](68-af1-empty-syncedlists-2.0.89.md) | **pass** on **2.0.89** |
 | #69 AF-2 TT project parent → note | [69-af2-project-parent-2.0.89.md](69-af2-project-parent-2.0.89.md) | **pass** on **2.0.89** |
-| #70 AF-3 | — | not run |
+| #70 AF-3 Obs note → TT parent | [70-af3-obs-project-note-2.0.89.md](70-af3-obs-project-note-2.0.89.md) | **pass** on **2.0.89** |
 | #71 AF-4 | — | not run |
 | #72 AF-5 | — | not run |
 | #73 AF-6 | — | not run |
