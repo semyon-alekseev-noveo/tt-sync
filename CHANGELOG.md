@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-25 12:25 UTC
+
+- Context: After #140 merge, pilot dual-stage line stuck: `lineHash` matched but TT list stayed nextAction.
+- Target: Hash-unchanged path must still push when dual stage tags or list≠Dexie (AF-GTD-TAG-ADD).
+- Actions log: `stageNeedsPushDespiteHash` + skip early-return in `TaskModificationScan`.
+- Validation: unit helpers; pilot prove×2 **pass** (`…65b2`, `…7c37` → waitingFor + single stage tag).
+- Problems: Residual hash-stick after skipped list move (`resolved` in tip).
+- To Be Done: Merge hotfix PR; then close #137.
+- References: `src/sync/vault-push/taskModification/scan.ts`, `CHANGELOG.md`, #137
+
 ### Iteration 2026-10-25 12:05 UTC
 
 - Context: Owner wants tag DnD Inbox↔Next fixed; checkbox-status GTD parked as alternate.

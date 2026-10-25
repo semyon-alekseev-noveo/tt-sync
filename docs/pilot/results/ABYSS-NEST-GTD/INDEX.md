@@ -6,4 +6,5 @@ Plugin under test: tip **2.0.89**
 
 | Phase | Result file | Status |
 |-------|-------------|--------|
-| AF-NEST-1 + AF-GTD-TAG-ADD | [137-af-nest-gtd-pilot.md](137-af-nest-gtd-pilot.md) | nest **pass**; GTD-tag-add **fail** vs desired |
+| AF-NEST-1 + AF-GTD-TAG-ADD | [137-af-nest-gtd-pilot.md](137-af-nest-gtd-pilot.md) | nest **pass**; GTD-tag-add **fail** on 2.0.89 discovery |
+| AF-GTD-TAG-ADD Option A prove×2 | [140-af-gtd-tag-add-option-a.md](140-af-gtd-tag-add-option-a.md) | **pass** ×2 (needs hash-stuck hotfix with #140) |

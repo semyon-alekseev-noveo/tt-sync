@@ -1081,4 +1081,8 @@ Checkbox-status GTD alternate: parked in `docs/pilot/AF-CHECKBOX-STATUS-GTD.md` 
 
 | ID | Pilot status | Evidence |
 |----|----------------|----------|
-| AF-GTD-TAG-ADD | **pass** (unit); live **not run** | `src/test/listMapping.test.ts`; prove×2 on pilot after merge |
+| AF-GTD-TAG-ADD | **pass** ×2 (pilot) | `docs/pilot/results/ABYSS-NEST-GTD/140-af-gtd-tag-add-option-a.md` — requires hash-stuck hotfix with #140 |
+
+### AF-GTD hash-stuck (follow-up)
+
+Quiet/`lineHash` match must not skip push when dual stage tags remain or converted list ≠ Dexie (`stageNeedsPushDespiteHash`).
