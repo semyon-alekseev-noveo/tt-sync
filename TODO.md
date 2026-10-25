@@ -17,7 +17,7 @@ Latest release: track GitHub Releases for `tt-sync` / `manifest.json` on `abyss-
 
 - [ ] NOTE-L3b, CTX-D2, and the one live gate (AF + DEL + NOTE-L3b) on `<pilot-vault>`. Record results in `ABYSS_FIRST_CASES.md`. Do not fill them in from CI.
 - [ ] Confirm Abyss Inbox is **With inbox tag** `#inbox`. Untagged mode still drops a line after `#obsidian`.
-- [ ] Revoke the `tp_…` token that was pasted in chat, if it is still valid.
+- [x] Revoke the `tp_…` token that was pasted in chat ([#32](https://github.com/semyon-alekseev-noveo/tt-sync/issues/32), 2026-10-25).
 
 ## Still open in code
 

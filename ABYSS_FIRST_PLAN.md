@@ -314,6 +314,7 @@ Today `TTS-data-preset.json` includes **`00 Inbox/`** in `syncScopeFolders`. Opt
 
 | Action | Detail |
 |--------|--------|
+| 8.0 | **Credentials checked** ([#32](https://github.com/semyon-alekseev-noveo/tt-sync/issues/32)): exposed Open API `tp_…` revoked; live vault uses session cookie (not `tp_…`); if autologin is on, exclude plugin `data.json` from vault sync; production presets must not contain `token` / `username` / `password`. |
 | 8.1 | Duplicate preset with production list names + sync tag policy. |
 | 8.2 | Re-run AF-* once. |
 | 8.3 | CASE-M1-style cleanup only if you still want list files as **optional** reading copies. |

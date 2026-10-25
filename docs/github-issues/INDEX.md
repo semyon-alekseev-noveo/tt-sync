@@ -20,12 +20,12 @@ Tracker issues live on [`semyon-alekseev-noveo/tt-sync`](https://github.com/semy
 | └ open-note / editor | [#16](https://github.com/semyon-alekseev-noveo/tt-sync/issues/16) | P0 | **closed / pass** (**2.0.76**) | keep closed |
 | └ EMPTY-SIDE-GUARD | [#17](https://github.com/semyon-alekseev-noveo/tt-sync/issues/17) | P0 | **pass** empty-vault on **2.0.89**; empty-ticktick not run | **done** 2026-10-24 |
 | └ deferred-id | [#18](https://github.com/semyon-alekseev-noveo/tt-sync/issues/18) | P0 | **pass** on **2.0.89** | **done** 2026-10-24 |
-| BUG-ACTIVEZONE-COMMENT-SHUFFLE | [#19](https://github.com/semyon-alekseev-noveo/tt-sync/issues/19) | P1 | **open** | **keep** |
-| Step 7 AF-* pilot soak | [#20](https://github.com/semyon-alekseev-noveo/tt-sync/issues/20) | P1 | **open** | **keep** — still blocked by #15 |
+| BUG-ACTIVEZONE-COMMENT-SHUFFLE | [#19](https://github.com/semyon-alekseev-noveo/tt-sync/issues/19) | P1 | **closed** — tip prove×2 after #134 | **done** 2026-10-25 |
+| Step 7 AF-* pilot soak | [#20](https://github.com/semyon-alekseev-noveo/tt-sync/issues/20) | P1 | **closed** — AF-1…AF-8 + #76 gate on **2.0.89** | **done** 2026-10-25 |
 | PROC-RELEASE-GATE | [#30](https://github.com/semyon-alekseev-noveo/tt-sync/issues/30) | P1 | **open** — Actions gate not encoded; **owner policy:** release only after merge to `abyss-mapping`, never retag same `2.0.x` | **keep** — see `30-proc-release-gate.md` |
 | TECH-SYNC-MODULARIZATION | [#31](https://github.com/semyon-alekseev-noveo/tt-sync/issues/31) | P1 | **closed** — **2.0.77**; tip also has **2.0.78** | keep closed |
 | └ PR1–PR7 | [#41](https://github.com/semyon-alekseev-noveo/tt-sync/issues/41)–[#48](https://github.com/semyon-alekseev-noveo/tt-sync/issues/48) | P1 | **closed** → PRs #34–#40 | keep closed |
-| SEC-CREDS-1 | [#32](https://github.com/semyon-alekseev-noveo/tt-sync/issues/32) | P1 | **open** — owner revoke + autologin decision | **keep** (pre–Step 8) |
+| SEC-CREDS-1 | [#32](https://github.com/semyon-alekseev-noveo/tt-sync/issues/32) | P1 | **closed** — revoke + live session decision; Step 8.0 | **done** 2026-10-25 |
 | Repo hygiene backlog | [#33](https://github.com/semyon-alekseev-noveo/tt-sync/issues/33) | P3 | **open** / backlog | **keep** — do not pick up before #15/#20 |
 | **PERF/DELTA** (wall-time + delta path) | [#62](https://github.com/semyon-alekseev-noveo/tt-sync/issues/62) | **P0** | **closed** — idle/wall-time on **2.0.85**; `TP-DELTA-*` → #84; evidence `PERF-DELTA/62-epic-close.md` | **done** 2026-10-23 |
 | Post-PERF regression | [#102](https://github.com/semyon-alekseev-noveo/tt-sync/issues/102) | P1 | **complete (honest)** — checklist filled; TT-DELETE fail → #104; close after docs PR | **done** 2026-10-23 |

@@ -42,13 +42,13 @@
 - Test vault `data.json` drift vs §2 — **resolved** on Thinkpad-tts-test **2.0.89** ([#64](https://github.com/semyon-alekseev-noveo/tt-sync/issues/64); SyncTag `tts-test`, TTS-* `syncedLists`).
 - First sync used unlimited defaults and polluted live TT titles/tags (`resolved` via MCP cleanup).
 - Plugin session auth ≠ MCP/Open API (`mitigated` — use MCP for account ops; plugin for vault sync).
-- Exposed `tp_…` token in chat — revoke if not already (`open`).
+- Exposed `tp_…` token in chat — **revoked / closed** 2026-10-25 ([#32](https://github.com/semyon-alekseev-noveo/tt-sync/issues/32)).
 
 ## To Be Done
 
 1. **[done] Step 7 AF soak** [#20](https://github.com/semyon-alekseev-noveo/tt-sync/issues/20) / [#76](https://github.com/semyon-alekseev-noveo/tt-sync/issues/76) **closed**. **[done] #19** Active Zone comment shuffle — pilot **pass** ×2. Step 8 live vault still closed.
 2. **[done] Comment case pilots:** [#28](https://github.com/semyon-alekseev-noveo/tt-sync/issues/28) / [#29](https://github.com/semyon-alekseev-noveo/tt-sync/issues/29) **pass** on **2.0.89**.
-3. Revoke the exposed `tp_…` token if still valid — [#32](https://github.com/semyon-alekseev-noveo/tt-sync/issues/32).
+3. **[done]** SEC-CREDS-1 [#32](https://github.com/semyon-alekseev-noveo/tt-sync/issues/32) — token revoke + live auth decision recorded (2026-10-25).
 4. Product risks — [#63](https://github.com/semyon-alekseev-noveo/tt-sync/issues/63): GAP-COMMENT-EDIT, RISK-PULL-WINS-LOCAL, RISK-DUAL-STORE, BUG-TICKTICK-ID-LEAK.
 5. TP-DELTA app-UI (optional) — [#84](https://github.com/semyon-alekseev-noveo/tt-sync/issues/84).
 6. Post-#31 modularization — [#66](https://github.com/semyon-alekseev-noveo/tt-sync/issues/66); [#86](https://github.com/semyon-alekseev-noveo/tt-sync/issues/86).

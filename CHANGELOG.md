@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-25 05:12 UTC
+
+- Context: [#135](https://github.com/semyon-alekseev-noveo/tt-sync/pull/135) merged; owner asked to close [#32](https://github.com/semyon-alekseev-noveo/tt-sync/issues/32) SEC-CREDS-1.
+- Target: Record `tp_…` revoke + live vault auth decision; add Step 8.0 credentials gate; close #32.
+- Actions log: Update `ABYSS_FIRST_PLAN.md` 8.0, `PO_STATUS.md`, `PROJECT_STATE.md`, `TODO.md`, issues INDEX; no code change.
+- Validation: Docs-only; checklist items for revoke + autologin decision covered.
+- Problems: None (`resolved`).
+- To Be Done: Owner merges docs PR; Step 8 live vault still closed until PO call.
+- References: `ABYSS_FIRST_PLAN.md`, `CHANGELOG.md`, #32
+
 ### Iteration 2026-10-25 04:18 UTC
 
 - Context: [#134](https://github.com/semyon-alekseev-noveo/tt-sync/pull/134) merged; post-merge pilot for [#19](https://github.com/semyon-alekseev-noveo/tt-sync/issues/19).
