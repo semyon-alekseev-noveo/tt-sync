@@ -3,7 +3,7 @@ import type { ITask, ITaskItem } from '@/api/types/Task';
 import type { NewFileMap, ITaskRecord } from '@/services/NewFileMap';
 import { Notice } from 'obsidian';
 import { mapObsidianTag } from '@/tagMapping';
-import { hasMultipleStageTags, isListTag, isStageToken, listForTags, pickLastStageTag, tickTickTagForStage, tagsForCurrentList } from '@/listMapping';
+import { hasMultipleStageTags, isListTag, isStageToken, listForTags, pickWinningStageTag, tickTickTagForStage, tagsForCurrentList } from '@/listMapping';
 import { checkboxChar, tagForStatusChar, isStatusTag } from '@/statusMapping';
 import { getSettings, updateSettings } from '@/settings';
 import { getAllProjects } from '@/db/projects';
@@ -107,14 +107,21 @@ export class TaskParserConvertToTask {
 		// *genuinely* TT-side "ticktick" tag if one already exists there.
 		const rawTags = this.getAllTagsFromLineText(textWithoutIndentation)
 			.filter(t => getSettings().stopInjectingTickTickTag ? t.toLowerCase() !== markerName() : true);
+		// Dexie list for AF-GTD-TAG-ADD winner (stage whose list ≠ current).
+		const savedForStage = TickTick_id
+			? (await this.plugin.taskRepository?.loadTaskById(TickTick_id))
+			: undefined;
+		const stageProjects = getSettings().tagListMappings?.length ? await getAllProjects() : [];
 		if (getSettings().abyssTasksFormat) {
 			// Abyss custom status char -> TickTick tag (e.g. `[/]` -> status/in-progress)
 			const smap = getSettings().statusMappings;
 			const kept = rawTags.filter(t => !isStatusTag(t, smap));
 			const stCh = checkboxChar(textWithoutIndentation);
-			const lost = abyssTagConflicts(rawTags, stCh, smap, getSettings().tagListMappings);
+			const lost = abyssTagConflicts(
+				rawTags, stCh, smap, getSettings().tagListMappings, stageProjects, savedForStage?.projectId,
+			);
 			if (lost.length) {
-				const msg = `TickTickSync: "${this.getTaskContentFromLineText(textWithoutIndentation).slice(0, 40)}" — tag(s) ${lost.map(t => '#' + t).join(', ')} conflict with the checkbox / first type tag and will be dropped.`;
+				const msg = `TickTickSync: "${this.getTaskContentFromLineText(textWithoutIndentation).slice(0, 40)}" — tag(s) ${lost.map(t => '#' + t).join(', ')} conflict with the checkbox / winning stage and will be dropped.`;
 				if (!warnedConflicts.has(msg)) { warnedConflicts.add(msg); log.warn(msg); new Notice(msg, 8000); }
 			}
 			rawTags.length = 0;
@@ -230,19 +237,20 @@ export class TaskParserConvertToTask {
 		if (!hasParent && !projectOf && TickTick_id && this.plugin.projectScheme?.enabled?.()) {
 			// A project subtask stays in its project wherever its line lives (file location
 			// must not drop the TickTick parent).
-			const cached = await this.plugin.taskRepository?.loadTaskById(TickTick_id);
-			if (cached?.parentId && this.plugin.projectScheme.isParentId(cached.parentId)) {
-				projectOf = { parentId: cached.parentId, listId: cached.projectId };
+			if (savedForStage?.parentId && this.plugin.projectScheme.isParentId(savedForStage.parentId)) {
+				projectOf = { parentId: savedForStage.parentId, listId: savedForStage.projectId };
 			}
 		}
+		const stageWinner = getSettings().tagListMappings?.length
+			? pickWinningStageTag(rawTags, getSettings().tagListMappings, stageProjects, savedForStage?.projectId)
+			: undefined;
 		if (projectOf) {
 			parentId = projectOf.parentId; // project task = subtask of the project parent
 			// No source tag yet: the line was written in Obsidian.
 			const hasSource = tags.some(t => t === 'obsidian' || t === 'ticktick' || t === markerName());
 			if (!hasSource) tags = [...tags, 'obsidian'];
 		} else if (getSettings().tagListMappings?.length && (getSettings().gtdStageVia ?? 'list') === 'tag') {
-			const stageRaw = pickLastStageTag(rawTags, getSettings().tagListMappings);
-			const tt = stageRaw ? tickTickTagForStage(stageRaw, getSettings().tagListMappings) : undefined;
+			const tt = stageWinner ? tickTickTagForStage(stageWinner, getSettings().tagListMappings) : undefined;
 			tags = tags.filter((t, i) => !isStageToken(rawTags[i], getSettings().tagListMappings) && !isStageToken(t, getSettings().tagListMappings));
 			if (tt) tags = [...tags.filter(x => x !== tt), tt];
 		} else if (getSettings().tagListMappings?.length) {
@@ -258,7 +266,9 @@ export class TaskParserConvertToTask {
 			if (projectOf) projectId = projectOf.listId;
 			// Explicit tag -> list table wins over file default and name-matching.
 			const listMap = getSettings().tagListMappings;
-			const mappedList = (!projectOf && (getSettings().gtdStageVia ?? 'list') !== 'tag' && listMap?.length) ? listForTags(rawTags, listMap, await getAllProjects()) : undefined;
+			const mappedList = (!projectOf && (getSettings().gtdStageVia ?? 'list') !== 'tag' && listMap?.length)
+				? listForTags(rawTags, listMap, stageProjects.length ? stageProjects : await getAllProjects(), savedForStage?.projectId)
+				: undefined;
 			if (mappedList) {
 				projectId = mappedList;
 			} else
@@ -347,9 +357,14 @@ export class TaskParserConvertToTask {
 		};
 
 		// AF-GTD-TAG-ADD: Abyss tag-tree may leave several stage tags; push rewrites the vault line.
-		if (hasMultipleStageTags(rawTags, getSettings().tagListMappings)) {
+		if (hasMultipleStageTags(rawTags, getSettings().tagListMappings) && stageWinner) {
 			Object.defineProperty(task, '__exclusiveStageRewrite', {
 				value: true,
+				enumerable: false,
+				configurable: true,
+			});
+			Object.defineProperty(task, '__exclusiveStageWinner', {
+				value: stageWinner,
 				enumerable: false,
 				configurable: true,
 			});

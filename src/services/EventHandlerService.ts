@@ -8,6 +8,7 @@ import type { PluginContext } from '@/pluginContext';
 import { getSettings } from '@/settings';
 import { isPathInPushScope } from '@/syncScope';
 import {
+	ABYSS_VAULT_MODIFY_PUSH_MS,
 	createActiveFilePushScheduler,
 	deferActiveFilePush,
 	planActiveFilePush,
@@ -239,7 +240,7 @@ export class EventHandlerService {
 						isMarkdown: true,
 						inScope,
 					})) {
-						this.activeFilePush.notify(filepath);
+						this.activeFilePush.notify(filepath, ABYSS_VAULT_MODIFY_PUSH_MS);
 					}
 
 					// Markdown editor keystrokes: editor-change already debounces; skip immediate

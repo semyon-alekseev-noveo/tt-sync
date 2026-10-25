@@ -1086,3 +1086,19 @@ Checkbox-status GTD alternate: parked in `docs/pilot/AF-CHECKBOX-STATUS-GTD.md` 
 ### AF-GTD hash-stuck (follow-up)
 
 Quiet/`lineHash` match must not skip push when dual stage tags remain or converted list ≠ Dexie (`stageNeedsPushDespiteHash`).
+
+## PR — AF-GTD-TAG-ADD mover-wins + Abyss open-note
+
+Branch into `abyss-mapping`. Residual on **2.0.90**: full Synchronize required; after check the intended (new) stage chip was dropped when Abyss sorted dual tags.
+
+### Behavior
+
+1. Task on TTS-nextAction with `#type/next`. Abyss tag-tree DnD adds `#type/waiting` (both tags may appear in any order on the line).
+2. Wait ~1.2s after Abyss write (open-note push) **or** Synchronize — list moves without requiring only the full-sync button.
+3. TickTick list = **waitingFor** (stage whose list ≠ Dexie current).
+4. Vault keeps a **single** stage tag `#type/waiting`; other tags (`#obsidian`, context, …) stay in place.
+5. Reverse: on waitingFor, DnD `#type/next` → list **nextAction**, single `#type/next` (must not keep waiting just because it sorts last).
+
+| ID | Pilot status | Evidence |
+|----|----------------|----------|
+| AF-GTD-TAG-ADD | **unit** mover-wins + surgical rewrite; live re-prove pending | `listMapping.test.ts` |

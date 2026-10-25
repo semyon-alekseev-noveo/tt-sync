@@ -1,8 +1,10 @@
 // Abyss tag -> TickTick list (settings.tagListMappings), e.g. type/next = nextAction.
-// Push: **last** mapped stage tag on the line decides the list (AF-GTD-TAG-ADD / Option A —
-// Abyss tag-tree DnD appends the new stage; rightmost/last wins). The stage tag is not
-// sent as a TickTick tag (the list represents it). Pull: the task's list re-creates the
-// tag and drops other mapped tags, so moving lists in TickTick rewrites the type tag.
+// Push: when several stage tags appear (Abyss tag-tree DnD adds without removing), the
+// winner is the stage whose list ≠ the task's current TickTick/Dexie list — that is the
+// DnD destination. Abyss may sort tags on the line, so "last on the line" is not reliable.
+// Fallback: last mapped stage on the line. The stage tag is not sent as a TickTick tag
+// (the list represents it). Pull: the task's list re-creates the tag and drops other
+// mapped tags, so moving lists in TickTick rewrites the type tag.
 export interface ITagListMapping { tag: string; list: string; listId?: string }
 interface P { id: string; name: string }
 const n = (s: string) => s.replace(/^#/, '').trim().toLowerCase();
@@ -27,33 +29,65 @@ export function healTagListMappings(map: ITagListMapping[] | undefined, projects
 	return changed ? out : undefined;
 }
 
-/** Last list-mapped tag on the line (Abyss DnD append order). */
-export function pickLastStageTag(tags: string[] | undefined, map: ITagListMapping[] | undefined): string | undefined {
-	if (!tags?.length || !map?.length) return undefined;
-	let last: string | undefined;
+/** Stage tags on the line in appearance order. */
+export function stageTagsOnLine(tags: string[] | undefined, map: ITagListMapping[] | undefined): string[] {
+	if (!tags?.length || !map?.length) return [];
+	const out: string[] = [];
 	for (const t of tags) {
-		if (isListTag(t, map)) last = t.replace(/^#/, '');
+		if (isListTag(t, map)) out.push(t.replace(/^#/, ''));
 	}
-	return last;
+	return out;
 }
 
-export function listForTags(tags: string[], map: ITagListMapping[] | undefined, projects: P[]): string | undefined {
-	const stage = pickLastStageTag(tags, map);
-	if (!stage) return undefined;
-	const m = map?.find(e => n(e.tag) === n(stage));
+/** Last list-mapped tag on the line (fallback when current list is unknown). */
+export function pickLastStageTag(tags: string[] | undefined, map: ITagListMapping[] | undefined): string | undefined {
+	const stages = stageTagsOnLine(tags, map);
+	return stages.length ? stages[stages.length - 1] : undefined;
+}
+
+function projectIdForStage(stage: string, map: ITagListMapping[], projects: P[]): string | undefined {
+	const m = map.find(e => n(e.tag) === n(stage));
 	if (!m) return undefined;
-	const id = (m.listId && projects.some(p => p.id === m.listId)) ? m.listId : listId(m.list, projects);
-	return id;
+	return (m.listId && projects.some(p => p.id === m.listId)) ? m.listId : listId(m.list, projects);
+}
+
+/**
+ * AF-GTD-TAG-ADD: prefer a stage tag that routes to a list other than `currentProjectId`
+ * (the DnD destination). Among those, last on the line. Else last stage on the line.
+ */
+export function pickWinningStageTag(
+	tags: string[] | undefined,
+	map: ITagListMapping[] | undefined,
+	projects?: P[],
+	currentProjectId?: string,
+): string | undefined {
+	const stages = stageTagsOnLine(tags, map);
+	if (!stages.length) return undefined;
+	if (stages.length === 1) return stages[0];
+	if (currentProjectId && projects?.length && map?.length) {
+		const movers = stages.filter(stage => {
+			const id = projectIdForStage(stage, map, projects);
+			return !!id && id !== currentProjectId;
+		});
+		if (movers.length) return movers[movers.length - 1];
+	}
+	return stages[stages.length - 1];
+}
+
+export function listForTags(
+	tags: string[],
+	map: ITagListMapping[] | undefined,
+	projects: P[],
+	currentProjectId?: string,
+): string | undefined {
+	const stage = pickWinningStageTag(tags, map, projects, currentProjectId);
+	if (!stage || !map?.length) return undefined;
+	return projectIdForStage(stage, map, projects);
 }
 
 /** True when more than one tagListMappings tag appears on the line (needs vault rewrite). */
 export function hasMultipleStageTags(tags: string[] | undefined, map: ITagListMapping[] | undefined): boolean {
-	if (!tags?.length || !map?.length) return false;
-	let nStage = 0;
-	for (const t of tags) {
-		if (isListTag(t, map) && ++nStage > 1) return true;
-	}
-	return false;
+	return stageTagsOnLine(tags, map).length > 1;
 }
 
 /** Hash-unchanged lines can still need a stage list move / exclusive rewrite (AF-GTD-TAG-ADD). */
@@ -65,6 +99,38 @@ export function stageNeedsPushDespiteHash(
 ): boolean {
 	return hasMultipleStageTags(tags, map)
 		|| !!(lineProjectId && savedProjectId && lineProjectId !== savedProjectId);
+}
+
+/**
+ * Keep only the winning stage tag on the markdown line; leave other tags / order intact.
+ * Avoids full convertTaskToLine reshuffles that confuse Abyss tag chips.
+ */
+export function rewriteLineExclusiveStage(
+	line: string,
+	map: ITagListMapping[] | undefined,
+	winner: string,
+): string {
+	if (!map?.length) return line;
+	const win = winner.replace(/^#/, '');
+	const esc = (tag: string) => tag.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\//g, '\\/');
+	let out = line;
+	let insertAt = -1;
+	for (const m of map) {
+		const tag = m.tag.replace(/^#/, '');
+		const re = new RegExp(`(\\s)#${esc(tag)}(?![\\w/-])`, 'gi');
+		out = out.replace(re, (match, _sp, offset: number) => {
+			if (insertAt < 0) insertAt = offset;
+			return '';
+		});
+	}
+	if (!new RegExp(`#${esc(win)}(?![\\w/-])`, 'i').test(out)) {
+		const insert = ` #${win}`;
+		const idAt = out.search(/\s*%%\[ticktick_id::/);
+		if (idAt >= 0) out = out.slice(0, idAt) + insert + out.slice(idAt);
+		else if (insertAt >= 0) out = out.slice(0, insertAt) + insert + out.slice(insertAt);
+		else out = out.trimEnd() + insert;
+	}
+	return out.replace(/ {2,}/g, ' ');
 }
 
 export function tagForList(projectId: string, map: ITagListMapping[] | undefined, projects: P[]): string | undefined {

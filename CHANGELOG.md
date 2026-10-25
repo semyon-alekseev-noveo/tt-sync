@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-25 13:47 UTC
+
+- Context: On **2.0.90** pilot, GTD stage DnD needed full Synchronize; after check the new stage chip was dropped (Abyss tag order ≠ “last wins”).
+- Target: Mover-wins stage routing; surgical vault rewrite; open-note Abyss push without only full sync.
+- Actions log: `pickWinningStageTag` (list ≠ Dexie); `rewriteLineExclusiveStage` in push; Abyss `vault.modify` debounce 1.2s; cases/TEST_PLAN.
+- Validation: focused + full `npx vitest run` / `npm run build` on fix branch.
+- Problems: Live re-prove×2 still needed after deploy (`open`).
+- To Be Done: PR into `abyss-mapping`; pilot prove×2 waiting↔next both directions.
+- References: `src/listMapping.ts`, `CHANGELOG.md`, #137
+
 ### Iteration 2026-10-25 13:30 UTC
 
 - Context: Owner asked for a release after AF-GTD-TAG-ADD (#140/#141) and docs #142 on `abyss-mapping`.
