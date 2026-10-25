@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-25 13:30 UTC
+
+- Context: Owner asked for a release after AF-GTD-TAG-ADD (#140/#141) and docs #142 on `abyss-mapping`.
+- Target: Bump **2.0.90** for BRAT; tag after this PR merges (PROC-RELEASE-GATE #30).
+- Actions log: `manifest` / `package` / `versions.json` → 2.0.90; point PO install to tip release after tag.
+- Validation: `npx vitest run` + `npm run build` on bump branch.
+- Problems: None.
+- To Be Done: Owner merges bump PR; tag `2.0.90` on merged `abyss-mapping` tip once.
+- References: `manifest.json`, `CHANGELOG.md`, #137, #140, #141
+
 ### Iteration 2026-10-25 12:35 UTC
 
 - Context: [#141](https://github.com/semyon-alekseev-noveo/tt-sync/pull/141) merged; [#137](https://github.com/semyon-alekseev-noveo/tt-sync/issues/137) closed.
