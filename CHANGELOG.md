@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-25 06:05 UTC
+
+- Context: Owner asked whether GTD is TT-only; formalize Abyss nest + tag-tree stage cases; pilot on Thinkpad-tts-test (not Step 8 live vault).
+- Target: Catalog **AF-NEST-1** / **AF-GTD-TAG-ADD**; record honest pilot; analysis for stage-replace UX.
+- Actions log: Cases + `TEST_PLAN`; seed/nest/dual-tag on `abyss-active.md`; MCP verify; evidence `ABYSS-NEST-GTD/`.
+- Validation: AF-NEST-1 **pass** (child `parentId` set); AF-GTD-TAG-ADD **fail** vs desired (dual tags; stayed nextAction).
+- Problems: Abyss tag-tree add does not replace GTD stage (`open` product gap).
+- To Be Done: Owner picks stage-replace option A–D in evidence analysis; optional GH issue.
+- References: `docs/pilot/results/ABYSS-NEST-GTD/137-af-nest-gtd-pilot.md`, `CHANGELOG.md`
+
 ### Iteration 2026-10-25 05:12 UTC
 
 - Context: [#135](https://github.com/semyon-alekseev-noveo/tt-sync/pull/135) merged; owner asked to close [#32](https://github.com/semyon-alekseev-noveo/tt-sync/issues/32) SEC-CREDS-1.

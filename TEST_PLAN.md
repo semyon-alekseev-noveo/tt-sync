@@ -1038,4 +1038,30 @@ Expected: each comment stays under its task; no orphan comment above the first c
 
 | ID | Pilot status | Evidence |
 |----|----------------|----------|
-| BUG-ACTIVEZONE-COMMENT-SHUFFLE | **pass** ×2 (unit + pilot) | Vitest **726**; pilot tip **2.0.89** AF-3 + AF-2. `docs/pilot/results/BUG-ACTIVEZONE-COMMENT-SHUFFLE/19-prove-2.0.89.md`. #19 / #134. |
+| BUG-ACTIVEZONE-COMMENT-SHUFFLE | **pass** ×2 (unit + pilot) | Vitest **726**; tip **2.0.89** AF-3 + AF-2. `docs/pilot/results/BUG-ACTIVEZONE-COMMENT-SHUFFLE/19-prove-2.0.89.md`. #19 / #134. |
+
+## PR — AF-NEST-1 + AF-GTD-TAG-ADD (pilot discovery)
+
+Branch into `abyss-mapping`. Cases in `ABYSS_FIRST_CASES.md`. Docs/evidence only (no code change this PR).
+
+### AF-NEST-1 — Abyss nest → TT hierarchy
+
+1. Two synced siblings in `00 Inbox/abyss-active.md`.
+2. Indent the second under the first (Abyss drag-onto-task equivalent).
+3. Synchronize.
+
+Expected: child `parentId` = parent id; same TT list; stage tags unchanged.
+
+### AF-GTD-TAG-ADD — Abyss tag-tree adds stage (does not replace)
+
+1. Synced task with `#type/next` on TTS-nextAction.
+2. Add `#type/waiting` without removing `#type/next` (Abyss tag-tree add).
+3. Synchronize.
+
+Desired: one stage tag (`waiting`); list TTS-waitingFor.  
+Observed gap: both tags remain; list stays nextAction (`listForTags` first match).
+
+| ID | Pilot status | Evidence |
+|----|----------------|----------|
+| AF-NEST-1 | **pass** | `docs/pilot/results/ABYSS-NEST-GTD/137-af-nest-gtd-pilot.md` |
+| AF-GTD-TAG-ADD | **fail** (vs desired) | same file — product UX gap |
