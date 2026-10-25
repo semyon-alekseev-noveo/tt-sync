@@ -1020,3 +1020,22 @@ No code change. Tip **2.0.89**. Cases **DEL-3**, **CTX-D2**, **AF-5** (Inbox) pe
 | ID | Pilot status | Evidence |
 |----|----------------|----------|
 | DEL-3 / CTX-D2 / AF-5 Inbox | **pass** | **2.0.89** one session. `docs/pilot/results/STEP7-AF-PILOT-SOAK/76-gate-del3-ctxd2-af5-inbox-2.0.89.md`. #76. |
+
+## PR — BUG-ACTIVEZONE-COMMENT-SHUFFLE (#19)
+
+Branch into `abyss-mapping`. Case **BUG-ACTIVEZONE-COMMENT-SHUFFLE** in `ABYSS_FIRST_CASES.md`.
+
+### What changed
+
+`repairProjectNoteTasks` used to hoist only checkbox lines into `## Active Zone` and leave Abyss comment bullets in the note body (orphans / wrong sibling). It now moves each task **with** its deeper comment/description lines. Nested children of a dropped parent checkbox still hoist. Unit: `projectScheme.test.ts` + `subtaskOrder.test.ts` named **BUG-ACTIVEZONE-COMMENT-SHUFFLE**.
+
+### Manual
+
+1. On a project note Active Zone, two siblings each with a comment bullet.
+2. Trigger project-note repair / Synchronize that rewrites Active Zone.
+
+Expected: each comment stays under its task; no orphan comment above the first checkbox.
+
+| ID | Pilot status | Evidence |
+|----|----------------|----------|
+| BUG-ACTIVEZONE-COMMENT-SHUFFLE | **pass (unit)**; pilot **not run** | Vitest **726**; `projectScheme.test.ts` / `subtaskOrder.test.ts`. #19. |

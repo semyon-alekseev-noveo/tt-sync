@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-25 04:07 UTC
+
+- Context: [#133](https://github.com/semyon-alekseev-noveo/tt-sync/pull/133) merged; epic #20 closed; start [#19](https://github.com/semyon-alekseev-noveo/tt-sync/issues/19) Active Zone comment shuffle.
+- Target: Failing test **BUG-ACTIVEZONE-COMMENT-SHUFFLE** then fix — comments stay under their sibling tasks on repair/reorder.
+- Actions log: Extended `repairProjectNoteTasks` to hoist task+deeper children; tests in `projectScheme.test.ts` / `subtaskOrder.test.ts`; `TEST_PLAN.md`.
+- Validation: `npx vitest run` → **726** passed; `npm run build` ok.
+- Problems: Pilot vault re-prove **not run** (`open`).
+- To Be Done: Owner merges; pilot on project MOC Active Zone; close #19 when pilot recorded or accepted unit-only.
+- References: `src/projectScheme.ts`, `CHANGELOG.md`
+
 ### Iteration 2026-10-25 04:00 UTC
 
 - Context: [#132](https://github.com/semyon-alekseev-noveo/tt-sync/pull/132) merged (AF-8); run [#76](https://github.com/semyon-alekseev-noveo/tt-sync/issues/76) pre–Step 8 gate rows.

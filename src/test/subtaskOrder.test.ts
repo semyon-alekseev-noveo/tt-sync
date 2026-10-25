@@ -17,4 +17,24 @@ describe('subtask order', () => {
 		expect(out).toEqual([doc[0], doc[3], doc[4], doc[5], doc[1], doc[2], 'after']);
 		expect(reorderLinesBySortOrder(out, { c1: 1, c2: 2, c3: 3 })).toBeNull();
 	});
+
+	it('BUG-ACTIVEZONE-COMMENT-SHUFFLE: reorder keeps comment bullets with each sibling', () => {
+		const lines = [
+			t(0, 'P', 'a0'),
+			t(1, 'A', 'aa'),
+			'\t\t- comment A',
+			t(1, 'B', 'bb'),
+			'\t\t- comment B',
+		];
+		const out = reorderLinesBySortOrder(lines, { aa: 2, bb: 1 })!;
+		expect(out).toEqual([
+			lines[0],
+			lines[3],
+			lines[4],
+			lines[1],
+			lines[2],
+		]);
+		expect(out[2]).toMatch(/comment B/);
+		expect(out[4]).toMatch(/comment A/);
+	});
 });

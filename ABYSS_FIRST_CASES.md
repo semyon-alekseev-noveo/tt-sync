@@ -111,6 +111,7 @@ Pass only with evidence: the note path, the `ticktick_id`, and either the journa
 
 | Date (UTC) | Vault | Build | Runner | Item | Result | Evidence |
 |------------|-------|-------|--------|------|--------|----------|
+| 2026-10-25 | unit | tip (#19) | agent | BUG-ACTIVEZONE-COMMENT-SHUFFLE | pass (unit) | `repairProjectNoteTasks` keeps comments with siblings; reorder subtrees. Pilot **not run**. #19. |
 | 2026-10-25 | Thinkpad-tts-test | 2.0.89 | agent (Obsidian CLI) | DEL-3 / CTX-D2 / AF-5 Inbox (#76 gate) | pass | Cancel keeps TT `…4f`; CTX-D2 single `#note/…`; AF-5 Inbox→nextAction `…51`. Evidence: `STEP7-AF-PILOT-SOAK/76-gate-del3-ctxd2-af5-inbox-2.0.89.md`. #76. |
 | 2026-10-25 | Thinkpad-tts-test | 2.0.89 | agent (Obsidian CLI) | AF-8 | pass | `80 Sandbox/…` checkbox not pushed; no id; 0 journal; TT search []. Evidence: `STEP7-AF-PILOT-SOAK/75-af8-out-of-scope-2.0.89.md`. #75. |
 | 2026-10-25 | Thinkpad-tts-test | 2.0.89 | agent (Obsidian CLI) | AF-7 | pass | Move `6add7baf…` nextAction→waitingFor; vault `#type/next`→`#type/waiting` same line. Evidence: `STEP7-AF-PILOT-SOAK/74-af7-list-move-tag-2.0.89.md`. #74. |
