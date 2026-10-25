@@ -13,7 +13,7 @@
 - Релиз **2.0.48** на `abyss-mapping`: PR #1 (fail-closed pull, debounce open-note 5s, BUG-COMMENT-INLINE, интеграционный тест). Релиз **2.0.47**: BUG-COMMENT-1 / BUG-TAG-1.
 - Abyss-first: задачи живут там, где их кладёт Abyss; TT зеркалит теги/списки и родителей-проекты (`ABYSS_FIRST_PLAN.md`, топология R / CASE-T4 отложена).
 - Комментарии Abyss → TickTick **Comments API** (`syncAbyssCommentsViaApi`, по умолчанию вкл.); описание остаётся в `content`.
-- Живой vault не трогаем; пилот — только `<pilot-vault>`. Ручной синк. Токен `tp_…`, если он светился в чате, отозвать.
+- Живой vault не трогаем; пилот — только `<pilot-vault>`. Ручной синк. Токен `tp_…` из чата — **отозван** (2026-10-25, [#32](https://github.com/semyon-alekseev-noveo/tt-sync/issues/32)).
 - Аналитический мит 2026-10-19 (три аналитика) — см. раздел ниже.
 
 ## Target
@@ -92,7 +92,8 @@
 | **TECH-API-1** | P1 | open (риск) | Неофициальный клиент `Tick`: изменения TT ломают sync, покрытие тестами минимальное |
 | **TECH-CIRC-1 / GOD-1/2** | P2 | cycle **resolved** (**2.0.77**); god extract → [#66](https://github.com/semyon-alekseev-noveo/tt-sync/issues/66) | Цикл `main` ↔ `services` снят (`PluginContext`); further extract open. |
 | **DOC-STALE-1** | P3 | mitigated on this branch | Канон: `DEV_FLOW.md`, `PO_STATUS.md`, `ABYSS_FIRST_PLAN.md`. `GTD_SYNC_*`, `TT_ABYSS_ROADMAP.md`, `SYNC_PROJECTS_AND_SUBTASKS.md` — архив. Comments API описан в `ABYSS_NOTES_ALIGNMENT.md` |
-| Прежние | — | open / mitigated | Токен `tp_…` из чата — отозвать ([#32](https://github.com/semyon-alekseev-noveo/tt-sync/issues/32)). Pilot `data.json` drift **resolved** on Thinkpad-tts-test **2.0.89** ([#64](https://github.com/semyon-alekseev-noveo/tt-sync/issues/64)). |
+| **SEC-CREDS-1** | P1 | **resolved** 2026-10-25 | `tp_…` revoke + live auth: session cookie (not Open API); autologin password-in-`data.json` stays opt-in — exclude from vault sync if on. Step 8.0 in `ABYSS_FIRST_PLAN.md`. [#32](https://github.com/semyon-alekseev-noveo/tt-sync/issues/32). |
+| Прежние | — | mitigated | Pilot `data.json` drift **resolved** on Thinkpad-tts-test **2.0.89** ([#64](https://github.com/semyon-alekseev-noveo/tt-sync/issues/64)). |
 
 ## Redo journal
 
@@ -105,7 +106,7 @@
 3. `TP-DELTA-*` app UI still **not run** → [#84](https://github.com/semyon-alekseev-noveo/tt-sync/issues/84). Idle-zero **pass** on **2.0.85**.
 4. **BUG-ACTIVEZONE-COMMENT-SHUFFLE** [#19](https://github.com/semyon-alekseev-noveo/tt-sync/issues/19) — **closed**; pilot **pass** ×2 on tip after #134.
 5. Step 7 AF soak [#20](https://github.com/semyon-alekseev-noveo/tt-sync/issues/20) + [#76](https://github.com/semyon-alekseev-noveo/tt-sync/issues/76) **closed** (**pass** on **2.0.89**). Step 8 live vault still closed.
-6. Open: GAP-COMMENT-EDIT / risks ([#63](https://github.com/semyon-alekseev-noveo/tt-sync/issues/63)); TECH-START-1; [#66](https://github.com/semyon-alekseev-noveo/tt-sync/issues/66); [#32](https://github.com/semyon-alekseev-noveo/tt-sync/issues/32) token revoke.
+6. Open: GAP-COMMENT-EDIT / risks ([#63](https://github.com/semyon-alekseev-noveo/tt-sync/issues/63)); TECH-START-1; [#66](https://github.com/semyon-alekseev-noveo/tt-sync/issues/66). [#32](https://github.com/semyon-alekseev-noveo/tt-sync/issues/32) **closed**.
 
 ## Аналитический мит 2026-10-19
 
@@ -248,7 +249,9 @@ Full analysis: `GTD_SYNC_RESEARCH.md` (hypotheses A/B, recommended R, test plans
 
 **Test vault hardened (2026-10-16 follow-up):** `SyncTag=tts-test`, `projectSchemeEnabled=true`, `TickTickTasksFilePath=30 Tasks/TickTick`, `tagListMappings` for `type/*`, Abyss `membershipQuery=10 Projects/`. Sync still creates stub files for every TT list (under `30 Tasks/TickTick/`) until plugin fix G1 — see `GTD_SYNC_RESEARCH.md` §3.7.
 
-**Owner confirmed (2026-10-16):** Topology **R + hub** (`30 Tasks/TickTick/` list files + capture hub). Sync lists: Inbox, nextAction, Planned, waitingFor, someDay, Projects, KB. GTD pilot: **Hypothesis A** tag table `type/next|planned|waiting|someday` (vault note `type/*` is mostly **document** taxonomy in frontmatter — not task routing; see `GTD_SYNC_RESEARCH.md` §2.4). Project template: **`60 templates/MOC.md`**. TTS-* test lists: **yes** (MCP). Still: rotate exposed `tp_…` token if not done.
+**Owner confirmed (2026-10-16):** Topology **R + hub** (`30 Tasks/TickTick/` list files + capture hub). Sync lists: Inbox, nextAction, Planned, waitingFor, someDay, Projects, KB. GTD pilot: **Hypothesis A** tag table `type/next|planned|waiting|someday` (vault note `type/*` is mostly **document** taxonomy in frontmatter — not task routing; see `GTD_SYNC_RESEARCH.md` §2.4). Project template: **`60 templates/MOC.md`**. TTS-* test lists: **yes** (MCP).
+
+**Owner closed (2026-10-25):** [#32](https://github.com/semyon-alekseev-noveo/tt-sync/issues/32) SEC-CREDS-1 — exposed `tp_…` revoked; live vault stays on session cookie; plaintext autologin remains opt-in with `data.json` excluded from vault sync if enabled.
 
 **Install (2026-10-16):** Community id `tickticksync` replaced by **`tickticksync-abyss`** — TickTickSync (Abyss fork) via BRAT ([Review](0a91bc4d-6305-4611-b72b-1b50e114e0f3#changes)); see `docs/BRAT_INSTALL.md`. **Push `abyss-mapping` to GitHub** before BRAT can pull (branch not on remote yet). Test vault: only `tickticksync-abyss` enabled; latest `dist/` deployed.
 
