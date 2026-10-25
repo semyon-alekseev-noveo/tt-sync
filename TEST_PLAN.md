@@ -991,3 +991,18 @@ Expected: same vault line gets `#type/waiting` (not `#type/next`); line does not
 | ID | Pilot status | Evidence |
 |----|----------------|----------|
 | AF-7 | **pass** | **2.0.89**: `6add7baf…` `#type/next`→`#type/waiting`. `docs/pilot/results/STEP7-AF-PILOT-SOAK/74-af7-list-move-tag-2.0.89.md`. #74. |
+
+## PR — AF-8 outside syncScopeFolders (#75 / #20)
+
+No code change. Tip **2.0.89**. Case **AF-8** in `ABYSS_FIRST_CASES.md`.
+
+### AF-8 — checkbox outside syncScopeFolders is not pushed
+
+1. Add a checkbox (with sync tags) in a note under a folder not listed in `syncScopeFolders` (e.g. `80 Sandbox/`).
+2. Run **Synchronize**.
+
+Expected: no TickTick task; no `ticktick_id` on the line; no journal `obs->tt` create for that path.
+
+| ID | Pilot status | Evidence |
+|----|----------------|----------|
+| AF-8 | **pass** | **2.0.89**: `80 Sandbox/AF-8 out-of-scope 035100.md` not pushed. `docs/pilot/results/STEP7-AF-PILOT-SOAK/75-af8-out-of-scope-2.0.89.md`. #75. |
