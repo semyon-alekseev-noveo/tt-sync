@@ -85,6 +85,7 @@
 | **BUG-DEFERRED-ID-PHASE2-DELETE** | P0 | fixed в **2.0.57** (pilot **not run**) | Создание в TT при открытой daily note: id в файл отложен (`commitVaultText` caret), Dexie уже знает задачу → ложный «удалена из Obsidian»; в строке нет `%%[ticktick_id:: …]%%`, Abyss view пусто. Guard: `registerPendingMarkerTaskId`, skip Phase 2 delete, `prunePendingMarkerTaskIds` at sync start. |
 | **BUG-ACTIVEZONE-COMMENT-SHUFFLE** | P1 | **resolved** on **2.0.89** tip (#134) | `repairProjectNoteTasks` keeps Abyss comments with each sibling (#19). Pilot **pass** ×2: `BUG-ACTIVEZONE-COMMENT-SHUFFLE/19-prove-2.0.89.md`. |
 | **BUG-TICKTICK-ID-LEAK** | P1 | mitigated on branch | Канонический `%%[ticktick_id:: <24hex>]%%`, strip loose fragment из title; тест `bugTicktickIdLeak.test.ts`. Почистить дубли в TT вручную. |
+| **AF-GTD-TAG-ADD** | P1 | open (UX gap) | Abyss tag-tree **adds** stage tags; sync keeps first mapped stage → list may not move; vault can keep two `#type/*`. Desired: exclusive stage replace. Pilot **fail** vs desired: `ABYSS-NEST-GTD/137-af-nest-gtd-pilot.md`. AF-NEST-1 nest→TT `parentId` **pass**. |
 | **GAP-COMMENT-EDIT** | P2 | open | Правка комментария = delete + add (новые ID, шум в ленте TT) |
 | **RISK-DUAL-STORE** | P2 | open | Две «истины»: Dexie `tasks` и `fileMetadata`/`syncFiles` → возможен дрейф |
 | **RISK-LARGE-VAULT** | P2 | partial (#62 slice 1) | `idsPresentInVault` + file cache; idle `getTaskById` already 0; idle `getTaskComments` only on count mismatch / unknown count / stamp twins (not every vault thread). `ensureVaultFilesRegistered` still walks all `.md` |
@@ -106,7 +107,8 @@
 3. `TP-DELTA-*` app UI still **not run** → [#84](https://github.com/semyon-alekseev-noveo/tt-sync/issues/84). Idle-zero **pass** on **2.0.85**.
 4. **BUG-ACTIVEZONE-COMMENT-SHUFFLE** [#19](https://github.com/semyon-alekseev-noveo/tt-sync/issues/19) — **closed**; pilot **pass** ×2 on tip after #134.
 5. Step 7 AF soak [#20](https://github.com/semyon-alekseev-noveo/tt-sync/issues/20) + [#76](https://github.com/semyon-alekseev-noveo/tt-sync/issues/76) **closed** (**pass** on **2.0.89**). Step 8 live vault still closed.
-6. Open: GAP-COMMENT-EDIT / risks ([#63](https://github.com/semyon-alekseev-noveo/tt-sync/issues/63)); TECH-START-1; [#66](https://github.com/semyon-alekseev-noveo/tt-sync/issues/66). [#32](https://github.com/semyon-alekseev-noveo/tt-sync/issues/32) **closed**.
+6. Open: **AF-GTD-TAG-ADD** stage-replace UX (see Problems); GAP-COMMENT-EDIT / risks ([#63](https://github.com/semyon-alekseev-noveo/tt-sync/issues/63)); TECH-START-1; [#66](https://github.com/semyon-alekseev-noveo/tt-sync/issues/66). [#32](https://github.com/semyon-alekseev-noveo/tt-sync/issues/32) **closed**.
+7. AF-NEST-1 nest→TT hierarchy **pass** on pilot — usable; deepen only if Active Zone sibling-nest vs MOC parent matters.
 
 ## Аналитический мит 2026-10-19
 
