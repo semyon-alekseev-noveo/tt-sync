@@ -17,7 +17,7 @@ const PILOT_LISTS = [
 	{ id: 'wf', name: 'TTS-waitingFor' },
 ];
 const PILOT_MAP = parseTagListText(
-	'inbox = TTS-Inbox\ntype/next = TTS-nextAction\ntype/waiting = TTS-waitingFor',
+	'inbox = TTS-Inbox\ngtd/next = TTS-nextAction\ngtd/waiting = TTS-waitingFor',
 );
 
 const PROJECTS = [
@@ -82,7 +82,7 @@ describe('bidirectional sync smoke (SYNC-*)', () => {
 		expect(listMoveSource(undefined, 'in', 'na')).toBe('in');
 	});
 
-	it('SYNC-6 Obs #type/next pushes to TTS-nextAction (stage tag not sent as TT tag)', async () => {
+	it('SYNC-6 Obs #gtd/next pushes to TTS-nextAction (stage tag not sent as TT tag)', async () => {
 		const S = (getSettings as unknown as () => Record<string, unknown>)();
 		Object.assign(S, {
 			noteDelimiter: '',
@@ -95,7 +95,7 @@ describe('bidirectional sync smoke (SYNC-*)', () => {
 			syncNotes: false,
 		});
 		const id = 'abcdefabcdefabcdefabcdef';
-		const line = `- [ ] next step #type/next %%[ticktick_id:: ${id}]%%`;
+		const line = `- [ ] next step #gtd/next %%[ticktick_id:: ${id}]%%`;
 		const parser = mkParser('in');
 		const fm = {
 			getTaskItems: () => [],
@@ -103,7 +103,7 @@ describe('bidirectional sync smoke (SYNC-*)', () => {
 		};
 		const task = await parser.convertLineToTask(line, 0, '00 Inbox/abyss-active.md', fm as never, null);
 		expect(task.projectId).toBe('na');
-		expect(task.tags).not.toContain('type-next');
+		expect(task.tags).not.toContain('gtd-next');
 		Object.assign(S, { abyssTasksFormat: false, tagListMappings: [] });
 	});
 
@@ -128,14 +128,14 @@ describe('bidirectional sync smoke (SYNC-*)', () => {
 		};
 		const task = await parser.convertLineToTask(line, 0, '00 Inbox/abyss-active.md', fm as never, null);
 		const moved = await parser.convertTaskToLine({ ...task, projectId: 'na', items: [] }, 0);
-		expect(moved).toMatch(/#type\/next/);
+		expect(moved).toMatch(/#gtd\/next/);
 		expect(moved).not.toMatch(/#inbox/);
 		Object.assign(S, { abyssTasksFormat: false, tagListMappings: [] });
 	});
 
 	it('SYNC-8 #inbox on TTS-Inbox file default does not route to live Inbox list', async () => {
 		const S = (getSettings as unknown as () => Record<string, unknown>)();
-		const mapNoInboxRow = parseTagListText('type/next = TTS-nextAction\ntype/waiting = TTS-waitingFor');
+		const mapNoInboxRow = parseTagListText('gtd/next = TTS-nextAction\ngtd/waiting = TTS-waitingFor');
 		Object.assign(S, {
 			noteDelimiter: '',
 			fileLinksInTickTick: 'noLink',
@@ -168,8 +168,8 @@ describe('bidirectional sync smoke (SYNC-*)', () => {
 
 	it('SYNC-10 tag → list helpers match pilot mapping table', () => {
 		expect(listForTags(['inbox'], PILOT_MAP, PILOT_LISTS)).toBe('in');
-		expect(listForTags(['type/next'], PILOT_MAP, PILOT_LISTS)).toBe('na');
-		expect(tagForList('na', PILOT_MAP, PILOT_LISTS)).toBe('type/next');
+		expect(listForTags(['gtd/next'], PILOT_MAP, PILOT_LISTS)).toBe('na');
+		expect(tagForList('na', PILOT_MAP, PILOT_LISTS)).toBe('gtd/next');
 		expect(tagForList('in', PILOT_MAP, PILOT_LISTS)).toBe('inbox');
 	});
 

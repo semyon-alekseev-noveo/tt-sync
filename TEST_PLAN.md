@@ -1115,4 +1115,17 @@ Owner intent: Abyss tag-tree **branch → branch** = replace stage tag. Brief: `
 
 | ID | Pilot status | Evidence |
 |----|----------------|----------|
-| AF-GTD-PREFIX | **backlog** — not run | `docs/pilot/AF-GTD-PREFIX.md` |
+| AF-GTD-PREFIX | superseded by implement PR | `docs/pilot/AF-GTD-PREFIX.md` |
+
+## PR — AF-GTD-PREFIX + release 2.0.91
+
+### Behavior
+
+1. Upgrade / reload with `tagListMappings` still on `type/next` etc.
+2. Settings LHS become `gtd/…`; synced lines rewrite `#type/…` → `#gtd/…`.
+3. New task `#gtd/next` → next-action list (AF-5).
+4. BRAT / manifest **2.0.91**.
+
+| ID | Pilot status | Evidence |
+|----|----------------|----------|
+| AF-GTD-PREFIX | **pass** (unit + pilot migrate) | `docs/pilot/results/ABYSS-NEST-GTD/150-af-gtd-prefix-2.0.91.md` |

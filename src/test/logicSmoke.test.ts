@@ -9,7 +9,7 @@ const LISTS = [
 	{ id: 'na', name: 'TTS-nextAction' },
 	{ id: 'wf', name: 'TTS-waitingFor' },
 ];
-const MAP = parseTagListText('inbox = TTS-Inbox\ntype/next = TTS-nextAction\ntype/waiting = TTS-waitingFor');
+const MAP = parseTagListText('inbox = TTS-Inbox\ngtd/next = TTS-nextAction\ngtd/waiting = TTS-waitingFor');
 const FOLDERS = ['00 Inbox/', '10 Projects/', '30 Tasks/'];
 
 describe('settled sync logic', () => {
@@ -43,15 +43,15 @@ describe('settled sync logic', () => {
 
 	it('LOGIC-5 tag → list, both directions', () => {
 		expect(listForTags(['inbox'], MAP, LISTS)).toBe('in');
-		expect(listForTags(['type/next'], MAP, LISTS)).toBe('na');
-		expect(tagForList('wf', MAP, LISTS)).toBe('type/waiting');
+		expect(listForTags(['gtd/next'], MAP, LISTS)).toBe('na');
+		expect(tagForList('wf', MAP, LISTS)).toBe('gtd/waiting');
 		expect(tagForList('in', MAP, LISTS)).toBe('inbox');
 	});
 
 	it('LOGIC-6 tag → tag, both directions, list unchanged by the helper', () => {
-		const tags = parseTagListText('inbox = inbox\ntype/next = type/next\ntype/waiting = type/waiting');
-		expect(tickTickTagForStage('type/next', tags)).toBe('type-next');
-		expect(obsidianTagForStageTag('type-waiting', tags)).toBe('type/waiting');
-		expect(listForTags(['type/next'], tags, LISTS)).toBeUndefined();
+		const tags = parseTagListText('inbox = inbox\ngtd/next = gtd/next\ngtd/waiting = gtd/waiting');
+		expect(tickTickTagForStage('gtd/next', tags)).toBe('gtd-next');
+		expect(obsidianTagForStageTag('gtd-waiting', tags)).toBe('gtd/waiting');
+		expect(listForTags(['gtd/next'], tags, LISTS)).toBeUndefined();
 	});
 });

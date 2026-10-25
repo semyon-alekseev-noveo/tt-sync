@@ -396,9 +396,9 @@
 			<div class="setting-item-name">GTD stage mapping</div>
 			<div class="setting-item-description">
 				{#if gtdStageVia === 'tag'}
-					One per line: <code>type/next = type/next</code>. The Obsidian tag is a TickTick tag. A TickTick filter on that tag is the view. Changing the tag on either side rewrites the other. The task stays on its list.
+					One per line: <code>gtd/next = gtd/next</code>. The Obsidian tag is a TickTick tag. A TickTick filter on that tag is the view. Changing the tag on either side rewrites the other. The task stays on its list.
 				{:else}
-					One per line: <code>type/next = nextAction</code>. The Obsidian tag selects the TickTick list and is not sent as a tag. Moving the task to another mapped list rewrites the tag.
+					One per line: <code>gtd/next = nextAction</code>. The Obsidian tag selects the TickTick list and is not sent as a tag. Moving the task to another mapped list rewrites the tag.
 				{/if}
 			</div>
 		</div>
@@ -407,7 +407,7 @@
 				<option value="list">Tag → list</option>
 				<option value="tag">Tag → tag</option>
 			</select>
-			<textarea rows="4" bind:value={tagListText} on:change={saveTagList} placeholder={gtdStageVia === 'tag' ? 'type/next = type/next' : 'type/next = nextAction'}></textarea>
+			<textarea rows="4" bind:value={tagListText} on:change={saveTagList} placeholder={gtdStageVia === 'tag' ? 'gtd/next = gtd/next' : 'gtd/next = nextAction'}></textarea>
 		</div>
 	</div>
 

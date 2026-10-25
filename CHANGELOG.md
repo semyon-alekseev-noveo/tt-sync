@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-25 14:35 UTC
+
+- Context: PO asked to ship `type/*`→`gtd/*` then release.
+- Target: AF-GTD-PREFIX auto-migrate + **2.0.91** for BRAT (#144/#146 + prefix).
+- Actions log: `migrateTypeStagePrefixToGtd` on settings check; UI placeholders; cases/tests → `gtd/`; bump manifest/package/versions.
+- Validation: `npx vitest run` + `npm run build`; pilot migrate on tip deploy.
+- Problems: Unsynced lines without id not rewritten (`mitigated` — documented).
+- To Be Done: Merge PR; tag `2.0.91` on `abyss-mapping` tip (PROC-RELEASE-GATE).
+- References: `src/settingsMigration.ts`, `CHANGELOG.md`, AF-GTD-PREFIX
+
 ### Iteration 2026-10-25 14:28 UTC
 
 - Context: PO: keep Option A; independence from Abyss; plan stage prefix `type/*`→`gtd/*`.

@@ -13,39 +13,39 @@ const PROJECTS = [
 vi.mock('@/db/projects', () => ({ getAllProjects: vi.fn().mockImplementation(async () => PROJECTS) }));
 vi.mock('@/utils/logger', () => ({ default: { debug: vi.fn(), warn: vi.fn(), error: vi.fn(), info: vi.fn() } }));
 
-const MAP = parseTagListText('type/next = nextAction\n#type/waiting = waitingFor\ntype/someday = someDay\ntype/planned = Planned');
+const MAP = parseTagListText('gtd/next = nextAction\n#gtd/waiting = waitingFor\ngtd/someday = someDay\ngtd/planned = Planned');
 
 describe('tag -> list mapping', () => {
 	it('pure helpers', () => {
-		expect(listForTags(['context/work', 'type/waiting'], MAP, PROJECTS)).toBe('wf');
+		expect(listForTags(['context/work', 'gtd/waiting'], MAP, PROJECTS)).toBe('wf');
 		expect(listForTags(['context/work'], MAP, PROJECTS)).toBeUndefined();
-		expect(tagForList('sd', MAP, PROJECTS)).toBe('type/someday');
+		expect(tagForList('sd', MAP, PROJECTS)).toBe('gtd/someday');
 		expect(tagForList('kb', MAP, PROJECTS)).toBeUndefined();
-		expect(isListTag('type-next', MAP)).toBe(true);
+		expect(isListTag('gtd-next', MAP)).toBe(true);
 	});
 
 	it('AF-GTD-TAG-ADD: stage that changes list wins (Abyss may sort tags)', () => {
-		expect(pickLastStageTag(['type/next', 'type/waiting'], MAP)).toBe('type/waiting');
+		expect(pickLastStageTag(['gtd/next', 'gtd/waiting'], MAP)).toBe('gtd/waiting');
 		// No current list → last on line
-		expect(listForTags(['type/next', 'type/waiting'], MAP, PROJECTS)).toBe('wf');
-		expect(listForTags(['type/waiting', 'type/next'], MAP, PROJECTS)).toBe('na');
+		expect(listForTags(['gtd/next', 'gtd/waiting'], MAP, PROJECTS)).toBe('wf');
+		expect(listForTags(['gtd/waiting', 'gtd/next'], MAP, PROJECTS)).toBe('na');
 		// On nextAction; Abyss sorted both tags so waiting is last — still move to waiting
-		expect(pickWinningStageTag(['type/next', 'type/waiting'], MAP, PROJECTS, 'na')).toBe('type/waiting');
-		expect(listForTags(['type/next', 'type/waiting'], MAP, PROJECTS, 'na')).toBe('wf');
+		expect(pickWinningStageTag(['gtd/next', 'gtd/waiting'], MAP, PROJECTS, 'na')).toBe('gtd/waiting');
+		expect(listForTags(['gtd/next', 'gtd/waiting'], MAP, PROJECTS, 'na')).toBe('wf');
 		// On waitingFor; DnD added next but sort put next first — must not keep waiting
-		expect(pickWinningStageTag(['type/next', 'type/waiting'], MAP, PROJECTS, 'wf')).toBe('type/next');
-		expect(listForTags(['type/next', 'type/waiting'], MAP, PROJECTS, 'wf')).toBe('na');
-		expect(hasMultipleStageTags(['type/next', 'type/waiting'], MAP)).toBe(true);
-		expect(hasMultipleStageTags(['type/next', 'context/work'], MAP)).toBe(false);
-		expect(stageNeedsPushDespiteHash(['type/next', 'type/waiting'], MAP, 'wf', 'na')).toBe(true);
-		expect(stageNeedsPushDespiteHash(['type/next'], MAP, 'na', 'na')).toBe(false);
+		expect(pickWinningStageTag(['gtd/next', 'gtd/waiting'], MAP, PROJECTS, 'wf')).toBe('gtd/next');
+		expect(listForTags(['gtd/next', 'gtd/waiting'], MAP, PROJECTS, 'wf')).toBe('na');
+		expect(hasMultipleStageTags(['gtd/next', 'gtd/waiting'], MAP)).toBe(true);
+		expect(hasMultipleStageTags(['gtd/next', 'context/work'], MAP)).toBe(false);
+		expect(stageNeedsPushDespiteHash(['gtd/next', 'gtd/waiting'], MAP, 'wf', 'na')).toBe(true);
+		expect(stageNeedsPushDespiteHash(['gtd/next'], MAP, 'na', 'na')).toBe(false);
 	});
 
 	it('AF-GTD-TAG-ADD: surgical line rewrite keeps non-stage tags', () => {
-		const line = `- [ ] stage-dnd #obsidian #type/next #context/work #type/waiting %%[ticktick_id:: abcdefabcdefabcdefabcdef]%%`;
-		const out = rewriteLineExclusiveStage(line, MAP, 'type/waiting');
-		expect(out).toMatch(/#type\/waiting/);
-		expect(out).not.toMatch(/type\/next/);
+		const line = `- [ ] stage-dnd #obsidian #gtd/next #context/work #gtd/waiting %%[ticktick_id:: abcdefabcdefabcdefabcdef]%%`;
+		const out = rewriteLineExclusiveStage(line, MAP, 'gtd/waiting');
+		expect(out).toMatch(/#gtd\/waiting/);
+		expect(out).not.toMatch(/gtd\/next/);
 		expect(out).toMatch(/#obsidian/);
 		expect(out).toMatch(/#context\/work/);
 		expect(out).toMatch(/ticktick_id:: abcdefabcdefabcdefabcdef/);
@@ -68,7 +68,7 @@ describe('tag -> list mapping', () => {
 		Object.assign(S, { noteDelimiter: '', fileLinksInTickTick: 'noLink', stopInjectingTickTickTag: true,
 			abyssTasksFormat: true, syncNoteContextTags: false, tagMappings: [], tagListMappings: MAP, syncNotes: false });
 		const id = 'abcdefabcdefabcdefabcdef';
-		const line = `- [ ] Позвонить #type/next #context/work %%[ticktick_id:: ${id}]%%`;
+		const line = `- [ ] Позвонить #gtd/next #context/work %%[ticktick_id:: ${id}]%%`;
 		const parser = mkParser('inbox1');
 		const fm = { getTaskItems: () => [], getTaskRecord: () => ({ task: line, parentId: '', taskLines: [] }) };
 		const task = await parser.convertLineToTask(line, 0, 'p.md', fm as never, null);
@@ -76,11 +76,11 @@ describe('tag -> list mapping', () => {
 		expect(task.tags).toEqual(['context-work']);
 		// moved to waitingFor in TickTick
 		const back = await parser.convertTaskToLine({ ...task, projectId: 'wf', items: [] }, 0);
-		expect(back).toMatch(/#type\/waiting/);
-		expect(back).not.toMatch(/type\/next/);
+		expect(back).toMatch(/#gtd\/waiting/);
+		expect(back).not.toMatch(/gtd\/next/);
 		// moved to a non-mapped list: type tag removed
 		const kb = await parser.convertTaskToLine({ ...task, projectId: 'kb', items: [] }, 0);
-		expect(kb).not.toMatch(/#type\//);
+		expect(kb).not.toMatch(/#gtd\//);
 		Object.assign(S, { abyssTasksFormat: false, tagListMappings: [] });
 	});
 
@@ -90,22 +90,22 @@ describe('tag -> list mapping', () => {
 			abyssTasksFormat: true, syncNoteContextTags: false, gtdStageVia: 'list', tagMappings: [], tagListMappings: MAP, syncNotes: false });
 		const id = 'abcdefabcdefabcdefabcdef';
 		// Abyss-sorted order: next before waiting; Dexie still on nextAction → waiting is the mover
-		const line = `- [ ] stage-dnd #type/next #type/waiting %%[ticktick_id:: ${id}]%%`;
+		const line = `- [ ] stage-dnd #gtd/next #gtd/waiting %%[ticktick_id:: ${id}]%%`;
 		const parser = mkParser('inbox1', 'na');
 		const fm = { getTaskItems: () => [], getTaskRecord: () => ({ task: line, parentId: '', taskLines: [] }) };
 		const task = await parser.convertLineToTask(line, 0, 'p.md', fm as never, null);
 		expect(task.projectId).toBe('wf');
 		expect((task as { __exclusiveStageRewrite?: boolean }).__exclusiveStageRewrite).toBe(true);
-		expect((task as { __exclusiveStageWinner?: string }).__exclusiveStageWinner).toBe('type/waiting');
+		expect((task as { __exclusiveStageWinner?: string }).__exclusiveStageWinner).toBe('gtd/waiting');
 		const back = await parser.convertTaskToLine({ ...task, projectId: 'wf', items: [] }, 0);
-		expect(back).toMatch(/#type\/waiting/);
-		expect(back).not.toMatch(/type\/next/);
+		expect(back).toMatch(/#gtd\/waiting/);
+		expect(back).not.toMatch(/gtd\/next/);
 		// Reverse DnD: still on waitingFor; sorted line keeps waiting last — next must win
-		const backToNext = `- [ ] stage-dnd #type/next #type/waiting %%[ticktick_id:: ${id}]%%`;
+		const backToNext = `- [ ] stage-dnd #gtd/next #gtd/waiting %%[ticktick_id:: ${id}]%%`;
 		const parser2 = mkParser('inbox1', 'wf');
 		const task2 = await parser2.convertLineToTask(backToNext, 0, 'p.md', fm as never, null);
 		expect(task2.projectId).toBe('na');
-		expect((task2 as { __exclusiveStageWinner?: string }).__exclusiveStageWinner).toBe('type/next');
+		expect((task2 as { __exclusiveStageWinner?: string }).__exclusiveStageWinner).toBe('gtd/next');
 		Object.assign(S, { abyssTasksFormat: false, tagListMappings: [] });
 	});
 
@@ -131,16 +131,16 @@ describe('tag -> list mapping', () => {
 		Object.assign(S, { noteDelimiter: '', fileLinksInTickTick: 'noLink', stopInjectingTickTickTag: true,
 			abyssTasksFormat: true, syncNoteContextTags: false, gtdStageVia: 'tag', tagMappings: [], tagListMappings: MAP, syncNotes: false });
 		const id = 'abcdefabcdefabcdefabcdef';
-		const line = `- [ ] Позвонить #type/next #context/work %%[ticktick_id:: ${id}]%%`;
+		const line = `- [ ] Позвонить #gtd/next #context/work %%[ticktick_id:: ${id}]%%`;
 		const parser = mkParser('inbox1');
 		const fm = { getTaskItems: () => [], getTaskRecord: () => ({ task: line, parentId: '', taskLines: [] }) };
 		const task = await parser.convertLineToTask(line, 0, 'p.md', fm as never, null);
 		expect(task.projectId).toBe('inbox1');
 		expect(task.tags).toContain('nextaction');
-		expect(task.tags).not.toContain('type-next');
+		expect(task.tags).not.toContain('gtd-next');
 		const back = await parser.convertTaskToLine({ ...task, tags: ['waitingfor', 'context-work'], items: [] }, 0);
-		expect(back).toMatch(/#type\/waiting/);
-		expect(back).not.toMatch(/type\/next/);
+		expect(back).toMatch(/#gtd\/waiting/);
+		expect(back).not.toMatch(/gtd\/next/);
 		Object.assign(S, { abyssTasksFormat: false, gtdStageVia: 'list', tagListMappings: [] });
 	});
 });

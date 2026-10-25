@@ -20,14 +20,14 @@ Preconditions for every AF row: plugin `tickticksync-abyss`, manual sync, `fileL
 | AF-2 | A parent task on the projects list becomes a project note under `10 Projects/` with `## Active Zone`. The parent is not a checkbox line in that note. |
 | AF-3 | A new project note (folder `10 Projects/`, tag `system/project`) creates the parent task on the projects list. |
 | AF-4 | A checkbox under `## Active Zone` becomes a subtask of that note’s parent. The line stays in the note. |
-| AF-5 | A checkbox in any in-scope note with `#type/next` lands on the next-action list. The line does not move to another file. |
+| AF-5 | A checkbox in any in-scope note with `#gtd/next` lands on the next-action list. The line does not move to another file. (`#type/next` migrates to `#gtd/next` — AF-GTD-PREFIX.) |
 | AF-6 | Checking the box completes the TickTick task. Completing it in TickTick checks the same line. |
 | AF-7 | Moving the task to another mapped list rewrites the stage tag on that same line. |
 | AF-8 | A checkbox in a note outside `syncScopeFolders` is not pushed. |
 | AF-NEST-1 | Two synced sibling checkboxes in an in-scope note. Nest the second under the first (Abyss View drag-onto-task / indent). Synchronize. TickTick: child `parentId` = parent task id; same list as parent; GTD stage tags unchanged unless the line tags changed. |
-| AF-GTD-TAG-ADD | Synced task with one stage tag (`#type/next`). Abyss tag-tree (or equivalent) **adds** another stage tag (`#type/waiting`) without removing the first (Abyss artifact). **Expected (Option A compensation):** the stage whose TickTick list **≠** the task’s current list wins; vault rewritten to **exactly one** stage tag; open-note push ~1.2s; no conflict toast for rival `#type/*`. See intent case **AF-GTD-STAGE-MOVE**. |
-| AF-GTD-STAGE-MOVE | **Owner intent:** moving a task from stage A → B (Abyss tag tree or any editor) means **replace** (drop A’s tag, set B’s). After sync/open-note: exactly one list-mapped stage tag (B); TickTick list = B’s mapping. Dual tags mid-flight are writer artifacts — Option A still lands on replace. Spec: `docs/pilot/AF-GTD-STAGE-REPLACE.md`. **PO:** keep Option A; no Abyss dependency. |
-| AF-GTD-PREFIX | Planned: stage tags use `#gtd/next` (etc.), not `#type/next`. After `tagListMappings` rename (same listId), synced lines rewrite; new tasks route by `gtd/*`. Spec: `docs/pilot/AF-GTD-PREFIX.md`. **not implemented** until dedicated PR. |
+| AF-GTD-TAG-ADD | Synced task with one stage tag (`#gtd/next`). Writer **adds** another (`#gtd/waiting`) without removing the first. **Expected (Option A):** mover wins list; vault → exactly one stage tag; open-note ~1.2s; no stage conflict toast. See **AF-GTD-STAGE-MOVE**. |
+| AF-GTD-STAGE-MOVE | Moving stage A → B means **replace**. After sync: one list-mapped stage tag (B); TT list = B. Spec: `docs/pilot/AF-GTD-STAGE-REPLACE.md`. **PO:** keep Option A. |
+| AF-GTD-PREFIX | On load, `tagListMappings` / `tagMappings` LHS `type/…` → `gtd/…`; synced lines (`ticktick_id`) rewrite. New tasks use `#gtd/next` etc. Spec: `docs/pilot/AF-GTD-PREFIX.md`. |
 | NOTE-L3b | A child comment line, title unchanged, Synchronize. The text shows in the TickTick Comments panel. The description stays in the task body. |
 | BUG-COMMENT-NO-PUSH | Same as NOTE-L3b; regression when only comment bullets change or hash path skips API (`PO_STATUS.md`). |
 | BUG-TICKTICK-ID-LEAK | Title must not contain loose `ticktick_id::` outside `%%[ticktick_id:: <24hex>]%%`; canonical id wins if both present. |
