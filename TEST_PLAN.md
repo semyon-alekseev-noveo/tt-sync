@@ -1102,3 +1102,11 @@ Branch into `abyss-mapping`. Residual on **2.0.90**: full Synchronize required; 
 | ID | Pilot status | Evidence |
 |----|----------------|----------|
 | AF-GTD-TAG-ADD | **pass** ×2 (tip deploy, open-note) | `docs/pilot/results/ABYSS-NEST-GTD/144-af-gtd-mover-wins-live.md` — BRAT 2.0.90 alone is pre-#144 |
+
+## PR — AF-GTD-STAGE-MOVE analyst brief (docs only)
+
+Owner intent: Abyss tag-tree **branch → branch** = replace stage tag. Brief: `docs/pilot/AF-GTD-STAGE-REPLACE.md`. No behavior change in this PR.
+
+| ID | Pilot status | Evidence |
+|----|----------------|----------|
+| AF-GTD-STAGE-MOVE | **spec** — not run as separate live row | same prove as AF-GTD-TAG-ADD framed as move; PO sign-off §4 |

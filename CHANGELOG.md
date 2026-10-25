@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-25 14:17 UTC
+
+- Context: Owner: Abyss tag-tree branch move = **replace** stage (drop one tag, set another), not accumulate.
+- Target: Analyst brief + case **AF-GTD-STAGE-MOVE**; Option A framed as compensation until Abyss exclusive groups.
+- Actions log: `docs/pilot/AF-GTD-STAGE-REPLACE.md`; catalog + PO_STATUS + INDEX; no code.
+- Validation: docs-only review against Option A–E in brief §4.
+- Problems: Abyss still writes add (`open` external).
+- To Be Done: PO/analyst sign-off §4; chase Abyss Option B or keep A.
+- References: `docs/pilot/AF-GTD-STAGE-REPLACE.md`, `ABYSS_FIRST_CASES.md`, `CHANGELOG.md`
+
 ### Iteration 2026-10-25 13:47 UTC
 
 - Context: On **2.0.90** pilot, GTD stage DnD needed full Synchronize; after check the new stage chip was dropped (Abyss tag order ≠ “last wins”).
