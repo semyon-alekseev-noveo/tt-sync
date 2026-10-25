@@ -110,8 +110,7 @@
 5. Step 7 AF soak [#20](https://github.com/semyon-alekseev-noveo/tt-sync/issues/20) + [#76](https://github.com/semyon-alekseev-noveo/tt-sync/issues/76) **closed** (**pass** on **2.0.89**). Step 8 live vault still closed.
 6. Open: GAP-COMMENT-EDIT / risks ([#63](https://github.com/semyon-alekseev-noveo/tt-sync/issues/63)); TECH-START-1; [#66](https://github.com/semyon-alekseev-noveo/tt-sync/issues/66). [#32](https://github.com/semyon-alekseev-noveo/tt-sync/issues/32) / [#137](https://github.com/semyon-alekseev-noveo/tt-sync/issues/137) **closed**.
 7. AF-NEST-1 nest→TT hierarchy **pass** on pilot — usable; deepen only if Active Zone sibling-nest vs MOC parent matters.
-8. **AF-GTD-PREFIX** (`type/*`→`gtd/*`): backlog — migrate mappings + cases when scheduled; engine already supports arbitrary LHS tags.
-9. Release **2.0.91** when owner wants BRAT to pick up #144+#146 (tip already has them).
+8. **AF-GTD-PREFIX** + release **2.0.91** — in flight (type→gtd + BRAT bump).
 
 ## Аналитический мит 2026-10-19
 

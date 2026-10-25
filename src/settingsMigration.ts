@@ -9,6 +9,57 @@ interface S {
 }
 const n = (t: string) => t.replace(/^#/, '').trim();
 
+/** AF-GTD-PREFIX: `type/next` → `gtd/next` (stage namespace clarity). Leaves under `type/` only. */
+export function typeStageToGtd(tag: string): string | null {
+	const t = n(tag);
+	const m = /^type\/(.+)$/i.exec(t);
+	return m ? `gtd/${m[1]}` : null;
+}
+
+/**
+ * Rewrite `tagListMappings` / `tagMappings` LHS from `type/…` → `gtd/…`.
+ * Caller persists settings and runs vault rename via `tagRenames` / `renameTagsInText`.
+ */
+export function migrateTypeStagePrefixToGtd(s: S): {
+	changed: boolean;
+	tagListMappings?: S['tagListMappings'];
+	tagMappings?: S['tagMappings'];
+	renames: Record<string, string>;
+} {
+	const renames: Record<string, string> = {};
+	let changed = false;
+	let tagListMappings = s.tagListMappings;
+	if (tagListMappings?.length) {
+		const next = tagListMappings.map(row => {
+			const neu = typeStageToGtd(row.tag);
+			if (!neu) return row;
+			renames[n(row.tag)] = neu;
+			changed = true;
+			return { ...row, tag: neu };
+		});
+		if (changed) tagListMappings = next;
+	}
+	let tagMappings = s.tagMappings;
+	if (tagMappings?.length) {
+		let tmChanged = false;
+		const next = tagMappings.map(row => {
+			const neu = typeStageToGtd(row.obsidian);
+			if (!neu) return row;
+			renames[n(row.obsidian)] = neu;
+			tmChanged = true;
+			changed = true;
+			return { ...row, obsidian: neu };
+		});
+		if (tmChanged) tagMappings = next;
+	}
+	return {
+		changed,
+		tagListMappings: changed ? tagListMappings : undefined,
+		tagMappings: changed ? tagMappings : undefined,
+		renames,
+	};
+}
+
 /** old tag -> new tag for mapping rows whose target (list / status char / TT tag) stayed the same. */
 export function tagRenames(prev: S, next: S): Record<string, string> {
 	const out: Record<string, string> = {};

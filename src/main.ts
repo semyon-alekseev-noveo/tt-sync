@@ -1,7 +1,7 @@
 import { RedoLog } from '@/redo/log';
 import { makeAdapter, instrumentVault, instrumentApi } from '@/redo/obsidian';
 import { RedoCommands } from '@/redo/commands';
-import { tagRenames, renameTagsInText, folderOf } from '@/settingsMigration';
+import { tagRenames, renameTagsInText, folderOf, migrateTypeStagePrefixToGtd } from '@/settingsMigration';
 const snap = (x: { tagListMappings?: unknown; statusMappings?: unknown; tagMappings?: unknown; projectsFolder?: string }) => JSON.parse(JSON.stringify({ tagListMappings: x.tagListMappings ?? [], statusMappings: x.statusMappings ?? [], tagMappings: x.tagMappings ?? [], projectsFolder: x.projectsFolder })) as Parameters<typeof tagRenames>[0];
 import { ProjectSchemeService } from '@/services/ProjectSchemeService';
 import { isPathInPushScope } from '@/syncScope';
@@ -325,10 +325,25 @@ export default class TickTickSync extends Plugin implements PluginContext {
 		if (this.migrating) { this.migrationAgain = true; return; }
 		this.migrating = true; this.migrationAgain = false;
 		try {
+			// AF-GTD-PREFIX: type/next → gtd/next in mappings, then vault lines with ticktick_id.
+			const beforeGtd = getSettings();
+			const gtdMig = migrateTypeStagePrefixToGtd(beforeGtd);
+			if (gtdMig.changed) {
+				const prevGtd = snap(beforeGtd);
+				updateSettings({
+					...(gtdMig.tagListMappings ? { tagListMappings: gtdMig.tagListMappings } : {}),
+					...(gtdMig.tagMappings ? { tagMappings: gtdMig.tagMappings } : {}),
+				});
+				await this.migrateSettingsChange(prevGtd, snap(getSettings())).catch(e => log.error('AF-GTD-PREFIX migration failed', e));
+				log.info('AF-GTD-PREFIX type→gtd', gtdMig.renames);
+			}
 			const cur = snap(getSettings());
 			const prev = (getSettings() as { migrationSnapshot?: ReturnType<typeof snap> }).migrationSnapshot;
 			log.debug('settings migration check', prev?.projectsFolder, '->', cur.projectsFolder);
-			if (prev && JSON.stringify(prev) === JSON.stringify(cur)) return;
+			if (prev && JSON.stringify(prev) === JSON.stringify(cur)) {
+				if (gtdMig.changed) await this.saveSettings();
+				return;
+			}
 			if (prev) await this.migrateSettingsChange(prev, cur).catch(e => log.error('Settings migration failed', e));
 			updateSettings({ migrationSnapshot: cur } as never, { persist: false });
 			await this.saveSettings();
