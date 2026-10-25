@@ -83,7 +83,7 @@
 | **BUG-OPEN-NOTE-BUFFER** | P0 | **resolved** (**2.0.55** code; same #16 pilot **pass**) | Буфер открытой заметки откатывался при sync/push. |
 | **BUG-EMPTY-EDITOR-DISK** | P0 | fixed в **2.0.56** (pilot **pass** on **2.0.76**) | Диск с текстом, markdown view пустой после reopen. **TP-EMPTY-EDITOR-DISK** pilot pass `#16`. |
 | **BUG-DEFERRED-ID-PHASE2-DELETE** | P0 | fixed в **2.0.57** (pilot **not run**) | Создание в TT при открытой daily note: id в файл отложен (`commitVaultText` caret), Dexie уже знает задачу → ложный «удалена из Obsidian»; в строке нет `%%[ticktick_id:: …]%%`, Abyss view пусто. Guard: `registerPendingMarkerTaskId`, skip Phase 2 delete, `prunePendingMarkerTaskIds` at sync start. |
-| **BUG-ACTIVEZONE-COMMENT-SHUFFLE** | P1 | open | При sync в project note (Active Zone): сортировка соседних задач и перенос comment-буллета с одной задачи на другую. Кейс в `ABYSS_FIRST_CASES.md`. |
+| **BUG-ACTIVEZONE-COMMENT-SHUFFLE** | P1 | mitigated (unit) | `repairProjectNoteTasks` keeps Abyss comments with each sibling (#19). Pilot **not run**. |
 | **BUG-TICKTICK-ID-LEAK** | P1 | mitigated on branch | Канонический `%%[ticktick_id:: <24hex>]%%`, strip loose fragment из title; тест `bugTicktickIdLeak.test.ts`. Почистить дубли в TT вручную. |
 | **GAP-COMMENT-EDIT** | P2 | open | Правка комментария = delete + add (новые ID, шум в ленте TT) |
 | **RISK-DUAL-STORE** | P2 | open | Две «истины»: Dexie `tasks` и `fileMetadata`/`syncFiles` → возможен дрейф |
@@ -103,9 +103,9 @@
 1. Editor-safety epic [#15](https://github.com/semyon-alekseev-noveo/tt-sync/issues/15) **closed** (#16 partial; #17/#18/#28/#29 **pass** on **2.0.89**).
 2. [#64](https://github.com/semyon-alekseev-noveo/tt-sync/issues/64) / [#65](https://github.com/semyon-alekseev-noveo/tt-sync/issues/65) **closed** (pass on **2.0.89**). #104 closed; BRAT **2.0.89** on pilot.
 3. `TP-DELTA-*` app UI still **not run** → [#84](https://github.com/semyon-alekseev-noveo/tt-sync/issues/84). Idle-zero **pass** on **2.0.85**.
-4. **BUG-ACTIVEZONE-COMMENT-SHUFFLE** — failing test + fix (`pullSubtaskOrder` / `mergeAbyssBlock`) → [#19](https://github.com/semyon-alekseev-noveo/tt-sync/issues/19).
-5. Step 7 AF soak [#20](https://github.com/semyon-alekseev-noveo/tt-sync/issues/20) + gate [#76](https://github.com/semyon-alekseev-noveo/tt-sync/issues/76): AF-1…AF-8 + DEL-3/CTX-D2/AF-5 Inbox **pass** on **2.0.89** (close after evidence PR). Step 8 live vault still closed.
-6. Next P1 code: [#19](https://github.com/semyon-alekseev-noveo/tt-sync/issues/19) Active Zone shuffle. Also open: GAP-COMMENT-EDIT / risks ([#63](https://github.com/semyon-alekseev-noveo/tt-sync/issues/63)); TECH-START-1; [#66](https://github.com/semyon-alekseev-noveo/tt-sync/issues/66); [#32](https://github.com/semyon-alekseev-noveo/tt-sync/issues/32) token revoke.
+4. **BUG-ACTIVEZONE-COMMENT-SHUFFLE** [#19](https://github.com/semyon-alekseev-noveo/tt-sync/issues/19) — unit fix in PR; pilot when convenient.
+5. Step 7 AF soak [#20](https://github.com/semyon-alekseev-noveo/tt-sync/issues/20) + [#76](https://github.com/semyon-alekseev-noveo/tt-sync/issues/76) **closed** (**pass** on **2.0.89**). Step 8 live vault still closed.
+6. Open: GAP-COMMENT-EDIT / risks ([#63](https://github.com/semyon-alekseev-noveo/tt-sync/issues/63)); TECH-START-1; [#66](https://github.com/semyon-alekseev-noveo/tt-sync/issues/66); [#32](https://github.com/semyon-alekseev-noveo/tt-sync/issues/32) token revoke.
 
 ## Аналитический мит 2026-10-19
 

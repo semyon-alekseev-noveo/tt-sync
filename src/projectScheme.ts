@@ -47,9 +47,15 @@ export function stripProjectParentDuplicateLines(
 	});
 }
 
+/** Leading indent depth: tabs, or 4 spaces as one tab (matches subtaskOrder). */
+function lineIndentTabs(line: string): number {
+	return (line.match(/^[\t ]*/)?.[0] ?? '').replace(/ {4}/g, '\t').length;
+}
+
 /**
  * Hoist all synced child task lines into `## Active Zone` (flat), drop parent-id duplicate lines.
  * Fixes P6 + tasks parked under Metadata / wrong list nesting after legacy sync or reset.
+ * BUG-ACTIVEZONE-COMMENT-SHUFFLE: each task keeps its deeper Abyss comment / description lines.
  */
 export function repairProjectNoteTasks(
 	lines: string[],
@@ -59,23 +65,55 @@ export function repairProjectNoteTasks(
 ): string[] {
 	if (!parentTaskId) return lines;
 	const seen = new Set<string>();
-	const childLines: string[] = [];
+	const childBlocks: string[][] = [];
 	const body: string[] = [];
-	for (const line of lines) {
+	for (let i = 0; i < lines.length; ) {
+		const line = lines[i];
 		if (!isTaskLine(line)) {
 			body.push(line);
+			i++;
 			continue;
 		}
 		const id = lineTaskId(line);
+		const taskTabs = lineIndentTabs(line);
+		/** Skip a task line and its deeper trailing children (comments / nested lines). */
+		const skipBlock = () => {
+			i++;
+			while (i < lines.length) {
+				const next = lines[i];
+				if (next.trim() && lineIndentTabs(next) <= taskTabs) break;
+				i++;
+			}
+		};
 		if (!id) {
 			body.push(line);
+			i++;
 			continue;
 		}
-		if (id === parentTaskId) continue;
-		if (seen.has(id)) continue;
+		// Parent lives in frontmatter — drop only that checkbox; nested children still hoist.
+		if (id === parentTaskId) {
+			i++;
+			continue;
+		}
+		if (seen.has(id)) {
+			skipBlock();
+			continue;
+		}
 		seen.add(id);
-		childLines.push(line.replace(/^\t+/, ''));
+		const block: string[] = [line.replace(/^\t+/, '')];
+		i++;
+		while (i < lines.length) {
+			const next = lines[i];
+			if (next.trim() && lineIndentTabs(next) <= taskTabs) break;
+			// Flatten: task at 0 tabs; keep relative deeper indent as at least one tab.
+			const deeper = Math.max(1, lineIndentTabs(next) - taskTabs);
+			const rest = next.replace(/^[\t ]*/, '');
+			block.push('\t'.repeat(deeper) + rest);
+			i++;
+		}
+		childBlocks.push(block);
 	}
+	const childLines = childBlocks.flat();
 	if (!childLines.length) {
 		return stripProjectParentDuplicateLines(lines, parentTaskId, isTaskLine, lineTaskId);
 	}

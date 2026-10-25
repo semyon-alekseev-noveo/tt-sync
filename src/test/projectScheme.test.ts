@@ -21,6 +21,37 @@ describe('project scheme helpers', () => {
 		expect(out.slice(az + 1, az + 3).every(l => l.startsWith('- [ ]'))).toBe(true);
 	});
 
+	it('BUG-ACTIVEZONE-COMMENT-SHUFFLE: repair keeps Abyss comments under their sibling tasks', () => {
+		const id = (l: string) => l.match(/ticktick_id:: ([0-9a-f]+)/)?.[1] ?? null;
+		const isTask = (l: string) => /^\t*- \[[ xX]\]/.test(l);
+		const lines = [
+			'## Active Zone',
+			'- [ ] Task A %%[ticktick_id:: aaaaaaaaaaaaaaaaaaaaaaaa]%%',
+			'\t- comment on A',
+			'- [ ] Task B %%[ticktick_id:: bbbbbbbbbbbbbbbbbbbbbbbb]%%',
+			'\t- comment on B',
+			'## Next',
+			'\t- [ ] Task C parked %%[ticktick_id:: cccccccccccccccccccccccc]%%',
+			'\t\t- comment on C',
+		];
+		const out = repairProjectNoteTasks(lines, 'pppppppppppppppppppppppp', isTask, id);
+		const az = out.findIndex(l => l.includes('Active Zone'));
+		const next = out.findIndex(l => l.includes('## Next'));
+		const zone = out.slice(az + 1, next < 0 ? undefined : next);
+		const iA = zone.findIndex(l => l.includes('aaaaaaaaaaaaaaaaaaaaaaaa'));
+		const iB = zone.findIndex(l => l.includes('bbbbbbbbbbbbbbbbbbbbbbbb'));
+		const iC = zone.findIndex(l => l.includes('cccccccccccccccccccccccc'));
+		expect(iA).toBeGreaterThanOrEqual(0);
+		expect(iB).toBeGreaterThan(iA);
+		expect(iC).toBeGreaterThan(iB);
+		expect(zone[iA + 1]).toMatch(/comment on A/);
+		expect(zone[iB + 1]).toMatch(/comment on B/);
+		expect(zone[iC + 1]).toMatch(/comment on C/);
+		// Orphan comment must not sit above the first task (dishwasher-style shuffle).
+		expect(zone[0]).toMatch(/Task A|Task B|Task C/);
+		expect(zone.filter(l => /comment on/.test(l))).toHaveLength(3);
+	});
+
 	it('detects duplicate parent checkbox lines (P6)', () => {
 		const fm = { tags: ['system/project'], ticktick_id: 'parent1' };
 		expect(isProjectParentDuplicateLine('10 Projects/P.md', fm, '10 Projects', 'parent1')).toBe(true);
