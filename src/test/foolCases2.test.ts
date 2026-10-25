@@ -12,7 +12,7 @@ describe('fool cases 2', () => {
 	it('reports losing status and extra type tags', () => {
 		expect(abyssTagConflicts(['status/cancelled', 'x'], '/', smap, lmap)).toEqual(['status/cancelled']);
 		expect(abyssTagConflicts(['status/in-progress'], '/', smap, lmap)).toEqual([]);
-		expect(abyssTagConflicts(['type/next', 'type/waiting'], ' ', smap, lmap)).toEqual(['type/waiting']);
+		expect(abyssTagConflicts(['type/next', 'type/waiting'], ' ', smap, lmap)).toEqual(['type/next']);
 	});
 	it('keeps the full tag path', () => {
 		expect(flatTagName('foo/Bar')).toBe('foo-bar');

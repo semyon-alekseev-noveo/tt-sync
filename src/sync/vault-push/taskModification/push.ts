@@ -176,6 +176,30 @@ export class TaskModificationPush {
 			await this.plugin.taskRepository.markVaultInSync?.(lineTask.id);
 		}
 
+		// AF-GTD-TAG-ADD Option A: last stage won the list; rewrite Obs line to a single stage tag.
+		if ((lineTask as ITask & { __exclusiveStageRewrite?: boolean }).__exclusiveStageRewrite) {
+			const forVault: ITask = {
+				...lineTask,
+				id: taskId,
+				projectId: lineTask.projectId || savedTask.projectId,
+				lineHash: newHash || lineTask.lineHash,
+			};
+			const liveFile = this.app.vault.getAbstractFileByPath(filepath);
+			let live = pushSnapshot;
+			if (liveFile instanceof TFile) {
+				try { live = await readNoteForWrite(this.app, liveFile); } catch (error) { log.debug('stage rewrite live read failed', error); }
+			}
+			if (pushSnapshot != null && live !== pushSnapshot) {
+				log.info(`Skipping exclusive-stage write-back of ${filepath}: the note changed after the push started`);
+			} else {
+				try {
+					await this.plugin.fileOperation?.synchronizeToVault(filepath, [forVault], true);
+				} catch (e) {
+					log.warn('exclusive-stage write-back failed', e);
+				}
+			}
+		}
+
 		if (useAbyssCommentsApi()) {
 			const projectId = lineTask.projectId || savedTask.projectId;
 			if (projectId) {
