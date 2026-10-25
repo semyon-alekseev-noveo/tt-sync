@@ -59,6 +59,18 @@ describe('RISK-OPEN-FILE-EDIT', () => {
 		scheduler.dispose();
 	});
 
+	it('AF-GTD-TAG-ADD: vault.modify can use a shorter quiet period', () => {
+		vi.useFakeTimers();
+		const push = vi.fn();
+		const scheduler = createActiveFilePushScheduler({ debounceMs: 5000, push });
+		scheduler.notify('notes/a.md', 1200);
+		vi.advanceTimersByTime(1199);
+		expect(push).not.toHaveBeenCalled();
+		vi.advanceTimersByTime(1);
+		expect(push).toHaveBeenCalledTimes(1);
+		scheduler.dispose();
+	});
+
 	it('BUG-COMMENT-ABYSS-VIEW schedules push on vault.modify for in-scope notes', () => {
 		expect(shouldNotifyPushOnVaultModify({
 			hasToken: true,

@@ -11,6 +11,7 @@ import type { LocalTask } from '@/db/schema';
 import type { ITaskItemRecord, ITaskRecord, NewFileMap } from '@/services/NewFileMap';
 import { commitVaultText, readNoteForWrite } from '@/sync/vault-io';
 import { getSettings } from '@/settings';
+import { rewriteLineExclusiveStage } from '@/listMapping';
 import { listMoveSource } from '@/syncScope';
 import log from '@/utils/logger';
 import ObjectID from 'bson-objectid';
@@ -176,24 +177,27 @@ export class TaskModificationPush {
 			await this.plugin.taskRepository.markVaultInSync?.(lineTask.id);
 		}
 
-		// AF-GTD-TAG-ADD Option A: last stage won the list; rewrite Obs line to a single stage tag.
-		if ((lineTask as ITask & { __exclusiveStageRewrite?: boolean }).__exclusiveStageRewrite) {
-			const forVault: ITask = {
-				...lineTask,
-				id: taskId,
-				projectId: lineTask.projectId || savedTask.projectId,
-				lineHash: newHash || lineTask.lineHash,
-			};
+		// AF-GTD-TAG-ADD: surgical strip of rival stage tags (keeps Abyss chip order for the rest).
+		const exclusive = lineTask as ITask & { __exclusiveStageRewrite?: boolean; __exclusiveStageWinner?: string };
+		if (exclusive.__exclusiveStageRewrite && exclusive.__exclusiveStageWinner) {
 			const liveFile = this.app.vault.getAbstractFileByPath(filepath);
-			let live = pushSnapshot;
 			if (liveFile instanceof TFile) {
-				try { live = await readNoteForWrite(this.app, liveFile); } catch (error) { log.debug('stage rewrite live read failed', error); }
-			}
-			if (pushSnapshot != null && live !== pushSnapshot) {
-				log.info(`Skipping exclusive-stage write-back of ${filepath}: the note changed after the push started`);
-			} else {
 				try {
-					await this.plugin.fileOperation?.synchronizeToVault(filepath, [forVault], true);
+					const live = await readNoteForWrite(this.app, liveFile);
+					const lines = live.split('\n');
+					const idx = lines.findIndex(l => l.includes(taskId));
+					if (idx >= 0) {
+						const nextLine = rewriteLineExclusiveStage(
+							lines[idx],
+							getSettings().tagListMappings,
+							exclusive.__exclusiveStageWinner,
+						);
+						if (nextLine !== lines[idx]) {
+							lines[idx] = nextLine;
+							const committed = await commitVaultText(this.app, liveFile, live, lines.join('\n'));
+							if (committed.status === 'deferred') log.warn('exclusive-stage write-back deferred', committed);
+						}
+					}
 				} catch (e) {
 					log.warn('exclusive-stage write-back failed', e);
 				}

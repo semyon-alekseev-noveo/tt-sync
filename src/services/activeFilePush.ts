@@ -2,6 +2,8 @@ import { isUnfinishedCapture } from '@/projectScheme';
 
 /** Quiet period before an open note is pushed. Short enough to feel responsive, long enough to avoid a half-typed `%%`. */
 export const ACTIVE_FILE_PUSH_DEBOUNCE_MS = 5000;
+/** Abyss / vault.modify writers do not half-type `%%` — shorter so DnD stage checks need no full Synchronize. */
+export const ABYSS_VAULT_MODIFY_PUSH_MS = 1200;
 
 export interface ActiveFilePushContext {
 	hasToken: boolean;
@@ -72,19 +74,19 @@ export function releaseDeferredActiveFilePushes(): string[] {
 	return paths;
 }
 
-/** One timer per note. A new keystroke resets it. */
+/** One timer per note. A new keystroke resets it. Optional `ms` overrides the default quiet period. */
 export function createActiveFilePushScheduler(opts: {
 	debounceMs: number;
 	push: (filepath: string) => void;
-}): { notify: (filepath: string) => void; dispose: () => void } {
+}): { notify: (filepath: string, ms?: number) => void; dispose: () => void } {
 	let timer: ReturnType<typeof setTimeout> | undefined;
 	return {
-		notify(filepath: string) {
+		notify(filepath: string, ms?: number) {
 			if (timer !== undefined) clearTimeout(timer);
 			timer = setTimeout(() => {
 				timer = undefined;
 				opts.push(filepath);
-			}, opts.debounceMs);
+			}, ms ?? opts.debounceMs);
 		},
 		dispose() {
 			if (timer !== undefined) clearTimeout(timer);

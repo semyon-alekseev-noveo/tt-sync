@@ -1,5 +1,8 @@
 import { describe, expect, it, vi } from 'vitest';
-import { listForTags, tagForList, parseTagListText, isListTag, pickLastStageTag, hasMultipleStageTags, stageNeedsPushDespiteHash } from '@/listMapping';
+import {
+	listForTags, tagForList, parseTagListText, isListTag, pickLastStageTag, pickWinningStageTag,
+	hasMultipleStageTags, stageNeedsPushDespiteHash, rewriteLineExclusiveStage,
+} from '@/listMapping';
 import { TaskParser } from '@/taskParser';
 import { getSettings } from '@/settings';
 
@@ -21,20 +24,40 @@ describe('tag -> list mapping', () => {
 		expect(isListTag('type-next', MAP)).toBe(true);
 	});
 
-	it('AF-GTD-TAG-ADD: last mapped stage tag wins the list', () => {
+	it('AF-GTD-TAG-ADD: stage that changes list wins (Abyss may sort tags)', () => {
 		expect(pickLastStageTag(['type/next', 'type/waiting'], MAP)).toBe('type/waiting');
+		// No current list → last on line
 		expect(listForTags(['type/next', 'type/waiting'], MAP, PROJECTS)).toBe('wf');
 		expect(listForTags(['type/waiting', 'type/next'], MAP, PROJECTS)).toBe('na');
+		// On nextAction; Abyss sorted both tags so waiting is last — still move to waiting
+		expect(pickWinningStageTag(['type/next', 'type/waiting'], MAP, PROJECTS, 'na')).toBe('type/waiting');
+		expect(listForTags(['type/next', 'type/waiting'], MAP, PROJECTS, 'na')).toBe('wf');
+		// On waitingFor; DnD added next but sort put next first — must not keep waiting
+		expect(pickWinningStageTag(['type/next', 'type/waiting'], MAP, PROJECTS, 'wf')).toBe('type/next');
+		expect(listForTags(['type/next', 'type/waiting'], MAP, PROJECTS, 'wf')).toBe('na');
 		expect(hasMultipleStageTags(['type/next', 'type/waiting'], MAP)).toBe(true);
 		expect(hasMultipleStageTags(['type/next', 'context/work'], MAP)).toBe(false);
 		expect(stageNeedsPushDespiteHash(['type/next', 'type/waiting'], MAP, 'wf', 'na')).toBe(true);
 		expect(stageNeedsPushDespiteHash(['type/next'], MAP, 'na', 'na')).toBe(false);
 	});
 
-	function mkParser(fileDefault: string) {
+	it('AF-GTD-TAG-ADD: surgical line rewrite keeps non-stage tags', () => {
+		const line = `- [ ] stage-dnd #obsidian #type/next #context/work #type/waiting %%[ticktick_id:: abcdefabcdefabcdefabcdef]%%`;
+		const out = rewriteLineExclusiveStage(line, MAP, 'type/waiting');
+		expect(out).toMatch(/#type\/waiting/);
+		expect(out).not.toMatch(/type\/next/);
+		expect(out).toMatch(/#obsidian/);
+		expect(out).toMatch(/#context\/work/);
+		expect(out).toMatch(/ticktick_id:: abcdefabcdefabcdefabcdef/);
+	});
+
+	function mkParser(fileDefault: string, savedProjectId?: string) {
 		const parser = new TaskParser({} as unknown, {} as unknown);
 		parser.plugin = { taskParser: parser, fileMetadataService: { getFilepathForTask: () => 'p.md' },
 			fileTaskQueries: { getDefaultProjectIdForFilepath: async () => fileDefault },
+			taskRepository: {
+				loadTaskById: async () => (savedProjectId ? { projectId: savedProjectId, parentId: '' } : null),
+			},
 			dateMan: { parseDates: () => ({}), stripDatesFromLine: (s: string) => s, formatDateToISO: () => '', addDatesToLine: (s: string) => s },
 			app: { vault: { getName: () => 'V' } } } as unknown as typeof parser.plugin;
 		return parser;
@@ -61,20 +84,28 @@ describe('tag -> list mapping', () => {
 		Object.assign(S, { abyssTasksFormat: false, tagListMappings: [] });
 	});
 
-	it('AF-GTD-TAG-ADD: dual stage tags → last wins list + exclusive rewrite flag', async () => {
+	it('AF-GTD-TAG-ADD: dual stage tags → mover wins list + exclusive rewrite flag', async () => {
 		const S = (getSettings as unknown as () => Record<string, unknown>)();
 		Object.assign(S, { noteDelimiter: '', fileLinksInTickTick: 'noLink', stopInjectingTickTickTag: true,
 			abyssTasksFormat: true, syncNoteContextTags: false, gtdStageVia: 'list', tagMappings: [], tagListMappings: MAP, syncNotes: false });
 		const id = 'abcdefabcdefabcdefabcdef';
+		// Abyss-sorted order: next before waiting; Dexie still on nextAction → waiting is the mover
 		const line = `- [ ] stage-dnd #type/next #type/waiting %%[ticktick_id:: ${id}]%%`;
-		const parser = mkParser('inbox1');
+		const parser = mkParser('inbox1', 'na');
 		const fm = { getTaskItems: () => [], getTaskRecord: () => ({ task: line, parentId: '', taskLines: [] }) };
 		const task = await parser.convertLineToTask(line, 0, 'p.md', fm as never, null);
 		expect(task.projectId).toBe('wf');
 		expect((task as { __exclusiveStageRewrite?: boolean }).__exclusiveStageRewrite).toBe(true);
+		expect((task as { __exclusiveStageWinner?: string }).__exclusiveStageWinner).toBe('type/waiting');
 		const back = await parser.convertTaskToLine({ ...task, projectId: 'wf', items: [] }, 0);
 		expect(back).toMatch(/#type\/waiting/);
 		expect(back).not.toMatch(/type\/next/);
+		// Reverse DnD: still on waitingFor; sorted line keeps waiting last — next must win
+		const backToNext = `- [ ] stage-dnd #type/next #type/waiting %%[ticktick_id:: ${id}]%%`;
+		const parser2 = mkParser('inbox1', 'wf');
+		const task2 = await parser2.convertLineToTask(backToNext, 0, 'p.md', fm as never, null);
+		expect(task2.projectId).toBe('na');
+		expect((task2 as { __exclusiveStageWinner?: string }).__exclusiveStageWinner).toBe('type/next');
 		Object.assign(S, { abyssTasksFormat: false, tagListMappings: [] });
 	});
 
