@@ -976,3 +976,18 @@ No code change. Tip **2.0.89**. Case **AF-6** in `ABYSS_FIRST_CASES.md`.
 | ID | Pilot status | Evidence |
 |----|----------------|----------|
 | AF-6 | **pass** | **2.0.89**: vault→TT + TT→vault on `abyss-active.md`. Recurring not run. `docs/pilot/results/STEP7-AF-PILOT-SOAK/73-af6-complete-both-ways-2.0.89.md`. #73. |
+
+## PR — AF-7 list move → stage tag (#74 / #20)
+
+No code change. Tip **2.0.89**. Case **AF-7** in `ABYSS_FIRST_CASES.md`.
+
+### AF-7 — moving a TickTick task to another mapped list rewrites the stage tag
+
+1. Sync a task with `#type/next` (TTS-nextAction).
+2. Move it in TickTick to TTS-waitingFor → **Synchronize**.
+
+Expected: same vault line gets `#type/waiting` (not `#type/next`); line does not move to another file.
+
+| ID | Pilot status | Evidence |
+|----|----------------|----------|
+| AF-7 | **pass** | **2.0.89**: `6add7baf…` `#type/next`→`#type/waiting`. `docs/pilot/results/STEP7-AF-PILOT-SOAK/74-af7-list-move-tag-2.0.89.md`. #74. |
