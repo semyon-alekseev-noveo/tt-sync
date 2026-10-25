@@ -948,3 +948,18 @@ Expected: TickTick task is a subtask of that note’s parent; the line stays in 
 | ID | Pilot status | Evidence |
 |----|----------------|----------|
 | AF-4 | **pass** | **2.0.89**: `6add70a0…` parent=`6adcbea8…`; line stayed. `docs/pilot/results/STEP7-AF-PILOT-SOAK/71-af4-active-zone-subtask-2.0.89.md`. #71. |
+
+## PR — AF-5 `#type/next` → next-action list (#72 / #20)
+
+No code change. Tip **2.0.89**. Case **AF-5** in `ABYSS_FIRST_CASES.md`.
+
+### AF-5 — `#type/next` in a non-project note lands on next-action; line stays
+
+1. In an in-scope Inbox/daily note (not a project MOC), add a checkbox with `#type/next`.
+2. Run **Synchronize**.
+
+Expected: TickTick task on TTS-nextAction; the line remains in the same note.
+
+| ID | Pilot status | Evidence |
+|----|----------------|----------|
+| AF-5 | **pass** | **2.0.89**: Inbox → `6add71c5…` on TTS-nextAction; line stayed. `docs/pilot/results/STEP7-AF-PILOT-SOAK/72-af5-type-next-2.0.89.md`. #72. |
