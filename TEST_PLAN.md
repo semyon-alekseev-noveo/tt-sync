@@ -933,3 +933,18 @@ Expected: exactly one parent on TTS-Projects with the note title; no injected `t
 | ID | Pilot status | Evidence |
 |----|----------------|----------|
 | AF-3 | **pass** | **2.0.89**: id `6adcbea8…`, tags `obsidian`/`project`, 1 create then idle. `docs/pilot/results/STEP7-AF-PILOT-SOAK/70-af3-obs-project-note-2.0.89.md`. #70. |
+
+## PR — AF-4 Active Zone checkbox → subtask (#71 / #20)
+
+No code change. Tip **2.0.89**. Case **AF-4** in `ABYSS_FIRST_CASES.md`.
+
+### AF-4 — Active Zone checkbox becomes a subtask and stays put
+
+1. In a synced project note, add a checkbox under `## Active Zone`.
+2. Run **Synchronize** (or allow open-note push).
+
+Expected: TickTick task is a subtask of that note’s parent; the line stays in the same note under Active Zone with `ticktick_id`.
+
+| ID | Pilot status | Evidence |
+|----|----------------|----------|
+| AF-4 | **pass** | **2.0.89**: `6add70a0…` parent=`6adcbea8…`; line stayed. `docs/pilot/results/STEP7-AF-PILOT-SOAK/71-af4-active-zone-subtask-2.0.89.md`. #71. |
