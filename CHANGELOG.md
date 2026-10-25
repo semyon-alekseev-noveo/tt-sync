@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-25 03:52 UTC
+
+- Context: [#131](https://github.com/semyon-alekseev-noveo/tt-sync/pull/131) merged (AF-7); finish AF rows with AF-8.
+- Target: Pilot **AF-8** on tip **2.0.89** — checkbox outside `syncScopeFolders` is not pushed.
+- Actions log: Note under `80 Sandbox/`; Synchronize; confirm no id / journal / TT task; evidence under `STEP7-AF-PILOT-SOAK/`.
+- Validation: Line unchanged without `ticktick_id`; journal 0; MCP search [].
+- Problems: None (`resolved`).
+- To Be Done: Merge evidence PR; close #75; epic #20 combined gate / #76; then #19.
+- References: `docs/pilot/results/STEP7-AF-PILOT-SOAK/75-af8-out-of-scope-2.0.89.md`, `CHANGELOG.md`
+
 ### Iteration 2026-10-25 03:49 UTC
 
 - Context: [#130](https://github.com/semyon-alekseev-noveo/tt-sync/pull/130) merged (AF-6); continue [#20](https://github.com/semyon-alekseev-noveo/tt-sync/issues/20) with AF-7.
