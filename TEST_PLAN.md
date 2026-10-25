@@ -1101,4 +1101,4 @@ Branch into `abyss-mapping`. Residual on **2.0.90**: full Synchronize required; 
 
 | ID | Pilot status | Evidence |
 |----|----------------|----------|
-| AF-GTD-TAG-ADD | **unit** mover-wins + surgical rewrite; live re-prove pending | `listMapping.test.ts` |
+| AF-GTD-TAG-ADD | **pass** ×2 (tip deploy, open-note) | `docs/pilot/results/ABYSS-NEST-GTD/144-af-gtd-mover-wins-live.md` — BRAT 2.0.90 alone is pre-#144 |
