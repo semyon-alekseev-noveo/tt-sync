@@ -5,10 +5,6 @@
 		{
 			"path": "src/main.ts",
 			"reason": "Obsidian entry wires the service graph; further extract waits on settings/query/redo seams."
-		},
-		{
-			"path": "src/api/index.ts",
-			"reason": "Unofficial Tick client; prefer TECH-API-1 contract tests over a big-bang split."
 		}
 	]
 }

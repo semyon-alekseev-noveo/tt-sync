@@ -1,5 +1,4 @@
 'use strict';
-import { Platform, requestUrl, type RequestUrlParam, type RequestUrlResponse } from 'obsidian';
 import ObjectID from 'bson-objectid';
 import type { IProjectGroup } from './types/ProjectGroup';
 import type { IProject, ISections } from './types/Project';
@@ -10,9 +9,21 @@ import { API_ENDPOINTS } from './utils/get-api-endpoints';
 import log from '@/utils/logger';
 import { getSettings, updateSettings } from '@/settings';
 import { normalizeTrigger } from '@/utils/ReminderConverter';
-import { noteHttpCall } from '@/sync/perf';
-
-const _userAgent = window['navigator']['userAgent'];
+import {
+	tickMakeRequest,
+	tickSetError,
+	getTickUserAgent,
+	getTickXDevice,
+	type TickHttpHost,
+} from '@/api/tickHttp';
+export {
+	buildAddTaskCommentBody,
+	parseTaskCommentFromApiResponse,
+} from '@/api/taskComments';
+import {
+	buildAddTaskCommentBody,
+	parseTaskCommentFromApiResponse,
+} from '@/api/taskComments';
 
 const {
 	TaskEndPoint,
@@ -63,64 +74,6 @@ interface UpdatePayload {
 	update: unknown[];
 }
 
-/**
- * Web-session POST `/comment` body. TickTick returns HTTP 500 `unknown_exception`
- * for `{ title }` / `{ title, content }` alone; the web client sends a client id
- * plus task/project ids (dida-cli web-api.md). See BUG-COMMENT-API-POST-500.
- */
-export function buildAddTaskCommentBody(projectId: string, taskId: string, title: string): Record<string, unknown> {
-	const clipped = title.slice(0, 1024);
-	return {
-		id: ObjectID().toHexString(),
-		createdTime: new Date().toISOString().replace('Z', '+0000'),
-		taskId,
-		projectId,
-		title: clipped,
-		userProfile: { isMyself: true },
-		mentions: [],
-		isNew: true,
-	};
-}
-
-/** Unwrap TickTick POST /comment JSON into `{ id, title? }` or null when the id is missing. */
-export function parseTaskCommentFromApiResponse(response: unknown, fallbackTitle: string): ITaskComment | null {
-	if (!response || typeof response !== 'object') return null;
-	const raw = response as Record<string, unknown>;
-	const pick = (v: unknown): ITaskComment | null => {
-		if (!v || typeof v !== 'object') return null;
-		const o = v as Record<string, unknown>;
-		const rawId = o.id ?? o.commentId;
-		const id = typeof rawId === 'string' ? rawId : (typeof rawId === 'number' ? String(rawId) : '');
-		if (!id.length) return null;
-		const t = o.title;
-		return { id, title: typeof t === 'string' ? t : fallbackTitle };
-	};
-	if (raw.ok === true && raw.result) {
-		const fromResult = pick(raw.result);
-		if (fromResult) return fromResult;
-	}
-	const direct = pick(raw);
-	if (direct) return direct;
-	if (raw.data) {
-		const fromData = pick(raw.data);
-		if (fromData) return fromData;
-	}
-	if (raw.result && raw.ok !== false) {
-		const fromLoose = pick(raw.result);
-		if (fromLoose) return fromLoose;
-	}
-	log.warn('Add Task Comment: response had no comment id', raw);
-	return null;
-}
-
-function httpStatusOf(error: unknown): number | undefined {
-	if (!error || typeof error !== 'object') return undefined;
-	const status = (error as { status?: unknown }).status;
-	if (typeof status === 'number') return status;
-	const nested = (error as { response?: { status?: unknown } }).response?.status;
-	return typeof nested === 'number' ? nested : undefined;
-}
-
 /** Pull could not read the TickTick delta. Callers must not treat this as an empty change set. */
 export class TickTickPullError extends Error {
 	constructor(message: string) {
@@ -144,9 +97,9 @@ export class Tick {
 	protocol: string = 'https://';
 	apiProtocol: string = 'https://api.';
 	apiVersion: string = '/api/v2';
-	private originUrl: string;
-	private userAgent: string;
-	private deviceAgent: string;
+	originUrl: string;
+	userAgent: string;
+	deviceAgent: string;
 
 	constructor({ username, password, baseUrl, token, checkPoint }: IoptionsProps) {
 		this.username = username;
@@ -155,8 +108,8 @@ export class Tick {
 		this.inboxProperties = {
 			id: '', sortOrder: 0
 		};
-		this.userAgent = this.getUserAgent();
-		this.deviceAgent = this.getXDevice();
+		this.userAgent = getTickUserAgent();
+		this.deviceAgent = getTickXDevice();
 
 		if (baseUrl) {
 			this.apiUrl = `${this.apiProtocol}${baseUrl}${this.apiVersion}`;
@@ -219,7 +172,7 @@ export class Tick {
 				};
 			}
 		} catch (error) {
-			this.setError('Login', null, error);
+			tickSetError(this, 'Login', null, error);
 			log.error(error);
 		}
 		return null;
@@ -238,7 +191,7 @@ export class Tick {
 			}
 		} catch (e) {
 			log.error('Get Inbox Properties failed: ', e);
-			this.setError('Get Inbox Properties', null, e);
+			tickSetError(this, 'Get Inbox Properties', null, e);
 			return null;
 		}
 	}
@@ -260,7 +213,7 @@ export class Tick {
 			}
 		} catch (e) {
 			log.error('Get User Status failed: ', e);
-			this.setError('Get User Status', null, e);
+			tickSetError(this, 'Get User Status', null, e);
 			return null;
 		}
 	}
@@ -284,7 +237,7 @@ export class Tick {
 			}
 		} catch (e) {
 			log.error('Get Inbox Properties failed: ', e);
-			this.setError('Get Inbox Properties', null, e);
+			tickSetError(this, 'Get Inbox Properties', null, e);
 		}
 		return false;
 	}
@@ -304,7 +257,7 @@ export class Tick {
 			}
 		} catch (e) {
 			log.error('Get Tags failed: ', e);
-			this.setError('Get Tags', null, e);
+			tickSetError(this, 'Get Tags', null, e);
 		}
 		return [];
 	}
@@ -317,7 +270,7 @@ export class Tick {
 			return response;
 		} catch (e) {
 			log.error('Create Tags failed: ', e);
-			this.setError('Create Tags', null, e);
+			tickSetError(this, 'Create Tags', null, e);
 			return null;
 		}
 	}
@@ -343,7 +296,7 @@ export class Tick {
 			}
 		} catch (e) {
 			log.error('Get ProjectF Groups failed: ', e);
-			this.setError('Get Project Groups', null, e);
+			tickSetError(this, 'Get Project Groups', null, e);
 		}
 		return [];
 	}
@@ -357,7 +310,7 @@ export class Tick {
 			}
 		} catch (e) {
 			log.error('Get Projects failed: ', e);
-			this.setError('Get Projects', null, e);
+			tickSetError(this, 'Get Projects', null, e);
 		}
 		return [];
 	}
@@ -374,7 +327,7 @@ export class Tick {
 			}
 		} catch (e) {
 			log.error('Get Project Sections failed: ', e);
-			this.setError('Get Project Sections', null, e);
+			tickSetError(this, 'Get Project Sections', null, e);
 			return [];
 		}
 	}
@@ -398,7 +351,7 @@ export class Tick {
 			}
 		} catch (e) {
 			log.error('Get Project Sections failed: ', e);
-			this.setError('Get Project Sections', null, e);
+			tickSetError(this, 'Get Project Sections', null, e);
 			return [];
 		}
 	}
@@ -410,7 +363,7 @@ export class Tick {
 		if (!response) {
 			const err = new TickTickPullError('Get Updated Tasks failed: no response');
 			log.error(err.message);
-			this.setError('Get All Resources', null, err);
+			tickSetError(this, 'Get All Resources', null, err);
 			throw err;
 		}
 		const r = response as {
@@ -420,7 +373,7 @@ export class Tick {
 		if (!r.syncTaskBean) {
 			const err = new TickTickPullError('Get Updated Tasks failed: malformed response');
 			log.error(err.message);
-			this.setError('Get All Resources', null, err);
+			tickSetError(this, 'Get All Resources', null, err);
 			throw err;
 		}
 		// Advance the checkpoint only after a readable delta. A failure leaves the previous value.
@@ -450,7 +403,7 @@ export class Tick {
 			}
 		} catch (e) {
 			log.error('Get All Resources failed: ', e);
-			this.setError('Get All Resources', null, e);
+			tickSetError(this, 'Get All Resources', null, e);
 		}
 		return null;
 	}
@@ -484,7 +437,7 @@ export class Tick {
 			return [];
 		} catch (e) {
 			log.error('Get Tasks Details failed: ', e);
-			this.setError('Get Tasks', null, e);
+			tickSetError(this, 'Get Tasks', null, e);
 			return [];
 		}
 	}
@@ -513,7 +466,7 @@ export class Tick {
 			return [];
 		} catch (e) {
 			log.error('Get Tasks failed: ', e);
-			this.setError('Get Tasks', null, e);
+			tickSetError(this, 'Get Tasks', null, e);
 			return [];
 		}
 	}
@@ -535,7 +488,7 @@ export class Tick {
 			}
 		} catch (e) {
 			log.error('Get Tasks failed: ', e);
-			this.setError('Get Tasks', null, e);
+			tickSetError(this, 'Get Tasks', null, e);
 			return null;
 		}
 	}
@@ -551,7 +504,7 @@ export class Tick {
 			}
 		} catch (e) {
 			log.error('Get All Completed Items failed: ', e);
-			this.setError('Get All Completed Tasks', null, e);
+			tickSetError(this, 'Get All Completed Tasks', null, e);
 			return [];
 		}
 	}
@@ -623,7 +576,7 @@ export class Tick {
 			}
 		} catch (e) {
 			log.error('Add Task failed: ', e);
-			this.setError('Add Task', null, e);
+			tickSetError(this, 'Add Task', null, e);
 			return [];
 		}
 
@@ -697,7 +650,7 @@ export class Tick {
 			}
 		} catch (e) {
 			log.error('Update Task failed: ', e);
-			this.setError('Update Task', null, e);
+			tickSetError(this, 'Update Task', null, e);
 			return null;
 		}
 	}
@@ -737,7 +690,7 @@ export class Tick {
 			}
 		} catch (e) {
 			log.error('Delete Task  failed: ', e);
-			this.setError('Delete Task Tasks', null, e);
+			tickSetError(this, 'Delete Task Tasks', null, e);
 			return null;
 		}
 	}
@@ -757,7 +710,7 @@ export class Tick {
 			return response;
 		} catch (e) {
 			log.error('Batch Update failed: ', e);
-			this.setError('Batch Update', null, e);
+			tickSetError(this, 'Batch Update', null, e);
 			return null;
 		}
 	}
@@ -781,7 +734,7 @@ export class Tick {
 			}
 		} catch (e) {
 			log.error('Export failed: ', e);
-			this.setError('Export', null, e);
+			tickSetError(this, 'Export', null, e);
 			return null;
 		}
 	}
@@ -811,7 +764,7 @@ export class Tick {
 			}
 		} catch (e) {
 			log.error('Project Move failed: ', e);
-			this.setError('Project Move', null, e);
+			tickSetError(this, 'Project Move', null, e);
 			return null;
 		}
 	}
@@ -845,7 +798,7 @@ export class Tick {
 			return null;
 		} catch (e) {
 			log.error('Get Task Comments failed: ', e);
-			this.setError('Get Task Comments', null, e);
+			tickSetError(this, 'Get Task Comments', null, e);
 			return null;
 		}
 	}
@@ -862,7 +815,7 @@ export class Tick {
 			return { id: String(body.id), title: String(body.title) };
 		} catch (e) {
 			log.error('Add Task Comment failed: ', e);
-			this.setError('Add Task Comment', null, e);
+			tickSetError(this, 'Add Task Comment', null, e);
 			return null;
 		}
 	}
@@ -874,7 +827,7 @@ export class Tick {
 			return response !== null;
 		} catch (e) {
 			log.error('Delete Task Comment failed: ', e);
-			this.setError('Delete Task Comment', null, e);
+			tickSetError(this, 'Delete Task Comment', null, e);
 			return false;
 		}
 	}
@@ -895,138 +848,14 @@ export class Tick {
 			return null;
 		} catch (e) {
 			log.error('Parent Move failed: ', e);
-			this.setError('Parent Move', null, e);
+			tickSetError(this, 'Parent Move', null, e);
 			return null;
 		}
 	}
+
 
 	async makeRequest(operation: string, url: string, method: string, body: unknown = undefined): Promise<unknown> {
-
-		this.lastError = undefined;
-		let noted = false;
-		try {
-			let requestOptions: RequestUrlParam | undefined;
-			if (operation == 'Login') {
-				requestOptions = this.createLoginRequestOptions(url, body);
-			} else {
-				if (!this.cookieHeader) {
-					this.cookieHeader = window.localStorage.getItem('TTS_Cookies') ?? '';
-				}
-				requestOptions = this.createRequestOptions(method, url, body);
-			}
-			const result = await requestUrl(requestOptions);
-			noteHttpCall(operation, url, result?.status);
-			noted = true;
-			if (result.status != 200) {
-				this.setError(operation, result, null);
-				return null;
-			}
-			this.cookies =
-				(result.headers['set-cookie'] as unknown as string[]) ?? [];
-			this.cookieHeader = this.cookies.join('; ') + ';';
-			window.localStorage.setItem('TTS_Cookies', this.cookieHeader);
-			// Comment create (and some DELETEs) return HTTP 200 with an empty body.
-			// Accessing `result.json` then throws and used to look like a hard failure.
-			const text = typeof result.text === 'string' ? result.text : '';
-			if (!text.trim()) return {};
-			try {
-				return result.json;
-			} catch {
-				try {
-					return JSON.parse(text);
-				} catch (parseErr) {
-					this.setError(operation, result, parseErr);
-					return null;
-				}
-			}
-		} catch (error) {
-			if (!noted) noteHttpCall(operation, url, httpStatusOf(error));
-			this.setError(operation, null, error);
-			log.error(error);
-			return null;
-		}
-
-	}
-
-	private createLoginRequestOptions(url: string, body: unknown) {
-		const headers = {
-			'Accept': '*/*',
-			'x-device': this.deviceAgent,
-			'Content-Type': 'application/json',
-			'X-Requested-With': 'XMLHttpRequest',
-			'User-Agent': this.userAgent,
-			'Origin': this.originUrl,
-			'Referer': `${this.originUrl}/signin`
-		};
-
-		const options: RequestUrlParam = {
-			method: 'POST',
-			url: url,
-			headers: headers,
-			contentType: 'application/json',
-			body: body ? JSON.stringify(body) : undefined,
-			throw: false
-		};
-		return options;
-	}
-
-	private createRequestOptions(method: string, url: string, body: unknown) {
-		let headers = {
-			'Content-Type': 'application/json',
-			'User-Agent': `${this.userAgent}`,
-			'x-device': `${this.deviceAgent}`,
-			'Cookie': 't=' + `${this.token}` + ';' + this.cookieHeader,
-			't': `${this.token}`
-		};
-		const options: RequestUrlParam = {
-			method: method,
-			url: url,
-			headers: headers,
-			contentType: 'application/json',
-			body: body ? JSON.stringify(body) : undefined,
-			throw: false
-		};
-		return options;
-	}
-
-	private setError(operation: string,
-					 response: RequestUrlResponse | null,
-					 error: unknown) {
-		if (response) {
-			const statusCode = response.status;
-			let errorMessage: unknown;
-			if (statusCode == 429) {
-				errorMessage = 'Error: ' + statusCode + ' TickTick reporting too many requests.';
-				this._lastError = { operation, statusCode, errorMessage };
-			} else {
-				try {
-					errorMessage = response.json;
-				} catch {
-					log.debug('Bad JSON response');
-					log.debug('Trying Text.');
-					try {
-						errorMessage = this.extractTitleContent(response.text);
-						log.error('Error: ', errorMessage);
-					} catch {
-						log.debug('Bad text response');
-						log.debug('No error message.');
-						errorMessage = 'No Error message received.';
-					}
-				}
-				this._lastError = { operation, statusCode, errorMessage };
-			}
-		} else {
-			let errorMessage: unknown;
-			let statusCode = 666;
-
-			if (error) {
-				errorMessage = error;
-			} else {
-				errorMessage = 'Unknown Error';
-			}
-			log.error(operation, errorMessage);
-			this._lastError = { operation, statusCode, errorMessage };
-		}
+		return tickMakeRequest(this as TickHttpHost, operation, url, method, body);
 	}
 
 	private getPreviousCheckPoint() {
@@ -1037,93 +866,8 @@ export class Tick {
 		return this._checkpoint;
 	}
 
-	private extractTitleContent(inputString: string) {
-		const startTag = '<title>';
-		const endTag = '</title>';
-		const startIndex = inputString.indexOf(startTag) + startTag.length;
-		const endIndex = inputString.indexOf(endTag);
-
-		return inputString.substring(startIndex, endIndex);
-	}
-
-	private getUserAgent() {
-		return _userAgent;
-	}
-
-	private getXDevice() {
-		const randomID = this.generateRandomID();
-		const randomVersion = 6070;
-
-		let xDeviceObject = {
-			platform: 'web',
-			os: 'Windows 10',
-			device: 'Firefox 117.0',
-			name: '',
-			version: randomVersion,
-			id: randomID,
-			channel: 'website',
-			campaign: '',
-			websocket: ''
-		};
-
-		return JSON.stringify(xDeviceObject);
-	}
-
-	private getPlatform() {
-		if (Platform.isIosApp) {
-			return 'ios';
-		} else if (Platform.isAndroidApp) {
-			return 'android';
-		} else if (Platform.isMacOS) {
-			return 'macOS';
-		} else if (Platform.isWin) {
-			return 'windows';
-		} else if (Platform.isLinux) {
-			return 'linux';
-		} else if (Platform.isSafari) {
-			return 'safari';
-		}
-	}
-
 	private reset() {
 		this._checkpoint = this.getPreviousCheckPoint();
 	}
 
-	private generateRandomID() {
-
-		let result = window.localStorage.getItem('TTS_UniqueID');
-
-		if (result) {
-			if (result.includes('-')) {
-				window.localStorage.removeItem('TTS_UniqueID');
-				result = null;
-			}
-		}
-
-		if (!result) {
-			const prefix = '66';
-			const length = 24;
-			const characters = '0123456789abcdef';
-
-			result = prefix;
-
-			const remainingLength = length - prefix.length;
-
-			for (let i = 0; i < remainingLength; i++) {
-				const randomIndex = Math.floor(Math.random() * characters.length);
-				result += characters[randomIndex];
-			}
-			window.localStorage.setItem('TTS_UniqueID', result);
-		}
-
-		return result;
-	}
-
-	private generateRandomVersion() {
-		let number: number;
-		do {
-			number = Math.floor(Math.random() * 4000) + 6000;
-		} while (number < 6000 || number > 9999);
-		return number;
-	}
 }

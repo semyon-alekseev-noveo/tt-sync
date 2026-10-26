@@ -41,6 +41,6 @@ Live/pilot smokes stay in `TEST_PLAN.md` / gate evidence — unit green does not
 ## References
 
 - `docs/TICKTICK_DELTA_API.md` — delta vs Open API comparison
-- `src/api/index.ts`, `src/api/utils/get-api-endpoints.ts`
+- `src/api/index.ts`, `src/api/tickHttp.ts`, `src/api/taskComments.ts`, `src/api/utils/get-api-endpoints.ts`
 - `PO_STATUS.md` → TECH-API-1
 - Issue [#66](https://github.com/semyon-alekseev-noveo/tt-sync/issues/66)

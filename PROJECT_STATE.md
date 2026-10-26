@@ -21,7 +21,7 @@
 - **Sync research (2026-10-20):** `docs/TICKTICK_DELTA_API.md` — delta has no comments; echo suppression in `pull.ts` uses `etag`; idle sync does not call `getTaskById` per quiet task.
 - **Deletion guard (2026-10-20):** over-threshold or empty-side deletions are held and the checkpoint stays. Defaults: guard on, more than 10 tasks and more than 20%, startup delay 30s. Pilot cases in `TEST_PLAN.md` are not run.
 - **Redo:** journal `<vault>/.tickticksync/journal/`; palette undo previews then applies `planUndo`. Not soaked on the live vault.
-- **Modularization (2026-10-22):** PR 1–7 landed; **2.0.77** closed #31. Follow-on [#66](https://github.com/semyon-alekseev-noveo/tt-sync/issues/66) slices A–E (PR #154): TECH-API-1, cycle/size CI, timed `vaultDeletion`, checkDatabase / vaultLineBehind / fileOperation extracts. Remaining size exceptions: main / api. Releases **2.0.78**–**2.0.91** — see `CHANGELOG.md`.
+- **Modularization (2026-10-22):** PR 1–7 landed; **2.0.77** closed #31. Follow-on [#66](https://github.com/semyon-alekseev-noveo/tt-sync/issues/66) slices A–E (#154) + F (tickHttp / taskComments): `api/index` ≤30 KB. Remaining size exception: `main.ts`. Releases **2.0.78**–**2.0.91** — see `CHANGELOG.md`.
 
 ## Validation
 
