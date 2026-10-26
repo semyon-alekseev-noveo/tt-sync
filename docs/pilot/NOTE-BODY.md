@@ -59,6 +59,10 @@ Map from smoke: NOTE-L1 ≈ BODY-1 (description-shaped); upstream delimiter form
 
 **Recommendation:** Keep Comments as the Abyss chatter path (B). Treat **NOTE-BODY** as compatibility with upstream / Tasks users: prove BODY-1/2 with delimiter form on pilot before any code change; if code already works, record **pass** and close; if not, open implement issue from failing BODY-1.
 
+### Live residual (2026-10-26)
+
+**BUG-NOTE-BODY-WIPE:** a second Synchronize could clear TickTick body when the vault note parsed empty (Abyss pilot ignores upstream delimiter prose) while another field still triggered `updateTask`. Fix: detect empty↔non-empty notes; preserve saved `content`/`desc` unless Abyss `- >` was removed. On Abyss-first pilots use `- > …` for body, not classic delimiter blocks.
+
 ### Working answers (2026-10-26 — unblock discovery; owner may override)
 
 | # | Decision |

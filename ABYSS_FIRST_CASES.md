@@ -31,6 +31,7 @@ Preconditions for every AF row: plugin `tickticksync-abyss`, manual sync, `fileL
 | NOTE-L3b | A child comment line, title unchanged, Synchronize. The text shows in the TickTick Comments panel. The description stays in the task body. |
 | NOTE-BODY-1 | Synced task; `syncNotes` on. Add an **upstream-style note** under the checkbox (indented block; optional `noteDelimiter`). Synchronize. TickTick task **body** (`content`/`desc`) contains that text; **Comments** panel does not gain a new comment for it; title unchanged. Spec: `docs/pilot/NOTE-BODY.md`. **unit pass**; live **not run**. |
 | NOTE-BODY-2 | Edit the same task’s note/body in TickTick. Synchronize. Vault note block under the checkbox updates; Abyss comment bullets (if any) stay as comments. Spec: `docs/pilot/NOTE-BODY.md`. **unit pass**; live **not run**. |
+| BUG-NOTE-BODY-WIPE | Synced task with TT body text. Vault note empty or Abyss delimiter children (not `- >`) while another field changes. Synchronize. TickTick **body must not clear** unless the Abyss `- >` description was removed. Spec: `docs/pilot/NOTE-BODY.md`. **unit pass**; live **not run**. |
 | BUG-COMMENT-NO-PUSH | Same as NOTE-L3b; regression when only comment bullets change or hash path skips API (`PO_STATUS.md`). |
 | BUG-TICKTICK-ID-LEAK | Title must not contain loose `ticktick_id::` outside `%%[ticktick_id:: <24hex>]%%`; canonical id wins if both present. |
 | BUG-ACTIVEZONE-COMMENT-SHUFFLE | Sync in a project Active Zone note must not move comment bullets between sibling tasks or reorder tasks without user edit. |
@@ -117,6 +118,7 @@ Pass only with evidence: the note path, the `ticktick_id`, and either the journa
 
 | Date (UTC) | Vault | Build | Runner | Item | Result | Evidence |
 |------------|-------|-------|--------|------|--------|----------|
+| 2026-10-26 | unit | tip (#152) | agent | BUG-NOTE-BODY-WIPE | **pass** (unit); live **not run** | `src/test/bugNoteBodyWipe.test.ts` — empty vault / delimiter must not clear TT body. |
 | 2026-10-26 | unit | tip (#152) | agent | NOTE-BODY-1 / NOTE-BODY-2 / NOTE-BODY-3 | **pass** (unit); live **not run** | `src/test/noteBody.upstream.test.ts`; `docs/pilot/results/NOTE-BODY/01-unit-discovery.md`. |
 | 2026-10-25 | Thinkpad-tts-test | **2.0.91** | agent (CLI+MCP) | AF-5 / NOTE-L3b×2 / AF-GTD-STAGE-MOVE / AF-6 / AF-7 | **pass** | Live regression; DEL-1/3 **not run**. `REGRESSION-2.0.91/01-…`. |
 | 2026-10-25 | Thinkpad-tts-test | 2.0.89 | agent (Obsidian CLI + MCP) | AF-NEST-1 | **pass** | Child `…439` `parentId`=`…438`; same TTS-Inbox. `ABYSS-NEST-GTD/137-af-nest-gtd-pilot.md`. |

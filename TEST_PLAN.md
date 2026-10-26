@@ -1266,4 +1266,10 @@ Upstream delimiter note ↔ TT body. No production code change; working PO answe
 |----|----------------|----------|
 | NOTE-BODY-1 | **unit pass**; live **not run** | `NOTE-BODY/01-unit-discovery.md` |
 | NOTE-BODY-2 | **unit pass**; live **not run** | same |
+| BUG-NOTE-BODY-WIPE | **unit pass**; live **not run** | `src/test/bugNoteBodyWipe.test.ts` |
+
+### BUG-NOTE-BODY-WIPE (same PR)
+
+1. `npx vitest run src/test/bugNoteBodyWipe.test.ts`
+2. Live: task with TT body; change only a tag / title; Synchronize — body must remain. Prefer `- >` body on Abyss pilot.
 

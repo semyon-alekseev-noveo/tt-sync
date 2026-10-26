@@ -1,12 +1,22 @@
 # Changelog
 
+### Iteration 2026-10-26 05:40 UTC
+
+- Context: Owner reported second Synchronize cleared TickTick note during NOTE-BODY try.
+- Target: Fix BUG-NOTE-BODY-WIPE — incidental push must not POST empty body.
+- Actions log: detect both-side notes; preserve content/desc; Abyss delimiter guard; unit tests.
+- Validation: `npx vitest run src/test/bugNoteBodyWipe.test.ts` pass; full suite this PR.
+- Problems: Live re-prove still needed (`open`).
+- To Be Done: Live prove×2 on pilot; prefer `- >` body under `abyssTasksFormat`.
+- References: `detect.ts`, `push.ts`, #152
+
 ### Iteration 2026-10-26 05:15 UTC
 
 - Context: Owner asked NOTE-BODY after #66 close; issue #152.
 - Target: Record §5 working answers; unit-prove BODY-1/2; no code unless fail.
 - Actions log: `noteBody.upstream.test.ts`; brief/PO/TEST_PLAN; `docs/pilot/results/NOTE-BODY/`.
 - Validation: `npx vitest run` 742; `npm run build` OK.
-- Problems: Live pilot BODY-1/2 still **not run** (`open`).
+- Problems: Live pilot BODY-1/2 still **not run** (`open`); then BUG-NOTE-BODY-WIPE found live.
 - To Be Done: Live Synchronize on `<pilot-vault>`; close #152 after live pass.
 - References: `docs/pilot/NOTE-BODY.md`, #152
 
