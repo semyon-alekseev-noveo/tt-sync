@@ -1129,3 +1129,14 @@ Owner intent: Abyss tag-tree **branch → branch** = replace stage tag. Brief: `
 | ID | Pilot status | Evidence |
 |----|----------------|----------|
 | AF-GTD-PREFIX | **pass** (unit + pilot migrate) | `docs/pilot/results/ABYSS-NEST-GTD/150-af-gtd-prefix-2.0.91.md` |
+
+## Live regression — 2.0.91 (BRAT)
+
+| ID | Pilot status | Evidence |
+|----|----------------|----------|
+| AF-5 | **pass** | `REGRESSION-2.0.91/01-live-gate-2.0.91.md` (`…492f3` → TTS-nextAction) |
+| NOTE-L3b | **pass** ×2 | same — `reg91-l3b-160427` / `reg91-l3b-b-160427` |
+| AF-GTD-STAGE-MOVE | **pass** | same — `…492f4` → waitingFor + `#gtd/waiting` |
+| AF-6 | **pass** (Obs→TT) | same — `…492f7` status 2 |
+| AF-7 | **pass** | same — `…492f8` → `#gtd/waiting` |
+| DEL-1 / DEL-3 | **not run** | needs TaskDeletionModal |
