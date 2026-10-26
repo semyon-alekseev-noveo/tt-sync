@@ -1278,7 +1278,20 @@ Ships #160 Notebook no-delete, #163 waitForObsidianSync restore, NOTE-BODY live 
 
 | ID | Pilot status | Evidence |
 |----|----------------|----------|
-| TP-RELEASE-2.0.92 | **not run** (bump PR) | Owner BRAT after tag |
+| TP-RELEASE-2.0.92 | tagged | https://github.com/semyon-alekseev-noveo/tt-sync/releases/tag/2.0.92 |
+
+## PR — release 2.0.93
+
+Ships #165 NOTE-BODY-2, #166/#167 Notebook MVP TT→vault, live evidence #168/#169.
+
+1. Install **2.0.93** on `<pilot-vault>` (BRAT or tip); reload; Synchronize once.
+2. Optional: BODY-2 smoke (TT body → `- >`); Notebook MVP only if `syncNotebook` on.
+
+| ID | Pilot status | Evidence |
+|----|----------------|----------|
+| TP-RELEASE-2.0.93 | **not run** (bump PR) | Owner BRAT after tag |
+| NOTE-BODY-2 | live **pass** ×2 on tip | `NOTE-BODY/03-live-body2-tip.md` |
+| FEAT-NOTEBOOK-MVP-1 | live **pass** ×2 on tip | `FEAT-NOTEBOOK/166-mvp-tt-to-vault-live.md` |
 
 ### BUG-NOTE-BODY-WIPE (same PR)
 

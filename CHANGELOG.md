@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-26 10:19 UTC
+
+- Context: Owner asked release after NOTE-BODY-2 + Notebook MVP live on tip past **2.0.92**.
+- Target: Bump **2.0.93**; tag after bump PR merges (no retag of 2.0.92).
+- Actions log: `npm version 2.0.93`; ships #165 BODY-2, #166/#167 Notebook MVP, live evidence #168/#169.
+- Validation: Version files = 2.0.93; gate already green on tip.
+- Problems: - No changes
+- To Be Done: Merge bump PR; tag **2.0.93** on tip; BRAT.
+- References: #152, #159, `CHANGELOG.md`
+
 ### Iteration 2026-10-26 10:12 UTC
 
 - Context: Owner go live FEAT-NOTEBOOK-MVP-1 after #166/#167 tip.
