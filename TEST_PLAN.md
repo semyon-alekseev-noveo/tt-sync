@@ -1225,3 +1225,17 @@ Extract-only.
 |----|----------------|----------|
 | TECH-FILEOP-EXTRACT | **unit**; pilot **not run** | `66-slice-e-file-operation.md` |
 
+## PR — #66 slice F (api HTTP + comments extract)
+
+Extract-only: session HTTP and comment helpers leave `api/index.ts` ≤ 30 KB. Public exports unchanged (`buildAddTaskCommentBody` still from `@/api`).
+
+### TECH-API-HTTP-EXTRACT
+
+1. `npx vitest run src/test/api/techApi1.contract.test.ts src/test/bugCommentApiPost500.test.ts src/test/api/getUpdatedTasks.failClosed.test.ts`
+2. `npm run check:sizes` — `api/index.ts` not excepted; only `main.ts` remains
+3. Optional live login / Synchronize — **not run**
+
+| ID | Pilot status | Evidence |
+|----|----------------|----------|
+| TECH-API-HTTP-EXTRACT | **unit**; pilot **not run** | `66-slice-f-api-http-extract.md` |
+

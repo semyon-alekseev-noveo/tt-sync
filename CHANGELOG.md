@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-26 04:50 UTC
+
+- Context: Continue #66 after #154 — drop `api/index` size exception.
+- Target: Extract Tick session HTTP + comment helpers; `api/index.ts` ≤30 KB.
+- Actions log: `tickHttp.ts`, `taskComments.ts`; thin `makeRequest`; shrink exceptions; docs/TEST_PLAN.
+- Validation: `check:sizes` (1 exception); `check:cycles` OK; `npx vitest run` 738; `npm run build` OK.
+- Problems: `main.ts` still excepted (`open`).
+- To Be Done: Owner merge; optional main extract or keep exception + close #66 DoD.
+- References: `66-slice-f-api-http-extract.md`, #66
+
 ### Iteration 2026-10-26 02:52 UTC
 
 - Context: Continue #66 — drop `fileOperation` size exception.

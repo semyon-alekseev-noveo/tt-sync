@@ -1,6 +1,6 @@
 # Sync modularization plan
 
-**Status:** **PR 7 landed**; **#66 slices A–E** — TECH-API-1 + cycle/size CI; timed `vaultDeletion`; checkDatabase / vaultLineBehind / fileOperation extracts (`fileOperation` under 30 KB). Evidence: `docs/pilot/results/TECH-SYNC-MODULARIZATION/`; playbook `docs/TECH_API_BREAKAGE.md`.
+**Status:** **PR 7 landed**; **#66 slices A–E** (#154); **slice F** — Tick HTTP + comment helpers (`api/index` under 30 KB). Remaining size exception: `main.ts`. Evidence: `docs/pilot/results/TECH-SYNC-MODULARIZATION/`; playbook `docs/TECH_API_BREAKAGE.md`.
 
 **Canonical boundaries:** [`ANALYST_REFERENCE_DIAGRAMS.md`](ANALYST_REFERENCE_DIAGRAMS.md). Process: [`DEV_FLOW.md`](../DEV_FLOW.md).
 
@@ -180,6 +180,12 @@ See **`docs/COMMENT_SYNC_MODEL.md`**. PR A: keys + `planCommentSync` + tests (in
 - `src/sync/vault-pull/persistTasksToFile.ts`, `taskSort.ts`
 - `fileOperation.ts` under 30 KB (dropped from exceptions).
 
+### PR 13 / #66 slice F — Tick HTTP + comment helpers
+
+- `src/api/tickHttp.ts` — session HTTP (`tickMakeRequest`, headers, device UA)
+- `src/api/taskComments.ts` — comment POST body / response parse (re-exported from `api/index`)
+- `src/api/index.ts` under 30 KB (dropped from exceptions)
+
 ### Files over 30 KB — exceptions (#66 / #31 DoD)
 
 Canonical list: `docs/file-size.exceptions.json` (must shrink when files drop ≤ 30 KB).
@@ -187,11 +193,10 @@ Canonical list: `docs/file-size.exceptions.json` (must shrink when files drop �
 | File | Exception / plan |
 |------|------------------|
 | `src/main.ts` | Obsidian entry; settings/query/redo seams later |
-| `src/api/index.ts` | Unofficial Tick; TECH-API-1 coverage first |
 
-### PR 13+ — next slices
+### PR 14+ — next slices
 
-- Further extract when a concrete fix needs a seam (`api/index`, `main`).
+- Further extract when a concrete fix needs a seam (`main`).
 
 ## Bug → module (quick routing)
 
