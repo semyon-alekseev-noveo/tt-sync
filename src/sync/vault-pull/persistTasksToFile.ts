@@ -9,6 +9,7 @@ import type { PluginContext } from '@/pluginContext';
 import type { ITask } from '@/api/types/Task';
 import { getSettings } from '@/settings';
 import { NewFileMap } from '@/services/NewFileMap';
+import { takePreMergeNoteBase } from '@/sync/preMergeNoteBase';
 import log from '@/utils/logger';
 
 export interface PersistTasksHost {
@@ -83,8 +84,14 @@ export async function persistToFile(host: PersistTasksHost,
 			//For updates doing the dateHolder mambo here because we need to make sure we get old dates....
 			const oldTask = await host.plugin.taskRepository.loadTaskById(task.id);
 			host.plugin.dateMan?.addDateHolderToTask(task, oldTask);
-			// last-synced note text, so the merge can tell new local comments from ones deleted in TickTick
-			Object.defineProperty(task, '__baseContent', { value: oldTask?.content ?? '', enumerable: false, configurable: true });
+			// last-synced note text, so the merge can tell new local comments / `- >` from TT edits.
+			// Prefer pre-pull Dexie content (NOTE-BODY-2); `oldTask` is already the remote row.
+			const preMerge = takePreMergeNoteBase(task.id);
+			Object.defineProperty(task, '__baseContent', {
+				value: preMerge !== undefined ? preMerge : (oldTask?.content ?? ''),
+				enumerable: false,
+				configurable: true,
+			});
 			if (oldTask) {
 				// Compare incoming task (from DB/TickTick) with current vault state
 				const vaultProjectId = await host.plugin.fileTaskQueries?.getDefaultProjectIdForFilepath(file.path);

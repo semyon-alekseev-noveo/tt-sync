@@ -9,6 +9,7 @@ import { deleteCommentMapsForTask } from '@/db/taskCommentMaps';
 import { deletionIdOf } from '@/sync/massDeleteGuard';
 import log from '@/utils/logger';
 import { addCount } from '@/sync/perf';
+import { rememberPreMergeNoteBase } from '@/sync/preMergeNoteBase';
 
 export interface PullApplyOptions {
 	/** Default true. False leaves remote delete[] unapplied. */
@@ -86,6 +87,8 @@ export async function pullFromTickTick(
 
 		// Ensure dateHolder is correctly merged with local task if available
 		if (local) {
+			// NOTE-BODY-2: vault merge needs pre-pull content; Dexie will hold remote next.
+			rememberPreMergeNoteBase(remoteId, local.task.content);
 			ticktickRestApi.plugin.dateMan?.addDateHolderToTask(rt, local.task);
 		}
 
