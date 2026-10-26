@@ -10,6 +10,7 @@ import type { TickTickService } from '@/services/index';
 import type { PendingTickTickDeletion } from '@/services/TaskModificationDetector';
 import type { SyncRunContext } from '@/sync/SyncRunContext';
 import { runVaultDeletionPhase } from '@/sync/lifecycle/runVaultDeletionPhase';
+import { assessDualStoreDrift, formatDualStoreDriftLog } from '@/sync/dualStoreDrift';
 import { commitVaultText, syncCachedRead } from '@/sync/vault-io';
 import { timePhase } from '@/sync/perf';
 import { getSettings } from '@/settings';
@@ -54,8 +55,24 @@ export async function runSyncFilesPass(
 			const text = await syncCachedRead(plugin.app.vault, f);
 			if (text.includes('ticktick_id::')) texts.push({ path: f.path, text });
 		}
+		const localTasks = await plugin.taskRepository.loadAllLocalTasks();
+		try {
+			// Read-only. Keys are the files table, including rows SyncProject will skip.
+			const line = formatDualStoreDriftLog(assessDualStoreDrift({
+				tasks: localTasks.map(lt => ({
+					taskId: lt.task?.id ?? lt.taskId,
+					file: lt.file ?? '',
+					deleted: lt.deleted,
+				})),
+				filePaths: Object.keys(filesToSync),
+				notes: texts,
+			}));
+			if (line) log.warn(line);
+		} catch (e) {
+			log.error('RISK-DUAL-STORE check failed', e);
+		}
 		const owners = new Map<string, string>();
-		for (const lt of await plugin.taskRepository.loadAllLocalTasks()) {
+		for (const lt of localTasks) {
 			if (lt.file && !lt.deleted) owners.set(lt.task?.id ?? lt.taskId, lt.file);
 		}
 		for (const c of dedupeTaskIds(texts, id => owners.get(id))) {

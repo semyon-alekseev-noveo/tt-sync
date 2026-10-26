@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-26 17:30 UTC
+
+- Context: [#175](https://github.com/semyon-alekseev-noveo/tt-sync/issues/175) RISK-DUAL-STORE. First slice is a sync-time count. Parent #63 stays open. #174 / #176 LWW behavior is unchanged.
+- Target: On the file pass, count three drifts for non-deleted tasks and `log.warn` once when any count is above zero. Task body stays in Dexie `tasks`. `files` stays path + `defaultProjectId`. `TickTickTasks` is still built from `tasks.file` and is not stored.
+- Actions log: `assessDualStoreDrift` counts (1) `tasks.file` set and that path missing from the `files` table, (2) blank `tasks.file` while a note has `%%[ticktick_id:: <24hex>]%%`, (3) that marker only in a different file. `runSyncFilesPass` logs the line before duplicate-line cleanup. It uses the note texts that pass already read and the unfiltered `files` keys. All three zero: no warning. No write.
+- Validation: `RISK-DUAL-STORE` failed first (`@/sync/dualStoreDrift` missing), then passed. `npx vitest run` 778 passed (112 files), including `GAP-COMMENT-EDIT` and `RISK-PULL-WINS-LOCAL`. `npm run build` OK. `npm run check:cycles` and `npm run check:sizes` OK. Pilot **not run**.
+- Problems: No auto-repair, so the same counts return on the next sync. Deleted tasks, loose `ticktick_id::` fragments, non-24-hex ids, frontmatter `ticktick_id`, orphan markers, and a registered file whose marker is simply absent are not counted. A second copy is not counted when `tasks.file` also contains the marker. One task can increment both file-missing and marker-mismatch. A failed `getAllFileMetadata` returns `{}` and then every set `tasks.file` looks like file-missing. TECH-START-1 ([#86](https://github.com/semyon-alekseev-noveo/tt-sync/issues/86)) is unchanged.
+- To Be Done: Owner merges. Pilot on `<pilot-vault>` is **not run**. #63 and #174 stay as they are.
+- References: #175, #63, `PO_STATUS.md`, `TEST_PLAN.md`
+
 ### Iteration 2026-10-26 17:00 UTC
 
 - Context: [#174](https://github.com/semyon-alekseev-noveo/tt-sync/issues/174) RISK-PULL-WINS-LOCAL. Owner approved the vault rewrite on a local LWW win. Bookkeeping `modifiedTime` vs a dirty flag stays out of scope.

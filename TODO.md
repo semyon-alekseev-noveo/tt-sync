@@ -23,7 +23,7 @@ Latest release: track GitHub Releases for `tt-sync` / `manifest.json` on `abyss-
 
 - [x] GAP-COMMENT-EDIT: unambiguous comment edit uses PUT and keeps the TickTick id (unit). Live PUT not run. PUT failure still delete+add.
 - [x] RISK-PULL-WINS-LOCAL ([#174](https://github.com/semyon-alekseev-noveo/tt-sync/issues/174)): local LWW win rewrites a vault line whose hash differs. Unit only. Pilot **not run**. Dirty-flag vs bookkeeping `modifiedTime` still open.
-- [ ] RISK-DUAL-STORE ([#175](https://github.com/semyon-alekseev-noveo/tt-sync/issues/175)): invariant documented (`tasks` vs `files` path). Detection not coded. RISK-LARGE-VAULT remainder and TECH-START-1 stay on [#86](https://github.com/semyon-alekseev-noveo/tt-sync/issues/86).
+- [x] RISK-DUAL-STORE ([#175](https://github.com/semyon-alekseev-noveo/tt-sync/issues/175)): file pass counts and logs three `tasks.file` drifts. Unit only. Pilot **not run**. No auto-repair. RISK-LARGE-VAULT remainder and TECH-START-1 stay on [#86](https://github.com/semyon-alekseev-noveo/tt-sync/issues/86).
 - [x] Break the `main` ↔ `services` cycle via `PluginContext` (PR #37 / **2.0.77** / epic #31). Remaining extract work → [#66](https://github.com/semyon-alekseev-noveo/tt-sync/issues/66).
 - [ ] Redo journal is in the product (`Undo last sync`) and is not soaked on a vault in this branch.
 

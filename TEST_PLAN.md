@@ -1413,14 +1413,14 @@ Expected: the plugin does not PUT the new text onto the TickTick-only comment.
 ### Still required after this PR (not this behavior change)
 
 - RISK-PULL-WINS-LOCAL ([#174](https://github.com/semyon-alekseev-noveo/tt-sync/issues/174)): unit on the follow-up PR. See the section below. Pilot **not run**.
-- RISK-DUAL-STORE ([#175](https://github.com/semyon-alekseev-noveo/tt-sync/issues/175)): no detection command yet.
+- RISK-DUAL-STORE ([#175](https://github.com/semyon-alekseev-noveo/tt-sync/issues/175)): unit on the follow-up PR. See the section below. Pilot **not run**. No auto-repair.
 - BUG-TICKTICK-ID-LEAK: optional look at pilot lines for loose `ticktick_id::` outside `%%[ticktick_id:: …]%%`. Clean any TickTick title that already contains that fragment by hand.
 
 | ID | Pilot status | Evidence |
 |----|----------------|----------|
 | GAP-COMMENT-EDIT | **unit pass**; live **not run** | `src/test/abyssCommentSync.test.ts`, `src/test/api/techApi1.contract.test.ts` |
 | RISK-PULL-WINS-LOCAL | **unit** on the follow-up PR; pilot **not run** | `src/test/synchronizationInner.integration.test.ts`, `src/test/riskPullWinsLocal.test.ts` |
-| RISK-DUAL-STORE | **not run** (detection not implemented) | Invariant in `PO_STATUS.md` |
+| RISK-DUAL-STORE | **unit** on the follow-up PR; pilot **not run** | `src/test/riskDualStore.test.ts` |
 | BUG-TICKTICK-ID-LEAK | **unit** on tip; pilot re-scan **not run** | `src/test/bugTicktickIdLeak.test.ts` |
 
 ## PR — #174 RISK-PULL-WINS-LOCAL (vault line on local LWW win)
@@ -1454,4 +1454,51 @@ Expected: the note line is left as it is. Dexie still has the local title, statu
 | RISK-PULL-WINS-LOCAL | **unit pass**; pilot **not run** | `src/test/synchronizationInner.integration.test.ts`, `src/test/riskPullWinsLocal.test.ts` |
 | RISK-PULL-WINS-LOCAL hash match | **unit pass**; pilot **not run** | same file, “hash matches the local winner” |
 | Remote-newer / tie still remote | **unit** (existing); pilot **not run** | `src/test/conflicts.test.ts` |
+
+## PR — #175 RISK-DUAL-STORE (count tasks.file drift)
+
+Each Synchronize file pass counts three drifts and writes one console warning when any count is above zero. It does not move lines, rewrite `tasks.file`, or add a task list onto `files`. `TickTickTasks` is still built in memory from `tasks.file` and is not stored. Pilot **not run**.
+
+### RISK-DUAL-STORE — file path missing from files
+
+1. On `<pilot-vault>`, a non-deleted Dexie task has `tasks.file` set to a note path that has no row in Dexie `files`.
+2. Synchronize. Open the developer console.
+
+Expected: one warning `RISK-DUAL-STORE: fileMissingFromFiles=… emptyFileWithMarker=… markerInDifferentFile=…` and `fileMissingFromFiles` is at least 1. The task row, the `files` table, and the note text are unchanged by this check.
+
+### RISK-DUAL-STORE — empty tasks.file with a marker in a note
+
+1. A non-deleted task has blank `tasks.file`. A note contains `%%[ticktick_id:: <that id>]%%` (24 hex characters).
+2. Synchronize.
+
+Expected: the same warning shape, with `emptyFileWithMarker` at least 1. The marker stays in that note. `tasks.file` stays blank.
+
+### RISK-DUAL-STORE — marker only in a different file
+
+1. `tasks.file` names note A, and note A is registered in `files`. The canonical marker for that task id is only in note B.
+2. Synchronize.
+
+Expected: `markerInDifferentFile` is at least 1. The line stays in note B. `tasks.file` stays note A.
+
+### RISK-DUAL-STORE — aligned task stays quiet
+
+1. `tasks.file` is a path present in `files`, and that same note contains the canonical marker.
+2. Synchronize.
+
+Expected: that task does not add to the three counts. When every task is aligned, the console has no `RISK-DUAL-STORE` warning.
+
+### Still required (unchanged behavior)
+
+- No automatic repair. A later sync logs the same counts until something else writes `tasks.file` or `files`.
+- A deleted task is not counted. A loose `ticktick_id::` fragment, a non-24-hex id, a frontmatter `ticktick_id`, and a marker with no task row are not counted.
+- A second copy of the marker is not counted when `tasks.file` also contains it.
+- A registered file that `SyncProject` skips is not “missing from files”.
+- TECH-START-1 ([#86](https://github.com/semyon-alekseev-noveo/tt-sync/issues/86)) is unchanged. This check uses the note texts the file pass already read.
+
+| ID | Pilot status | Evidence |
+|----|----------------|----------|
+| RISK-DUAL-STORE file missing from files | **unit pass**; pilot **not run** | `src/test/riskDualStore.test.ts` |
+| RISK-DUAL-STORE empty file with marker | **unit pass**; pilot **not run** | same file |
+| RISK-DUAL-STORE marker in a different file | **unit pass**; pilot **not run** | same file |
+| RISK-DUAL-STORE aligned / no warn | **unit pass**; pilot **not run** | same file, “does not warn when the three counts are zero” |
 
