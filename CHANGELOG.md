@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-26 10:12 UTC
+
+- Context: Owner go live FEAT-NOTEBOOK-MVP-1 after #166/#167 tip.
+- Target: Opt-in TT NOTE → `TickTick Notebook/` create+update prove ×2.
+- Actions log: Tip deploy; `syncNotebook=true`; MCP NOTES A/B; sync create+update; evidence `166-mvp-…`; restore opt-in **off**.
+- Validation: A/B files with `ticktick_id` + UPDATED bodies; no checkbox leak.
+- Problems: - No changes
+- To Be Done: Merge evidence PR; leave #159 open for bi-di.
+- References: #159, `docs/pilot/results/FEAT-NOTEBOOK/166-mvp-tt-to-vault-live.md`, `CHANGELOG.md`
+
 ### Iteration 2026-10-26 10:02 UTC
 
 - Context: Owner go live BODY-2 prove ×2 after #165/#167 on tip.

@@ -46,7 +46,7 @@ Upstream TickTickSync docs “Notes” = **task body** (`docs-src/configuration/
 | Role | Next |
 |------|------|
 | PO | Accept epic size; folder/id for MVP when spike done |
-| Dev | MVP TT→vault: settings `syncNotebook` / `notebookFolder`; `notebookVault.ts`; case **FEAT-NOTEBOOK-MVP-1** |
-| Tester | Live FEAT-NOTEBOOK-MVP-1 on `<pilot-vault>` (opt-in on); re-check no-delete after **2.0.92** |
+| Dev | MVP landed (#166); bi-di / scope next when PO ready |
+| Tester | FEAT-NOTEBOOK-MVP-1 live **pass** ×2 — `FEAT-NOTEBOOK/166-mvp-tt-to-vault-live.md` |
 
 **References:** #159, #160, `docs/pilot/NOTE-BODY.md`, TECH-API-1.
