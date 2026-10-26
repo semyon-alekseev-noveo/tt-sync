@@ -6,6 +6,7 @@
 	"scripts": {
 		"check": "tsc --noEmit",
 		"check:cycles": "node scripts/check-import-cycles.mjs",
+		"check:sizes": "node scripts/check-file-sizes.mjs --strict",
 		"lint": "eslint src/",
 		"dev": " vite build --mode development --watch",
 		"build": "vite build --mode production",

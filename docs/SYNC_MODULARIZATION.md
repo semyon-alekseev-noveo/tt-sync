@@ -1,6 +1,6 @@
 # Sync modularization plan
 
-**Status:** **PR 7 landed**; **#66 slices A+B** — TECH-API-1 + cycle CI; timed `vaultDeletion` + `syncFiles` body extracted to `sync/phases/syncFilesPass.ts` (`services/index.ts` ~49 KB → ~41 KB). Next: further god-class extract when a bug needs a seam; optional size-warn CI. Evidence: `docs/pilot/results/TECH-SYNC-MODULARIZATION/`; playbook `docs/TECH_API_BREAKAGE.md`.
+**Status:** **PR 7 landed**; **#66 slices A–C** — TECH-API-1 + cycle CI; timed `vaultDeletion` + `syncFilesPass`; `checkDatabase` extract (`services/index.ts` under 30 KB); CI `check:sizes`. Evidence: `docs/pilot/results/TECH-SYNC-MODULARIZATION/`; playbook `docs/TECH_API_BREAKAGE.md`.
 
 **Canonical boundaries:** [`ANALYST_REFERENCE_DIAGRAMS.md`](ANALYST_REFERENCE_DIAGRAMS.md). Process: [`DEV_FLOW.md`](../DEV_FLOW.md).
 
@@ -164,20 +164,26 @@ See **`docs/COMMENT_SYNC_MODEL.md`**. PR A: keys + `planCommentSync` + tests (in
 - Dedupe owners via `plugin.taskRepository.loadAllLocalTasks()` (no `@/db` in phases).
 - Guard: `src/test/syncFilesPass.vaultDeletion.test.ts`.
 
+### PR 10 / #66 slice C — checkDatabase extract + size CI
+
+- `src/services/checkDatabase.ts` (`runCheckDatabase`); `TickTickService.checkDataBase` thin wrapper.
+- `src/services/index.ts` now **under 30 KB** (no longer excepted).
+- CI: `npm run check:sizes` (`scripts/check-file-sizes.mjs` + `docs/file-size.exceptions.json`, strict).
+
 ### Files over 30 KB — exceptions (#66 / #31 DoD)
 
-| File | ~bytes | Exception / plan |
-|------|--------|------------------|
-| `src/services/index.ts` | ~41 KB | **Exception (temporary):** still over 30 KB after syncFiles extract; further shrink when a bug needs a seam (`checkDataBase`, login, register). |
-| `src/main.ts` | ~40 KB | **Exception:** Obsidian entry wires the service graph; further extract waits on settings/query/redo seams. |
-| `src/fileOperation.ts` | ~38 KB | **Exception:** vault-pull / file ops; split when a concrete pull bug needs a seam. |
-| `src/api/index.ts` | ~36 KB | **Exception:** unofficial `Tick` client; prefer contract tests + playbook (`TECH_API_BREAKAGE.md`) over a big bang split. Optional later: group methods by resource. |
+Canonical list: `docs/file-size.exceptions.json` (must shrink when files drop ≤ 30 KB).
 
-Optional size warn CI: deferred (document-only for now).
+| File | Exception / plan |
+|------|------------------|
+| `src/main.ts` | Obsidian entry; settings/query/redo seams later |
+| `src/fileOperation.ts` | Vault-pull; split on a concrete pull bug |
+| `src/api/index.ts` | Unofficial Tick; TECH-API-1 coverage first |
+| `src/services/VaultSyncCoordinator.ts` | Reconcile; extract on pull/reconcile seam |
 
-### PR 10+ — next slices
+### PR 11+ — next slices
 
-- Further `TickTickService` / store extraction when a concrete fix needs a seam; optional size-warn CI.
+- Further extract when a concrete fix needs a seam (`VaultSyncCoordinator`, `fileOperation`, `api/index`).
 
 ## Bug → module (quick routing)
 

@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-26 02:40 UTC
+
+- Context: Continue #66 — god-class still over 30 KB; DoD size CI deferred.
+- Target: Extract `checkDataBase`; get `services/index.ts` ≤30 KB; wire `check:sizes`.
+- Actions log: `checkDatabase.ts`; thin wrapper; `file-size.exceptions.json` + CI; docs/TEST_PLAN.
+- Validation: `check:sizes` OK; `check:cycles` OK; `npx vitest run` 738 pass; `npm run build` OK.
+- Problems: Four production files still excepted (`open` — extract on seam).
+- To Be Done: Owner merge PR #154; further extract when a seam is needed.
+- References: `src/services/checkDatabase.ts`, `66-slice-c-checkdatabase.md`, #66
+
 ### Iteration 2026-10-25 16:25 UTC
 
 - Context: Continue #66 after slice A (timed `vaultDeletion` / syncFiles extract).

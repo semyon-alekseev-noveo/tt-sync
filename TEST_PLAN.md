@@ -1170,3 +1170,24 @@ Expected: unit green; `[perf]` may list `vaultDeletion` beside `syncFiles`. Live
 | ID | Pilot status | Evidence |
 |----|----------------|----------|
 | TECH-VAULT-DELETION-TIMED | **unit**; pilot **not run** | `66-slice-b-vault-deletion.md` |
+
+## PR — #66 slice C (checkDatabase + size CI)
+
+Extract-only + engineering gate. Settings "Check database" behavior unchanged.
+
+### TECH-CHECKDB-EXTRACT
+
+1. `npx vitest run src/test/checkDatabase.extract.test.ts`
+2. Optional: Settings → Check database on pilot (modals/paths unchanged).
+
+| ID | Pilot status | Evidence |
+|----|----------------|----------|
+| TECH-CHECKDB-EXTRACT | **unit**; pilot **not run** | `66-slice-c-checkdatabase.md` |
+
+### TECH-FILE-SIZE-CI
+
+1. `npm run check:sizes` — fails if a non-excepted `src/**/*.ts` (excl. test) exceeds 30 KB.
+
+| ID | Pilot status | Evidence |
+|----|----------------|----------|
+| TECH-FILE-SIZE-CI | **unit** (CI) | `docs/file-size.exceptions.json` |

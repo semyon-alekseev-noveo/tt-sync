@@ -1,7 +1,7 @@
 {
 	"generatedBy": "scripts/check-import-cycles.mjs",
 	"note": "Allowlist may only shrink. Remove an entry after breaking that cycle; never add without updating this note in the PR.",
-	"count": 111,
+	"count": 114,
 	"cycles": [
 		"abyssCommentSync.ts | db/dexie.ts | db/meta.ts | db/taskCommentMaps.ts | fileOperation.ts | pluginContext.ts | settings.ts | taskParser.ts | taskParser/TaskParser.ts | taskParser/convertToLine.ts | taskParser/index.ts | ui/settings/settingsstore.ts",
 		"abyssCommentSync.ts | db/dexie.ts | db/meta.ts | db/taskCommentMaps.ts | fileOperation.ts | pluginContext.ts | settings.ts | taskParser.ts | taskParser/TaskParser.ts | taskParser/index.ts | taskParser/notes.ts | ui/settings/settingsstore.ts",
@@ -32,6 +32,7 @@
 		"db/dexie.ts | db/meta.ts | pluginContext.ts | services/TaskDeletionHandler.ts | settings.ts | sync/SyncRunContext.ts | sync/deletionGuardRun.ts | ui/settings/settingsstore.ts",
 		"db/dexie.ts | db/meta.ts | pluginContext.ts | services/TaskDeletionHandler.ts | settings.ts | ui/settings/settingsstore.ts",
 		"db/dexie.ts | db/meta.ts | pluginContext.ts | services/VaultSyncCoordinator.ts | settings.ts | ui/settings/settingsstore.ts",
+		"db/dexie.ts | db/meta.ts | pluginContext.ts | services/checkDatabase.ts | services/index.ts | settings.ts | ui/settings/settingsstore.ts",
 		"db/dexie.ts | db/meta.ts | pluginContext.ts | services/index.ts | services/syncModule.ts | settings.ts | ui/settings/settingsstore.ts",
 		"db/dexie.ts | db/meta.ts | pluginContext.ts | services/index.ts | settings.ts | sync/journal.ts | sync/phases/index.ts | sync/phases/pullPhase.ts | sync/sync.ts | ui/settings/settingsstore.ts",
 		"db/dexie.ts | db/meta.ts | pluginContext.ts | services/index.ts | settings.ts | sync/phases/index.ts | sync/phases/pullPhase.ts | sync/pull.ts | sync/sync.ts | ui/settings/settingsstore.ts",
@@ -87,6 +88,8 @@
 		"pluginContext.ts | services/TaskOperationsService.ts | settings.ts | ui/settings/settingsstore.ts",
 		"pluginContext.ts | services/VaultSyncCoordinator.ts",
 		"pluginContext.ts | services/VaultSyncCoordinator.ts | settings.ts | ui/settings/settingsstore.ts",
+		"pluginContext.ts | services/checkDatabase.ts | services/index.ts",
+		"pluginContext.ts | services/checkDatabase.ts | services/index.ts | settings.ts | ui/settings/settingsstore.ts",
 		"pluginContext.ts | services/index.ts",
 		"pluginContext.ts | services/index.ts | services/syncModule.ts",
 		"pluginContext.ts | services/index.ts | services/syncModule.ts | settings.ts | ui/settings/settingsstore.ts",

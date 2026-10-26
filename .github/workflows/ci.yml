@@ -25,6 +25,9 @@ jobs:
       - name: Import cycles (allowlist may only shrink)
         run: npm run check:cycles
 
+      - name: File size exceptions (≤30 KB or listed)
+        run: npm run check:sizes
+
       - name: Test
         run: npm test
 
