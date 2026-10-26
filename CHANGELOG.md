@@ -50,6 +50,17 @@
 - To Be Done: PR into `abyss-mapping`; later PR for vaultDeletion or further extract when a seam is needed.
 - References: `docs/TECH_API_BREAKAGE.md`, `docs/import-cycles.allowlist.json`, `CHANGELOG.md`, #66
 
+### Iteration 2026-10-25 16:10 UTC
+
+- Context: Owner updated to **2.0.91**; asked for live regression after fork/notes discussion.
+- Target: AF-5, NOTE-L3b×2, AF-GTD-STAGE-MOVE, AF-6, AF-7 on pilot; record honest DEL skip.
+- Actions log: Seed `REG91-*-160427` in `abyss-active.md`; CLI sync + MCP verify; evidence `REGRESSION-2.0.91/`.
+- Validation: AF-5/GTD/NOTE/AF-6/AF-7 **pass**; DEL-1/3 **not run** (modal).
+- Problems: New-task create rate ~2–3 ids per sync (`mitigated` — re-sync).
+- To Be Done: Owner/agent DEL-1 Confirm + DEL-3 Cancel when modal available; optional NOTE-BODY scope.
+- References: `docs/pilot/results/REGRESSION-2.0.91/`, `CHANGELOG.md`
+
+
 ### Iteration 2026-10-25 14:35 UTC
 
 - Context: PO asked to ship `type/*`→`gtd/*` then release.

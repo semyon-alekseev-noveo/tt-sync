@@ -29,6 +29,8 @@ Preconditions for every AF row: plugin `tickticksync-abyss`, manual sync, `fileL
 | AF-GTD-STAGE-MOVE | Moving stage A → B means **replace**. After sync: one list-mapped stage tag (B); TT list = B. Spec: `docs/pilot/AF-GTD-STAGE-REPLACE.md`. **PO:** keep Option A. |
 | AF-GTD-PREFIX | On load, `tagListMappings` / `tagMappings` LHS `type/…` → `gtd/…`; synced lines (`ticktick_id`) rewrite. New tasks use `#gtd/next` etc. Spec: `docs/pilot/AF-GTD-PREFIX.md`. |
 | NOTE-L3b | A child comment line, title unchanged, Synchronize. The text shows in the TickTick Comments panel. The description stays in the task body. |
+| NOTE-BODY-1 | Synced task; `syncNotes` on. Add an **upstream-style note** under the checkbox (indented block; optional `noteDelimiter`). Synchronize. TickTick task **body** (`content`/`desc`) contains that text; **Comments** panel does not gain a new comment for it; title unchanged. Spec: `docs/pilot/NOTE-BODY.md`. **not run**. |
+| NOTE-BODY-2 | Edit the same task’s note/body in TickTick. Synchronize. Vault note block under the checkbox updates; Abyss comment bullets (if any) stay as comments. Spec: `docs/pilot/NOTE-BODY.md`. **not run**. |
 | BUG-COMMENT-NO-PUSH | Same as NOTE-L3b; regression when only comment bullets change or hash path skips API (`PO_STATUS.md`). |
 | BUG-TICKTICK-ID-LEAK | Title must not contain loose `ticktick_id::` outside `%%[ticktick_id:: <24hex>]%%`; canonical id wins if both present. |
 | BUG-ACTIVEZONE-COMMENT-SHUFFLE | Sync in a project Active Zone note must not move comment bullets between sibling tasks or reorder tasks without user edit. |
@@ -115,6 +117,7 @@ Pass only with evidence: the note path, the `ticktick_id`, and either the journa
 
 | Date (UTC) | Vault | Build | Runner | Item | Result | Evidence |
 |------------|-------|-------|--------|------|--------|----------|
+| 2026-10-25 | Thinkpad-tts-test | **2.0.91** | agent (CLI+MCP) | AF-5 / NOTE-L3b×2 / AF-GTD-STAGE-MOVE / AF-6 / AF-7 | **pass** | Live regression; DEL-1/3 **not run**. `REGRESSION-2.0.91/01-…`. |
 | 2026-10-25 | Thinkpad-tts-test | 2.0.89 | agent (Obsidian CLI + MCP) | AF-NEST-1 | **pass** | Child `…439` `parentId`=`…438`; same TTS-Inbox. `ABYSS-NEST-GTD/137-af-nest-gtd-pilot.md`. |
 | 2026-10-25 | Thinkpad-tts-test | 2.0.89 | agent (Obsidian CLI + MCP) | AF-GTD-TAG-ADD | **fail** (vs desired) | Dual `#type/next`+`#type/waiting` stayed on vault; TT stayed TTS-nextAction (`…43a`). Evidence `ABYSS-NEST-GTD/137-…`. Pre–Option A. |
 | 2026-10-25 | unit | tip (#137 Option A) | agent | AF-GTD-TAG-ADD | **pass** (unit) | Last stage → list; exclusive rewrite flag. |
