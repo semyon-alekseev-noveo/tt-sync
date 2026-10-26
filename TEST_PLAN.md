@@ -1412,8 +1412,8 @@ Expected: the plugin does not PUT the new text onto the TickTick-only comment.
 
 ### Still required after this PR (not this behavior change)
 
-- RISK-PULL-WINS-LOCAL: proposed only. Do not treat a local LWW win as a vault refresh until that child lands.
-- RISK-DUAL-STORE: no detection command yet.
+- RISK-PULL-WINS-LOCAL ([#174](https://github.com/semyon-alekseev-noveo/tt-sync/issues/174)): proposed only. Do not treat a local LWW win as a vault refresh until that issue lands.
+- RISK-DUAL-STORE ([#175](https://github.com/semyon-alekseev-noveo/tt-sync/issues/175)): no detection command yet.
 - BUG-TICKTICK-ID-LEAK: optional look at pilot lines for loose `ticktick_id::` outside `%%[ticktick_id:: …]%%`. Clean any TickTick title that already contains that fragment by hand.
 
 | ID | Pilot status | Evidence |

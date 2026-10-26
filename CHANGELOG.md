@@ -8,7 +8,7 @@
 - Validation: New `GAP-COMMENT-EDIT` tests failed before the PUT (update call count 0), then passed. `npx vitest run` 766 passed. `npm run build` OK. Live TickTick.com PUT **not run**. Pilot id-leak re-scan **not run**.
 - Problems: RISK-PULL-WINS-LOCAL still drops a losing remote and does not rewrite a lagging vault line (`proposed`, not coded). RISK-DUAL-STORE detection not coded (invariant: task body only in `tasks`; `files` is path + default project). BUG-TICKTICK-ID-LEAK junk already stored in TickTick still needs a manual edit. `api/index.ts` is close to the 30 KB size cap.
 - To Be Done: Owner decides the LWW proposal and whether to close #63. Child issues hold the two deferred code items. Live PUT on `<pilot-vault>` when someone can run it.
-- References: #63, `docs/TICKTICK_DELTA_API.md` §2.1, dida-cli `internal/webapi/comments.go`, `CHANGELOG.md`
+- References: #63, #173, #174, #175, `docs/TICKTICK_DELTA_API.md` §2.1, dida-cli `internal/webapi/comments.go`, `CHANGELOG.md`
 
 ### Iteration 2026-10-26 13:22 UTC
 
