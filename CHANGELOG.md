@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-26 13:50 UTC
+
+- Context: [#63](https://github.com/semyon-alekseev-noveo/tt-sync/issues/63) product-risk triage after PERF (#62 closed). One code slice: comment edit.
+- Target: GAP-COMMENT-EDIT uses `PUT /project/{pid}/task/{tid}/comment/{cid}` with `{ title }` when the edit is unambiguous. Other three items stay deferred with written reasons.
+- Actions log: `Tick.updateTaskComment` + `syncAbyssCommentsToTickTick` PUT for one vault-origin key change and for a linked title mismatch. PUT without an id falls back to delete+add. `origin: remote` is not overwritten. Two key changes in one sync are not paired. Perf counter names the PUT `updateTaskComment`.
+- Validation: New `GAP-COMMENT-EDIT` tests failed before the PUT (update call count 0), then passed. `npx vitest run` 766 passed. `npm run build` OK. Live TickTick.com PUT **not run**. Pilot id-leak re-scan **not run**.
+- Problems: RISK-PULL-WINS-LOCAL still drops a losing remote and does not rewrite a lagging vault line (`proposed`, not coded). RISK-DUAL-STORE detection not coded (invariant: task body only in `tasks`; `files` is path + default project). BUG-TICKTICK-ID-LEAK junk already stored in TickTick still needs a manual edit. `api/index.ts` is close to the 30 KB size cap.
+- To Be Done: Owner decides the LWW proposal and whether to close #63. Child issues hold the two deferred code items. Live PUT on `<pilot-vault>` when someone can run it.
+- References: #63, `docs/TICKTICK_DELTA_API.md` §2.1, dida-cli `internal/webapi/comments.go`, `CHANGELOG.md`
+
 ### Iteration 2026-10-26 13:22 UTC
 
 - Context: [#30](https://github.com/semyon-alekseev-noveo/tt-sync/issues/30) PROC-RELEASE-GATE — manual policy from PR #57; Actions still published red tests (**2.0.59**), unmerged branches (**2.0.75/76/77**), and the same tag twice (**2.0.78**).

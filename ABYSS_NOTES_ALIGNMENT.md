@@ -45,7 +45,7 @@ Canonical merge order on pull: **task line → descriptions → checklist items 
 |---------------|----------------|--------|
 | Checkbox title + inline tags/dates | `title`, `status`, `tags`, dates | `convertTaskToLine` / `convertLineToTask` |
 | `- > …` | `content` | `abyssDescriptionToNote` when the Comments API is on; otherwise the description half of `abyssLinesToNote` |
-| `- …` comments | Comments API `title` when `syncAbyssCommentsViaApi` | Fingerprint is trimmed, lower-cased, whitespace collapsed. A changed comment is delete + add (GAP-COMMENT-EDIT). Hash of the parent line still uses `abyssLinesToNote` (description and comments together) |
+| `- …` comments | Comments API `title` when `syncAbyssCommentsViaApi` | Fingerprint is trimmed, lower-cased, whitespace collapsed. One vault-origin key change, or a linked title mismatch, is `PUT .../comment/{cid}` (GAP-COMMENT-EDIT). PUT failure falls back to delete + add. Hash of the parent line still uses `abyssLinesToNote` (description and comments together) |
 | Checklist lines | `items` + often `desc` vs `content` split | `getTaskPayLoad`: if items exist, note text may go to `description` |
 | Nested task line | Separate task with `parentId` | Project scheme + hierarchy; not the same as checklist item |
 

@@ -173,7 +173,9 @@ export function httpEndpointKey(operation: string, url: string): string {
 	const tail = path.replace(/^api\/v\d+\//, '');
 	if (/^task\/[^/]+$/.test(tail)) return 'getTaskById';
 	if (/\/comments$/.test(tail)) return 'getTaskComments';
-	if (/\/comment\/[^/]+$/.test(tail)) return 'deleteTaskComment';
+	if (/\/comment\/[^/]+$/.test(tail)) {
+		return /update/i.test(operation) ? 'updateTaskComment' : 'deleteTaskComment';
+	}
 	if (/\/comment$/.test(tail)) return 'addTaskComment';
 	if (tail.includes('batch/check')) return 'batch/check';
 	if (tail.includes('batch/taskParent')) return 'batch/taskParent';
