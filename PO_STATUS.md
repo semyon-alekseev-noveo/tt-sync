@@ -117,7 +117,7 @@
 9. **NOTE-BODY** [#152](https://github.com/semyon-alekseev-noveo/tt-sync/issues/152): unit discovery green; **live** BODY-1 then BODY-2 on pilot still open.
 10. **BUG-NOTEBOOK-NO-DELETE** [#160](https://github.com/semyon-alekseev-noveo/tt-sync/issues/160) before FEAT-NOTEBOOK [#159](https://github.com/semyon-alekseev-noveo/tt-sync/issues/159) (M–L). Brief: `docs/pilot/NOTEBOOK.md`.
 11. Optional: DEL-1/DEL-3 modal on 2.0.91 (skipped in REGRESSION-2.0.91).
-12. Live re-soak **AF-2 / AF-3 / AF-4** on tip after NOTE-BODY merge (project scheme).
+12. Live re-soak **AF-2 / AF-3 / AF-4** on **2.0.91** — **pass** (`162-af2-af3-af4-tip-2.0.91.md`).
 
 
 ## Аналитический мит 2026-10-19
