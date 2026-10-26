@@ -1202,3 +1202,14 @@ Extract-only: comment/line reconcile moved to `sync/vault-pull/vaultLineBehind.t
 | ID | Pilot status | Evidence |
 |----|----------------|----------|
 | TECH-VAULT-LINE-BEHIND-EXTRACT | **unit**; pilot **not run** | `66-slice-d-vault-line-behind.md` |
+
+## PR — #66 slice E (fileOperation persist + sort)
+
+Extract-only.
+
+1. `npx vitest run src/test/services/updatePathWritesMissingTasks.test.ts src/test/staleFileWrite.test.ts`
+2. Pilot vault write / Synchronize — **not run**.
+
+| ID | Pilot status | Evidence |
+|----|----------------|----------|
+| TECH-FILEOP-EXTRACT | **unit**; pilot **not run** | `66-slice-e-file-operation.md` |

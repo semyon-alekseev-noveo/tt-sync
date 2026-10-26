@@ -41,7 +41,7 @@ Tracker issues live on [`semyon-alekseev-noveo/tt-sync`](https://github.com/semy
 | Sync product risks cluster | [#63](https://github.com/semyon-alekseev-noveo/tt-sync/issues/63) | P1 | **open** — GAP-COMMENT-EDIT, RISK-PULL-WINS-LOCAL, RISK-DUAL-STORE, BUG-TICKTICK-ID-LEAK | **new** 2026-10-22 |
 | Pilot vault config | [#64](https://github.com/semyon-alekseev-noveo/tt-sync/issues/64) | P1 | **pass** on **2.0.89** — Abyss Inbox tag `#inbox`; SyncTag/`syncedLists` hardened | **done** 2026-10-24 |
 | NOTE-L3b / BUG-COMMENT-NO-PUSH recheck | [#65](https://github.com/semyon-alekseev-noveo/tt-sync/issues/65) | P1 | **pass** ×2 on **2.0.89** — `NOTE-L3B-RECHECK/65-note-l3b-2.0.89.md` | **done** 2026-10-24 |
-| Post-#31 modularization follow-on | [#66](https://github.com/semyon-alekseev-noveo/tt-sync/issues/66) | P1 | **partial** — A–D in PR #154; 3 size exceptions left (main/fileOperation/api) | **in progress** 2026-10-26 |
+| Post-#31 modularization follow-on | [#66](https://github.com/semyon-alekseev-noveo/tt-sync/issues/66) | P1 | **partial** — A–E in PR #154; 2 size exceptions left (main/api) | **in progress** 2026-10-26 |
 | DOC-SYNC tip alignment | [#77](https://github.com/semyon-alekseev-noveo/tt-sync/issues/77) | P1 | **docs PR** — version pointers + Steps 4–6 + editor-safety rows | **in progress** 2026-10-23 |
 
 **Closed this audit:** none (nothing newly obsolete after #55).

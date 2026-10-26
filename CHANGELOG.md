@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-26 02:52 UTC
+
+- Context: Continue #66 — drop `fileOperation` size exception.
+- Target: Extract persist + task sort into vault-pull; FO ≤30 KB.
+- Actions log: `persistTasksToFile.ts`, `taskSort.ts`; shrink exceptions; docs.
+- Validation: `check:sizes` (2 exceptions); vitest 738; build OK.
+- Problems: Two production files still excepted (`open`).
+- To Be Done: Owner merge PR #154; further extract on seam.
+- References: `66-slice-e-file-operation.md`, #66
+
 ### Iteration 2026-10-26 02:45 UTC
 
 - Context: Continue #66 — drop `VaultSyncCoordinator` size exception.

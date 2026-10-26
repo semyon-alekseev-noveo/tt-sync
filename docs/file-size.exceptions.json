@@ -7,10 +7,6 @@
 			"reason": "Obsidian entry wires the service graph; further extract waits on settings/query/redo seams."
 		},
 		{
-			"path": "src/fileOperation.ts",
-			"reason": "Vault-pull / file ops; split when a concrete pull bug needs a seam."
-		},
-		{
 			"path": "src/api/index.ts",
 			"reason": "Unofficial Tick client; prefer TECH-API-1 contract tests over a big-bang split."
 		}
