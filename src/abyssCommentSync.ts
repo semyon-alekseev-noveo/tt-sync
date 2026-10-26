@@ -156,6 +156,46 @@ function isVaultOriginCommentMap(m: TaskCommentMap): boolean {
 	return m.origin !== 'remote';
 }
 
+/** PUT when the method exists. Null means the caller should delete+add. */
+async function tryUpdateTaskComment(
+	api: TickTickRestAPI,
+	projectId: string,
+	taskId: string,
+	commentId: string,
+	title: string,
+): Promise<ITaskComment | null> {
+	const update = api.updateTaskComment;
+	if (typeof update !== 'function') return null;
+	try {
+		const updated = await update.call(api, projectId, taskId, commentId, title);
+		return updated?.id ? updated : null;
+	} catch {
+		log.warn('GAP-COMMENT-EDIT: comment update failed; falling back to delete+add', taskId);
+		return null;
+	}
+}
+
+async function retargetCommentMap(
+	taskId: string,
+	projectId: string,
+	previous: TaskCommentMap,
+	thread: AbyssCommentThread,
+	ticktickCommentId: string,
+): Promise<void> {
+	const fp = mapFingerprintForThread(thread);
+	const nextId = commentMapId(taskId, fp);
+	if (previous.id !== nextId) await deleteCommentMap(previous.id);
+	await upsertCommentMap({
+		id: nextId,
+		taskId,
+		projectId,
+		fingerprint: fp,
+		ticktickCommentId,
+		body: thread.body,
+		origin: 'vault',
+	});
+}
+
 /**
  * Push Abyss comment threads to TickTick Comments API; descriptions stay in task `content` via parser.
  */
@@ -322,7 +362,32 @@ export async function syncAbyssCommentsToTickTick(
 		return !!(m?.ticktickCommentId && !remoteIds.has(m.ticktickCommentId));
 	}).length;
 
+	// GAP-COMMENT-EDIT: one vault bullet replaced one vault-origin comment → PUT that id.
+	// Two replacements in one sync stay ambiguous (do not guess which id). Remote-origin
+	// maps are TickTick-only and must not be overwritten (BUG-COMMENT-TT-AHEAD-NO-DELETE).
+	let editedVault: (typeof plan.vaultOnly)[number] | undefined;
+	if (
+		plan.vaultOnly.length === 1
+		&& plan.mapWithoutVault.length === 1
+		&& deletionConfirmMode() !== 'skip'
+	) {
+		const onlyVault = plan.vaultOnly[0];
+		const orphan = plan.mapWithoutVault[0];
+		const commentId = orphan?.remote?.comment.id;
+		const previous = orphan?.map;
+		if (onlyVault && previous && commentId && previous.origin !== 'remote') {
+			const title = tickTickCommentTitle(onlyVault.thread.body);
+			const updated = await tryUpdateTaskComment(api, projectId, taskId, commentId, title);
+			if (updated?.id) {
+				await retargetCommentMap(taskId, projectId, previous, onlyVault.thread, updated.id);
+				editedVault = onlyVault;
+				changed = true;
+			}
+		}
+	}
+
 	for (const v of plan.vaultOnly) {
+		if (v === editedVault) continue;
 		const thread = v.thread;
 		const fp = mapFingerprintForThread(thread);
 		const key = normalizedCommentKey(thread.body);
@@ -390,8 +455,17 @@ export async function syncAbyssCommentsToTickTick(
 		const existing = link.map;
 		if (!existing) continue;
 		if (deletionConfirmMode() === 'skip') continue;
+		const title = tickTickCommentTitle(vaultBody);
+		const updated = await tryUpdateTaskComment(
+			api, projectId, taskId, existing.ticktickCommentId, title,
+		);
+		if (updated?.id) {
+			await retargetCommentMap(taskId, projectId, existing, link.vault.thread, updated.id);
+			changed = true;
+			continue;
+		}
 		await api.deleteTaskComment(projectId, taskId, existing.ticktickCommentId);
-		const created = await api.addTaskComment(projectId, taskId, tickTickCommentTitle(vaultBody));
+		const created = await api.addTaskComment(projectId, taskId, title);
 		if (created?.id) {
 			const fp = mapFingerprintForThread(link.vault.thread);
 			await deleteCommentMap(existing.id);

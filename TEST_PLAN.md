@@ -1328,7 +1328,6 @@ Opt-in `syncNotebook` + `notebookFolder`. One-way TickTick NOTE → markdown. De
 | FEAT-NOTEBOOK-MVP-1 | **unit pass**; live **pass** ×2 | `FEAT-NOTEBOOK/166-mvp-tt-to-vault-live.md` |
 
 ## PR — PROC-RELEASE-GATE (#30)
-
 Workflow and docs only. No vault sync change. Do not push a tag or run **Release Obsidian plugin** unless the owner asked for that publish. Rows stay **not run** until someone does.
 
 Local check (no tag, current tree at **2.0.93**):
@@ -1387,4 +1386,40 @@ Expected: live does not move when a higher pre-release exists. Pilot on **latest
 | PROC-RELEASE-GATE-RETAG | **not run** | existing Release fails the job |
 | PROC-RELEASE-GATE-HAPPY | **not run** | next owner tag on `abyss-mapping` |
 | PROC-RELEASE-GATE-BRAT | **not run** | `docs/BRAT_INSTALL.md` pilot vs live |
+
+## PR — #63 GAP-COMMENT-EDIT (comment PUT)
+
+Unambiguous Abyss comment edits call TickTick `PUT .../comment/{id}` with `{ title }` and keep the comment id. `syncAbyssCommentsViaApi` on. Live PUT is **not run**.
+
+### GAP-COMMENT-EDIT — one bullet text change
+
+1. On `<pilot-vault>`, synced task with one Abyss comment bullet that already exists in TickTick Comments (note the comment id).
+2. Change that bullet’s text. Synchronize.
+3. In TickTick Comments, confirm the same comment id now has the new text. There is not a second comment with the old text.
+
+Expected: one comment, same id, new text. Vault bullet unchanged aside from the edit.
+
+### GAP-COMMENT-EDIT — PUT failure still lands the text
+
+No manual step. Unit: `updateTaskComment` returns null → `deleteTaskComment` then `addTaskComment` with the plain title (stamp stripped).
+
+### GAP-COMMENT-EDIT — TickTick-only comment survives a new vault bullet
+
+1. Task has a TickTick comment that was never a vault bullet, and the vault gains a different new bullet. Synchronize.
+2. The TickTick-only comment is still there. The new bullet is an additional comment.
+
+Expected: the plugin does not PUT the new text onto the TickTick-only comment.
+
+### Still required after this PR (not this behavior change)
+
+- RISK-PULL-WINS-LOCAL ([#174](https://github.com/semyon-alekseev-noveo/tt-sync/issues/174)): proposed only. Do not treat a local LWW win as a vault refresh until that issue lands.
+- RISK-DUAL-STORE ([#175](https://github.com/semyon-alekseev-noveo/tt-sync/issues/175)): no detection command yet.
+- BUG-TICKTICK-ID-LEAK: optional look at pilot lines for loose `ticktick_id::` outside `%%[ticktick_id:: …]%%`. Clean any TickTick title that already contains that fragment by hand.
+
+| ID | Pilot status | Evidence |
+|----|----------------|----------|
+| GAP-COMMENT-EDIT | **unit pass**; live **not run** | `src/test/abyssCommentSync.test.ts`, `src/test/api/techApi1.contract.test.ts` |
+| RISK-PULL-WINS-LOCAL | **not run** (not implemented) | Proposed row in `ABYSS_FIRST_CASES.md` |
+| RISK-DUAL-STORE | **not run** (detection not implemented) | Invariant in `PO_STATUS.md` |
+| BUG-TICKTICK-ID-LEAK | **unit** on tip; pilot re-scan **not run** | `src/test/bugTicktickIdLeak.test.ts` |
 

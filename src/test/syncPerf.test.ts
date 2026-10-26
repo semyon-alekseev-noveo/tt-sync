@@ -29,6 +29,14 @@ describe('PERF-COUNTERS', () => {
 		expect(httpEndpointKey('Get Task Comments', 'https://api.ticktick.com/api/v2/project/p/task/abc/comments')).toBe('getTaskComments');
 		expect(httpEndpointKey('Get All Resources', 'https://api.ticktick.com/api/v2/batch/check/0')).toBe('batch/check');
 		expect(httpEndpointKey('Batch Update', 'https://api.ticktick.com/api/v2/batch/task')).toBe('batch/task');
+		expect(httpEndpointKey(
+			'Update Task Comment',
+			'https://api.ticktick.com/api/v2/project/p/task/abc/comment/cid',
+		)).toBe('updateTaskComment');
+		expect(httpEndpointKey(
+			'Delete Task Comment',
+			'https://api.ticktick.com/api/v2/project/p/task/abc/comment/cid',
+		)).toBe('deleteTaskComment');
 	});
 
 	it('counts HTTP calls, 429s, and phase time on the open run', async () => {

@@ -252,6 +252,16 @@ export class TickTickRestAPI {
 		}
 	}
 
+	async updateTaskComment(projectId: string, taskId: string, commentId: string, title: string): Promise<ITaskComment | null> {
+		await this.initializeAPI();
+		try {
+			return (await this.api?.updateTaskComment(projectId, taskId, commentId, title)) ?? null;
+		} catch (error) {
+			log.error('Error updating task comment:', error);
+			return null;
+		}
+	}
+
 	async deleteTaskComment(projectId: string, taskId: string, commentId: string): Promise<boolean> {
 		await this.initializeAPI();
 		try {

@@ -21,9 +21,9 @@ Latest release: track GitHub Releases for `tt-sync` / `manifest.json` on `abyss-
 
 ## Still open in code
 
-- [ ] GAP-COMMENT-EDIT: editing a comment deletes and recreates it.
-- [ ] RISK-PULL-WINS-LOCAL: a local LWW win can leave the vault line old.
-- [ ] RISK-DUAL-STORE, RISK-LARGE-VAULT (id index landed; N+1 `getTaskById` and `ensureVaultFilesRegistered` remain), TECH-START-1 (startup full pull blocks load).
+- [x] GAP-COMMENT-EDIT: unambiguous comment edit uses PUT and keeps the TickTick id (unit). Live PUT not run. PUT failure still delete+add.
+- [ ] RISK-PULL-WINS-LOCAL ([#174](https://github.com/semyon-alekseev-noveo/tt-sync/issues/174)): deferred. Proposed in `PO_STATUS.md` / `ABYSS_FIRST_CASES.md`. Not coded (local win can still leave the vault line old).
+- [ ] RISK-DUAL-STORE ([#175](https://github.com/semyon-alekseev-noveo/tt-sync/issues/175)): invariant documented (`tasks` vs `files` path). Detection not coded. RISK-LARGE-VAULT remainder and TECH-START-1 stay on [#86](https://github.com/semyon-alekseev-noveo/tt-sync/issues/86).
 - [x] Break the `main` ↔ `services` cycle via `PluginContext` (PR #37 / **2.0.77** / epic #31). Remaining extract work → [#66](https://github.com/semyon-alekseev-noveo/tt-sync/issues/66).
 - [ ] Redo journal is in the product (`Undo last sync`) and is not soaked on a vault in this branch.
 

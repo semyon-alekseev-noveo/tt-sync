@@ -18,10 +18,12 @@ import {
 } from '@/api/tickHttp';
 export {
 	buildAddTaskCommentBody,
+	buildUpdateTaskCommentBody,
 	parseTaskCommentFromApiResponse,
 } from '@/api/taskComments';
 import {
 	buildAddTaskCommentBody,
+	buildUpdateTaskCommentBody,
 	parseTaskCommentFromApiResponse,
 } from '@/api/taskComments';
 
@@ -816,6 +818,29 @@ export class Tick {
 		} catch (e) {
 			log.error('Add Task Comment failed: ', e);
 			tickSetError(this, 'Add Task Comment', null, e);
+			return null;
+		}
+	}
+
+	/**
+	 * PUT the same path DELETE uses. Empty HTTP 200 keeps `commentId` (GAP-COMMENT-EDIT).
+	 * Live TickTick.com confirm is still not run; dida-cli marks this PUT stable.
+	 */
+	async updateTaskComment(projectId: string, taskId: string, commentId: string, title: string): Promise<ITaskComment | null> {
+		try {
+			const url = `${this.apiUrl}/${taskCommentDelete(projectId, taskId, commentId)}`;
+			const body = buildUpdateTaskCommentBody(title);
+			const response = await this.makeRequest('Update Task Comment', url, 'PUT', body);
+			if (this._lastError) return null;
+			const parsed = parseTaskCommentFromApiResponse(response, String(body.title));
+			if (parsed) return parsed;
+			if (response && typeof response === 'object') {
+				return { id: commentId, title: String(body.title) };
+			}
+			return null;
+		} catch (e) {
+			log.error('Update Task Comment failed: ', e);
+			tickSetError(this, 'Update Task Comment', null, e);
 			return null;
 		}
 	}

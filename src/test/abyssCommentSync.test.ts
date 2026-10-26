@@ -613,4 +613,139 @@ describe('abyssCommentSync', () => {
 		expect(getTaskComments).toHaveBeenCalled();
 		expect(add).not.toHaveBeenCalled();
 	});
+
+	it('GAP-COMMENT-EDIT: one vault-origin key change updates the TickTick comment in place', async () => {
+		const S = getSettings() as Record<string, unknown>;
+		Object.assign(S, { syncNotes: true, abyssTasksFormat: true, syncAbyssCommentsViaApi: true });
+		const previous = {
+			id: 'task1:old text',
+			taskId: 'task1',
+			projectId: 'proj1',
+			fingerprint: 'old text',
+			ticktickCommentId: 'tt-keep',
+			body: 'old text',
+			origin: 'vault' as const,
+		};
+		listMaps.mockResolvedValue([previous]);
+		const upsert = upsertCommentMap as unknown as ReturnType<typeof vi.fn>;
+		upsert.mockClear();
+		upsert.mockImplementation(async (row: unknown) => {
+			listMaps.mockResolvedValue([row]);
+		});
+		let remote = [{ id: 'tt-keep', title: 'old text' }];
+		const update = vi.fn(async () => {
+			remote = [{ id: 'tt-keep', title: 'new text' }];
+			return { id: 'tt-keep', title: 'new text' };
+		});
+		const add = vi.fn();
+		const del = vi.fn().mockResolvedValue(true);
+		const api = {
+			getTaskComments: vi.fn(async () => remote),
+			addTaskComment: add,
+			deleteTaskComment: del,
+			updateTaskComment: update,
+		} as unknown as TickTickRestAPI;
+		await syncAbyssCommentsToTickTick(api, 'task1', 'proj1', ['\t- new text']);
+		expect(update).toHaveBeenCalledWith('proj1', 'task1', 'tt-keep', 'new text');
+		expect(add).not.toHaveBeenCalled();
+		expect(del).not.toHaveBeenCalled();
+		expect(upsert).toHaveBeenCalledWith(expect.objectContaining({
+			ticktickCommentId: 'tt-keep',
+			body: 'new text',
+			origin: 'vault',
+		}));
+		upsert.mockReset();
+		upsert.mockResolvedValue(undefined);
+	});
+
+	it('GAP-COMMENT-EDIT: linked map whose remote title differs uses PUT and keeps the comment id', async () => {
+		const S = getSettings() as Record<string, unknown>;
+		Object.assign(S, { syncNotes: true, abyssTasksFormat: true, syncAbyssCommentsViaApi: true });
+		listMaps.mockResolvedValue([
+			{
+				id: 'task1:updated',
+				taskId: 'task1',
+				projectId: 'proj1',
+				fingerprint: 'updated',
+				ticktickCommentId: 'tt-old',
+				body: 'updated',
+				origin: 'vault',
+			},
+		]);
+		const upsert = upsertCommentMap as unknown as ReturnType<typeof vi.fn>;
+		upsert.mockClear();
+		let remote = [{ id: 'tt-old', title: 'stale other' }];
+		const update = vi.fn(async () => {
+			remote = [{ id: 'tt-old', title: 'updated' }];
+			return { id: 'tt-old', title: 'updated' };
+		});
+		const add = vi.fn();
+		const del = vi.fn().mockResolvedValue(true);
+		const api = {
+			getTaskComments: vi.fn(async () => remote),
+			addTaskComment: add,
+			deleteTaskComment: del,
+			updateTaskComment: update,
+		} as unknown as TickTickRestAPI;
+		await syncAbyssCommentsToTickTick(api, 'task1', 'proj1', ['\t- 2026-10-21 21:22: updated']);
+		expect(update).toHaveBeenCalledWith('proj1', 'task1', 'tt-old', 'updated');
+		expect(add).not.toHaveBeenCalled();
+		expect(del).not.toHaveBeenCalled();
+	});
+
+	it('GAP-COMMENT-EDIT: failed PUT falls back to delete+add', async () => {
+		const S = getSettings() as Record<string, unknown>;
+		Object.assign(S, { syncNotes: true, abyssTasksFormat: true, syncAbyssCommentsViaApi: true });
+		listMaps.mockResolvedValue([
+			{
+				id: 'task1:updated',
+				taskId: 'task1',
+				projectId: 'proj1',
+				fingerprint: 'updated',
+				ticktickCommentId: 'tt-old',
+				body: 'updated',
+				origin: 'vault',
+			},
+		]);
+		const add = vi.fn().mockResolvedValue({ id: 'tt-new', title: 'updated' });
+		const del = vi.fn().mockResolvedValue(true);
+		const api = {
+			getTaskComments: vi.fn().mockResolvedValue([{ id: 'tt-old', title: 'stale other' }]),
+			addTaskComment: add,
+			deleteTaskComment: del,
+			updateTaskComment: vi.fn().mockResolvedValue(null),
+		} as unknown as TickTickRestAPI;
+		await syncAbyssCommentsToTickTick(api, 'task1', 'proj1', ['\t- 2026-10-21 21:22: updated']);
+		expect(del).toHaveBeenCalledWith('proj1', 'task1', 'tt-old');
+		expect(add).toHaveBeenCalledWith('proj1', 'task1', 'updated');
+	});
+
+	it('GAP-COMMENT-EDIT: a remote-origin comment is not overwritten by a new vault bullet', async () => {
+		const S = getSettings() as Record<string, unknown>;
+		Object.assign(S, { syncNotes: true, abyssTasksFormat: true, syncAbyssCommentsViaApi: true });
+		listMaps.mockResolvedValue([
+			{
+				id: 'task1:from phone',
+				taskId: 'task1',
+				projectId: 'proj1',
+				fingerprint: 'from phone',
+				ticktickCommentId: 'tt-phone',
+				body: 'from phone',
+				origin: 'remote',
+			},
+		]);
+		const update = vi.fn();
+		const add = vi.fn().mockResolvedValue({ id: 'tt-new', title: 'vault only' });
+		const del = vi.fn().mockResolvedValue(true);
+		const api = {
+			getTaskComments: vi.fn().mockResolvedValue([{ id: 'tt-phone', title: 'from phone' }]),
+			addTaskComment: add,
+			deleteTaskComment: del,
+			updateTaskComment: update,
+		} as unknown as TickTickRestAPI;
+		await syncAbyssCommentsToTickTick(api, 'task1', 'proj1', ['\t- vault only']);
+		expect(update).not.toHaveBeenCalled();
+		expect(del).not.toHaveBeenCalled();
+		expect(add).toHaveBeenCalledWith('proj1', 'task1', 'vault only');
+	});
 });

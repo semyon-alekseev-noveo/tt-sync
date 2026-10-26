@@ -11,6 +11,14 @@ import log from '@/utils/logger';
  * for `{ title }` / `{ title, content }` alone; the web client sends a client id
  * plus task/project ids (dida-cli web-api.md). See BUG-COMMENT-API-POST-500.
  */
+/**
+ * PUT `/comment/{id}` body. dida-cli's live comment update sends `{ title }` only
+ * (web-api.md). Do not reuse the POST create shape: that generates a new id and `isNew: true`.
+ */
+export function buildUpdateTaskCommentBody(title: string): Record<string, unknown> {
+	return { title: title.slice(0, 1024) };
+}
+
 export function buildAddTaskCommentBody(projectId: string, taskId: string, title: string): Record<string, unknown> {
 	const clipped = title.slice(0, 1024);
 	return {
