@@ -118,6 +118,7 @@ Pass only with evidence: the note path, the `ticktick_id`, and either the journa
 
 | Date (UTC) | Vault | Build | Runner | Item | Result | Evidence |
 |------------|-------|-------|--------|------|--------|----------|
+| 2026-10-26 | Thinkpad-tts-test | **2.0.91** | agent (CLI+MCP) | AF-2 / AF-3 / AF-4 | **pass** | TT parent `…076e7` → note; Obs parent `…492fb`; AZ subtask `…492fc` parentId=`…492fb`. `STEP7-AF-PILOT-SOAK/162-af2-af3-af4-tip-2.0.91.md`. |
 | 2026-10-26 | unit | tip (#152) | agent | BUG-NOTE-BODY-WIPE | **pass** (unit); live **not run** | `src/test/bugNoteBodyWipe.test.ts` — empty vault / delimiter must not clear TT body. |
 | 2026-10-26 | unit | tip (#152) | agent | NOTE-BODY-1 / NOTE-BODY-2 / NOTE-BODY-3 | **pass** (unit); live **not run** | `src/test/noteBody.upstream.test.ts`; `docs/pilot/results/NOTE-BODY/01-unit-discovery.md`. |
 | 2026-10-25 | Thinkpad-tts-test | **2.0.91** | agent (CLI+MCP) | AF-5 / NOTE-L3b×2 / AF-GTD-STAGE-MOVE / AF-6 / AF-7 | **pass** | Live regression; DEL-1/3 **not run**. `REGRESSION-2.0.91/01-…`. |

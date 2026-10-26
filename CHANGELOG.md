@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-26 07:15 UTC
+
+- Context: Owner asked Notebook as M–L product work + no-delete bug; then live project soak.
+- Target: Issues + brief; re-prove AF-2/3/4 on 2.0.91 pilot.
+- Actions log: #159 FEAT-NOTEBOOK; #160 BUG-NOTEBOOK-NO-DELETE; `NOTEBOOK.md`; AF-2/3/4 live pass.
+- Validation: Obsidian `tts-sync` + MCP; evidence `162-af2-af3-af4-tip-2.0.91.md`.
+- Problems: #160 / #159 still open (implement later).
+- To Be Done: Implement #160 guard; optional NOTE-BODY live; merge docs PR #161.
+- References: #159, #160, PR #161, `CHANGELOG.md`
+
 ### Iteration 2026-10-26 05:40 UTC
 
 - Context: Owner reported second Synchronize cleared TickTick note during NOTE-BODY try.
