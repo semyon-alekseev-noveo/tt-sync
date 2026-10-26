@@ -32,6 +32,7 @@ import {
 	tickTickCommentMergeHint,
 } from '@/abyssFormat';
 import log from '@/utils/logger';
+import { defineLocalLwwRewrite } from '@/sync/localLwwWin';
 
 export interface VaultLineBehindDeps {
 	app: App;
@@ -54,8 +55,18 @@ export function attachCommentPullState(
 }
 
 
+export interface VaultLineBehindOptions {
+	/** This pull kept the local task. A hash mismatch rewrites the line from that task. */
+	localLwwWin?: boolean;
+}
+
 /** Vault line differs from the Dexie copy. Idle sync does not call getTaskById (docs/TICKTICK_DELTA_API.md §3.2). */
-export async function vaultLineBehindTask(deps: VaultLineBehindDeps, task: ITask, filePath: string): Promise<{ behind: boolean; task: ITask; localEdit: boolean; reason: string }> {
+export async function vaultLineBehindTask(
+	deps: VaultLineBehindDeps,
+	task: ITask,
+	filePath: string,
+	opts?: VaultLineBehindOptions,
+): Promise<{ behind: boolean; task: ITask; localEdit: boolean; reason: string }> {
 	const same = { behind: false, task, localEdit: false, reason: 'in-sync' };
 	const file = deps.app.vault.getAbstractFileByPath(filePath);
 	if (!(file instanceof TFile)) return same;
@@ -77,7 +88,7 @@ export async function vaultLineBehindTask(deps: VaultLineBehindDeps, task: ITask
 		taskRec.task, lineIdx, filePath, fileMap, taskRec,
 	);
 	if (!lineTask) return same;
-	if (task.lineHash) {
+	if (task.lineHash || opts?.localLwwWin) {
 		let taskNotes = '';
 		if (getSettings().syncNotes && taskRec.taskLines?.length) {
 			taskNotes = useAbyssCommentsApi()
@@ -85,7 +96,13 @@ export async function vaultLineBehindTask(deps: VaultLineBehindDeps, task: ITask
 				: (parser.getNoteString(taskRec, task.id) ?? '');
 		}
 		const hash = await parser.getLineHash((taskRec.task ?? '') + taskNotes);
-		if (hash && hash !== task.lineHash) {
+		// RISK-PULL-WINS-LOCAL: the winning local task is the line to write.
+		// A mismatch is a stale note, not a sticky local edit.
+		if (opts?.localLwwWin && hash && hash !== (task.lineHash || '')) {
+			defineLocalLwwRewrite(task);
+			return { behind: true, task, localEdit: false, reason: 'local-lww-rewrite' };
+		}
+		if (hash && task.lineHash && hash !== task.lineHash) {
 			// Twins alone can make hash ≠ lineHash while TT keys already match; do not
 			// treat that as a sticky local-edit that skips vault rewrite (BUG-COMMENT-VAULT-DUP-KEY).
 			const lines = taskRec.taskLines ?? [];

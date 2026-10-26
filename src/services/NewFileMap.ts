@@ -1,7 +1,8 @@
 import { fencedLines } from '@/utils/vaultIdScan';
 import { activeZoneInsertLine } from '@/projectScheme';
 import { isDetached } from '@/detach';
-import { abyssRegionEnd, mergeAbyssBlock, type TickTickCommentSync } from '@/abyssFormat';
+import { abyssRegionEnd, localLwwRewriteBase, mergeAbyssBlock, type TickTickCommentSync } from '@/abyssFormat';
+import { isLocalLwwRewrite } from '@/sync/localLwwWin';
 import { App, type ListItemCache, TFile } from 'obsidian';
 import type { ITask } from '@/api/types/Task';
 import type { PluginContext } from '@/pluginContext';
@@ -133,10 +134,13 @@ export class NewFileMap {
 		const linesToReplaceCount = oldContentEndLine - oldLineIdx + 1;
 		if (getSettings().abyssTasksFormat) {
 			const hint = task as { __baseContent?: string; __ticktickComments?: TickTickCommentSync };
+			const oldChild = this.fileLines.slice(oldLineIdx + 1, oldContentEndLine + 1);
+			// Local LWW win: generated title/status/content replace the stale vault body.
+			const base = isLocalLwwRewrite(task) ? localLwwRewriteBase(oldChild) : hint.__baseContent;
 			taskLine = mergeAbyssBlock(
 				taskLine,
-				this.fileLines.slice(oldLineIdx + 1, oldContentEndLine + 1),
-				hint.__baseContent,
+				oldChild,
+				base,
 				hint.__ticktickComments,
 			);
 		}

@@ -823,4 +823,130 @@ describe('synchronizationInner integration', () => {
 		expect(world.api.addTaskComment).not.toHaveBeenCalled();
 		expect(world.files.get('notes/a.md')?.text ?? '').not.toContain(body);
 	}, 20_000);
+
+	it('RISK-PULL-WINS-LOCAL rewrites a stale vault line from the local winner', async () => {
+		const world = await makeWorld();
+		const id = '174174174174174174174174';
+		const file = 'notes/local-win.md';
+		putFile(world, file, `- [x] remote title %%[ticktick_id:: ${id}]%%\n\t- > remote body\n`);
+		await db.tasks.put({
+			localId: `tt:${id}`,
+			taskId: id,
+			task: {
+				id,
+				projectId: 'proj-1',
+				title: 'local title',
+				content: 'local body',
+				desc: '',
+				status: 0,
+				modifiedTime: '2026-10-20T12:00:00.000+0000',
+				etag: 'local-etag',
+				lineHash: 'stale-not-the-vault-line',
+				tags: [],
+				items: [],
+				priority: 0,
+			} as never,
+			updatedAt: 5_000,
+			lastVaultSync: 5_000,
+			file,
+			source: 'obsidian',
+			deleted: false,
+		});
+		world.api.getUpdatedTasks.mockImplementation(async () => {
+			world.api.checkpoint = 91;
+			return {
+				update: [{
+					id,
+					projectId: 'proj-1',
+					title: 'remote title',
+					content: 'remote body',
+					status: 2,
+					modifiedTime: '2026-10-19T12:00:00.000+0000',
+					etag: 'remote-etag',
+					tags: [],
+				}],
+				delete: [],
+			};
+		});
+
+		const result = await world.service.synchronizationInner(false, 'manual');
+		expect(result.ok).toBe(true);
+
+		const row = await db.tasks.where('taskId').equals(id).first();
+		expect(row?.task.title).toBe('local title');
+		expect(row?.task.content).toBe('local body');
+		expect(row?.task.status).toBe(0);
+		expect(row?.task.modifiedTime).toBe('2026-10-20T12:00:00.000+0000');
+
+		const write = world.writes.find(w => w.updating && w.tasks.some(t => t.id === id));
+		expect(write).toBeTruthy();
+		const written = write!.tasks.find(t => t.id === id) as {
+			title?: string;
+			content?: string;
+			status?: number;
+			__localLwwRewrite?: boolean;
+		};
+		expect(written.title).toBe('local title');
+		expect(written.content).toBe('local body');
+		expect(written.status).toBe(0);
+		expect(written.__localLwwRewrite).toBe(true);
+	});
+
+	it('RISK-PULL-WINS-LOCAL does not rewrite a vault line whose hash matches the local winner', async () => {
+		const world = await makeWorld();
+		const id = '174274274274274274274274';
+		const file = 'notes/local-match.md';
+		const line = `- [ ] local title %%[ticktick_id:: ${id}]%%`;
+		const parser = (world.service.plugin as { taskParser: { getLineHash: (s: string) => Promise<string | undefined> } }).taskParser;
+		const lineHash = await parser.getLineHash(line);
+		expect(lineHash).toBeTruthy();
+		putFile(world, file, `${line}\n`);
+		await db.tasks.put({
+			localId: `tt:${id}`,
+			taskId: id,
+			task: {
+				id,
+				projectId: 'proj-1',
+				title: 'local title',
+				content: '',
+				desc: '',
+				status: 0,
+				modifiedTime: '2026-10-20T12:00:00.000+0000',
+				etag: 'local-etag',
+				lineHash,
+				tags: [],
+				items: [],
+				priority: 0,
+			} as never,
+			updatedAt: 5_000,
+			lastVaultSync: 5_000,
+			file,
+			source: 'obsidian',
+			deleted: false,
+		});
+		world.api.getUpdatedTasks.mockImplementation(async () => {
+			world.api.checkpoint = 92;
+			return {
+				update: [{
+					id,
+					projectId: 'proj-1',
+					title: 'remote title',
+					content: 'remote body',
+					status: 2,
+					modifiedTime: '2026-10-19T12:00:00.000+0000',
+					etag: 'remote-etag',
+					tags: [],
+				}],
+				delete: [],
+			};
+		});
+
+		const result = await world.service.synchronizationInner(false, 'manual');
+		expect(result.ok).toBe(true);
+		const row = await db.tasks.where('taskId').equals(id).first();
+		expect(row?.task.title).toBe('local title');
+		expect(row?.task.status).toBe(0);
+		expect(row?.task.content).toBe('');
+		expect(world.writes.some(w => w.tasks.some(t => t.id === id))).toBe(false);
+	});
 });

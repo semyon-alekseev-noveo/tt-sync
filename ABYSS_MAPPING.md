@@ -20,7 +20,7 @@
 | `#type/next`, `#context/work` | setting `tagMappings` (`obsidian/tag = ticktick-tag`), both directions; unmapped → upstream hierarchy logic | **done** (`src/tagMapping.ts`, hooks in `convertLineToTask` tag resolve + `addTagsToLine`) |
 | ⏳ scheduled | setting `scheduledAsStartDate`: ⏳ → TickTick `startDate` when line has no 🛫; on pull `startDate` → ⏳ unless the previous local task had 🛫 | **done** (`convertLineToTask` actualStartDate, `DateMan.addDateHolderToTask`) |
 | priority, 📅/🛫/🔁/⏰ | as upstream | upstream |
-| conflicts | per-field merge on push (`mergeTask` in `TaskModificationDetector`) | **done** for the push path. A local LWW win can still leave the vault line stale (RISK-PULL-WINS-LOCAL, deferred — proposed in `PO_STATUS.md`, not coded) |
+| conflicts | per-field merge on push (`mergeTask` in `TaskModificationDetector`). On pull, a local LWW win keeps the Dexie body and rewrites a vault line whose hash differs (RISK-PULL-WINS-LOCAL) | **done** in code. Pilot **not run**. Bookkeeping `modifiedTime` vs a dirty flag is still open |
 
 **Comments (current):** with `syncAbyssCommentsViaApi`, comment bullets go to the Comments API. Descriptions stay in `content`. Pull compares API comment fingerprints in `vaultLineBehindTask`. An unambiguous edit of a vault-origin comment is `PUT .../comment/{cid}` (GAP-COMMENT-EDIT). PUT failure, or two key changes in one sync, still delete + recreate. The paragraph below is the older `content` design and applies only when the setting is off.
 

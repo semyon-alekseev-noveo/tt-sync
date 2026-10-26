@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-26 17:00 UTC
+
+- Context: [#174](https://github.com/semyon-alekseev-noveo/tt-sync/issues/174) RISK-PULL-WINS-LOCAL. Owner approved the vault rewrite on a local LWW win. Bookkeeping `modifiedTime` vs a dirty flag stays out of scope.
+- Target: When `resolveTaskConflict` picks local, Dexie keeps that task body. If the vault line hash differs, rewrite the line from the local task. The losing remote title, status, and content stay out of the note.
+- Actions log: `pullFromTickTick` marks a local win. `vaultLineBehindTask` treats a hash mismatch on that win as a rewrite (`local-lww-rewrite`), not a sticky local edit. `NewFileMap.updateTask` uses `localLwwRewriteBase` so a stale `- >` is replaced by the local `content`. `modifiedTime` comparison is unchanged.
+- Validation: `RISK-PULL-WINS-LOCAL` failed first (no vault write; merge kept `remote body`), then passed. `npx vitest run` 769 passed. `npm run build` OK. `npm run check:cycles` and `npm run check:sizes` OK. Pilot **not run**.
+- Problems: A bookkeeping `modifiedTime` (push sets it to now) can still beat a real TickTick edit and, on that win, the vault line now follows the local body. Dirty flag still open (`docs/TICKTICK_DELTA_API.md` §3.2). Comment probe is skipped on the rewrite pass; the next sync compares the new hash. RISK-DUAL-STORE ([#175](https://github.com/semyon-alekseev-noveo/tt-sync/issues/175)) not in this PR.
+- To Be Done: Owner merges. Pilot on `<pilot-vault>` when someone can run it. Do not close #174 from this PR.
+- References: #174, #63, `ABYSS_FIRST_CASES.md`, `TEST_PLAN.md`
+
 ### Iteration 2026-10-26 13:50 UTC
 
 - Context: [#63](https://github.com/semyon-alekseev-noveo/tt-sync/issues/63) product-risk triage after PERF (#62 closed). One code slice: comment edit.

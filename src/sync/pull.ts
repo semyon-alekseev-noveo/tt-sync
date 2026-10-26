@@ -10,6 +10,7 @@ import { deletionIdOf } from '@/sync/massDeleteGuard';
 import log from '@/utils/logger';
 import { addCount } from '@/sync/perf';
 import { rememberPreMergeNoteBase } from '@/sync/preMergeNoteBase';
+import { clearLocalLwwWins, markLocalLwwWin } from '@/sync/localLwwWin';
 
 export interface PullApplyOptions {
 	/** Default true. False leaves remote delete[] unapplied. */
@@ -39,6 +40,7 @@ export async function pullFromTickTick(
 ) {
 	const applyDeletions = options?.applyDeletions !== false;
 	const advanceCheckpoint = options?.advanceCheckpoint !== false;
+	clearLocalLwwWins();
 
 	const { update, delete: deletedIds } = options?.prefetched ?? await ticktickRestApi.getUpdatedTasks(
 		fullSync ? 0 : meta.lastDeltaSync
@@ -104,6 +106,8 @@ export async function pullFromTickTick(
 		};
 
 		const { resolved, conflictDetected, winner } = resolveTaskConflict(local, remoteLocalTask);
+		// Local body stays in Dexie. Vault reconcile rewrites a line whose hash differs.
+		if (winner === 'local') markLocalLwwWin(resolved.taskId);
 		if (conflictDetected) {
 			logSyncEvent(meta.deviceId, "conflict:resolved", {
 				taskId: resolved.taskId,
