@@ -52,7 +52,7 @@
 4. Product risks — [#63](https://github.com/semyon-alekseev-noveo/tt-sync/issues/63): GAP-COMMENT-EDIT unit (live PUT not run, #173). RISK-PULL-WINS-LOCAL [#174](https://github.com/semyon-alekseev-noveo/tt-sync/issues/174) unit (pilot not run). RISK-DUAL-STORE [#175](https://github.com/semyon-alekseev-noveo/tt-sync/issues/175) unit (pilot not run, no auto-repair) in `PO_STATUS.md`. BUG-TICKTICK-ID-LEAK mitigated in code; pilot re-scan not run.
 5. TP-DELTA app-UI (optional) — [#84](https://github.com/semyon-alekseev-noveo/tt-sync/issues/84).
 6. Post-#31 modularization — [#66](https://github.com/semyon-alekseev-noveo/tt-sync/issues/66) (slice A in PR; vaultDeletion/god remain); [#86](https://github.com/semyon-alekseev-noveo/tt-sync/issues/86).
-7. [#64](https://github.com/semyon-alekseev-noveo/tt-sync/issues/64) / [#65](https://github.com/semyon-alekseev-noveo/tt-sync/issues/65) / #104 / #137 / #152 / #160 **closed**; bump **2.0.93** for BRAT.
+7. [#64](https://github.com/semyon-alekseev-noveo/tt-sync/issues/64) / [#65](https://github.com/semyon-alekseev-noveo/tt-sync/issues/65) / #104 / #137 / #152 / #160 **closed**; **2.0.93** tagged; bump **2.0.94** for BRAT.
 8. FEAT-NOTEBOOK MVP live **pass** ×2 — bi-di still open (#159).
 9. PROC-RELEASE-GATE [#30](https://github.com/semyon-alekseev-noveo/tt-sync/issues/30): `release.yml` gate is in the PR; owner still enables required status check `CI / test` on `abyss-mapping`.
 

@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-26 17:40 UTC
+
+- Context: Owner asked release after the #63 product-risk slices landed on tip past tagged **2.0.93**.
+- Target: Bump **2.0.94**; tag after bump PR merges (no retag of 2.0.93).
+- Actions log: `npm version 2.0.94`; ships #173 GAP-COMMENT-EDIT (PUT comments), #176 RISK-PULL-WINS-LOCAL (vault rewrite on local LWW), #177 RISK-DUAL-STORE (drift count + warn, no repair). #171 release-gate Actions encode was not in the 2.0.93 notes (that tag is NOTE-BODY-2 + Notebook MVP only).
+- Validation: Version files = 2.0.94. `npx vitest run` 778 passed (112 files). `npm run build` OK (`dist/manifest.json` 2.0.94, `styles.css` present). `TAG=2.0.94` version script pass; `v` prefix rejected. No tag pushed.
+- Problems: Live comment PUT, LWW vault rewrite, and dual-store warning are **not run** on the pilot. #63 stays open for the owner.
+- To Be Done: Merge bump PR; tag **2.0.94** once on that tip; BRAT. Do not retag **2.0.93**.
+- References: #63, #171, #173, #174, #175, #176, #177, `CHANGELOG.md`
+
 ### Iteration 2026-10-26 17:30 UTC
 
 - Context: [#175](https://github.com/semyon-alekseev-noveo/tt-sync/issues/175) RISK-DUAL-STORE. First slice is a sync-time count. Parent #63 stays open. #174 / #176 LWW behavior is unchanged.
