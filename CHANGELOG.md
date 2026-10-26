@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-26 05:05 UTC
+
+- Context: Owner merged #156; #66 modularization DoD complete on tip.
+- Target: Mark #66 closed in PO/INDEX; keep TECH-API-1 live risk in PO.
+- Actions log: INDEX A–G landed; PO TECH-CIRC resolved; comment + close #66.
+- Validation: `check:sizes` (0); `check:cycles` OK on `abyss-mapping` tip.
+- Problems: No changes.
+- To Be Done: Next backlog from PO (NOTE-BODY / #63 / TECH-START-1).
+- References: #66, PR #154–#156, `CHANGELOG.md`
+
 ### Iteration 2026-10-26 05:00 UTC
 
 - Context: Continue #66 after #155 — last size exception was `main.ts`.

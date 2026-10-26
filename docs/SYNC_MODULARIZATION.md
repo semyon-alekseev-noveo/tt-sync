@@ -1,6 +1,6 @@
 # Sync modularization plan
 
-**Status:** **PR 7 landed**; **#66 slices A–G** — cycle/size CI DoD met (0 file-size exceptions; `main` / `api` / services / FO / VSC under 30 KB). Evidence: `docs/pilot/results/TECH-SYNC-MODULARIZATION/`; playbook `docs/TECH_API_BREAKAGE.md`.
+**Status:** **PR 7 landed**; **#66 closed** (slices A–G / PRs #154–#156) — cycle/size CI DoD met (0 file-size exceptions). TECH-API-1 live breakage stays in `PO_STATUS.md`. Evidence: `docs/pilot/results/TECH-SYNC-MODULARIZATION/`; playbook `docs/TECH_API_BREAKAGE.md`.
 
 **Canonical boundaries:** [`ANALYST_REFERENCE_DIAGRAMS.md`](ANALYST_REFERENCE_DIAGRAMS.md). Process: [`DEV_FLOW.md`](../DEV_FLOW.md).
 

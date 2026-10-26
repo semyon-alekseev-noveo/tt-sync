@@ -13,10 +13,11 @@ Plan: [`docs/SYNC_MODULARIZATION.md`](../../../SYNC_MODULARIZATION.md)
 | PR 6 split TaskModificationDetector | [`31-pr6-task-modification-detector.md`](31-pr6-task-modification-detector.md) | **landed** — [PR #39](https://github.com/semyon-alekseev-noveo/tt-sync/pull/39) |
 | PR 7 store ports | [`31-pr7-store-ports.md`](31-pr7-store-ports.md) | **landed** — [PR #40](https://github.com/semyon-alekseev-noveo/tt-sync/pull/40) |
 | Release **2.0.77** + smoke | [`31-release-2.0.77-smoke.md`](31-release-2.0.77-smoke.md) | **pass** — [release 2.0.77](https://github.com/semyon-alekseev-noveo/tt-sync/releases/tag/2.0.77) |
-| #66 slice A TECH-API-1 / cycles | (PR #154) | **in PR** — playbook + contract + CI allowlist |
-| #66 slice B timed vaultDeletion | [`66-slice-b-vault-deletion.md`](66-slice-b-vault-deletion.md) | **in PR** — syncFilesPass + timed Phase 2 |
-| #66 slice C checkDatabase + sizes | [`66-slice-c-checkdatabase.md`](66-slice-c-checkdatabase.md) | **in PR** — god-class ≤30 KB; `check:sizes` CI |
-| #66 slice D vaultLineBehind | [`66-slice-d-vault-line-behind.md`](66-slice-d-vault-line-behind.md) | **in PR** — VSC ≤30 KB |
+| #66 slice A TECH-API-1 / cycles | (PR #154) | **landed** — playbook + contract + CI allowlist |
+| #66 slice B timed vaultDeletion | [`66-slice-b-vault-deletion.md`](66-slice-b-vault-deletion.md) | **landed** — syncFilesPass + timed Phase 2 |
+| #66 slice C checkDatabase + sizes | [`66-slice-c-checkdatabase.md`](66-slice-c-checkdatabase.md) | **landed** — god-class ≤30 KB; `check:sizes` CI |
+| #66 slice D vaultLineBehind | [`66-slice-d-vault-line-behind.md`](66-slice-d-vault-line-behind.md) | **landed** — VSC ≤30 KB |
 | #66 slice E fileOperation | [`66-slice-e-file-operation.md`](66-slice-e-file-operation.md) | **landed** — PR #154 |
 | #66 slice F api HTTP extract | [`66-slice-f-api-http-extract.md`](66-slice-f-api-http-extract.md) | **landed** — PR #155 |
-| #66 slice G main extract | [`66-slice-g-main-extract.md`](66-slice-g-main-extract.md) | **in PR** — main ≤30 KB; 0 size exceptions |
+| #66 slice G main extract | [`66-slice-g-main-extract.md`](66-slice-g-main-extract.md) | **landed** — PR #156; 0 size exceptions |
+| #66 close | — | **closed** — cycle/size DoD + timed vaultDeletion + TECH-API-1 playbook; live TT risk → PO TECH-API-1 |
