@@ -23,6 +23,7 @@ import { TaskDeletionModal } from '@/modals/TaskDeletionModal';
 import { FolderSyncService } from '@/services/FolderSyncService';
 import log from '@/utils/logger';
 import { commitVaultText, readNoteForWrite, syncCachedRead, syncRead } from '@/sync/vault-io';
+import { isNotebookTask } from '@/sync/notebookGuard';
 import { traceWrite } from '@/services/writeTrace';
 import { deferActiveFilePush } from '@/services/activeFilePush';
 import { addCount } from '@/sync/perf';
@@ -79,6 +80,8 @@ export class VaultSyncCoordinator {
 			let task = lt.task;
 			// Project parents are represented by project notes, never by task lines.
 			if (scheme?.isParentTask(task)) continue;
+			// Notebook NOTES are never checkbox lines (FEAT-NOTEBOOK MVP uses a folder).
+			if (isNotebookTask(task)) continue;
 			let targetFile: string | undefined;
 			const actualFile = !lt.deleted ? presentAt.get(task.id) : undefined;
 			const linkedInVault = !!(actualFile || lt.file);

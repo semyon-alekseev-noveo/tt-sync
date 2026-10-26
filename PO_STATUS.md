@@ -88,7 +88,7 @@
 | **BUG-TICKTICK-ID-LEAK** | P1 | mitigated on branch | Канонический `%%[ticktick_id:: <24hex>]%%`, strip loose fragment из title; тест `bugTicktickIdLeak.test.ts`. Почистить дубли в TT вручную. |
 | **AF-GTD-TAG-ADD** | P1 | **resolved** (#140+#141+#144) | Option A **kept** (PO 2026-10-25). Independence from Abyss: exclusivity in TTS. Intent **AF-GTD-STAGE-MOVE**. Planned rename `type/*`→`gtd/*`: `docs/pilot/AF-GTD-PREFIX.md`. Checkbox GTD parked. |
 | **NOTE-BODY** | P2 | partial ([#152](https://github.com/semyon-alekseev-noveo/tt-sync/issues/152)) | Live BODY-1 + wipe **pass** ×2; BODY-2 **fail** (TT body → Abyss `- >`). `NOTE-BODY/02-live-tip.md`. |
-| **FEAT-NOTEBOOK** | P2 | open (M–L); spike done | Spike NOTE project + CRUD — [#159](https://github.com/semyon-alekseev-noveo/tt-sync/issues/159); `FEAT-NOTEBOOK/159-spike-note-crud.md`. MVP next. |
+| **FEAT-NOTEBOOK** | P2 | open (M–L); MVP coded | Spike done; MVP TT→vault folder (`syncNotebook`) unit — [#159](https://github.com/semyon-alekseev-noveo/tt-sync/issues/159); live **not run**. |
 | **BUG-NOTEBOOK-NO-DELETE** | P1 | **resolved** (#162) | Vault→TT delete skips Notebook — [#160](https://github.com/semyon-alekseev-noveo/tt-sync/issues/160). |
 | **GAP-COMMENT-EDIT** | P2 | open | Правка комментария = delete + add (новые ID, шум в ленте TT) |
 | **RISK-DUAL-STORE** | P2 | open | Две «истины»: Dexie `tasks` и `fileMetadata`/`syncFiles` → возможен дрейф |
@@ -116,7 +116,7 @@
 8. **AF-GTD-PREFIX** + release **2.0.91** — **done** (tagged); [#66](https://github.com/semyon-alekseev-noveo/tt-sync/issues/66) A–G **closed** (cycle/size DoD).
 9. **NOTE-BODY** [#152](https://github.com/semyon-alekseev-noveo/tt-sync/issues/152): BODY-1/wipe live **pass**; **BODY-2 fail** — implement TT→Abyss `- >` pull.
 10. Tag/release **2.0.92** after bump PR merges (#160+#163+docs).
-11. FEAT-NOTEBOOK [#159](https://github.com/semyon-alekseev-noveo/tt-sync/issues/159) MVP after spike (`159-spike-note-crud.md`).
+11. FEAT-NOTEBOOK [#159](https://github.com/semyon-alekseev-noveo/tt-sync/issues/159) MVP PR + live FEAT-NOTEBOOK-MVP-1.
 12. Optional: DEL-1/DEL-3 modal.
 
 

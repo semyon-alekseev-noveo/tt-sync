@@ -13,6 +13,8 @@
 
 	let isWorking: boolean = false;
 	let syncNotes: boolean = false;
+	let syncNotebook: boolean = false;
+	let notebookFolder: string = 'TickTick Notebook';
 	let abyssTasksFormat: boolean = false;
 	let abyssIndent: 'tab' | 'spaces' = 'tab';
 	let syncNoteContextTags: boolean = true;
@@ -60,6 +62,8 @@
 
 	onMount(() => {
 		syncNotes = $settingsStore.syncNotes;
+		syncNotebook = $settingsStore.syncNotebook ?? false;
+		notebookFolder = $settingsStore.notebookFolder || 'TickTick Notebook';
 		abyssTasksFormat = $settingsStore.abyssTasksFormat ?? false;
 		abyssIndent = $settingsStore.abyssIndent ?? 'tab';
 		syncNoteContextTags = $settingsStore.syncNoteContextTags ?? true;
@@ -83,6 +87,8 @@
 
 	$: if (!notesHydrated && plugin.settingsReady) {
 		syncNotes = $settingsStore.syncNotes;
+		syncNotebook = $settingsStore.syncNotebook ?? false;
+		notebookFolder = $settingsStore.notebookFolder || 'TickTick Notebook';
 		abyssTasksFormat = $settingsStore.abyssTasksFormat ?? false;
 		abyssIndent = $settingsStore.abyssIndent ?? 'tab';
 		syncNoteContextTags = $settingsStore.syncNoteContextTags ?? true;
@@ -94,6 +100,16 @@
 		onTickTickDeletion = $settingsStore.onTickTickDeletion ?? 'ask';
 		autoCleanupDatabase = $settingsStore.autoCleanupDatabase ?? false;
 		notesHydrated = true;
+	}
+
+	async function saveNotebook() {
+		if (!notesHydrated || !plugin.settingsReady) return;
+		settingsStore.update(s => ({
+			...s,
+			syncNotebook,
+			notebookFolder: notebookFolder.trim() || 'TickTick Notebook',
+		}));
+		await plugin.saveSettings();
 	}
 
 	function handleOptionChange(option: 'none' | 'custom') {
@@ -152,6 +168,38 @@
 				</label>
 			</div>
 		</div>
+
+		<div class="setting-item">
+			<div class="setting-item-info">
+				<div class="setting-item-name">Sync TickTick Notebook</div>
+				<div class="setting-item-description">
+					Opt-in. Write TickTick Notebook items (<code>kind: NOTE</code>) as markdown under a vault folder
+					(TT→vault only). Not the same as task-body Sync Notes above. Default off.
+				</div>
+			</div>
+			<div class="setting-item-control">
+				<label class="checkbox-container" class:is-enabled={syncNotebook}>
+					<input type="checkbox" bind:checked={syncNotebook} on:change={saveNotebook} />
+				</label>
+			</div>
+		</div>
+		{#if syncNotebook}
+			<div class="setting-item">
+				<div class="setting-item-info">
+					<div class="setting-item-name">Notebook folder</div>
+					<div class="setting-item-description">Vault path for Notebook markdown (frontmatter <code>ticktick_id</code>).</div>
+				</div>
+				<div class="setting-item-control">
+					<input
+						type="text"
+						bind:value={notebookFolder}
+						on:change={saveNotebook}
+						placeholder="TickTick Notebook"
+						style="width: 14em"
+					/>
+				</div>
+			</div>
+		{/if}
 
 		<div class="setting-item">
 			<div class="setting-item-info">

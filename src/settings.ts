@@ -36,6 +36,13 @@ export interface ITickTickSyncSettings {
 	TickTickTasksFilePath: string;
 	keepProjectFolders: boolean;
 	syncNotes: boolean;
+	/**
+	 * Opt-in: TickTick Notebook items (`kind: NOTE`) → markdown under `notebookFolder`.
+	 * Default off. Not task-body `syncNotes` / NOTE-BODY.
+	 */
+	syncNotebook: boolean;
+	/** Vault folder for Notebook MVP (TT→vault). */
+	notebookFolder: string;
 	noteDelimiter: string;
 	// Abyss Tasks format: notes as `- > ` lines, comments as `- ` lines
 	abyssTasksFormat: boolean;
@@ -146,6 +153,8 @@ export const DEFAULT_SETTINGS: ITickTickSyncSettings = {
 	TickTickTasksFilePath: '/',
 	keepProjectFolders: false,
 	syncNotes: true,
+	syncNotebook: false,
+	notebookFolder: 'TickTick Notebook',
 	noteDelimiter: '-------------------------------------------------------------',
 	abyssTasksFormat: false,
 	abyssIndent: 'tab',

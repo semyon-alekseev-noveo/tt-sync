@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-26 09:50 UTC
+
+- Context: Owner go FEAT-NOTEBOOK MVP after spike; BODY-2 on PR #165.
+- Target: Opt-in TT Notebook → vault folder (one-way); default off.
+- Actions log: `syncNotebook` / `notebookFolder`; `notebookVault.ts`; skip NOTE checkboxes; Notes UI; FEAT-NOTEBOOK-MVP-1 unit.
+- Validation: `npx vitest run` 757; `npm run build` OK.
+- Problems: Live MVP **not run**; bi-di out of scope (`open`).
+- To Be Done: PR into abyss-mapping; live FEAT-NOTEBOOK-MVP-1.
+- References: #159, `docs/pilot/NOTEBOOK.md`, `CHANGELOG.md`
+
 ### Iteration 2026-10-26 08:51 UTC
 
 - Context: Owner go NOTE-BODY live + release + FEAT-NOTEBOOK spike after #162/#163 merge.
