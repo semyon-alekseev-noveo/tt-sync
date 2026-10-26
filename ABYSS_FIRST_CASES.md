@@ -29,9 +29,9 @@ Preconditions for every AF row: plugin `tickticksync-abyss`, manual sync, `fileL
 | AF-GTD-STAGE-MOVE | Moving stage A → B means **replace**. After sync: one list-mapped stage tag (B); TT list = B. Spec: `docs/pilot/AF-GTD-STAGE-REPLACE.md`. **PO:** keep Option A. |
 | AF-GTD-PREFIX | On load, `tagListMappings` / `tagMappings` LHS `type/…` → `gtd/…`; synced lines (`ticktick_id`) rewrite. New tasks use `#gtd/next` etc. Spec: `docs/pilot/AF-GTD-PREFIX.md`. |
 | NOTE-L3b | A child comment line, title unchanged, Synchronize. The text shows in the TickTick Comments panel. The description stays in the task body. |
-| NOTE-BODY-1 | Synced task; `syncNotes` on. Add an **upstream-style note** under the checkbox (indented block; optional `noteDelimiter`). Synchronize. TickTick task **body** (`content`/`desc`) contains that text; **Comments** panel does not gain a new comment for it; title unchanged. Spec: `docs/pilot/NOTE-BODY.md`. **unit pass**; live **not run**. |
-| NOTE-BODY-2 | Edit the same task’s note/body in TickTick. Synchronize. Vault note block under the checkbox updates; Abyss comment bullets (if any) stay as comments. Spec: `docs/pilot/NOTE-BODY.md`. **unit pass**; live **not run**. |
-| BUG-NOTE-BODY-WIPE | Synced task with TT body text. Vault note empty or Abyss delimiter children (not `- >`) while another field changes. Synchronize. TickTick **body must not clear** unless the Abyss `- >` description was removed. Spec: `docs/pilot/NOTE-BODY.md`. **unit pass**; live **not run**. |
+| NOTE-BODY-1 | Synced task; `syncNotes` on. Add an **upstream-style note** under the checkbox (indented block; optional `noteDelimiter`). Synchronize. TickTick task **body** (`content`/`desc`) contains that text; **Comments** panel does not gain a new comment for it; title unchanged. Spec: `docs/pilot/NOTE-BODY.md`. **unit pass**; live **pass** ×2 (Abyss `- >`). |
+| NOTE-BODY-2 | Edit the same task’s note/body in TickTick. Synchronize. Vault note block under the checkbox updates; Abyss comment bullets (if any) stay as comments. Spec: `docs/pilot/NOTE-BODY.md`. **unit pass**; live **fail** on tip (title pulls; Abyss `- >` body does not). |
+| BUG-NOTE-BODY-WIPE | Synced task with TT body text. Vault note empty or Abyss delimiter children (not `- >`) while another field changes. Synchronize. TickTick **body must not clear** unless the Abyss `- >` description was removed. Spec: `docs/pilot/NOTE-BODY.md`. **unit pass**; live **pass** ×2. |
 | BUG-NOTEBOOK-NO-DELETE | TickTick Notebook note (`kind: NOTE`, optionally under a NOTE project) with **no** vault task line. Synchronize (including Phase 2 / orphan scan). The Notebook note **must remain** in TickTick — never treated as a vault-deleted task. Spec: `docs/pilot/NOTEBOOK.md`. **unit pass**; live **pass** ×2. |
 | BUG-COMMENT-NO-PUSH | Same as NOTE-L3b; regression when only comment bullets change or hash path skips API (`PO_STATUS.md`). |
 | BUG-TICKTICK-ID-LEAK | Title must not contain loose `ticktick_id::` outside `%%[ticktick_id:: <24hex>]%%`; canonical id wins if both present. |
@@ -119,6 +119,8 @@ Pass only with evidence: the note path, the `ticktick_id`, and either the journa
 
 | Date (UTC) | Vault | Build | Runner | Item | Result | Evidence |
 |------------|-------|-------|--------|------|--------|----------|
+| 2026-10-26 | Thinkpad-tts-test | tip | agent (CLI+MCP) | NOTE-BODY-1 / wipe | **pass** ×2 | `- >` → TT content A/B; wipe kept TT body. BODY-2 **fail**. `NOTE-BODY/02-live-tip.md`. |
+| 2026-10-26 | Thinkpad-tts-test | tip | agent (CLI+MCP) | NOTE-BODY-1 / wipe | **pass** ×2; BODY-2 **fail** | `NOTE-BODY/02-live-tip.md`. |
 | 2026-10-26 | Thinkpad-tts-test | tip (#160) | agent (CLI+MCP) | BUG-NOTEBOOK-NO-DELETE | **pass** ×2 | NOTES `…d5a5` / `…f29e` (Inbox) + `…c2f6` (NOTE project) survived `tts-sync` ×2. `BUG-NOTEBOOK-NO-DELETE/160-notebook-no-delete.md`. |
 | 2026-10-26 | Thinkpad-tts-test | **2.0.91** | agent (CLI+MCP) | AF-2 / AF-3 / AF-4 | **pass** | TT parent `…076e7` → note; Obs parent `…492fb`; AZ subtask `…492fc` parentId=`…492fb`. `STEP7-AF-PILOT-SOAK/162-af2-af3-af4-tip-2.0.91.md`. |
 | 2026-10-26 | unit | tip (#152) | agent | BUG-NOTE-BODY-WIPE | **pass** (unit); live **not run** | `src/test/bugNoteBodyWipe.test.ts` — empty vault / delimiter must not clear TT body. |

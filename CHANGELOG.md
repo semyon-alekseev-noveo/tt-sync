@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-26 08:51 UTC
+
+- Context: Owner go NOTE-BODY live + release + FEAT-NOTEBOOK spike after #162/#163 merge.
+- Target: Live BODY-1/2/wipe; bump **2.0.92**; spike NOTE CRUD evidence.
+- Actions log: Live tip prove; `02-live-tip.md`; FEAT-NOTEBOOK spike; version 2.0.92 files.
+- Validation: BODY-1 + wipe **pass** ×2; BODY-2 **fail** (Abyss `- >` not pulled); NOTE create/update via MCP.
+- Problems: BODY-2 open — keep #152 open (`open`).
+- To Be Done: Merge bump PR; tag **2.0.92** on tip; BODY-2 implement; Notebook MVP.
+- References: #152, #159, `CHANGELOG.md`
+
 ### Iteration 2026-10-26 08:05 UTC
 
 - Context: Tip after #66 main extract broke Synchronize: `this.waitForObsidianSync is not a function`.

@@ -5,4 +5,5 @@ Brief: [`docs/pilot/NOTE-BODY.md`](../../NOTE-BODY.md)
 
 | Phase | File | Status |
 |-------|------|--------|
-| Unit discovery BODY-1/2/3 | [`01-unit-discovery.md`](01-unit-discovery.md) | **unit pass** — live **not run** |
+| Unit discovery BODY-1/2/3 | [`01-unit-discovery.md`](01-unit-discovery.md) | **unit pass** |
+| Live tip BODY-1/2 + wipe | [`02-live-tip.md`](02-live-tip.md) | BODY-1 **pass** ×2; BODY-2 **fail**; wipe **pass** ×2 |
