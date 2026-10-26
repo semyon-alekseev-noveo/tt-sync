@@ -22,6 +22,8 @@ import { syncCachedRead } from '@/sync/vault-io';
 import { isPathInPushScope } from '@/syncScope';
 import { db } from '@/db/dexie';
 import { classifyFileRead, deletionConfirmMode, obsidianSyncFileState } from '@/sync/massDeleteGuard';
+import { isNotebookProtectedFromVaultDelete, isNotebookTask } from '@/sync/notebookGuard';
+import { getProjectById } from '@/db/projects';
 import type { SyncRunContext } from '@/sync/SyncRunContext';
 import log from '@/utils/logger';
 
@@ -153,20 +155,35 @@ export class TaskDeletionHandler {
 			log.warn('TickTickSync: vault index incomplete; not inferring deletions from missing task lines');
 			return [];
 		}
-		return candidates
-			.filter(lt => {
-				if (scan.presentIds.has(lt.taskId)) {
-					return false;
-				}
-				if (lt.file && scan.untrustedFiles.has(lt.file)) {
-					return false;
-				}
-				if (lt.file && isPathInPushScope(lt.file)) {
-					return true;
-				}
-				return (lt.task?.tags ?? []).includes('obsidian');
-			})
-			.map(lt => lt.taskId);
+		const out: string[] = [];
+		for (const lt of candidates) {
+			if (scan.presentIds.has(lt.taskId)) continue;
+			if (lt.file && scan.untrustedFiles.has(lt.file)) continue;
+			if (await this.isNotebookProtectedLocal(lt.task)) {
+				log.info(`TickTickSync: BUG-NOTEBOOK-NO-DELETE skip orphan delete for ${lt.taskId} (Notebook)`);
+				continue;
+			}
+			const eligible = (lt.file && isPathInPushScope(lt.file))
+				|| (lt.task?.tags ?? []).includes('obsidian');
+			if (eligible) out.push(lt.taskId);
+		}
+		return out;
+	}
+
+	/** Notebook notes / note-projects must never be deleted from TT by vault sync (#160). */
+	private async isNotebookProtectedLocal(task: ITask | undefined): Promise<boolean> {
+		if (!task) return false;
+		if (isNotebookTask(task)) return true;
+		const projectId = task.projectId;
+		if (!projectId) return false;
+		try {
+			const project = await getProjectById(projectId);
+			return isNotebookProtectedFromVaultDelete(task, project);
+		} catch (e) {
+			log.warn('TickTickSync: notebook project lookup failed; not deleting', task.id, e);
+			// Fail closed for deletion: if we cannot classify, do not delete.
+			return isNotebookTask(task);
+		}
 	}
 
 	/**
@@ -234,7 +251,15 @@ export class TaskDeletionHandler {
 		const tasksInFile = await this.fileTaskQueries.getTasksInFile(filePath);
 		// Tombstoned tasks (deleted in TickTick, e.g. detached lines) are not "missing".
 		// Project parents live as project notes, never as lines: never treat them as removed.
-		const dbTaskIds = tasksInFile.filter(lt => !lt.deleted && !this.plugin.projectScheme?.isParentTask(lt.task)).map(lt => lt.taskId).filter(id => !!id);
+		const dbTaskIds: string[] = [];
+		for (const lt of tasksInFile) {
+			if (lt.deleted || !lt.taskId || this.plugin.projectScheme?.isParentTask(lt.task)) continue;
+			if (await this.isNotebookProtectedLocal(lt.task)) {
+				log.info(`TickTickSync: BUG-NOTEBOOK-NO-DELETE skip file-missing delete for ${lt.taskId}`);
+				continue;
+			}
+			dbTaskIds.push(lt.taskId);
+		}
 
 		// Find tasks in DB but not in file
 		let missingTaskIds = dbTaskIds.filter(taskId =>
@@ -376,6 +401,26 @@ export class TaskDeletionHandler {
 
 		// Never delete project parents; skip ids that still exist in some note (file recreated / task moved).
 		taskIds = await this.filterStillReferenced(taskIds.filter(id => !this.plugin.projectScheme?.isParentId(id)));
+		if (taskIds.length === 0) return [];
+
+		// Last line of defense: never vault-delete Notebook notes (#160).
+		const allowed: string[] = [];
+		for (const id of taskIds) {
+			let local = await this.plugin.taskRepository?.loadTaskById?.(id);
+			if (!local) {
+				try {
+					local = (await db.tasks?.get(id))?.task;
+				} catch {
+					local = undefined;
+				}
+			}
+			if (await this.isNotebookProtectedLocal(local ?? undefined)) {
+				log.info(`TickTickSync: BUG-NOTEBOOK-NO-DELETE blocked deleteTasksByIds for ${id}`);
+				continue;
+			}
+			allowed.push(id);
+		}
+		taskIds = allowed;
 		if (taskIds.length === 0) return [];
 		if (deletionConfirmMode() === 'skip') {
 			log.info('TickTickSync: mass-delete guard skipped TickTick deletions for this run');
