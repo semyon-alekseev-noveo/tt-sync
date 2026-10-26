@@ -22,7 +22,7 @@ Tracker issues live on [`semyon-alekseev-noveo/tt-sync`](https://github.com/semy
 | └ deferred-id | [#18](https://github.com/semyon-alekseev-noveo/tt-sync/issues/18) | P0 | **pass** on **2.0.89** | **done** 2026-10-24 |
 | BUG-ACTIVEZONE-COMMENT-SHUFFLE | [#19](https://github.com/semyon-alekseev-noveo/tt-sync/issues/19) | P1 | **closed** — tip prove×2 after #134 | **done** 2026-10-25 |
 | Step 7 AF-* pilot soak | [#20](https://github.com/semyon-alekseev-noveo/tt-sync/issues/20) | P1 | **closed** — AF-1…AF-8 + #76 gate on **2.0.89** | **done** 2026-10-25 |
-| PROC-RELEASE-GATE | [#30](https://github.com/semyon-alekseev-noveo/tt-sync/issues/30) | P1 | **open** — Actions gate not encoded; **owner policy:** release only after merge to `abyss-mapping`, never retag same `2.0.x` | **keep** — see `30-proc-release-gate.md` |
+| PROC-RELEASE-GATE | [#30](https://github.com/semyon-alekseev-noveo/tt-sync/issues/30) | P1 | **open** — `release.yml` encodes tests, ancestor, version match, no republish; **owner follow-up:** required check `CI / test` on `abyss-mapping` | **keep** — see `30-proc-release-gate.md`; do not close until merge + that click |
 | TECH-SYNC-MODULARIZATION | [#31](https://github.com/semyon-alekseev-noveo/tt-sync/issues/31) | P1 | **closed** — **2.0.77**; tip also has **2.0.78** | keep closed |
 | └ PR1–PR7 | [#41](https://github.com/semyon-alekseev-noveo/tt-sync/issues/41)–[#48](https://github.com/semyon-alekseev-noveo/tt-sync/issues/48) | P1 | **closed** → PRs #34–#40 | keep closed |
 | SEC-CREDS-1 | [#32](https://github.com/semyon-alekseev-noveo/tt-sync/issues/32) | P1 | **closed** — revoke + live session decision; Step 8.0 | **done** 2026-10-25 |

@@ -42,7 +42,7 @@ npx vitest run
 npm run build
 ```
 
-The gate includes unit tests and the full-sync integration test `src/test/synchronizationInner.integration.test.ts` (fake TickTick API + `fake-indexeddb`). Both must pass. CI (`.github/workflows/ci.yml`) runs `npm test` and `npm run build` on pull requests into `abyss-mapping`.
+The gate includes unit tests and the full-sync integration test `src/test/synchronizationInner.integration.test.ts` (fake TickTick API + `fake-indexeddb`). Both must pass. CI (`.github/workflows/ci.yml`) runs `npm run check:cycles`, `npm run check:sizes`, `npm test`, and `npm run build` on pull requests into `abyss-mapping`. The release workflow runs that same `test` job before it publishes.
 
 Rules:
 
@@ -79,16 +79,24 @@ Phase names: use **Step 1–8** from `ABYSS_FIRST_PLAN.md`. Do not start a new �
 - The owner tags and publishes. BRAT installs from that release (`docs/BRAT_INSTALL.md`).
 - **Release source (owner decision for [#30](https://github.com/semyon-alekseev-noveo/tt-sync/issues/30) PROC-RELEASE-GATE):**
   - Release **only** from `abyss-mapping` **after** the version-bump / fix PR is **merged**.
-  - Do **not** publish a GitHub release from a feature-branch tip (even if that tip is about to merge).
+  - Do **not** publish a non-prerelease GitHub release from a feature-branch tip (even if that tip is about to merge).
   - Do **not** force-move or retag the same version (`2.0.x`) onto a later merge commit.
   - If the merge tip still needs a GitHub release and version files are unchanged: either **wait for merge**, then tag that commit **once**, or **bump** the version for a new tag. Never retag the same `2.0.x` twice.
-- Until Actions encode the gate in `release.yml`, the manual process is: bump/fix on a feature branch → PR into `abyss-mapping` → owner merges → tag/release the merged `abyss-mapping` tip once (when the owner asked for the release).
+- **Actions gate** (`.github/workflows/release.yml`). Every tag push and every **Run workflow** must pass this before a GitHub Release is created. The incidents it stops: **2.0.59** (release while tests were red), **2.0.75 / 2.0.76 / 2.0.77** (release from an unmerged branch), **2.0.78** (same tag published twice).
+  1. **Tests.** Job `test` runs the same checks as `.github/workflows/ci.yml`: `npm ci`, `npm run check:cycles`, `npm run check:sizes`, `npm test`, `npm run build`. Job `release` has `needs: test` and does not upload assets when that job fails.
+  2. **Ancestor.** The publish fails unless `git fetch origin abyss-mapping` and `git merge-base --is-ancestor "$GITHUB_SHA" origin/abyss-mapping` succeed. A tag push always runs this check. The only skip is **Actions → Release Obsidian plugin → Run workflow** with **pre-release** checked (pilot build from an open PR).
+  3. **Version match.** Before the plugin zip is built, the tag must equal `manifest.json` `version`, `package.json` `version`, and a key in `versions.json` (`scripts/check-release-version.sh`). The workflow does not rewrite `dist/manifest.json` from the tag. A `v` prefix (`v2.0.93`) fails: the tag string has to equal the manifest version (`2.0.93`).
+  4. **No retag.** If a GitHub Release for that tag already exists, or the tag already points at a different commit, the job fails. The uploader sets `overwrite_files: false`. Same commit, release deleted, tag still on that commit: a re-run can create the release again. Moving the tag onto a later commit cannot.
+- **Live release:** merge the bump PR, then on the `abyss-mapping` tip tag once (`git tag 2.0.x && git push origin 2.0.x`). Tag push publishes a normal release (not a prerelease). **Run workflow** with pre-release **unchecked** is the same gate, on a commit that is already on `abyss-mapping`.
+- **Pilot prerelease:** Actions → Release Obsidian plugin → Run workflow on the PR branch → version empty to use `manifest.json`, or set the tag → leave **pre-release** checked (the default). Tests, version match, and “no existing release” still apply. The ancestor check does not. BRAT on the live vault must not pick this up (`docs/BRAT_INSTALL.md`).
+- Parent epic [#20](https://github.com/semyon-alekseev-noveo/tt-sync/issues/20) is closed. This gate does not add a Step 7 feature freeze.
+- **Required CI on merge** (`CI / test` on `abyss-mapping`) is an owner setting. The workflow file cannot turn it on. Click-path and `gh` command: `docs/github-issues/30-proc-release-gate.md`.
 - **Epic close (multi-PR / long work):** do not close the epic issue until (1) regression gate green (`npx vitest run` + `npm run build`), (2) a GitHub release exists for the landed stack on `abyss-mapping`, and (3) for sync-related epics, pilot smoke is recorded under `docs/pilot/results/` (honest pass / fail / not run). Close the epic with a short comment linking the release URL and the evidence file.
 
 ## Branches and pull requests
 
 - Work on a branch. Open a pull request into `abyss-mapping`.
-- Do not push to `abyss-mapping` or `master`. Do not merge. Do not create tags or GitHub releases unless the owner explicitly asked for a release in the current task — and then only on the **merged** `abyss-mapping` tip (see Versioning and releases above).
+- Do not push to `abyss-mapping` or `master`. Do not merge. Do not create tags or GitHub releases unless the owner explicitly asked for a release in the current task — and then only on the **merged** `abyss-mapping` tip, or as a **pre-release** `workflow_dispatch` when the owner asked for a pilot build (see Versioning and releases above).
 - One PR may contain several commits (process, fix, docs). Stacked PRs are fine when a later change depends on an earlier one; each still targets the owner’s merge.
 
 ## Safety

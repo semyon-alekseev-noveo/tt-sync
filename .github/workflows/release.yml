@@ -1,13 +1,20 @@
+# PROC-RELEASE-GATE (#30). Publish only when:
+# - job test matches ci.yml (cycles, sizes, npm test, build)
+# - the commit is an ancestor of origin/abyss-mapping
+#   (workflow_dispatch with prerelease=true may skip this — pilot PR builds)
+# - tag == manifest.json version == package.json version, and versions.json has that key
+#   (checked before the build; dist/manifest.json is not rewritten from the tag)
+# - no GitHub Release for that tag exists yet (no retag / no asset replace)
 name: Release Obsidian plugin
 
 on:
   workflow_dispatch:
     inputs:
       version:
-        description: Release tag (defaults to manifest.json version, e.g. 2.0.15)
+        description: Release tag (defaults to manifest.json version, e.g. 2.0.93). Must match manifest.json, package.json, and versions.json.
         required: false
       prerelease:
-        description: Mark as pre-release
+        description: Mark as pre-release. Checked = pilot build (ancestor check skipped). Unchecked = live release (commit must be on abyss-mapping).
         type: boolean
         default: true
   push:
@@ -15,14 +22,20 @@ on:
       - "v*"
       - "[0-9]+.[0-9]+.[0-9]*"
 
+# One publish at a time so a second run sees the release the first run created.
+concurrency:
+  group: release-obsidian-plugin
+  cancel-in-progress: false
+
 permissions:
-  contents: write
+  contents: read
 
 env:
   PLUGIN_ID: tickticksync-abyss
 
 jobs:
-  release:
+  # Keep these steps aligned with .github/workflows/ci.yml job test.
+  test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -32,28 +45,140 @@ jobs:
           node-version: 22
           cache: npm
 
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Import cycles (allowlist may only shrink)
+        run: npm run check:cycles
+
+      - name: File size exceptions (≤30 KB or listed)
+        run: npm run check:sizes
+
+      - name: Test
+        run: npm test
+
+      - name: Build
+        run: npm run build
+
+  release:
+    needs: test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
       - name: Resolve release version
         id: version
+        env:
+          INPUT_VERSION: ${{ github.event.inputs.version }}
+          EVENT_NAME: ${{ github.event_name }}
         run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            TAG="${{ github.event.inputs.version }}"
+          set -euo pipefail
+          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            TAG="$INPUT_VERSION"
             if [ -z "$TAG" ]; then
               TAG=$(jq -r .version manifest.json)
             fi
           else
-            TAG="${GITHUB_REF_NAME}"
+            TAG="$GITHUB_REF_NAME"
           fi
+          case "$TAG" in
+            ""|*[!0-9A-Za-z.+-]*)
+              echo "::error::Release tag must be a single version token without whitespace."
+              exit 1
+              ;;
+          esac
           echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
 
-      - name: Build plugin assets
+      - name: Require ancestor of abyss-mapping
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          IS_PRERELEASE: ${{ github.event.inputs.prerelease }}
         run: |
+          set -euo pipefail
+          if [ "$EVENT_NAME" = "workflow_dispatch" ] && [ "$IS_PRERELEASE" = "true" ]; then
+            echo "Pilot prerelease (workflow_dispatch): ancestor check skipped."
+            exit 0
+          fi
+          git fetch origin abyss-mapping
+          if ! git merge-base --is-ancestor "$GITHUB_SHA" origin/abyss-mapping; then
+            echo "::error::Commit ${GITHUB_SHA} is not an ancestor of origin/abyss-mapping. Tag pushes always require this. A pilot build from an open PR must use workflow_dispatch with pre-release checked."
+            exit 1
+          fi
+          echo "Ancestor check passed: ${GITHUB_SHA} is on origin/abyss-mapping."
+
+      - name: Require tag, manifest, package, and versions.json to match
+        env:
+          TAG: ${{ steps.version.outputs.tag }}
+        run: bash scripts/check-release-version.sh
+
+      - name: Reject an existing GitHub Release for this tag
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.version.outputs.tag }}
+        run: |
+          set -euo pipefail
+          # Tag already on another commit: do not move it. A missing tag is a first publish.
+          FETCH_OK=true
+          FETCH_ERR=$(git fetch origin "refs/tags/${TAG}:refs/tags/${TAG}" 2>&1) || FETCH_OK=false
+          if [ "$FETCH_OK" = "true" ]; then
+            TAG_SHA=$(git rev-parse "refs/tags/${TAG}^{}")
+            if [ "$TAG_SHA" != "$GITHUB_SHA" ]; then
+              echo "::error::Tag ${TAG} already points at ${TAG_SHA}, not ${GITHUB_SHA}. Refusing to move it."
+              exit 1
+            fi
+            echo "Tag ${TAG} already points at this commit."
+          elif printf '%s' "$FETCH_ERR" | grep -Eqi 'not found|couldn.t find remote ref'; then
+            echo "Tag ${TAG} does not exist yet."
+          else
+            echo "::error::Could not fetch tag ${TAG}: ${FETCH_ERR}"
+            exit 1
+          fi
+          TAG_ENC=$(jq -rn --arg t "$TAG" '$t|@uri')
+          set +e
+          RESP=$(gh api --include "repos/${GITHUB_REPOSITORY}/releases/tags/${TAG_ENC}" 2>&1)
+          set -e
+          # First line only. Do not pipe through head: pipefail + SIGPIPE fails the step on a 200 body.
+          STATUS=${RESP%%$'\n'*}
+          case "$STATUS" in
+            HTTP/*\ 200\ *)
+              echo "::error::GitHub Release for ${TAG} already exists. Refusing to republish or replace assets."
+              exit 1
+              ;;
+            HTTP/*\ 404\ *)
+              echo "No GitHub Release for ${TAG}."
+              ;;
+            *)
+              echo "::error::Could not confirm that release ${TAG} is absent (${STATUS})."
+              exit 1
+              ;;
+          esac
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Build plugin assets
+        env:
+          TAG: ${{ steps.version.outputs.tag }}
+        run: |
+          set -euo pipefail
           npm ci
           npm run build
-          jq --arg v "${{ steps.version.outputs.tag }}" '.version = $v' dist/manifest.json > dist/manifest.json.tmp
-          mv dist/manifest.json.tmp dist/manifest.json
-          mkdir -p "${{ env.PLUGIN_ID }}"
-          cp dist/main.js dist/manifest.json dist/styles.css "${{ env.PLUGIN_ID }}/"
-          zip -r "${{ env.PLUGIN_ID }}.zip" "${{ env.PLUGIN_ID }}"
+          # dist/manifest.json is the source manifest copied by Vite.
+          # Do not overwrite .version from the tag — that hid mismatches.
+          DIST_VER=$(jq -r .version dist/manifest.json)
+          if [ "$DIST_VER" != "$TAG" ]; then
+            echo "::error::dist/manifest.json version ${DIST_VER} != tag ${TAG} after build."
+            exit 1
+          fi
+          mkdir -p "${PLUGIN_ID}"
+          cp dist/main.js dist/manifest.json dist/styles.css "${PLUGIN_ID}/"
+          zip -r "${PLUGIN_ID}.zip" "${PLUGIN_ID}"
 
       - name: Create GitHub release
         uses: softprops/action-gh-release@v2
@@ -64,6 +189,9 @@ jobs:
           draft: false
           prerelease: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.prerelease == 'true' }}
           generate_release_notes: true
+          # Defense in depth: a second upload must not replace assets.
+          overwrite_files: false
+          fail_on_unmatched_files: true
           files: |
             ${{ env.PLUGIN_ID }}.zip
             dist/main.js
