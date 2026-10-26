@@ -53,7 +53,7 @@
 5. TP-DELTA app-UI (optional) — [#84](https://github.com/semyon-alekseev-noveo/tt-sync/issues/84).
 6. Post-#31 modularization — [#66](https://github.com/semyon-alekseev-noveo/tt-sync/issues/66) (slice A in PR; vaultDeletion/god remain); [#86](https://github.com/semyon-alekseev-noveo/tt-sync/issues/86).
 7. [#64](https://github.com/semyon-alekseev-noveo/tt-sync/issues/64) / [#65](https://github.com/semyon-alekseev-noveo/tt-sync/issues/65) / #104 / #137 / #160 **closed**; bump **2.0.92** pending tag.
-8. NOTE-BODY-2 fix on branch (#152) — live re-prove; FEAT-NOTEBOOK MVP next (#159).
+8. NOTE-BODY #152 live BODY-2 **pass** ×2 — close; FEAT-NOTEBOOK MVP live still **not run** (#159).
 
 ## References
 

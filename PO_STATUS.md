@@ -87,7 +87,7 @@
 | **BUG-ACTIVEZONE-COMMENT-SHUFFLE** | P1 | **resolved** on **2.0.89** tip (#134) | `repairProjectNoteTasks` keeps Abyss comments with each sibling (#19). Pilot **pass** ×2: `BUG-ACTIVEZONE-COMMENT-SHUFFLE/19-prove-2.0.89.md`. |
 | **BUG-TICKTICK-ID-LEAK** | P1 | mitigated on branch | Канонический `%%[ticktick_id:: <24hex>]%%`, strip loose fragment из title; тест `bugTicktickIdLeak.test.ts`. Почистить дубли в TT вручную. |
 | **AF-GTD-TAG-ADD** | P1 | **resolved** (#140+#141+#144) | Option A **kept** (PO 2026-10-25). Independence from Abyss: exclusivity in TTS. Intent **AF-GTD-STAGE-MOVE**. Planned rename `type/*`→`gtd/*`: `docs/pilot/AF-GTD-PREFIX.md`. Checkbox GTD parked. |
-| **NOTE-BODY** | P2 | partial ([#152](https://github.com/semyon-alekseev-noveo/tt-sync/issues/152)) | BODY-1/wipe live **pass**; BODY-2 fix on branch (pre-merge note base); live re-prove **not run**. |
+| **NOTE-BODY** | P2 | **resolved** ([#152](https://github.com/semyon-alekseev-noveo/tt-sync/issues/152)) | BODY-1/wipe/BODY-2 live **pass** ×2. `NOTE-BODY/03-live-body2-tip.md`. |
 | **FEAT-NOTEBOOK** | P2 | open (M–L); spike done | Spike NOTE project + CRUD — [#159](https://github.com/semyon-alekseev-noveo/tt-sync/issues/159); `FEAT-NOTEBOOK/159-spike-note-crud.md`. MVP next. |
 | **BUG-NOTEBOOK-NO-DELETE** | P1 | **resolved** (#162) | Vault→TT delete skips Notebook — [#160](https://github.com/semyon-alekseev-noveo/tt-sync/issues/160). |
 | **GAP-COMMENT-EDIT** | P2 | open | Правка комментария = delete + add (новые ID, шум в ленте TT) |
@@ -114,7 +114,7 @@
 6. Open: GAP-COMMENT-EDIT / risks ([#63](https://github.com/semyon-alekseev-noveo/tt-sync/issues/63)); TECH-START-1; TECH-API-1 live. [#66](https://github.com/semyon-alekseev-noveo/tt-sync/issues/66) / [#32](https://github.com/semyon-alekseev-noveo/tt-sync/issues/32) / [#137](https://github.com/semyon-alekseev-noveo/tt-sync/issues/137) **closed**.
 7. AF-NEST-1 nest→TT hierarchy **pass** on pilot — usable; deepen only if Active Zone sibling-nest vs MOC parent matters.
 8. **AF-GTD-PREFIX** + release **2.0.91** — **done** (tagged); [#66](https://github.com/semyon-alekseev-noveo/tt-sync/issues/66) A–G **closed** (cycle/size DoD).
-9. **NOTE-BODY** [#152](https://github.com/semyon-alekseev-noveo/tt-sync/issues/152): BODY-2 fix (pre-merge base) — live re-prove ×2 then close.
+9. **NOTE-BODY** [#152](https://github.com/semyon-alekseev-noveo/tt-sync/issues/152) — **close** after evidence PR (`03-live-body2-tip.md`).
 10. Tag/release **2.0.92** — **done** (merged tip).
 11. FEAT-NOTEBOOK [#159](https://github.com/semyon-alekseev-noveo/tt-sync/issues/159) MVP after spike (`159-spike-note-crud.md`).
 12. Optional: DEL-1/DEL-3 modal.
