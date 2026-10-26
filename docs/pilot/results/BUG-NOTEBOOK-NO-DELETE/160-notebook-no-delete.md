@@ -39,6 +39,8 @@ Full suite: **752** pass; `npm run build` OK; `check:sizes` 0 exceptions.
 
 Phase 2 / orphan vault→TT deletion skips Notebook notes (`notebookGuard` + `TaskDeletionHandler`). Live: two Inbox NOTE fixtures + one NOTE-project fixture survived Synchronize without vault mapping.
 
+**Tip sync regression (same PR):** after #66 main extract, `scheduledSynchronization` still called `this.waitForObsidianSync()` though the method was moved to `@/sync/waitForObsidianSync` — tip sync failed immediately (`is not a function`). Fixed to `waitForObsidianSync(this.app)`. Re-prove: tip eval sync `ok:true`; NOTES A/B still present.
+
 ## Checklist
 
 - [x] Guard on orphan / file-missing / `deleteTasksByIds`

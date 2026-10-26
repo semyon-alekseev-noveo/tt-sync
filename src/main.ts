@@ -127,7 +127,7 @@ export default class TickTickSync extends Plugin implements PluginContext {
 		// addSettingTab must run synchronously in onload; awaiting loadSettings first left no gear if loadData hung.
 		this.registerSettingsTab();
 		this.app.workspace.onLayoutReady(async () => {
-			await this.waitForObsidianSync();
+			await waitForObsidianSync(this.app);
 			await this.ensureSettingsLoaded();
 			try {
 				await this.pluginLoad();
@@ -645,7 +645,7 @@ export default class TickTickSync extends Plugin implements PluginContext {
 			return { ok: false, error: 'TickTickSync is not ready.' };
 		}
 
-		await this.waitForObsidianSync();
+		await waitForObsidianSync(this.app);
 
 		let result: SyncRunResult;
 		try {

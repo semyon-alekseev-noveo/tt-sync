@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-26 08:05 UTC
+
+- Context: Tip after #66 main extract broke Synchronize: `this.waitForObsidianSync is not a function`.
+- Target: Restore calls to imported `waitForObsidianSync(this.app)` so tip sync runs again.
+- Actions log: Fixed `onload` + `scheduledSynchronization` in `main.ts`; redeployed tip; eval sync `ok:true`.
+- Validation: tip probe `_tip160-probe2.json` ok; Notebook NOTES A/B still present after real tip sync.
+- Problems: Earlier tip “live prove” for #160 was invalid while sync was dead (`resolved`).
+- To Be Done: Push fix on PR #162; merge.
+- References: #160, PR #162, `CHANGELOG.md`
+
 ### Iteration 2026-10-26 07:30 UTC
 
 - Context: Owner go on #160 BUG-NOTEBOOK-NO-DELETE before live NOTE-BODY / FEAT-NOTEBOOK.
