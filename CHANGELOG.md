@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-26 02:45 UTC
+
+- Context: Continue #66 — drop `VaultSyncCoordinator` size exception.
+- Target: Extract vault-line/comment reconcile; VSC ≤30 KB.
+- Actions log: `sync/vault-pull/vaultLineBehind.ts`; update vaultCommentBehind tests; shrink exceptions.
+- Validation: `check:sizes` (3 exceptions); `check:cycles`; `npx vitest run` 738; `npm run build` OK.
+- Problems: Three production files still excepted (`open`).
+- To Be Done: Owner merge PR #154; further extract on seam.
+- References: `66-slice-d-vault-line-behind.md`, #66
+
 ### Iteration 2026-10-26 02:40 UTC
 
 - Context: Continue #66 — god-class still over 30 KB; DoD size CI deferred.

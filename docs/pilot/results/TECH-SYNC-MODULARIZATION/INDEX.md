@@ -16,3 +16,4 @@ Plan: [`docs/SYNC_MODULARIZATION.md`](../../../SYNC_MODULARIZATION.md)
 | #66 slice A TECH-API-1 / cycles | (PR #154) | **in PR** — playbook + contract + CI allowlist |
 | #66 slice B timed vaultDeletion | [`66-slice-b-vault-deletion.md`](66-slice-b-vault-deletion.md) | **in PR** — syncFilesPass + timed Phase 2 |
 | #66 slice C checkDatabase + sizes | [`66-slice-c-checkdatabase.md`](66-slice-c-checkdatabase.md) | **in PR** — god-class ≤30 KB; `check:sizes` CI |
+| #66 slice D vaultLineBehind | [`66-slice-d-vault-line-behind.md`](66-slice-d-vault-line-behind.md) | **in PR** — VSC ≤30 KB |

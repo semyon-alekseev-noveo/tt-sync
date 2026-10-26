@@ -5,6 +5,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { TFile } from 'obsidian';
 import { VaultSyncCoordinator } from '@/services/VaultSyncCoordinator';
+import { vaultLineBehindTask } from '@/sync/vault-pull/vaultLineBehind';
 import { updateSettings } from '@/settings';
 import { apiCommentsDifferFromVault } from '@/abyssCommentSync';
 import { listCommentMapsForTask } from '@/db/taskCommentMaps';
@@ -82,9 +83,8 @@ describe('BUG-PULL-COMMENT-STALE', () => {
 			},
 		};
 		const coordinator = new VaultSyncCoordinator(app as never, plugin as never);
-		const behind = (coordinator as unknown as {
-			vaultLineBehindTask(task: unknown, path: string): Promise<{ behind: boolean; task: { _apiComments?: unknown[] } }>;
-		}).vaultLineBehindTask.bind(coordinator);
+		const behind = (task: unknown, path: string) =>
+			vaultLineBehindTask({ app: app as never, plugin: plugin as never }, task as never, path);
 
 		const matched = await behind({
 			id: taskId, projectId: 'proj-1', title: 'same title', content: '', desc: '', status: 0, commentCount: 0,
@@ -166,9 +166,8 @@ describe('BUG-PULL-COMMENT-STALE', () => {
 			vault: { getAbstractFileByPath: () => file, read: async () => text },
 		};
 		const coordinator = new VaultSyncCoordinator(app as never, plugin as never);
-		const behind = (coordinator as unknown as {
-			vaultLineBehindTask(task: unknown, path: string): Promise<{ behind: boolean; reason: string }>;
-		}).vaultLineBehindTask.bind(coordinator);
+		const behind = (task: unknown, path: string) =>
+			vaultLineBehindTask({ app: app as never, plugin: plugin as never }, task as never, path);
 
 		const result = await behind({
 			id: taskId,
@@ -243,9 +242,8 @@ describe('BUG-PULL-COMMENT-STALE', () => {
 			vault: { getAbstractFileByPath: () => file, read: async () => text },
 		};
 		const coordinator = new VaultSyncCoordinator(app as never, plugin as never);
-		const behind = (coordinator as unknown as {
-			vaultLineBehindTask(task: unknown, path: string): Promise<{ behind: boolean; localEdit: boolean; reason: string }>;
-		}).vaultLineBehindTask.bind(coordinator);
+		const behind = (task: unknown, path: string) =>
+			vaultLineBehindTask({ app: app as never, plugin: plugin as never }, task as never, path);
 
 		const result = await behind({
 			id: taskId,
@@ -317,9 +315,8 @@ describe('BUG-PULL-COMMENT-STALE', () => {
 			vault: { getAbstractFileByPath: () => file, read: async () => text },
 		};
 		const coordinator = new VaultSyncCoordinator(app as never, plugin as never);
-		const behind = (coordinator as unknown as {
-			vaultLineBehindTask(task: unknown, path: string): Promise<{ behind: boolean; localEdit: boolean; reason: string }>;
-		}).vaultLineBehindTask.bind(coordinator);
+		const behind = (task: unknown, path: string) =>
+			vaultLineBehindTask({ app: app as never, plugin: plugin as never }, task as never, path);
 
 		const result = await behind({
 			id: taskId,
@@ -414,9 +411,8 @@ describe('BUG-PULL-COMMENT-STALE', () => {
 			vault: { getAbstractFileByPath: () => file, read: async () => text },
 		};
 		const coordinator = new VaultSyncCoordinator(app as never, plugin as never);
-		const behind = (coordinator as unknown as {
-			vaultLineBehindTask(task: unknown, path: string): Promise<{ behind: boolean; localEdit: boolean; reason: string }>;
-		}).vaultLineBehindTask.bind(coordinator);
+		const behind = (task: unknown, path: string) =>
+			vaultLineBehindTask({ app: app as never, plugin: plugin as never }, task as never, path);
 
 		const result = await behind({
 			id: taskId,
@@ -493,9 +489,8 @@ describe('BUG-PULL-COMMENT-STALE', () => {
 			vault: { getAbstractFileByPath: () => file, read: async () => text },
 		};
 		const coordinator = new VaultSyncCoordinator(app as never, plugin as never);
-		const behind = (coordinator as unknown as {
-			vaultLineBehindTask(task: unknown, path: string): Promise<{ behind: boolean; localEdit: boolean; reason: string }>;
-		}).vaultLineBehindTask.bind(coordinator);
+		const behind = (task: unknown, path: string) =>
+			vaultLineBehindTask({ app: app as never, plugin: plugin as never }, task as never, path);
 
 		const result = await behind({
 			id: taskId,
@@ -583,9 +578,8 @@ describe('BUG-PULL-COMMENT-STALE', () => {
 			vault: { getAbstractFileByPath: () => file, read: async () => text },
 		};
 		const coordinator = new VaultSyncCoordinator(app as never, plugin as never);
-		const behind = (coordinator as unknown as {
-			vaultLineBehindTask(task: unknown, path: string): Promise<{ behind: boolean; localEdit: boolean; reason: string }>;
-		}).vaultLineBehindTask.bind(coordinator);
+		const behind = (task: unknown, path: string) =>
+			vaultLineBehindTask({ app: app as never, plugin: plugin as never }, task as never, path);
 
 		const result = await behind({
 			id: taskId,
@@ -665,9 +659,8 @@ describe('BUG-PULL-COMMENT-STALE', () => {
 			vault: { getAbstractFileByPath: () => file, read: async () => twinText },
 		};
 		const coordinator = new VaultSyncCoordinator(app as never, plugin as never);
-		const behind = (coordinator as unknown as {
-			vaultLineBehindTask(task: unknown, path: string): Promise<{ behind: boolean; localEdit: boolean; reason: string }>;
-		}).vaultLineBehindTask.bind(coordinator);
+		const behind = (task: unknown, path: string) =>
+			vaultLineBehindTask({ app: app as never, plugin: plugin as never }, task as never, path);
 
 		const result = await behind({
 			id: taskId,
@@ -747,14 +740,8 @@ describe('BUG-PULL-COMMENT-STALE', () => {
 			vault: { getAbstractFileByPath: () => file, read: async () => text },
 		};
 		const coordinator = new VaultSyncCoordinator(app as never, plugin as never);
-		const behind = (coordinator as unknown as {
-			vaultLineBehindTask(task: unknown, path: string): Promise<{
-				behind: boolean;
-				localEdit: boolean;
-				reason: string;
-				task: { _apiComments?: unknown[] };
-			}>;
-		}).vaultLineBehindTask.bind(coordinator);
+		const behind = (task: unknown, path: string) =>
+			vaultLineBehindTask({ app: app as never, plugin: plugin as never }, task as never, path);
 
 		const result = await behind({
 			id: taskId,
@@ -836,9 +823,8 @@ describe('BUG-PULL-COMMENT-STALE', () => {
 			vault: { getAbstractFileByPath: () => file, read: async () => text },
 		};
 		const coordinator = new VaultSyncCoordinator(app as never, plugin as never);
-		const behind = (coordinator as unknown as {
-			vaultLineBehindTask(task: unknown, path: string): Promise<{ behind: boolean; localEdit: boolean; reason: string }>;
-		}).vaultLineBehindTask.bind(coordinator);
+		const behind = (task: unknown, path: string) =>
+			vaultLineBehindTask({ app: app as never, plugin: plugin as never }, task as never, path);
 
 		const result = await behind({
 			id: taskId,
@@ -925,21 +911,8 @@ describe('BUG-PULL-COMMENT-STALE', () => {
 			vault: { getAbstractFileByPath: () => file, read: async () => text },
 		};
 		const coordinator = new VaultSyncCoordinator(app as never, plugin as never);
-		const behind = (coordinator as unknown as {
-			vaultLineBehindTask(task: unknown, path: string): Promise<{
-				behind: boolean;
-				localEdit: boolean;
-				reason: string;
-				task: {
-					_apiComments?: unknown[];
-					__ticktickComments?: {
-						knownBodies: string[];
-						apiBodies: string[];
-						remoteCommentCount?: number;
-					};
-				};
-			}>;
-		}).vaultLineBehindTask.bind(coordinator);
+		const behind = (task: unknown, path: string) =>
+			vaultLineBehindTask({ app: app as never, plugin: plugin as never }, task as never, path);
 
 		// Dexie count already 0 after TT delete while vault still has the mapped bullet
 		// (count mismatch forces comment probe; matched count would idle-skip GET).

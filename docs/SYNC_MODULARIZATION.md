@@ -1,6 +1,6 @@
 # Sync modularization plan
 
-**Status:** **PR 7 landed**; **#66 slices A–C** — TECH-API-1 + cycle CI; timed `vaultDeletion` + `syncFilesPass`; `checkDatabase` extract (`services/index.ts` under 30 KB); CI `check:sizes`. Evidence: `docs/pilot/results/TECH-SYNC-MODULARIZATION/`; playbook `docs/TECH_API_BREAKAGE.md`.
+**Status:** **PR 7 landed**; **#66 slices A–D** — TECH-API-1 + cycle/size CI; timed `vaultDeletion`; `checkDatabase` + `vaultLineBehind` extracts (`services/index.ts` and `VaultSyncCoordinator` under 30 KB). Evidence: `docs/pilot/results/TECH-SYNC-MODULARIZATION/`; playbook `docs/TECH_API_BREAKAGE.md`.
 
 **Canonical boundaries:** [`ANALYST_REFERENCE_DIAGRAMS.md`](ANALYST_REFERENCE_DIAGRAMS.md). Process: [`DEV_FLOW.md`](../DEV_FLOW.md).
 
@@ -170,6 +170,11 @@ See **`docs/COMMENT_SYNC_MODEL.md`**. PR A: keys + `planCommentSync` + tests (in
 - `src/services/index.ts` now **under 30 KB** (no longer excepted).
 - CI: `npm run check:sizes` (`scripts/check-file-sizes.mjs` + `docs/file-size.exceptions.json`, strict).
 
+### PR 11 / #66 slice D — vaultLineBehind extract
+
+- `src/sync/vault-pull/vaultLineBehind.ts` — comment/line reconcile helpers from `VaultSyncCoordinator`.
+- `VaultSyncCoordinator.ts` under 30 KB (dropped from exceptions).
+
 ### Files over 30 KB — exceptions (#66 / #31 DoD)
 
 Canonical list: `docs/file-size.exceptions.json` (must shrink when files drop ≤ 30 KB).
@@ -179,11 +184,10 @@ Canonical list: `docs/file-size.exceptions.json` (must shrink when files drop �
 | `src/main.ts` | Obsidian entry; settings/query/redo seams later |
 | `src/fileOperation.ts` | Vault-pull; split on a concrete pull bug |
 | `src/api/index.ts` | Unofficial Tick; TECH-API-1 coverage first |
-| `src/services/VaultSyncCoordinator.ts` | Reconcile; extract on pull/reconcile seam |
 
-### PR 11+ — next slices
+### PR 12+ — next slices
 
-- Further extract when a concrete fix needs a seam (`VaultSyncCoordinator`, `fileOperation`, `api/index`).
+- Further extract when a concrete fix needs a seam (`fileOperation`, `api/index`, `main`).
 
 ## Bug → module (quick routing)
 

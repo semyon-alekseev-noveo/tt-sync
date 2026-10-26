@@ -92,7 +92,7 @@
 | **RISK-LARGE-VAULT** | P2 | partial (#62 slice 1) | `idsPresentInVault` + file cache; idle `getTaskById` already 0; idle `getTaskComments` only on count mismatch / unknown count / stamp twins (not every vault thread). `ensureVaultFilesRegistered` still walks all `.md` |
 | **TECH-START-1** | P2 | open | Полный pull на старте блокирует инициализацию |
 | **TECH-API-1** | P1 | partial ([#66](https://github.com/semyon-alekseev-noveo/tt-sync/issues/66) A–C) | Playbook + contract tests; live TT breakage risk remains |
-| **TECH-CIRC-1 / GOD-1/2** | P2 | #66 A–C: cycle CI + vaultDeletion + checkDatabase; `services/index.ts` ≤30 KB | Remaining >30 KB: main / fileOperation / api / VaultSyncCoordinator ([#66](https://github.com/semyon-alekseev-noveo/tt-sync/issues/66)) |
+| **TECH-CIRC-1 / GOD-1/2** | P2 | #66 A–D: cycle/size CI; vaultDeletion; checkDatabase; vaultLineBehind | Remaining >30 KB: main / fileOperation / api ([#66](https://github.com/semyon-alekseev-noveo/tt-sync/issues/66)) |
 | **DOC-STALE-1** | P3 | mitigated on this branch | Канон: `DEV_FLOW.md`, `PO_STATUS.md`, `ABYSS_FIRST_PLAN.md`. `GTD_SYNC_*`, `TT_ABYSS_ROADMAP.md`, `SYNC_PROJECTS_AND_SUBTASKS.md` — архив. Comments API описан в `ABYSS_NOTES_ALIGNMENT.md` |
 | **SEC-CREDS-1** | P1 | **resolved** 2026-10-25 | `tp_…` revoke + live auth: session cookie (not Open API); autologin password-in-`data.json` stays opt-in — exclude from vault sync if on. Step 8.0 in `ABYSS_FIRST_PLAN.md`. [#32](https://github.com/semyon-alekseev-noveo/tt-sync/issues/32). |
 | Прежние | — | mitigated | Pilot `data.json` drift **resolved** on Thinkpad-tts-test **2.0.89** ([#64](https://github.com/semyon-alekseev-noveo/tt-sync/issues/64)). |

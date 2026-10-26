@@ -1191,3 +1191,14 @@ Extract-only + engineering gate. Settings "Check database" behavior unchanged.
 | ID | Pilot status | Evidence |
 |----|----------------|----------|
 | TECH-FILE-SIZE-CI | **unit** (CI) | `docs/file-size.exceptions.json` |
+
+## PR — #66 slice D (vaultLineBehind)
+
+Extract-only: comment/line reconcile moved to `sync/vault-pull/vaultLineBehind.ts`.
+
+1. `npx vitest run src/test/vaultCommentBehind.test.ts`
+2. Optional pilot Synchronize with comments — **not run**.
+
+| ID | Pilot status | Evidence |
+|----|----------------|----------|
+| TECH-VAULT-LINE-BEHIND-EXTRACT | **unit**; pilot **not run** | `66-slice-d-vault-line-behind.md` |

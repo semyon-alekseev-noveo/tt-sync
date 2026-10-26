@@ -13,10 +13,6 @@
 		{
 			"path": "src/api/index.ts",
 			"reason": "Unofficial Tick client; prefer TECH-API-1 contract tests over a big-bang split."
-		},
-		{
-			"path": "src/services/VaultSyncCoordinator.ts",
-			"reason": "Vault reconcile coordinator; extract when a pull/reconcile bug needs a seam."
 		}
 	]
 }
