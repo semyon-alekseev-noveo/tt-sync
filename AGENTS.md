@@ -6,7 +6,7 @@ Short version: the analyst writes a case ID and expected behavior in [`ABYSS_FIR
 
 Every PR that changes behavior updates [`TEST_PLAN.md`](TEST_PLAN.md) in that same PR (steps, expected result, pilot status). Reviewers and tester agents reject a PR that does not.
 
-Do not push `abyss-mapping` or `master`, do not merge, and do not create tags or releases. Open a pull request into `abyss-mapping`. The owner merges.
+Do not push `abyss-mapping` or `master`, do not merge, and do not create tags or releases. Open a pull request into `abyss-mapping`. The owner merges. Publishing is gated by `.github/workflows/release.yml` (tests, ancestor of `abyss-mapping`, version match, no retag) — see `DEV_FLOW.md` § Versioning and releases. A pilot build is a pre-release **Run workflow**, only when the owner asked.
 
 Pilot vault only. No secrets and no personal filesystem paths in the repo. Do not mark a live-vault case as passed unless it was run.
 

@@ -1327,3 +1327,64 @@ Opt-in `syncNotebook` + `notebookFolder`. One-way TickTick NOTE → markdown. De
 |----|----------------|----------|
 | FEAT-NOTEBOOK-MVP-1 | **unit pass**; live **pass** ×2 | `FEAT-NOTEBOOK/166-mvp-tt-to-vault-live.md` |
 
+## PR — PROC-RELEASE-GATE (#30)
+
+Workflow and docs only. No vault sync change. Do not push a tag or run **Release Obsidian plugin** unless the owner asked for that publish. Rows stay **not run** until someone does.
+
+Local check (no tag, current tree at **2.0.93**):
+
+```bash
+TAG=2.0.93 bash scripts/check-release-version.sh   # expect: Version match
+TAG=0.0.0 bash scripts/check-release-version.sh    # expect: non-zero, version mismatch
+TAG=v2.0.93 bash scripts/check-release-version.sh  # expect: non-zero, v prefix rejected
+```
+
+### PROC-RELEASE-GATE-TESTS
+
+1. On a commit where `npm test` fails, push a tag that matches the version files, or **Run workflow** on that commit.
+2. Open the Actions run for **Release Obsidian plugin**.
+
+Expected: job `test` fails. Job `release` does not upload assets. No new GitHub Release.
+
+### PROC-RELEASE-GATE-ANCESTOR
+
+1. **Run workflow** on a commit that is not in `abyss-mapping` history. Leave **pre-release** unchecked.
+2. Repeat with **pre-release** checked, version files equal to the tag, tests green, and no existing Release for that tag.
+3. Push a tag (not **Run workflow**) for a commit that is not an ancestor of `origin/abyss-mapping`.
+
+Expected: (1) fails the ancestor step, no Release. (2) publishes a **pre-release** only. (3) fails the ancestor step even though a tag push is never the pre-release skip.
+
+### PROC-RELEASE-GATE-VERSION
+
+1. Push tag `2.0.99` on a commit whose `manifest.json`, `package.json`, and `versions.json` are still `2.0.93`.
+
+Expected: `scripts/check-release-version.sh` fails before `npm ci` in the `release` job. `dist/manifest.json` is not rewritten to `2.0.99`. No Release.
+
+### PROC-RELEASE-GATE-RETAG
+
+1. After a Release for tag `2.0.x` exists, push that same tag again or **Run workflow** with version `2.0.x`.
+
+Expected: the job fails because the Release exists. Assets on the existing Release stay as they were (`overwrite_files: false`).
+
+### PROC-RELEASE-GATE-HAPPY
+
+1. Merge the bump so `abyss-mapping` contains the commit. Tag that tip once with the manifest version. Push the tag.
+
+Expected: `test` green, ancestor check green, version match, Release created with `main.js`, `manifest.json`, `styles.css`, and the zip. The Release is not a pre-release.
+
+### PROC-RELEASE-GATE-BRAT
+
+1. On the live vault, BRAT → edit `tt-sync` → version is a **frozen** non-prerelease tag.
+2. On the pilot, either **latest** or a frozen pre-release tag the owner just cut.
+
+Expected: live does not move when a higher pre-release exists. Pilot on **latest** does, because BRAT’s latest includes pre-releases.
+
+| ID | Pilot status | Evidence |
+|----|----------------|----------|
+| PROC-RELEASE-GATE-TESTS | **not run** | `release.yml` job `test`; do not push a red tag unless the owner asks |
+| PROC-RELEASE-GATE-ANCESTOR | **not run** | ancestor step; pre-release **Run workflow** is the only skip |
+| PROC-RELEASE-GATE-VERSION | **not run** | `scripts/check-release-version.sh` (local mismatch checked in the PR; Actions row not run) |
+| PROC-RELEASE-GATE-RETAG | **not run** | existing Release fails the job |
+| PROC-RELEASE-GATE-HAPPY | **not run** | next owner tag on `abyss-mapping` |
+| PROC-RELEASE-GATE-BRAT | **not run** | `docs/BRAT_INSTALL.md` pilot vs live |
+

@@ -1,10 +1,10 @@
 # Product owner brief — TickTickSync Abyss fork (project scheme)
 
-**Обновлено:** 2026-10-24  
+**Обновлено:** 2026-10-26  
 **Audience:** Product owner / decision maker  
 **Repo:** `tickticksync` branch `abyss-mapping`  
 **Test vault:** `<pilot-vault>` (copy only; live vault `<live-vault>` untouched)  
-**Install:** BRAT → `https://github.com/semyon-alekseev-noveo/tt-sync` track **latest release** (**2.0.93** after tag); plugin id **`tickticksync-abyss`** — `docs/BRAT_INSTALL.md`. Preset: `00 Inbox/TTS-data-preset.json`.
+**Install:** BRAT → `https://github.com/semyon-alekseev-noveo/tt-sync`; plugin id **`tickticksync-abyss`** — `docs/BRAT_INSTALL.md`. Pilot may track **latest** (that track includes pre-releases). Live vault stays **frozen** on the last non-prerelease tag (**2.0.93** after that tag) and must not track pre-releases. Preset: `00 Inbox/TTS-data-preset.json`.
 
 История изменений — только в `CHANGELOG.md`; здесь — снимок для PO.
 
@@ -118,6 +118,7 @@
 10. Tag/release **2.0.93** after this bump merges (ships BODY-2 + Notebook MVP).
 11. FEAT-NOTEBOOK [#159](https://github.com/semyon-alekseev-noveo/tt-sync/issues/159): MVP live **pass**; bi-di / scope still open.
 12. Optional: DEL-1/DEL-3 modal.
+13. PROC-RELEASE-GATE [#30](https://github.com/semyon-alekseev-noveo/tt-sync/issues/30): Actions gate is in `release.yml` (tests, ancestor, version match, no retag). Owner still turns on required check `CI / test` for `abyss-mapping` (`docs/github-issues/30-proc-release-gate.md`). Leave #30 open until merge and that decision.
 
 
 ## Аналитический мит 2026-10-19

@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-26 13:22 UTC
+
+- Context: [#30](https://github.com/semyon-alekseev-noveo/tt-sync/issues/30) PROC-RELEASE-GATE — manual policy from PR #57; Actions still published red tests (**2.0.59**), unmerged branches (**2.0.75/76/77**), and the same tag twice (**2.0.78**).
+- Target: `release.yml` fails closed on those cases; docs describe the gate and BRAT pilot vs live tracks. No plugin runtime change. #20 stays closed (no feature freeze). #30 stays open for the owner.
+- Actions log: Release job `test` matches `ci.yml` and `release` needs it. Ancestor check on `origin/abyss-mapping` (skip only for `workflow_dispatch` with pre-release checked). `scripts/check-release-version.sh` before the zip; `dist/manifest.json` is not rewritten from the tag. Existing GitHub Release or a tag on another commit fails the job; `overwrite_files: false`.
+- Validation: `npx vitest run` 760 passed; `npm run build` OK (`dist/manifest.json` 2.0.93, `styles.css` present). Version script: `TAG=2.0.93` pass; mismatch, `v` prefix, newline, and missing `versions.json` key fail. No tag pushed. Branch protection not changed (token HTTP 403 on read; ruleset list empty).
+- Problems: Required check `CI / test` on `abyss-mapping` is still an owner click. BRAT **latest** includes pre-releases, so the live vault must stay frozen. Deleting a Release and force-moving the tag still publishes.
+- To Be Done: Owner merges; optionally adds the ruleset in `docs/github-issues/30-proc-release-gate.md`; then closes #30. Actions rows in `TEST_PLAN.md` stay **not run** until someone pushes a bad tag or a real release on purpose.
+- References: #30, `DEV_FLOW.md`, `docs/BRAT_INSTALL.md`, `.github/workflows/release.yml`
+
 ### Iteration 2026-10-26 10:19 UTC
 
 - Context: Owner asked release after NOTE-BODY-2 + Notebook MVP live on tip past **2.0.92**.

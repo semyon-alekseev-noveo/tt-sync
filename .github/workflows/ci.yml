@@ -9,6 +9,7 @@ on:
       - abyss-mapping
 
 jobs:
+  # Job name is the required check "CI / test". release.yml job test mirrors these steps.
   test:
     runs-on: ubuntu-latest
     steps:
