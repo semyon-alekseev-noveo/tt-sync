@@ -1412,14 +1412,46 @@ Expected: the plugin does not PUT the new text onto the TickTick-only comment.
 
 ### Still required after this PR (not this behavior change)
 
-- RISK-PULL-WINS-LOCAL ([#174](https://github.com/semyon-alekseev-noveo/tt-sync/issues/174)): proposed only. Do not treat a local LWW win as a vault refresh until that issue lands.
+- RISK-PULL-WINS-LOCAL ([#174](https://github.com/semyon-alekseev-noveo/tt-sync/issues/174)): unit on the follow-up PR. See the section below. Pilot **not run**.
 - RISK-DUAL-STORE ([#175](https://github.com/semyon-alekseev-noveo/tt-sync/issues/175)): no detection command yet.
 - BUG-TICKTICK-ID-LEAK: optional look at pilot lines for loose `ticktick_id::` outside `%%[ticktick_id:: …]%%`. Clean any TickTick title that already contains that fragment by hand.
 
 | ID | Pilot status | Evidence |
 |----|----------------|----------|
 | GAP-COMMENT-EDIT | **unit pass**; live **not run** | `src/test/abyssCommentSync.test.ts`, `src/test/api/techApi1.contract.test.ts` |
-| RISK-PULL-WINS-LOCAL | **not run** (not implemented) | Proposed row in `ABYSS_FIRST_CASES.md` |
+| RISK-PULL-WINS-LOCAL | **unit** on the follow-up PR; pilot **not run** | `src/test/synchronizationInner.integration.test.ts`, `src/test/riskPullWinsLocal.test.ts` |
 | RISK-DUAL-STORE | **not run** (detection not implemented) | Invariant in `PO_STATUS.md` |
 | BUG-TICKTICK-ID-LEAK | **unit** on tip; pilot re-scan **not run** | `src/test/bugTicktickIdLeak.test.ts` |
+
+## PR — #174 RISK-PULL-WINS-LOCAL (vault line on local LWW win)
+
+A local win in `resolveTaskConflict` keeps the Dexie task. If the vault line hash differs from that task, Synchronize rewrites the line from the local title, status, and content. The older remote body is not written into the note. `modifiedTime` comparison is unchanged.
+
+### RISK-PULL-WINS-LOCAL — stale line follows the local winner
+
+1. On `<pilot-vault>`, pick a synced task whose Dexie `modifiedTime` is newer than TickTick and whose note line does not match that local task (different title, checkbox, and `- >` body).
+2. Synchronize.
+3. Read the note and the Dexie task.
+
+Expected: the note line shows the local title, the local checkbox state, and the local `- >` body. The TickTick title, status, and content from the older remote task are not in the note. Dexie still has the local body.
+
+### RISK-PULL-WINS-LOCAL — matching hash stays put
+
+1. Note line hash already equals the winning local task’s `lineHash`.
+2. Synchronize while an older remote task is in the delta.
+
+Expected: the note line is left as it is. Dexie still has the local title, status, and content.
+
+### Still required (unchanged behavior)
+
+- A newer remote `modifiedTime` still replaces the Dexie body (remote win). Equal `modifiedTime` still takes the remote body.
+- A hash mismatch that is not a local LWW win is still a local edit: the vault line is not overwritten.
+- A normal Abyss merge still keeps an unpushed `- >` that is not a local-LWW rewrite (NOTE-BODY-2).
+- Bookkeeping `modifiedTime` (push sets it to now) can still beat a real TickTick edit. This PR does not add a dirty flag.
+
+| ID | Pilot status | Evidence |
+|----|----------------|----------|
+| RISK-PULL-WINS-LOCAL | **unit pass**; pilot **not run** | `src/test/synchronizationInner.integration.test.ts`, `src/test/riskPullWinsLocal.test.ts` |
+| RISK-PULL-WINS-LOCAL hash match | **unit pass**; pilot **not run** | same file, “hash matches the local winner” |
+| Remote-newer / tie still remote | **unit** (existing); pilot **not run** | `src/test/conflicts.test.ts` |
 

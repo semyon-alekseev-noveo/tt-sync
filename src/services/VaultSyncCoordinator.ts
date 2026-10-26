@@ -12,6 +12,7 @@ import type { PluginContext } from '@/pluginContext';
 import type { ITask } from '@/api/types/Task';
 import type { LocalTask } from '@/db/schema';
 import { vaultLineBehindTask } from '@/sync/vault-pull/vaultLineBehind';
+import { clearLocalLwwWins, consumeLocalLwwWin, defineLocalLwwRewrite, isLocalLwwRewrite } from '@/sync/localLwwWin';
 import { db } from "@/db/dexie";
 import { getSettings } from '@/settings';
 import { deletionConfirmMode } from '@/sync/massDeleteGuard';
@@ -138,7 +139,13 @@ export class VaultSyncCoordinator {
 			} else if (matchesFilter) {
 				let actionNeeded = this.determineActionNeeded(lt, targetFile);
 				if (targetFile && (actionNeeded.action === 'none' || actionNeeded.action === 'update')) {
-					const behind = await vaultLineBehindTask({ app: this.app, plugin: this.plugin }, task, targetFile);
+					const localLwwWin = consumeLocalLwwWin(task.id);
+					const behind = await vaultLineBehindTask(
+						{ app: this.app, plugin: this.plugin },
+						task,
+						targetFile,
+						{ localLwwWin },
+					);
 					traceWrite(this.app, 'syncVaultWithDatabase', targetFile, 'decision', {
 						reason: actionNeeded.action === 'update' && !behind.behind && !behind.localEdit
 							? 'hasChanged'
@@ -223,6 +230,7 @@ export class VaultSyncCoordinator {
 			enabled: !!getSettings().syncNotebook,
 			folder: getSettings().notebookFolder || 'TickTick Notebook',
 		});
+		clearLocalLwwWins();
 	}
 
 	/**
@@ -518,6 +526,7 @@ export class VaultSyncCoordinator {
 		const next = { ...task, tags: nextTags };
 		// Spread drops non-enumerable pull state (TP-COMMENT-TT-DELETE F1): keep merge hint + API list.
 		this.copyCommentPullState(task, next);
+		if (isLocalLwwRewrite(task)) defineLocalLwwRewrite(next);
 		try {
 			await this.plugin.tickTickRestAPI?.updateTask(next);
 		} catch (e) {

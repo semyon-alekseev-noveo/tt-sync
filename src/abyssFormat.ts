@@ -262,6 +262,20 @@ function descBody(line: string): string {
 }
 
 /**
+ * Description bodies already on the vault line. Passed as `mergeAbyssBlock` `base`
+ * on a local LWW rewrite so those lines are not kept as an unpushed edit.
+ * The generated `- >` from the winning local task replaces them.
+ */
+export function localLwwRewriteBase(oldChild: string[]): string {
+	const kinds = classifyChildren(oldChild);
+	return oldChild
+		.filter((_, i) => kinds[i] === 'desc')
+		.map(descBody)
+		.filter(body => body.length > 0)
+		.join('\n');
+}
+
+/**
  * `base` = note text last synced with TickTick (legacy `Comments:` block only). Comments API deletions use `ticktick`, not `base`.
  * A description or comment that is in the vault and not in the generated block or the last synced base is an unpushed local edit.
  * Those lines stay. A generated comment the vault no longer has is not put back beside that edit.
