@@ -1239,3 +1239,17 @@ Extract-only: session HTTP and comment helpers leave `api/index.ts` ≤ 30 KB. P
 |----|----------------|----------|
 | TECH-API-HTTP-EXTRACT | **unit**; pilot **not run** | `66-slice-f-api-http-extract.md` |
 
+## PR — #66 slice G (main.ts extract)
+
+Extract-only: Obsidian Sync wait, settings migrate helpers, palette commands; remove unused dumpDB. `main.ts` ≤ 30 KB; empty size-exception list.
+
+### TECH-MAIN-EXTRACT
+
+1. `npm run check:sizes` — 0 exceptions
+2. `npx vitest run` (full suite)
+3. Optional: enable plugin / settings migrate / Synchronize — **not run**
+
+| ID | Pilot status | Evidence |
+|----|----------------|----------|
+| TECH-MAIN-EXTRACT | **unit**; pilot **not run** | `66-slice-g-main-extract.md` |
+

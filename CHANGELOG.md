@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-26 05:00 UTC
+
+- Context: Continue #66 after #155 — last size exception was `main.ts`.
+- Target: Extract settings migrate / Sync wait / commands; `main.ts` ≤30 KB; empty exceptions.
+- Actions log: `waitForObsidianSync`, `settingsDataMigrate`, `settingsVaultMigrate`, `pluginCommands`; drop dumpDB; docs/TEST_PLAN.
+- Validation: `check:sizes` (0); `check:cycles`; vitest 738; build OK.
+- Problems: No changes.
+- To Be Done: Owner merge; close #66 DoD (TECH-API-1 live risk stays in PO).
+- References: `66-slice-g-main-extract.md`, #66
+
 ### Iteration 2026-10-26 04:50 UTC
 
 - Context: Continue #66 after #154 — drop `api/index` size exception.

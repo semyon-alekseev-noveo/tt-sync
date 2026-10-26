@@ -1,6 +1,6 @@
 # Sync modularization plan
 
-**Status:** **PR 7 landed**; **#66 slices A–E** (#154); **slice F** — Tick HTTP + comment helpers (`api/index` under 30 KB). Remaining size exception: `main.ts`. Evidence: `docs/pilot/results/TECH-SYNC-MODULARIZATION/`; playbook `docs/TECH_API_BREAKAGE.md`.
+**Status:** **PR 7 landed**; **#66 slices A–G** — cycle/size CI DoD met (0 file-size exceptions; `main` / `api` / services / FO / VSC under 30 KB). Evidence: `docs/pilot/results/TECH-SYNC-MODULARIZATION/`; playbook `docs/TECH_API_BREAKAGE.md`.
 
 **Canonical boundaries:** [`ANALYST_REFERENCE_DIAGRAMS.md`](ANALYST_REFERENCE_DIAGRAMS.md). Process: [`DEV_FLOW.md`](../DEV_FLOW.md).
 
@@ -186,17 +186,21 @@ See **`docs/COMMENT_SYNC_MODEL.md`**. PR A: keys + `planCommentSync` + tests (in
 - `src/api/taskComments.ts` — comment POST body / response parse (re-exported from `api/index`)
 - `src/api/index.ts` under 30 KB (dropped from exceptions)
 
+### PR 14 / #66 slice G — main.ts under 30 KB
+
+- `src/sync/waitForObsidianSync.ts`
+- `src/settingsDataMigrate.ts`, `src/settingsVaultMigrate.ts`
+- `src/pluginCommands.ts`
+- Dropped dead `dumpDB` + commented ribbon stubs
+- `docs/file-size.exceptions.json` empty (DoD size item closed)
+
 ### Files over 30 KB — exceptions (#66 / #31 DoD)
 
-Canonical list: `docs/file-size.exceptions.json` (must shrink when files drop ≤ 30 KB).
+Canonical list: `docs/file-size.exceptions.json` (must shrink when files drop ≤ 30 KB). **None** after slice G.
 
-| File | Exception / plan |
-|------|------------------|
-| `src/main.ts` | Obsidian entry; settings/query/redo seams later |
+### PR 15+ — next slices
 
-### PR 14+ — next slices
-
-- Further extract when a concrete fix needs a seam (`main`).
+- Further extract only when a concrete fix needs a seam.
 
 ## Bug → module (quick routing)
 

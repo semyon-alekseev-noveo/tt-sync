@@ -1,10 +1,5 @@
 {
 	"limitBytes": 30720,
 	"note": "#66 / #31 DoD. Remove an entry when the file drops ≤ 30 KB. Add only with a reason in the same PR.",
-	"files": [
-		{
-			"path": "src/main.ts",
-			"reason": "Obsidian entry wires the service graph; further extract waits on settings/query/redo seams."
-		}
-	]
+	"files": []
 }

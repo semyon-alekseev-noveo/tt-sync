@@ -93,7 +93,7 @@
 | **RISK-LARGE-VAULT** | P2 | partial (#62 slice 1) | `idsPresentInVault` + file cache; idle `getTaskById` already 0; idle `getTaskComments` only on count mismatch / unknown count / stamp twins (not every vault thread). `ensureVaultFilesRegistered` still walks all `.md` |
 | **TECH-START-1** | P2 | open | Полный pull на старте блокирует инициализацию |
 | **TECH-API-1** | P1 | partial ([#66](https://github.com/semyon-alekseev-noveo/tt-sync/issues/66) A–C) | Playbook + contract tests; live TT breakage risk remains |
-| **TECH-CIRC-1 / GOD-1/2** | P2 | #66 A–F: cycle/size CI; extracts through api HTTP | Remaining >30 KB: `main.ts` only ([#66](https://github.com/semyon-alekseev-noveo/tt-sync/issues/66)) |
+| **TECH-CIRC-1 / GOD-1/2** | P2 | #66 A–G: cycle/size CI DoD; 0 size exceptions | Close #66 after slice G merge; TECH-API-1 live risk stays P1 |
 | **DOC-STALE-1** | P3 | mitigated on this branch | Канон: `DEV_FLOW.md`, `PO_STATUS.md`, `ABYSS_FIRST_PLAN.md`. `GTD_SYNC_*`, `TT_ABYSS_ROADMAP.md`, `SYNC_PROJECTS_AND_SUBTASKS.md` — архив. Comments API описан в `ABYSS_NOTES_ALIGNMENT.md` |
 | **SEC-CREDS-1** | P1 | **resolved** 2026-10-25 | `tp_…` revoke + live auth: session cookie (not Open API); autologin password-in-`data.json` stays opt-in — exclude from vault sync if on. Step 8.0 in `ABYSS_FIRST_PLAN.md`. [#32](https://github.com/semyon-alekseev-noveo/tt-sync/issues/32). |
 | Прежние | — | mitigated | Pilot `data.json` drift **resolved** on Thinkpad-tts-test **2.0.89** ([#64](https://github.com/semyon-alekseev-noveo/tt-sync/issues/64)). |
@@ -111,7 +111,7 @@
 5. Step 7 AF soak [#20](https://github.com/semyon-alekseev-noveo/tt-sync/issues/20) + [#76](https://github.com/semyon-alekseev-noveo/tt-sync/issues/76) **closed** (**pass** on **2.0.89**). Step 8 live vault still closed.
 6. Open: GAP-COMMENT-EDIT / risks ([#63](https://github.com/semyon-alekseev-noveo/tt-sync/issues/63)); TECH-START-1; [#66](https://github.com/semyon-alekseev-noveo/tt-sync/issues/66). [#32](https://github.com/semyon-alekseev-noveo/tt-sync/issues/32) / [#137](https://github.com/semyon-alekseev-noveo/tt-sync/issues/137) **closed**.
 7. AF-NEST-1 nest→TT hierarchy **pass** on pilot — usable; deepen only if Active Zone sibling-nest vs MOC parent matters.
-8. **AF-GTD-PREFIX** + release **2.0.91** — **done** (tagged); [#66](https://github.com/semyon-alekseev-noveo/tt-sync/issues/66) A–E (#154); slice F api HTTP extract in flight.
+8. **AF-GTD-PREFIX** + release **2.0.91** — **done** (tagged); [#66](https://github.com/semyon-alekseev-noveo/tt-sync/issues/66) A–F landed; slice G main extract closes size DoD.
 9. **NOTE-BODY-1/2** live discovery on pilot (upstream notes); PO answers `NOTE-BODY.md` §5 before code.
 10. Optional: DEL-1/DEL-3 modal on 2.0.91 (skipped in REGRESSION-2.0.91).
 
