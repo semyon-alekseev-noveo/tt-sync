@@ -1253,19 +1253,20 @@ Extract-only: Obsidian Sync wait, settings migrate helpers, palette commands; re
 |----|----------------|----------|
 | TECH-MAIN-EXTRACT | **unit**; pilot **not run** | `66-slice-g-main-extract.md` |
 
-## PR — #152 NOTE-BODY unit discovery
+## PR — #152 NOTE-BODY-2 Abyss pull fix
 
-Upstream delimiter note ↔ TT body. No production code change; working PO answers in `docs/pilot/NOTE-BODY.md` §5.
+Root cause: after TT pull, Dexie already had remote `content`, so `mergeAbyssBlock` treated vault `- >` as unpushed. Fix: remember pre-pull content (`preMergeNoteBase`) for `__baseContent`.
 
 ### NOTE-BODY-1 / NOTE-BODY-2
 
-1. `npx vitest run src/test/noteBody.upstream.test.ts` — expect 4 pass
-2. Live Synchronize on `<pilot-vault>` with Abyss `- >` — BODY-1/wipe **pass**; BODY-2 **fail** (`02-live-tip.md`)
+1. `npx vitest run src/test/noteBody.upstream.test.ts src/test/noteBody2AbyssPull.test.ts` — expect pass
+2. Deploy tip / build to `<pilot-vault>`; MCP-edit TT body on two fixtures; Synchronize; expect Abyss `- >` matches TT
+3. Prior live: BODY-1/wipe **pass**; BODY-2 **fail** (`02-live-tip.md`) — re-prove BODY-2 after this PR
 
 | ID | Pilot status | Evidence |
 |----|----------------|----------|
 | NOTE-BODY-1 | **unit pass**; live **pass** ×2 | `NOTE-BODY/02-live-tip.md` |
-| NOTE-BODY-2 | **unit pass**; live **fail** | `NOTE-BODY/02-live-tip.md` — Abyss `- >` not rewritten from TT |
+| NOTE-BODY-2 | **unit pass** (fix); live **not run** (re-prove) | `noteBody2AbyssPull.test.ts`; prior fail `02-live-tip.md` |
 | BUG-NOTE-BODY-WIPE | **unit pass**; live **pass** ×2 | `NOTE-BODY/02-live-tip.md` |
 
 ## PR — release 2.0.92

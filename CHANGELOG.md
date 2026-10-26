@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-26 09:39 UTC
+
+- Context: BODY-2 live fail — title pulled, Abyss `- >` stayed; `__baseContent` was post-pull Dexie content.
+- Target: TT body → vault `- >` on pull (NOTE-BODY-2); keep #152 open until live prove×2.
+- Actions log: `preMergeNoteBase` remember on pull / take in persist; clear on prepare; unit `noteBody2AbyssPull.test.ts`.
+- Validation: `npx vitest run` 755; `npm run build` OK.
+- Problems: Live BODY-2 still **not re-proven** after fix (`open`).
+- To Be Done: Live BODY-2 ×2 on pilot; then Notebook MVP (#159).
+- References: #152, `src/sync/preMergeNoteBase.ts`, `CHANGELOG.md`
+
 ### Iteration 2026-10-26 08:51 UTC
 
 - Context: Owner go NOTE-BODY live + release + FEAT-NOTEBOOK spike after #162/#163 merge.
