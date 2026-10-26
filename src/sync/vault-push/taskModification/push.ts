@@ -1,7 +1,7 @@
 import { nextOccurrence, rollRecurringLines } from '@/recurrence';
 import { fencedLines } from '@/utils/vaultIdScan';
 import { mergeTask, conflictNote } from '@/merge3';
-import { extractAbyssCommentThreads, stripLegacyCommentsBlock } from '@/abyssFormat';
+import { classifyChildren, extractAbyssCommentThreads, stripLegacyCommentsBlock } from '@/abyssFormat';
 import { syncAbyssCommentsToTickTick, useAbyssCommentsApi, type AbyssCommentSyncOptions } from '@/abyssCommentSync';
 import { listCommentMapsForTask } from '@/db/taskCommentMaps';
 import { appendContextTags, dedupeTags, stripInjectedContextTags } from '@/contextTags';
@@ -124,6 +124,28 @@ export class TaskModificationPush {
 			}
 			if (!lineTask.repeatFlag && savedTask.repeatFlag) {
 				lineTask.repeatFlag = savedTask.repeatFlag;
+			}
+			// BUG-NOTE-BODY-WIPE: do not POST empty content/desc unless the vault note
+			// was intentionally cleared (no child region / Abyss `- >` removed).
+			if (!modifications.notesModified) {
+				lineTask.content = savedTask.content ?? '';
+				lineTask.desc = savedTask.desc ?? '';
+			} else if (
+				!(lineTask.content ?? '')
+				&& !(lineTask.desc ?? '')
+				&& ((savedTask.content ?? '') || (savedTask.desc ?? ''))
+			) {
+				const childLines = taskRecord.taskLines ?? [];
+				if (childLines.length > 0 && getSettings().abyssTasksFormat) {
+					const hasDesc = classifyChildren(childLines).includes('desc');
+					if (!hasDesc) {
+						// Upstream delimiter / non-`- >` children: parser yields empty body;
+						// do not wipe TickTick note on incidental sync.
+						lineTask.content = savedTask.content ?? '';
+						lineTask.desc = savedTask.desc ?? '';
+						modifications.notesModified = false;
+					}
+				}
 			}
 			if (useAbyssCommentsApi()) {
 				lineTask.content = stripLegacyCommentsBlock(lineTask.content ?? '');

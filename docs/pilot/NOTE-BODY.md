@@ -59,14 +59,26 @@ Map from smoke: NOTE-L1 ≈ BODY-1 (description-shaped); upstream delimiter form
 
 **Recommendation:** Keep Comments as the Abyss chatter path (B). Treat **NOTE-BODY** as compatibility with upstream / Tasks users: prove BODY-1/2 with delimiter form on pilot before any code change; if code already works, record **pass** and close; if not, open implement issue from failing BODY-1.
 
+### Live residual (2026-10-26)
+
+**BUG-NOTE-BODY-WIPE:** a second Synchronize could clear TickTick body when the vault note parsed empty (Abyss pilot ignores upstream delimiter prose) while another field still triggered `updateTask`. Fix: detect empty↔non-empty notes; preserve saved `content`/`desc` unless Abyss `- >` was removed. On Abyss-first pilots use `- > …` for body, not classic delimiter blocks.
+
+### Working answers (2026-10-26 — unblock discovery; owner may override)
+
+| # | Decision |
+|---|----------|
+| 1 | **Both with axes:** upstream delimiter note ↔ `content` (no items) / `desc` (with checklist items); Abyss `- >` ↔ description when `abyssTasksFormat`; Abyss stamps ↔ Comments API when `syncAbyssCommentsViaApi`. No silent drop of Comments when note sync runs. |
+| 2 | Keep **`syncNotes` default on**; Abyss-first Comments-only vaults may turn it off. |
+| 3 | Discovery **now** (post-#66); DEL modal optional; not blocking Step 8. |
+
 ---
 
 ## 6. Hand-off
 
 | Role | Next |
 |------|------|
-| Analyst | PO answers §5; keep NOTE-BODY-* in catalog |
-| Tester | Live BODY-1 then BODY-2 on `<pilot-vault>` (prove×2 if bug found) |
-| Developer | Only after BODY-1 **fail** with expected written — failing test named `NOTE-BODY-1` |
+| Analyst | §5 working answers recorded (2026-10-26); owner may override |
+| Tester | **Live** BODY-1 then BODY-2 on `<pilot-vault>` (prove×2 if bug found) |
+| Developer | Unit path green (`noteBody.upstream.test.ts`); code only if live BODY-1 **fails** |
 
 **References:** `docs-src/configuration/notes.md`, `SMOKE_TESTS.md` NOTE-L1–L5, `ABYSS_FIRST_CASES.md` NOTE-L3b, `REGRESSION-2.0.91/01-…`

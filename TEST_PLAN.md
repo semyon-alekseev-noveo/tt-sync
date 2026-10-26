@@ -1253,3 +1253,23 @@ Extract-only: Obsidian Sync wait, settings migrate helpers, palette commands; re
 |----|----------------|----------|
 | TECH-MAIN-EXTRACT | **unit**; pilot **not run** | `66-slice-g-main-extract.md` |
 
+## PR — #152 NOTE-BODY unit discovery
+
+Upstream delimiter note ↔ TT body. No production code change; working PO answers in `docs/pilot/NOTE-BODY.md` §5.
+
+### NOTE-BODY-1 / NOTE-BODY-2
+
+1. `npx vitest run src/test/noteBody.upstream.test.ts` — expect 4 pass
+2. Live Synchronize on `<pilot-vault>` with delimiter note — **not run**
+
+| ID | Pilot status | Evidence |
+|----|----------------|----------|
+| NOTE-BODY-1 | **unit pass**; live **not run** | `NOTE-BODY/01-unit-discovery.md` |
+| NOTE-BODY-2 | **unit pass**; live **not run** | same |
+| BUG-NOTE-BODY-WIPE | **unit pass**; live **not run** | `src/test/bugNoteBodyWipe.test.ts` |
+
+### BUG-NOTE-BODY-WIPE (same PR)
+
+1. `npx vitest run src/test/bugNoteBodyWipe.test.ts`
+2. Live: task with TT body; change only a tag / title; Synchronize — body must remain. Prefer `- >` body on Abyss pilot.
+

@@ -27,19 +27,26 @@ export class TaskModificationDetect {
 	}
 
 	/**
-	 * Detect if notes/description changed
+	 * Detect if notes/description changed.
+	 * Compare both sides: an empty vault note vs a non-empty TickTick body is a change
+	 * (BUG-NOTE-BODY-WIPE — previously skipped when lineTask.content/desc were falsy).
 	 */
 	detectNotesModification(this: TaskModificationDetector, lineTask: ITask, savedTask: ITask): boolean {
 		if (!getSettings().syncNotes) {
 			return false;
 		}
 
-		if (lineTask.content) {
-			return this.plugin.taskParser.areNotesChanged(lineTask.content, savedTask.content);
-		} else if (lineTask.desc) {
-			return this.plugin.taskParser.areNotesChanged(lineTask.desc, savedTask.desc);
-		}
+		const lineContent = lineTask.content ?? '';
+		const savedContent = savedTask.content ?? '';
+		const lineDesc = lineTask.desc ?? '';
+		const savedDesc = savedTask.desc ?? '';
 
+		if (lineContent || savedContent) {
+			return this.plugin.taskParser.areNotesChanged(lineContent, savedContent);
+		}
+		if (lineDesc || savedDesc) {
+			return this.plugin.taskParser.areNotesChanged(lineDesc, savedDesc);
+		}
 		return false;
 	}
 
