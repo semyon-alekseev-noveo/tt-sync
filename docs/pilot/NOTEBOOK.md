@@ -37,7 +37,7 @@ Upstream TickTickSync docs “Notes” = **task body** (`docs-src/configuration/
 
 ## 4. Safety gate (now)
 
-**BUG-NOTEBOOK-NO-DELETE:** Synchronize must not delete Notebook notes from TT (e.g. treat as “missing vault tasks”). Fix before any FEAT MVP.
+**BUG-NOTEBOOK-NO-DELETE:** Synchronize must not delete Notebook notes from TT (e.g. treat as “missing vault tasks”). Guard landed (`notebookGuard` + `TaskDeletionHandler`); evidence `docs/pilot/results/BUG-NOTEBOOK-NO-DELETE/160-notebook-no-delete.md`. Close [#160](https://github.com/semyon-alekseev-noveo/tt-sync/issues/160) after merge.
 
 ---
 
@@ -46,7 +46,7 @@ Upstream TickTickSync docs “Notes” = **task body** (`docs-src/configuration/
 | Role | Next |
 |------|------|
 | PO | Accept epic size; folder/id for MVP when spike done |
-| Dev | [#160](https://github.com/semyon-alekseev-noveo/tt-sync/issues/160) guard + test first |
-| Tester | Live prove×2 Notebook survives Synchronize |
+| Dev | [#160](https://github.com/semyon-alekseev-noveo/tt-sync/issues/160) guard done → FEAT [#159](https://github.com/semyon-alekseev-noveo/tt-sync/issues/159) spike |
+| Tester | Live prove×2 **pass**; re-check after release bump if needed |
 
 **References:** #159, #160, `docs/pilot/NOTE-BODY.md`, TECH-API-1.

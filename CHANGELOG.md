@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-26 07:30 UTC
+
+- Context: Owner go on #160 BUG-NOTEBOOK-NO-DELETE before live NOTE-BODY / FEAT-NOTEBOOK.
+- Target: Guard vault→TT deletes for Notebook; unit + live prove×2; PR into abyss-mapping.
+- Actions log: `notebookGuard.ts`; TaskDeletionHandler orphan/file-missing/`deleteTasksByIds` skips; unit tests; pilot fixtures A/B/C; docs.
+- Validation: `npx vitest run` 752; `npm run build` OK; live NOTES `…d5a5`/`…f29e` survived `tts-sync` ×2.
+- Problems: FEAT-NOTEBOOK #159 still open; NOTE-BODY live still **not run**.
+- To Be Done: Merge #160 PR; optional NOTE-BODY live; then #159 spike.
+- References: #160, `docs/pilot/results/BUG-NOTEBOOK-NO-DELETE/160-notebook-no-delete.md`, `CHANGELOG.md`
+
 ### Iteration 2026-10-26 07:15 UTC
 
 - Context: Owner asked Notebook as M–L product work + no-delete bug; then live project soak.

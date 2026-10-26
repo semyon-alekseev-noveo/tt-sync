@@ -1273,3 +1273,18 @@ Upstream delimiter note ↔ TT body. No production code change; working PO answe
 1. `npx vitest run src/test/bugNoteBodyWipe.test.ts`
 2. Live: task with TT body; change only a tag / title; Synchronize — body must remain. Prefer `- >` body on Abyss pilot.
 
+## PR — #160 BUG-NOTEBOOK-NO-DELETE
+
+Vault→TT Phase 2 / orphan deletion must never remove TickTick Notebook notes (`kind: NOTE` or NOTE projects). Not the same as task-body `syncNotes` / NOTE-BODY.
+
+### BUG-NOTEBOOK-NO-DELETE
+
+1. `npx vitest run src/test/bugNotebookNoDelete.test.ts` — expect pass
+2. On `<pilot-vault>`: create two TT Notebook notes (MCP/`kind: NOTE`) with no vault lines; Synchronize twice; both notes remain in TickTick.
+
+Expected: unit green; live notes survive; no deletion dialog for those ids.
+
+| ID | Pilot status | Evidence |
+|----|----------------|----------|
+| BUG-NOTEBOOK-NO-DELETE | **unit pass**; live **pass** ×2 | `BUG-NOTEBOOK-NO-DELETE/160-notebook-no-delete.md` |
+

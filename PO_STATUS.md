@@ -89,7 +89,7 @@
 | **AF-GTD-TAG-ADD** | P1 | **resolved** (#140+#141+#144) | Option A **kept** (PO 2026-10-25). Independence from Abyss: exclusivity in TTS. Intent **AF-GTD-STAGE-MOVE**. Planned rename `type/*`→`gtd/*`: `docs/pilot/AF-GTD-PREFIX.md`. Checkbox GTD parked. |
 | **NOTE-BODY** | P2 | partial ([#152](https://github.com/semyon-alekseev-noveo/tt-sync/issues/152)) | Unit **pass** (delimiter ↔ `content`/`desc` + BUG-NOTE-BODY-WIPE); live BODY-1/2 **not run**. Brief §5 working answers. |
 | **FEAT-NOTEBOOK** | P2 | open (M–L) | TickTick Notebook ↔ vault — [#159](https://github.com/semyon-alekseev-noveo/tt-sync/issues/159); brief `docs/pilot/NOTEBOOK.md`. **Not** task-body Notes. |
-| **BUG-NOTEBOOK-NO-DELETE** | P1 | open | Sync must not delete TT Notebook notes — [#160](https://github.com/semyon-alekseev-noveo/tt-sync/issues/160). Safety before FEAT MVP. |
+| **BUG-NOTEBOOK-NO-DELETE** | P1 | **fixed** (PR pending merge) | Vault→TT delete skips `kind: NOTE` / NOTE projects — [#160](https://github.com/semyon-alekseev-noveo/tt-sync/issues/160). Unit + live **pass** ×2: `BUG-NOTEBOOK-NO-DELETE/160-notebook-no-delete.md`. |
 | **GAP-COMMENT-EDIT** | P2 | open | Правка комментария = delete + add (новые ID, шум в ленте TT) |
 | **RISK-DUAL-STORE** | P2 | open | Две «истины»: Dexie `tasks` и `fileMetadata`/`syncFiles` → возможен дрейф |
 | **RISK-LARGE-VAULT** | P2 | partial (#62 slice 1) | `idsPresentInVault` + file cache; idle `getTaskById` already 0; idle `getTaskComments` only on count mismatch / unknown count / stamp twins (not every vault thread). `ensureVaultFilesRegistered` still walks all `.md` |
@@ -115,7 +115,7 @@
 7. AF-NEST-1 nest→TT hierarchy **pass** on pilot — usable; deepen only if Active Zone sibling-nest vs MOC parent matters.
 8. **AF-GTD-PREFIX** + release **2.0.91** — **done** (tagged); [#66](https://github.com/semyon-alekseev-noveo/tt-sync/issues/66) A–G **closed** (cycle/size DoD).
 9. **NOTE-BODY** [#152](https://github.com/semyon-alekseev-noveo/tt-sync/issues/152): unit discovery green; **live** BODY-1 then BODY-2 on pilot still open.
-10. **BUG-NOTEBOOK-NO-DELETE** [#160](https://github.com/semyon-alekseev-noveo/tt-sync/issues/160) before FEAT-NOTEBOOK [#159](https://github.com/semyon-alekseev-noveo/tt-sync/issues/159) (M–L). Brief: `docs/pilot/NOTEBOOK.md`.
+10. **BUG-NOTEBOOK-NO-DELETE** [#160](https://github.com/semyon-alekseev-noveo/tt-sync/issues/160) — guard + prove×2 done; close after PR merge. Then FEAT-NOTEBOOK [#159](https://github.com/semyon-alekseev-noveo/tt-sync/issues/159) (M–L). Brief: `docs/pilot/NOTEBOOK.md`.
 11. Optional: DEL-1/DEL-3 modal on 2.0.91 (skipped in REGRESSION-2.0.91).
 12. Live re-soak **AF-2 / AF-3 / AF-4** on **2.0.91** — **pass** (`162-af2-af3-af4-tip-2.0.91.md`).
 
