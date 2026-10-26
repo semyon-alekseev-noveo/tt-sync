@@ -1312,5 +1312,5 @@ Opt-in `syncNotebook` + `notebookFolder`. One-way TickTick NOTE → markdown. De
 
 | ID | Pilot status | Evidence |
 |----|----------------|----------|
-| FEAT-NOTEBOOK-MVP-1 | **unit pass**; live **not run** | `notebookVault.mvp.test.ts` |
+| FEAT-NOTEBOOK-MVP-1 | **unit pass**; live **pass** ×2 | `FEAT-NOTEBOOK/166-mvp-tt-to-vault-live.md` |
 
