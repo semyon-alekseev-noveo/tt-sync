@@ -1260,13 +1260,24 @@ Upstream delimiter note ↔ TT body. No production code change; working PO answe
 ### NOTE-BODY-1 / NOTE-BODY-2
 
 1. `npx vitest run src/test/noteBody.upstream.test.ts` — expect 4 pass
-2. Live Synchronize on `<pilot-vault>` with delimiter note — **not run**
+2. Live Synchronize on `<pilot-vault>` with Abyss `- >` — BODY-1/wipe **pass**; BODY-2 **fail** (`02-live-tip.md`)
 
 | ID | Pilot status | Evidence |
 |----|----------------|----------|
-| NOTE-BODY-1 | **unit pass**; live **not run** | `NOTE-BODY/01-unit-discovery.md` |
-| NOTE-BODY-2 | **unit pass**; live **not run** | same |
-| BUG-NOTE-BODY-WIPE | **unit pass**; live **not run** | `src/test/bugNoteBodyWipe.test.ts` |
+| NOTE-BODY-1 | **unit pass**; live **pass** ×2 | `NOTE-BODY/02-live-tip.md` |
+| NOTE-BODY-2 | **unit pass**; live **fail** | `NOTE-BODY/02-live-tip.md` — Abyss `- >` not rewritten from TT |
+| BUG-NOTE-BODY-WIPE | **unit pass**; live **pass** ×2 | `NOTE-BODY/02-live-tip.md` |
+
+## PR — release 2.0.92
+
+Ships #160 Notebook no-delete, #163 waitForObsidianSync restore, NOTE-BODY live evidence, FEAT-NOTEBOOK spike.
+
+1. Install **2.0.92** on `<pilot-vault>`; reload; Synchronize once.
+2. Confirm sync completes (journal / notice); Notebook NOTES still present if fixtures exist.
+
+| ID | Pilot status | Evidence |
+|----|----------------|----------|
+| TP-RELEASE-2.0.92 | **not run** (bump PR) | Owner BRAT after tag |
 
 ### BUG-NOTE-BODY-WIPE (same PR)
 

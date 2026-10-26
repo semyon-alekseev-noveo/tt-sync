@@ -52,8 +52,8 @@
 4. Product risks — [#63](https://github.com/semyon-alekseev-noveo/tt-sync/issues/63): GAP-COMMENT-EDIT, RISK-PULL-WINS-LOCAL, RISK-DUAL-STORE, BUG-TICKTICK-ID-LEAK.
 5. TP-DELTA app-UI (optional) — [#84](https://github.com/semyon-alekseev-noveo/tt-sync/issues/84).
 6. Post-#31 modularization — [#66](https://github.com/semyon-alekseev-noveo/tt-sync/issues/66) (slice A in PR; vaultDeletion/god remain); [#86](https://github.com/semyon-alekseev-noveo/tt-sync/issues/86).
-7. [#64](https://github.com/semyon-alekseev-noveo/tt-sync/issues/64) / [#65](https://github.com/semyon-alekseev-noveo/tt-sync/issues/65) / #104 / #137 **closed**; BRAT tip **2.0.91**.
-8. **BUG-NOTEBOOK-NO-DELETE** [#160](https://github.com/semyon-alekseev-noveo/tt-sync/issues/160) guard + prove×2 done (merge pending); then FEAT-NOTEBOOK [#159](https://github.com/semyon-alekseev-noveo/tt-sync/issues/159); NOTE-BODY live still open.
+7. [#64](https://github.com/semyon-alekseev-noveo/tt-sync/issues/64) / [#65](https://github.com/semyon-alekseev-noveo/tt-sync/issues/65) / #104 / #137 / #160 **closed**; bump **2.0.92** pending tag.
+8. NOTE-BODY BODY-2 fail open (#152); FEAT-NOTEBOOK spike done — MVP next (#159).
 
 ## References
 
