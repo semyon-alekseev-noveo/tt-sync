@@ -1140,3 +1140,88 @@ Owner intent: Abyss tag-tree **branch → branch** = replace stage tag. Brief: `
 | AF-6 | **pass** (Obs→TT) | same — `…492f7` status 2 |
 | AF-7 | **pass** | same — `…492f8` → `#gtd/waiting` |
 | DEL-1 / DEL-3 | **not run** | needs TaskDeletionModal |
+
+## PR — #66 slice A (TECH-API-1 + import-cycle CI)
+
+No sync behavior change. Engineering / risk mitigation only.
+
+### TECH-API-1-CONTRACT — unofficial client path/body smoke
+
+1. Run `npx vitest run src/test/api/techApi1.contract.test.ts`.
+2. Optionally skim `docs/TECH_API_BREAKAGE.md` against a real TT HTTP failure (pilot).
+
+Expected: contract tests green; playbook lists detect → mitigate steps. Live TT outage still **not run** here.
+
+| ID | Pilot status | Evidence |
+|----|----------------|----------|
+| TECH-API-1 | **unit** (contract); live playbook **not run** | `src/test/api/techApi1.contract.test.ts`; `docs/TECH_API_BREAKAGE.md` |
+
+### TECH-CIRC-ALLOWLIST — cycles may only shrink
+
+1. Run `npm run check:cycles`.
+2. After intentionally breaking a cycle, regenerate with `node scripts/check-import-cycles.mjs --write` and commit the smaller allowlist.
+
+Expected: CI fails on new cycles; stale allowlist (removed cycles still listed) also fails.
+
+| ID | Pilot status | Evidence |
+|----|----------------|----------|
+| TECH-CIRC-ALLOWLIST | **unit** (CI script) | `docs/import-cycles.allowlist.json`; `.github/workflows/ci.yml` |
+
+## PR — #66 slice B (timed vaultDeletion)
+
+Extract-only: Phase 1→2 order and lock unchanged; perf now reports `vaultDeletion` separately.
+
+### TECH-VAULT-DELETION-TIMED
+
+1. Run `npx vitest run src/test/syncFilesPass.vaultDeletion.test.ts src/test/services/TickTickService.test.ts`.
+2. Optional pilot: Synchronize; confirm deletion prompts / Phase 2 still behave (no behavior change expected).
+
+Expected: unit green; `[perf]` may list `vaultDeletion` beside `syncFiles`. Live deletion smokes **not run** in this PR.
+
+| ID | Pilot status | Evidence |
+|----|----------------|----------|
+| TECH-VAULT-DELETION-TIMED | **unit**; pilot **not run** | `66-slice-b-vault-deletion.md` |
+
+## PR — #66 slice C (checkDatabase + size CI)
+
+Extract-only + engineering gate. Settings "Check database" behavior unchanged.
+
+### TECH-CHECKDB-EXTRACT
+
+1. `npx vitest run src/test/checkDatabase.extract.test.ts`
+2. Optional: Settings → Check database on pilot (modals/paths unchanged).
+
+| ID | Pilot status | Evidence |
+|----|----------------|----------|
+| TECH-CHECKDB-EXTRACT | **unit**; pilot **not run** | `66-slice-c-checkdatabase.md` |
+
+### TECH-FILE-SIZE-CI
+
+1. `npm run check:sizes` — fails if a non-excepted `src/**/*.ts` (excl. test) exceeds 30 KB.
+
+| ID | Pilot status | Evidence |
+|----|----------------|----------|
+| TECH-FILE-SIZE-CI | **unit** (CI) | `docs/file-size.exceptions.json` |
+
+## PR — #66 slice D (vaultLineBehind)
+
+Extract-only: comment/line reconcile moved to `sync/vault-pull/vaultLineBehind.ts`.
+
+1. `npx vitest run src/test/vaultCommentBehind.test.ts`
+2. Optional pilot Synchronize with comments — **not run**.
+
+| ID | Pilot status | Evidence |
+|----|----------------|----------|
+| TECH-VAULT-LINE-BEHIND-EXTRACT | **unit**; pilot **not run** | `66-slice-d-vault-line-behind.md` |
+
+## PR — #66 slice E (fileOperation persist + sort)
+
+Extract-only.
+
+1. `npx vitest run src/test/services/updatePathWritesMissingTasks.test.ts src/test/staleFileWrite.test.ts`
+2. Pilot vault write / Synchronize — **not run**.
+
+| ID | Pilot status | Evidence |
+|----|----------------|----------|
+| TECH-FILEOP-EXTRACT | **unit**; pilot **not run** | `66-slice-e-file-operation.md` |
+

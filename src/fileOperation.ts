@@ -18,6 +18,8 @@ import type { DeletionItem } from './modals/TaskDeletionModal';
 import { TaskDeletionModal } from './modals/TaskDeletionModal';
 import { getProjectById } from '@/db/projects';
 import { db } from '@/db/dexie';
+import { persistToFile } from '@/sync/vault-pull/persistTasksToFile';
+import { doTheSortMambo } from '@/sync/vault-pull/taskSort';
 
 export class FileOperation {
 	app: App;
@@ -119,7 +121,7 @@ export class FileOperation {
 		}
 
 		// Sort the tasks for that file so that Parents are processed first
-		const sortedTasks = this.doTheSortMambo(tasks);
+		const sortedTasks = doTheSortMambo(tasks);
 		// log.debug('Sorted Tasks:');
 		// sortedTasks.forEach(t => {
 		// 	log.debug(`Task: id=${t.id}, ParentID=${t.parentId}, title=${t.title.substring(0, 20)}`);
@@ -446,7 +448,11 @@ export class FileOperation {
 			// Network first. The write snapshot is taken after these calls return.
 			await this.preparePersistNetwork(tasks, file);
 			const snapshot = await this.readFileContent(file);
-			const built = await this.persistToFile(tasks, file, bUpdating, snapshot);
+			const built = await persistToFile({
+				app: this.app,
+				plugin: this.plugin,
+				handleTickTickStructureMove: (n, o, line, map) => this.handleTickTickStructureMove(n, o, line, map),
+			}, tasks, file, bUpdating, snapshot);
 			if (built.text === snapshot) {
 				log.debug(`No changes to write for ${file.path}, skipping write`);
 				await built.afterWrite();
@@ -514,179 +520,6 @@ export class FileOperation {
 			});
 			task.content = stripLegacyCommentsBlock(task.content ?? '');
 			task.desc = stripLegacyCommentsBlock(task.desc ?? '');
-		}
-	}
-
-	private async persistToFile(
-		tasks: ITask[],
-		file: TFile,
-		bUpdating: boolean,
-		snapshot: string,
-	): Promise<{ text: string; afterWrite: () => Promise<void> }> {
-		// Go through the tasks.
-		// For every task
-		// 	if it has a parent, add it after the parent.
-		//  else add at the the insertion point in lines.
-		log.debug('Processing File: ', file.path);
-		const fileMap = new NewFileMap(this.app, this.plugin, file);
-		await fileMap.init(snapshot);
-		let bTaskMove: boolean = false;
-		const after: Array<() => Promise<void>> = [];
-
-
-		// log.debug('================');
-		// log.debug('Tasks: ', tasks);
-		// log.debug('Data: \n', fileMap.getFileLines());
-		// log.debug('file: ', file);
-		// log.debug('================');
-		for (const task of tasks) {
-			let numParentTabs = 0;
-			const parentID = task.parentId;
-			const schemeParent = parentID && this.plugin.projectScheme?.isParentId(parentID);
-			if (parentID && !schemeParent && fileMap.getTaskIndex(parentID) >= 0) {
-				const parentTabs = fileMap.getNumParentTabs(parentID);
-				numParentTabs = parentTabs + 1;
-			}
-
-			let lineText = '';
-			let filePath = fileMap.getFilePath();
-			//Did this task's line actually make it into the file? Only then may we
-			//record a vault sync for it.
-			let bLinePersisted = true;
-
-			lineText = await this.plugin.taskParser?.convertTaskToLine(task, numParentTabs);
-			//Tired of seeing duplicates because of Sync conflicts.
-			if (!bUpdating) {
-				if (fileMap.getTaskIndex(task.id) != -1) {
-					log.warn('A Task was being added but was already in file: ', task.id, task.title);
-					//it's in the file, but not in cache. Just update it.
-					await this.recordVaultSync(task, file, fileMap.updateTask(task, lineText));
-					continue;
-				} else {
-					fileMap.addTask(task, lineText);
-				}
-			} else if (fileMap.getTaskIndex(task.id) == -1 && fileMap.isFencedOnly(task.id)) {
-				log.debug('Task only appears inside a code block, leaving it alone: ', task.id);
-				bLinePersisted = false;
-			} else if (fileMap.getTaskIndex(task.id) == -1) {
-				//it's in the cache, but not in the file. Just add it.
-				//Mirrors the add branch above: without this the update is a silent
-				//no-op, and the task is then read back as deleted from the vault.
-				log.warn('A Task was being updated but was not in file: ', task.id, task.title);
-				fileMap.addTask(task, lineText);
-			} else {
-				//For updates doing the dateHolder mambo here because we need to make sure we get old dates....
-				const oldTask = await this.plugin.taskRepository.loadTaskById(task.id);
-				this.plugin.dateMan?.addDateHolderToTask(task, oldTask);
-				// last-synced note text, so the merge can tell new local comments from ones deleted in TickTick
-				Object.defineProperty(task, '__baseContent', { value: oldTask?.content ?? '', enumerable: false, configurable: true });
-				if (oldTask) {
-					// Compare incoming task (from DB/TickTick) with current vault state
-					const vaultProjectId = await this.plugin.fileTaskQueries?.getDefaultProjectIdForFilepath(file.path);
-					const vaultParentId = fileMap.getParentId(task.id);
-					const vaultTask: ITask = { ...task, projectId: vaultProjectId ?? '', parentId: vaultParentId ?? '' };
-
-					//Only check for Project/Parent change if task is in cache.
-					const keepLineInPlace = !!getSettings().newTasksFile?.trim() || getSettings().abyssTasksFormat;
-					if (!keepLineInPlace && (await this.plugin.taskParser?.isProjectIdChanged(vaultTask, task))) {
-						log.debug('Moving Task: ', task.id, task.title, ' from Project: ', vaultTask.projectId, ' to Project: ', task.projectId);
-						filePath = await this.handleTickTickStructureMove(task, vaultTask, lineText, fileMap);
-						//because we need to update the OBS URL in TT and fix up the cache.
-						bTaskMove = true;
-
-						// Check if project groups differ and move file if necessary
-						const localTaskRecord = await this.plugin.taskRepository.loadLocalTaskById(task.id);
-						if (localTaskRecord) {
-							await this.plugin.taskModificationDetector?.checkForProjectGroupChange(task, localTaskRecord);
-						}
-					} else {
-						const bParentUpdate = this.plugin.taskParser?.isParentIdChanged(vaultTask, task);
-						bLinePersisted = fileMap.updateTask(task, lineText, bParentUpdate);
-					}
-				} else {
-					//how would that happen???? The task has no DB record, so we
-					//never touched the file -- don't record a vault sync that
-					//would make it look user-deleted on the next scan.
-					log.warn('No Old Task found for: ', task.id);
-					bLinePersisted = false;
-				}
-			}
-
-			// Calculate hash for change detection
-			//TODO:consider getting the taskRecord from getTaskPayload and be done....
-			let taskRecord = fileMap.getTaskRecord(task.id);
-			const taskString = taskRecord?.task ?? '';
-			const stringToHash = taskString + (taskRecord ? this.plugin.taskParser.getNoteString(taskRecord, task.id) : '');
-			let lineHash = await this.plugin.taskParser?.getLineHash(stringToHash);
-			if (!lineHash) {
-				lineHash = '';
-			}
-
-			//we've made changes. Let's get the TTversion of the task right.
-			const linkLoc = this.plugin.taskParser.getLinkLocation(filePath)
-			if (linkLoc.taskURL) {
-				task.title = task.title + ' ' + linkLoc.taskURL;
-			} else if (linkLoc.noteURL) {
-				const taskPayLoad = this.plugin.taskParser.getTaskPayLoad(fileMap, task.id, linkLoc.noteURL);
-				task.content = taskPayLoad.content ? taskPayLoad.content : '';
-				task.desc = taskPayLoad.description ? taskPayLoad.description : '';
-
-			}
-
-			// Backwards compatibility: keep the "ticktick" tag injected on
-			// the TickTick task unless the user opted out (see
-			// stopInjectingTickTickTag setting).
-			if (!getSettings().stopInjectingTickTickTag && !task.tags?.includes(markerName())) {
-				task.tags = [...(task.tags || []), markerName()];
-			}
-
-			const persisted = bLinePersisted;
-			const hash = lineHash;
-			const pathForTask = filePath;
-			const moved = bTaskMove;
-			if (!bUpdating) {
-				after.push(async () => {
-					// OBS URL is pushed after the note write, so the HTTP call is not inside the write window.
-					let addedTask = (await this.plugin.tickTickRestAPI?.updateTask(task))!;
-					addedTask.lineHash = hash;
-					await this.plugin.taskRepository.upsertTask(addedTask, file.path, Date.now());
-				});
-			} else if (!moved) {
-				after.push(async () => {
-					task.lineHash = hash;
-					await this.recordVaultSync(task, file, persisted);
-				});
-			} else {
-				after.push(async () => {
-					task.lineHash = hash;
-					let addedTask = (await this.plugin.tickTickRestAPI?.updateTask(task))!;
-					await this.plugin.taskRepository.upsertTask(addedTask, pathForTask, Date.now());
-				});
-			}
-		}
-
-		const resultLines = fileMap.getFileLines();
-		this.plugin.lastLines.set(file.path, resultLines.length);
-		return {
-			text: resultLines,
-			afterWrite: async () => {
-				for (const job of after) await job();
-			},
-		};
-	}
-
-	/**
-	 * Record that a task was synced to the vault -- but only when its line was
-	 * actually written to the file. Recording a vault sync for a write that
-	 * never happened makes the task look user-deleted on the next scan, and it
-	 * gets offered up for deletion in TickTick.
-	 */
-	private async recordVaultSync(task: ITask, file: TFile, bLinePersisted: boolean): Promise<void> {
-		if (bLinePersisted) {
-			await this.plugin.taskRepository.upsertTask(task, file.path, Date.now());
-		} else {
-			log.warn(`Not recording a vault sync for ${task.id}: its line was not written to ${file.path}`);
-			await this.plugin.taskRepository.upsertTask(task);
 		}
 	}
 
@@ -836,196 +669,4 @@ export class FileOperation {
 	}
 
 	//TODO: Get rid of extraneous sorts!
-	private compareTasks(a: ITask, b: ITask) {
-		// Check for tasks with no parentId (parent tasks)
-		if (!a.parentId && b.parentId) {
-			return -1; // Parent task comes first
-		} else if (a.parentId && !b.parentId) {
-			return 1; // Task with parentId comes after
-		} else if (a.parentId && b.parentId) {
-			return b.parentId.localeCompare(a.parentId);
-		} else {
-			return a.sortOrder - b.sortOrder;
-		}
-	}
-
-	// private compareTasks(a: ITask, b: ITask, depth = 0, tasks: ITask[]) {
-	// 	// Check for tasks with no parentId (parent tasks)
-	// 	if (!a.parentId && b.parentId) {
-	// 		return -1; // Parent task comes first
-	// 	} else if (a.parentId && !b.parentId) {
-	// 		return 1; // Task with parentId comes after
-	// 	} else if (!a.parentId && !b.parentId) {
-	// 		// No parent - sort by sortOrder
-	// 		return a.sortOrder - b.sortOrder;
-	// 	} else {
-	// 		// Use a set to track visited tasks to detect circular dependencies
-	// 		const visited = new Set();
-	//
-	// 		let currentA = a;
-	// 		while (currentA.parentId && depth < 100) { // Set a maximum depth limit (adjust as needed)
-	// 			if (visited.has(currentA.id)) {
-	// 				// Circular dependency detected - sort based on task id as a fallback
-	// 				return a.id.localeCompare(b.id);
-	// 			}
-	// 			visited.add(currentA.id);
-	// 			currentA = this.getParent(currentA.id, tasks);
-	// 		}
-	//
-	// 		let currentB = b;
-	// 		visited.clear(); // Clear visited set for task B
-	// 		while (currentB.parentId && depth < 100) {
-	// 			if (visited.has(currentB.id)) {
-	// 				// Circular dependency detected
-	// 				return a.id.localeCompare(b.id);
-	// 			}
-	// 			visited.add(currentB.id);
-	// 			currentB = this.getParent(currentB.id, tasks);
-	// 		}
-	//
-	// 		// If one stack is empty, remaining elements in the other are higher level parents
-	// 		return currentA ? -1 : 1;
-	// 	}
-	// }
-
-	private getParent(taskId: string, tasks: ITask[]) {
-		return tasks.find(task => task.id === taskId);
-	}
-
-
-	// Recursive function to sort tasks, placing child tasks before their parents
-	private sortChildrenfirst(tasks: ITask[]): ITask[] {
-		const sorted: ITask[] = [];
-		const taskMap = new Map<string, ITask>();
-
-		// Map tasks by their IDs for easy lookup
-		tasks.forEach(task => taskMap.set(task.id, task));
-
-		// Function to recursively add tasks, making sure children appear before parents
-		const addTaskWithChildren = (task: ITask) => {
-			if (!sorted.includes(task)) {
-				// Add children first
-				if (task.childIds) {
-					task.childIds.forEach(childId => {
-						const childTask = taskMap.get(childId);
-						if (childTask) {
-							addTaskWithChildren(childTask);
-						}
-					});
-				}
-
-				// Add the current task after its children
-				sorted.push(task);
-			}
-		};
-
-		// Iterate through all tasks and ensure children are added before their parents
-		tasks.forEach(task => {
-			addTaskWithChildren(task);
-		});
-		return sorted;
-	}
-
-	private sortTasks(tasks: ITask[]) {
-		type TaskNode = ITask & { children: TaskNode[] };
-		const taskMap = new Map<string, TaskNode>();
-
-		// Populate the map
-		tasks.forEach(task => taskMap.set(task.id, { ...task, children: [] }));
-
-		const rootTasks: TaskNode[] = [];
-
-		// Build the hierarchy
-		tasks.forEach(task => {
-			const node = taskMap.get(task.id)!;
-			if (task.parentId && taskMap.has(task.parentId)) {
-				taskMap.get(task.parentId)!.children.push(node);
-			} else {
-				rootTasks.push(node);
-			}
-		});
-
-		// Function to flatten the hierarchy with depth-first traversal
-		function flattenHierarchy(taskList: TaskNode[], sortedArray: TaskNode[] = []): TaskNode[] {
-			for (const task of taskList) {
-				sortedArray.push(task);
-				if (task.children.length) {
-					flattenHierarchy(task.children, sortedArray);
-				}
-			}
-			return sortedArray;
-		}
-
-		// Get the sorted array
-		return flattenHierarchy(rootTasks).map(({ children, ...task }) => task);
-	}
-
-	private doTheSortMambo(tasks: ITask[]) {
-		// Example usage with the provided tasks
-		const jsonStringifiedTasks = JSON.parse(JSON.stringify(tasks)) as ITask[]; // Deep copy the tasks
-		const sortedTasks = this.sortTasksByLevel(jsonStringifiedTasks);
-
-		// // Format the result to show the hierarchy
-		// const result = sortedTasks.map(task => {
-		// 	const indent = '  '.repeat(task.level - 1);
-		// 	return `${indent}${task.id} - ${task.parentId} - ${task.title} (Level: ${task.level})`;
-		// }).join('\n');
-		//
-		// log.debug('Sorted Tasks Hierarchy:');
-		// result.split('\n').forEach(line => {
-		// 	log.debug(line);
-		// });
-
-		return sortedTasks as ITask[];
-	}
-
-	private sortTasksByLevel(tasks: ITask[]) {
-		// Create a map of tasks by ID for easy reference
-		type TaskWithLevel = ITask & { level: number };
-		const taskMap: Record<string, TaskWithLevel> = {};
-		tasks.forEach(task => {
-			taskMap[task.id] = { ...task, level: 0 };
-		});
-
-		// Calculate the level of each task
-		tasks.forEach(task => {
-			const entry = taskMap[task.id];
-			if (!entry.parentId) {
-				// This is a top-level task
-				entry.level = 1;
-			} else {
-				// Child task - we need to calculate its level
-				let currentId = task.id;
-				let level = 1;
-
-				while (taskMap[currentId] && taskMap[currentId].parentId) {
-					level++;
-					//This happened once. It caused an infinite loop. Throw an error.
-					if (level > 6) {
-						log.debug('this is the issue: ', currentId, ' ', taskMap[currentId].parentId, '');
-						new Notice('A circular parent-child dependency was found. Please fix in ticktick by checking parent-child relationships.');
-						throw new Error('Circular parent-child dependency was found.');
-					}
-					currentId = taskMap[currentId].parentId;
-				}
-
-				entry.level = level;
-			}
-		});
-
-		// Convert back to array and sort by level
-		const sortedTasks = Object.values(taskMap);
-		sortedTasks.sort((a, b) => {
-			// Primary sort by level
-			if (a.level !== b.level) {
-				return a.level - b.level;
-			}
-
-			// Secondary sort by original order (using sortOrder property)
-			return a.sortOrder - b.sortOrder;
-		});
-
-		return sortedTasks;
-	}
-
 }

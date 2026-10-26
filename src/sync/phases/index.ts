@@ -11,3 +11,4 @@ export { runPullPhase } from '@/sync/phases/pullPhase';
 export { runVaultReconcilePhase } from '@/sync/phases/vaultReconcilePhase';
 export { runSubtasksPhase } from '@/sync/phases/subtasksPhase';
 export { runSyncFilesPhase } from '@/sync/phases/syncFilesPhase';
+export { runSyncFilesPass } from '@/sync/phases/syncFilesPass';

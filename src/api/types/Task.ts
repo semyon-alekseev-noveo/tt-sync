@@ -1,4 +1,4 @@
-import type { date_holder_type } from '@/dateMan';
+import type { date_holder_type } from '@/api/types/DateHolder';
 
 /**
  * A TickTick reminder. On the web sync API (batch/check, batch/task) reminders

@@ -1,6 +1,6 @@
 # Sync modularization plan
 
-**Status:** **PR 7 landed** — store ports (`FileTaskQueriesPort` / `TaskRepositoryPort` / `SyncMetaPort`); orchestrator phases use `PluginContext` ports, not `@/db/*`. Next: timed `vaultDeletion` phase, or further store extraction from services. Evidence: `docs/pilot/results/TECH-SYNC-MODULARIZATION/`.
+**Status:** **PR 7 landed**; **#66 slices A–E** — TECH-API-1 + cycle/size CI; timed `vaultDeletion`; checkDatabase / vaultLineBehind / fileOperation extracts (`fileOperation` under 30 KB). Evidence: `docs/pilot/results/TECH-SYNC-MODULARIZATION/`; playbook `docs/TECH_API_BREAKAGE.md`.
 
 **Canonical boundaries:** [`ANALYST_REFERENCE_DIAGRAMS.md`](ANALYST_REFERENCE_DIAGRAMS.md). Process: [`DEV_FLOW.md`](../DEV_FLOW.md).
 
@@ -46,9 +46,10 @@ Future: `createdTaskIdsThisRun`, `filesPushed`, `pluginWritePaths` — add when 
 | 6 | `pull` | `syncTickTickWithDexie`, list mapping heal, vanished lists |
 | 7 | `vaultReconcile` | `vaultSyncCoordinator.syncVaultWithDatabase` |
 | 8 | `subtasks` | `pullSubtaskOrder` |
-| 9 | `syncFiles` | `syncFiles` (file pass + calls `runVaultDeletionPhase` inside same `LOCK_TASKS`) |
+| 9 | `syncFiles` | `runSyncFilesPass` Phase 1 (timed `syncFiles`) under `LOCK_TASKS` |
+| 10 | `vaultDeletion` | `runVaultDeletionPhase` (timed `vaultDeletion`) same `LOCK_TASKS` after Phase 1 |
 
-Phase 2 vault→TT deletion is implemented in **lifecycle** (`runVaultDeletionPhase`); still invoked from `syncFiles` so Phase 1→2 stays under one lock. A later PR may promote it to a timed `vaultDeletion` phase after the file pass.
+Phase 2 vault→TT deletion is in **lifecycle** (`runVaultDeletionPhase`); timed separately from the file pass while still under one lock (#66 slice B).
 
 ## PR sequence
 
@@ -150,9 +151,47 @@ See **`docs/COMMENT_SYNC_MODEL.md`**. PR A: keys + `planCommentSync` + tests (in
 
 **Gate:** same as PR 1; storePorts guard + `synchronizationInner.integration.test.ts` green.
 
-### PR 8+ — next slices
+### PR 8 / #66 slice A — cycles + TECH-API-1
 
-- Timed `vaultDeletion` phase (promote `runVaultDeletionPhase` out of `syncFiles` lock body), and/or further store extraction from services / tt-remote.
+- CI: `scripts/check-import-cycles.mjs` + `docs/import-cycles.allowlist.json` (madge; list may only shrink). Wired in `.github/workflows/ci.yml`.
+- Broke `api/types/Task` ↔ `dateMan` by moving `date_holder_type` to `api/types/DateHolder.ts`.
+- TECH-API-1: `docs/TECH_API_BREAKAGE.md` + `src/test/api/techApi1.contract.test.ts`.
+
+### PR 9 / #66 slice B — timed `vaultDeletion` + syncFiles extract
+
+- Body moved to `src/sync/phases/syncFilesPass.ts`; `TickTickService.syncFiles` is a thin wrapper.
+- Under one `LOCK_TASKS`: `timePhase('syncFiles', Phase 1)` then `timePhase('vaultDeletion', Phase 2)`.
+- Dedupe owners via `plugin.taskRepository.loadAllLocalTasks()` (no `@/db` in phases).
+- Guard: `src/test/syncFilesPass.vaultDeletion.test.ts`.
+
+### PR 10 / #66 slice C — checkDatabase extract + size CI
+
+- `src/services/checkDatabase.ts` (`runCheckDatabase`); `TickTickService.checkDataBase` thin wrapper.
+- `src/services/index.ts` now **under 30 KB** (no longer excepted).
+- CI: `npm run check:sizes` (`scripts/check-file-sizes.mjs` + `docs/file-size.exceptions.json`, strict).
+
+### PR 11 / #66 slice D — vaultLineBehind extract
+
+- `src/sync/vault-pull/vaultLineBehind.ts` — comment/line reconcile helpers from `VaultSyncCoordinator`.
+- `VaultSyncCoordinator.ts` under 30 KB (dropped from exceptions).
+
+### PR 12 / #66 slice E — fileOperation persist + sort
+
+- `src/sync/vault-pull/persistTasksToFile.ts`, `taskSort.ts`
+- `fileOperation.ts` under 30 KB (dropped from exceptions).
+
+### Files over 30 KB — exceptions (#66 / #31 DoD)
+
+Canonical list: `docs/file-size.exceptions.json` (must shrink when files drop ≤ 30 KB).
+
+| File | Exception / plan |
+|------|------------------|
+| `src/main.ts` | Obsidian entry; settings/query/redo seams later |
+| `src/api/index.ts` | Unofficial Tick; TECH-API-1 coverage first |
+
+### PR 13+ — next slices
+
+- Further extract when a concrete fix needs a seam (`api/index`, `main`).
 
 ## Bug → module (quick routing)
 

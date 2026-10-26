@@ -11,8 +11,11 @@
 //
 // https://forum.obsidian.md/t/task-time-editing-ux-ui-advice/86124/2?u=thesamim
 import type { ITask } from './api/types/Task';
+import type { date_holder_type, date_time_type } from '@/api/types/DateHolder';
 import log from '@/utils/logger';
 import { getSettings } from '@/settings';
+
+export type { date_holder_type, date_time_type } from '@/api/types/DateHolder';
 
 enum date_emoji {
 	createdTime = '➕',
@@ -21,25 +24,6 @@ enum date_emoji {
 	dueDate = '📅',
 	completedTime = '✅',
 	cancelled_date = '❌'
-}
-
-interface date_time_type {
-	hasATime: boolean,
-	date: string | null,
-	time: string | null,
-	isoDate: string | null,
-	emoji: string | null
-}
-
-export interface date_holder_type {
-	[key: string]: date_time_type | boolean | null;
-	isAllDay: boolean,
-	createdTime: date_time_type | null,
-	scheduled_date: date_time_type | null,
-	startDate: date_time_type | null,
-	dueDate: date_time_type | null,
-	completedTime: date_time_type | null,
-	cancelled_date: date_time_type | null
 }
 
 

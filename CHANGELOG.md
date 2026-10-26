@@ -1,5 +1,55 @@
 # Changelog
 
+### Iteration 2026-10-26 02:52 UTC
+
+- Context: Continue #66 — drop `fileOperation` size exception.
+- Target: Extract persist + task sort into vault-pull; FO ≤30 KB.
+- Actions log: `persistTasksToFile.ts`, `taskSort.ts`; shrink exceptions; docs.
+- Validation: `check:sizes` (2 exceptions); vitest 738; build OK.
+- Problems: Two production files still excepted (`open`).
+- To Be Done: Owner merge PR #154; further extract on seam.
+- References: `66-slice-e-file-operation.md`, #66
+
+### Iteration 2026-10-26 02:45 UTC
+
+- Context: Continue #66 — drop `VaultSyncCoordinator` size exception.
+- Target: Extract vault-line/comment reconcile; VSC ≤30 KB.
+- Actions log: `sync/vault-pull/vaultLineBehind.ts`; update vaultCommentBehind tests; shrink exceptions.
+- Validation: `check:sizes` (3 exceptions); `check:cycles`; `npx vitest run` 738; `npm run build` OK.
+- Problems: Three production files still excepted (`open`).
+- To Be Done: Owner merge PR #154; further extract on seam.
+- References: `66-slice-d-vault-line-behind.md`, #66
+
+### Iteration 2026-10-26 02:40 UTC
+
+- Context: Continue #66 — god-class still over 30 KB; DoD size CI deferred.
+- Target: Extract `checkDataBase`; get `services/index.ts` ≤30 KB; wire `check:sizes`.
+- Actions log: `checkDatabase.ts`; thin wrapper; `file-size.exceptions.json` + CI; docs/TEST_PLAN.
+- Validation: `check:sizes` OK; `check:cycles` OK; `npx vitest run` 738 pass; `npm run build` OK.
+- Problems: Four production files still excepted (`open` — extract on seam).
+- To Be Done: Owner merge PR #154; further extract when a seam is needed.
+- References: `src/services/checkDatabase.ts`, `66-slice-c-checkdatabase.md`, #66
+
+### Iteration 2026-10-25 16:25 UTC
+
+- Context: Continue #66 after slice A (timed `vaultDeletion` / syncFiles extract).
+- Target: Phase 1→2 same lock; separate `timePhase('vaultDeletion')`; shrink `TickTickService`.
+- Actions log: `syncFilesPass.ts`; thin `syncFiles`; store-port dedupe; guard test; docs/TEST_PLAN.
+- Validation: `npx vitest run` 737 pass; `npm run build`; `check:cycles` OK.
+- Problems: `services/index.ts` still ~41 KB (`open` — further extract later).
+- To Be Done: Push onto PR #154; owner merge.
+- References: `src/sync/phases/syncFilesPass.ts`, `docs/pilot/results/TECH-SYNC-MODULARIZATION/66-slice-b-vault-deletion.md`, #66
+
+### Iteration 2026-10-25 16:15 UTC
+
+- Context: Owner assigned [#66](https://github.com/semyon-alekseev-noveo/tt-sync/issues/66) after modularity check (post-#31).
+- Target: Slice A — TECH-API-1 playbook/contract, CI cycle allowlist, record 30 KB exceptions; no sync behavior change.
+- Actions log: `DateHolder` extract; `TECH_API_BREAKAGE.md` + contract tests; `check-import-cycles` + allowlist (134→108); CI step; SYNC_MODULARIZATION / PO / TEST_PLAN.
+- Validation: `npm run check:cycles` OK (108); `npx vitest run` 736 pass; `npm run build` OK.
+- Problems: God-class / timed `vaultDeletion` still open on #66 (`open`).
+- To Be Done: PR into `abyss-mapping`; later PR for vaultDeletion or further extract when a seam is needed.
+- References: `docs/TECH_API_BREAKAGE.md`, `docs/import-cycles.allowlist.json`, `CHANGELOG.md`, #66
+
 ### Iteration 2026-10-25 16:10 UTC
 
 - Context: Owner updated to **2.0.91**; asked for live regression after fork/notes discussion.
@@ -9,6 +59,7 @@
 - Problems: New-task create rate ~2–3 ids per sync (`mitigated` — re-sync).
 - To Be Done: Owner/agent DEL-1 Confirm + DEL-3 Cancel when modal available; optional NOTE-BODY scope.
 - References: `docs/pilot/results/REGRESSION-2.0.91/`, `CHANGELOG.md`
+
 
 ### Iteration 2026-10-25 14:35 UTC
 
