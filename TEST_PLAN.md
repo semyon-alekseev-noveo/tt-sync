@@ -1300,3 +1300,17 @@ Expected: unit green; live notes survive; no deletion dialog for those ids.
 |----|----------------|----------|
 | BUG-NOTEBOOK-NO-DELETE | **unit pass**; live **pass** ×2 | `BUG-NOTEBOOK-NO-DELETE/160-notebook-no-delete.md` |
 
+## PR — #159 FEAT-NOTEBOOK MVP (TT→vault folder)
+
+Opt-in `syncNotebook` + `notebookFolder`. One-way TickTick NOTE → markdown. Default off. Does not replace NOTE-BODY / `syncNotes`.
+
+### FEAT-NOTEBOOK-MVP-1
+
+1. `npx vitest run src/test/notebookVault.mvp.test.ts` — expect pass
+2. On `<pilot-vault>`: enable Sync TickTick Notebook; set folder; ensure a TT NOTE exists; Synchronize; file under folder has `ticktick_id` + body
+3. Confirm NOTE is not a checkbox line; BUG-NOTEBOOK-NO-DELETE still holds
+
+| ID | Pilot status | Evidence |
+|----|----------------|----------|
+| FEAT-NOTEBOOK-MVP-1 | **unit pass**; live **not run** | `notebookVault.mvp.test.ts` |
+
