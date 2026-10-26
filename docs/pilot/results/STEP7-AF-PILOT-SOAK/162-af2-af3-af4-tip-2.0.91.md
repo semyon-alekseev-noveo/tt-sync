@@ -26,7 +26,7 @@
 | Check | Result |
 |-------|--------|
 | Note | `10 Projects/AF-2 tip parent 140700.md` |
-| Frontmatter `ticktick_id` | `6adefc3b8f0841315e870da9` → **`6adefc3b8f08f395054076e7`** |
+| Frontmatter `ticktick_id` | **`6adefc3b8f08f395054076e7`** |
 | `## Active Zone` | present |
 | Parent as checkbox in that note | **none** |
 
