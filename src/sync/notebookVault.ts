@@ -1,18 +1,21 @@
 /**
  * FEAT-NOTEBOOK MVP — opt-in TickTick Notebook (`kind: NOTE`) → vault markdown folder.
  * One-way TT→vault. Distinct from task-body `syncNotes` / NOTE-BODY.
+ *
+ * No imports from settings / db / pluginContext — callers pass notes + options so
+ * sync/phases → this module does not grow the import-cycle allowlist (#166 CI).
  */
 import type { App } from 'obsidian';
-import { TFile } from 'obsidian';
 import type { ITask } from '@/api/types/Task';
-import type { PluginContext } from '@/pluginContext';
-import { getSettings } from '@/settings';
-import { isNotebookTask } from '@/sync/notebookGuard';
 import { commitVaultText, syncRead } from '@/sync/vault-io';
-import { db } from '@/db/dexie';
 import log from '@/utils/logger';
 
 const ID_FM = /^ticktick_id:\s*([^\s#]+)\s*$/m;
+
+export interface NotebookVaultSyncOptions {
+	enabled: boolean;
+	folder: string;
+}
 
 /** Collapse duplicate slashes; trim leading/trailing `/` (no Obsidian normalizePath — unit-testable). */
 function vaultPath(...parts: string[]): string {
@@ -85,11 +88,10 @@ async function ensureFolder(app: App, folderPath: string): Promise<void> {
 	}
 }
 
-async function findExistingNotebookFile(app: App, folder: string, taskId: string): Promise<TFile | null> {
+async function findExistingNotebookFile(app: App, folder: string, taskId: string): Promise<import('obsidian').TFile | null> {
 	const dir = vaultPath(folder);
 	const abstract = app.vault.getAbstractFileByPath(dir);
 	if (!abstract || !('children' in abstract)) {
-		// Folder missing or not a folder — scan all md via metadata when possible.
 		for (const f of app.vault.getMarkdownFiles()) {
 			if (!f.path.startsWith(dir + '/') && f.path !== dir) continue;
 			const cache = app.metadataCache.getFileCache(f);
@@ -114,19 +116,20 @@ async function findExistingNotebookFile(app: App, folder: string, taskId: string
 }
 
 /**
- * Write/update markdown files for TickTick Notebook notes when `syncNotebook` is on.
+ * Write/update markdown files for the given Notebook tasks when `options.enabled`.
  * @returns number of files created or updated
  */
-export async function syncNotebooksToVault(app: App, _plugin: PluginContext): Promise<number> {
-	const s = getSettings();
-	if (!s.syncNotebook) return 0;
-	const folder = (s.notebookFolder || 'TickTick Notebook').trim() || 'TickTick Notebook';
+export async function syncNotebooksToVault(
+	app: App,
+	notes: ITask[],
+	options: NotebookVaultSyncOptions,
+): Promise<number> {
+	if (!options.enabled) return 0;
+	const folder = (options.folder || 'TickTick Notebook').trim() || 'TickTick Notebook';
 	await ensureFolder(app, folder);
 
-	const locals = await db.tasks.filter(lt => !lt.deleted && isNotebookTask(lt.task)).toArray();
 	let changed = 0;
-	for (const lt of locals) {
-		const task = lt.task;
+	for (const task of notes) {
 		if (!task?.id) continue;
 		const next = renderNotebookMarkdown(task);
 		const existing = await findExistingNotebookFile(app, folder, task.id);
@@ -148,7 +151,6 @@ export async function syncNotebooksToVault(app: App, _plugin: PluginContext): Pr
 			const parent = path.includes('/') ? path.slice(0, path.lastIndexOf('/')) : '';
 			if (parent) await ensureFolder(app, parent);
 			if (app.vault.getAbstractFileByPath(path)) {
-				// Collision: append more of the id.
 				const alt = vaultPath(
 					folder,
 					`${sanitizeNotebookBasename(task.title ?? '', task.id)}-${task.id.slice(0, 6)}.md`,

@@ -1,7 +1,7 @@
 /**
  * FEAT-NOTEBOOK MVP — TT NOTE → vault markdown (opt-in folder).
  */
-import { describe, expect, it, beforeEach, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import {
 	notebookBodyFromMarkdown,
 	notebookVaultPath,
@@ -10,29 +10,14 @@ import {
 	sanitizeNotebookBasename,
 	syncNotebooksToVault,
 } from '@/sync/notebookVault';
-import { getSettings } from '@/settings';
+import type { ITask } from '@/api/types/Task';
 
-vi.mock('@/db/dexie', () => ({
-	db: {
-		tasks: {
-			filter: () => ({
-				toArray: vi.fn().mockResolvedValue([
-					{
-						deleted: false,
-						task: {
-							id: '6adf147e8f08f3950543e3aa',
-							title: 'FEAT-NOTEBOOK spike',
-							content: 'spike body CRUD',
-							kind: 'NOTE',
-						},
-					},
-				]),
-			}),
-		},
-	},
-}));
-
-const S = () => (getSettings as unknown as () => Record<string, unknown>)();
+const NOTE: ITask = {
+	id: '6adf147e8f08f3950543e3aa',
+	title: 'FEAT-NOTEBOOK spike',
+	content: 'spike body CRUD',
+	kind: 'NOTE',
+} as ITask;
 
 describe('FEAT-NOTEBOOK-MVP-1 render / path', () => {
 	it('sanitizeNotebookBasename strips path-hostile chars and appends id suffix', () => {
@@ -61,10 +46,6 @@ describe('FEAT-NOTEBOOK-MVP-1 render / path', () => {
 });
 
 describe('FEAT-NOTEBOOK-MVP-1 syncNotebooksToVault', () => {
-	beforeEach(() => {
-		Object.assign(S(), { syncNotebook: false, notebookFolder: 'TickTick Notebook' });
-	});
-
 	it('no-ops when syncNotebook is off', async () => {
 		const create = vi.fn();
 		const app = {
@@ -76,13 +57,15 @@ describe('FEAT-NOTEBOOK-MVP-1 syncNotebooksToVault', () => {
 			},
 			metadataCache: { getFileCache: () => null },
 		};
-		const n = await syncNotebooksToVault(app as never, {} as never);
+		const n = await syncNotebooksToVault(app as never, [NOTE], {
+			enabled: false,
+			folder: 'TickTick Notebook',
+		});
 		expect(n).toBe(0);
 		expect(create).not.toHaveBeenCalled();
 	});
 
 	it('FEAT-NOTEBOOK-MVP-1: creates markdown under folder when enabled', async () => {
-		Object.assign(S(), { syncNotebook: true, notebookFolder: 'TickTick Notebook' });
 		const created: string[] = [];
 		const folders: string[] = [];
 		const app = {
@@ -100,7 +83,10 @@ describe('FEAT-NOTEBOOK-MVP-1 syncNotebooksToVault', () => {
 			},
 			metadataCache: { getFileCache: () => null },
 		};
-		const n = await syncNotebooksToVault(app as never, {} as never);
+		const n = await syncNotebooksToVault(app as never, [NOTE], {
+			enabled: true,
+			folder: 'TickTick Notebook',
+		});
 		expect(n).toBe(1);
 		expect(created.some(p => p.startsWith('TickTick Notebook/') && p.endsWith('.md'))).toBe(true);
 	});

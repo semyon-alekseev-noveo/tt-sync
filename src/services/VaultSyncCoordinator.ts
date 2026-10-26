@@ -24,6 +24,7 @@ import { FolderSyncService } from '@/services/FolderSyncService';
 import log from '@/utils/logger';
 import { commitVaultText, readNoteForWrite, syncCachedRead, syncRead } from '@/sync/vault-io';
 import { isNotebookTask } from '@/sync/notebookGuard';
+import { syncNotebooksToVault } from '@/sync/notebookVault';
 import { traceWrite } from '@/services/writeTrace';
 import { deferActiveFilePush } from '@/services/activeFilePush';
 import { addCount } from '@/sync/perf';
@@ -213,6 +214,15 @@ export class VaultSyncCoordinator {
 
 		// Ensure all projects with DB file mappings have their vault files
 		await this.ensureProjectFilesExist();
+
+		// FEAT-NOTEBOOK MVP: opt-in TT NOTE → folder (not checkbox lines).
+		const notebookNotes = tasks
+			.filter(lt => !lt.deleted && isNotebookTask(lt.task))
+			.map(lt => lt.task);
+		await syncNotebooksToVault(this.app, notebookNotes, {
+			enabled: !!getSettings().syncNotebook,
+			folder: getSettings().notebookFolder || 'TickTick Notebook',
+		});
 	}
 
 	/**
