@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-26 05:15 UTC
+
+- Context: Owner asked NOTE-BODY after #66 close; issue #152.
+- Target: Record §5 working answers; unit-prove BODY-1/2; no code unless fail.
+- Actions log: `noteBody.upstream.test.ts`; brief/PO/TEST_PLAN; `docs/pilot/results/NOTE-BODY/`.
+- Validation: `npx vitest run` 742; `npm run build` OK.
+- Problems: Live pilot BODY-1/2 still **not run** (`open`).
+- To Be Done: Live Synchronize on `<pilot-vault>`; close #152 after live pass.
+- References: `docs/pilot/NOTE-BODY.md`, #152
+
 ### Iteration 2026-10-26 05:05 UTC
 
 - Context: Owner merged #156; #66 modularization DoD complete on tip.
