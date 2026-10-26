@@ -1266,7 +1266,7 @@ Root cause: after TT pull, Dexie already had remote `content`, so `mergeAbyssBlo
 | ID | Pilot status | Evidence |
 |----|----------------|----------|
 | NOTE-BODY-1 | **unit pass**; live **pass** ×2 | `NOTE-BODY/02-live-tip.md` |
-| NOTE-BODY-2 | **unit pass** (fix); live **not run** (re-prove) | `noteBody2AbyssPull.test.ts`; prior fail `02-live-tip.md` |
+| NOTE-BODY-2 | **unit pass**; live **pass** ×2 | `NOTE-BODY/03-live-body2-tip.md` (rounds 1–2; A/B) |
 | BUG-NOTE-BODY-WIPE | **unit pass**; live **pass** ×2 | `NOTE-BODY/02-live-tip.md` |
 
 ## PR — release 2.0.92

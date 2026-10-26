@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-26 10:02 UTC
+
+- Context: Owner go live BODY-2 prove ×2 after #165/#167 on tip.
+- Target: TT body → Abyss `- >` on pilot; close #152 when evidence lands.
+- Actions log: Tip deploy; align reset; MCP prove markers round1+2 on A/B; `03-live-body2-tip.md`.
+- Validation: Vault A/B `- >` = `note-body-2-prove-*-100104` then `note-body-2-prove2-*-ROUND2`.
+- Problems: - No changes
+- To Be Done: Merge evidence PR; close #152; Notebook MVP live (#159).
+- References: #152, `docs/pilot/results/NOTE-BODY/03-live-body2-tip.md`, `CHANGELOG.md`
+
 ### Iteration 2026-10-26 09:52 UTC
 
 - Context: CI `check:cycles` failed after #166 — `notebookVault` pulled settings/db into phases.
