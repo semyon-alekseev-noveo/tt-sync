@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-26 09:52 UTC
+
+- Context: CI `check:cycles` failed after #166 — `notebookVault` pulled settings/db into phases.
+- Target: Break new cycles without allowlist growth.
+- Actions log: `syncNotebooksToVault(app, notes, options)`; call from VaultSyncCoordinator; phase no longer imports notebookVault.
+- Validation: `node scripts/check-import-cycles.mjs` OK (118); vitest 760; build OK.
+- Problems: - No changes
+- To Be Done: Merge #167.
+- References: #159, #166, #167, `CHANGELOG.md`
+
 ### Iteration 2026-10-26 09:39 UTC
 
 - Context: BODY-2 live fail — title pulled, Abyss `- >` stayed; `__baseContent` was post-pull Dexie content.
