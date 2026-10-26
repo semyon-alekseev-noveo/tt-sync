@@ -1,8 +1,18 @@
 import { RedoLog } from '@/redo/log';
 import { makeAdapter, instrumentVault, instrumentApi } from '@/redo/obsidian';
 import { RedoCommands } from '@/redo/commands';
-import { tagRenames, renameTagsInText, folderOf, migrateTypeStagePrefixToGtd } from '@/settingsMigration';
-const snap = (x: { tagListMappings?: unknown; statusMappings?: unknown; tagMappings?: unknown; projectsFolder?: string }) => JSON.parse(JSON.stringify({ tagListMappings: x.tagListMappings ?? [], statusMappings: x.statusMappings ?? [], tagMappings: x.tagMappings ?? [], projectsFolder: x.projectsFolder })) as Parameters<typeof tagRenames>[0];
+import { migrateTypeStagePrefixToGtd } from '@/settingsMigration';
+import { migratePersistedSettingsData } from '@/settingsDataMigrate';
+import { migrateSettingsVaultChange } from '@/settingsVaultMigrate';
+import { waitForObsidianSync } from '@/sync/waitForObsidianSync';
+import { registerPluginCommands } from '@/pluginCommands';
+import type { SettingsSnap } from '@/settingsVaultMigrate';
+const snap = (x: SettingsSnap): SettingsSnap => JSON.parse(JSON.stringify({
+	tagListMappings: x.tagListMappings ?? [],
+	statusMappings: x.statusMappings ?? [],
+	tagMappings: x.tagMappings ?? [],
+	projectsFolder: x.projectsFolder,
+}));
 import { ProjectSchemeService } from '@/services/ProjectSchemeService';
 import { isPathInPushScope } from '@/syncScope';
 import { ensureSession } from '@/autoLogin';
@@ -12,8 +22,7 @@ import { getTick } from '@/api/tick_singleton_factory';
 import type { PluginContext } from '@/pluginContext';
 import '@/static/styles.css';
 
-import { type Editor, type MarkdownFileInfo, MarkdownView, Notice, Plugin, TFolder } from 'obsidian';
-import { commitVaultText, readNoteForWrite } from '@/sync/vault-io';
+import { type Editor, MarkdownView, Notice, Plugin } from 'obsidian';
 import { installWriteTraceWatch } from '@/services/writeTrace';
 
 //settings
@@ -38,14 +47,8 @@ import { TaskParser } from './taskParser';
 import { FileOperation } from './fileOperation';
 
 //import modals
-import { SetDefaultProjectForFileModal } from './modals/DefaultProjectModal';
 import { LatestChangesModal } from './modals/LatestChangesModal';
-import { CleanupDeletedTasksModal } from './modals/CleanupDeletedTasksModal';
-import { RecoverDeletedTasksModal } from './modals/RecoverDeletedTasksModal';
 
-//import utils
-import { isOlder } from './utils/version';
-import { NOTABLE_CHANGES } from './notable-changes';
 import { TickTickSyncSettingTab } from './ui/settings';
 import { refreshSettingsStore } from '@/ui/settings/settingsstore';
 import { MarkdownProcessor } from '@/query/MarkdownProcessor';
@@ -58,7 +61,6 @@ import log from '@/utils/logger';
 
 //database
 import { initDB } from '@/db/dexie';
-import { migrateFromDataJson } from '@/db/migrations';
 import type { DeviceInfo } from '@/db/schema';
 
 //NEW: Repository layer
@@ -220,66 +222,6 @@ export default class TickTickSync extends Plugin implements PluginContext {
 		});
 	}
 
-	/**
-	 * If Obsidian Sync is installed and enabled, wait until it finishes
-	 * syncing before proceeding with plugin initialization.
-	 */
-	private async waitForObsidianSync(): Promise<void> {
-		const app = this.app as unknown as {
-			internalPlugins: { getPluginById(id: string): { enabled: boolean; instance?: unknown } | undefined };
-			sync?: { isSyncing?: () => boolean; on?: (event: string, handler: () => void) => void; syncing?: boolean };
-		};
-		const internalPlugins = app.internalPlugins;
-		if (!internalPlugins) return;
-
-		const syncPlugin = internalPlugins.getPluginById('sync');
-		if (!syncPlugin?.enabled) return;
-
-		const syncService = app.sync ?? syncPlugin.instance as { isSyncing?: () => boolean; on?: (event: string, handler: () => void) => void; syncing?: boolean };
-		if (!syncService) return;
-
-		log.debug('Obsidian Sync detected, waiting for sync to complete...');
-
-		return new Promise<void>((resolve) => {
-			const isSyncing = (): boolean => {
-				try {
-					const fn = syncService.isSyncing;
-					return typeof fn === 'function' ? fn() : (fn ?? syncService.syncing ?? false);
-				} catch {
-					return false;
-				}
-			};
-
-			if (!isSyncing()) {
-				log.debug('Obsidian Sync already idle, proceeding.');
-				resolve();
-				return;
-			}
-
-			const poll = () => {
-				if (!isSyncing()) {
-					log.debug('Obsidian Sync finished, proceeding.');
-					resolve();
-					return;
-				}
-				window.setTimeout(poll, 500);
-			};
-			poll();
-
-			try {
-				if (typeof syncService.on === 'function') {
-					syncService.on('status-change', () => {
-						if (!isSyncing()) {
-							resolve();
-						}
-					});
-				}
-			} catch {
-				// event listener not available, polling alone is fine
-			}
-		});
-	}
-
 	reloadInterval() {
 		if (this.syncIntervalId) {
 			window.clearInterval(this.syncIntervalId);
@@ -293,17 +235,6 @@ export default class TickTickSync extends Plugin implements PluginContext {
 			window.setInterval(() => { void this.scheduledSynchronization(false, 'scheduled'); }, timeout)
 		);
 	}
-
-	// Configure logging.
-	// reloadLogging() {
-	// 	const options: LogOptions = {
-	// 		minLevels: {
-	// 			'': getSettings().logLevel,
-	// 			ticktick: getSettings().logLevel
-	// 		}
-	// 	};
-	// 	logging.configure(options);
-	// }
 
 	onunload() {
 		super.onunload();
@@ -371,36 +302,7 @@ export default class TickTickSync extends Plugin implements PluginContext {
 
 	/** Tag/status/list mapping renamed or projects folder changed: carry existing notes over. */
 	async migrateSettingsChange(prev: ReturnType<typeof snap>, next: ReturnType<typeof snap>) {
-		const renames = tagRenames(prev, next);
-		if (Object.keys(renames).length) {
-			let n = 0;
-			for (const f of this.app.vault.getMarkdownFiles()) {
-				const snapshot = await readNoteForWrite(this.app, f);
-				const next = renameTagsInText(snapshot, renames);
-				if (next === snapshot) continue;
-				n++;
-				await commitVaultText(this.app, f, snapshot, next);
-			}
-			log.info('Tag mapping change migrated', renames, n, 'file(s)');
-			new Notice(`TickTickSync: renamed ${Object.entries(renames).map(([a, b]) => `#${a} → #${b}`).join(', ')} in ${n} note(s)`);
-		}
-		const from = folderOf(prev), to = folderOf(next);
-		if (from !== to && to) {
-			const old = this.app.vault.getAbstractFileByPath(from);
-			if (old instanceof TFolder) {
-				let moved = 0;
-				const files = this.app.vault.getMarkdownFiles().filter(f => f.path.startsWith(from + '/'));
-				for (const f of files) {
-					const dest = to + f.path.slice(from.length);
-					if (this.app.vault.getAbstractFileByPath(dest)) { log.warn('Projects folder move: target exists, kept', f.path); continue; }
-					const dir = dest.slice(0, dest.lastIndexOf('/'));
-					if (dir && !this.app.vault.getAbstractFileByPath(dir)) await this.app.vault.createFolder(dir).catch(() => undefined);
-					await this.app.vault.rename(f, dest); moved++; // vault.rename: fileManager.renameFile may block on an 'Update links?' prompt
-				}
-				if (moved) new Notice(`TickTickSync: moved ${moved} project note(s) from ${from} to ${to}`);
-				log.info(`Projects folder ${from} -> ${to}: moved ${moved}`);
-			}
-		}
+		await migrateSettingsVaultChange(this.app, prev, next);
 	}
 
 	async loadSettings() {
@@ -599,7 +501,7 @@ export default class TickTickSync extends Plugin implements PluginContext {
 				if (this.app.workspace.layoutReady) return;
 				await new Promise<void>(resolve => { this.app.workspace.onLayoutReady(() => resolve()); });
 			},
-			waitForObsidianSync: () => this.waitForObsidianSync(),
+			waitForObsidianSync: () => waitForObsidianSync(this.app),
 			delaySeconds: getSettings().startupSyncDelaySeconds,
 		});
 		const loadedSync = await this.service.synchronization(true, 'startup');
@@ -867,99 +769,9 @@ export default class TickTickSync extends Plugin implements PluginContext {
 		this.markdownProcessor = new MarkdownProcessor(this);
 		this.markdownProcessor.activate();
 
-
-		// //Used for testing adhoc code.
-		// this.addRibbonIcon('check', 'Tts test', async (evt: MouseEvent) => {
-		// 	// Nothing to see here right now.
-		// 	const vaultId = this.app.vault.getName();
-		// 	log.debug(`Vault ID: ${vaultId}`);
-		// 	this.dumpDB();
-		// });
-
-		//Used for testing adhoc code.
-		// this.addRibbonIcon('dice', 'Tts test 2', async (evt: MouseEvent) => {
-		// 	// Nothing to see here right now.
-		// 	// for (const file of this.app.vault.getMarkdownFiles()) {
-		// 	// 	if (file.path.includes("List 1")) {
-		// 	// 		const fileMap = new NewFileMap(this.app, this, file);
-		// 	// 		await fileMap.init();
-		// 	// 		const taskRecord = fileMap.getTaskRecord("6a08733c9086963234d145a5")
-		// 	// 		const taskItems = fileMap.getTaskItems("6a08733c9086963234d145a5")
-		// 	// 		log.debug("record", taskRecord)
-		// 	// 		log.debug("items", taskItems)
-		// 	// 	}
-		// 	// }
-		// 	// Example Usage inside a command or event:
-		// 	// const targetFolder = 'Folder 1';
-		// 	//
-		// 	// // Get every file in the vault and filter by path prefix
-		// 	// const allFilesInFolder = this.app.vault.getFiles().filter(file =>
-		// 	// 	file.path.startsWith(targetFolder + '/')
-		// 	// );
-		// 	//
-		// 	// for (const file of allFilesInFolder) {
-		// 	// 	const activeFile = this.app.vault.getFileByPath(file)
-		// 	// 	const tasks = await getTasksWithChildren(activeFile, this.app);
-		// 	// 	// const fm = new NewFileMap(this.app, this, activeFile);
-		// 	// 	// await fm.init();
-		// 	// 	// const tasks = fm.getTasks();
-		// 	//
-		// 	// 	log.debug("In File: ", file.name, "\nStructured Tasks:\n", JSON.stringify(tasks,null, 4));
-		// 	// }
-		// 	generateDeviceId();
-		//
-		//
-		// });
-
-
 		this.registerEvents();
 		this.reloadInterval();
-
-		// set default project for TickTick task in the current file
-		// This adds an editor command that can perform some operation on the current editor instance
-		this.addCommand({
-			id: 'tts-default-project-for-file',
-			name: 'Set default ticktick project for current file',
-			editorCallback: (editor: Editor, view: MarkdownView | MarkdownFileInfo) => {
-				if (!view || !view.file) {
-					new Notice(`No active file.`);
-					return;
-				}
-				const filepath = view.file.path;
-				new SetDefaultProjectForFileModal(this.app, this, filepath);
-			}
-		});
-		this.addCommand({
-			id: 'tts-delete-permanent',
-			name: 'Permanently delete tasks',
-			callback: async () => {
-				const deletedTasks = await this.taskRepository.getDeletedTasks();
-				if (deletedTasks.length === 0) {
-					new Notice('No deleted tasks found.');
-					return;
-				}
-				const modal = new CleanupDeletedTasksModal(this.app, deletedTasks);
-				const selected = await modal.showModal();
-				if (selected.length > 0) {
-					await this.taskRepository.hardDeleteTasks(selected);
-					new Notice(`Permanently deleted ${selected.length} task(s).`);
-				}
-			}
-		});
-
-		this.addCommand({
-			id: 'tts-recover-tasks',
-			name: 'View and recover deleted tasks',
-			callback: async () => {
-				const deletedTasks = await this.taskRepository.getDeletedTasks();
-				if (deletedTasks.length === 0) {
-					new Notice('No deleted tasks found.');
-					return;
-				}
-				const modal = new RecoverDeletedTasksModal(this.app, this, deletedTasks);
-				await modal.showModal();
-			}
-		});
+		registerPluginCommands(this);
 
 		//display default project for the current file on status bar
 		// This adds a status bar item to the bottom of the app. Does not work on mobile apps.
@@ -978,64 +790,10 @@ export default class TickTickSync extends Plugin implements PluginContext {
 	}
 
 	private async migrateData(data: Record<string, unknown>): Promise<Record<string, unknown>> {
-		if (!data) return data;
-
-		//We're going to handle data structure conversions here.
-		//NB: The version that goes in the literal is the current version.
-		if ((!data.version) || (isOlder(data.version as string, '1.0.10'))) {
-			//get rid of username and password. we don't need them no more.
-			delete data.username;
-			delete data.password;
-		}
-		if ((!data.version) || (isOlder(data.version as string, '1.0.36'))) {
-			//default to AND because that's what we used to do:
-			data.tagAndOr = 1;
-		}
-
-		//BIG Change. BIG I tell you!
-		if ((!data.version) || isOlder(data.version as string, '2.0.0')) {
-			log.debug('Entering 1.1.17 migration block');
-			// Migrate from legacy data.json repository to Dexie-based repository
-			data.__migratedDBData = migrateFromDataJson(data);
-			log.debug('migrateFromDataJson completed');
-		}
-		if ((!data.version) || (isOlder(data.version as string, '2.0.5'))) {
-			log.debug('Entering 2.0.5 migration block');
-			// New in 2.0.5: opt-in settings for the "#ticktick" control tag.
-			// Historically the plugin force-injected "ticktick" onto every
-			// synced task's TickTick tags. Default off (false) preserves the
-			// legacy behavior for existing installs.
-			data.stopInjectingTickTickTag = false;
-			data.stripTickTickTagOnReset = false;
-		}
-
-		//Build notable changes from the single source of truth
-		const notableChanges: string[][] = [];
-		const currentVersion = (data.version as string) || '0.0.0';
-		for (const change of NOTABLE_CHANGES) {
-			if (!data.version || isOlder(currentVersion, change.version)) {
-				notableChanges.push([change.title, change.description, change.anchor]);
-			}
-		}
-
-		if (notableChanges.length > 0) {
-			log.debug('Calling LatestChangesModal with', notableChanges.length, 'items');
-			await this.LatestChangesModal(notableChanges);
-			log.debug('LatestChangesModal returned');
-		} else {
-			log.debug('Skipping LatestChangesModal - no notable changes');
-		}
-
-		//Update the version number. It will save me headaches later.
-
-		if ((!data.version) || (isOlder(data.version as string, this.manifest.version))) {
-			log.debug('Updating version number to ', this.manifest.version);
-			data.version = this.manifest.version;
-			// No saveSettings() here: in-memory settings are still DEFAULT_SETTINGS at this point and would
-			// overwrite data.json (syncedLists, tagListMappings, token...). loadSettings() saves the merged data.
-		}
-
-		return data;
+		return migratePersistedSettingsData(data, {
+			pluginVersion: this.manifest.version,
+			showNotableChanges: (items) => this.LatestChangesModal(items),
+		});
 	}
 
 	private async LatestChangesModal(notableChanges: string[][]) {
@@ -1047,49 +805,5 @@ export default class TickTickSync extends Plugin implements PluginContext {
 		});
 
 	}
-	private dumpDB() {
-		let dbName = (getSettings().vaultName || '')  + "TickTickSync";
-		const request = indexedDB.open(dbName);
-
-		request.onsuccess = async (event) => {
-			const db = (event.target as EventTarget & { result: IDBDatabase }).result;
-			const storeNames = Array.from(db.objectStoreNames);
-			const exportData: Record<string, unknown> = {};
-
-			// Process all stores
-			for (const storeName of storeNames) {
-				exportData[storeName] = await new Promise((resolve) => {
-					const transaction = db.transaction([storeName], "readonly");
-					const store = transaction.objectStore(storeName);
-					const allItems = store.getAll();
-
-					allItems.onsuccess = () => resolve(allItems.result);
-					allItems.onerror = () => resolve([]); // Handle empty/error stores
-				});
-			}
-
-			// Create and download JSON file
-			const jsonString = JSON.stringify(exportData, null, 2);
-			const blob = new Blob([jsonString], { type: "application/json" });
-			const url = URL.createObjectURL(blob);
-			const a = createEl("a");
-
-			a.href = url;
-			a.download = `${dbName}_full_dump.json`;
-			a.click();
-
-			URL.revokeObjectURL(url);
-			log.debug(`Exported ${storeNames.length} stores to ${dbName}_full_dump.json`);
-			db.close();
-		};
-
-		request.onerror = (e: Event) => console.error("Database failed to open:", (e.target as IDBRequest)?.error);
-
-	}
-
 
 }
-
-
-
-

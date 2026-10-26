@@ -18,4 +18,5 @@ Plan: [`docs/SYNC_MODULARIZATION.md`](../../../SYNC_MODULARIZATION.md)
 | #66 slice C checkDatabase + sizes | [`66-slice-c-checkdatabase.md`](66-slice-c-checkdatabase.md) | **in PR** — god-class ≤30 KB; `check:sizes` CI |
 | #66 slice D vaultLineBehind | [`66-slice-d-vault-line-behind.md`](66-slice-d-vault-line-behind.md) | **in PR** — VSC ≤30 KB |
 | #66 slice E fileOperation | [`66-slice-e-file-operation.md`](66-slice-e-file-operation.md) | **landed** — PR #154 |
-| #66 slice F api HTTP extract | [`66-slice-f-api-http-extract.md`](66-slice-f-api-http-extract.md) | **in PR** — tickHttp + taskComments; api ≤30 KB |
+| #66 slice F api HTTP extract | [`66-slice-f-api-http-extract.md`](66-slice-f-api-http-extract.md) | **landed** — PR #155 |
+| #66 slice G main extract | [`66-slice-g-main-extract.md`](66-slice-g-main-extract.md) | **in PR** — main ≤30 KB; 0 size exceptions |
