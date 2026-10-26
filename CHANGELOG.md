@@ -1,14 +1,14 @@
 # Changelog
 
-### Iteration 2026-10-26 09:50 UTC
+### Iteration 2026-10-26 09:39 UTC
 
-- Context: Owner go FEAT-NOTEBOOK MVP after spike; BODY-2 on PR #165.
-- Target: Opt-in TT Notebook → vault folder (one-way); default off.
-- Actions log: `syncNotebook` / `notebookFolder`; `notebookVault.ts`; skip NOTE checkboxes; Notes UI; FEAT-NOTEBOOK-MVP-1 unit.
-- Validation: `npx vitest run` 757; `npm run build` OK.
-- Problems: Live MVP **not run**; bi-di out of scope (`open`).
-- To Be Done: PR into abyss-mapping; live FEAT-NOTEBOOK-MVP-1.
-- References: #159, `docs/pilot/NOTEBOOK.md`, `CHANGELOG.md`
+- Context: BODY-2 live fail — title pulled, Abyss `- >` stayed; `__baseContent` was post-pull Dexie content.
+- Target: TT body → vault `- >` on pull (NOTE-BODY-2); keep #152 open until live prove×2.
+- Actions log: `preMergeNoteBase` remember on pull / take in persist; clear on prepare; unit `noteBody2AbyssPull.test.ts`.
+- Validation: `npx vitest run` 755; `npm run build` OK.
+- Problems: Live BODY-2 still **not re-proven** after fix (`open`).
+- To Be Done: Live BODY-2 ×2 on pilot; then Notebook MVP (#159).
+- References: #152, `src/sync/preMergeNoteBase.ts`, `CHANGELOG.md`
 
 ### Iteration 2026-10-26 08:51 UTC
 

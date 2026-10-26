@@ -78,7 +78,7 @@ Map from smoke: NOTE-L1 ≈ BODY-1 (description-shaped); upstream delimiter form
 | Role | Next |
 |------|------|
 | Analyst | §5 working answers recorded (2026-10-26); owner may override |
-| Tester | Live BODY-1 + wipe **pass** ×2; BODY-2 **fail** — `docs/pilot/results/NOTE-BODY/02-live-tip.md` |
-| Developer | Implement TT→vault Abyss `- >` body pull (BODY-2); then close #152 |
+| Tester | Live BODY-1 + wipe **pass** ×2; BODY-2 **fail** pre-fix — `02-live-tip.md`; re-prove BODY-2 after fix PR |
+| Developer | BODY-2 fix: `preMergeNoteBase` + `noteBody2AbyssPull.test.ts`; live prove×2 then close #152 |
 
 **References:** `docs-src/configuration/notes.md`, `SMOKE_TESTS.md` NOTE-L1–L5, `ABYSS_FIRST_CASES.md` NOTE-L3b, `REGRESSION-2.0.91/01-…`
