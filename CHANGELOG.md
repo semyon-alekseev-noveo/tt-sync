@@ -1,3 +1,13 @@
+### Iteration 2026-10-27 15:10 UTC
+
+- Context: Owner go on Abyss checkbox-status → TickTick list map (SoT: symbol); `#gtd/*` must not drive lists.
+- Target: `statusListMappings`; cases UX-STATUS-MAP-*; TTS-WIP created; AF-5 documented as legacy when map empty.
+- Actions log: Added `src/statusListMapping.ts`; wired convertLineToTask/ToLine + strip stage tags; Settings UI; pilot `syncedLists`+map; cases/TEST_PLAN/AF-CHECKBOX doc.
+- Validation: `npx vitest run` → 800 passed (114 files); `npm run build` OK. Pilot smoke **not run** until build installed.
+- Problems: Abyss customs `?`/`=`/`~` and rename `!`→next still owner vault steps (`open`).
+- To Be Done: Merge PR; install build; pilot prove `[!]`+`[/]`; Abyss custom statuses on pilot.
+- References: `docs/pilot/results/UX-OBS-TT-SOAK/14-task-status-to-list-map.md`, `ABYSS_FIRST_CASES.md`, `CHANGELOG.md`
+
 # Changelog
 
 ### Iteration 2026-10-27 10:00 UTC

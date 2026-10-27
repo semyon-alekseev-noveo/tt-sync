@@ -5,6 +5,7 @@ import { Notice } from 'obsidian';
 import { mapObsidianTag } from '@/tagMapping';
 import { hasMultipleStageTags, isListTag, isStageToken, listForTags, pickWinningStageTag, tickTickTagForStage, tagsForCurrentList } from '@/listMapping';
 import { checkboxChar, tagForStatusChar, isStatusTag } from '@/statusMapping';
+import { isStatusListMapActive, listForStatusChar, isTerminalStatusChar } from '@/statusListMapping';
 import { getSettings, updateSettings } from '@/settings';
 import { getAllProjects } from '@/db/projects';
 import { tasksTextToRRule } from '@/utils/RecurrenceConverter';
@@ -111,14 +112,20 @@ export class TaskParserConvertToTask {
 		const savedForStage = TickTick_id
 			? (await this.plugin.taskRepository?.loadTaskById(TickTick_id))
 			: undefined;
-		const stageProjects = getSettings().tagListMappings?.length ? await getAllProjects() : [];
+		const statusListMap = getSettings().statusListMappings;
+		const useStatusList = getSettings().abyssTasksFormat && isStatusListMapActive(statusListMap);
+		const needProjects = !!(getSettings().tagListMappings?.length || useStatusList);
+		const stageProjects = needProjects ? await getAllProjects() : [];
 		if (getSettings().abyssTasksFormat) {
 			// Abyss custom status char -> TickTick tag (e.g. `[/]` -> status/in-progress)
 			const smap = getSettings().statusMappings;
 			const kept = rawTags.filter(t => !isStatusTag(t, smap));
 			const stCh = checkboxChar(textWithoutIndentation);
+			// When status->list is SoT, skip tagList stage-conflict toasts (tags are stripped, not "lost").
 			const lost = abyssTagConflicts(
-				rawTags, stCh, smap, getSettings().tagListMappings, stageProjects, savedForStage?.projectId,
+				rawTags, stCh, smap,
+				useStatusList ? undefined : getSettings().tagListMappings,
+				stageProjects, savedForStage?.projectId,
 			);
 			// Status↔checkbox mismatch is surprising → Notice. Rival stage tags after Abyss DnD
 			// are expected (AF-GTD-TAG-ADD); exclusive rewrite handles them without a toast.
@@ -246,7 +253,7 @@ export class TaskParserConvertToTask {
 				projectOf = { parentId: savedForStage.parentId, listId: savedForStage.projectId };
 			}
 		}
-		const stageWinner = getSettings().tagListMappings?.length
+		const stageWinner = (!useStatusList && getSettings().tagListMappings?.length)
 			? pickWinningStageTag(rawTags, getSettings().tagListMappings, stageProjects, savedForStage?.projectId)
 			: undefined;
 		if (projectOf) {
@@ -254,11 +261,12 @@ export class TaskParserConvertToTask {
 			// No source tag yet: the line was written in Obsidian.
 			const hasSource = tags.some(t => t === 'obsidian' || t === 'ticktick' || t === markerName());
 			if (!hasSource) tags = [...tags, 'obsidian'];
-		} else if (getSettings().tagListMappings?.length && (getSettings().gtdStageVia ?? 'list') === 'tag') {
+		} else if (!useStatusList && getSettings().tagListMappings?.length && (getSettings().gtdStageVia ?? 'list') === 'tag') {
 			const tt = stageWinner ? tickTickTagForStage(stageWinner, getSettings().tagListMappings) : undefined;
 			tags = tags.filter((t, i) => !isStageToken(rawTags[i], getSettings().tagListMappings) && !isStageToken(t, getSettings().tagListMappings));
 			if (tt) tags = [...tags.filter(x => x !== tt), tt];
 		} else if (getSettings().tagListMappings?.length) {
+			// Always drop list-mapped stage tags from the TT payload (list or status SoT represents stage).
 			tags = tags.filter((_, i) => !isListTag(rawTags[i], getSettings().tagListMappings));
 		}
 		let projectId = await this.plugin.fileTaskQueries?.getDefaultProjectIdForFilepath(filepath);
@@ -269,17 +277,25 @@ export class TaskParserConvertToTask {
 			}
 		} else {
 			if (projectOf) projectId = projectOf.listId;
-			// Explicit tag -> list table wins over file default and name-matching.
 			const listMap = getSettings().tagListMappings;
-			const mappedList = (!projectOf && (getSettings().gtdStageVia ?? 'list') !== 'tag' && listMap?.length)
-				? listForTags(rawTags, listMap, stageProjects.length ? stageProjects : await getAllProjects(), savedForStage?.projectId)
+			const stChForList = checkboxChar(textWithoutIndentation);
+			const statusMappedList = (!projectOf && useStatusList && !isTerminalStatusChar(stChForList))
+				? listForStatusChar(stChForList, statusListMap, stageProjects.length ? stageProjects : await getAllProjects())
 				: undefined;
+			// Status->list SoT wins over tagListMappings. Terminal chars keep current/default list.
+			const mappedList = statusMappedList
+				?? ((!projectOf && !useStatusList && (getSettings().gtdStageVia ?? 'list') !== 'tag' && listMap?.length)
+					? listForTags(rawTags, listMap, stageProjects.length ? stageProjects : await getAllProjects(), savedForStage?.projectId)
+					: undefined);
 			if (mappedList) {
 				projectId = mappedList;
+			} else if (useStatusList && isTerminalStatusChar(stChForList) && savedForStage?.projectId) {
+				// [x]/[-]: complete/cancel — list unchanged
+				projectId = savedForStage.projectId;
 			} else
 			// A tag that merely shares a list's name (e.g. #inbox → the real Inbox)
 			// must not override the file default once the mapping table is in use.
-			if (!listMap?.length && rawTags) {
+			if (!listMap?.length && !useStatusList && rawTags) {
 				for (const rawTag of rawTags) {
 					const labelName = rawTag.replace(/[/_]/g, ' ');
 	
@@ -293,7 +309,7 @@ export class TaskParserConvertToTask {
 			}
 		}
 	
-		if (projectId && (getSettings().gtdStageVia ?? 'list') === 'list') {
+		if (projectId && (getSettings().gtdStageVia ?? 'list') === 'list' && !useStatusList) {
 			tags = tagsForCurrentList(tags, projectId, getSettings().tagListMappings, {
 				defaultProjectId: getSettings().defaultProjectId,
 				via: 'list',
@@ -362,7 +378,15 @@ export class TaskParserConvertToTask {
 		};
 
 		// AF-GTD-TAG-ADD: Abyss tag-tree may leave several stage tags; push rewrites the vault line.
-		if (hasMultipleStageTags(rawTags, getSettings().tagListMappings) && stageWinner) {
+		// UX-STATUS-MAP: when status->list is SoT, strip leftover #gtd stage tags entirely.
+		if (useStatusList && getSettings().tagListMappings?.length
+			&& rawTags.some(t => isListTag(t, getSettings().tagListMappings))) {
+			Object.defineProperty(task, '__stripStageTagsRewrite', {
+				value: true,
+				enumerable: false,
+				configurable: true,
+			});
+		} else if (hasMultipleStageTags(rawTags, getSettings().tagListMappings) && stageWinner) {
 			Object.defineProperty(task, '__exclusiveStageRewrite', {
 				value: true,
 				enumerable: false,

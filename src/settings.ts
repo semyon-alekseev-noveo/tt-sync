@@ -57,6 +57,12 @@ export interface ITickTickSyncSettings {
 	scheduledAsStartDate: boolean;
 	tagMappings: { obsidian: string; ticktick: string }[];
 	statusMappings: { char: string; tag: string }[];
+	/**
+	 * Abyss checkbox symbol → TickTick list (SoT for list when non-empty + abyssTasksFormat).
+	 * Distinct from statusMappings (char → TT tag). When set, #gtd/* via tagListMappings
+	 * does not drive list placement; stage tags are stripped on sync rewrite.
+	 */
+	statusListMappings: { char: string; list: string; listId?: string }[];
 	projectMappings: { path: string; project: string }[];
 	tagListMappings: { tag: string; list: string; listId?: string }[];
 	/** GTD stage: Obsidian tag selects a TickTick list, or a TickTick tag for a filter view. */
@@ -165,6 +171,7 @@ export const DEFAULT_SETTINGS: ITickTickSyncSettings = {
 	scheduledAsStartDate: false,
 	tagMappings: [],
 	statusMappings: [{ char: '/', tag: 'status/in-progress' }, { char: '-', tag: 'status/cancelled' }],
+	statusListMappings: [],
 	projectMappings: [],
 	tagListMappings: [],
 	gtdStageVia: 'list',

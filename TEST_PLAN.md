@@ -6,6 +6,21 @@ Manual cases for behavior changes. Automated tests do not replace a row here.
 
 Pilot means `<pilot-vault>`, manual **Synchronize**, plugin id `tickticksync-abyss`. Do not use `<live-vault>`. A cloud agent does not mark a row passed. Status stays **not run** until a person or a local agent on that Obsidian records what they saw.
 
+## UX-STATUS-MAP — Abyss checkbox → TickTick list (this PR)
+
+Settings: `abyssTasksFormat` + non-empty `statusListMappings` (pilot: space/!/?/=/~// → TTS-* lists). `#gtd/*` must not drive list placement.
+
+| Case | Steps | Expected | Pilot |
+|------|-------|----------|-------|
+| UX-STATUS-MAP-1 | In-scope `- [!] …` Synchronize | TT list TTS-nextAction; line stays | **not run** |
+| UX-STATUS-MAP-2 | In-scope `- [/] …` Synchronize | TT list TTS-WIP | **not run** |
+| UX-STATUS-MAP-3 | `- [ ] … #gtd/next` Synchronize | stays TTS-Inbox; `#gtd/next` stripped | **not run** |
+| UX-STATUS-MAP-4 | `- [x]` / `- [-]` | complete / cancel; list unchanged | **not run** |
+| UX-STATUS-MAP-PULL | Move task to TTS-waitingFor in TT; Synchronize | vault checkbox `[?]`; no new `#gtd/*` | **not run** |
+| AF-5 legacy | Empty `statusListMappings` + `#gtd/next` | still nextAction (regression) | **not run** (unit covers tag path) |
+
+Unit: `src/test/statusListMapping.test.ts` (named by case IDs).
+
 ## PR #1 — fail-closed sync, open-note push, comments
 
 Branch `abyss-mapping` (PR #1 merged). Release build under test: **2.0.48** (tag on `tt-sync`). Manual rows below stay **not run** until executed on `<pilot-vault>` with that build installed.

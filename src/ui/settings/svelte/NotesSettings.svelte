@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { parseTagMappingText, tagMappingToText } from '@/tagMapping';
 	import { parseStatusMappingText, statusMappingToText } from '@/statusMapping';
+	import { parseStatusListText, statusListToText } from '@/statusListMapping';
 	import { parseProjectMappingText, projectMappingToText } from '@/projectMapping';
 	import { getSettings } from '@/settings';
 	import type TickTickSync from '@/main';
@@ -22,6 +23,7 @@
 	let scheduledAsStartDate: boolean = false;
 	let tagMappingText = '';
 	let statusMappingText = '';
+	let statusListMappingText = '';
 	let projectMappingText = '';
 	let onTickTickDeletion: 'ask' | 'cancel' = 'ask';
 	let autoCleanupDatabase = false;
@@ -40,6 +42,7 @@
 			scheduledAsStartDate,
 			tagMappings: parseTagMappingText(tagMappingText),
 			statusMappings: parseStatusMappingText(statusMappingText),
+			statusListMappings: parseStatusListText(statusListMappingText),
 			projectMappings: parseProjectMappingText(projectMappingText),
 			onTickTickDeletion,
 			autoCleanupDatabase,
@@ -71,6 +74,7 @@
 		scheduledAsStartDate = $settingsStore.scheduledAsStartDate ?? false;
 		tagMappingText = tagMappingToText($settingsStore.tagMappings);
 		statusMappingText = statusMappingToText($settingsStore.statusMappings);
+		statusListMappingText = statusListToText($settingsStore.statusListMappings);
 		projectMappingText = projectMappingToText($settingsStore.projectMappings);
 		onTickTickDeletion = $settingsStore.onTickTickDeletion ?? 'ask';
 		autoCleanupDatabase = $settingsStore.autoCleanupDatabase ?? false;
@@ -96,6 +100,7 @@
 		scheduledAsStartDate = $settingsStore.scheduledAsStartDate ?? false;
 		tagMappingText = tagMappingToText($settingsStore.tagMappings);
 		statusMappingText = statusMappingToText($settingsStore.statusMappings);
+		statusListMappingText = statusListToText($settingsStore.statusListMappings);
 		projectMappingText = projectMappingToText($settingsStore.projectMappings);
 		onTickTickDeletion = $settingsStore.onTickTickDeletion ?? 'ask';
 		autoCleanupDatabase = $settingsStore.autoCleanupDatabase ?? false;
@@ -307,6 +312,21 @@
 				</div>
 				<div class="setting-item-control">
 					<textarea rows="4" bind:value={statusMappingText} on:change={saveFormat}></textarea>
+				</div>
+			</div>
+			<div class="setting-item">
+				<div class="setting-item-info">
+					<div class="setting-item-name">Status → list mapping</div>
+					<div class="setting-item-description">
+						Checkbox char = TickTick list (SoT when non-empty). Example:
+						<code>! = TTS-nextAction</code>. Stage tags <code>gtd/*</code> no longer move the list;
+						they are stripped on sync rewrite. <code>[x]</code>/<code>[-]</code> complete/cancel (list unchanged).
+						Distinct from Status mapping (char → TT tag) above.
+					</div>
+				</div>
+				<div class="setting-item-control">
+					<textarea rows="6" bind:value={statusListMappingText} on:change={saveFormat}
+						placeholder={" = TTS-Inbox\n/ = TTS-WIP\n! = TTS-nextAction\n? = TTS-waitingFor\n= = TTS-Planned\n~ = TTS-someDay"}></textarea>
 				</div>
 			</div>
 		{/if}

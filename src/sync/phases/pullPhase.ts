@@ -1,4 +1,5 @@
 import { healTagListMappings } from '@/listMapping';
+import { healStatusListMappings } from '@/statusListMapping';
 import { getSettings, updateSettings } from '@/settings';
 import { deletionConfirmMode } from '@/sync/massDeleteGuard';
 import type { SyncPhaseDeps } from '@/sync/phases/types';
@@ -17,13 +18,18 @@ export async function runPullPhase(deps: SyncPhaseDeps): Promise<void> {
 	const projects = ctx.projects;
 	if (projects?.length) {
 		const healed = healTagListMappings(getSettings().tagListMappings, projects);
+		const healedStatus = healStatusListMappings(getSettings().statusListMappings, projects);
 		const pl = resolveProjectsList(projects, getSettings().projectsListName, getSettings().projectsListId);
 		const plUpd =
 			pl && (pl.id !== getSettings().projectsListId || pl.name !== getSettings().projectsListName)
 				? { projectsListId: pl.id, projectsListName: pl.name }
 				: {};
-		if (healed || Object.keys(plUpd).length) {
-			updateSettings({ ...(healed ? { tagListMappings: healed } : {}), ...plUpd }, { persist: false });
+		if (healed || healedStatus || Object.keys(plUpd).length) {
+			updateSettings({
+				...(healed ? { tagListMappings: healed } : {}),
+				...(healedStatus ? { statusListMappings: healedStatus } : {}),
+				...plUpd,
+			}, { persist: false });
 			await plugin.saveSettings();
 			log.info('List mapping refreshed (rename-safe)');
 		}
