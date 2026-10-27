@@ -1289,7 +1289,7 @@ Ships #165 NOTE-BODY-2, #166/#167 Notebook MVP TT→vault, live evidence #168/#1
 
 | ID | Pilot status | Evidence |
 |----|----------------|----------|
-| TP-RELEASE-2.0.93 | **not run** (bump PR) | Owner BRAT after tag |
+| TP-RELEASE-2.0.93 | tagged | https://github.com/semyon-alekseev-noveo/tt-sync/releases/tag/2.0.93 |
 | NOTE-BODY-2 | live **pass** ×2 on tip | `NOTE-BODY/03-live-body2-tip.md` |
 | FEAT-NOTEBOOK-MVP-1 | live **pass** ×2 on tip | `FEAT-NOTEBOOK/166-mvp-tt-to-vault-live.md` |
 
@@ -1297,6 +1297,21 @@ Ships #165 NOTE-BODY-2, #166/#167 Notebook MVP TT→vault, live evidence #168/#1
 
 1. `npx vitest run src/test/bugNoteBodyWipe.test.ts`
 2. Live: task with TT body; change only a tag / title; Synchronize — body must remain. Prefer `- >` body on Abyss pilot.
+
+## PR — release 2.0.94
+
+Ships #173 GAP-COMMENT-EDIT (PUT comments), #176 RISK-PULL-WINS-LOCAL (vault rewrite on local LWW), #177 RISK-DUAL-STORE (drift count + warn, no repair), and #171 release-gate Actions encode (not in the 2.0.93 notes). Do not retag **2.0.93**.
+
+1. Install **2.0.94** on `<pilot-vault>` (BRAT or tip); reload; Synchronize once.
+2. Optional: GAP-COMMENT-EDIT, RISK-PULL-WINS-LOCAL, and RISK-DUAL-STORE steps in the sections below. Those pilots stay **not run** on this bump.
+
+| ID | Pilot status | Evidence |
+|----|----------------|----------|
+| TP-RELEASE-2.0.94 | **not run** (bump PR) | Owner BRAT after tag |
+| GAP-COMMENT-EDIT | **unit pass**; live **not run** | `src/test/abyssCommentSync.test.ts` |
+| RISK-PULL-WINS-LOCAL | **unit pass**; pilot **not run** | `src/test/riskPullWinsLocal.test.ts` |
+| RISK-DUAL-STORE | **unit pass**; pilot **not run** | `src/test/riskDualStore.test.ts` |
+| PROC-RELEASE-GATE | encode on tip (#171); Actions rows **not run** | `.github/workflows/release.yml` |
 
 ## PR — #160 BUG-NOTEBOOK-NO-DELETE
 
@@ -1330,12 +1345,12 @@ Opt-in `syncNotebook` + `notebookFolder`. One-way TickTick NOTE → markdown. De
 ## PR — PROC-RELEASE-GATE (#30)
 Workflow and docs only. No vault sync change. Do not push a tag or run **Release Obsidian plugin** unless the owner asked for that publish. Rows stay **not run** until someone does.
 
-Local check (no tag, current tree at **2.0.93**):
+Local check (no tag, current tree at **2.0.94**):
 
 ```bash
-TAG=2.0.93 bash scripts/check-release-version.sh   # expect: Version match
+TAG=2.0.94 bash scripts/check-release-version.sh   # expect: Version match
 TAG=0.0.0 bash scripts/check-release-version.sh    # expect: non-zero, version mismatch
-TAG=v2.0.93 bash scripts/check-release-version.sh  # expect: non-zero, v prefix rejected
+TAG=v2.0.94 bash scripts/check-release-version.sh  # expect: non-zero, v prefix rejected
 ```
 
 ### PROC-RELEASE-GATE-TESTS
@@ -1355,7 +1370,7 @@ Expected: (1) fails the ancestor step, no Release. (2) publishes a **pre-release
 
 ### PROC-RELEASE-GATE-VERSION
 
-1. Push tag `2.0.99` on a commit whose `manifest.json`, `package.json`, and `versions.json` are still `2.0.93`.
+1. Push tag `2.0.99` on a commit whose `manifest.json`, `package.json`, and `versions.json` are still `2.0.94`.
 
 Expected: `scripts/check-release-version.sh` fails before `npm ci` in the `release` job. `dist/manifest.json` is not rewritten to `2.0.99`. No Release.
 

@@ -4,7 +4,7 @@
 **Audience:** Product owner / decision maker  
 **Repo:** `tickticksync` branch `abyss-mapping`  
 **Test vault:** `<pilot-vault>` (copy only; live vault `<live-vault>` untouched)  
-**Install:** BRAT → `https://github.com/semyon-alekseev-noveo/tt-sync`; plugin id **`tickticksync-abyss`** — `docs/BRAT_INSTALL.md`. Pilot may track **latest** (that track includes pre-releases). Live vault stays **frozen** on the last non-prerelease tag (**2.0.93** after that tag) and must not track pre-releases. Preset: `00 Inbox/TTS-data-preset.json`.
+**Install:** BRAT → `https://github.com/semyon-alekseev-noveo/tt-sync`; plugin id **`tickticksync-abyss`** — `docs/BRAT_INSTALL.md`. Pilot may track **latest** (that track includes pre-releases). Live vault stays **frozen** on the last non-prerelease tag (**2.0.94** after that tag) and must not track pre-releases. Preset: `00 Inbox/TTS-data-preset.json`.
 
 История изменений — только в `CHANGELOG.md`; здесь — снимок для PO.
 
@@ -115,7 +115,7 @@
 7. AF-NEST-1 nest→TT hierarchy **pass** on pilot — usable; deepen only if Active Zone sibling-nest vs MOC parent matters.
 8. **AF-GTD-PREFIX** + release **2.0.91** — **done** (tagged); [#66](https://github.com/semyon-alekseev-noveo/tt-sync/issues/66) A–G **closed** (cycle/size DoD).
 9. **NOTE-BODY** [#152](https://github.com/semyon-alekseev-noveo/tt-sync/issues/152) — **closed**.
-10. Tag/release **2.0.93** after this bump merges (ships BODY-2 + Notebook MVP).
+10. Tag/release **2.0.94** after this bump merges (#173 comment PUT, #176 local LWW vault rewrite, #177 dual-store count + warn, #171 release-gate encode). **2.0.93** is already tagged (BODY-2 + Notebook MVP); do not retag it.
 11. FEAT-NOTEBOOK [#159](https://github.com/semyon-alekseev-noveo/tt-sync/issues/159): MVP live **pass**; bi-di / scope still open.
 12. Optional: DEL-1/DEL-3 modal.
 13. PROC-RELEASE-GATE [#30](https://github.com/semyon-alekseev-noveo/tt-sync/issues/30): Actions gate is in `release.yml` (tests, ancestor, version match, no retag). Owner still turns on required check `CI / test` for `abyss-mapping` (`docs/github-issues/30-proc-release-gate.md`). Leave #30 open until merge and that decision.
