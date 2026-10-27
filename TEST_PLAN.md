@@ -1551,7 +1551,7 @@ Expected: sync does **not** recreate `== Added by … ==` files under `zz-parked
 
 | ID | Pilot status | Evidence |
 |----|----------------|----------|
-| UX-STUB-1 | **unit pass**; pilot **not run** | `src/test/uxStubListFiles.test.ts`, `ProjectSyncService.test.ts`, `VaultSyncCoordinator.test.ts` |
-| BUG-LIST-STUB-RECREATE | **unit pass**; pilot **not run** | same + parked drop in `VaultSyncCoordinator.test.ts` |
+| UX-STUB-1 | **unit pass**; pilot **pass** ×2 | `src/test/uxStubListFiles.test.ts`, …; live `docs/pilot/results/UX-OBS-TT-SOAK/08-stub-cleanup-prove.md` (tip #179 / **2.0.94**) |
+| BUG-LIST-STUB-RECREATE | **unit pass**; pilot **pass** ×2 | same + parked drop; live `08-stub-cleanup-prove.md` |
 | Classic stubs when predicate off | **unit pass**; pilot **not run** | existing G1 tests |
 
