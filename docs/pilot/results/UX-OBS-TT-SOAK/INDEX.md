@@ -26,7 +26,7 @@
 | 5 | Synthesis | `05-synthesis.md` | done |
 | 6 | Decision #1: Abyss vs `#ticktick` | `06-decision-ticktick-vs-abyss.md` | done |
 | 7 | Owner Q: `30 Tasks/TickTick` stubs / duplicates | `07-ticktick-folder-stubs.md` | done |
-| 14 | Task status → TT list map | `14-task-status-to-list-map.md` | **implementing** (TTS-WIP `6ae0bc8d…`; cases+code) |
+| 8 | Post-#179 stub cleanup prove ×2 | `08-stub-cleanup-prove.md` | **pass** ×2 |
 
 ## Rules
 
