@@ -4,7 +4,7 @@
 |-------|--------|
 | Gate | UX-OBS-TT-SOAK |
 | Vault | Thinkpad-tts-test (pilot only) |
-| Plugin | tickticksync-abyss **2.0.94** (confirm in evidence) |
+| Plugin | tickticksync-abyss **2.0.94** label; tip after #182 has `statusListMappings` (see `16-status-map-prove.md`) |
 | Goal | Qualitative feedback on day-to-day use — not a green/red AF gate |
 
 ## Feedback axes (all roles)
@@ -27,6 +27,9 @@
 | 6 | Decision #1: Abyss vs `#ticktick` | `06-decision-ticktick-vs-abyss.md` | done |
 | 7 | Owner Q: `30 Tasks/TickTick` stubs / duplicates | `07-ticktick-folder-stubs.md` | done |
 | 8 | Post-#179 stub cleanup prove ×2 | `08-stub-cleanup-prove.md` | **pass** ×2 |
+| 14 | Task status → TT list map (spec) | `14-task-status-to-list-map.md` | done (code #182) |
+| 15 | Release notes mapping (tag **2.0.94**) | `15-release-notes-mapping.md` | done (tag zip still tags→lists) |
+| 16 | Post-#182 status map prove ×2 | `16-status-map-prove.md` | **pass** ×2 (tip; version still 2.0.94) |
 
 ## Rules
 
