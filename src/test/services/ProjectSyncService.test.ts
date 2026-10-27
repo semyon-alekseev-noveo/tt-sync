@@ -57,6 +57,9 @@ const testSettings = vi.hoisted(() => ({
 	syncedLists: ['Work', 'Home', 'Inbox'] as string[],
 	projectSchemeEnabled: false,
 	projectsListName: 'Projects',
+	abyssTasksFormat: false,
+	syncScopeFolders: [] as string[],
+	newTasksFile: '',
 }));
 
 vi.mock('@/settings', () => ({
@@ -106,6 +109,9 @@ describe('ProjectSyncService.saveProjectsToCache', () => {
 		upsertFile.mockClear();
 		testSettings.syncedLists = ['Work', 'Home', 'Inbox'];
 		testSettings.projectSchemeEnabled = false;
+		testSettings.abyssTasksFormat = false;
+		testSettings.syncScopeFolders = [];
+		testSettings.newTasksFile = '';
 	});
 
 	it('creates no file entry or stub for lists outside syncedLists (G1)', async () => {
@@ -145,6 +151,36 @@ describe('ProjectSyncService.saveProjectsToCache', () => {
 		const svc = new ProjectSyncService({} as never, plugin as never);
 		await svc.saveProjectsToCache([...remoteProjects(), { id: 'proj-p', name: 'Projects' } as IProject]);
 		expect(upsertFile.mock.calls.map(c => c[0]).sort()).toEqual(['Projects.md', 'Work.md']);
+	});
+
+	it('UX-STUB-1: Abyss/GTD path creates no list stub files', async () => {
+		testSettings.projectSchemeEnabled = true;
+		testSettings.abyssTasksFormat = true;
+		testSettings.syncScopeFolders = ['00 Inbox/', '10 Projects/'];
+		const create = vi.fn(async () => {});
+		const { plugin } = makePlugin();
+		const svc = new ProjectSyncService(
+			{ vault: { getAbstractFileByPath: () => null, create, createFolder: vi.fn() } } as never,
+			plugin as never,
+		);
+		await svc.saveProjectsToCache(remoteProjects());
+		expect(upsertFile).not.toHaveBeenCalled();
+		expect(create).not.toHaveBeenCalled();
+		// list cache still populated for tag/list mapping
+		expect(projectsTable.size).toBe(3);
+	});
+
+	it('UX-STUB-1: newTasksFile hub alone also skips per-list stubs', async () => {
+		testSettings.newTasksFile = '00 Inbox/TickTick-capture.md';
+		const create = vi.fn(async () => {});
+		const { plugin } = makePlugin();
+		const svc = new ProjectSyncService(
+			{ vault: { getAbstractFileByPath: () => null, create, createFolder: vi.fn() } } as never,
+			plugin as never,
+		);
+		await svc.saveProjectsToCache(remoteProjects());
+		expect(upsertFile).not.toHaveBeenCalled();
+		expect(create).not.toHaveBeenCalled();
 	});
 
 	it('maps every project to a file on the very first sync', async () => {

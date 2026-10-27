@@ -1517,3 +1517,41 @@ Expected: that task does not add to the three counts. When every task is aligned
 | RISK-DUAL-STORE marker in a different file | **unit pass**; pilot **not run** | same file |
 | RISK-DUAL-STORE aligned / no warn | **unit pass**; pilot **not run** | same file, “does not warn when the three counts are zero” |
 
+## PR — UX-STUB-1 / BUG-LIST-STUB-RECREATE (stop list-file stubs)
+
+Abyss/GTD path (`projectSchemeEnabled` + `abyssTasksFormat` + non-empty `syncScopeFolders`) no longer creates or maintains empty per-list mirrors under `TickTickTasksFilePath`. Hub `newTasksFile` remains an independent off-switch. Parked Dexie paths (`zz-parked-*`) are dropped instead of recreating `== Added by … ==` banners. Plugin does **not** delete existing vault stub files — owner cleans the pilot tree manually.
+
+### UX-STUB-1 — Abyss/GTD does not create TTS list stubs
+
+1. On `<pilot-vault>`, confirm settings: `projectSchemeEnabled`, `abyssTasksFormat`, `syncScopeFolders` non-empty, `newTasksFile` empty, `syncedLists` = TTS-* lists, `TickTickTasksFilePath` = `30 Tasks/TickTick`.
+2. Optionally move or delete `30 Tasks/TickTick/TTS-*.md` (keep project notes under `10 Projects/` alone).
+3. Synchronize (manual).
+
+Expected: no new empty `TTS-*.md` banners under `TickTickTasksFilePath`. Project notes and scoped task lines still sync. Classic mode (predicate off, `newTasksFile` empty) still creates allow-listed stubs (G1).
+
+### BUG-LIST-STUB-RECREATE — parked Dexie path does not resurrect stubs
+
+1. With classic stubs still enabled **or** after upgrading with leftover Dexie rows under `zz-parked-17/30 Tasks/TickTick/…`, ensure those vault files are absent (or delete the parked stub folder).
+2. Synchronize.
+
+Expected: sync does **not** recreate `== Added by … ==` files under `zz-parked-*`. Stale Dexie `files` rows for parked paths are dropped. Live task content elsewhere is untouched.
+
+### Manual vault cleanup (owner)
+
+1. After installing a build with this PR: delete `30 Tasks/TickTick/TTS-*.md` if unused, and delete `zz-parked-17/30 Tasks/TickTick/` (or the whole `zz-parked-17` tree if only stubs remain).
+2. Synchronize twice. Confirm stubs do not return.
+3. Do not delete `10 Projects/TTS-*.md` project notes — those are scheme notes, not list stubs.
+
+### Still required (unchanged behavior)
+
+- Empty `syncedLists` still pulls nothing (AF-1).
+- Hub `newTasksFile` still disables per-list files.
+- Allow-listed stubs still work when Abyss/GTD predicate is false and hub is empty.
+- Project scheme notes under `projectsFolder` are unchanged.
+
+| ID | Pilot status | Evidence |
+|----|----------------|----------|
+| UX-STUB-1 | **unit pass**; pilot **not run** | `src/test/uxStubListFiles.test.ts`, `ProjectSyncService.test.ts`, `VaultSyncCoordinator.test.ts` |
+| BUG-LIST-STUB-RECREATE | **unit pass**; pilot **not run** | same + parked drop in `VaultSyncCoordinator.test.ts` |
+| Classic stubs when predicate off | **unit pass**; pilot **not run** | existing G1 tests |
+

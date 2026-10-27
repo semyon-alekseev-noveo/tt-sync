@@ -8,7 +8,7 @@ import log from '@/utils/logger';
 import { db } from '@/db/dexie';
 import { getAllProjects } from '@/db/projects';
 import { upsertFile, getAllFiles } from '@/db/files';
-import { healSyncedLists, isListAllowed, unmatchedEntries } from '@/syncScope';
+import { healSyncedLists, isListAllowed, listStubFilesEnabled, unmatchedEntries } from '@/syncScope';
 
 export class ProjectSyncService {
 	app: App;
@@ -87,6 +87,8 @@ export class ProjectSyncService {
 
 	async checkProjectRename(ttProjectId: string, ttProjectName: string, ttProject?: IProject): Promise<void> {
 		if (!this.isListSynced({ id: ttProjectId, name: ttProjectName })) return;
+		// UX-STUB-1 / hub: Abyss/GTD or newTasksFile — no per-list mirror stubs.
+		if (!listStubFilesEnabled()) return;
 		const fileMetadatas = await this.plugin.fileMetadataService.getAllFileMetadata();
 		if (!fileMetadatas) return;
 		const projects = await getAllProjects();
@@ -162,7 +164,6 @@ export class ProjectSyncService {
 
 			return;
 		}
-		if (getSettings().newTasksFile?.trim()) return; // single-file mode: never rename files per list
 		if (project && project.name !== ttProjectName) {
 			log.debug(`Project Name Changed from ${project?.name} to ${ttProjectName}`)
 

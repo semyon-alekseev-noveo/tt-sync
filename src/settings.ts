@@ -24,9 +24,11 @@ export interface ITickTickSyncSettings {
 	tagAndOr: number; // 1 == And ; 2 == Or
 	SyncProject: string;
 	SyncTag: string;
-	// GTD scope: TickTick lists (name or id) that are pulled into the vault and get list files.
+	// GTD scope: TickTick lists (name or id) that are pulled into the vault.
 	// Empty = pull nothing (safe default, NOT "everything"). Replaces the single SyncProject
 	// (migrated on load when this key is absent); SyncTag/SyncProject still narrow it further.
+	// Per-list mirror stubs under TickTickTasksFilePath are created only when listStubFilesEnabled()
+	// (off for newTasksFile hub and for Abyss/GTD: projectScheme + abyssTasksFormat + syncScopeFolders).
 	syncedLists: string[];
 	// Vault folders (prefix match, e.g. "00 Inbox/") that may push to TickTick. Empty = no folder
 	// restriction. The tasks folder, the projects folder and newTasksFile are always in scope.

@@ -18,8 +18,8 @@ import { getSettings } from '@/settings';
 import { deletionConfirmMode } from '@/sync/massDeleteGuard';
 import { getAllProjects } from '@/db/projects';
 import { tagsForCurrentList } from '@/listMapping';
-import { upsertFile } from '@/db/files';
-import { allowVaultUpdate, fileForNewTickTickTask, isListAllowed, normalizeSyncTag, resolveSyncedListIds, taskMatchesSyncLimit, unmatchedEntries } from '@/syncScope';
+import { deleteFile, upsertFile } from '@/db/files';
+import { allowVaultUpdate, fileForNewTickTickTask, isListAllowed, isParkedVaultPath, listStubFilesEnabled, normalizeSyncTag, resolveSyncedListIds, taskMatchesSyncLimit, unmatchedEntries } from '@/syncScope';
 import { TaskDeletionModal } from '@/modals/TaskDeletionModal';
 import { FolderSyncService } from '@/services/FolderSyncService';
 import log from '@/utils/logger';
@@ -293,7 +293,8 @@ export class VaultSyncCoordinator {
 			}
 		}
 
-		if (!targetFile && task.projectId !== defaultProjectId) {
+		// Classic per-list mirror only when list stubs are enabled (UX-STUB-1).
+		if (!targetFile && listStubFilesEnabled() && task.projectId !== defaultProjectId) {
 			const rec = await db.projects.get(task.projectId);
 			const name = rec?.project?.name;
 			const list = name ? { id: task.projectId, name } : undefined;
@@ -556,9 +557,11 @@ export class VaultSyncCoordinator {
 	/**
 	 * Ensure all projects with DB file mappings have their vault files.
 	 * This covers projects that have no tasks yet but still need a file created.
+	 * UX-STUB-1: Abyss/GTD / hub skips per-list stubs entirely.
+	 * BUG-LIST-STUB-RECREATE: parked or missing stub paths drop Dexie rows instead of banner recreate.
 	 */
 	private async ensureProjectFilesExist(): Promise<void> {
-		if (getSettings().newTasksFile?.trim()) return; // single-file mode: no per-list files
+		if (!listStubFilesEnabled()) return;
 		const allFileRecords = await db.files.toArray();
 		// Only allow-listed lists get (re-created) files; the Projects list lives in project notes.
 		const s = getSettings();
@@ -572,6 +575,17 @@ export class VaultSyncCoordinator {
 		for (const fileRecord of managedFiles) {
 			const file = this.app.vault.getAbstractFileByPath(fileRecord.path);
 			if (file instanceof TFile) {
+				continue;
+			}
+
+			// Stale Dexie path under zz-parked-* (or similar): drop mapping, do not recreate junk.
+			if (isParkedVaultPath(fileRecord.path)) {
+				log.info(`Dropping parked list-file mapping (no recreate): ${fileRecord.path}`);
+				try {
+					await deleteFile(fileRecord.path);
+				} catch (error) {
+					log.error(`Error dropping parked file mapping ${fileRecord.path}:`, error);
+				}
 				continue;
 			}
 

@@ -233,3 +233,28 @@ export function hasConfiguredPushScope(): boolean {
 export function scopePushWithoutMarker(): boolean {
 	return !!getSettings().abyssTasksFormat && hasConfiguredPushScope();
 }
+
+/**
+ * Classic per-list mirror files under `TickTickTasksFilePath` (`TTS-*.md` stubs).
+ *
+ * Off when:
+ * - hub mode (`newTasksFile` set) — existing single-file gate, or
+ * - Abyss/GTD path: `projectSchemeEnabled` + `abyssTasksFormat` + non-empty `syncScopeFolders`
+ *   (tasks live in scoped notes / project notes; list mirrors are not wanted — UX-STUB-1).
+ */
+export function listStubFilesEnabled(): boolean {
+	if (getSettings().newTasksFile?.trim()) return false;
+	const s = getSettings();
+	if (s.projectSchemeEnabled && s.abyssTasksFormat && hasConfiguredPushScope()) return false;
+	return true;
+}
+
+/**
+ * Pilot deletion-guard / empty-side park trees (`zz-parked-17/…`).
+ * Dexie rows under these paths must not recreate empty list stubs (BUG-LIST-STUB-RECREATE).
+ */
+export function isParkedVaultPath(path: string | undefined | null): boolean {
+	if (!path) return false;
+	const first = path.replace(/^\/+/, '').split('/')[0] ?? '';
+	return /^zz-parked/i.test(first);
+}

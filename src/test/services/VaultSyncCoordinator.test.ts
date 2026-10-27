@@ -36,6 +36,15 @@ vi.mock('@/db/dexie', () => ({
 	},
 }));
 
+const deleteFileMock = vi.hoisted(() => vi.fn(async () => undefined));
+vi.mock('@/db/files', () => ({
+	upsertFile: vi.fn(),
+	deleteFile: (...args: unknown[]) => deleteFileMock(...args),
+	getAllFiles: vi.fn(async () => []),
+	getFile: vi.fn(),
+	updateFilePath: vi.fn(),
+}));
+
 vi.mock('@/settings', () => ({
 	getSettings: vi.fn(() => ({
 		SyncTag: undefined,
@@ -231,10 +240,24 @@ describe('VaultSyncCoordinator', () => {
 	});
 
 	describe('ensureProjectFilesExist (no stub files for non-synced lists)', () => {
-		const run = async (syncedLists: string[]) => {
+		const run = async (
+			syncedLists: string[],
+			opts?: {
+				files?: Array<{ path: string; defaultProjectId?: string }>;
+				settings?: Record<string, unknown>;
+			},
+		) => {
 			const create = vi.fn(async () => undefined);
-			(getSettings as Mock).mockReturnValue({ syncedLists, projectSchemeEnabled: false, newTasksFile: '' });
-			(db.files.toArray as Mock).mockResolvedValue([
+			deleteFileMock.mockClear();
+			(getSettings as Mock).mockReturnValue({
+				syncedLists,
+				projectSchemeEnabled: false,
+				abyssTasksFormat: false,
+				syncScopeFolders: [],
+				newTasksFile: '',
+				...(opts?.settings ?? {}),
+			});
+			(db.files.toArray as Mock).mockResolvedValue(opts?.files ?? [
 				{ path: 'Tasks/Inbox.md', defaultProjectId: 'inbox-1' },
 				{ path: 'Tasks/KB.md', defaultProjectId: 'kb' },
 				{ path: 'Tasks/Loose.md' },
@@ -247,15 +270,35 @@ describe('VaultSyncCoordinator', () => {
 				vault: { getAbstractFileByPath: () => null, create, createFolder: vi.fn() },
 			} as unknown as never, { manifest: { name: 'TTS', version: 't' } } as unknown as never, undefined);
 			await (c as unknown as { ensureProjectFilesExist(): Promise<void> }).ensureProjectFilesExist();
-			return create.mock.calls.map(c => (c as unknown[])[0]);
+			return { created: create.mock.calls.map(c => (c as unknown[])[0]) as string[] };
 		};
 
 		it('re-creates only files of allow-listed lists', async () => {
-			expect(await run(['Inbox'])).toEqual(['Tasks/Inbox.md']);
+			expect((await run(['Inbox'])).created).toEqual(['Tasks/Inbox.md']);
 		});
 
 		it('creates nothing when syncedLists is empty', async () => {
-			expect(await run([])).toEqual([]);
+			expect((await run([])).created).toEqual([]);
+		});
+
+		it('UX-STUB-1: Abyss/GTD path creates no list stub files', async () => {
+			const { created } = await run(['Inbox'], {
+				settings: {
+					projectSchemeEnabled: true,
+					abyssTasksFormat: true,
+					syncScopeFolders: ['00 Inbox/', '10 Projects/'],
+				},
+			});
+			expect(created).toEqual([]);
+			expect(deleteFileMock).not.toHaveBeenCalled();
+		});
+
+		it('BUG-LIST-STUB-RECREATE: drops parked Dexie path instead of recreating stub', async () => {
+			const { created } = await run(['Inbox'], {
+				files: [{ path: 'zz-parked-17/30 Tasks/TickTick/TTS-Inbox.md', defaultProjectId: 'inbox-1' }],
+			});
+			expect(created).toEqual([]);
+			expect(deleteFileMock).toHaveBeenCalledWith('zz-parked-17/30 Tasks/TickTick/TTS-Inbox.md');
 		});
 	});
 

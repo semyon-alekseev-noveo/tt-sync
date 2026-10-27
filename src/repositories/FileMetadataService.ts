@@ -7,6 +7,7 @@ import { getSettings } from '@/settings';
 import { db } from "@/db/dexie";
 import { getAllFiles, getFile, upsertFile, deleteFile } from "@/db/files";
 import type { ITask } from "@/api/types/Task";
+import { isParkedVaultPath, listStubFilesEnabled } from '@/syncScope';
 import log from "@/utils/logger";
 
 export interface FileMetadata {
@@ -127,9 +128,13 @@ export class FileMetadataService {
 	async getFilepathForProjectId(projectId: string): Promise<string | undefined> {
 		const single = getSettings().newTasksFile?.trim();
 		if (single) return single.endsWith('.md') ? single : single + '.md';
+		// UX-STUB-1: Abyss/GTD does not resolve to per-list mirror paths.
+		if (!listStubFilesEnabled()) return undefined;
 		try {
 			const files = await getAllFiles();
 			const file = files.find(f => f.defaultProjectId === projectId);
+			// BUG-LIST-STUB-RECREATE: never treat parked Dexie paths as live targets.
+			if (file && isParkedVaultPath(file.path)) return undefined;
 			return file?.path;
 		} catch (error) {
 			log.error(`Error getting filepath for project ${projectId}:`, error);
