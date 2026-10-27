@@ -20,7 +20,7 @@ Preconditions for every AF row: plugin `tickticksync-abyss`, manual sync, `fileL
 | AF-2 | A parent task on the projects list becomes a project note under `10 Projects/` with `## Active Zone`. The parent is not a checkbox line in that note. |
 | AF-3 | A new project note (folder `10 Projects/`, tag `system/project`) creates the parent task on the projects list. |
 | AF-4 | A checkbox under `## Active Zone` becomes a subtask of that note’s parent. The line stays in the note. |
-| AF-5 | A checkbox in any in-scope note with `#gtd/next` lands on the next-action list. The line does not move to another file. (`#type/next` migrates to `#gtd/next` — AF-GTD-PREFIX.) |
+| AF-5 | **Legacy (statusListMappings empty):** a checkbox with `#gtd/next` lands on the next-action list; the line does not move to another file. (`#type/next` → `#gtd/next` — AF-GTD-PREFIX.) **When statusListMappings is set:** superseded by **UX-STATUS-MAP-*** — checkbox symbol is SoT; use `[!]` → TTS-nextAction (not `#gtd/next`). |
 | AF-6 | Checking the box completes the TickTick task. Completing it in TickTick checks the same line. |
 | AF-7 | Moving the task to another mapped list rewrites the stage tag on that same line. |
 | AF-8 | A checkbox in a note outside `syncScopeFolders` is not pushed. |
@@ -94,8 +94,13 @@ Preconditions for every AF row: plugin `tickticksync-abyss`, manual sync, `fileL
 | TP-TWO-LEAVES | A line patch for one file is applied to one editor. A second leaf showing that file is not patched again. |
 | UX-STUB-1 | Abyss/GTD path active: `projectSchemeEnabled` **and** `abyssTasksFormat` **and** non-empty `syncScopeFolders` (same stack as the pilot; hub `newTasksFile` remains an independent off-switch). Synchronize does **not** create or maintain empty per-list mirror files under `TickTickTasksFilePath` (`TTS-*.md` banners). Tasks stay in scoped notes / project notes; classic stubs stay off. When that predicate is false and `newTasksFile` is empty, allow-listed list stubs still work (G1). Evidence: `docs/pilot/results/UX-OBS-TT-SOAK/07-ticktick-folder-stubs.md`. |
 | BUG-LIST-STUB-RECREATE | Dexie `files` still points at a deleted or `zz-parked-*` path for an allow-listed list. Synchronize does **not** recreate an empty `== Added by … ==` stub at that path. Stale parked/missing stub metadata is dropped (or left without a vault write). Must not delete user task content — only banner-only recreate is blocked. |
+| UX-STATUS-MAP-1 | `abyssTasksFormat` + non-empty `statusListMappings`. In-scope line `- [!] …` (no `#gtd/next` required) → TickTick list **TTS-nextAction**; line stays in the note. Spec table: `docs/pilot/results/UX-OBS-TT-SOAK/14-task-status-to-list-map.md`. |
+| UX-STATUS-MAP-2 | Same settings. `- [/] …` → **TTS-WIP** (list must exist in TickTick + `syncedLists`). |
+| UX-STATUS-MAP-3 | Same settings. `- [ ] … #gtd/next` stays on **TTS-Inbox** (status SoT); `#gtd/*` does **not** move the list; sync rewrite strips mapped stage tags. Dual tag+status routing rejected. |
+| UX-STATUS-MAP-4 | Same settings. `- [x]` completes TT task (list unchanged). `- [-]` cancels (status/cancelled tag path; list unchanged). Also covers `[ ]`→Inbox, `[?]`→waitingFor, `[=]`→Planned, `[~]`→someDay. |
+| UX-STATUS-MAP-PULL | Same settings. Moving a task in TickTick to a mapped list rewrites the checkbox char on pull (e.g. TTS-waitingFor → `[?]`); does **not** add `#gtd/*`. Completed → `[x]`; cancelled tag → `[-]`. |
 
-Unit tests cover parts of AF-1, AF-5, AF-8, comments, a failed pull, and PERF-INDEX / PERF-CACHE / PERF-COUNTERS. They do not replace the live gate.
+Unit tests cover parts of AF-1, AF-5, AF-8, UX-STATUS-MAP-*, comments, a failed pull, and PERF-INDEX / PERF-CACHE / PERF-COUNTERS. They do not replace the live gate.
 
 ## Old ids
 

@@ -105,6 +105,20 @@ export function stageNeedsPushDespiteHash(
  * Keep only the winning stage tag on the markdown line; leave other tags / order intact.
  * Avoids full convertTaskToLine reshuffles that confuse Abyss tag chips.
  */
+const escStage = (tag: string) => tag.replace(/[.*+?^${}()|[\]\\]/g, "\\$&").replace(/\//g, "\\/");
+
+/** Drop every tagListMappings stage tag (status->list SoT; #gtd no longer on the line). */
+export function stripAllStageTags(line: string, map: ITagListMapping[] | undefined): string {
+	if (!map?.length) return line;
+	let out = line;
+	for (const m of map) {
+		const tag = m.tag.replace(/^#/, "");
+		const re = new RegExp(`(\\s)#${escStage(tag)}(?![\\w/-])`, "gi");
+		out = out.replace(re, "");
+	}
+	return out.replace(/ {2,}/g, " ");
+}
+
 export function rewriteLineExclusiveStage(
 	line: string,
 	map: ITagListMapping[] | undefined,

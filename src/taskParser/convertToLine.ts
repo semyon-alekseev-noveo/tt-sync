@@ -7,7 +7,8 @@ import { noteToAbyssLines, childIndent } from '@/abyssFormat';
 import { formatApiCommentAsAbyssLines, useAbyssCommentsApi } from '@/abyssCommentSync';
 import { mapTickTickTag } from '@/tagMapping';
 import { isListTag, isStageToken, obsidianTagForStageTag, tagForList, tagsForCurrentList } from '@/listMapping';
-import { restoreStatus } from '@/statusMapping';
+import { isStatusTag, restoreStatus } from '@/statusMapping';
+import { charForList, isStatusListMapActive, restoreStatusFromList } from '@/statusListMapping';
 import { getSettings } from '@/settings';
 import { getAllProjects } from '@/db/projects';
 import { rruleToTasksText } from '@/utils/RecurrenceConverter';
@@ -27,14 +28,38 @@ export class TaskParserConvertToLine {
 	
 		let checkChar = task.status > 0 ? 'x' : ' ';
 		let lineTags = stripInjectedContextTags(task.tags);
+		const statusListMap = getSettings().statusListMappings;
+		const useStatusList = getSettings().abyssTasksFormat && isStatusListMapActive(statusListMap);
 		if (getSettings().abyssTasksFormat) {
-			const r = restoreStatus(task.status, task.tags, getSettings().statusMappings);
-			checkChar = r.char;
-			lineTags = r.tags;
+			const smap = getSettings().statusMappings;
+			const cancelMap = smap?.filter(m => m.char === '-') ?? [];
+			if (useStatusList) {
+				const projects = await getAllProjects();
+				const r = restoreStatusFromList(
+					task.status,
+					task.tags,
+					task.projectId,
+					statusListMap,
+					projects,
+					(t) => !!isStatusTag(t, cancelMap),
+				);
+				checkChar = r.char;
+				lineTags = r.tags.filter(t => !isStatusTag(t, smap));
+				if (checkChar === ' ' && task.status === 0 && !charForList(task.projectId, statusListMap, projects)) {
+					const fromTag = restoreStatus(task.status, task.tags, smap);
+					if (fromTag.char !== ' ') checkChar = fromTag.char;
+				}
+			} else {
+				const r = restoreStatus(task.status, task.tags, smap);
+				checkChar = r.char;
+				lineTags = r.tags;
+			}
 		}
 		const listMapP = getSettings().tagListMappings;
 		if (listMapP?.length && !this.plugin?.projectScheme?.isParentId?.(task.parentId)) {
-			if ((getSettings().gtdStageVia ?? 'list') === 'tag') {
+			if (useStatusList) {
+				lineTags = (lineTags ?? []).filter(t => !isListTag(t, listMapP) && !isStageToken(t, listMapP));
+			} else if ((getSettings().gtdStageVia ?? 'list') === 'tag') {
 				const stage = (lineTags ?? []).map(t => obsidianTagForStageTag(t, listMapP)).find((t): t is string => !!t);
 				lineTags = (lineTags ?? []).filter(t => !isStageToken(t, listMapP));
 				if (stage) lineTags = [...lineTags, stage];

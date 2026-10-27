@@ -11,7 +11,7 @@ import type { LocalTask } from '@/db/schema';
 import type { ITaskItemRecord, ITaskRecord, NewFileMap } from '@/services/NewFileMap';
 import { commitVaultText, readNoteForWrite } from '@/sync/vault-io';
 import { getSettings } from '@/settings';
-import { rewriteLineExclusiveStage } from '@/listMapping';
+import { rewriteLineExclusiveStage, stripAllStageTags } from '@/listMapping';
 import { listMoveSource } from '@/syncScope';
 import log from '@/utils/logger';
 import ObjectID from 'bson-objectid';
@@ -199,9 +199,14 @@ export class TaskModificationPush {
 			await this.plugin.taskRepository.markVaultInSync?.(lineTask.id);
 		}
 
-		// AF-GTD-TAG-ADD: surgical strip of rival stage tags (keeps Abyss chip order for the rest).
-		const exclusive = lineTask as ITask & { __exclusiveStageRewrite?: boolean; __exclusiveStageWinner?: string };
-		if (exclusive.__exclusiveStageRewrite && exclusive.__exclusiveStageWinner) {
+				// AF-GTD-TAG-ADD: surgical strip of rival stage tags (keeps Abyss chip order for the rest).
+		// UX-STATUS-MAP: strip all #gtd stage tags when checkbox status is SoT for lists.
+		const exclusive = lineTask as ITask & {
+			__exclusiveStageRewrite?: boolean;
+			__exclusiveStageWinner?: string;
+			__stripStageTagsRewrite?: boolean;
+		};
+		if (exclusive.__stripStageTagsRewrite || (exclusive.__exclusiveStageRewrite && exclusive.__exclusiveStageWinner)) {
 			const liveFile = this.app.vault.getAbstractFileByPath(filepath);
 			if (liveFile instanceof TFile) {
 				try {
@@ -209,11 +214,13 @@ export class TaskModificationPush {
 					const lines = live.split('\n');
 					const idx = lines.findIndex(l => l.includes(taskId));
 					if (idx >= 0) {
-						const nextLine = rewriteLineExclusiveStage(
-							lines[idx],
-							getSettings().tagListMappings,
-							exclusive.__exclusiveStageWinner,
-						);
+						const nextLine = exclusive.__stripStageTagsRewrite
+							? stripAllStageTags(lines[idx], getSettings().tagListMappings)
+							: rewriteLineExclusiveStage(
+								lines[idx],
+								getSettings().tagListMappings,
+								exclusive.__exclusiveStageWinner!,
+							);
 						if (nextLine !== lines[idx]) {
 							lines[idx] = nextLine;
 							const committed = await commitVaultText(this.app, liveFile, live, lines.join('\n'));
