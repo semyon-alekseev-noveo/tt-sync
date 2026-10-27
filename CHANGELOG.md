@@ -1,14 +1,14 @@
 # Changelog
 
-### Iteration 2026-10-27 15:03 UTC
+### Iteration 2026-10-27 10:00 UTC
 
-- Context: Owner asked for release-facing notes stating which task→list mapping the current plugin version actually uses.
-- Target: Honest table for **2.0.94** (tip + pilot install) — shipped mechanism only; do not claim aspirational Abyss status→list map.
-- Actions log: Read tip `settings`/`listMapping` (no `statusListMappings`); read pilot `data.json` `tagListMappings` / SyncTag / `syncedLists`; wrote `docs/pilot/results/UX-OBS-TT-SOAK/15-release-notes-mapping.md`; INDEX row 15; brief `PROJECT_STATE.md` pointer. Did not edit published GitHub Release **2.0.94** body; no tag/bump.
-- Validation: Pilot manifest **2.0.94**; tip @ #179; open PRs into `abyss-mapping` had no status→list map PR at write time.
-- Problems: Published Release **2.0.94** notes still list only #63 slice PRs (no mapping subsection) — mitigated via this CHANGELOG + phase 15 file.
-- To Be Done: Owner merges docs PR. Status→list remains out of release until merged + proven; then refresh this table.
-- References: `docs/pilot/results/UX-OBS-TT-SOAK/15-release-notes-mapping.md`, `INDEX.md`, `PROJECT_STATE.md`, `CHANGELOG.md`
+- Context: Owner merged #179; asked post-merge install, pilot stub cleanup, and prove-twice (no release/tag).
+- Target: UX-STUB-1 / BUG-LIST-STUB-RECREATE live **pass** ×2 on tip; evidence under UX-OBS-TT-SOAK.
+- Actions log: Fetched tip `343284e`; built **2.0.94**; installed to pilot `tickticksync-abyss`; deleted live+parked `TTS-*.md` stubs; Synchronize ×2 (prove2 after inbox touch); wrote `08-stub-cleanup-prove.md`; updated INDEX / cases / TEST_PLAN.
+- Validation: Prove1 write-trace `in-sync` @ 09:54:49Z, no TickTick stub recreate; Prove2 `checkPoint` advanced, write-trace grew, stubs still absent; project notes + `30 Tasks/301…` kept.
+- Problems: `syncRunning` sticky after CLI sync (`mitigated` — clear via eval; does not recreate stubs). Dexie parked-row dump not probed (`open` optional).
+- To Be Done: Merge docs PR; optional Dexie check; Decision #1 Abyss ignore still owner.
+- References: `docs/pilot/results/UX-OBS-TT-SOAK/08-stub-cleanup-prove.md`, PR #179, `CHANGELOG.md`
 
 ### Iteration 2026-10-27 09:45 UTC
 

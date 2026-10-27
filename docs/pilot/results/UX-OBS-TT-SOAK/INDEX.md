@@ -26,7 +26,7 @@
 | 5 | Synthesis | `05-synthesis.md` | done |
 | 6 | Decision #1: Abyss vs `#ticktick` | `06-decision-ticktick-vs-abyss.md` | done |
 | 7 | Owner Q: `30 Tasks/TickTick` stubs / duplicates | `07-ticktick-folder-stubs.md` | done |
-| 15 | Release notes: mapping used by **2.0.94** | `15-release-notes-mapping.md` | **done** (docs; tags→lists; status→list **not** shipped) |
+| 8 | Post-#179 stub cleanup prove ×2 | `08-stub-cleanup-prove.md` | **pass** ×2 |
 
 ## Rules
 
