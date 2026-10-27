@@ -92,8 +92,8 @@ Preconditions for every AF row: plugin `tickticksync-abyss`, manual sync, `fileL
 | TP-NO-STALE-VIEW-READ | During a sync or a 5-second push, Obsidian's own `vault.read` is not replaced. A modify listener registered before the run reads the new disk text. |
 | TP-ABYSS-LOCAL-CHILD-KEEP | Rewriting an Abyss block keeps a description or comment the user edited locally and has not pushed. The previous TickTick comment does not reappear beside the edit. |
 | TP-TWO-LEAVES | A line patch for one file is applied to one editor. A second leaf showing that file is not patched again. |
-| UX-STUB-1 | Abyss/GTD path active: `projectSchemeEnabled` **and** `abyssTasksFormat` **and** non-empty `syncScopeFolders` (same stack as the pilot; hub `newTasksFile` remains an independent off-switch). Synchronize does **not** create or maintain empty per-list mirror files under `TickTickTasksFilePath` (`TTS-*.md` banners). Tasks stay in scoped notes / project notes; classic stubs stay off. When that predicate is false and `newTasksFile` is empty, allow-listed list stubs still work (G1). Evidence: `docs/pilot/results/UX-OBS-TT-SOAK/07-ticktick-folder-stubs.md`. |
-| BUG-LIST-STUB-RECREATE | Dexie `files` still points at a deleted or `zz-parked-*` path for an allow-listed list. Synchronize does **not** recreate an empty `== Added by … ==` stub at that path. Stale parked/missing stub metadata is dropped (or left without a vault write). Must not delete user task content — only banner-only recreate is blocked. |
+| UX-STUB-1 | Abyss/GTD path active: `projectSchemeEnabled` **and** `abyssTasksFormat` **and** non-empty `syncScopeFolders` (same stack as the pilot; hub `newTasksFile` remains an independent off-switch). Synchronize does **not** create or maintain empty per-list mirror files under `TickTickTasksFilePath` (`TTS-*.md` banners). Tasks stay in scoped notes / project notes; classic stubs stay off. When that predicate is false and `newTasksFile` is empty, allow-listed list stubs still work (G1). **unit pass**; pilot **pass** ×2 (`UX-OBS-TT-SOAK/08-stub-cleanup-prove.md`). |
+| BUG-LIST-STUB-RECREATE | Dexie `files` still points at a deleted or `zz-parked-*` path for an allow-listed list. Synchronize does **not** recreate an empty `== Added by … ==` stub at that path. Stale parked/missing stub metadata is dropped (or left without a vault write). Must not delete user task content — only banner-only recreate is blocked. **unit pass**; pilot **pass** ×2 (`UX-OBS-TT-SOAK/08-stub-cleanup-prove.md`). |
 
 Unit tests cover parts of AF-1, AF-5, AF-8, comments, a failed pull, and PERF-INDEX / PERF-CACHE / PERF-COUNTERS. They do not replace the live gate.
 
@@ -125,6 +125,7 @@ Pass only with evidence: the note path, the `ticktick_id`, and either the journa
 
 | Date (UTC) | Vault | Build | Runner | Item | Result | Evidence |
 |------------|-------|-------|--------|------|--------|----------|
+| 2026-10-27 | Thinkpad-tts-test | tip #179 (**2.0.94**) | agent (Obsidian CLI) | UX-STUB-1 / BUG-LIST-STUB-RECREATE | **pass** ×2 | Deleted live+parked list stubs; `tts-sync` ×2; no recreate. `UX-OBS-TT-SOAK/08-stub-cleanup-prove.md`. |
 | 2026-10-26 | Thinkpad-tts-test | tip | agent (CLI+MCP) | NOTE-BODY-1 / wipe | **pass** ×2 | `- >` → TT content A/B; wipe kept TT body. BODY-2 **fail**. `NOTE-BODY/02-live-tip.md`. |
 | 2026-10-26 | Thinkpad-tts-test | tip | agent (CLI+MCP) | NOTE-BODY-1 / wipe | **pass** ×2; BODY-2 **fail** | `NOTE-BODY/02-live-tip.md`. |
 | 2026-10-26 | Thinkpad-tts-test | tip (#165/#167) | agent (CLI+MCP) | NOTE-BODY-2 | **pass** ×2 | Rounds A/B markers `…100104` then `…ROUND2`. `NOTE-BODY/03-live-body2-tip.md`. |
