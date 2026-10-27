@@ -92,6 +92,8 @@ Preconditions for every AF row: plugin `tickticksync-abyss`, manual sync, `fileL
 | TP-NO-STALE-VIEW-READ | During a sync or a 5-second push, Obsidian's own `vault.read` is not replaced. A modify listener registered before the run reads the new disk text. |
 | TP-ABYSS-LOCAL-CHILD-KEEP | Rewriting an Abyss block keeps a description or comment the user edited locally and has not pushed. The previous TickTick comment does not reappear beside the edit. |
 | TP-TWO-LEAVES | A line patch for one file is applied to one editor. A second leaf showing that file is not patched again. |
+| UX-STUB-1 | Abyss/GTD path active: `projectSchemeEnabled` **and** `abyssTasksFormat` **and** non-empty `syncScopeFolders` (same stack as the pilot; hub `newTasksFile` remains an independent off-switch). Synchronize does **not** create or maintain empty per-list mirror files under `TickTickTasksFilePath` (`TTS-*.md` banners). Tasks stay in scoped notes / project notes; classic stubs stay off. When that predicate is false and `newTasksFile` is empty, allow-listed list stubs still work (G1). Evidence: `docs/pilot/results/UX-OBS-TT-SOAK/07-ticktick-folder-stubs.md`. |
+| BUG-LIST-STUB-RECREATE | Dexie `files` still points at a deleted or `zz-parked-*` path for an allow-listed list. Synchronize does **not** recreate an empty `== Added by … ==` stub at that path. Stale parked/missing stub metadata is dropped (or left without a vault write). Must not delete user task content — only banner-only recreate is blocked. |
 
 Unit tests cover parts of AF-1, AF-5, AF-8, comments, a failed pull, and PERF-INDEX / PERF-CACHE / PERF-COUNTERS. They do not replace the live gate.
 

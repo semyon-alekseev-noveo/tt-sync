@@ -1,5 +1,35 @@
 # Changelog
 
+### Iteration 2026-10-27 09:45 UTC
+
+- Context: Owner «избавляться от костылей» after UX soak — list stubs under `TickTickTasksFilePath` and Dexie recreate into `zz-parked-*` (`07-ticktick-folder-stubs.md`).
+- Target: UX-STUB-1 + BUG-LIST-STUB-RECREATE — Abyss/GTD path stops creating/maintaining empty `TTS-*.md` mirrors; parked Dexie paths drop instead of banner recreate.
+- Actions log: Cases in `ABYSS_FIRST_CASES.md`; `listStubFilesEnabled` / `isParkedVaultPath` in `syncScope.ts`; gated `ProjectSyncService`, `ensureProjectFilesExist`, `getFilepathForProjectId`, pull fallback; unit tests; TEST_PLAN section.
+- Validation: `npx vitest run` 790 passed (113 files). `npm run build` OK.
+- Problems: Existing live stubs / parked vault trees still on disk until owner deletes; pilot live prove **not run**.
+- To Be Done: Merge PR; owner deletes `30 Tasks/TickTick/TTS-*.md` and `zz-parked-17/…` stubs on pilot after install; optional Dexie check that parked rows are gone after one Synchronize.
+- References: `ABYSS_FIRST_CASES.md` UX-STUB-1 / BUG-LIST-STUB-RECREATE, `TEST_PLAN.md`, `docs/pilot/results/UX-OBS-TT-SOAK/07-ticktick-folder-stubs.md`, `CHANGELOG.md`
+
+### Iteration 2026-10-27 09:32 UTC
+
+- Context: Owner asked why pilot has `30 Tasks/TickTick` (and `zz-parked-*` twins); soak flagged stub recreation noise.
+- Target: Short evidence note — purpose of list stubs, inventory, duplicates vs Abyss project notes, options; no plugin code.
+- Actions log: Inventoried vault `TickTick` dirs / `TTS-*.md`; traced `TickTickTasksFilePath` + `checkProjectRename` / `ensureProjectFilesExist`; correlated pilot-17 parked orphans + journal recreate; wrote `07-ticktick-folder-stubs.md`; INDEX row 7 → done.
+- Validation: 2 `TickTick` dirs (live + parked); live 6 stubs almost empty; parked 5 stubs from sync `2.0.94`; settings `TickTickTasksFilePath=30 Tasks/TickTick`, scheme on, `newTasksFile` empty.
+- Problems: Dexie still maps some list files under `zz-parked-17/…` so delete-without-DB-cleanup recreates them (`open` — addressed in 09:45 iteration).
+- To Be Done: Stop-creating implemented in follow-on iteration (UX-STUB-1).
+- References: `docs/pilot/results/UX-OBS-TT-SOAK/07-ticktick-folder-stubs.md`, `INDEX.md`, `CHANGELOG.md`
+
+### Iteration 2026-10-27 08:53 UTC
+
+- Context: UX-OBS-TT-SOAK synthesis flagged P0 Abyss `taskIgnoreQuery: #ticktick` vs TTS note/line `#ticktick`; owner asked decision brief #1.
+- Target: Evidence-only product brief — intent, mechanism, options A–E, recommendation; no plugin code change.
+- Actions log: Read pilot Abyss `data.json` (ignore + membership + inbox `#inbox`); traced `stampSourceTags` / `renderProjectNote` / line `addTickTickTag`; skimmed soak 01a–05 + `ABYSS_FIRST_PLAN` §3.1 + CHANGELOG Option B; wrote `06-decision-ticktick-vs-abyss.md`; INDEX row 6 → done.
+- Validation: Brief distinguishes SyncTag / syncMarkerTag / note provenance; Option B supersession documented; recommendation A(+D) now, B later.
+- Problems: Pilot still has leftover Option B ignore while Inbox is already tag `#inbox` (`open` until owner applies A).
+- To Be Done: Owner picks A/B/C/D; if A — clear ignore on pilot and smoke Abyss create on TT-origin note ×2.
+- References: `docs/pilot/results/UX-OBS-TT-SOAK/06-decision-ticktick-vs-abyss.md`, `INDEX.md`, `ABYSS_FIRST_PLAN.md`, `CHANGELOG.md`
+
 ### Iteration 2026-10-26 17:40 UTC
 
 - Context: Owner asked release after the #63 product-risk slices landed on tip past tagged **2.0.93**.

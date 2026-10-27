@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
-	allowVaultUpdate, fileForNewTickTickTask, healSyncedLists, isListAllowed, isPathInFolders, lineListToText, listMoveSource, migrateSyncedLists, normalizeSyncTag, parseLineList, tickTickTaskEntersVault,
+	allowVaultUpdate, fileForNewTickTickTask, healSyncedLists, isListAllowed, isParkedVaultPath, isPathInFolders, lineListToText, listMoveSource, migrateSyncedLists, normalizeSyncTag, parseLineList, tickTickTaskEntersVault,
 	pushScopeAllows, resolveProjectsList, resolveSyncedListIds, taskMatchesSyncLimit, unmatchedEntries,
 } from '@/syncScope';
 
@@ -125,5 +125,12 @@ describe('syncScopeFolders push scope', () => {
 		expect(isPathInFolders('a/b.md', ['a/b.md'])).toBe(true);
 		expect(isPathInFolders('a/c.md', ['a/b.md'])).toBe(false);
 		expect(isPathInFolders('any/thing.md', ['/'])).toBe(true);
+	});
+});
+
+describe('isParkedVaultPath (BUG-LIST-STUB-RECREATE)', () => {
+	it('detects zz-parked trees', () => {
+		expect(isParkedVaultPath('zz-parked-17/30 Tasks/TickTick/TTS-Inbox.md')).toBe(true);
+		expect(isParkedVaultPath('30 Tasks/TickTick/TTS-Inbox.md')).toBe(false);
 	});
 });
