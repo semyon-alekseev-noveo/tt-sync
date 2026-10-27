@@ -1,5 +1,15 @@
 # Changelog
 
+### Iteration 2026-10-27 15:03 UTC
+
+- Context: Owner asked for release-facing notes stating which task→list mapping the current plugin version actually uses.
+- Target: Honest table for **2.0.94** (tip + pilot install) — shipped mechanism only; do not claim aspirational Abyss status→list map.
+- Actions log: Read tip `settings`/`listMapping` (no `statusListMappings`); read pilot `data.json` `tagListMappings` / SyncTag / `syncedLists`; wrote `docs/pilot/results/UX-OBS-TT-SOAK/15-release-notes-mapping.md`; INDEX row 15; brief `PROJECT_STATE.md` pointer. Did not edit published GitHub Release **2.0.94** body; no tag/bump.
+- Validation: Pilot manifest **2.0.94**; tip @ #179; open PRs into `abyss-mapping` had no status→list map PR at write time.
+- Problems: Published Release **2.0.94** notes still list only #63 slice PRs (no mapping subsection) — mitigated via this CHANGELOG + phase 15 file.
+- To Be Done: Owner merges docs PR. Status→list remains out of release until merged + proven; then refresh this table.
+- References: `docs/pilot/results/UX-OBS-TT-SOAK/15-release-notes-mapping.md`, `INDEX.md`, `PROJECT_STATE.md`, `CHANGELOG.md`
+
 ### Iteration 2026-10-27 09:45 UTC
 
 - Context: Owner «избавляться от костылей» after UX soak — list stubs under `TickTickTasksFilePath` and Dexie recreate into `zz-parked-*` (`07-ticktick-folder-stubs.md`).
