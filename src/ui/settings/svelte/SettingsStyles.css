@@ -284,3 +284,29 @@ label.checkbox-container {
 	color: var(--text-warning, #b07000);
 	font-size: var(--font-ui-small);
 }
+.tts-ux-cold-start {
+	margin: 0 0 1em;
+	padding: 0.65em 0.85em;
+	border-left: 3px solid var(--interactive-accent, var(--text-accent));
+	background: var(--background-secondary);
+	border-radius: 4px;
+}
+.tts-ux-cold-start-title {
+	font-weight: 600;
+	margin-bottom: 0.35em;
+}
+.tts-ux-cold-start-list {
+	margin: 0;
+	padding-left: 1.25em;
+	font-size: var(--font-ui-small);
+	color: var(--text-muted);
+}
+.tts-ux-cold-start-list li {
+	margin: 0.2em 0;
+}
+.tts-ux-progress-disabled {
+	opacity: 0.55;
+}
+.tts-ux-progress-disabled input[type='checkbox'] {
+	pointer-events: none;
+}

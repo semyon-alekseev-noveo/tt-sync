@@ -6,9 +6,9 @@ Manual cases for behavior changes. Automated tests do not replace a row here.
 
 Pilot means `<pilot-vault>`, manual **Synchronize**, plugin id `tickticksync-abyss`. Do not use `<live-vault>`. A cloud agent does not mark a row passed. Status stays **not run** until a person or a local agent on that Obsidian records what they saw.
 
-## UX-SET — Settings UX redesign (epic #189 / Phase 1 #191 / Phase 2 #192 / Phase 3 #193)
+## UX-SET — Settings UX redesign (epic #189 / Phase 1 #191 / Phase 2 #192 / Phase 3 #193 / Phase 4 #194)
 
-Phase 1: **copy / layout**. Phase 2 (#192): **visibility / merge** when Abyss/GTD mode is active. Phase 3 (#193): **names / safer defaults / warnings** (no sync logic change). Glossary/plan: `docs/pilot/results/UX-OBS-TT-SOAK/27-settings-ux-redesign-plan.md`. Catalog: `ABYSS_FIRST_CASES.md` `UX-SET-*`. Units: `uxSetPhase1.settingsCopy.test.ts`, `uxSetPhase2.settingsVisibility.test.ts`, `uxSetPhase3.settingsNames.test.ts`. Pilot stays **not run** until Settings UI is installed and exercised on the pilot vault.
+Phase 1: **copy / layout**. Phase 2 (#192): **visibility / merge** when Abyss/GTD mode is active. Phase 3 (#193): **names / safer defaults / warnings**. Phase 4 (#194): **cold-start strip & polish** (no sync logic change). Glossary/plan: `docs/pilot/results/UX-OBS-TT-SOAK/27-settings-ux-redesign-plan.md`. Catalog: `ABYSS_FIRST_CASES.md` `UX-SET-*`. Units: `uxSetPhase1.settingsCopy.test.ts`, `uxSetPhase2.settingsVisibility.test.ts`, `uxSetPhase3.settingsNames.test.ts`, `uxSetPhase4.settingsColdStart.test.ts`. Pilot stays **not run** until Settings UI is installed and exercised on the pilot vault.
 
 | Case | Steps | Expected | Pilot |
 |------|-------|----------|-------|
@@ -25,10 +25,10 @@ Phase 1: **copy / layout**. Phase 2 (#192): **visibility / merge** when Abyss/GT
 | UX-SET-NOTEBOOK-WARN | Enable Sync TickTick Notebook; set Notebook folder to `00 Inbox` (or Inbox/capture). | Warning: Notebook ≠ Inbox/capture; prefer dedicated folder. No forced rewrite of existing path. | unit **pass**; pilot **not run** |
 | UX-SET-BKUP-DEFAULT | New install / DEFAULT: backup folder. Existing vault with `/`: open Maintenance → Backup folder. | Default `TickTickSync/backups`; warn when value is vault root `/`. | unit **pass**; pilot **not run** |
 | UX-SET-LEAN-WARN | GTD → Project note template = `60 templates/MOC.md`. | Lean/MOC warn (soak P0 / 1/2/3); empty or lean path has no warn. No MOC engine. | unit **pass**; pilot **not run** |
-| UX-SET-COLD-START | Fresh-eyes Settings scan (after #194). | Synchronize + SyncTag/Abyss cues findable without docs hunt. | **not run** |
-| UX-SET-DEVICE-PRUNE | Device prune UI (after #194). | Wording clear. | **not run** |
-| UX-SET-INTERVAL-ZERO | Set sync interval = 0 (after #194). | Progress presentation grey / non-active per PR. | **not run** |
-| UX-SET-PW-CONFIRM | If password shown plaintext (after #194). | Confirm/warn present. | **not run** |
+| UX-SET-COLD-START | Open Sync Control. Read cold-start strip. | Projects note + `#system/project` + Active Zone + Synchronize; new TT list must be ticked. | unit **pass**; pilot **not run** |
+| UX-SET-DEVICE-PRUNE | Sync Control → Device Identity → Known devices. | Clear labels; **Remove** prunes non-current only. | unit **pass**; pilot **not run** |
+| UX-SET-INTERVAL-ZERO | Set automatic sync interval = 0. | Progress-on-scheduled grey/disabled + hint. | unit **pass**; pilot **not run** |
+| UX-SET-PW-CONFIRM | Access Control → enter/change Regular Login password. | Explicit plaintext confirm before store; cancel does not save. | unit **pass**; pilot **not run** |
 
 Regression (still **not run** here): `UX-RESET-1`, `BUG-RESET-CACHE-DELETE`, `EMPTY-SIDE-GUARD` / held modal Skip path (`26`), `DEL-1` / `DEL-3`, `AF-1` empty `syncedLists`.
 

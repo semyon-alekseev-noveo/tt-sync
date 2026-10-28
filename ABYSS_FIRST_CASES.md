@@ -125,12 +125,12 @@ Preconditions for every AF row: plugin `tickticksync-abyss`, manual sync, `fileL
 | UX-SET-NOTEBOOK-WARN | **Phase 3 #193.** Notebook folder warns when path looks like Inbox/capture; no forced pilot data.json rewrite. Unit covered. Pilot **not run**. |
 | UX-SET-BKUP-DEFAULT | **Phase 3 #193.** New-install `bkupFolder` = `TickTickSync/backups`; warn when value is vault root `/`. Unit covered. Pilot **not run**. |
 | UX-SET-LEAN-WARN | **Phase 3 #193.** Project template path that looks like heavy `MOC.md` surfaces lean warn (soak P0); not a full MOC engine. Unit covered. Pilot **not run**. |
-| UX-SET-COLD-START | **Phase 4 #194.** Cold-start strip: Synchronize + SyncTag/Abyss cues findable without hunting docs. Pilot **not run**. |
-| UX-SET-DEVICE-PRUNE | **Phase 4 #194.** Device prune UX wording clear. Pilot **not run**. |
-| UX-SET-INTERVAL-ZERO | **Phase 4 #194.** Sync interval = 0 → progress presentation grey / non-active per implementing PR. Pilot **not run**. |
-| UX-SET-PW-CONFIRM | **Phase 4 #194.** If password shown plaintext, confirm/warn present. Pilot **not run**. |
+| UX-SET-COLD-START | **Phase 4 #194.** Cold-start strip in Sync Control: Projects note + `#system/project` + Active Zone + Synchronize; new TT list must be ticked. Unit: `uxSetPhase4.settingsColdStart.test.ts`. Pilot **not run**. |
+| UX-SET-DEVICE-PRUNE | **Phase 4 #194.** Known devices prune: Remove stale (non-current); clearer labels. Unit covered. Pilot **not run**. |
+| UX-SET-INTERVAL-ZERO | **Phase 4 #194.** Sync interval = 0 → progress-on-scheduled grey/disabled. Unit covered. Pilot **not run**. |
+| UX-SET-PW-CONFIRM | **Phase 4 #194.** Explicit plaintext confirm before storing Regular Login password. Unit covered. Pilot **not run**. |
 
-Unit tests cover parts of AF-1, AF-5, AF-8, UX-STATUS-MAP-*, UX-RESET-1 / BUG-RESET-TASKS-PARTIAL / BUG-RESET-CACHE-DELETE, UX-SET Phase 1 copy/layout (`uxSetPhase1.settingsCopy.test.ts`), UX-SET Phase 2 visibility (`uxSetPhase2.settingsVisibility.test.ts`), UX-SET Phase 3 names/defaults (`uxSetPhase3.settingsNames.test.ts`), comments, a failed pull, and PERF-INDEX / PERF-CACHE / PERF-COUNTERS. They do not replace the live gate. Settings UX Phase 1–3 are copy/layout/visibility/names only — pilot UX-SET-* still **not run**.
+Unit tests cover parts of AF-1, AF-5, AF-8, UX-STATUS-MAP-*, UX-RESET-1 / BUG-RESET-TASKS-PARTIAL / BUG-RESET-CACHE-DELETE, UX-SET Phase 1–4 Settings UX (`uxSetPhase1`…`uxSetPhase4`), comments, a failed pull, and PERF-INDEX / PERF-CACHE / PERF-COUNTERS. They do not replace the live gate. Settings UX Phase 1–4 are copy/layout/visibility/names/polish only — pilot UX-SET-* still **not run**.
 
 ## Old ids
 
@@ -160,6 +160,9 @@ Pass only with evidence: the note path, the `ticktick_id`, and either the journa
 
 | Date (UTC) | Vault | Build | Runner | Item | Result | Evidence |
 |------------|-------|-------|--------|------|--------|----------|
+| 2026-10-28 | — | tip #194 PR | unit | UX-SET Phase 4 cold-start/polish (#194) | unit **pass**; pilot **not run** | `uxSetPhase4.settingsColdStart.test.ts`. Evidence note `UX-OBS-TT-SOAK/31-settings-ux-phase4.md`. |
+| 2026-10-28 | — | tip #193 PR | unit | UX-SET Phase 3 names/defaults (#193) | unit **pass**; pilot **not run** | `uxSetPhase3.settingsNames.test.ts`. Evidence note `UX-OBS-TT-SOAK/30-settings-ux-phase3.md`. |
+| 2026-10-28 | — | tip #192 PR | unit | UX-SET Phase 2 visibility (#192) | unit **pass**; pilot **not run** | `uxSetPhase2.settingsVisibility.test.ts`. Evidence note `UX-OBS-TT-SOAK/29-settings-ux-phase2.md`. |
 | 2026-10-28 | — | tip #191 PR | unit | UX-SET Phase 1 copy/layout (#191) | unit **pass**; pilot **not run** | `uxSetPhase1.settingsCopy.test.ts`. Evidence note `UX-OBS-TT-SOAK/28-settings-ux-phase1.md`. |
 | 2026-10-28 | — | — | analyst | UX-SET-* (Settings UX #189 / Phase 0 #190) | **not run** | Glossary + case stubs only. `UX-OBS-TT-SOAK/27-settings-ux-redesign-plan.md`. No Settings UI. |
 | 2026-10-28 | — | — | analyst | UX-ABYSS-STATUS-SRC-* | **not run** | Spec only (#185). No pilot. `docs/pilot/UX-ABYSS-STATUS-SRC.md`. |

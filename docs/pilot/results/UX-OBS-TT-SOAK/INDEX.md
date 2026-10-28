@@ -37,6 +37,7 @@
 | 28 | Settings UX Phase 1 (#191) | `28-settings-ux-phase1.md` | **unit pass**; pilot Settings **not run** |
 | 29 | Settings UX Phase 2 (#192) | `29-settings-ux-phase2.md` | **unit pass**; pilot Settings **not run** |
 | 30 | Settings UX Phase 3 (#193) | `30-settings-ux-phase3.md` | **unit pass**; pilot Settings **not run** |
+| 31 | Settings UX Phase 4 (#194) | `31-settings-ux-phase4.md` | **unit pass**; pilot Settings **not run** |
 | 185 | #185 status source (analyst spec) | [`../../UX-ABYSS-STATUS-SRC.md`](../../UX-ABYSS-STATUS-SRC.md) | **spec only (not run)**; not DoR |
 
 ## Rules

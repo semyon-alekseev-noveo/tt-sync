@@ -5,6 +5,14 @@
 	import { getCurrentDeviceInfo, setCurrentDeviceInfo } from '@/db/device';
 	import { db } from '@/db/dexie';
 	import log from 'loglevel';
+	import {
+		DEVICE_CURRENT_BADGE,
+		DEVICE_LIST_HELP,
+		DEVICE_LIST_LABEL,
+		DEVICE_PRUNE_BUTTON,
+		DEVICE_PRUNE_HELP,
+		pruneDeviceFromList,
+	} from '@/ui/settings/settingsUxPolish';
 
 	export let plugin;
 	export let open = false;
@@ -84,6 +92,18 @@
 		await plugin.saveSettings();
 	}
 
+	async function removeDevice(deviceId: string) {
+		const currentId = currentDevice?.deviceId;
+		const updatedDevices = pruneDeviceFromList(getSettings().devices, deviceId, currentId);
+		if (updatedDevices.length === getSettings().devices.length) {
+			return;
+		}
+		updateSettings({ devices: updatedDevices });
+		await db.meta.update('sync', { devices: updatedDevices });
+		devices = updatedDevices;
+		await plugin.saveSettings();
+	}
+
 	function focus(node: HTMLElement) {
 		node.focus();
 	}
@@ -108,7 +128,7 @@
 		<div class="setting-item-info">
 			<div class="setting-item-name">Current Device</div>
 			<div class="setting-item-description">
-				This device's identity
+				This device's identity — give it a clear label (e.g. Laptop, Phone) so the Known devices list stays readable.
 			</div>
 		</div>
 		<div class="setting-item-control">
@@ -157,9 +177,10 @@
 
 	<div class="setting-item">
 		<div class="setting-item-info">
-			<div class="setting-item-name">Known Devices</div>
+			<div class="setting-item-name">{DEVICE_LIST_LABEL}</div>
 			<div class="setting-item-description">
-				All devices that have been used with this vault.
+				{DEVICE_LIST_HELP}
+				<br />{DEVICE_PRUNE_HELP}
 			</div>
 		</div>
 		<div class="setting-item-control">
@@ -170,16 +191,28 @@
 			{:else}
 				<div style="display: flex; flex-direction: column; gap: 0.5em;">
 					{#each devices as device}
-						<div style="padding: 0.5em; background: var(--background-secondary); border-radius: 4px;">
+						<div style="padding: 0.5em; background: var(--background-secondary); border-radius: 4px; display: flex; align-items: flex-start; justify-content: space-between; gap: 0.75em;">
 							<div>
-								<strong>{device.deviceLabel}</strong>
-								{#if currentDevice && device.deviceId === currentDevice.deviceId}
-									<span style="color: var(--text-accent); font-size: 0.9em;">(current)</span>
-								{/if}
+								<div>
+									<strong>{device.deviceLabel || '(unnamed)'}</strong>
+									{#if currentDevice && device.deviceId === currentDevice.deviceId}
+										<span style="color: var(--text-accent); font-size: 0.9em;">({DEVICE_CURRENT_BADGE})</span>
+									{/if}
+								</div>
+								<div style="font-family: monospace; font-size: 0.85em; color: var(--text-muted);">
+									{device.deviceId}
+								</div>
 							</div>
-							<div style="font-family: monospace; font-size: 0.85em; color: var(--text-muted);">
-								{device.deviceId}
-							</div>
+							{#if !currentDevice || device.deviceId !== currentDevice.deviceId}
+								<button
+									class="tts-maint-secondary"
+									style="padding: 0.25em 0.5em; flex-shrink: 0;"
+									aria-label={`Remove device ${device.deviceLabel || device.deviceId}`}
+									on:click={() => removeDevice(device.deviceId)}
+								>
+									{DEVICE_PRUNE_BUTTON}
+								</button>
+							{/if}
 						</div>
 					{/each}
 				</div>

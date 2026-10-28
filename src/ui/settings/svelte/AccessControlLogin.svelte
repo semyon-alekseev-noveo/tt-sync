@@ -7,6 +7,11 @@
 	import log from 'loglevel';
 	import { getTick } from '@/api/tick_singleton_factory';
 	import { loginPatch } from '@/loginSettings';
+	import { ConfirmPasswordPlaintextModal } from '@/modals/ConfirmPasswordPlaintextModal';
+	import {
+		PASSWORD_PLAINTEXT_BANNER,
+		passwordNeedsPlaintextConfirm,
+	} from '@/ui/settings/settingsUxPolish';
 
 	export let plugin: TickTickSync;
 
@@ -14,6 +19,8 @@
 	const PROVIDER_OPTIONS = { 'ticktick.com': 'TickTick', 'dida365.com': 'Dida365' };
 	let userLogin: string;
 	let userPassword: string;
+	/** Last successfully stored password (for UX-SET-PW-CONFIRM diff). */
+	let storedPassword: string = '';
 
 	let baseURL: string;
 	let isWorking: boolean = false;
@@ -105,16 +112,31 @@
 	}
 
 	// username/password are kept in data.json (keys username, password) so the plugin logs in by itself at start
-	async function saveCredentials() {
+	async function persistCredentials() {
 		const patch = { username: (userLogin ?? '').trim(), password: userPassword ?? '' };
 		settingsStore.update(s => ({ ...s, ...patch }));
 		updateSettings(patch);
 		await plugin.saveSettings();
+		storedPassword = userPassword ?? '';
+	}
+
+	async function saveCredentials() {
+		const nextPassword = userPassword ?? '';
+		if (passwordNeedsPlaintextConfirm(nextPassword, storedPassword)) {
+			const confirmed = await new ConfirmPasswordPlaintextModal(plugin.app, () => {}).showModal();
+			if (!confirmed) {
+				userPassword = storedPassword;
+				new Notice('Password not stored (confirm cancelled).');
+				return;
+			}
+		}
+		await persistCredentials();
 	}
 
 	onMount(async () => {
 		userLogin = $settingsStore.username ?? '';
 		userPassword = $settingsStore.password ?? '';
+		storedPassword = userPassword;
 		loggedIn = !!$settingsStore.token;
 		baseURL = $settingsStore.baseURL;
 		desktoApp = Platform.isDesktopApp;
@@ -126,7 +148,8 @@
 	<div class="login-status-banner">
 		{loggedIn ? 'You are logged in. You can re-login here.' : 'Please login here.'}
 		<div class="login-status-banner-actions">
-			<br>Username and password entered under Regular Login are stored in plain text in this plugin's data.json so TickTickSync can log in by itself when Obsidian starts. Leave them empty to log in manually (nothing is stored then).<br>
+			<br>{PASSWORD_PLAINTEXT_BANNER}<br>
+			Leave username/password empty to log in manually (nothing is stored then).<br>
 		</div>
 		{#if desktoApp}
 			<div class="login-status-banner-actions">
