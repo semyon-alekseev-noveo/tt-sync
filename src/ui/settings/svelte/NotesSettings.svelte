@@ -50,11 +50,6 @@
 		await plugin.saveSettings();
 	}
 
-	let resetTasksText: string = '';
-	$: resetTasksText = syncNotes
-		? 'Get all Notes from TickTick?'
-		: 'Remove all Notes from Obsidian? (This will not delete Notes in TickTick)';
-
 	function setIsWorking(value: boolean) {
 		isWorking = value;
 	}
@@ -399,6 +394,6 @@
 		{/if}
 
 		<br />
-		<ResetTasksControl {isWorking} {resetTasksText} {plugin} {setIsWorking} />
+		<ResetTasksControl {isWorking} {plugin} {setIsWorking} />
 	</div>
 </div>

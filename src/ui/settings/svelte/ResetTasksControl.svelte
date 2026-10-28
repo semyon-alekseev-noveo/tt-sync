@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { resetTasks } from '@/ui/settings/utils/ResetSynchronization';
 	export let isWorking: boolean;
-	export let resetTasksText: string;
 	export let plugin;
 	export let setIsWorking: (val: boolean) => void;
 
@@ -28,12 +27,14 @@
 
 <div class="setting-item">
 	<div class="setting-item-info">
-		<div class="setting-item-name">Reset Tasks</div>
+		<div class="setting-item-name">Reset local sync database</div>
 		<div class="setting-item-description">
-			Do you want to {resetTasksText}
+			Clears the plugin’s local task cache, file/task maps, comment maps, and sync checkpoint.
+			Vault markdown notes are <strong>not</strong> deleted.
 			<br>
 			<em>
-				Caution: This will take some time and update Tasks from TickTick to Obsidian and Obsidian to TickTick.
+				Use before restoring a TickTick account backup (instead of deleting IndexedDB in DevTools).
+				Then run <strong>Synchronize</strong> to re-link from vault markers and TickTick.
 			</em>
 		</div>
 	</div>
@@ -42,7 +43,7 @@
 			disabled={isWorking}
 			class="mod-cta"
 			on:click={onReset}>
-			Reset Tasks.
+			Reset local sync database
 		</button>
 	</div>
 </div>
@@ -64,14 +65,21 @@
 		style={modalWorking ? 'cursor: wait;' : ''}
 	>
 		<div class="local-modal-content">
-			<h2>Confirm Reset</h2>
-			<p>Do you <strong>REALLY</strong> want to {resetTasksText}?</p>
-			<p style="color:var(--text-warning);"><em>This will sync everything and can take a while.</em></p>
+			<h2>Confirm reset</h2>
+			<p>
+				Clear the <strong>local sync database</strong> (IndexedDB tasks, maps, checkpoint)?
+			</p>
+			<p style="color:var(--text-warning);">
+				<em>
+					Vault notes stay. TickTick is not changed. After this, restore TickTick if needed,
+					then Synchronize for a clean re-link. Mass-delete guards still protect an empty local DB.
+				</em>
+			</p>
 			<div class="local-modal-actions">
 				<button class="mod-cta"
 					on:click={confirmReset}
 					disabled={modalWorking}>
-					{modalWorking ? 'Resetting...' : 'Yes, reset'}
+					{modalWorking ? 'Clearing…' : 'Yes, clear local DB'}
 				</button>
 				<button
 					style="margin-left:1em;"

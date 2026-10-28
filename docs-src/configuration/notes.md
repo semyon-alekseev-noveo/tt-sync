@@ -53,10 +53,6 @@ The note separator (the line of dashes) is configurable in settings. You can cho
 !!! note
     Markdown is supported in TickTick, but TickTick's markdown implementation differs from Obsidian's. TickTickSync sends and receives text as-is without attempting to reconcile differences.
 
-## Reset Tasks
+## Reset local sync database
 
-
-The **Reset Tasks** button performs a full synchronization pass to update Tasks to conform to new settings.
-
-!!! warning
-    This operation can take some time depending on the number of tasks. Use only when you suspect the sync state has become inconsistent.
+Same control as on the Tasks settings tab: clears the local sync IndexedDB and `checkPoint` (not vault notes). Use before a TickTick backup restore, then **Synchronize**. See [Task settings](task-settings.md#reset-local-sync-database).

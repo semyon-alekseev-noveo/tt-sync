@@ -6,8 +6,6 @@
 	import './SettingsStyles.css';
 	import ResetTasksControl from '@/ui/settings/svelte/ResetTasksControl.svelte';
 
-	import { resetTasks } from '@/ui/settings/utils/ResetSynchronization'
-
 	export let plugin: TickTickSync;
 
 	let isWorking: boolean = false;
@@ -34,9 +32,6 @@
 	function setIsWorking(value: boolean) {
 		isWorking = value;
 	}
-
-	let resetTasksText: string = '';
-	$: resetTasksText = 'Update Tasks in TickTick and Obsidian?';
 
 	async function confirmKeepFoldersChange() {
 		modalWorking = true;
@@ -344,8 +339,9 @@
 			<div class="setting-item-info">
 				<div class="setting-item-name">Strip the ticktick tag on reset</div>
 				<div class="setting-item-description">
-					On a task reset, actively remove the legacy "ticktick" tag from existing
-					TickTick tasks. Requires the setting above to be enabled.
+					Legacy option from the old force-sync Reset Tasks path. Reset local sync database
+					is wipe-only and does not push tag strips. Requires the setting above to be enabled
+					if a future force-update path reuses it.
 				</div>
 			</div>
 			<div class="setting-item-control">
@@ -361,7 +357,6 @@
 		<br>
 		<ResetTasksControl
 			{isWorking}
-			{resetTasksText}
 			{plugin}
 			{setIsWorking}
 		/>

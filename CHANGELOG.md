@@ -1,3 +1,13 @@
+### Iteration 2026-10-28 03:55 UTC
+
+- Context: Owner — Reset Tasks must be a real local wipe for TT backup restore, not only `checkPoint=0` / DevTools IndexedDB delete.
+- Target: **UX-RESET-1** / **BUG-RESET-TASKS-PARTIAL** — Reset local sync database clears Dexie sync tables + checkpoint; vault notes stay; next Synchronize re-links safely.
+- Actions log: Case rows; `clearLocalSyncDatabase`; rewrite `resetTasks` (wipe-only, no auto force-sync); UI/docs copy; unit tests; TEST_PLAN restore sequence.
+- Validation: `npx vitest run` → **115** files, **803** passed; `npm run build` → ok.
+- Problems: Pilot restore sequence **not run** (`open`).
+- To Be Done: Merge PR; owner uses button before TT restore then Synchronize; optional pilot prove ×2.
+- References: `src/db/clearLocalSyncDatabase.ts`, `src/ui/settings/utils/ResetSynchronization.ts`, `TEST_PLAN.md`, `CHANGELOG.md`
+
 ### Iteration 2026-10-27 15:10 UTC
 
 - Context: Owner go on Abyss checkbox-status → TickTick list map (SoT: symbol); `#gtd/*` must not drive lists.

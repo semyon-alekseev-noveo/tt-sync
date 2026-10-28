@@ -23,8 +23,14 @@ export function loadPluginWrites(saved: Record<string, number> | undefined): voi
 	for (const [path, mtime] of Object.entries(saved)) notePluginWrite(path, mtime);
 }
 
-export function clearPluginWritesForTests(): void {
+/** Drop in-memory plugin-write mtimes (e.g. after local sync DB reset). */
+export function clearPluginWrites(): void {
 	pluginWriteMtime.clear();
+}
+
+/** @deprecated Prefer clearPluginWrites */
+export function clearPluginWritesForTests(): void {
+	clearPluginWrites();
 }
 
 /** Vault files (from `paths`) modified after `since` (ms epoch), excluding our own writes. */
