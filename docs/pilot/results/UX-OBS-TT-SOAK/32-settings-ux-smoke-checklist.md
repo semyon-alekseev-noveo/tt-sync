@@ -1,87 +1,175 @@
-# 32 — Чеклист smoke Settings UX (эпик #189 — код готов)
+# 32 — Smoke Settings (глазами)
 
-| Поле | Значение |
-|-------|--------|
-| Gate | UX-OBS-TT-SOAK |
-| Фаза | 32 (pilot smoke — **не запускался**) |
-| Эпик | [#189](https://github.com/semyon-alekseev-noveo/tt-sync/issues/189) |
-| Фазы-issues | [#191](https://github.com/semyon-alekseev-noveo/tt-sync/issues/191)–[#194](https://github.com/semyon-alekseev-noveo/tt-sync/issues/194) (PR #196–#199) |
-| Каталог | `ABYSS_FIRST_CASES.md` `UX-SET-*`; план `27-settings-ux-redesign-plan.md` |
-| Vault | Thinkpad-tts-test (только pilot) |
-| Сборка | Tip `abyss-mapping` после merge [#199](https://github.com/semyon-alekseev-noveo/tt-sync/pull/199) (`6038e8d`); или BRAT, когда будет тег |
-| Статус | **не запускался** — не ставить live **pass** / не закрывать эпик, пока владелец не запишет результаты |
+Только смотри Settings. Ничего опасного не жми. Статусы: ☐ не смотрел · ☑ ок · ✗ плохо.
 
-## Входы
+Vault: Thinkpad-tts-test · Сборка: tip после #199 · Статус: **не запускался**
 
-- План Phase 0: `27-settings-ux-redesign-plan.md`
-- Доказательства реализации: `28`–`31` (unit pass; pilot Settings UI отложен)
-- TEST_PLAN § UX-SET
+---
 
-## Tip / установка (релиз на GitHub не обязателен)
+## Как начать
 
-1. Pull / checkout tip `abyss-mapping`, в котором есть #199.
-2. `npm run build` → скопировать `dist/{main.js,manifest.json,styles.css}` → `<pilot-vault>/.obsidian/plugins/tickticksync-abyss/` **или** BRAT с `abyss-mapping`, если удобнее через релиз.
-3. Reload плагина `tickticksync-abyss`. `data.json` / remapping не трогать (не затирать).
-4. Открыть **Settings → TickTickSync (Abyss)** и пройти таблицу ниже. Только взгляд — без prove sync-движка, если в строке не сказано `Synchronize`.
+1. Reload плагина `tickticksync-abyss` (или перезапусти Obsidian).
+2. Settings → **TickTickSync** (Abyss).
+3. Иди по списку ниже. Меняй поля только если в пункте сказано «поставь / очисти».
 
-## Smoke-чеклист (всё **не запускалось**)
+## Что НЕ жать
 
-Отметьте строку после просмотра; оставьте **не запускался**, если пропустили. Не выдумывать pass.
+Пока идёшь по этому списку — **не** нажимай:
 
-### Phase 1 — формулировки / раскладка
+- `Apply once` (held-модалка после sync)
+- `Confirm Deletion`
+- `Delete from ticktick`
+- `Reset local sync database`
+- `Purge trash (DB)` (можно найти глазами, кнопку не жать)
 
-| Case | Шаги (≤30–60 с) | Ожидание | Статус |
-|------|-----------------|----------|--------|
-| UX-SET-GLOSSARY | Глоссарий Maintenance + чипы Sync Control **Deletion guard** (защита от удаления). Различить Skip vs Cancel vs `Purge trash` (DB) (очистить корзину БД). | Вслух верно назвать отличия. | **не запускался** |
-| UX-SET-SYNCTAG-EMPTY | GTD: очистить **Pull filter tag**; прочитать badge/tooltip. | Пусто = `pull ALL` allow-listed списков. | **не запускался** |
-| UX-SET-MANAGE-DELETED | Maintenance: **Purge trash (DB)** vs модалка held-deletions. | ≠ held / Apply once. | **не запускался** |
-| UX-SET-RESET-ONE | Только Maintenance **Danger zone**; у Tasks/Notes нет Reset. | Один контрол Reset; vault+TT целы (по копирайту). | **не запускался** |
-| UX-SET-SYNCED-LISTS-HELP | Справка Synced lists под GTD. | Allow-list; пусто → ничего; новый список нужно отметить. | **не запускался** |
-| UX-SET-MAINT-SYNC-PRIMARY | Открыть Maintenance. | **Synchronize** — единственная primary CTA. | **не запускался** |
+`Synchronize` — только если пункт явно просит. Обычно хватает взгляда.
 
-### Phase 2 — видимость (путь Abyss/GTD включён)
+---
 
-| Case | Шаги | Ожидание | Статус |
-|------|-------|----------|--------|
-| UX-SET-HIDE-DEFAULTS | Sync Control → Defaults (стек GTD включён). | Двойник Default folder скрыт; note → папка GTD Tasks. | **не запускался** |
-| UX-SET-EXTRA-FILTERS | Непустой `syncedLists`; Sync Control. | Extra filters / Limit sync отсутствуют. | **не запускался** |
-| UX-SET-STATUS-VS-STAGE | Непустой `statusListMappings`; GTD. | Баннер Stage→list неактивен; Status→list под Notes остаётся. | **не запускался** |
+## Список
 
-### Phase 3 — имена / предупреждения / более безопасные дефолты
+### 1. Слова про удаление
 
-| Case | Шаги | Ожидание | Статус |
-|------|-------|----------|--------|
-| UX-SET-SYNC-NOTES | Notes: **Sync task descriptions**. | ≠ Notebook; help про descriptions / NOTE-BODY. | **не запускался** |
-| UX-SET-NOTEBOOK-WARN | Папка Notebook → путь вроде Inbox/capture. | Warn; принудительной перезаписи пути нет. | **не запускался** |
-| UX-SET-BKUP-DEFAULT | Maintenance → Backup folder (если значение `/`). | Warn на корне vault; новый дефолт `TickTickSync/backups`. | **не запускался** |
-| UX-SET-LEAN-WARN | Шаблон project note → `…/MOC.md`. | Warn lean/MOC; lean/пустой путь — тихо. | **не запускался** |
+- [ ] **Где:** `Maintenance` + `Sync Control` → `Deletion guard`  
+  **Смотри:** `Deletion glossary` (полная таблица) и короткие чипы у Deletion guard.  
+  **Ок если:** ясно, что `Skip` ≠ `Cancel` ≠ `Purge trash (DB)`; held-модалка — после sync, не в Purge.  
+  **Плохо если:** всё выглядит как одно и то же.  
+  `UX-SET-GLOSSARY`
 
-### Phase 4 — cold-start и полировка
+### 2. Пустой Pull filter
 
-| Case | Шаги | Ожидание | Статус |
-|------|-------|----------|--------|
-| UX-SET-COLD-START | Верхняя полоса Sync Control. | Projects note + `#system/project` + Active Zone + Synchronize; новый список TT нужно отметить. | **не запускался** |
-| UX-SET-DEVICE-PRUNE | Device Identity → Known devices. | Понятные подписи; Remove = только не-текущее. | **не запускался** |
-| UX-SET-INTERVAL-ZERO | Automatic sync interval = 0. | Progress-on-scheduled серый/disabled + подсказка. | **не запускался** |
-| UX-SET-PW-CONFIRM | Access Control → set/change password. | Явное подтверждение plaintext; Cancel не сохраняет. | **не запускался** |
+- [ ] **Где:** `Sync Control` → GTD  
+  **Смотри:** поле `Pull filter tag` — очисти, если не пустое. Badge / tooltip.  
+  **Ок если:** badge `pull ALL`; пусто = тянуть **все** задачи из отмеченных списков.  
+  **Плохо если:** кажется, что «пусто = ничего не тянуть» или «фильтр выключен и безопасно».  
+  `UX-SET-SYNCTAG-EMPTY`
 
-## Evidence (заполнить после smoke)
+### 3. Purge trash ≠ удаление задач
 
-- Tip SHA / версия BRAT: `6038e8d` (abyss-mapping после #199); локальная копия tip → `<pilot-vault>/.obsidian/plugins/tickticksync-abyss/` (manifest всё ещё **2.0.94**; в бандле есть cold-start / подсказки `#system/project`); `plugin:reload` пробовали 2026-10-28 ~07:43 UTC
-- Дата (UTC): только установка; взгляд Settings **не запускался**
-- Заметки / скриншоты (только vault-relative):
-- Строки всё ещё **не запускался:** все `UX-SET-*` в таблицах выше
+- [ ] **Где:** `Maintenance`  
+  **Смотри:** кнопка/лейбл `Purge trash (DB)` и help рядом.  
+  **Ок если:** это чистка уже soft-deleted строк в локальной БД; не held / не `Apply once`.  
+  **Плохо если:** похоже на «удалить задачи из TickTick» или на held-модалку.  
+  `UX-SET-MANAGE-DELETED`
 
-## Заключение
+### 4. Один Reset
 
-Эпик #189 **code-complete** (фазы 0–4 смержены). Этот файл — pilot Settings smoke владельца по всем `UX-SET-*`. Tip может уже лежать на диске; статус взгляда Settings остаётся **не запускался**, пока таблица не пройдена. **Не** закрывать #189/#194 и не ставить TEST_PLAN / AF live **pass** только по этому чеклисту.
+- [ ] **Где:** `Maintenance` → `Danger zone`; потом вкладки `Task Settings` и `Task & note format`  
+  **Смотри:** есть ли Reset только в Danger zone.  
+  **Ок если:** один `Reset local sync database`; на Tasks/Notes Reset нет; текст: vault и TickTick целы.  
+  **Плохо если:** Reset в двух местах или звучит как wipe vault/TT.  
+  `UX-SET-RESET-ONE`
 
-## Чеклист
+### 5. Synced lists — справка
 
-- [x] Tip с `abyss-mapping` (после #199) установлен на Thinkpad-tts-test (копия агентом; без release/tag)
-- [ ] Строки Phase 1 просмотрены
-- [ ] Строки Phase 2 просмотрены (путь GTD)
-- [ ] Строки Phase 3 просмотрены
-- [ ] Строки Phase 4 просмотрены
-- [ ] Комментарий в #189 со ссылкой на этот файл + честные статусы (после smoke)
-- [ ] Закрывать issues / ставить live pass только после sign-off владельца (не автоматически)
+- [ ] **Где:** `Sync Control` → GTD → `Synced lists`  
+  **Смотри:** короткий help под контролом.  
+  **Ок если:** allow-list; пусто → ничего не тянем; новый список TT нужно отметить галкой.  
+  **Плохо если:** help нет или непонятно, что пустой список = тишина.  
+  `UX-SET-SYNCED-LISTS-HELP`
+
+### 6. Главная кнопка Maintenance
+
+- [ ] **Где:** `Maintenance`  
+  **Смотри:** какая кнопка «главная» (яркая / primary).  
+  **Ок если:** только `Synchronize` — primary; Check / Backup / Purge — вторичные.  
+  **Плохо если:** Purge или Reset выглядит главнее Sync.  
+  `UX-SET-MAINT-SYNC-PRIMARY`
+
+### 7. Defaults скрыты (путь GTD)
+
+- [ ] **Где:** `Sync Control` → Defaults (GTD/Abyss уже включён на pilot)  
+  **Смотри:** есть ли `Default folder location`.  
+  **Ок если:** двойник папки скрыт; папка задач — в GTD (`Tasks folder`).  
+  **Плохо если:** два одинаковых контрола папки рядом.  
+  `UX-SET-HIDE-DEFAULTS`
+
+### 8. Extra filters нет
+
+- [ ] **Где:** `Sync Control` (есть отмеченные `Synced lists`)  
+  **Смотри:** секции `Extra filters` / `Limit synchronization`.  
+  **Ок если:** их нет (или не как второй allow-list).  
+  **Плохо если:** снова просят выбрать списки «по-старому».  
+  `UX-SET-EXTRA-FILTERS`
+
+### 9. Status→list vs Stage→list
+
+- [ ] **Где:** `Sync Control` → GTD; плюс Notes / status map (есть `statusListMappings`)  
+  **Смотри:** баннер про Stage→list; блок `Status → list mapping`.  
+  **Ок если:** Stage→list неактивен; Status→list под Notes остаётся.  
+  **Плохо если:** два живых конкурирующих маппинга списка.  
+  `UX-SET-STATUS-VS-STAGE`
+
+### 10. Sync descriptions ≠ Notebook
+
+- [ ] **Где:** `Task & note format` (Notes)  
+  **Смотри:** лейбл `Sync task descriptions` vs Notebook.  
+  **Ок если:** ясно, что это описания задач (NOTE-BODY), не Notebook.  
+  **Плохо если:** путается с `Notebook folder` / Sync Notebook.  
+  `UX-SET-SYNC-NOTES`
+
+### 11. Notebook ≠ Inbox
+
+- [ ] **Где:** `Task & note format` → `Notebook folder`  
+  **Смотри:** поставь путь вроде `00 Inbox` / Inbox / capture (можно вернуть назад).  
+  **Ок если:** Warning; путь сам не переписывается.  
+  **Плохо если:** молчит или насильно меняет путь.  
+  `UX-SET-NOTEBOOK-WARN`
+
+### 12. Backup folder
+
+- [ ] **Где:** `Maintenance` → `Backup folder`  
+  **Смотри:** значение. Если `/` — warn.  
+  **Ок если:** дефолт/совет `TickTickSync/backups`; на корне vault есть Warning.  
+  **Плохо если:** молча лежит в корне vault без предупреждения.  
+  `UX-SET-BKUP-DEFAULT`
+
+### 13. Lean / MOC warn
+
+- [ ] **Где:** `Sync Control` → GTD → `Project note template`  
+  **Смотри:** путь с `MOC.md`; потом пустой/lean.  
+  **Ок если:** на MOC — Warning; на пустом/lean — тихо.  
+  **Плохо если:** warn на всём подряд или нет warn на MOC.  
+  `UX-SET-LEAN-WARN`
+
+### 14. Cold start полоска
+
+- [ ] **Где:** верх `Sync Control`  
+  **Смотри:** полоска `Cold start — make a synced project`.  
+  **Ок если:** Projects note + `#system/project` + `Active Zone` + `Synchronize`; новый список TT — галкой в Synced lists.  
+  **Плохо если:** полоски нет или непонятно с чего начать.  
+  `UX-SET-COLD-START`
+
+### 15. Known devices
+
+- [ ] **Где:** `Sync Control` → Device Identity → `Known devices`  
+  **Смотри:** подписи; кнопка `Remove`.  
+  **Ок если:** понятно что за устройства; Remove только не-текущее (`current` не снять).  
+  **Плохо если:** можно снести текущее устройство или лейблы каша.  
+  `UX-SET-DEVICE-PRUNE`
+
+### 16. Interval = 0
+
+- [ ] **Где:** `Sync Control` → `Automatic sync interval time`  
+  **Смотри:** поставь `0`; рядом `Show progress during scheduled sync`.  
+  **Ок если:** progress серый/disabled + подсказка про interval.  
+  **Плохо если:** toggle живой при нуле.  
+  `UX-SET-INTERVAL-ZERO`
+
+### 17. Password confirm
+
+- [ ] **Где:** `Access Control` → смена/ввод пароля Regular Login  
+  **Смотри:** диалог перед сохранением.  
+  **Ок если:** явное подтверждение plaintext (`Store password in plaintext?`); Cancel — не сохраняет.  
+  **Плохо если:** пароль пишется без спроса.  
+  `UX-SET-PW-CONFIRM`
+
+---
+
+## После прохода (коротко)
+
+- Дата (UTC):
+- Что поставил ☑ / ✗:
+- Заметки (пути только относительно vault):
+
+Не ставь live **pass** и не закрывай эпик #189, пока сам не прошёл список.

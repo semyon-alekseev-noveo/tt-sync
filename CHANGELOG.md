@@ -1,3 +1,13 @@
+### Iteration 2026-10-28 09:32 UTC
+
+- Context: Owner: previous RU Settings smoke checklist still hard to follow after [#203](https://github.com/semyon-alekseev-noveo/tt-sync/pull/203).
+- Target: Plain RU owner walkthrough — Где → Смотри → Ок если → Плохо если; short start / do-not-click.
+- Actions log: Rewrote `32-settings-ux-smoke-checklist.md`; tightened UX-OBS-TT-SOAK `INDEX.md` row 32.
+- Validation: Docs-only; all `UX-SET-*` IDs retained at end of each item.
+- Problems: Pilot Settings smoke still **not run** (`open`).
+- To Be Done: Owner ticks checklist on Thinkpad-tts-test; records ☑/✗.
+- References: `docs/pilot/results/UX-OBS-TT-SOAK/32-settings-ux-smoke-checklist.md`, `INDEX.md`, `CHANGELOG.md`
+
 ### Iteration 2026-10-28 09:23 UTC
 
 - Context: Owner asked for Russian rewrite of Settings UX smoke checklist after PR [#200](https://github.com/semyon-alekseev-noveo/tt-sync/pull/200) merged.
