@@ -1,3 +1,13 @@
+### Iteration 2026-10-28 15:28 UTC
+
+- Context: After Rematch prove 1, owner Synchronize failed: `File already exists` on Notebook NOTE `.cursorrules` under `00 Inbox` (dotfile often unindexed).
+- Target: Notebook create must not abort Synchronize; basenames must not start with `.`.
+- Actions log: `sanitizeNotebookBasename` strips leading dots; create catches exists and skips; unit tests; TEST_PLAN/AF BUG-NOTEBOOK-CREATE-EXISTS; note on rematch prove 2 block.
+- Validation: `npx vitest run src/test/notebookVault.mvp.test.ts` + `noWholeNoteWrite` 6 pass; `check:cycles` OK; full suite pending.
+- Problems: Rematch prove 2 still needs tip reload + quiet Synchronize (`open`).
+- To Be Done: Full vitest/build; push #212; tip install; owner Synchronize (Skip if held) for prove 2.
+- References: #208, #212, `src/sync/notebookVault.ts`, `35-bug-208-rematch-prove.md`, `CHANGELOG.md`
+
 ### Iteration 2026-10-28 14:17 UTC
 
 - Context: Owner Rematch on tip: journal choice=rematch but AZ stayed empty; synchronizeToVault(add) returned false.

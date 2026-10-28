@@ -31,8 +31,14 @@
 
 Earlier Rematch @ 13:57 / 14:35 on tip without vault-only write left AZ empty — void for prove.
 
+## Blocker after prove 1
+
+Owner Synchronize after Rematch aborted with **File already exists** creating Notebook NOTE `00 Inbox/.cursorrules (dbb8c8ff).md` (file already on disk; Obsidian often does not index leading-dot basenames, so MVP tried create again). Keyboard-garbled report: «ынтс афшдув…» → *sync failed file already exists. check*.
+
+Fix: `notebookVault` strip leading `.` + catch exists (PR #212 follow-up). Prove 2 waits on tip reload.
+
 ## Next
 
-1. Merge #212 if not yet.
-2. Second Synchronize: expect quiet or much smaller held plan (prove 2 / different check).
+1. Tip with notebook create fix; reload Obsidian.
+2. Synchronize (Skip / Rematch only if held again): expect no `File already exists`; quiet or small held plan — prove 2.
 3. Then close #208.
