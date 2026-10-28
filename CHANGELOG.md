@@ -1,3 +1,13 @@
+### Iteration 2026-10-28 09:23 UTC
+
+- Context: Owner asked for Russian rewrite of Settings UX smoke checklist after PR [#200](https://github.com/semyon-alekseev-noveo/tt-sync/pull/200) merged.
+- Target: Same structure/`UX-SET-*`/links; RU prose; EN UI strings kept for Settings matching.
+- Actions log: Rewrote `32-settings-ux-smoke-checklist.md` to RU; updated UX-OBS-TT-SOAK `INDEX.md` row 32 blurb.
+- Validation: Docs-only; structure and case IDs unchanged vs EN original.
+- Problems: Pilot Settings smoke still **not run** (`open`).
+- To Be Done: Owner walks RU checklist on Thinkpad-tts-test; records statuses.
+- References: `docs/pilot/results/UX-OBS-TT-SOAK/32-settings-ux-smoke-checklist.md`, `INDEX.md`, `CHANGELOG.md`
+
 ### Iteration 2026-10-28 07:45 UTC
 
 - Context: Owner merged Phase 4 PR [#199](https://github.com/semyon-alekseev-noveo/tt-sync/pull/199) into `abyss-mapping`; epic [#189](https://github.com/semyon-alekseev-noveo/tt-sync/issues/189) Settings UX phases 0–4 code-complete.
