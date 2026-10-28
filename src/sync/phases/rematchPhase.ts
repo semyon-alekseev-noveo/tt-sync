@@ -1,11 +1,12 @@
-import { Notice } from 'obsidian';
+import { Notice, TFile } from 'obsidian';
 import type { SyncPhaseDeps } from '@/sync/phases/types';
 import { rematchVaultFromPlanned } from '@/sync/rematchVault';
 import log from '@/utils/logger';
 
 /**
  * After pull (Dexie current), if the owner chose Rematch on the held modal,
- * materialize missing vault lines from Dexie without applying TT deletes.
+ * materialize missing vault lines from Dexie without applying TT deletes and
+ * without the add-to-vault network path (Comments / updateTask).
  */
 export async function runRematchPhase(deps: SyncPhaseDeps): Promise<void> {
 	const { plugin, ui, ctx } = deps;
@@ -13,24 +14,33 @@ export async function runRematchPhase(deps: SyncPhaseDeps): Promise<void> {
 	if (!planned?.length) return;
 
 	ui.setFullStep('Rematching vault from TickTick…');
-	if (!plugin.fileOperation?.synchronizeToVault) {
-		log.error('TickTickSync rematch: fileOperation.synchronizeToVault missing');
-		new Notice('TickTickSync: rematch failed (no vault writer).', 8000);
+	if (!plugin.taskRepository?.loadLocalTaskById || !plugin.taskParser?.convertTaskToLine) {
+		log.error('TickTickSync rematch: taskRepository/taskParser missing');
+		new Notice('TickTickSync: rematch failed (no task reader).', 8000);
 		return;
 	}
 
 	const result = await rematchVaultFromPlanned(planned, {
-		synchronizeToVault: (file, tasks, updating) =>
-			plugin.fileOperation!.synchronizeToVault(file, tasks, updating),
 		loadLiveTask: async (taskId) => {
-			const row = await plugin.taskRepository?.loadLocalTaskById(taskId);
+			const row = await plugin.taskRepository!.loadLocalTaskById(taskId);
 			if (!row) return null;
 			return { taskId: row.taskId, deleted: row.deleted, task: row.task };
 		},
+		readFile: async (path) => {
+			const f = plugin.app.vault.getAbstractFileByPath(path);
+			if (!(f instanceof TFile)) return null;
+			return plugin.app.vault.read(f);
+		},
+		writeFile: async (path, text) => {
+			const f = plugin.app.vault.getAbstractFileByPath(path);
+			if (!(f instanceof TFile)) throw new Error(`missing file ${path}`);
+			await plugin.app.vault.modify(f, text);
+		},
+		convertTaskToLine: (task, tabs) => plugin.taskParser!.convertTaskToLine(task, tabs),
 	});
-	log.info(`TickTickSync rematch: wrote ${result.written}, skipped ${result.skipped}`);
+	log.info(`TickTickSync rematch: wrote ${result.written} line(s) in ${result.files} file(s), skipped ${result.skipped}`);
 	new Notice(
-		`TickTickSync: rematched ${result.written} task(s) into the vault`
+		`TickTickSync: rematched ${result.written} task(s) into ${result.files} note(s)`
 			+ (result.skipped ? ` (${result.skipped} skipped)` : '')
 			+ '. TickTick was not wiped.',
 		10000,
