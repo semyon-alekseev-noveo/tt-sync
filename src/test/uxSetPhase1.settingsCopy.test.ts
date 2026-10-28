@@ -6,6 +6,7 @@ import { readFileSync, readdirSync, statSync } from 'fs';
 import { join } from 'path';
 import { describe, expect, it } from 'vitest';
 import {
+	CHECK_DATABASE_ORPHAN_HELP,
 	DELETION_GLOSSARY_TERMS,
 	MAINT_PRIMARY_CTA_CLASS,
 	MAINT_SYNC_PRIMARY_LABEL,
@@ -145,13 +146,14 @@ describe('UX-SET-MAINT-SYNC-PRIMARY', () => {
 });
 
 describe('UX-SET-GLOSSARY (Phase 1 surface)', () => {
-	it('glossary terms cover Skip, Cancel, Purge trash, Held, Reset', () => {
+	it('glossary stays short (≤4) and covers Held/Skip, Confirm/Cancel, Purge, Reset', () => {
+		expect(DELETION_GLOSSARY_TERMS.length).toBeLessThanOrEqual(4);
 		const terms = DELETION_GLOSSARY_TERMS.map((t) => t.term.toLowerCase()).join(' | ');
-		expect(terms).toMatch(/reset/);
 		expect(terms).toMatch(/held/);
 		expect(terms).toMatch(/skip/);
 		expect(terms).toMatch(/confirm|cancel/);
 		expect(terms).toMatch(/purge trash/);
+		expect(terms).toMatch(/reset/);
 	});
 
 	it('Maintenance and Guard mount DeletionGlossary', () => {
@@ -159,5 +161,13 @@ describe('UX-SET-GLOSSARY (Phase 1 surface)', () => {
 		const guard = readFileSync(join(SETTINGS_SVELTE_ROOT, 'svelte/sections/MassDeleteGuardSection.svelte'), 'utf8');
 		expect(maint).toContain('DeletionGlossary');
 		expect(guard).toContain('DeletionGlossary');
+	});
+
+	it('Check Database help says what to do with orphans', () => {
+		expect(CHECK_DATABASE_ORPHAN_HELP.toLowerCase()).toMatch(/cancel/);
+		expect(CHECK_DATABASE_ORPHAN_HELP.toLowerCase()).toMatch(/delete from ticktick/);
+		expect(CHECK_DATABASE_ORPHAN_HELP.toLowerCase()).toMatch(/add to file/);
+		const maint = readFileSync(join(SETTINGS_SVELTE_ROOT, 'svelte/ManualSyncOperations.svelte'), 'utf8');
+		expect(maint).toContain('CHECK_DATABASE_ORPHAN_HELP');
 	});
 });

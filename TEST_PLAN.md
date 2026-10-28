@@ -12,7 +12,7 @@ Phase 1: **copy / layout**. Phase 2 (#192): **visibility / merge** when Abyss/GT
 
 | Case | Steps | Expected | Pilot |
 |------|-------|----------|-------|
-| UX-SET-GLOSSARY | Open Settings → **Maintenance** (full glossary) and Sync Control → **Deletion guard** (compact chips). Or read `27-…plan.md`. State Skip vs Cancel vs Purge trash (DB) aloud. | Correct distinctions in ≤30s; comment on #191/#189. | **not run** |
+| UX-SET-GLOSSARY | Maintenance: ~4-row **Deletion glossary** + Guard chips. Also read **Check Database** orphan help (Cancel / Add / Delete). State Skip vs Cancel vs leave Purge alone. | ≤30s; orphans actionable from Maintenance copy. | **not run** |
 | UX-SET-SYNCTAG-EMPTY | Sync Control → GTD: clear **Pull filter tag**. Read badge `pull ALL` / tooltip. | Empty = pull **all** allow-listed lists; not “filter safely off.” | **not run** |
 | UX-SET-MANAGE-DELETED | Maintenance: find **Purge trash (DB)**. Compare to held-deletions modal copy. | Name/help ≠ held / Apply once; purge soft-deleted Dexie only. | **not run** |
 | UX-SET-RESET-ONE | Maintenance → **Danger zone** only. Confirm Tasks / Notes tabs have no Reset control. | One **Reset local sync database**; vault + TickTick stay intact (copy). | **not run** |
