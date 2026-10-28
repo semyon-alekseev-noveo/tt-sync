@@ -215,7 +215,13 @@ export async function runSyncFilesPass(
 				}
 
 				try {
-					await plugin.taskModificationDetector.checkFileForModifications(fileKey, pendingTickTickDeletions);
+					await plugin.taskModificationDetector.checkFileForModifications(
+						fileKey,
+						pendingTickTickDeletions,
+						syncCtx.skipOrphanVaultLineDeletes
+							? { skipOrphanVaultLineDeletes: true }
+							: undefined,
+					);
 				} catch (error) {
 					log.error('An error occurred in fullTextModifiedTaskCheck:', error);
 				}

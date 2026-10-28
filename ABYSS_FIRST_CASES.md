@@ -113,7 +113,7 @@ Preconditions for every AF row: plugin `tickticksync-abyss`, manual sync, `fileL
 | UX-ABYSS-STATUS-SRC-PROJ-MIG | **Proposed.** `projects.statusMigration` set: do not guess a status string; completion uses current `isDoneStatus` only. Pilot **not run**. |
 | UX-ABYSS-STATUS-SRC-UI | **Proposed.** Format on: settings copy says statuses come from Abyss Tasks and Status → list is a list-id overlay. Format off: no such claim. Pilot **not run**. |
 
-Unit tests cover parts of AF-1, AF-5, AF-8, UX-STATUS-MAP-*, UX-RESET-1 / BUG-RESET-TASKS-PARTIAL, comments, a failed pull, and PERF-INDEX / PERF-CACHE / PERF-COUNTERS. They do not replace the live gate.
+Unit tests cover parts of AF-1, AF-5, AF-8, UX-STATUS-MAP-*, UX-RESET-1 / BUG-RESET-TASKS-PARTIAL / BUG-RESET-CACHE-DELETE, comments, a failed pull, and PERF-INDEX / PERF-CACHE / PERF-COUNTERS. They do not replace the live gate.
 
 ## Old ids
 

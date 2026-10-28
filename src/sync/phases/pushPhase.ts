@@ -8,6 +8,8 @@ import type { SyncPhaseDeps } from '@/sync/phases/types';
 export async function runPushPhase(deps: SyncPhaseDeps): Promise<void> {
 	const { service, ui, ctx } = deps;
 	ui.setFullStep('Pushing vault changes to TickTick…');
-	const edited = await service.pushLocalEditsFirst(ctx.pushSinceMs, ctx.trigger);
+	const edited = await service.pushLocalEditsFirst(ctx.pushSinceMs, ctx.trigger, {
+		skipOrphanVaultLineDeletes: ctx.skipOrphanVaultLineDeletes,
+	});
 	ctx.locallyEdited = edited;
 }

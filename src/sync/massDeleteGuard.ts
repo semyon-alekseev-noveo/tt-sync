@@ -221,6 +221,29 @@ export function evaluateMassDeleteGuard(
 	return { ...base, block: false, reason: 'allow' };
 }
 
+/**
+ * BUG-RESET-CACHE-DELETE / UX-RESET-1 companion.
+ *
+ * Mass-delete guard only blocks vault→TickTick / TickTick→vault *task* deletes.
+ * A separate path strips vault lines when `ticktick_id` is missing from Dexie and
+ * `getTaskById` 404s (modal reason «task not found in local cache»). After Reset
+ * (empty Dexie) or checkPoint 0, that path would mass-delete notes that still hold
+ * pre-wipe / out-of-synced-list ids — fail closed instead.
+ *
+ * `syncBootstrapSkip` is sticky for one Synchronize that *started* empty/reset so
+ * a mid-run pull filling Dexie does not re-enable orphan vault-line removal.
+ */
+export function shouldSkipOrphanVaultLineDelete(args: {
+	dexieTaskCount: number;
+	checkPoint: number;
+	syncBootstrapSkip?: boolean;
+}): boolean {
+	if (args.syncBootstrapSkip) return true;
+	if (args.dexieTaskCount <= 0) return true;
+	if (!Number.isFinite(args.checkPoint) || args.checkPoint === 0) return true;
+	return false;
+}
+
 export function planVaultTaskDeletions(args: {
 	tasks: readonly LocalDeletionCandidate[];
 	presentIds: ReadonlySet<string>;
