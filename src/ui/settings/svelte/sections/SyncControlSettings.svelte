@@ -9,6 +9,10 @@
 	import { settingsStore } from '@/ui/settings/settingsstore';
 	import { getSettings } from '@/settings';
 	import { EXTRA_FILTERS_HIDDEN_NOTE, hideExtraFilters } from '@/ui/settings/settingsUxVisibility';
+	import {
+		COLD_START_STRIP_LINES,
+		COLD_START_STRIP_TITLE,
+	} from '@/ui/settings/settingsUxPolish';
 	export let plugin;
 
 	$: syncedLists =
@@ -33,6 +37,15 @@
 		openSection = openSection === sectionKey ? '' : sectionKey;
 	}
 </script>
+
+<div class="tts-ux-cold-start" role="note">
+	<div class="tts-ux-cold-start-title">{COLD_START_STRIP_TITLE}</div>
+	<ol class="tts-ux-cold-start-list">
+		{#each COLD_START_STRIP_LINES as line}
+			<li>{line}</li>
+		{/each}
+	</ol>
+</div>
 
 <p class="setting-item-description" style="margin-bottom: 1em;">
 	List allow-list, push scope, project scheme, and tag → list routing live under <strong>GTD and projects</strong>.

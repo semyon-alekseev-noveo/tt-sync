@@ -1,3 +1,13 @@
+### Iteration 2026-10-28 07:29 UTC
+
+- Context: Owner merged Phase 3 PR #198; Settings UX Phase 4 [#194](https://github.com/semyon-alekseev-noveo/tt-sync/issues/194) (epic [#189](https://github.com/semyon-alekseev-noveo/tt-sync/issues/189)). Cold-start & polish only.
+- Target: Cold-start strip; device prune; debug dump GTD/statusListMappings; password plaintext confirm; progress grey when interval=0.
+- Actions log: Added `settingsUxPolish.ts` + ConfirmPasswordPlaintextModal; wired Sync Control / Device / Auto interval / Access Control / Debug; unit `uxSetPhase4.settingsColdStart.test.ts`; TEST_PLAN / AF / pilot `31`.
+- Validation: `npx vitest run` 863 pass; `npm run build` ok.
+- Problems: Pilot Settings UI still **not run** (`open`).
+- To Be Done: Owner merges PR; pilot smoke UX-SET-COLD-START / DEVICE-PRUNE / INTERVAL-ZERO / PW-CONFIRM; epic #189 phases code-complete pending smoke — owner closes after pilot.
+- References: `src/ui/settings/settingsUxPolish.ts`, `docs/pilot/results/UX-OBS-TT-SOAK/31-settings-ux-phase4.md`, `TEST_PLAN.md`, `CHANGELOG.md`
+
 ### Iteration 2026-10-28 07:16 UTC
 
 - Context: Owner go after Phase 2 PR #197; Settings UX Phase 3 [#193](https://github.com/semyon-alekseev-noveo/tt-sync/issues/193) (epic [#189](https://github.com/semyon-alekseev-noveo/tt-sync/issues/189)). Names/defaults/warnings only.

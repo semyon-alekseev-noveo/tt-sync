@@ -107,7 +107,8 @@ Canonical expected behavior: `ABYSS_FIRST_CASES.md`. Manual steps: `TEST_PLAN.md
 - [x] Phase 0 DoR merged (#195)
 - [x] Phase 1 Settings UI — see `28-settings-ux-phase1.md` / #191 (unit pass; pilot not run; PR #196)
 - [x] Phase 2 hide/merge — see `29-settings-ux-phase2.md` / #192 (unit pass; pilot not run; PR #197)
-- [ ] Phase 3 names/defaults — see `30-settings-ux-phase3.md` / #193 (unit pass; pilot not run)
+- [x] Phase 3 names/defaults — see `30-settings-ux-phase3.md` / #193 (unit pass; pilot not run; PR #198)
+- [x] Phase 4 cold-start & polish — see `31-settings-ux-phase4.md` / #194 (unit pass; pilot not run)
 
 ## Conclusion
 

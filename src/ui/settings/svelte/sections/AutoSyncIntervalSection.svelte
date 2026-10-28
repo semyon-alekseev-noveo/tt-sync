@@ -3,6 +3,12 @@
 	import { createEventDispatcher } from 'svelte';
 	import { getSettings, updateSettings } from '@/settings';
 	import { Notice } from 'obsidian';
+	import {
+		SCHEDULED_PROGRESS_DISABLED_HINT,
+		SCHEDULED_PROGRESS_HELP,
+		SCHEDULED_PROGRESS_LABEL,
+		scheduledProgressControlEnabled,
+	} from '@/ui/settings/settingsUxPolish';
 
 	export let open = false;
 	export let plugin;
@@ -10,6 +16,7 @@
 	let automaticSynchronizationInterval: number = getSettings().automaticSynchronizationInterval;
 	let showSyncProgressOnScheduledSync: boolean = getSettings().showSyncProgressOnScheduledSync;
 	$: automaticSynchronizationIntervalString = automaticSynchronizationInterval.toString();
+	$: progressEnabled = scheduledProgressControlEnabled(automaticSynchronizationInterval);
 	let debounceTimeout: ReturnType<typeof setTimeout>;
 	const dispatch = createEventDispatcher();
 
@@ -27,6 +34,7 @@
 			new Notice(`The synchronization interval time cannot be less than 20 seconds.`);
 			return;
 		}
+		automaticSynchronizationInterval = intervalNum;
 		updateSettings({ automaticSynchronizationInterval: intervalNum });
 		await plugin.saveSettings();
 		plugin.reloadInterval();
@@ -63,16 +71,24 @@
 			/>
 		</div>
 	</div>
-	<div class="setting-item">
+	<div class="setting-item" class:tts-ux-progress-disabled={!progressEnabled}>
 		<div class="setting-item-info">
-			<div class="setting-item-name">Show progress during scheduled sync</div>
-			<div class="setting-item-description">When off (default), automatic interval sync runs silently. Manual Sync and inline updates still show a top-right progress notice.</div>
+			<div class="setting-item-name">{SCHEDULED_PROGRESS_LABEL}</div>
+			<div class="setting-item-description">
+				{SCHEDULED_PROGRESS_HELP}
+				{#if !progressEnabled}
+					<br /><span class="tts-ux-warn" style="display:inline-block;margin-top:0.35em;">{SCHEDULED_PROGRESS_DISABLED_HINT}</span>
+				{/if}
+			</div>
 		</div>
 		<div class="setting-item-control">
 			<input
 				type="checkbox"
 				bind:checked={showSyncProgressOnScheduledSync}
+				disabled={!progressEnabled}
+				aria-disabled={!progressEnabled}
 				on:change={async () => {
+					if (!scheduledProgressControlEnabled(automaticSynchronizationInterval)) return;
 					updateSettings({ showSyncProgressOnScheduledSync });
 					await plugin.saveSettings();
 				}}

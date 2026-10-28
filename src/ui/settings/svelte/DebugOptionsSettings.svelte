@@ -6,6 +6,7 @@
 	import { LOG_LEVEL } from '@/ui/settings/svelte/constants.svelte.js';
 	import './SettingsStyles.css';
 	import { SyncJournalModal } from '@/modals/SyncJournalModal';
+	import { buildSettingsDebugDump } from '@/ui/settings/settingsUxPolish';
 
 	export let plugin: TickTickSync;
 
@@ -29,38 +30,10 @@
 			fmdData.push(`${file}, ${numFiles}`);
 		}
 
-
-		const debugInfo = {
-			general: {
-				version: settings.version,
-				baseURL: settings.baseURL,
-				enableFullVaultSync: settings.enableFullVaultSync,
-				debugMode: settings.debugMode,
-				logLevel: settings.logLevel,
-				fileLinksInTickTick: settings.fileLinksInTickTick,
-				taskLinksInObsidian: settings.taskLinksInObsidian,
-				bkupFolder: settings.bkupFolder,
-				skipBackup: settings.skipBackup,
-				numProjects: (await plugin.service.getProjects()).length,
-				fileTasks: fmdData
-			},
-			defaults:
-				{
-					defaultProjectName: settings.defaultProjectName,
-					defaultProjectId: settings.defaultProjectId,
-					TickTickTasksFilePath: settings.TickTickTasksFilePath
-				},
-			syncControl: {
-				SyncProject: settings.SyncProject,
-				tagAndOr: settings.tagAndOr,
-				SyncTag: settings.SyncTag
-			},
-			noteSetting: {
-				syncNotes: settings.syncNotes,
-				noteDelimiter: settings.noteDelimiter
-			}
-		};
-		return debugInfo;
+		return buildSettingsDebugDump(settings, {
+			numProjects: (await plugin.service.getProjects()).length,
+			fileTasks: fmdData,
+		});
 	}
 
 	async function generateDebug() {
