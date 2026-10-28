@@ -65,8 +65,12 @@ export const DEFAULTS_FOLDER_MERGED_NOTE =
 export const EXTRA_FILTERS_HIDDEN_NOTE =
 	'Extra filters (legacy SyncProject / AND-OR) are hidden while synced lists are the allow-list.';
 
+/** #205 §9 — say «tag», not «stage» */
 export const GTD_STAGE_INACTIVE_BANNER =
-	'Inactive: Status → list mapping is the source of truth. GTD stage → list does not move the TickTick list while status→list rows are set.';
+	'Inactive: Status → list is the source of truth. GTD tag → list (#gtd/* style maps) does not move the TickTick list while Status → list rows are set.';
+
+export const GTD_TAG_LIST_MAPPING_LABEL = 'GTD tag → list mapping';
+export const GTD_TAG_LIST_INACTIVE_LABEL = 'GTD tag → list mapping (inactive)';
 
 export const HUB_HIDDEN_NOTE =
 	'Single tasks file (hub) is hidden in Abyss/GTD mode; tasks stay in scoped notes / project notes.';

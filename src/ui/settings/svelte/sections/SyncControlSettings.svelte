@@ -13,6 +13,7 @@
 		COLD_START_STRIP_LINES,
 		COLD_START_STRIP_TITLE,
 	} from '@/ui/settings/settingsUxPolish';
+	import { SYNC_CONTROL_TAB_INTRO } from '@/ui/settings/settingsUxCopy';
 	export let plugin;
 
 	$: syncedLists =
@@ -37,6 +38,8 @@
 		openSection = openSection === sectionKey ? '' : sectionKey;
 	}
 </script>
+
+<p class="setting-item-description tts-tab-intro">{SYNC_CONTROL_TAB_INTRO}</p>
 
 <div class="tts-ux-cold-start" role="note">
 	<div class="tts-ux-cold-start-title">{COLD_START_STRIP_TITLE}</div>

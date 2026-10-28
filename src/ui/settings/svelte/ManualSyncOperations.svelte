@@ -17,6 +17,7 @@
 		MAINT_SYNC_PRIMARY_HELP,
 		MAINT_SYNC_PRIMARY_LABEL,
 		MAINT_SYNC_PRIMARY_NAME,
+		MAINT_TAB_INTRO,
 		PURGE_TRASH_DB_BUTTON,
 		PURGE_TRASH_DB_HELP,
 		PURGE_TRASH_DB_LABEL,
@@ -107,6 +108,7 @@
 
 <div class="manual-operations {isWorking ? 'wait-cursor' : 'default-cursor'}">
 	{#if getSettings().token}
+		<p class="setting-item-description tts-tab-intro">{MAINT_TAB_INTRO}</p>
 		<DeletionGlossary />
 
 		<div class="setting-item">

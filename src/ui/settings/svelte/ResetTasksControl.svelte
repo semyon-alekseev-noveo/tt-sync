@@ -69,7 +69,7 @@
 		<div class="local-modal-content">
 			<h2>Confirm reset</h2>
 			<p>
-				Clear the <strong>local sync database</strong> (IndexedDB tasks, maps, checkpoint)?
+				Clear the <strong>local sync cache</strong> (task links, maps, checkpoint)?
 			</p>
 			<p style="color:var(--text-warning);">
 				<em>

@@ -88,17 +88,18 @@ describe('UX-SET-SYNCED-LISTS-HELP', () => {
 });
 
 describe('UX-SET-MANAGE-DELETED', () => {
-	it('rename is Purge trash (DB) and help ≠ held / Apply once', () => {
-		expect(PURGE_TRASH_DB_LABEL).toBe('Purge trash (DB)');
-		expect(PURGE_TRASH_DB_BUTTON).toBe('Purge trash (DB)');
+	it('Purge soft-deleted cache rows — when/what; no Dexie; ≠ held', () => {
+		expect(PURGE_TRASH_DB_LABEL.toLowerCase()).toMatch(/soft-deleted/);
+		expect(PURGE_TRASH_DB_BUTTON.toLowerCase()).toMatch(/soft-deleted/);
 		const h = PURGE_TRASH_DB_HELP.toLowerCase();
-		expect(h).toMatch(/soft-deleted|dexie/);
-		expect(h).toMatch(/held/);
-		expect(h).toMatch(/apply once/);
-		expect(h).not.toMatch(/^apply the held/);
+		expect(h).toMatch(/soft-deleted/);
+		expect(h).toMatch(/local sync cache/);
+		expect(h).not.toMatch(/dexie/);
+		expect(h).toMatch(/held|apply once/);
+		expect(h).toMatch(/does not delete live ticktick/);
 	});
 
-	it('Maintenance uses Purge trash copy (not Manage Deleted Tasks)', () => {
+	it('Maintenance uses Purge soft-deleted copy (not Manage Deleted Tasks)', () => {
 		const src = readFileSync(join(SETTINGS_SVELTE_ROOT, 'svelte/ManualSyncOperations.svelte'), 'utf8');
 		expect(src).toContain('PURGE_TRASH_DB');
 		expect(src).not.toMatch(/Manage Deleted Tasks/);
@@ -152,7 +153,7 @@ describe('UX-SET-GLOSSARY (Phase 1 surface)', () => {
 		expect(terms).toMatch(/held/);
 		expect(terms).toMatch(/skip/);
 		expect(terms).toMatch(/confirm|cancel/);
-		expect(terms).toMatch(/purge trash/);
+		expect(terms).toMatch(/purge/);
 		expect(terms).toMatch(/reset/);
 	});
 

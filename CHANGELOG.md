@@ -1,3 +1,13 @@
+### Iteration 2026-10-28 10:10 UTC
+
+- Context: Owner «пили» on [#205](https://github.com/semyon-alekseev-noveo/tt-sync/issues/205) Settings UX smoke fails (§3–9).
+- Target: Purge when/what; local sync cache term; Synced lists layout + remove stale; tab intros; Defaults Abyss ON/OFF; tag→list rename.
+- Actions log: Updated settingsUxCopy/Visibility/Names; GtdSection panel + stale remove; Defaults dual-mode; unit `uxSet205`; AF/TEST_PLAN/pilot `33`.
+- Validation: `npx vitest run` 869 pass; `npm run build` ok.
+- Problems: Pilot re-smoke **not run** (`open`); §10 still truncated.
+- To Be Done: Owner merge PR; tip reload; re-check §3–9.
+- References: #205, #189, `settingsUxCopy.ts`, `33-settings-ux-205-smoke-feedback.md`, `CHANGELOG.md`
+
 ### Iteration 2026-10-28 09:35 UTC
 
 - Context: Owner: Maintenance orphans unclear; Deletion glossary overloaded.
