@@ -1,3 +1,13 @@
+### Iteration 2026-10-28 05:53 UTC
+
+- Context: Owner merged [#187](https://github.com/semyon-alekseev-noveo/tt-sync/pull/187) (BUG-RESET-CACHE-DELETE). Post-merge install; no GitHub release/tag.
+- Target: Tip on pilot; Reset→Sync prove ×2 if CLI allows; evidence under UX-OBS-TT-SOAK.
+- Actions log: Fetched tip `bc89f31`; built **2.0.94**; installed `main.js`/`manifest.json`/`styles.css` (kept `data.json`); reload; smoke `tts-sync` ×2; wrote `25-reset-cache-delete-prove.md`; INDEX / TEST_PLAN / phase 24 pointers.
+- Validation: DON-253 kept 10 markers on healthy Dexie smoke. No Reset palette command — Reset-path prove **blocked** for owner click.
+- Problems: Full empty-Dexie prove needs Settings **Reset local sync database** (`open`).
+- To Be Done: Owner Reset → Synchronize ×2; then normal day-to-day sync. No release this task.
+- References: `docs/pilot/results/UX-OBS-TT-SOAK/25-reset-cache-delete-prove.md`, PR #187, `CHANGELOG.md`
+
 ### Iteration 2026-10-28 05:40 UTC
 
 - Context: Analyst only for [#185](https://github.com/semyon-alekseev-noveo/tt-sync/issues/185) (Abyss task + project statuses from Abyss Tasks settings). No plugin code, no version bump.
