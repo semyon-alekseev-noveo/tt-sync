@@ -1,3 +1,13 @@
+### Iteration 2026-10-28 06:40 UTC
+
+- Context: Owner go on Settings UX redesign epic [#189](https://github.com/semyon-alekseev-noveo/tt-sync/issues/189) Phase 0 [#190](https://github.com/semyon-alekseev-noveo/tt-sync/issues/190). Docs/DoR only.
+- Target: Deletion glossary + `UX-SET-*` case IDs + TEST_PLAN stubs + UX-OBS-TT-SOAK plan; no Settings UI code.
+- Actions log: Wrote `27-settings-ux-redesign-plan.md` (glossary Reset≠Held≠Confirm≠Manage Deleted≠On TT deletion; phases #190–#194). Catalog + TEST_PLAN stubs **not run**. INDEX row 27.
+- Validation: Docs only. No `vitest` / build required (no behavior change).
+- Problems: Owner 30s glossary check still open (`open`). Phase 1 UI blocked until merge/accept.
+- To Be Done: Owner ≤30s check on #190; then Phase 1 [#191](https://github.com/semyon-alekseev-noveo/tt-sync/issues/191) copy/layout.
+- References: `docs/pilot/results/UX-OBS-TT-SOAK/27-settings-ux-redesign-plan.md`, `ABYSS_FIRST_CASES.md`, `TEST_PLAN.md`, `CHANGELOG.md`
+
 ### Iteration 2026-10-28 05:53 UTC
 
 - Context: Owner merged [#187](https://github.com/semyon-alekseev-noveo/tt-sync/pull/187) (BUG-RESET-CACHE-DELETE). Post-merge install; no GitHub release/tag.
