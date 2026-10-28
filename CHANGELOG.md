@@ -1,3 +1,13 @@
+### Iteration 2026-10-28 10:05 UTC
+
+- Context: Owner smoke checklist 32 §3–9 feedback (Purge/terms/lists/tabs/Defaults/stage); §10 truncated.
+- Target: Track redesign in issue; record fails on checklist 32.
+- Actions log: Opened #205 under epic #189; annotated `32` with owner ✗ notes; commented #189.
+- Validation: Issue URL returned; no code change this iteration.
+- Problems: Synced lists layout + stale numbered lists; glossary terms; Defaults dual-mode (`open` via #205).
+- To Be Done: Owner finish §10; implement #205 copy/layout/tabs (split PRs).
+- References: `docs/pilot/results/UX-OBS-TT-SOAK/32-settings-ux-smoke-checklist.md`, #205, #189, `CHANGELOG.md`
+
 ### Iteration 2026-10-28 09:35 UTC
 
 - Context: Owner: Maintenance orphans unclear; Deletion glossary overloaded.
