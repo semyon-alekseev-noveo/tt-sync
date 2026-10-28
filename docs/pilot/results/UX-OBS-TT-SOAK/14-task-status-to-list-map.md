@@ -9,7 +9,7 @@
 | Vault | Thinkpad-tts-test (pilot) |
 | Plugin | tickticksync-abyss **2.0.94+** (statusListMappings PR) |
 | Abyss | `abyss-tasks/data.json` → `taskStatuses` |
-| Status | **implementing** (TTS-WIP created; cases + code) |
+| Status | **done** (code #182; pilot smoke in `16-status-map-prove.md`) |
 | When | 2026-10-27 |
 
 ## Inputs
@@ -43,8 +43,8 @@ Status wins for list; strip `#gtd/next|waiting|planned|someday` on sync rewrite.
 - [x] AF cases + implementation (`UX-STATUS-MAP-*`, `statusListMappings`)
 - [ ] Abyss: rename `!` waiting→next; add `[?]` `[=]` `[~]`
 - [ ] Migrate vault lines that should stay waiting: `[!]` → `[?]`
-- [ ] Pilot smoke `[!]` + `[/]` after install
+- [x] Pilot smoke `[!]` + `[/]` after install — **pass** ×2 (`16-status-map-prove.md`)
 
 ## Conclusion
 
-Full owner map implemented in plugin via `statusListMappings`. Pilot smoke after install **not run**.
+Full owner map implemented in plugin via `statusListMappings`. Pilot smoke after #182 install: **pass** ×2 — see `16-status-map-prove.md`.
