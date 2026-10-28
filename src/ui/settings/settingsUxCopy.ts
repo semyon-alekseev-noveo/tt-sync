@@ -41,7 +41,7 @@ export const RESET_VAULT_TT_INTACT_COPY =
 /** Only Maintenance hosts ResetTasksControl (Tasks / Notes must not duplicate it). */
 export const RESET_CONTROL_HOSTS = ['maintenance'] as const;
 
-/** UX-SET-GLOSSARY — compact chips for Maintenance + Deletion guard */
+/** UX-SET-GLOSSARY — short chips + table (keep ≤4 rows; orphans live under Check Database) */
 export type DeletionGlossaryTerm = {
 	term: string;
 	summary: string;
@@ -50,42 +50,35 @@ export type DeletionGlossaryTerm = {
 
 export const DELETION_GLOSSARY_HEADING = 'Deletion glossary';
 export const DELETION_GLOSSARY_INTRO =
-	'Skip ≠ Cancel ≠ Purge trash (DB). Held deletions appear after Synchronize, not in this purge control.';
+	'Three safe exits: Skip (held modal) · Cancel (Confirm Deletion) · leave Purge alone. Orphans → Check Database help below.';
 
 export const DELETION_GLOSSARY_TERMS: readonly DeletionGlossaryTerm[] = [
 	{
-		term: 'Reset',
-		summary: 'Wipes local Dexie + checkpoint only.',
-		not: 'Not a TickTick wipe; not held deletions; not Purge trash.',
+		term: 'Held → Skip',
+		summary: 'After Synchronize: big delete plan is held. Skip = keep tasks; Apply once = delete in TickTick.',
+		not: 'Not Purge trash; not Reset.',
 	},
 	{
-		term: 'Held deletions',
-		summary: 'Modal after Synchronize when a big delete plan is held.',
-		not: 'Not Settings Purge trash; not Reset.',
-	},
-	{
-		term: 'Skip deletions this run',
-		summary: 'Safe default on held modal: no planned deletes; creates/updates still run.',
-		not: 'Not Cancel on Confirm Deletion; not Purge trash.',
-	},
-	{
-		term: 'Apply once',
-		summary: 'Applies the held delete plan this run only.',
-		not: 'Never confuse with Purge trash (DB).',
-	},
-	{
-		term: 'Confirm / Cancel',
-		summary: 'Per-task orphan dialog; Cancel leaves lines/tasks alone.',
-		not: 'Not held Skip; not Purge trash.',
+		term: 'Confirm → Cancel',
+		summary: 'Dialog wants to remove a vault line (or similar). Cancel = leave the file alone.',
+		not: 'Not Skip on held; not Purge.',
 	},
 	{
 		term: 'Purge trash (DB)',
-		summary: 'Permanent purge of already soft-deleted Dexie rows.',
-		not: '≠ held modal; does not clear a held plan.',
+		summary: 'Wipes already soft-deleted rows in the local DB only.',
+		not: 'Does not delete live TickTick tasks; not the held modal.',
 	},
 	{
-		term: 'On TT deletion',
-		summary: 'You deleted in TickTick; sync pulls that truth.',
-		not: 'Not Reset; not Purge trash; not a Danger action.',
+		term: 'Reset',
+		summary: 'Clears local sync cache only; vault markdown and TickTick stay.',
+		not: 'Not a task wipe; run Synchronize after to re-link.',
 	},
 ] as const;
+
+/** Check Database / Orphaned TickTick Tasks — what to press */
+export const CHECK_DATABASE_LABEL = 'Check database';
+export const CHECK_DATABASE_BUTTON = 'Check Database';
+export const CHECK_DATABASE_HELP =
+	'Looks for sync/file mismatches. May open Orphaned TickTick Tasks (in TickTick, missing from vault/DB).';
+export const CHECK_DATABASE_ORPHAN_HELP =
+	'Orphans: Cancel = leave TickTick alone (usual after Reset). Add to file & db = import into vault. Delete from ticktick = remove in TickTick — avoid unless sure.';

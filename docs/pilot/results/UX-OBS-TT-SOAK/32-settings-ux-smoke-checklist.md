@@ -28,13 +28,21 @@ Vault: Thinkpad-tts-test · Сборка: tip после #199 · Статус: *
 
 ## Список
 
-### 1. Слова про удаление
+### 1. Глоссарий удалений (короткий)
 
-- [ ] **Где:** `Maintenance` + `Sync Control` → `Deletion guard`  
-  **Смотри:** `Deletion glossary` (полная таблица) и короткие чипы у Deletion guard.  
-  **Ок если:** ясно, что `Skip` ≠ `Cancel` ≠ `Purge trash (DB)`; held-модалка — после sync, не в Purge.  
-  **Плохо если:** всё выглядит как одно и то же.  
+- [ ] **Где:** `Maintenance` (таблица) и `Deletion guard` (чипы)  
+  **Смотри:** ровно ~4 строки: Held→Skip · Confirm→Cancel · Purge · Reset.  
+  **Ок если:** за 10 сек понятно три «безопасных» хода: Skip / Cancel / не трогать Purge.  
+  **Плохо если:** простыня из 7+ терминов или всё звучит одинаково.  
   `UX-SET-GLOSSARY`
+
+### 1b. Орфаны в Maintenance
+
+- [ ] **Где:** `Maintenance` → `Check Database`  
+  **Смотри:** help под кнопкой (не жми, если не готов к модалке).  
+  **Ок если:** написано явно: модалка `Orphaned TickTick Tasks` → **Cancel** = оставить в TT (обычно после Reset); `Add to file & db` = забрать в vault; `Delete from ticktick` = удалить в TT (не жать без нужды).  
+  **Плохо если:** Check Database молчит про орфанов или непонятно, что жать.  
+  *(не отдельный UX-SET; follow-up к Maintenance / #189)*
 
 ### 2. Пустой Pull filter
 

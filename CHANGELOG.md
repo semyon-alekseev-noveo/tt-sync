@@ -1,3 +1,13 @@
+### Iteration 2026-10-28 09:35 UTC
+
+- Context: Owner: Maintenance orphans unclear; Deletion glossary overloaded.
+- Target: ≤4 glossary rows; Check Database help with Orphaned Cancel / Add / Delete; smoke checklist 1 + 1b.
+- Actions log: Slimmed `DELETION_GLOSSARY_TERMS`; `CHECK_DATABASE_*` copy in Maintenance; updated `32` + TEST_PLAN; unit asserts ≤4 + orphan help.
+- Validation: `npx vitest run src/test/uxSetPhase1.settingsCopy.test.ts` — 17 pass.
+- Problems: Pilot Settings smoke still **not run** (`open`).
+- To Be Done: Tip reload; owner re-checks Maintenance glossary + Check Database help.
+- References: `src/ui/settings/settingsUxCopy.ts`, `ManualSyncOperations.svelte`, `32-settings-ux-smoke-checklist.md`, `CHANGELOG.md`
+
 ### Iteration 2026-10-28 09:32 UTC
 
 - Context: Owner: previous RU Settings smoke checklist still hard to follow after [#203](https://github.com/semyon-alekseev-noveo/tt-sync/pull/203).

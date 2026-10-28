@@ -9,6 +9,10 @@
 	import DeletionGlossary from '@/ui/settings/svelte/DeletionGlossary.svelte';
 	import ResetTasksControl from '@/ui/settings/svelte/ResetTasksControl.svelte';
 	import {
+		CHECK_DATABASE_BUTTON,
+		CHECK_DATABASE_HELP,
+		CHECK_DATABASE_LABEL,
+		CHECK_DATABASE_ORPHAN_HELP,
 		MAINT_PRIMARY_CTA_CLASS,
 		MAINT_SYNC_PRIMARY_HELP,
 		MAINT_SYNC_PRIMARY_LABEL,
@@ -119,17 +123,16 @@
 
 		<div class="setting-item">
 			<div class="setting-item-info">
-				<div class="setting-item-name">Check database</div>
-				<div class="setting-item-description">
-					Check for possible issues: sync error, file renaming not updated, or missed tasks not synchronized
-				</div>
+				<div class="setting-item-name">{CHECK_DATABASE_LABEL}</div>
+				<div class="setting-item-description">{CHECK_DATABASE_HELP}</div>
+				<div class="setting-item-description">{CHECK_DATABASE_ORPHAN_HELP}</div>
 			</div>
 			<div class="setting-item-control">
 				<button
 					class="tts-maint-secondary"
 					on:click={handleCheckDatabase}
 					disabled={isCheckingDatabase || isWorking}>
-					{isCheckingDatabase ? 'Checking...' : 'Check Database'}
+					{isCheckingDatabase ? 'Checking...' : CHECK_DATABASE_BUTTON}
 				</button>
 			</div>
 		</div>
