@@ -7,12 +7,10 @@
 	import type TickTickSync from '@/main';
 	import './SettingsStyles.css';
 	import { onMount } from 'svelte';
-	import ResetTasksControl from '@/ui/settings/svelte/ResetTasksControl.svelte';
 	import { settingsStore } from '@/ui/settings/settingsstore';
 
 	export let plugin: TickTickSync;
 
-	let isWorking: boolean = false;
 	let syncNotes: boolean = false;
 	let syncNotebook: boolean = false;
 	let notebookFolder: string = 'TickTick Notebook';
@@ -48,10 +46,6 @@
 			autoCleanupDatabase,
 		}));
 		await plugin.saveSettings();
-	}
-
-	function setIsWorking(value: boolean) {
-		isWorking = value;
 	}
 
 	let delimiterOption: 'none' | 'custom' = 'none';
@@ -143,7 +137,7 @@
 				: `☐ Task Title \n   ${customDelimiter}\n   Note 1\n   Note 2\n   ${customDelimiter}`;
 	}
 </script>
-<div class="{isWorking ? 'wait-cursor' : 'default-cursor'}">
+<div class="default-cursor">
 	<div class="notes-settings">
 		<p class="setting-item-description" style="margin-bottom: 1em;">
 			How task lines and note bodies look in Obsidian. List allow-list, tag → list routing, and project scheme are
@@ -393,7 +387,5 @@
 			</div>
 		{/if}
 
-		<br />
-		<ResetTasksControl {isWorking} {plugin} {setIsWorking} />
 	</div>
 </div>

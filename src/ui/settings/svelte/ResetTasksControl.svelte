@@ -1,5 +1,9 @@
 <script lang="ts">
 	import { resetTasks } from '@/ui/settings/utils/ResetSynchronization';
+	import {
+		RESET_CONTROL_LABEL,
+		RESET_VAULT_TT_INTACT_COPY,
+	} from '@/ui/settings/settingsUxCopy';
 	export let isWorking: boolean;
 	export let plugin;
 	export let setIsWorking: (val: boolean) => void;
@@ -27,23 +31,21 @@
 
 <div class="setting-item">
 	<div class="setting-item-info">
-		<div class="setting-item-name">Reset local sync database</div>
+		<div class="setting-item-name">{RESET_CONTROL_LABEL}</div>
 		<div class="setting-item-description">
-			Clears the plugin’s local task cache, file/task maps, comment maps, and sync checkpoint.
-			Vault markdown notes are <strong>not</strong> deleted.
+			{RESET_VAULT_TT_INTACT_COPY}
 			<br>
 			<em>
 				Use before restoring a TickTick account backup (instead of deleting IndexedDB in DevTools).
-				Then run <strong>Synchronize</strong> to re-link from vault markers and TickTick.
 			</em>
 		</div>
 	</div>
 	<div class="setting-item-control">
 		<button
 			disabled={isWorking}
-			class="mod-cta"
+			class="mod-warning"
 			on:click={onReset}>
-			Reset local sync database
+			{RESET_CONTROL_LABEL}
 		</button>
 	</div>
 </div>
@@ -71,8 +73,9 @@
 			</p>
 			<p style="color:var(--text-warning);">
 				<em>
-					Vault notes stay. TickTick is not changed. After this, restore TickTick if needed,
-					then Synchronize for a clean re-link. Mass-delete guards still protect an empty local DB.
+					{RESET_VAULT_TT_INTACT_COPY}
+					After this, restore TickTick if needed, then Synchronize for a clean re-link.
+					Mass-delete guards still protect an empty local DB.
 				</em>
 			</p>
 			<div class="local-modal-actions">

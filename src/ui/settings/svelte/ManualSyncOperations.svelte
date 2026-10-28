@@ -6,11 +6,29 @@
 	import { FolderSuggest } from '@/utils/FolderSuggester';
 	import { onMount } from 'svelte';
 	import { validateNewFolder } from '@/utils/FolderUtils';
+	import DeletionGlossary from '@/ui/settings/svelte/DeletionGlossary.svelte';
+	import ResetTasksControl from '@/ui/settings/svelte/ResetTasksControl.svelte';
+	import {
+		MAINT_PRIMARY_CTA_CLASS,
+		MAINT_SYNC_PRIMARY_HELP,
+		MAINT_SYNC_PRIMARY_LABEL,
+		MAINT_SYNC_PRIMARY_NAME,
+		PURGE_TRASH_DB_BUTTON,
+		PURGE_TRASH_DB_HELP,
+		PURGE_TRASH_DB_LABEL,
+		RESET_DANGER_ZONE_TITLE,
+	} from '@/ui/settings/settingsUxCopy';
+	import './SettingsStyles.css';
 
 	export let plugin: TickTickSync;
 
 	let folderOptions: Record<string, string> = {};
 	let isCheckingDatabase = false;
+	let isWorking = false;
+
+	function setIsWorking(value: boolean) {
+		isWorking = value;
+	}
 
 	async function handleManualSync() {
 		if (!getSettings().token) {
@@ -77,16 +95,18 @@
 
 </script>
 
-<div class="manual-operations">
+<div class="manual-operations {isWorking ? 'wait-cursor' : 'default-cursor'}">
 	{#if getSettings().token}
+		<DeletionGlossary />
+
 		<div class="setting-item">
 			<div class="setting-item-info">
-				<div class="setting-item-name">Manual sync</div>
-				<div class="setting-item-description">Manually perform a synchronization task</div>
+				<div class="setting-item-name">{MAINT_SYNC_PRIMARY_NAME}</div>
+				<div class="setting-item-description">{MAINT_SYNC_PRIMARY_HELP}</div>
 			</div>
 			<div class="setting-item-control">
-				<button class="mod-cta" on:click={handleManualSync} disabled={isCheckingDatabase}>
-					Sync
+				<button class={MAINT_PRIMARY_CTA_CLASS} on:click={handleManualSync} disabled={isCheckingDatabase || isWorking}>
+					{MAINT_SYNC_PRIMARY_LABEL}
 				</button>
 			</div>
 		</div>
@@ -100,9 +120,9 @@
 			</div>
 			<div class="setting-item-control">
 				<button
-					class="mod-cta"
+					class="tts-maint-secondary"
 					on:click={handleCheckDatabase}
-					disabled={isCheckingDatabase}>
+					disabled={isCheckingDatabase || isWorking}>
 					{isCheckingDatabase ? 'Checking...' : 'Check Database'}
 				</button>
 			</div>
@@ -118,9 +138,9 @@
 			</div>
 			<div class="setting-item-control">
 				<button
-					class="mod-cta"
+					class="tts-maint-secondary"
 					on:click={() => plugin.service.backup()}
-					disabled={isCheckingDatabase}>
+					disabled={isCheckingDatabase || isWorking}>
 					Backup
 				</button>
 			</div>
@@ -161,11 +181,11 @@
 
 		<div class="setting-item">
 			<div class="setting-item-info">
-				<div class="setting-item-name">Permanently delete deleted tasks</div>
-				<div class="setting-item-description">View and permanently remove deleted task records from the database</div>
+				<div class="setting-item-name">{PURGE_TRASH_DB_LABEL}</div>
+				<div class="setting-item-description">{PURGE_TRASH_DB_HELP}</div>
 			</div>
 			<div class="setting-item-control">
-				<button class="mod-cta" on:click={async () => {
+				<button class="tts-maint-secondary" on:click={async () => {
 					const { CleanupDeletedTasksModal } = await import('@/modals/CleanupDeletedTasksModal');
 					const deletedTasks = await plugin.taskRepository.getDeletedTasks();
 					if (deletedTasks.length === 0) {
@@ -178,8 +198,8 @@
 						await plugin.taskRepository.hardDeleteTasks(selected);
 						new Notice(`Permanently deleted ${selected.length} task(s).`);
 					}
-				}} disabled={isCheckingDatabase}>
-					Manage Deleted Tasks
+				}} disabled={isCheckingDatabase || isWorking}>
+					{PURGE_TRASH_DB_BUTTON}
 				</button>
 			</div>
 		</div>
@@ -190,7 +210,7 @@
 				<div class="setting-item-description">View and restore deleted tasks back to their original or a different file</div>
 			</div>
 			<div class="setting-item-control">
-				<button class="mod-cta" on:click={async () => {
+				<button class="tts-maint-secondary" on:click={async () => {
 					const { RecoverDeletedTasksModal } = await import('@/modals/RecoverDeletedTasksModal');
 					const deletedTasks = await plugin.taskRepository.getDeletedTasks();
 					if (deletedTasks.length === 0) {
@@ -199,7 +219,7 @@
 					}
 					const modal = new RecoverDeletedTasksModal(plugin.app, plugin, deletedTasks);
 					await modal.showModal();
-				}} disabled={isCheckingDatabase}>
+				}} disabled={isCheckingDatabase || isWorking}>
 					Recover Deleted Tasks
 				</button>
 			</div>
@@ -223,6 +243,15 @@
 					}}
 				/>
 			</div>
+		</div>
+
+		<div class="tts-danger-zone">
+			<div class="tts-danger-zone-title">{RESET_DANGER_ZONE_TITLE}</div>
+			<ResetTasksControl
+				{isWorking}
+				{plugin}
+				{setIsWorking}
+			/>
 		</div>
 	{/if}
 </div>

@@ -3,8 +3,8 @@
 	import { updateSettings } from '@/settings';
 	import type TickTickSync from '@/main';
 	import { LINK_BEHAVIOR, LINK_VISIBILITY } from '@/ui/settings/svelte/constants.svelte.js';
+	import { resetTasks } from '@/ui/settings/utils/ResetSynchronization';
 	import './SettingsStyles.css';
-	import ResetTasksControl from '@/ui/settings/svelte/ResetTasksControl.svelte';
 
 	export let plugin: TickTickSync;
 
@@ -353,13 +353,6 @@
 				/>
 			</div>
 		</div>
-
-		<br>
-		<ResetTasksControl
-			{isWorking}
-			{plugin}
-			{setIsWorking}
-		/>
 
 	</div>
 </div>

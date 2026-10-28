@@ -112,12 +112,12 @@ Preconditions for every AF row: plugin `tickticksync-abyss`, manual sync, `fileL
 | UX-ABYSS-STATUS-SRC-PROJ-WRITE | **Proposed.** TTS-created / completion-driven project `status` uses Abyss default name and `done`, not emoji. Pilot **not run**. |
 | UX-ABYSS-STATUS-SRC-PROJ-MIG | **Proposed.** `projects.statusMigration` set: do not guess a status string; completion uses current `isDoneStatus` only. Pilot **not run**. |
 | UX-ABYSS-STATUS-SRC-UI | **Proposed.** Format on: settings copy says statuses come from Abyss Tasks and Status → list is a list-id overlay. Format off: no such claim. Pilot **not run**. |
-| UX-SET-GLOSSARY | **Settings UX #189 / Phase 0 #190.** Owner can explain **Skip deletions this run** vs **Cancel** (Confirm Deletion) vs **Manage Deleted** in ≤30s from the canonical glossary. Glossary: `docs/pilot/results/UX-OBS-TT-SOAK/27-settings-ux-redesign-plan.md` (Reset ≠ Held ≠ Confirm/Orphan ≠ Manage Deleted ≠ On TT deletion). Aligns with `24`–`26`. No sync behavior change. Pilot **not run** until owner records the 30s check. |
-| UX-SET-SYNCTAG-EMPTY | **Phase 1 #191 (copy).** Empty SyncTag shows badge/tooltip: empty means pull **all** allow-listed `syncedLists` tasks (not a silent “safe empty filter”). Label/help lean toward pull-filter wording. No SyncTag engine change. Pilot **not run**. |
-| UX-SET-MANAGE-DELETED | **Phase 1 #191 (copy).** Settings control for soft-deleted Dexie purge is named/described so it is clearly **≠** held-deletions modal / Apply once (`26`). Pilot **not run**. |
-| UX-SET-RESET-ONE | **Phase 1 #191 (layout/copy).** Settings shows **one** primary Reset local sync database control in Danger zone (no competing Reset stories). Semantics remain `UX-RESET-1`. Pilot **not run**. |
-| UX-SET-SYNCED-LISTS-HELP | **Phase 1 #191 (copy).** Synced lists control has short in-UI help: allow-list of TickTick lists; empty → nothing pulled (`AF-1`). Pilot **not run**. |
-| UX-SET-MAINT-SYNC-PRIMARY | **Phase 1 #191 (layout).** Maintenance: **Synchronize** is the primary action vs secondary housekeeping (Manage Deleted, reports). Pilot **not run**. |
+| UX-SET-GLOSSARY | **Settings UX #189 / Phase 1 #191.** Owner can explain **Skip deletions this run** vs **Cancel** (Confirm Deletion) vs **Purge trash (DB)** in ≤30s from Settings Maintenance/Guard glossary (or `27-settings-ux-redesign-plan.md`). Aligns with `24`–`26`. No sync behavior change. Pilot **not run** until owner records the 30s check. |
+| UX-SET-SYNCTAG-EMPTY | **Phase 1 #191 (copy).** Empty **Pull filter tag** shows badge/tooltip `pull ALL`: empty means pull **all** allow-listed `syncedLists` tasks (not a silent “safe empty filter”). No SyncTag engine change. Unit: `uxSetPhase1.settingsCopy.test.ts`. Pilot **not run**. |
+| UX-SET-MANAGE-DELETED | **Phase 1 #191 (copy).** Soft-deleted Dexie purge labeled **Purge trash (DB)** so it is clearly **≠** held-deletions modal / Apply once (`26`). Unit covered. Pilot **not run**. |
+| UX-SET-RESET-ONE | **Phase 1 #191 (layout/copy).** **One** Reset local sync database in Maintenance **Danger zone** (removed from Tasks/Notes). Vault + TickTick stay intact (copy). Semantics remain `UX-RESET-1`. Unit covered. Pilot **not run**. |
+| UX-SET-SYNCED-LISTS-HELP | **Phase 1 #191 (copy).** Synced lists help: allow-list; empty → nothing pulled (`AF-1`); new TT list ≠ synced until ticked. Unit covered. Pilot **not run**. |
+| UX-SET-MAINT-SYNC-PRIMARY | **Phase 1 #191 (layout).** Maintenance: **Synchronize** is the sole primary CTA vs secondary Check/Backup/Purge. Unit covered. Pilot **not run**. |
 | UX-SET-HIDE-DEFAULTS | **Phase 2 #192 (visibility).** When Abyss/GTD path is active (same predicate as `UX-STUB-1`: `projectSchemeEnabled` + `abyssTasksFormat` + non-empty `syncScopeFolders`), Defaults Tasks folder is hidden or non-primary. No mapping-engine change. Pilot **not run**. |
 | UX-SET-EXTRA-FILTERS | **Phase 2 #192 (visibility).** Extra filters folded/hidden when redundant under that Abyss mode. Pilot **not run**. |
 | UX-SET-STATUS-VS-STAGE | **Phase 2 #192 (visibility).** When `statusListMappings` is the active SoT, stage→list UI is inactive/hidden so it does not compete. Mapping semantics unchanged unless a later case says otherwise. Pilot **not run**. |
@@ -130,7 +130,7 @@ Preconditions for every AF row: plugin `tickticksync-abyss`, manual sync, `fileL
 | UX-SET-INTERVAL-ZERO | **Phase 4 #194.** Sync interval = 0 → progress presentation grey / non-active per implementing PR. Pilot **not run**. |
 | UX-SET-PW-CONFIRM | **Phase 4 #194.** If password shown plaintext, confirm/warn present. Pilot **not run**. |
 
-Unit tests cover parts of AF-1, AF-5, AF-8, UX-STATUS-MAP-*, UX-RESET-1 / BUG-RESET-TASKS-PARTIAL / BUG-RESET-CACHE-DELETE, comments, a failed pull, and PERF-INDEX / PERF-CACHE / PERF-COUNTERS. They do not replace the live gate. Settings UX `UX-SET-*` rows are analyst DoR for epic #189 — no Settings UI in Phase 0.
+Unit tests cover parts of AF-1, AF-5, AF-8, UX-STATUS-MAP-*, UX-RESET-1 / BUG-RESET-TASKS-PARTIAL / BUG-RESET-CACHE-DELETE, UX-SET Phase 1 copy/layout (`uxSetPhase1.settingsCopy.test.ts`), comments, a failed pull, and PERF-INDEX / PERF-CACHE / PERF-COUNTERS. They do not replace the live gate. Settings UX Phase 1 is copy/layout only — pilot UX-SET-* still **not run**.
 
 ## Old ids
 
@@ -160,6 +160,7 @@ Pass only with evidence: the note path, the `ticktick_id`, and either the journa
 
 | Date (UTC) | Vault | Build | Runner | Item | Result | Evidence |
 |------------|-------|-------|--------|------|--------|----------|
+| 2026-10-28 | — | tip #191 PR | unit | UX-SET Phase 1 copy/layout (#191) | unit **pass**; pilot **not run** | `uxSetPhase1.settingsCopy.test.ts`. Evidence note `UX-OBS-TT-SOAK/28-settings-ux-phase1.md`. |
 | 2026-10-28 | — | — | analyst | UX-SET-* (Settings UX #189 / Phase 0 #190) | **not run** | Glossary + case stubs only. `UX-OBS-TT-SOAK/27-settings-ux-redesign-plan.md`. No Settings UI. |
 | 2026-10-28 | — | — | analyst | UX-ABYSS-STATUS-SRC-* | **not run** | Spec only (#185). No pilot. `docs/pilot/UX-ABYSS-STATUS-SRC.md`. |
 | 2026-10-27 | Thinkpad-tts-test | tip #182 (**2.0.94** label) | agent (CLI+MCP) | UX-STATUS-MAP-1 / UX-STATUS-MAP-2 | **pass** ×2 | `[!]`→nextAction `…57c8`; `[/]`→WIP `…57c9`. `UX-OBS-TT-SOAK/16-status-map-prove.md`. |

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import CollapsibleSection from '@/ui/settings/svelte/sections/CollapsibleSection.svelte';
+	import DeletionGlossary from '@/ui/settings/svelte/DeletionGlossary.svelte';
 	import { createEventDispatcher } from 'svelte';
 	import { getSettings, updateSettings } from '@/settings';
 	import { Notice } from 'obsidian';
@@ -37,6 +38,8 @@
 	open={open}
 	on:headerClick={handleHeaderClick}
 >
+	<DeletionGlossary compact={true} />
+
 	<div class="setting-item">
 		<div class="setting-item-info">
 			<div class="setting-item-name">Hold mass deletions</div>

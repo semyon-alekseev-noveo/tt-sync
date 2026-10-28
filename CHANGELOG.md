@@ -1,3 +1,13 @@
+### Iteration 2026-10-28 06:42 UTC
+
+- Context: Owner go after Phase 0 PR #195; Settings UX Phase 1 [#191](https://github.com/semyon-alekseev-noveo/tt-sync/issues/191) (epic [#189](https://github.com/semyon-alekseev-noveo/tt-sync/issues/189)). Copy/layout only.
+- Target: Glossary in Settings; SyncTag empty badge; Synced lists help; one Danger-zone Reset; Purge trash (DB); Maintenance Synchronize primary.
+- Actions log: Added `settingsUxCopy.ts` + `DeletionGlossary.svelte`; wired Maintenance / Guard / GTD; Reset only in Maintenance Danger zone; unit `uxSetPhase1.settingsCopy.test.ts`; TEST_PLAN / AF / pilot note.
+- Validation: `npx vitest run` 823 pass; `npm run build` ok.
+- Problems: Pilot Settings UI still **not run** (`open`).
+- To Be Done: Owner merges PR; pilot smoke UX-SET-* rows; Phase 2 [#192](https://github.com/semyon-alekseev-noveo/tt-sync/issues/192) later.
+- References: `src/ui/settings/settingsUxCopy.ts`, `docs/pilot/results/UX-OBS-TT-SOAK/28-settings-ux-phase1.md`, `TEST_PLAN.md`, `CHANGELOG.md`
+
 ### Iteration 2026-10-28 06:40 UTC
 
 - Context: Owner go on Settings UX redesign epic [#189](https://github.com/semyon-alekseev-noveo/tt-sync/issues/189) Phase 0 [#190](https://github.com/semyon-alekseev-noveo/tt-sync/issues/190). Docs/DoR only.

@@ -8,6 +8,15 @@
 	import { isListAllowed, lineListToText, parseLineList } from '@/syncScope';
 	import { projectsVersion } from '@/projectsVersion';
 	import { parseTagListText, tagListToText } from '@/listMapping';
+	import {
+		PULL_FILTER_EMPTY_BADGE,
+		PULL_FILTER_EMPTY_TOOLTIP,
+		PULL_FILTER_TAG_HELP,
+		PULL_FILTER_TAG_LABEL,
+		SYNCED_LISTS_HELP,
+		SYNCED_LISTS_LABEL,
+		syncTagEmptyBadgeVisible,
+	} from '@/ui/settings/settingsUxCopy';
 
 	export let open = false;
 	export let plugin;
@@ -250,17 +259,17 @@
 	on:headerClick={handleHeaderClick}
 >
 	<div class="setting-item-description">
-		Nothing is pulled from TickTick until you tick at least one list below. Lists that are not ticked get no
-		file in your vault.
+		{SYNCED_LISTS_HELP}
 	</div>
 
 	<div class="setting-item">
 		<div class="setting-item-info">
-			<div class="setting-item-name">Synced lists</div>
+			<div class="setting-item-name">{SYNCED_LISTS_LABEL}</div>
 			<div class="setting-item-description">
-				TickTick lists pulled into the vault (each gets a file in the tasks folder, created on the next
-				sync). Matched by list name. If you rename a list in TickTick, tick it again. If the project scheme is
-				on, the Projects list must be ticked too.
+				{SYNCED_LISTS_HELP}
+				Each ticked list gets a file in the tasks folder (created on the next sync). Matched by list name.
+				If you rename a list in TickTick, tick it again. If the project scheme is on, the Projects list must
+				be ticked too.
 			</div>
 		</div>
 		<div class="setting-item-control" style="flex-direction: column; align-items: flex-start;">
@@ -301,18 +310,23 @@
 
 	<div class="setting-item">
 		<div class="setting-item-info">
-			<div class="setting-item-name">Sync tag (pull filter)</div>
+			<div class="setting-item-name">
+				{PULL_FILTER_TAG_LABEL}
+				{#if syncTagEmptyBadgeVisible(syncTag)}
+					<span class="tts-pull-all-badge" title={PULL_FILTER_EMPTY_TOOLTIP}>{PULL_FILTER_EMPTY_BADGE}</span>
+				{/if}
+			</div>
 			<div class="setting-item-description">
-				Optional. Only tasks with this TickTick tag are pulled from allow-listed lists (no <code>#</code>).
-				Pilot example: <code>tts-test</code>. Leave empty to pull all tasks in the ticked lists (subject to
-				extra filters below).
+				{PULL_FILTER_TAG_HELP}
+				Pilot example: <code>tts-test</code>. Subject to extra filters below when set.
 			</div>
 		</div>
 		<div class="setting-item-control">
 			<input
 				type="text"
 				value={syncTag}
-				placeholder="e.g. tts-test"
+				placeholder="e.g. tts-test (empty = pull ALL)"
+				title={syncTagEmptyBadgeVisible(syncTag) ? PULL_FILTER_EMPTY_TOOLTIP : undefined}
 				on:input={(e) => handleSyncTagInput((e.target as HTMLInputElement).value)}
 			/>
 		</div>
