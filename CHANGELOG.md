@@ -1,3 +1,13 @@
+### Iteration 2026-10-28 05:40 UTC
+
+- Context: Analyst only for [#185](https://github.com/semyon-alekseev-noveo/tt-sync/issues/185) (Abyss task + project statuses from Abyss Tasks settings). No plugin code, no version bump.
+- Target: Proposed cases `UX-ABYSS-STATUS-SRC-*` and a settings-shape note. **Not DoR** until the owner confirms overlay, fallback, and project → TickTick entity.
+- Actions log: Read public Abyss Tasks **2.3.0** `taskStatuses` / `projects.statuses` (no vault `data.json` this session). Wrote `docs/pilot/UX-ABYSS-STATUS-SRC.md`. Catalog + TEST_PLAN stubs **not run**. `PO_STATUS.md` row P1 **not DoR**.
+- Validation: Docs only. `npx vitest run` / `npm run build` not required (no behavior change).
+- Problems: (a)(b)(c) still open (`open`). Pilot file not re-read (`open`).
+- To Be Done: Owner answers; then a developer may add failing tests. `GTD_ARRAY_KEYS` vs `statusListMappings` is a child engineering note, not this DoR.
+- References: `docs/pilot/UX-ABYSS-STATUS-SRC.md`, `ABYSS_FIRST_CASES.md`, #185
+
 ### Iteration 2026-10-27 15:25 UTC
 
 - Context: Owner merged #182; post-merge install + prove-twice for status→list (no tag/release).

@@ -30,6 +30,7 @@
 | 14 | Task status → TT list map (spec) | `14-task-status-to-list-map.md` | done (code #182) |
 | 15 | Release notes mapping (tag **2.0.94**) | `15-release-notes-mapping.md` | done (tag zip still tags→lists) |
 | 16 | Post-#182 status map prove ×2 | `16-status-map-prove.md` | **pass** ×2 (tip; version still 2.0.94) |
+| 185 | #185 status source (analyst spec) | [`../../UX-ABYSS-STATUS-SRC.md`](../../UX-ABYSS-STATUS-SRC.md) | **spec only (not run)**; not DoR |
 
 ## Rules
 
