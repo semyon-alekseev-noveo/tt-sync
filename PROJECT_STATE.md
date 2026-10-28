@@ -53,7 +53,7 @@
 ## To Be Done
 
 0. **BUG-RESET-CACHE-DELETE:** Cancel open modal if any; tip installed; prove ×2 Reset→Synchronize without vault-line cache-miss delete (`25-reset-cache-delete-prove.md` — owner Reset click).
-0b. **Settings UX #189:** Owner 30s glossary check (#190); Phase 1 merged (#196); Phase 2 hide/merge [#192](https://github.com/semyon-alekseev-noveo/tt-sync/issues/192) (unit; pilot not run); then Phase 3 naming [#193](https://github.com/semyon-alekseev-noveo/tt-sync/issues/193).
+0b. **Settings UX #189:** Owner 30s glossary check (#190); Phase 1–2 merged (#196/#197); Phase 3 names/defaults [#193](https://github.com/semyon-alekseev-noveo/tt-sync/issues/193) (unit; pilot not run); then Phase 4 cold-start [#194](https://github.com/semyon-alekseev-noveo/tt-sync/issues/194).
 1. Owner decides UX Decision #1 (Abyss vs `#ticktick`) — prefer clear ignore on pilot; optional TTS stop note-level `ticktick` stamp later (`06-decision-ticktick-vs-abyss.md`).
 2. **[done]** UX-STUB-1 / BUG-LIST-STUB-RECREATE pilot cleanup + prove ×2 after #179 (`08-stub-cleanup-prove.md`).
 2b. **[done]** UX-STATUS-MAP-1/2 prove ×2 after #182 (`16-status-map-prove.md`); MAP-3/4/PULL + Abyss customs still open; version bump when owner asks.

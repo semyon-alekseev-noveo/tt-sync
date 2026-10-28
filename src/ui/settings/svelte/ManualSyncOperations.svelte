@@ -18,6 +18,12 @@
 		PURGE_TRASH_DB_LABEL,
 		RESET_DANGER_ZONE_TITLE,
 	} from '@/ui/settings/settingsUxCopy';
+	import {
+		BKUP_FOLDER_HELP,
+		BKUP_FOLDER_LABEL,
+		BKUP_ROOT_WARN,
+		bkupFolderIsVaultRoot,
+	} from '@/ui/settings/settingsUxNames';
 	import './SettingsStyles.css';
 
 	export let plugin: TickTickSync;
@@ -166,8 +172,11 @@
 		</div>
 		<div class="setting-item">
 			<div class="setting-item-info">
-				<div class="setting-item-name">Backup folder</div>
-				<div class="setting-item-description">Choose the folder to store the backup files.</div>
+				<div class="setting-item-name">{BKUP_FOLDER_LABEL}</div>
+				<div class="setting-item-description">{BKUP_FOLDER_HELP}</div>
+				{#if bkupFolderIsVaultRoot($settingsStore.bkupFolder)}
+					<div class="setting-item-description tts-ux-warn">{BKUP_ROOT_WARN}</div>
+				{/if}
 			</div>
 			<div class="setting-item-control flex-container">
 				<div

@@ -277,3 +277,10 @@ label.checkbox-container {
 .tts-ux-inactive-banner .setting-item-name {
 	color: var(--text-muted);
 }
+.tts-ux-warn {
+	margin-top: 0.4em;
+	padding: 0.4em 0.65em;
+	border-left: 3px solid var(--text-warning, #b07000);
+	color: var(--text-warning, #b07000);
+	font-size: var(--font-ui-small);
+}

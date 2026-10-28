@@ -6,9 +6,9 @@ Manual cases for behavior changes. Automated tests do not replace a row here.
 
 Pilot means `<pilot-vault>`, manual **Synchronize**, plugin id `tickticksync-abyss`. Do not use `<live-vault>`. A cloud agent does not mark a row passed. Status stays **not run** until a person or a local agent on that Obsidian records what they saw.
 
-## UX-SET — Settings UX redesign (epic #189 / Phase 1 #191 / Phase 2 #192)
+## UX-SET — Settings UX redesign (epic #189 / Phase 1 #191 / Phase 2 #192 / Phase 3 #193)
 
-Phase 1: **copy / layout**. Phase 2 (#192): **visibility / merge** when Abyss/GTD mode is active (no sync logic change). Glossary/plan: `docs/pilot/results/UX-OBS-TT-SOAK/27-settings-ux-redesign-plan.md`. Catalog: `ABYSS_FIRST_CASES.md` `UX-SET-*`. Units: `uxSetPhase1.settingsCopy.test.ts`, `uxSetPhase2.settingsVisibility.test.ts`. Pilot stays **not run** until Settings UI is installed and exercised on the pilot vault.
+Phase 1: **copy / layout**. Phase 2 (#192): **visibility / merge** when Abyss/GTD mode is active. Phase 3 (#193): **names / safer defaults / warnings** (no sync logic change). Glossary/plan: `docs/pilot/results/UX-OBS-TT-SOAK/27-settings-ux-redesign-plan.md`. Catalog: `ABYSS_FIRST_CASES.md` `UX-SET-*`. Units: `uxSetPhase1.settingsCopy.test.ts`, `uxSetPhase2.settingsVisibility.test.ts`, `uxSetPhase3.settingsNames.test.ts`. Pilot stays **not run** until Settings UI is installed and exercised on the pilot vault.
 
 | Case | Steps | Expected | Pilot |
 |------|-------|----------|-------|
@@ -21,10 +21,10 @@ Phase 1: **copy / layout**. Phase 2 (#192): **visibility / merge** when Abyss/GT
 | UX-SET-HIDE-DEFAULTS | Abyss/GTD path on (UX-STUB-1: `projectSchemeEnabled` + `abyssTasksFormat` + non-empty `syncScopeFolders`). Open Sync Control → Defaults. | Default folder location hidden; note points to GTD **Tasks folder** (same key). | unit **pass**; pilot **not run** |
 | UX-SET-EXTRA-FILTERS | Non-empty `syncedLists`. Open Sync Control. | Extra filters / Limit sync section omitted (not a competing allow-list). | unit **pass**; pilot **not run** |
 | UX-SET-STATUS-VS-STAGE | Non-empty `statusListMappings`. Open GTD. | Stage→list shows inactive banner (no editable twin); Status → list under Notes remains. | unit **pass**; pilot **not run** |
-| UX-SET-SYNC-NOTES | Scan Sync Notes label (after #193). | Distinguishable from Notebook / NOTE-BODY. | **not run** |
-| UX-SET-NOTEBOOK-WARN | Open Notebook-related settings (after #193). | Notebook ≠ Inbox warning visible. | **not run** |
-| UX-SET-BKUP-DEFAULT | Check backup folder default (after #193). | Sane for Abyss pilots or warned. | **not run** |
-| UX-SET-LEAN-WARN | Lean project template setting (after #193). | Warn present; no full MOC engine required. | **not run** |
+| UX-SET-SYNC-NOTES | Notes: find **Sync task descriptions** (was Sync Notes). Compare to Sync TickTick Notebook. | Label ≠ Notebook; help mentions NOTE-BODY / descriptions. | unit **pass**; pilot **not run** |
+| UX-SET-NOTEBOOK-WARN | Enable Sync TickTick Notebook; set Notebook folder to `00 Inbox` (or Inbox/capture). | Warning: Notebook ≠ Inbox/capture; prefer dedicated folder. No forced rewrite of existing path. | unit **pass**; pilot **not run** |
+| UX-SET-BKUP-DEFAULT | New install / DEFAULT: backup folder. Existing vault with `/`: open Maintenance → Backup folder. | Default `TickTickSync/backups`; warn when value is vault root `/`. | unit **pass**; pilot **not run** |
+| UX-SET-LEAN-WARN | GTD → Project note template = `60 templates/MOC.md`. | Lean/MOC warn (soak P0 / 1/2/3); empty or lean path has no warn. No MOC engine. | unit **pass**; pilot **not run** |
 | UX-SET-COLD-START | Fresh-eyes Settings scan (after #194). | Synchronize + SyncTag/Abyss cues findable without docs hunt. | **not run** |
 | UX-SET-DEVICE-PRUNE | Device prune UI (after #194). | Wording clear. | **not run** |
 | UX-SET-INTERVAL-ZERO | Set sync interval = 0 (after #194). | Progress presentation grey / non-active per PR. | **not run** |

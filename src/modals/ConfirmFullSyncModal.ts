@@ -1,16 +1,16 @@
 import { App, Modal, Setting } from 'obsidian';
+import {
+	FULL_VAULT_CONFIRM_LABEL,
+	FULL_VAULT_CONFIRM_MESSAGE,
+	FULL_VAULT_CONFIRM_TITLE,
+} from '@/ui/settings/settingsUxNames';
 
 
 export class ConfirmFullSyncModal extends Modal {
-	title = 'Full Vault Task Sync Confirmation';
-	message = 'Are you sure you want to Sync ALL tasks? \n' +
-		'Indented Tasks created in Obsidian will be created as subtasks in TickTick\n ' +
-		'Task Items created in TickTick will still be Task Items. This is the only way to create Task Items when Full Vault Sync is enabled.\n' +
-		'Tasks that are currently "Items" of tasks MAY be ' +
-		'converted to "Sub Tasks" of the containing Tasks.\n' +
-		'The "Items" will not be deleted.\nPlease proceed with Caution.';
+	title = FULL_VAULT_CONFIRM_TITLE;
+	message = FULL_VAULT_CONFIRM_MESSAGE;
 	cancelLabel = 'Cancel';
-	confirmLabel = 'Confirm Full Vault Task Sync';
+	confirmLabel = FULL_VAULT_CONFIRM_LABEL;
 	result: boolean = false;
 	onSubmit: (result: boolean) => void;
 	resolvePromise!: (value: (PromiseLike<boolean> | boolean)) => void;

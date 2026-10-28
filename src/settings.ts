@@ -1,5 +1,6 @@
 import type { DeviceInfo } from '@/db/schema';
 import { settingsStore } from '@/ui/settings/settingsstore';
+import { DEFAULT_BKUP_FOLDER } from '@/ui/settings/settingsUxNames';
 
 export interface TaskDisplayModeSettings {
 	link: 'show' | 'hide' | 'hover';
@@ -189,7 +190,8 @@ export const DEFAULT_SETTINGS: ITickTickSyncSettings = {
 	// Fork defaults: no obsidian:// links in TickTick titles, no "ticktick" tag pushed to TickTick.
 	fileLinksInTickTick: 'noLink',
 	taskLinksInObsidian: 'taskLink',
-	bkupFolder: '/',
+	// Phase 3 #193 UX-SET-BKUP-DEFAULT: subfolder for new installs (existing data.json kept as-is).
+	bkupFolder: DEFAULT_BKUP_FOLDER,
 	stopInjectingTickTickTag: true,
 	stripTickTickTagOnReset: false,
 
@@ -204,7 +206,8 @@ export const DEFAULT_SETTINGS: ITickTickSyncSettings = {
 		reading: {
 			link: 'show',
 			id: false,
-			tag: true,
+			// Phase 3 #193 quiet reading: hide sync tag chrome in Reading mode for new installs.
+			tag: false,
 		},
 		editing: {
 			link: 'show',

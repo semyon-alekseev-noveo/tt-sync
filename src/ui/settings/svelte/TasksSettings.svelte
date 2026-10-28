@@ -8,6 +8,7 @@
 		hideKeepTickTickFolders,
 		hideStripTickTickOnReset,
 	} from '@/ui/settings/settingsUxVisibility';
+	import { QUIET_READING_DEFAULTS_NOTE } from '@/ui/settings/settingsUxNames';
 	import './SettingsStyles.css';
 
 	export let plugin: TickTickSync;
@@ -249,6 +250,9 @@
 		<h3 class="setting-item-name" style="margin-bottom: 8px;">Task Display</h3>
 		<p class="setting-item-description" style="margin-bottom: 12px;">
 			Control which task elements are visible in Reading mode and Edit mode.
+		</p>
+		<p class="setting-item-description tts-ux-merged-note" style="margin-bottom: 12px;">
+			{QUIET_READING_DEFAULTS_NOTE}
 		</p>
 
 		<div class="setting-item">

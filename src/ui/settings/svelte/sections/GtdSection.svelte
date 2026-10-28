@@ -23,6 +23,12 @@
 		hideHubSingleTasksFile,
 		hideOrInactiveGtdStageMapping,
 	} from '@/ui/settings/settingsUxVisibility';
+	import {
+		LEAN_PROJECT_TEMPLATE_WARN,
+		PROJECT_TEMPLATE_HELP,
+		PROJECT_TEMPLATE_LABEL,
+		projectTemplateLooksHeavyMoc,
+	} from '@/ui/settings/settingsUxNames';
 
 	export let open = false;
 	export let plugin;
@@ -414,14 +420,14 @@
 
 	<div class="setting-item">
 		<div class="setting-item-info">
-			<div class="setting-item-name">Project note template</div>
-			<div class="setting-item-description">
-				Optional note used for projects created from TickTick, e.g. <code>60 templates/MOC.md</code>.
-				Templater prompts and blocks are skipped; title and id are filled. Empty = built-in template.
-			</div>
+			<div class="setting-item-name">{PROJECT_TEMPLATE_LABEL}</div>
+			<div class="setting-item-description">{PROJECT_TEMPLATE_HELP}</div>
+			{#if projectTemplateLooksHeavyMoc(projectTemplatePath)}
+				<div class="setting-item-description tts-ux-warn">{LEAN_PROJECT_TEMPLATE_WARN}</div>
+			{/if}
 		</div>
 		<div class="setting-item-control">
-			<input type="text" bind:value={projectTemplatePath} on:change={saveProjectTemplate} placeholder="60 templates/MOC.md" />
+			<input type="text" bind:value={projectTemplatePath} on:change={saveProjectTemplate} placeholder="60 templates/lean-project.md" />
 		</div>
 	</div>
 
