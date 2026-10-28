@@ -1,3 +1,13 @@
+### Iteration 2026-10-27 15:25 UTC
+
+- Context: Owner merged #182; post-merge install + prove-twice for status→list (no tag/release).
+- Target: UX-STATUS-MAP-1 / -2 live **pass** ×2 on tip; tip-vs-**2.0.94**-tag mapping clarified in evidence.
+- Actions log: Fetched tip `41d734c`; built/installed **2.0.94** label into pilot; set `statusListMappings` + TTS-WIP; Synchronize A `[!]` then B `[/]`; MCP verified projectIds; wrote `16-status-map-prove.md`; restored dropped AF case rows; updated INDEX / TEST_PLAN / AF log / #181 note.
+- Validation: A `…57c8` on TTS-nextAction; B `…57c9` on TTS-WIP; lines stayed in `00 Inbox/abyss-active.md`.
+- Problems: Merge #182 had dropped UX-STATUS-MAP-* rows from `ABYSS_FIRST_CASES.md` (`resolved` in docs PR). MCP showed garbled `-tatu-in-progre-` tag on B (`open` — statusMappings side path).
+- To Be Done: Owner bump/release when ready; remaining MAP-3/4/PULL; Abyss custom `?`/`=`/`~`.
+- References: `docs/pilot/results/UX-OBS-TT-SOAK/16-status-map-prove.md`, PR #182, `CHANGELOG.md`
+
 ### Iteration 2026-10-27 15:10 UTC
 
 - Context: Owner go on Abyss checkbox-status → TickTick list map (SoT: symbol); `#gtd/*` must not drive lists.

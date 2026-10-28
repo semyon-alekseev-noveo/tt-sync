@@ -12,8 +12,8 @@ Settings: `abyssTasksFormat` + non-empty `statusListMappings` (pilot: space/!/?/
 
 | Case | Steps | Expected | Pilot |
 |------|-------|----------|-------|
-| UX-STATUS-MAP-1 | In-scope `- [!] …` Synchronize | TT list TTS-nextAction; line stays | **not run** |
-| UX-STATUS-MAP-2 | In-scope `- [/] …` Synchronize | TT list TTS-WIP | **not run** |
+| UX-STATUS-MAP-1 | In-scope `- [!] …` Synchronize | TT list TTS-nextAction; line stays | **pass** (`16-status-map-prove.md`; tip #182) |
+| UX-STATUS-MAP-2 | In-scope `- [/] …` Synchronize | TT list TTS-WIP | **pass** (`16-status-map-prove.md`; tip #182) |
 | UX-STATUS-MAP-3 | `- [ ] … #gtd/next` Synchronize | stays TTS-Inbox; `#gtd/next` stripped | **not run** |
 | UX-STATUS-MAP-4 | `- [x]` / `- [-]` | complete / cancel; list unchanged | **not run** |
 | UX-STATUS-MAP-PULL | Move task to TTS-waitingFor in TT; Synchronize | vault checkbox `[?]`; no new `#gtd/*` | **not run** |

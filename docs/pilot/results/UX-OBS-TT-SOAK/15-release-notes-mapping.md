@@ -52,7 +52,7 @@
 | TickTick list **TTS-WIP** | **Does not exist** in pilot `syncedLists` / current MCP set; needed only if/when status→list lands. |
 | Dual routing (tags **and** status both move list) | Rejected for the future cutover; today tags alone move the list. |
 
-Do not treat soak phase **14** (owner-clarified status map) as release behavior until that work is merged to `abyss-mapping` and proven.
+**Update 2026-10-27 (post-#182):** tip `41d734c` **does** ship `statusListMappings`. Published GitHub Release / tag **2.0.94** zip is still tag→list only. Tip installs after #182 (same version string until bump) use status→list when `statusListMappings` is set — prove: `16-status-map-prove.md`.
 
 ## Checklist
 
