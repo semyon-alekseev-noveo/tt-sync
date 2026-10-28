@@ -18,6 +18,7 @@ import {
 	pullOptionsForMode,
 	setGuardRun,
 	settleGuardChoice,
+	shouldSkipOrphanVaultLineDelete,
 	writeDeletionReport,
 	type GuardDecision,
 	type PlannedDeletion,
@@ -154,6 +155,17 @@ describe('EMPTY-SIDE-GUARD', () => {
 		}), cfg);
 		expect(invented.block).toBe(true);
 		expect(invented.reason).toBe('empty-dexie');
+	});
+
+	it('BUG-RESET-CACHE-DELETE: skip vault-line orphan strip on empty/reset bootstrap', () => {
+		expect(shouldSkipOrphanVaultLineDelete({ dexieTaskCount: 0, checkPoint: 99 })).toBe(true);
+		expect(shouldSkipOrphanVaultLineDelete({ dexieTaskCount: 5, checkPoint: 0 })).toBe(true);
+		expect(shouldSkipOrphanVaultLineDelete({
+			dexieTaskCount: 5,
+			checkPoint: 99,
+			syncBootstrapSkip: true,
+		})).toBe(true);
+		expect(shouldSkipOrphanVaultLineDelete({ dexieTaskCount: 5, checkPoint: 99 })).toBe(false);
 	});
 
 	it('startup and scheduled runs do not auto-apply', async () => {

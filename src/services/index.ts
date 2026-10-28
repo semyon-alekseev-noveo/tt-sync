@@ -18,7 +18,7 @@ import { OrphanTaskModal, type OrphanItem } from '@/modals/OrphanTaskModal';
 import type { SyncTrigger } from '@/services/SyncActivityIndicator';
 import type { ITask } from '@/api/types/Task';
 import { getTick } from '@/api/tick_singleton_factory'
-import { clearGuardRun } from '@/sync/massDeleteGuard';
+import { clearGuardRun, shouldSkipOrphanVaultLineDelete } from '@/sync/massDeleteGuard';
 import { createSyncRunContext, type SyncRunContext } from '@/sync/SyncRunContext';
 import {
 	runDeletionGuardPhase,
@@ -133,7 +133,11 @@ export class TickTickService {
 	}
 
 	private locallyEdited = new Set<string>();
-	async pushLocalEditsFirst(since?: number, trigger: SyncTrigger = 'manual'): Promise<Set<string>> {
+	async pushLocalEditsFirst(
+		since?: number,
+		trigger: SyncTrigger = 'manual',
+		opts?: { skipOrphanVaultLineDeletes?: boolean },
+	): Promise<Set<string>> {
 		this.locallyEdited = new Set();
 		const meta = since == null ? await db.meta.get("sync") : undefined;
 		if (meta?.pluginWriteMtimes) loadPluginWrites(meta.pluginWriteMtimes);
@@ -146,8 +150,11 @@ export class TickTickService {
 			manualSync: trigger === 'manual',
 		});
 		this.locallyEdited = new Set(edited);
+		const modOpts = opts?.skipOrphanVaultLineDeletes
+			? { skipOrphanVaultLineDeletes: true }
+			: undefined;
 		for (const path of edited) {
-			try { await this.plugin.taskModificationDetector.checkFileForModifications(path); }
+			try { await this.plugin.taskModificationDetector.checkFileForModifications(path, undefined, modOpts); }
 			catch (e) { log.warn('pre-pull push failed', path, e); }
 			try { await this.pushSubtaskOrder(path); } catch (e) { log.warn('subtask order push failed', path, e); }
 		}
@@ -264,6 +271,20 @@ export class TickTickService {
 			// NEW: Use TaskCache
 			this.plugin.syncRunning = true;
 			await timePhase('prepare', async () => {
+				// BUG-RESET-CACHE-DELETE: capture empty/reset *before* pull fills Dexie.
+				const dexieTaskCount = await this.plugin.taskRepository.getTaskCount();
+				const checkPoint = getSettings().checkPoint ?? 0;
+				syncCtx.skipOrphanVaultLineDeletes = shouldSkipOrphanVaultLineDelete({
+					dexieTaskCount,
+					checkPoint,
+				});
+				if (syncCtx.skipOrphanVaultLineDeletes) {
+					log.info(
+						'BUG-RESET-CACHE-DELETE: bootstrap skip orphan vault-line removes',
+						`dexie=${dexieTaskCount}`,
+						`checkPoint=${checkPoint}`,
+					);
+				}
 				await runPreparePhase(phaseDeps);
 			});
 

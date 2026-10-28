@@ -1,3 +1,13 @@
+### Iteration 2026-10-28 05:35 UTC
+
+- Context: After UX-RESET-1 wipe + Synchronize, owner saw Confirm Deletion («task not found in local cache») for vault lines (e.g. DON-253) whose pre-wipe ids miss Dexie / 404 on TT.
+- Target: **BUG-RESET-CACHE-DELETE** — post-reset Synchronize must not strip vault task lines solely for cache miss; fail closed for the whole run.
+- Actions log: `shouldSkipOrphanVaultLineDelete`; sticky `skipOrphanVaultLineDeletes` on SyncRunContext at prepare; wire push + syncFiles + scan; case/TEST_PLAN/evidence `24-post-reset-delete-modal.md`.
+- Validation: `npx vitest run` (incl. `bugResetCacheDelete`, massDeleteGuard, synchronizationInner) **pass**; `npm run build` **pass**.
+- Problems: Owner must Cancel any open modal (`open` until tip install + prove ×2).
+- To Be Done: Open/merge PR; install tip; Cancel if modal; prove ×2 Reset→Synchronize without vault-line delete prompts.
+- References: `src/sync/massDeleteGuard.ts`, `src/sync/vault-push/taskModification/scan.ts`, `docs/pilot/results/UX-OBS-TT-SOAK/24-post-reset-delete-modal.md`, `CHANGELOG.md`
+
 ### Iteration 2026-10-27 15:25 UTC
 
 - Context: Owner merged #182; post-merge install + prove-twice for status→list (no tag/release).

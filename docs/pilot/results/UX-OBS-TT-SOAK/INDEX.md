@@ -30,6 +30,7 @@
 | 14 | Task status → TT list map (spec) | `14-task-status-to-list-map.md` | done (code #182) |
 | 15 | Release notes mapping (tag **2.0.94**) | `15-release-notes-mapping.md` | done (tag zip still tags→lists) |
 | 16 | Post-#182 status map prove ×2 | `16-status-map-prove.md` | **pass** ×2 (tip; version still 2.0.94) |
+| 24 | Post-Reset cache-miss delete modal | `24-post-reset-delete-modal.md` | **fail** observed; fix **BUG-RESET-CACHE-DELETE** (Cancel now; pilot re-prove pending) |
 
 ## Rules
 

@@ -99,8 +99,11 @@ Preconditions for every AF row: plugin `tickticksync-abyss`, manual sync, `fileL
 | UX-STATUS-MAP-3 | Same settings. `- [ ] … #gtd/next` stays on **TTS-Inbox** (status SoT); `#gtd/*` does **not** move the list; sync rewrite strips mapped stage tags. Dual tag+status routing rejected. |
 | UX-STATUS-MAP-4 | Same settings. `- [x]` completes TT task (list unchanged). `- [-]` cancels (status/cancelled tag path; list unchanged). Also covers `[ ]`→Inbox, `[?]`→waitingFor, `[=]`→Planned, `[~]`→someDay. |
 | UX-STATUS-MAP-PULL | Same settings. Moving a task in TickTick to a mapped list rewrites the checkbox char on pull (e.g. TTS-waitingFor → `[?]`); does **not** add `#gtd/*`. Completed → `[x]`; cancelled tag → `[-]`. |
+| UX-RESET-1 | Settings → **Reset local sync database**. Clears Dexie sync tables + `checkPoint` `0`; keeps device id. Does **not** delete vault notes or call TickTick deletes; does **not** auto-sync. Next Synchronize is a clean full pull that re-links markers; empty-Dexie mass-delete guard blocks invented TT deletes. |
+| BUG-RESET-TASKS-PARTIAL | Reset must not only zero `checkPoint` while leaving stale Dexie tasks/maps/files/comment maps. Expected: same clear path as **UX-RESET-1**. |
+| BUG-RESET-CACHE-DELETE | After Reset (empty Dexie and/or `checkPoint` 0), Synchronize must **not** strip vault lines whose `ticktick_id` is missing from Dexie and 404s on TickTick (pre-wipe / out-of-synced-list ids). No toast «Task not found. It will be removed from the file.» / modal «task not found in local cache» for that bootstrap run (sticky after mid-run pull fills Dexie). Mass-delete guard does not cover this vault-text path. Owner: **Cancel** any such modal — never Confirm. Alias: BUG-RESET-ORPHAN-VAULT-DELETE. Unit: `src/test/bugResetCacheDelete.test.ts`. Pilot: `docs/pilot/results/UX-OBS-TT-SOAK/24-post-reset-delete-modal.md`. |
 
-Unit tests cover parts of AF-1, AF-5, AF-8, UX-STATUS-MAP-*, UX-RESET-1 / BUG-RESET-TASKS-PARTIAL, comments, a failed pull, and PERF-INDEX / PERF-CACHE / PERF-COUNTERS. They do not replace the live gate.
+Unit tests cover parts of AF-1, AF-5, AF-8, UX-STATUS-MAP-*, UX-RESET-1 / BUG-RESET-TASKS-PARTIAL / BUG-RESET-CACHE-DELETE, comments, a failed pull, and PERF-INDEX / PERF-CACHE / PERF-COUNTERS. They do not replace the live gate.
 
 ## Old ids
 

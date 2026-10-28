@@ -8,9 +8,19 @@ import { getSettings } from '@/settings';
 import { getAllProjects } from '@/db/projects';
 import { stageNeedsPushDespiteHash } from '@/listMapping';
 import { isPathInPushScope, normalizeSyncTag, resolveSyncedListIds, tickTickTaskEntersVault, vaultParentMeaningfullyChanged, type TaskSyncLimitOptions } from '@/syncScope';
+import { shouldSkipOrphanVaultLineDelete } from '@/sync/massDeleteGuard';
 import log from '@/utils/logger';
 import type { TaskModificationDetector } from '@/sync/vault-push/taskModification/TaskModificationDetector';
 import type { PendingTickTickDeletion } from '@/sync/vault-push/taskModification/types';
+
+export type TaskModificationScanOptions = {
+	skipLines?: ReadonlySet<number>;
+	identifiedOnly?: boolean;
+	pushSnapshot?: string;
+	deferCommentSweep?: boolean;
+	/** Sticky sync-run bootstrap skip (empty Dexie / post-Reset). */
+	skipOrphanVaultLineDeletes?: boolean;
+};
 
 /** Scan vault lines/files for modifications and route into detect + push. */
 export class TaskModificationScan {
@@ -25,7 +35,7 @@ export class TaskModificationScan {
 		fileMap: NewFileMap,
 		pendingDeletions?: PendingTickTickDeletion[],
 		pushLimit?: TaskSyncLimitOptions,
-		options?: { identifiedOnly?: boolean; pushSnapshot?: string; deferCommentSweep?: boolean },
+		options?: TaskModificationScanOptions,
 	): Promise<boolean> {
 		// Outside syncScopeFolders: no update, no completion, no deletion push.
 		if (!isPathInPushScope(filepath)) {
@@ -85,6 +95,22 @@ export class TaskModificationScan {
 			if (remoteTask) {
 				log.warn(`Task ${taskId} not in local DB but exists on TickTick. Importing.`);
 				await this.plugin.taskRepository.upsertTask(remoteTask, filepath, Date.now());
+				return false;
+			}
+
+			// BUG-RESET-CACHE-DELETE: empty Dexie / post-Reset must not strip vault
+			// lines whose pre-wipe ids 404 on TickTick (mass-delete guard does not
+			// cover this vault-text path). Prefer Cancel if a modal still appears.
+			const dexieTaskCount = await this.plugin.taskRepository.getTaskCount();
+			if (shouldSkipOrphanVaultLineDelete({
+				dexieTaskCount,
+				checkPoint: getSettings().checkPoint ?? 0,
+				syncBootstrapSkip: options?.skipOrphanVaultLineDeletes,
+			})) {
+				log.warn(
+					`BUG-RESET-CACHE-DELETE: skip vault remove for ${taskId} in ${filepath} ` +
+						`(empty/reset bootstrap; leave marker for re-link)`,
+				);
 				return false;
 			}
 
@@ -220,7 +246,7 @@ export class TaskModificationScan {
 		this: TaskModificationDetector,
 		filepath: string | null,
 		pendingDeletions?: PendingTickTickDeletion[],
-		options?: { skipLines?: ReadonlySet<number>; identifiedOnly?: boolean },
+		options?: TaskModificationScanOptions,
 	): Promise<void> {
 		if (!filepath || !isPathInPushScope(filepath)) {
 			return;

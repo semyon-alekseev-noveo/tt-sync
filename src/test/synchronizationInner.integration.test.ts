@@ -309,7 +309,9 @@ describe('synchronizationInner integration', () => {
 		const result = await world.service.synchronizationInner(false, 'manual');
 		expect(result.ok).toBe(true);
 		const detector = (world.service.plugin as { taskModificationDetector: { checkFileForModifications: ReturnType<typeof vi.fn> } }).taskModificationDetector;
-		expect(detector.checkFileForModifications).toHaveBeenCalledWith('notes/push.md');
+		expect(detector.checkFileForModifications.mock.calls.some(
+			(c) => c[0] === 'notes/push.md',
+		)).toBe(true);
 	});
 
 	it('BUG-PULL-COMMENT-STALE rewrites the vault line when TickTick has an API comment the note lacks', async () => {
@@ -628,7 +630,8 @@ describe('synchronizationInner integration', () => {
 		// Count only the pre-pull push. checkDB calls the same method with one argument later.
 		spy.mockImplementation(async (...args: unknown[]) => {
 			const stack = new Error().stack ?? '';
-			if (args[0] === path && args.length === 1 && stack.includes('pushLocalEditsFirst')) pushesOnSecondPrePull++;
+			// pre-pull push: path + optional pending + opts (BUG-RESET-CACHE-DELETE sticky flag)
+			if (args[0] === path && args[1] == null && stack.includes('pushLocalEditsFirst')) pushesOnSecondPrePull++;
 			return Object.getPrototypeOf(det).checkFileForModifications.apply(det, args);
 		});
 		const secondResult = await world.service.synchronizationInner(false, 'manual');

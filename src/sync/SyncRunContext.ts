@@ -53,6 +53,13 @@ export interface SyncRunContext {
 	/** File paths edited locally during push (subtask order). */
 	locallyEdited: Set<string>;
 
+	/**
+	 * BUG-RESET-CACHE-DELETE: set when this run starts with empty Dexie or
+	 * checkPoint 0. Sticky for the whole Synchronize so a mid-run pull cannot
+	 * re-enable vault-line orphan stripping for pre-wipe ids.
+	 */
+	skipOrphanVaultLineDeletes: boolean;
+
 	/** Task ids created/updated in TT before `%%[ticktick_id:: …]%%` is in the vault. */
 	registerPendingMarker(taskId: string): void;
 	isPendingMarker(taskId: string): boolean;
@@ -80,6 +87,7 @@ export function createSyncRunContext(options: CreateSyncRunContextOptions): Sync
 		pushSinceMs: 0,
 		guardedPull: undefined,
 		locallyEdited: new Set(),
+		skipOrphanVaultLineDeletes: false,
 
 		registerPendingMarker(taskId: string) {
 			registerPendingMarkerTaskId(taskId);
