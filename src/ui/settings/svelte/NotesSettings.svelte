@@ -8,6 +8,19 @@
 	import './SettingsStyles.css';
 	import { onMount } from 'svelte';
 	import { settingsStore } from '@/ui/settings/settingsstore';
+	import {
+		NOTEBOOK_FOLDER_HELP,
+		NOTEBOOK_FOLDER_LABEL,
+		NOTEBOOK_INBOX_WARN,
+		STATUS_LIST_MAPPING_HELP,
+		STATUS_LIST_MAPPING_LABEL,
+		STATUS_LIST_WINS_BANNER,
+		STATUS_TAG_MAPPING_HELP,
+		STATUS_TAG_MAPPING_LABEL,
+		SYNC_TASK_DESCRIPTIONS_HELP,
+		SYNC_TASK_DESCRIPTIONS_LABEL,
+		notebookFolderLooksLikeInboxOrCapture,
+	} from '@/ui/settings/settingsUxNames';
 
 	export let plugin: TickTickSync;
 
@@ -146,8 +159,8 @@
 
 		<div class="setting-item">
 			<div class="setting-item-info">
-				<div class="setting-item-name">Sync Notes</div>
-				<div class="setting-item-description">Pull task descriptions from TickTick into vault lines.</div>
+				<div class="setting-item-name">{SYNC_TASK_DESCRIPTIONS_LABEL}</div>
+				<div class="setting-item-description">{SYNC_TASK_DESCRIPTIONS_HELP}</div>
 			</div>
 			<div class="setting-item-control">
 				<label class="checkbox-container" class:is-enabled={syncNotes}>
@@ -168,7 +181,7 @@
 				<div class="setting-item-name">Sync TickTick Notebook</div>
 				<div class="setting-item-description">
 					Opt-in. Write TickTick Notebook items (<code>kind: NOTE</code>) as markdown under a vault folder
-					(TT→vault only). Not the same as task-body Sync Notes above. Default off.
+					(TT→vault only). Not the same as <strong>{SYNC_TASK_DESCRIPTIONS_LABEL}</strong> above. Default off.
 				</div>
 			</div>
 			<div class="setting-item-control">
@@ -180,8 +193,11 @@
 		{#if syncNotebook}
 			<div class="setting-item">
 				<div class="setting-item-info">
-					<div class="setting-item-name">Notebook folder</div>
-					<div class="setting-item-description">Vault path for Notebook markdown (frontmatter <code>ticktick_id</code>).</div>
+					<div class="setting-item-name">{NOTEBOOK_FOLDER_LABEL}</div>
+					<div class="setting-item-description">{NOTEBOOK_FOLDER_HELP}</div>
+					{#if notebookFolderLooksLikeInboxOrCapture(notebookFolder)}
+						<div class="setting-item-description tts-ux-warn">{NOTEBOOK_INBOX_WARN}</div>
+					{/if}
 				</div>
 				<div class="setting-item-control">
 					<input
@@ -294,23 +310,27 @@
 			</div>
 			<div class="setting-item">
 				<div class="setting-item-info">
-					<div class="setting-item-name">Status mapping</div>
-					<div class="setting-item-description">
-						Checkbox char = TickTick tag, e.g. <code>/ = status/in-progress</code>
-					</div>
+					<div class="setting-item-name">{STATUS_TAG_MAPPING_LABEL}</div>
+					<div class="setting-item-description">{STATUS_TAG_MAPPING_HELP}</div>
 				</div>
 				<div class="setting-item-control">
 					<textarea rows="4" bind:value={statusMappingText} on:change={saveFormat}></textarea>
 				</div>
 			</div>
+			{#if (statusListMappingText.trim().length > 0) || (($settingsStore.statusListMappings?.length ?? 0) > 0)}
+				<div class="setting-item tts-ux-inactive-banner">
+					<div class="setting-item-info">
+						<div class="setting-item-description tts-ux-warn">{STATUS_LIST_WINS_BANNER}</div>
+					</div>
+				</div>
+			{/if}
 			<div class="setting-item">
 				<div class="setting-item-info">
-					<div class="setting-item-name">Status → list mapping</div>
+					<div class="setting-item-name">{STATUS_LIST_MAPPING_LABEL}</div>
 					<div class="setting-item-description">
-						Checkbox char = TickTick list (SoT when non-empty). Example:
-						<code>! = TTS-nextAction</code>. Stage tags <code>gtd/*</code> no longer move the list;
-						they are stripped on sync rewrite. <code>[x]</code>/<code>[-]</code> complete/cancel (list unchanged).
-						Distinct from Status mapping (char → TT tag) above.
+						{STATUS_LIST_MAPPING_HELP}
+						Stage tags <code>gtd/*</code> no longer move the list; they are stripped on sync rewrite.
+						<code>[x]</code>/<code>[-]</code> complete/cancel (list unchanged).
 					</div>
 				</div>
 				<div class="setting-item-control">

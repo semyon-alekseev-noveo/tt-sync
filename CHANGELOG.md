@@ -1,3 +1,13 @@
+### Iteration 2026-10-28 07:16 UTC
+
+- Context: Owner go after Phase 2 PR #197; Settings UX Phase 3 [#193](https://github.com/semyon-alekseev-noveo/tt-sync/issues/193) (epic [#189](https://github.com/semyon-alekseev-noveo/tt-sync/issues/189)). Names/defaults/warnings only.
+- Target: Sync task descriptions; Status→tag/list headers; Notebook≠Inbox warn; bkupFolder default; Full vault Abyss copy; quiet reading; lean MOC warn.
+- Actions log: Added `settingsUxNames.ts`; wired Notes / GTD / Maintenance / Full vault / Confirm modal / Tasks display; DEFAULT `bkupFolder` + reading.tag; unit `uxSetPhase3.settingsNames.test.ts`; TEST_PLAN / AF / pilot `30`.
+- Validation: `npx vitest run` 850 pass; `npm run build` ok.
+- Problems: Pilot Settings UI still **not run** (`open`).
+- To Be Done: Owner merges PR; pilot smoke UX-SET-SYNC-NOTES / NOTEBOOK-WARN / BKUP-DEFAULT / LEAN-WARN; Phase 4 [#194](https://github.com/semyon-alekseev-noveo/tt-sync/issues/194) later.
+- References: `src/ui/settings/settingsUxNames.ts`, `docs/pilot/results/UX-OBS-TT-SOAK/30-settings-ux-phase3.md`, `TEST_PLAN.md`, `CHANGELOG.md`
+
 ### Iteration 2026-10-28 07:10 UTC
 
 - Context: Owner merged Phase 1 PR #196; Settings UX Phase 2 [#192](https://github.com/semyon-alekseev-noveo/tt-sync/issues/192) (epic [#189](https://github.com/semyon-alekseev-noveo/tt-sync/issues/189)). Visibility/merge only.
