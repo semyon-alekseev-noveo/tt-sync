@@ -1,3 +1,13 @@
+### Iteration 2026-10-28 11:41 UTC
+
+- Context: Owner «гоу #208» + asked why Active Zone inline tasks vanished (thought agent deleted them).
+- Target: Fail-closed wipe-shaped TT delta; honest held labels; Rematch into vault without Apply wipe TT.
+- Actions log: Root-cause note `34` + #208 comment; `looksLikeTickTickWipe`; `formatPlannedDeletionLabel`; Rematch choice + `rematchVault` phase; AF/TEST_PLAN cases BUG-208-*.
+- Validation: `npx vitest run` massDeleteGuard + bug208RematchVault 16 pass; `npm run build` ok; full suite pending.
+- Problems: Live rematch prove ×2 not run (`open`); dishwasher AZ still empty until tip Rematch.
+- To Be Done: Full vitest; PR into abyss-mapping; tip Rematch on pilot; prove ×2.
+- References: #208, `src/sync/massDeleteGuard.ts`, `src/sync/rematchVault.ts`, `34-held-post-restore-az-wipe.md`, `CHANGELOG.md`
+
 ### Iteration 2026-10-28 10:29 UTC
 
 - Context: Owner cleared Pull filter `укук` but it bounced back; also unclear GTD Safe defaults / Copy / Import block layout.

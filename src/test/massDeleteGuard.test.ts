@@ -10,12 +10,17 @@ import {
 	evaluateMassDeleteGuard,
 	formatDeletionReport,
 	guardDecisionRecord,
+	canOfferRematch,
+	deletionConfirmModeOf,
+	formatPlannedDeletionLabel,
 	isEmptyTickTickSnapshot,
+	looksLikeTickTickWipe,
 	massDeleteSettingsFrom,
 	planRemoteTaskDeletions,
 	planVaultCommentDeletions,
 	planVaultTaskDeletions,
 	pullOptionsForMode,
+	rematchCandidates,
 	setGuardRun,
 	settleGuardChoice,
 	shouldSkipOrphanVaultLineDelete,
@@ -252,5 +257,79 @@ describe('EMPTY-SIDE-GUARD', () => {
 		expect(spy).not.toHaveBeenCalled();
 		expect(deletionConfirmMode()).toBe('skip');
 		clearGuardRun();
+	});
+
+	it('BUG-208-EMPTY-TT-NO-AZ-STRIP: wipe-shaped delta is empty-ticktick even when since > 0', () => {
+		expect(looksLikeTickTickWipe({ updateCount: 0, deleteCount: 20, dexieTaskCount: 40 })).toBe(true);
+		expect(looksLikeTickTickWipe({ updateCount: 1, deleteCount: 20, dexieTaskCount: 40 })).toBe(false);
+		expect(looksLikeTickTickWipe({ updateCount: 0, deleteCount: 5, dexieTaskCount: 40 })).toBe(false);
+		expect(looksLikeTickTickWipe({ updateCount: 0, deleteCount: 1, dexieTaskCount: 1 })).toBe(false);
+		expect(isEmptyTickTickSnapshot(false, 50, 0)).toBe(false);
+		const wiped = isEmptyTickTickSnapshot(false, 50, 0)
+			|| looksLikeTickTickWipe({ updateCount: 0, deleteCount: 30, dexieTaskCount: 40 });
+		expect(wiped).toBe(true);
+		const planned = planRemoteTaskDeletions(
+			Array.from({ length: 30 }, (_, i) => `g${i}`),
+			new Map(Array.from({ length: 30 }, (_, i) => [`g${i}`, { title: `G${i}`, file: 'n.md' }])),
+			'detach',
+		);
+		const decision = evaluateMassDeleteGuard(planned, side({
+			vaultTrackedCount: 40,
+			dexieTaskCount: 40,
+			ticktickSnapshotEmpty: true,
+		}), cfg);
+		expect(decision.block).toBe(true);
+		expect(decision.reason).toBe('empty-ticktick');
+	});
+
+	it('BUG-208-HELD-LABEL: vault-to-ticktick delete names wipe TickTick', () => {
+		const label = formatPlannedDeletionLabel({
+			id: 'a1',
+			kind: 'task',
+			direction: 'vault-to-ticktick',
+			action: 'delete',
+			title: 'Mixer',
+			file: '10 Projects/n.md',
+			taskId: 'a1',
+		});
+		expect(label).toContain('Would delete from TickTick');
+		expect(label).toContain('missing vault');
+		expect(label).toContain('Mixer');
+		const remote = formatPlannedDeletionLabel({
+			id: 'b1',
+			kind: 'task',
+			direction: 'ticktick-to-vault',
+			action: 'detach',
+			title: 'Gone',
+			file: 'n.md',
+		});
+		expect(remote).toContain('gone from TickTick');
+	});
+
+	it('BUG-208-REMATCH: rematch choice skips deletes and lists vault rewrite candidates', async () => {
+		const planned = planVaultTaskDeletions({
+			tasks: [
+				{ taskId: 'a', title: 'A', file: 'p.md', inPushScope: true },
+				{ taskId: 'b', title: 'B', file: 'p.md', inPushScope: true },
+			],
+			presentIds: new Set(),
+			untrustedFiles: new Set(),
+			indexIncomplete: false,
+		});
+		expect(canOfferRematch(planned)).toBe(true);
+		expect(canOfferRematch([
+			...planned,
+			{ id: 'x', kind: 'task', direction: 'ticktick-to-vault', action: 'detach' },
+		])).toBe(false);
+		expect(rematchCandidates(planned)).toHaveLength(2);
+		const blocked = evaluateMassDeleteGuard(planned, side({
+			vaultTrackedCount: 0,
+			dexieTaskCount: 2,
+		}), cfg);
+		expect(blocked.block).toBe(true);
+		const prompt = vi.fn(async () => 'rematch' as const);
+		expect(await settleGuardChoice('manual', blocked, prompt)).toBe('rematch');
+		expect(deletionConfirmModeOf('rematch', true)).toBe('skip');
+		expect(pullOptionsForMode('skip')).toEqual({ applyDeletions: false, advanceCheckpoint: false });
 	});
 });

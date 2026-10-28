@@ -533,6 +533,27 @@ Expected: a notice that deletions were held (`empty-vault`). No TickTick task is
 
 Expected: the same hold, reason `empty-ticktick`. No vault line is marked `[-]` or detached because of that snapshot.
 
+### TP-BUG-208-HELD-LABEL — held modal names wipe TickTick
+
+1. Produce a held plan of vault→TickTick task deletes (empty Active Zone / missing line markers while Dexie has restored TT ids — see `34-held-post-restore-az-wipe.md`).
+2. Open the held modal (or the deletion report).
+
+Expected: each vault→TT task row reads **Would delete from TickTick — missing vault line/marker…**. Apply copy warns that Apply would wipe TickTick. Pilot status: **not run**.
+
+### TP-BUG-208-EMPTY-TT-NO-AZ-STRIP — wipe-shaped TT delta does not empty Active Zone
+
+1. With Dexie holding N≥10 tasks and vault AZ still showing those line markers, simulate or observe a TickTick wipe delta (many deletes, zero updates) on Synchronize — pilot only; do not wipe a production account.
+2. Choose **Skip** if prompted.
+
+Expected: guard reason `empty-ticktick` (or threshold). No mass `tt→obs` line deletes emptying Active Zone. Unit: `massDeleteGuard.test.ts` (`looksLikeTickTickWipe`). Pilot: **not run**.
+
+### TP-BUG-208-REMATCH — rematch vault from restored TickTick
+
+1. After TT restore + empty/stale AZ markers, Synchronize until the held modal lists only vault→TT deletes.
+2. Choose **Rematch into vault (keep TickTick)** (not Apply once).
+
+Expected: missing checkboxes/`%%[ticktick_id::]%%` lines are rewritten from Dexie/TT into the named project notes; TickTick task count unchanged; no Apply wipe. Next Synchronize is quiet or only small diffs. Unit: `bug208RematchVault.test.ts`. Pilot: **not run**.
+
 ### TP-MASS-DELETE-THRESHOLD — count and percent together
 
 1. With the defaults (more than 10 and more than 20%), delete 11 lines that are more than 20% of the tracked tasks. **Synchronize**.

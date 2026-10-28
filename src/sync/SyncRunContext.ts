@@ -22,6 +22,7 @@ export type SyncPhaseName =
 	| 'deletionGuard'
 	| 'push'
 	| 'pull'
+	| 'rematch'
 	| 'vaultReconcile'
 	| 'subtasks'
 	| 'syncFiles'
