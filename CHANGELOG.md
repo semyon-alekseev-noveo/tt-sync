@@ -1,12 +1,12 @@
-### Iteration 2026-10-28 05:35 UTC
+### Iteration 2026-10-28 05:40 UTC
 
-- Context: After UX-RESET-1 wipe + Synchronize, owner saw Confirm Deletion («task not found in local cache») for vault lines (e.g. DON-253) whose pre-wipe ids miss Dexie / 404 on TT.
-- Target: **BUG-RESET-CACHE-DELETE** — post-reset Synchronize must not strip vault task lines solely for cache miss; fail closed for the whole run.
-- Actions log: `shouldSkipOrphanVaultLineDelete`; sticky `skipOrphanVaultLineDeletes` on SyncRunContext at prepare; wire push + syncFiles + scan; case/TEST_PLAN/evidence `24-post-reset-delete-modal.md`.
-- Validation: `npx vitest run` (incl. `bugResetCacheDelete`, massDeleteGuard, synchronizationInner) **pass**; `npm run build` **pass**.
-- Problems: Owner must Cancel any open modal (`open` until tip install + prove ×2).
-- To Be Done: Open/merge PR; install tip; Cancel if modal; prove ×2 Reset→Synchronize without vault-line delete prompts.
-- References: `src/sync/massDeleteGuard.ts`, `src/sync/vault-push/taskModification/scan.ts`, `docs/pilot/results/UX-OBS-TT-SOAK/24-post-reset-delete-modal.md`, `CHANGELOG.md`
+- Context: Analyst only for [#185](https://github.com/semyon-alekseev-noveo/tt-sync/issues/185) (Abyss task + project statuses from Abyss Tasks settings). No plugin code, no version bump.
+- Target: Proposed cases `UX-ABYSS-STATUS-SRC-*` and a settings-shape note. **Not DoR** until the owner confirms overlay, fallback, and project → TickTick entity.
+- Actions log: Read public Abyss Tasks **2.3.0** `taskStatuses` / `projects.statuses` (no vault `data.json` this session). Wrote `docs/pilot/UX-ABYSS-STATUS-SRC.md`. Catalog + TEST_PLAN stubs **not run**. `PO_STATUS.md` row P1 **not DoR**.
+- Validation: Docs only. `npx vitest run` / `npm run build` not required (no behavior change).
+- Problems: (a)(b)(c) still open (`open`). Pilot file not re-read (`open`).
+- To Be Done: Owner answers; then a developer may add failing tests. `GTD_ARRAY_KEYS` vs `statusListMappings` is a child engineering note, not this DoR.
+- References: `docs/pilot/UX-ABYSS-STATUS-SRC.md`, `ABYSS_FIRST_CASES.md`, #185
 
 ### Iteration 2026-10-27 15:25 UTC
 

@@ -34,6 +34,28 @@ Settings: `abyssTasksFormat` + non-empty `statusListMappings` (pilot: space/!/?/
 
 Unit: `src/test/statusListMapping.test.ts` (named by case IDs).
 
+## UX-ABYSS-STATUS-SRC — read statuses from Abyss Tasks (#185)
+
+Analyst stubs only. **Not DoR** until the owner confirms (a) overlay vs derived lists, (b) fallback, (c) project status → TickTick entity. Spec: `docs/pilot/UX-ABYSS-STATUS-SRC.md`. No plugin behavior in this PR. Pilot **not run**. `<pilot-vault>` only.
+
+| Case | Steps | Expected | Pilot |
+|------|-------|----------|-------|
+| UX-ABYSS-STATUS-SRC-TASK | Abyss symbol `!` (open) + TTS overlay to TTS-nextAction. Synchronize `- [!] …`. | Vault line stays `[!]`. TT list TTS-nextAction. | **not run** |
+| UX-ABYSS-STATUS-SRC-UNMAPPED | Open Abyss symbol with no overlay. Synchronize. | Same TT list. No new list. Notice. | **not run** |
+| UX-ABYSS-STATUS-SRC-STALE | Overlay symbol removed in Abyss. Sync existing line, then a new line. | Existing line not rewritten. New line not placed by the stale row. | **not run** |
+| UX-ABYSS-STATUS-SRC-TERM | `- [x]` / `- [-]` (Abyss types done / cancelled). | Complete / cancel. List unchanged. | **not run** |
+| UX-ABYSS-STATUS-SRC-PULL | Move task to TTS-waitingFor. Synchronize. | Vault `[?]` if that symbol is still in Abyss. No `#gtd/*`. | **not run** |
+| UX-ABYSS-STATUS-SRC-OFF | Format off. AF-5 `#gtd/next`. | Tag path. No Abyss read required. Sync succeeds. | **not run** |
+| UX-ABYSS-STATUS-SRC-MISS | Format on, Abyss `data.json` missing, overlay set. | Notice. Sync completes. Overlay list (else tags). | **not run** |
+| UX-ABYSS-STATUS-SRC-PROJ-OPEN | Project `status: wip`. Synchronize. | Parent open on projects list. AZ checkbox uses task path. | **not run** |
+| UX-ABYSS-STATUS-SRC-PROJ-DONE | Project `status: done`. Synchronize. | Parent completed on projects list. | **not run** |
+| UX-ABYSS-STATUS-SRC-PROJ-UNKNOWN | `status: 🟢 In Progress` not in Abyss. Quiet sync. | Frontmatter unchanged. Parent stays open. | **not run** |
+| UX-ABYSS-STATUS-SRC-PROJ-WRITE | Create note from TT parent; complete; reopen. | `status` uses Abyss default name and `done`, not emoji. | **not run** |
+| UX-ABYSS-STATUS-SRC-PROJ-MIG | `projects.statusMigration` set. | No guessed status string. Current done-detection only. | **not run** |
+| UX-ABYSS-STATUS-SRC-UI | Toggle Abyss Tasks format. Read settings copy. | On: statuses from Abyss, list table is overlay. Off: no Abyss-source claim. | **not run** |
+
+Regression after implementation (still **not run** here): UX-STATUS-MAP-* when Abyss symbols match the overlay; AF-5 when format is off or the map is empty; AF-2 / AF-3 / AF-4 parent stays on the projects list.
+
 ## PR #1 — fail-closed sync, open-note push, comments
 
 Branch `abyss-mapping` (PR #1 merged). Release build under test: **2.0.48** (tag on `tt-sync`). Manual rows below stay **not run** until executed on `<pilot-vault>` with that build installed.
