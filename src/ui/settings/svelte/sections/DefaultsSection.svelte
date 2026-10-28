@@ -2,6 +2,11 @@
 	import CollapsibleSection from '@/ui/settings/svelte/sections/CollapsibleSection.svelte';
 	import { createEventDispatcher, onMount } from 'svelte';
 	import { getDefaultFolder, getSettings, updateSettings } from '@/settings';
+	import { settingsStore } from '@/ui/settings/settingsstore';
+	import {
+		DEFAULTS_FOLDER_MERGED_NOTE,
+		hideDefaultsTasksFolderTwin,
+	} from '@/ui/settings/settingsUxVisibility';
 	import { Setting, TFile } from 'obsidian';
 	import { FolderSuggest } from '@/utils/FolderSuggester';
 	import { validateNewFolder } from '@/utils/FolderUtils';
@@ -18,6 +23,15 @@
 	let showUpdateButton: boolean = false;
 	let showCreateText: boolean = false;
 	let filesToMove: TFile[] = [];
+
+	$: abyssGtdSlice = {
+		projectSchemeEnabled: $settingsStore.projectSchemeEnabled ?? getSettings().projectSchemeEnabled,
+		abyssTasksFormat: $settingsStore.abyssTasksFormat ?? getSettings().abyssTasksFormat,
+		syncScopeFolders: ($settingsStore.syncScopeFolders?.length ?? 0) > 0
+			? $settingsStore.syncScopeFolders
+			: (getSettings().syncScopeFolders ?? []),
+	};
+	$: hideDefaultsFolder = hideDefaultsTasksFolderTwin(abyssGtdSlice);
 
 	const dispatch = createEventDispatcher();
 
@@ -296,33 +310,38 @@
 		</div>
 
 
-		<div class="setting-item">
-			<div class="setting-item-info">
-				<div class="setting-item-name">Default folder location</div>
-				<div class="setting-item-description">
-					<div>Folder where TickTick tasks are stored.</div>
-					Default Project File <span class="setting-item-name"> {currentDefault}.md</span>
-					{#if showCreateText}
-						will be created <strong><span class="setting-item-name"> after you hit  ENTER </span></strong>
-					{/if}
+		{#if hideDefaultsFolder}
+			<div class="setting-item-description tts-ux-merged-note">{DEFAULTS_FOLDER_MERGED_NOTE}</div>
+		{:else}
+			<div class="setting-item">
+				<div class="setting-item-info">
+					<div class="setting-item-name">Default folder location</div>
+					<div class="setting-item-description">
+						<div>Folder where TickTick tasks are stored.</div>
+						Default Project File <span class="setting-item-name"> {currentDefault}.md</span>
+						{#if showCreateText}
+							will be created <strong><span class="setting-item-name"> after you hit  ENTER </span></strong>
+						{/if}
+					</div>
+				</div>
+				<div class="setting-item-control flex-container">
+					<div
+						class="local-modal-form remove-padding remove-border fix-suggest"
+						use:defaultFolder
+					>
+					</div>
 				</div>
 			</div>
-			<div class="setting-item-control flex-container">
-				<div
-					class="local-modal-form remove-padding remove-border fix-suggest"
-					use:defaultFolder
-				>
-				</div>
-			</div>
-
-		</div>
+		{/if}
 	</div>
 
+	{#if !hideDefaultsFolder}
 	<div style="margin-top: 2em; text-align: right;">
 		<button class="mod-cta" on:click={onUpdateWorldClicked} disabled={!showUpdateButton}>
 			Move Existing Files.
 		</button>
 	</div>
+	{/if}
 
 	<!-- MODAL DIALOG: simple conditional rendering -->
 	{#if showUpdateWorldModal}

@@ -17,6 +17,12 @@
 		SYNCED_LISTS_LABEL,
 		syncTagEmptyBadgeVisible,
 	} from '@/ui/settings/settingsUxCopy';
+	import {
+		GTD_STAGE_INACTIVE_BANNER,
+		HUB_HIDDEN_NOTE,
+		hideHubSingleTasksFile,
+		hideOrInactiveGtdStageMapping,
+	} from '@/ui/settings/settingsUxVisibility';
 
 	export let open = false;
 	export let plugin;
@@ -50,6 +56,20 @@
 			? $settingsStore.syncedLists
 			: (getSettings().syncedLists ?? []);
 	$: schemeEnabled = $settingsStore.projectSchemeEnabled ?? getSettings().projectSchemeEnabled ?? false;
+	$: abyssGtdSlice = {
+		projectSchemeEnabled: schemeEnabled,
+		abyssTasksFormat: $settingsStore.abyssTasksFormat ?? getSettings().abyssTasksFormat,
+		syncScopeFolders:
+			($settingsStore.syncScopeFolders?.length ?? 0) > 0
+				? $settingsStore.syncScopeFolders
+				: (getSettings().syncScopeFolders ?? []),
+		statusListMappings:
+			($settingsStore.statusListMappings?.length ?? 0) > 0
+				? $settingsStore.statusListMappings
+				: (getSettings().statusListMappings ?? []),
+	};
+	$: hubHidden = hideHubSingleTasksFile(abyssGtdSlice);
+	$: stageMappingInactive = hideOrInactiveGtdStageMapping(abyssGtdSlice);
 	$: settingsListCount = syncedLists.length;
 	$: checkboxLists = buildCheckboxLists(lists, syncedLists);
 	// entries that match no known list (typo / renamed list): shown so they can be fixed in data.json
@@ -405,38 +425,51 @@
 		</div>
 	</div>
 
-	<div class="setting-item">
-		<div class="setting-item-info">
-			<div class="setting-item-name">GTD stage mapping</div>
-			<div class="setting-item-description">
-				{#if gtdStageVia === 'tag'}
-					One per line: <code>gtd/next = gtd/next</code>. The Obsidian tag is a TickTick tag. A TickTick filter on that tag is the view. Changing the tag on either side rewrites the other. The task stays on its list.
-				{:else}
-					One per line: <code>gtd/next = nextAction</code>. The Obsidian tag selects the TickTick list and is not sent as a tag. Moving the task to another mapped list rewrites the tag.
-				{/if}
+	{#if stageMappingInactive}
+		<div class="setting-item tts-ux-inactive-banner">
+			<div class="setting-item-info">
+				<div class="setting-item-name">GTD stage mapping (inactive)</div>
+				<div class="setting-item-description">{GTD_STAGE_INACTIVE_BANNER}</div>
 			</div>
 		</div>
-		<div class="setting-item-control">
-			<select bind:value={gtdStageVia} on:change={saveStageVia}>
-				<option value="list">Tag → list</option>
-				<option value="tag">Tag → tag</option>
-			</select>
-			<textarea rows="4" bind:value={tagListText} on:change={saveTagList} placeholder={gtdStageVia === 'tag' ? 'gtd/next = gtd/next' : 'gtd/next = nextAction'}></textarea>
+	{:else}
+		<div class="setting-item">
+			<div class="setting-item-info">
+				<div class="setting-item-name">GTD stage mapping</div>
+				<div class="setting-item-description">
+					{#if gtdStageVia === 'tag'}
+						One per line: <code>gtd/next = gtd/next</code>. The Obsidian tag is a TickTick tag. A TickTick filter on that tag is the view. Changing the tag on either side rewrites the other. The task stays on its list.
+					{:else}
+						One per line: <code>gtd/next = nextAction</code>. The Obsidian tag selects the TickTick list and is not sent as a tag. Moving the task to another mapped list rewrites the tag.
+					{/if}
+				</div>
+			</div>
+			<div class="setting-item-control">
+				<select bind:value={gtdStageVia} on:change={saveStageVia}>
+					<option value="list">Tag → list</option>
+					<option value="tag">Tag → tag</option>
+				</select>
+				<textarea rows="4" bind:value={tagListText} on:change={saveTagList} placeholder={gtdStageVia === 'tag' ? 'gtd/next = gtd/next' : 'gtd/next = nextAction'}></textarea>
+			</div>
 		</div>
-	</div>
+	{/if}
 
-	<div class="setting-item">
-		<div class="setting-item-info">
-			<div class="setting-item-name">Single tasks file (hub mode)</div>
-			<div class="setting-item-description">
-				Optional. Every list is written to this one file, e.g. <code>30 Tasks/TickTick/Tasks.md</code>; no
-				per-list files. Empty = one file per list.
+	{#if hubHidden}
+		<div class="setting-item-description tts-ux-merged-note">{HUB_HIDDEN_NOTE}</div>
+	{:else}
+		<div class="setting-item">
+			<div class="setting-item-info">
+				<div class="setting-item-name">Single tasks file (hub mode)</div>
+				<div class="setting-item-description">
+					Optional. Every list is written to this one file, e.g. <code>30 Tasks/TickTick/Tasks.md</code>; no
+					per-list files. Empty = one file per list.
+				</div>
+			</div>
+			<div class="setting-item-control">
+				<input type="text" bind:value={newTasksFile} on:change={saveNewTasksFile} placeholder="" />
 			</div>
 		</div>
-		<div class="setting-item-control">
-			<input type="text" bind:value={newTasksFile} on:change={saveNewTasksFile} placeholder="" />
-		</div>
-	</div>
+	{/if}
 
 	<div class="setting-item">
 		<div class="setting-item-info">

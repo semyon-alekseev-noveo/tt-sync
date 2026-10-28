@@ -20,7 +20,7 @@
 - **Still valid:** TT **Projects** ↔ project notes under `10 Projects/`; safety: `syncedLists`, `syncScopeFolders`, manual sync.
 - **Next execution order:** Steps 1–8 in `ABYSS_FIRST_PLAN.md`. Comment gate **pass** through **2.0.76**. Editor-safety [#15](https://github.com/semyon-alekseev-noveo/tt-sync/issues/15) and Step 7 AF soak [#20](https://github.com/semyon-alekseev-noveo/tt-sync/issues/20) **closed**. [#19](https://github.com/semyon-alekseev-noveo/tt-sync/issues/19) Active Zone shuffle: **pass** ×2 on tip after [#134](https://github.com/semyon-alekseev-noveo/tt-sync/pull/134). Step 8 live vault still closed. Abyss Inbox stage tag `#inbox` (§3.1); untagged Inbox still open. Birth tag `#obsidian` stays.
 - **UX soak (2026-10-27):** `docs/pilot/results/UX-OBS-TT-SOAK/` — qualitative; Decision #1 brief in `06-decision-ticktick-vs-abyss.md`. Tag **2.0.94** notes in `15-…`; tip status→list prove in `16-status-map-prove.md` (MAP-1/2 **pass** ×2).
-- **Settings UX redesign (2026-10-28):** Epic [#189](https://github.com/semyon-alekseev-noveo/tt-sync/issues/189) — Phase 0 DoR merged (#195). Phase 1 [#191](https://github.com/semyon-alekseev-noveo/tt-sync/issues/191) Settings copy/layout (glossary, Pull filter empty badge, Purge trash, one Danger Reset, Synchronize primary); no sync-semantics change. Pilot UX-SET-* still **not run**.
+- **Settings UX redesign (2026-10-28):** Epic [#189](https://github.com/semyon-alekseev-noveo/tt-sync/issues/189) — Phase 0 (#195) + Phase 1 (#196) merged. Phase 2 [#192](https://github.com/semyon-alekseev-noveo/tt-sync/issues/192): hide Defaults folder twin / Extra filters / hub / strip-on-reset / Keep TickTick folders; inactive stage→list when status→list SoT (`29-settings-ux-phase2.md`). Visibility only; pilot UX-SET-* still **not run**.
 - **Sync research (2026-10-20):** `docs/TICKTICK_DELTA_API.md` — delta has no comments; echo suppression in `pull.ts` uses `etag`; idle sync does not call `getTaskById` per quiet task.
 - **Deletion guard (2026-10-20):** over-threshold or empty-side deletions are held and the checkpoint stays. Defaults: guard on, more than 10 tasks and more than 20%, startup delay 30s. Pilot cases in `TEST_PLAN.md` are not run.
 - **Redo:** journal `<vault>/.tickticksync/journal/`; palette undo previews then applies `planUndo`. Not soaked on the live vault.
@@ -53,7 +53,7 @@
 ## To Be Done
 
 0. **BUG-RESET-CACHE-DELETE:** Cancel open modal if any; tip installed; prove ×2 Reset→Synchronize without vault-line cache-miss delete (`25-reset-cache-delete-prove.md` — owner Reset click).
-0b. **Settings UX #189:** Owner 30s glossary check (#190); then Phase 1 traps/help [#191](https://github.com/semyon-alekseev-noveo/tt-sync/issues/191) (copy/layout only).
+0b. **Settings UX #189:** Owner 30s glossary check (#190); Phase 1 merged (#196); Phase 2 hide/merge [#192](https://github.com/semyon-alekseev-noveo/tt-sync/issues/192) (unit; pilot not run); then Phase 3 naming [#193](https://github.com/semyon-alekseev-noveo/tt-sync/issues/193).
 1. Owner decides UX Decision #1 (Abyss vs `#ticktick`) — prefer clear ignore on pilot; optional TTS stop note-level `ticktick` stamp later (`06-decision-ticktick-vs-abyss.md`).
 2. **[done]** UX-STUB-1 / BUG-LIST-STUB-RECREATE pilot cleanup + prove ×2 after #179 (`08-stub-cleanup-prove.md`).
 2b. **[done]** UX-STATUS-MAP-1/2 prove ×2 after #182 (`16-status-map-prove.md`); MAP-3/4/PULL + Abyss customs still open; version bump when owner asks.

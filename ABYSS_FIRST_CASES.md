@@ -118,9 +118,9 @@ Preconditions for every AF row: plugin `tickticksync-abyss`, manual sync, `fileL
 | UX-SET-RESET-ONE | **Phase 1 #191 (layout/copy).** **One** Reset local sync database in Maintenance **Danger zone** (removed from Tasks/Notes). Vault + TickTick stay intact (copy). Semantics remain `UX-RESET-1`. Unit covered. Pilot **not run**. |
 | UX-SET-SYNCED-LISTS-HELP | **Phase 1 #191 (copy).** Synced lists help: allow-list; empty → nothing pulled (`AF-1`); new TT list ≠ synced until ticked. Unit covered. Pilot **not run**. |
 | UX-SET-MAINT-SYNC-PRIMARY | **Phase 1 #191 (layout).** Maintenance: **Synchronize** is the sole primary CTA vs secondary Check/Backup/Purge. Unit covered. Pilot **not run**. |
-| UX-SET-HIDE-DEFAULTS | **Phase 2 #192 (visibility).** When Abyss/GTD path is active (same predicate as `UX-STUB-1`: `projectSchemeEnabled` + `abyssTasksFormat` + non-empty `syncScopeFolders`), Defaults Tasks folder is hidden or non-primary. No mapping-engine change. Pilot **not run**. |
-| UX-SET-EXTRA-FILTERS | **Phase 2 #192 (visibility).** Extra filters folded/hidden when redundant under that Abyss mode. Pilot **not run**. |
-| UX-SET-STATUS-VS-STAGE | **Phase 2 #192 (visibility).** When `statusListMappings` is the active SoT, stage→list UI is inactive/hidden so it does not compete. Mapping semantics unchanged unless a later case says otherwise. Pilot **not run**. |
+| UX-SET-HIDE-DEFAULTS | **Phase 2 #192 (visibility).** When Abyss/GTD path is active (same predicate as `UX-STUB-1`: `projectSchemeEnabled` + `abyssTasksFormat` + non-empty `syncScopeFolders`), Defaults folder location (twin of GTD Tasks folder / `TickTickTasksFilePath`) is hidden. Also in #192 scope (same PR): hub single-tasks file hidden on that path; strip-on-reset hidden (wipe-only Reset); Keep TickTick folders hidden when `projectSchemeEnabled`. No mapping-engine change. Unit: `uxSetPhase2.settingsVisibility.test.ts`. Pilot **not run**. |
+| UX-SET-EXTRA-FILTERS | **Phase 2 #192 (visibility).** Extra filters (Legacy SyncProject / AND-OR) hidden when `syncedLists` non-empty. Unit covered. Pilot **not run**. |
+| UX-SET-STATUS-VS-STAGE | **Phase 2 #192 (visibility).** When `statusListMappings` is the active SoT (non-empty), GTD stage→list UI is inactive (banner; controls hidden) so it does not compete. Mapping semantics unchanged. Unit covered. Pilot **not run**. |
 | UX-SET-SYNC-NOTES | **Phase 3 #193 (naming).** Sync Notes label distinguishable from Notebook / NOTE-BODY. Pilot **not run**. |
 | UX-SET-NOTEBOOK-WARN | **Phase 3 #193.** Notebook ≠ Inbox warning where both appear. Pilot **not run**. |
 | UX-SET-BKUP-DEFAULT | **Phase 3 #193.** Backup folder default sane for Abyss pilots (or warned). Pilot **not run**. |
@@ -130,7 +130,7 @@ Preconditions for every AF row: plugin `tickticksync-abyss`, manual sync, `fileL
 | UX-SET-INTERVAL-ZERO | **Phase 4 #194.** Sync interval = 0 → progress presentation grey / non-active per implementing PR. Pilot **not run**. |
 | UX-SET-PW-CONFIRM | **Phase 4 #194.** If password shown plaintext, confirm/warn present. Pilot **not run**. |
 
-Unit tests cover parts of AF-1, AF-5, AF-8, UX-STATUS-MAP-*, UX-RESET-1 / BUG-RESET-TASKS-PARTIAL / BUG-RESET-CACHE-DELETE, UX-SET Phase 1 copy/layout (`uxSetPhase1.settingsCopy.test.ts`), comments, a failed pull, and PERF-INDEX / PERF-CACHE / PERF-COUNTERS. They do not replace the live gate. Settings UX Phase 1 is copy/layout only — pilot UX-SET-* still **not run**.
+Unit tests cover parts of AF-1, AF-5, AF-8, UX-STATUS-MAP-*, UX-RESET-1 / BUG-RESET-TASKS-PARTIAL / BUG-RESET-CACHE-DELETE, UX-SET Phase 1 copy/layout (`uxSetPhase1.settingsCopy.test.ts`), UX-SET Phase 2 visibility (`uxSetPhase2.settingsVisibility.test.ts`), comments, a failed pull, and PERF-INDEX / PERF-CACHE / PERF-COUNTERS. They do not replace the live gate. Settings UX Phase 1–2 are copy/layout/visibility only — pilot UX-SET-* still **not run**.
 
 ## Old ids
 
