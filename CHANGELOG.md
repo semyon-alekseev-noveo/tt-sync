@@ -1,3 +1,13 @@
+### Iteration 2026-10-28 07:45 UTC
+
+- Context: Owner merged Phase 4 PR [#199](https://github.com/semyon-alekseev-noveo/tt-sync/pull/199) into `abyss-mapping`; epic [#189](https://github.com/semyon-alekseev-noveo/tt-sync/issues/189) Settings UX phases 0–4 code-complete.
+- Target: Pilot smoke checklist for all `UX-SET-*` (status **not run**); issue comments; optional tip install without release/tag.
+- Actions log: Added `32-settings-ux-smoke-checklist.md`; updated UX-OBS-TT-SOAK `INDEX.md`; commented #189/#194 (no close / no live pass).
+- Validation: `gh pr view 199` → MERGED (`6038e8d` on `abyss-mapping`); tip install documented in checklist.
+- Problems: Pilot Settings smoke still **not run** (`open`).
+- To Be Done: Owner installs tip/BRAT on Thinkpad-tts-test; walk `32` checklist; record statuses; close epic only after smoke sign-off.
+- References: `docs/pilot/results/UX-OBS-TT-SOAK/32-settings-ux-smoke-checklist.md`, `INDEX.md`, `CHANGELOG.md`
+
 ### Iteration 2026-10-28 07:29 UTC
 
 - Context: Owner merged Phase 3 PR #198; Settings UX Phase 4 [#194](https://github.com/semyon-alekseev-noveo/tt-sync/issues/194) (epic [#189](https://github.com/semyon-alekseev-noveo/tt-sync/issues/189)). Cold-start & polish only.
