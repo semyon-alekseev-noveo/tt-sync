@@ -22,6 +22,11 @@ export async function runRematchPhase(deps: SyncPhaseDeps): Promise<void> {
 	const result = await rematchVaultFromPlanned(planned, {
 		synchronizeToVault: (file, tasks, updating) =>
 			plugin.fileOperation!.synchronizeToVault(file, tasks, updating),
+		loadLiveTask: async (taskId) => {
+			const row = await plugin.taskRepository?.loadLocalTaskById(taskId);
+			if (!row) return null;
+			return { taskId: row.taskId, deleted: row.deleted, task: row.task };
+		},
 	});
 	log.info(`TickTickSync rematch: wrote ${result.written}, skipped ${result.skipped}`);
 	new Notice(
