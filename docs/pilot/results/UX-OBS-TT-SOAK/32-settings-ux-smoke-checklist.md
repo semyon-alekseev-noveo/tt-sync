@@ -110,10 +110,7 @@ Vault: Thinkpad-tts-test · Сборка: tip после #199 · Статус: *
 
 ### 10. Sync descriptions ≠ Notebook
 
-- [ ] **Где:** `Task & note format` (Notes)  
-  **Смотри:** лейбл `Sync task descriptions` vs Notebook.  
-  **Ок если:** ясно, что это описания задач (NOTE-BODY), не Notebook.  
-  **Плохо если:** путается с `Notebook folder` / Sync Notebook.  
+- [x] **Skipped** — owner 2026-10-28: **not needed** (no further feedback / not a fail for #205).  
   `UX-SET-SYNC-NOTES`
 
 ### 11. Notebook ≠ Inbox

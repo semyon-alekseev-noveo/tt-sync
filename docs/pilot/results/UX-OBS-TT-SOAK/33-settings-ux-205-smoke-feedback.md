@@ -18,9 +18,9 @@
 - `npx vitest run` 869 pass; `npm run build` ok
 
 ## Conclusion
-Addresses #205 acceptance draft except live pilot re-smoke and truncated §10.
+Addresses #205 acceptance draft except live pilot re-smoke. Owner: checklist **§10 not needed**.
 
 ## Checklist
 - [x] Unit green
 - [ ] Owner tip reload + re-check §3–9 on Thinkpad-tts-test
-- [ ] §10 owner note when provided
+- [x] §10 — not needed (owner 2026-10-28)
