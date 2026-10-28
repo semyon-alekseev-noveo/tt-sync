@@ -6,7 +6,7 @@
 | Phase | 24 |
 | Case | **BUG-RESET-CACHE-DELETE** (alias BUG-RESET-ORPHAN-VAULT-DELETE; companion to **UX-RESET-1**) |
 | Vault | Thinkpad-tts-test |
-| Status | **fail** observed on tip before fix; fix unit **pass**; pilot re-prove **not run** |
+| Status | **fail** observed on tip before fix; fix merged #187; pilot re-prove → [`25-reset-cache-delete-prove.md`](25-reset-cache-delete-prove.md) |
 
 ## Owner action (immediate)
 
@@ -37,11 +37,12 @@ Confirming would strip vault checkbox lines (e.g. DON-253 «Merge MR, run deploy
 ## Evidence
 
 - Unit: `src/test/bugResetCacheDelete.test.ts`, `shouldSkipOrphanVaultLineDelete` in `massDeleteGuard.test.ts`.
-- Pilot live re-prove after install: **not run** (needs Cancel on current tip, then build with fix ×2).
+- Pilot live re-prove after install: see [`25-reset-cache-delete-prove.md`](25-reset-cache-delete-prove.md) (install done; Reset-path prove owner-gated).
 
 ## Checklist
 
 - [x] Owner told Cancel immediately
 - [x] Root cause documented
 - [x] Case + unit test + fail-closed code
-- [ ] Pilot prove ×2 after fix build installed
+- [x] Fix merged #187 + tip installed (phase 25)
+- [ ] Pilot prove ×2 after Reset (owner; phase 25 checklist)

@@ -4,7 +4,7 @@
 |-------|--------|
 | Gate | UX-OBS-TT-SOAK |
 | Vault | Thinkpad-tts-test (pilot only) |
-| Plugin | tickticksync-abyss **2.0.94** label; tip after #182 has `statusListMappings` (see `16-status-map-prove.md`) |
+| Plugin | tickticksync-abyss **2.0.94** label; tip after #187 = `bc89f31` (BUG-RESET-CACHE-DELETE; see `25-reset-cache-delete-prove.md`) |
 | Goal | Qualitative feedback on day-to-day use — not a green/red AF gate |
 
 ## Feedback axes (all roles)
@@ -30,6 +30,9 @@
 | 14 | Task status → TT list map (spec) | `14-task-status-to-list-map.md` | done (code #182) |
 | 15 | Release notes mapping (tag **2.0.94**) | `15-release-notes-mapping.md` | done (tag zip still tags→lists) |
 | 16 | Post-#182 status map prove ×2 | `16-status-map-prove.md` | **pass** ×2 (tip; version still 2.0.94) |
+| 24 | Post-Reset orphan vault-line modal | `24-post-reset-delete-modal.md` | **fail** observed; fixed in #187 |
+| 25 | Post-#187 Reset cache-delete prove | `25-reset-cache-delete-prove.md` | **install pass**; Reset-path prove **blocked** (owner Reset → Sync ×2) |
+| 26 | Held deletions after Reset (owner screenshot) | `26-held-deletions-after-reset.md` | **DO NOT APPLY** — Skip; false vault-absent |
 | 185 | #185 status source (analyst spec) | [`../../UX-ABYSS-STATUS-SRC.md`](../../UX-ABYSS-STATUS-SRC.md) | **spec only (not run)**; not DoR |
 
 ## Rules
