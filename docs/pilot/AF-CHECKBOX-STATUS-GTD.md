@@ -2,6 +2,8 @@
 
 **Status:** **active** (owner go 2026-10-27) — `statusListMappings` (symbol → TickTick list). Supersedes the parked “tags only” decision below for vaults that enable the map.
 
+Symbol vocabulary is still typed in TickTickSync. Reading it from Abyss Tasks (`taskStatuses` / project statuses) is [#185](https://github.com/semyon-alekseev-noveo/tt-sync/issues/185) — spec `UX-ABYSS-STATUS-SRC.md`, **not DoR**, not this map.
+
 ## Active path (status SoT)
 
 | Symbol | → TickTick |

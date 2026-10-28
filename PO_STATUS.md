@@ -1,6 +1,6 @@
 # Product owner brief — TickTickSync Abyss fork (project scheme)
 
-**Обновлено:** 2026-10-26  
+**Обновлено:** 2026-10-28  
 **Audience:** Product owner / decision maker  
 **Repo:** `tickticksync` branch `abyss-mapping`  
 **Test vault:** `<pilot-vault>` (copy only; live vault `<live-vault>` untouched)  
@@ -98,6 +98,7 @@
 | **TECH-CIRC-1 / GOD-1/2** | P2 | **resolved** ([#66](https://github.com/semyon-alekseev-noveo/tt-sync/issues/66) A–G) | Cycle CI + 0 file-size exceptions on tip |
 | **DOC-STALE-1** | P3 | mitigated on this branch | Канон: `DEV_FLOW.md`, `PO_STATUS.md`, `ABYSS_FIRST_PLAN.md`. `GTD_SYNC_*`, `TT_ABYSS_ROADMAP.md`, `SYNC_PROJECTS_AND_SUBTASKS.md` — архив. Comments API описан в `ABYSS_NOTES_ALIGNMENT.md` |
 | **SEC-CREDS-1** | P1 | **resolved** 2026-10-25 | `tp_…` revoke + live auth: session cookie (not Open API); autologin password-in-`data.json` stays opt-in — exclude from vault sync if on. Step 8.0 in `ABYSS_FIRST_PLAN.md`. [#32](https://github.com/semyon-alekseev-noveo/tt-sync/issues/32). |
+| **UX-ABYSS-STATUS-SRC** | P1 | **not DoR** ([#185](https://github.com/semyon-alekseev-noveo/tt-sync/issues/185)) | Abyss format should read task + project statuses from `abyss-tasks` `data.json`. Cases drafted (`docs/pilot/UX-ABYSS-STATUS-SRC.md`). Owner must confirm overlay vs derived lists, missing-plugin fallback, and project status → TT entity before code. Pilot **not run**. |
 | Прежние | — | mitigated | Pilot `data.json` drift **resolved** on Thinkpad-tts-test **2.0.89** ([#64](https://github.com/semyon-alekseev-noveo/tt-sync/issues/64)). |
 
 ## Redo journal
@@ -119,6 +120,7 @@
 11. FEAT-NOTEBOOK [#159](https://github.com/semyon-alekseev-noveo/tt-sync/issues/159): MVP live **pass**; bi-di / scope still open.
 12. Optional: DEL-1/DEL-3 modal.
 13. PROC-RELEASE-GATE [#30](https://github.com/semyon-alekseev-noveo/tt-sync/issues/30): Actions gate is in `release.yml` (tests, ancestor, version match, no retag). Owner still turns on required check `CI / test` for `abyss-mapping` (`docs/github-issues/30-proc-release-gate.md`). Leave #30 open until merge and that decision.
+14. **UX-ABYSS-STATUS-SRC** [#185](https://github.com/semyon-alekseev-noveo/tt-sync/issues/185) — P1 label kept; **not DoR** until owner answers overlay / fallback / project-status entity. No code until then.
 
 
 ## Аналитический мит 2026-10-19

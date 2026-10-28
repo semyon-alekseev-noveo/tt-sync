@@ -14,7 +14,7 @@
 
 ## Inputs
 
-- Owner clarification (full map): **`[!]` → TTS-nextAction** (next); **`[/]` → TTS-WIP**; **`[?]` → TTS-waitingFor**; **`[=]` → TTS-Planned**; **`[~]` → TTS-someDay**; **`[ ]` → TTS-Inbox**; **`[x]` / `[-]`** → complete / cancel. Project statuses out of scope.
+- Owner clarification (full map): **`[!]` → TTS-nextAction** (next); **`[/]` → TTS-WIP**; **`[?]` → TTS-waitingFor**; **`[=]` → TTS-Planned**; **`[~]` → TTS-someDay**; **`[ ]` → TTS-Inbox**; **`[x]` / `[-]`** → complete / cancel. Project statuses out of scope. Follow-up (Abyss settings as the status source, including project statuses): [#185](https://github.com/semyon-alekseev-noveo/tt-sync/issues/185), spec `docs/pilot/UX-ABYSS-STATUS-SRC.md` (not a prove).
 - TickTick MCP: **TTS-WIP** created `6ae0bc8d8f08408071531645`; added to pilot `syncedLists`.
 - Settings shape: `statusListMappings` (symbol → listId), distinct from `statusMappings` (char → TT tag).
 

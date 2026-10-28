@@ -99,6 +99,19 @@ Preconditions for every AF row: plugin `tickticksync-abyss`, manual sync, `fileL
 | UX-STATUS-MAP-3 | Same settings. `- [ ] … #gtd/next` stays on **TTS-Inbox** (status SoT); `#gtd/*` does **not** move the list; sync rewrite strips mapped stage tags. Dual tag+status routing rejected. |
 | UX-STATUS-MAP-4 | Same settings. `- [x]` completes TT task (list unchanged). `- [-]` cancels (status/cancelled tag path; list unchanged). Also covers `[ ]`→Inbox, `[?]`→waitingFor, `[=]`→Planned, `[~]`→someDay. |
 | UX-STATUS-MAP-PULL | Same settings. Moving a task in TickTick to a mapped list rewrites the checkbox char on pull (e.g. TTS-waitingFor → `[?]`); does **not** add `#gtd/*`. Completed → `[x]`; cancelled tag → `[-]`. |
+| UX-ABYSS-STATUS-SRC-TASK | **Proposed, #185, not DoR.** Format on. Abyss `taskStatuses` symbol `!` (type open) is the vocabulary; TTS overlay `!` → **TTS-nextAction**. Line `- [!] …` stays in the note; TickTick list TTS-nextAction. Spec: `docs/pilot/UX-ABYSS-STATUS-SRC.md`. Pilot **not run**. |
+| UX-ABYSS-STATUS-SRC-UNMAPPED | **Proposed.** Open Abyss symbol with no overlay row: checkbox unchanged; TickTick list unchanged; no new list; Notice names the symbol. Pilot **not run**. |
+| UX-ABYSS-STATUS-SRC-STALE | **Proposed.** Symbol dropped from Abyss: existing line not rewritten; existing task stays; stale overlay must not place a **new** task. Pilot **not run**. |
+| UX-ABYSS-STATUS-SRC-TERM | **Proposed.** Abyss type `done` completes the task; type `cancelled` cancels it; list unchanged (core `x` / `-` included). Pilot **not run**. |
+| UX-ABYSS-STATUS-SRC-PULL | **Proposed.** TickTick move to a list whose symbol is still in Abyss rewrites that checkbox (e.g. `[?]`) and does not add `#gtd/*`. Pilot **not run**. |
+| UX-ABYSS-STATUS-SRC-OFF | **Proposed.** `abyssTasksFormat` off: do not read Abyss; **AF-5** tag path; sync succeeds. Pilot **not run**. |
+| UX-ABYSS-STATUS-SRC-MISS | **Proposed.** Format on, Abyss `data.json` missing: Notice; sync **completes**; non-empty `statusListMappings` else tag path. Pilot **not run**. |
+| UX-ABYSS-STATUS-SRC-PROJ-OPEN | **Proposed.** Project frontmatter `status: wip` (Abyss name): parent stays **open** on the **projects list**. Active Zone checkbox uses the task path, not `wip`. Pilot **not run**. |
+| UX-ABYSS-STATUS-SRC-PROJ-DONE | **Proposed.** Frontmatter name `done`: parent **completed** on the projects list (not a stage list). Pilot **not run**. |
+| UX-ABYSS-STATUS-SRC-PROJ-UNKNOWN | **Proposed.** `status: 🟢 In Progress` not in Abyss statuses: quiet sync does not rewrite it; parent stays open. Pilot **not run**. |
+| UX-ABYSS-STATUS-SRC-PROJ-WRITE | **Proposed.** TTS-created / completion-driven project `status` uses Abyss default name and `done`, not emoji. Pilot **not run**. |
+| UX-ABYSS-STATUS-SRC-PROJ-MIG | **Proposed.** `projects.statusMigration` set: do not guess a status string; completion uses current `isDoneStatus` only. Pilot **not run**. |
+| UX-ABYSS-STATUS-SRC-UI | **Proposed.** Format on: settings copy says statuses come from Abyss Tasks and Status → list is a list-id overlay. Format off: no such claim. Pilot **not run**. |
 
 Unit tests cover parts of AF-1, AF-5, AF-8, UX-STATUS-MAP-*, UX-RESET-1 / BUG-RESET-TASKS-PARTIAL, comments, a failed pull, and PERF-INDEX / PERF-CACHE / PERF-COUNTERS. They do not replace the live gate.
 
@@ -130,6 +143,7 @@ Pass only with evidence: the note path, the `ticktick_id`, and either the journa
 
 | Date (UTC) | Vault | Build | Runner | Item | Result | Evidence |
 |------------|-------|-------|--------|------|--------|----------|
+| 2026-10-28 | — | — | analyst | UX-ABYSS-STATUS-SRC-* | **not run** | Spec only (#185). No pilot. `docs/pilot/UX-ABYSS-STATUS-SRC.md`. |
 | 2026-10-27 | Thinkpad-tts-test | tip #182 (**2.0.94** label) | agent (CLI+MCP) | UX-STATUS-MAP-1 / UX-STATUS-MAP-2 | **pass** ×2 | `[!]`→nextAction `…57c8`; `[/]`→WIP `…57c9`. `UX-OBS-TT-SOAK/16-status-map-prove.md`. |
 | 2026-10-27 | Thinkpad-tts-test | tip #179 (**2.0.94**) | agent (Obsidian CLI) | UX-STUB-1 / BUG-LIST-STUB-RECREATE | **pass** ×2 | Deleted live+parked list stubs; `tts-sync` ×2; no recreate. `UX-OBS-TT-SOAK/08-stub-cleanup-prove.md`. |
 | 2026-10-26 | Thinkpad-tts-test | tip | agent (CLI+MCP) | NOTE-BODY-1 / wipe | **pass** ×2 | `- >` → TT content A/B; wipe kept TT body. BODY-2 **fail**. `NOTE-BODY/02-live-tip.md`. |
