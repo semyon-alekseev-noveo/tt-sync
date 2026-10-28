@@ -100,7 +100,7 @@ Preconditions for every AF row: plugin `tickticksync-abyss`, manual sync, `fileL
 | UX-STATUS-MAP-4 | Same settings. `- [x]` completes TT task (list unchanged). `- [-]` cancels (status/cancelled tag path; list unchanged). Also covers `[ ]`→Inbox, `[?]`→waitingFor, `[=]`→Planned, `[~]`→someDay. |
 | UX-STATUS-MAP-PULL | Same settings. Moving a task in TickTick to a mapped list rewrites the checkbox char on pull (e.g. TTS-waitingFor → `[?]`); does **not** add `#gtd/*`. Completed → `[x]`; cancelled tag → `[-]`. |
 
-Unit tests cover parts of AF-1, AF-5, AF-8, UX-STATUS-MAP-*, comments, a failed pull, and PERF-INDEX / PERF-CACHE / PERF-COUNTERS. They do not replace the live gate.
+Unit tests cover parts of AF-1, AF-5, AF-8, UX-STATUS-MAP-*, UX-RESET-1 / BUG-RESET-TASKS-PARTIAL, comments, a failed pull, and PERF-INDEX / PERF-CACHE / PERF-COUNTERS. They do not replace the live gate.
 
 ## Old ids
 

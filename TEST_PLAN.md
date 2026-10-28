@@ -6,7 +6,19 @@ Manual cases for behavior changes. Automated tests do not replace a row here.
 
 Pilot means `<pilot-vault>`, manual **Synchronize**, plugin id `tickticksync-abyss`. Do not use `<live-vault>`. A cloud agent does not mark a row passed. Status stays **not run** until a person or a local agent on that Obsidian records what they saw.
 
-## UX-STATUS-MAP — Abyss checkbox → TickTick list (this PR)
+## UX-RESET-1 — Reset local sync database (this PR)
+
+Settings → Tasks (or Notes) → **Reset local sync database**. Pilot only. Do not use DevTools IndexedDB delete for the restore sequence.
+
+| Case | Steps | Expected | Pilot |
+|------|-------|----------|-------|
+| UX-RESET-1 | Note a vault note with `%%[ticktick_id:: …]%%`. Confirm settings `checkPoint` ≠ 0 and sync has run before. Click **Reset local sync database** → confirm. | Notice that local DB cleared; vault note file still present; `checkPoint` is `0`. No TickTick task deleted by the button itself. | **not run** |
+| UX-RESET-1 restore seq | (1) Reset local sync database. (2) Restore TickTick from backup (owner). (3) **Synchronize**. | Clean full pull; vault markers re-link; empty-Dexie guard holds invented deletes; no need for DevTools IndexedDB wipe. | **not run** |
+| BUG-RESET-TASKS-PARTIAL | After reset, inspect that Dexie is empty of tasks/maps (unit) / next sync does not keep pre-reset stale task rows. | Not checkPoint-only; tables cleared. | unit **pass**; pilot **not run** |
+
+Unit: `src/test/uxReset1.clearLocalSyncDatabase.test.ts`.
+
+## UX-STATUS-MAP — Abyss checkbox → TickTick list
 
 Settings: `abyssTasksFormat` + non-empty `statusListMappings` (pilot: space/!/?/=/~// → TTS-* lists). `#gtd/*` must not drive list placement.
 

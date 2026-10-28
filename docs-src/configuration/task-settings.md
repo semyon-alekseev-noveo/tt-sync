@@ -24,12 +24,14 @@ Control which task elements are visible in **Reading mode** and **Edit mode** in
 | **TickTick ID** | Show or hide the TickTick task ID | Show or hide the TickTick task ID |
 | **#ticktick Tag** | Show or hide the `#ticktick` tag | Show or hide the `#ticktick` tag |
 
-## Reset Tasks
+## Reset local sync database
 
-The **Reset Tasks** button performs a full synchronization pass to update Tasks to conform to new settings.
+Formerly **Reset Tasks**. Clears the plugin’s local IndexedDB sync state (tasks, file/task maps, comment maps, projects, tags, journal) and sets the sync `checkPoint` to `0`. Vault markdown notes are **not** deleted. TickTick is not changed. The button does **not** auto-sync.
+
+Use this **before restoring a TickTick account backup** (instead of deleting the plugin database in browser DevTools). After restore, run **Synchronize** once so the plugin re-links from vault `ticktick_id` markers and a full TickTick pull. With an empty local DB, the empty-Dexie mass-delete guard still blocks invented deletions.
 
 !!! warning
-    This operation can take some time depending on the number of tasks. Use only when you suspect the sync state has become inconsistent.
+    This only clears the local sync cache. It does not delete notes in your vault and does not delete tasks in TickTick.
 
 ## Notes Settings
 
