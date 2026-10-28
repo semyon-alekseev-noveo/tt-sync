@@ -62,7 +62,7 @@ export function bkupFolderIsVaultRoot(folder: string | null | undefined): boolea
 /** Full vault — Abyss-aware wording; confirm modal kept. */
 export const FULL_VAULT_SYNC_LABEL = 'Full vault sync';
 export const FULL_VAULT_SYNC_HELP =
-	'Abyss/GTD pilots usually leave this off: sync follows Synced lists + vault scope, not every checkbox in the vault. When on, every vault task line can sync (including items under tasks). Requires confirmation.';
+	'Rule only (Sync Control). Abyss/GTD pilots usually leave this off: sync follows Synced lists + vault scope, not every checkbox in the vault. When on, every vault task line can sync (including items under tasks). Requires confirmation. To run sync → Maintenance → Synchronize.';
 export const FULL_VAULT_CONFIRM_TITLE = 'Full Vault Task Sync Confirmation';
 export const FULL_VAULT_CONFIRM_MESSAGE =
 	'Are you sure you want to sync ALL vault task lines?\n' +

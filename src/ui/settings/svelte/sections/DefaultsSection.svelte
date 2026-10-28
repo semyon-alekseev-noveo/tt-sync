@@ -7,6 +7,11 @@
 		DEFAULTS_FOLDER_MERGED_NOTE,
 		hideDefaultsTasksFolderTwin,
 	} from '@/ui/settings/settingsUxVisibility';
+	import {
+		DEFAULT_PROJECT_LABEL,
+		DEFAULTS_ABYSS_OFF_HELP,
+		DEFAULTS_ABYSS_ON_HELP,
+	} from '@/ui/settings/settingsUxCopy';
 	import { Setting, TFile } from 'obsidian';
 	import { FolderSuggest } from '@/utils/FolderSuggester';
 	import { validateNewFolder } from '@/utils/FolderUtils';
@@ -32,6 +37,9 @@
 			: (getSettings().syncScopeFolders ?? []),
 	};
 	$: hideDefaultsFolder = hideDefaultsTasksFolderTwin(abyssGtdSlice);
+	$: abyssFormatOn = !!(
+		$settingsStore.abyssTasksFormat ?? getSettings().abyssTasksFormat
+	);
 
 	const dispatch = createEventDispatcher();
 
@@ -282,16 +290,19 @@
 	on:headerClick={handleHeaderClick}
 >
 	<div class="sync-control">
+		<div class="setting-item-description tts-defaults-mode">
+			{#if abyssFormatOn}
+				{DEFAULTS_ABYSS_ON_HELP}
+			{:else}
+				{DEFAULTS_ABYSS_OFF_HELP}
+			{/if}
+		</div>
 		<div class="setting-item">
 			<div class="setting-item-info">
-				<div class="setting-item-name">Default Project</div>
+				<div class="setting-item-name">{DEFAULT_PROJECT_LABEL}</div>
 				<div class="setting-item-description">
-					<div>Tasks are added to the default project associated with a file.</div>
-					<div>If tasks are added to a file with no default project association
-					</div>
-					<div>they will be added to the <span
-						class="setting-item-name"> {getSettings().defaultProjectName}</span> project.
-					</div>
+					Fallback TickTick list when a new task has no stronger mapping. Current name:{' '}
+					<span class="setting-item-name">{getSettings().defaultProjectName}</span>.
 				</div>
 			</div>
 			<div class="setting-item-control">

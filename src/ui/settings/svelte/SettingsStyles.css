@@ -310,3 +310,55 @@ label.checkbox-container {
 .tts-ux-progress-disabled input[type='checkbox'] {
 	pointer-events: none;
 }
+
+/* #205 Synced lists: full-width under info, not jammed in right control */
+.tts-synced-lists-block {
+	display: block;
+	align-items: stretch;
+}
+.tts-synced-lists-block .setting-item-info {
+	flex: 1 1 100%;
+	max-width: 100%;
+}
+.tts-synced-lists-panel {
+	margin-top: 0.75em;
+	width: 100%;
+	max-width: 36rem;
+}
+.tts-synced-lists-checks {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 0.35em;
+	margin: 0.5em 0 0.75em;
+}
+.tts-synced-list-row {
+	display: flex;
+	align-items: center;
+	gap: 0.5em;
+	width: 100%;
+}
+.tts-synced-lists-stale {
+	margin-top: 0.75em;
+	padding: 0.5em 0.65em;
+	border-left: 3px solid var(--text-warning, #b07000);
+	background: var(--background-secondary);
+}
+.tts-synced-lists-stale-ul {
+	list-style: none;
+	margin: 0.5em 0;
+	padding: 0;
+}
+.tts-synced-lists-stale-ul li {
+	justify-content: space-between;
+	margin: 0.35em 0;
+}
+.tts-tab-intro {
+	margin: 0 0 1em;
+	padding: 0.5em 0.65em;
+	border-left: 3px solid var(--interactive-accent, var(--text-accent));
+	background: var(--background-secondary);
+}
+.tts-defaults-mode {
+	margin-bottom: 0.75em;
+}

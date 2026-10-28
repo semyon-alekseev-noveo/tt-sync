@@ -15,10 +15,14 @@
 		PULL_FILTER_TAG_LABEL,
 		SYNCED_LISTS_HELP,
 		SYNCED_LISTS_LABEL,
+		SYNCED_LISTS_REMOVE_STALE,
+		SYNCED_LISTS_STALE_HELP,
 		syncTagEmptyBadgeVisible,
 	} from '@/ui/settings/settingsUxCopy';
 	import {
 		GTD_STAGE_INACTIVE_BANNER,
+		GTD_TAG_LIST_INACTIVE_LABEL,
+		GTD_TAG_LIST_MAPPING_LABEL,
 		HUB_HIDDEN_NOTE,
 		hideHubSingleTasksFile,
 		hideOrInactiveGtdStageMapping,
@@ -185,6 +189,16 @@
 		await save({ syncedLists: checked ? [...rest, list.name] : rest });
 	}
 
+	async function removeStaleEntry(entry: string) {
+		await save({ syncedLists: syncedLists.filter(e => e !== entry) });
+	}
+
+	async function removeAllStaleEntries() {
+		if (!unknownEntries.length) return;
+		const stale = new Set(unknownEntries);
+		await save({ syncedLists: syncedLists.filter(e => !stale.has(e)) });
+	}
+
 	// one field per save: editing one input must never rewrite the others
 	const saveTasksFolder = () => save({ TickTickTasksFilePath: tasksFolder.trim() || '/' });
 	const saveScope = () => save({ syncScopeFolders: parseLineList(scopeText) });
@@ -288,49 +302,75 @@
 		{SYNCED_LISTS_HELP}
 	</div>
 
-	<div class="setting-item">
-		<div class="setting-item-info">
+	<div class="setting-item tts-synced-lists-block">
+		<div class="setting-item-info" style="width: 100%;">
 			<div class="setting-item-name">{SYNCED_LISTS_LABEL}</div>
 			<div class="setting-item-description">
 				{SYNCED_LISTS_HELP}
-				Each ticked list gets a file in the tasks folder (created on the next sync). Matched by list name.
-				If you rename a list in TickTick, tick it again. If the project scheme is on, the Projects list must
-				be ticked too.
+				Matched by list name. If you rename a list in TickTick, tick the new name. With project scheme on, tick
+				<strong>Projects</strong> too.
 			</div>
-		</div>
-		<div class="setting-item-control" style="flex-direction: column; align-items: flex-start;">
-			<div class="setting-item-description" style="margin-bottom: 0.5em;">
-				{#if settingsListCount > 0}
-					Loaded {settingsListCount} list{settingsListCount === 1 ? '' : 's'} from settings
-					{#if !lists.length && listsError}
-						(TickTick API unavailable — names below are from saved config).
+			<div class="tts-synced-lists-panel">
+				<div class="setting-item-description" style="margin-bottom: 0.5em;">
+					{#if settingsListCount > 0}
+						Allow-list has {settingsListCount} saved entr{settingsListCount === 1 ? 'y' : 'ies'}
+						{#if !lists.length && listsError}
+							(TickTick API unavailable — checkboxes use live lists when available).
+						{/if}
+					{:else}
+						No lists saved — use <strong>Import GTD from clipboard</strong> or merge a preset into plugin data
+						while Obsidian is closed.
 					{/if}
-				{:else}
-					No lists on disk — use <strong>Import GTD from clipboard</strong> or merge
-					<code>00 Inbox/TTS-data-preset.json</code> into plugin data while Obsidian is closed.
+				</div>
+				<div class="tts-synced-lists-checks">
+					{#each checkboxLists as list}
+						<label class="tts-synced-list-row">
+							<input
+								type="checkbox"
+								checked={syncedLists.some(e => isListAllowed([e], list))}
+								on:change={(e) => toggleList(list, (e.target as HTMLInputElement).checked)}
+							/>
+							<span>{list.name}</span>
+						</label>
+					{/each}
+				</div>
+				{#if listsError}
+					<div class="setting-item-description" style="color: var(--text-error)">
+						Could not load TickTick lists: {listsError} Your saved selection is unchanged.
+					</div>
+				{:else if !lists.length && !listsLoading}
+					<div class="setting-item-description">
+						No lists yet. Lists load after login (Access Control). Saved selection is kept.
+					</div>
+				{/if}
+				<button class="tts-maint-secondary" type="button" on:click={refreshLists} disabled={listsLoading}>
+					Reload lists
+				</button>
+				{#if unknownEntries.length}
+					<div class="tts-synced-lists-stale">
+						<div class="setting-item-description">{SYNCED_LISTS_STALE_HELP}</div>
+						<ul class="tts-synced-lists-stale-ul">
+							{#each unknownEntries as entry}
+								<li class="tts-synced-list-row">
+									<code>{entry}</code>
+									<button
+										type="button"
+										class="tts-maint-secondary"
+										on:click={() => removeStaleEntry(entry)}
+									>
+										{SYNCED_LISTS_REMOVE_STALE}
+									</button>
+								</li>
+							{/each}
+						</ul>
+						{#if unknownEntries.length > 1}
+							<button type="button" class="tts-maint-secondary" on:click={removeAllStaleEntries}>
+								Remove all stale entries
+							</button>
+						{/if}
+					</div>
 				{/if}
 			</div>
-			{#each checkboxLists as list}
-				<label style="display:block">
-					<input
-						type="checkbox"
-						checked={syncedLists.some(e => isListAllowed([e], list))}
-						on:change={(e) => toggleList(list, (e.target as HTMLInputElement).checked)}
-					/>
-					{list.name}
-				</label>
-			{/each}
-			{#if listsError}
-				<div class="setting-item-description" style="color: var(--text-error)">
-					Could not load TickTick lists: {listsError} Your saved selection is unchanged.
-				</div>
-			{:else if !lists.length && !listsLoading}
-				<div class="setting-item-description">No lists yet. Lists load automatically after login at plugin start (set username and password in the Access Control tab, or log in there once); your saved selection is kept.</div>
-			{/if}
-			<button on:click={refreshLists} disabled={listsLoading}>Reload lists</button>
-			{#if unknownEntries.length}
-				<div class="setting-item-description">Not found in TickTick: {unknownEntries.join(', ')}</div>
-			{/if}
 		</div>
 	</div>
 
@@ -434,14 +474,14 @@
 	{#if stageMappingInactive}
 		<div class="setting-item tts-ux-inactive-banner">
 			<div class="setting-item-info">
-				<div class="setting-item-name">GTD stage mapping (inactive)</div>
+				<div class="setting-item-name">{GTD_TAG_LIST_INACTIVE_LABEL}</div>
 				<div class="setting-item-description">{GTD_STAGE_INACTIVE_BANNER}</div>
 			</div>
 		</div>
 	{:else}
 		<div class="setting-item">
 			<div class="setting-item-info">
-				<div class="setting-item-name">GTD stage mapping</div>
+				<div class="setting-item-name">{GTD_TAG_LIST_MAPPING_LABEL}</div>
 				<div class="setting-item-description">
 					{#if gtdStageVia === 'tag'}
 						One per line: <code>gtd/next = gtd/next</code>. The Obsidian tag is a TickTick tag. A TickTick filter on that tag is the view. Changing the tag on either side rewrites the other. The task stays on its list.
