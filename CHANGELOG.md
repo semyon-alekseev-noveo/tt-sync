@@ -1,3 +1,13 @@
+### Iteration 2026-10-28 10:29 UTC
+
+- Context: Owner cleared Pull filter `укук` but it bounced back; also unclear GTD Safe defaults / Copy / Import block layout.
+- Target: Persist empty SyncTag; full-width presets rows with clear help.
+- Actions log: Dropped SyncTag from `GTD_SCALAR_KEYS` preserve; BUG-SYNC-TAG-CLEAR unit; GTD presets panel rewrite + CSS.
+- Validation: `npx vitest run` 870 pass; `npm run build` ok; tip installed; pilot `SyncTag` cleared in data.json.
+- Problems: Owner must reload Obsidian to confirm empty Pull filter sticks (`open`).
+- To Be Done: Merge PR; owner prove BUG-SYNC-TAG-CLEAR ×2 if treated as live bug.
+- References: `src/settingsMerge.ts`, `GtdSection.svelte`, `BUG-SYNC-TAG-CLEAR`, `CHANGELOG.md`
+
 ### Iteration 2026-10-28 10:10 UTC
 
 - Context: Owner «пили» on [#205](https://github.com/semyon-alekseev-noveo/tt-sync/issues/205) Settings UX smoke fails (§3–9).

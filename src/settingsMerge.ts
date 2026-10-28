@@ -4,13 +4,17 @@ import { migrateSyncedLists } from '@/syncScope';
 /** GTD arrays that must not be replaced by empty in-memory defaults when disk still has data. */
 export const GTD_ARRAY_KEYS = ['syncedLists', 'tagListMappings', 'syncScopeFolders'] as const;
 
+/**
+ * Scalars restored from disk when memory still equals DEFAULT (upgrade / early-save race).
+ * SyncTag is intentionally omitted: empty means pull ALL and must be persistable when the
+ * owner clears Pull filter tag (BUG-SYNC-TAG-CLEAR / stuck «укук»).
+ */
 const GTD_SCALAR_KEYS: (keyof ITickTickSyncSettings)[] = [
 	'TickTickTasksFilePath',
 	'projectsFolder',
 	'projectsListName',
 	'newTasksFile',
 	'projectTemplatePath',
-	'SyncTag',
 	'projectsListId',
 	'defaultProjectId',
 	'defaultProjectName',

@@ -362,3 +362,29 @@ label.checkbox-container {
 .tts-defaults-mode {
 	margin-bottom: 0.75em;
 }
+
+/* GTD presets: full-width rows — avoid Obsidian right-control squeeze */
+.tts-gtd-presets-block {
+	display: block;
+	align-items: stretch;
+}
+.tts-gtd-presets-block .setting-item-info {
+	flex: 1 1 100%;
+	max-width: 100%;
+}
+.tts-gtd-presets-panel {
+	margin-top: 0.75em;
+	display: flex;
+	flex-direction: column;
+	gap: 0.85em;
+	max-width: 40rem;
+}
+.tts-gtd-preset-row {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 0.35em;
+}
+.tts-gtd-preset-row button {
+	align-self: flex-start;
+}

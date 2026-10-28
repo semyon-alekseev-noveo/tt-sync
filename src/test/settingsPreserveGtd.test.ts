@@ -51,7 +51,7 @@ describe('wouldWipeGtdFromDisk', () => {
 });
 
 describe('buildPersistedSettings', () => {
-	it('keeps GTD from disk when memory still has plugin defaults (upgrade race)', () => {
+	it('keeps GTD arrays from disk when memory still has plugin defaults (upgrade race)', () => {
 		const memory = { ...DEFAULT_SETTINGS } as ITickTickSyncSettings;
 		const disk = {
 			version: '2.0.21',
@@ -63,8 +63,19 @@ describe('buildPersistedSettings', () => {
 		const out = buildPersistedSettings(memory, disk);
 		expect(out.syncedLists).toEqual(disk.syncedLists);
 		expect(out.tagListMappings).toEqual(disk.tagListMappings);
-		expect(out.SyncTag).toBe('tts-test');
 		expect(out.token).toBe('keep-me');
+	});
+
+	it('BUG-SYNC-TAG-CLEAR: empty SyncTag persists (pull ALL); disk tag is not forced back', () => {
+		const memory = { ...DEFAULT_SETTINGS, SyncTag: '', syncedLists: ['Inbox'] } as ITickTickSyncSettings;
+		const disk = {
+			syncedLists: ['Inbox'],
+			SyncTag: 'укук',
+			token: 't',
+		};
+		const out = buildPersistedSettings(memory, disk);
+		expect(out.SyncTag).toBe('');
+		expect(out.syncedLists).toEqual(['Inbox']);
 	});
 });
 
