@@ -4,7 +4,7 @@
 |-------|--------|
 | Gate | UX-OBS-TT-SOAK |
 | Vault | Thinkpad-tts-test (pilot only) |
-| Plugin | tickticksync-abyss **2.0.94** label; tip after #187 = `bc89f31` (BUG-RESET-CACHE-DELETE; see `25-reset-cache-delete-prove.md`) |
+| Plugin | tickticksync-abyss **2.0.94** label; Settings UX tip = `abyss-mapping` after [#199](https://github.com/semyon-alekseev-noveo/tt-sync/pull/199) (`6038e8d`); older tip after #187 = `bc89f31` (see `25-reset-cache-delete-prove.md`) |
 | Goal | Qualitative feedback on day-to-day use — not a green/red AF gate |
 
 ## Feedback axes (all roles)
@@ -37,7 +37,8 @@
 | 28 | Settings UX Phase 1 (#191) | `28-settings-ux-phase1.md` | **unit pass**; pilot Settings **not run** |
 | 29 | Settings UX Phase 2 (#192) | `29-settings-ux-phase2.md` | **unit pass**; pilot Settings **not run** |
 | 30 | Settings UX Phase 3 (#193) | `30-settings-ux-phase3.md` | **unit pass**; pilot Settings **not run** |
-| 31 | Settings UX Phase 4 (#194) | `31-settings-ux-phase4.md` | **unit pass**; pilot Settings **not run** |
+| 31 | Settings UX Phase 4 (#194) | `31-settings-ux-phase4.md` | **unit pass**; pilot Settings **not run**; code merged #199 |
+| 32 | Settings UX smoke (epic #189) | `32-settings-ux-smoke-checklist.md` | **not run** — owner Settings smoke for all `UX-SET-*` |
 | 185 | #185 status source (analyst spec) | [`../../UX-ABYSS-STATUS-SRC.md`](../../UX-ABYSS-STATUS-SRC.md) | **spec only (not run)**; not DoR |
 
 ## Rules
