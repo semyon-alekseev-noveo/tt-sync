@@ -517,18 +517,39 @@
 		</div>
 	{/if}
 
-	<div class="setting-item">
-		<div class="setting-item-info">
-			<div class="setting-item-name">Safe defaults</div>
+	<div class="setting-item tts-gtd-presets-block">
+		<div class="setting-item-info" style="width: 100%;">
+			<div class="setting-item-name">GTD presets / backup</div>
 			<div class="setting-item-description">
-				No automatic sync, no full-vault sync, no file links in TickTick titles, no <code>ticktick</code> tag
-				pushed to TickTick. Does not touch your lists.
+				Tools for this tab only. They do not run Synchronize and do not change TickTick.
 			</div>
-		</div>
-		<div class="setting-item-control">
-			<button on:click={applySafeDefaults}>Apply safe defaults</button>
-			<button on:click={copyConfig}>Copy GTD settings (JSON)</button>
-			<button on:click={importConfig}>Import GTD from clipboard</button>
+			<div class="tts-gtd-presets-panel">
+				<div class="tts-gtd-preset-row">
+					<button type="button" class="tts-maint-secondary" on:click={applySafeDefaults}>
+						Apply safe defaults
+					</button>
+					<div class="setting-item-description">
+						Sets: auto-sync off, full-vault sync off, no file links in titles, stop injecting
+						<code>#ticktick</code>. Does <strong>not</strong> change Synced lists or folders.
+					</div>
+				</div>
+				<div class="tts-gtd-preset-row">
+					<button type="button" class="tts-maint-secondary" on:click={copyConfig}>
+						Copy GTD settings (JSON)
+					</button>
+					<div class="setting-item-description">
+						Copies allow-list / folders / maps / SyncTag to the clipboard for backup or another vault.
+					</div>
+				</div>
+				<div class="tts-gtd-preset-row">
+					<button type="button" class="tts-maint-secondary" on:click={importConfig}>
+						Import GTD from clipboard
+					</button>
+					<div class="setting-item-description">
+						Pastes that JSON back into settings. Overwrites GTD fields — undo via vault backup if wrong.
+					</div>
+				</div>
+			</div>
 		</div>
 	</div>
 </CollapsibleSection>

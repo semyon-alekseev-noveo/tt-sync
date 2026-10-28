@@ -14,6 +14,7 @@ Phase 1: **copy / layout**. Phase 2 (#192): **visibility / merge** when Abyss/GT
 |------|-------|----------|-------|
 | UX-SET-GLOSSARY | Maintenance: ~4-row **Deletion glossary** + Guard chips. Also read **Check Database** orphan help (Cancel / Add / Delete). State Skip vs Cancel vs leave Purge alone. | ≤30s; orphans actionable from Maintenance copy. | **not run** |
 | UX-SET-SYNCTAG-EMPTY | Sync Control → GTD: clear **Pull filter tag**. Read badge `pull ALL` / tooltip. | Empty = pull **all** allow-listed lists; not “filter safely off.” | **not run** |
+| BUG-SYNC-TAG-CLEAR | Clear Pull filter tag; wait 1s; reload plugin / reopen Settings. | Field stays empty; data.json `SyncTag` is `""`; no bounce to old value. | **not run** |
 | UX-SET-MANAGE-DELETED | Maintenance: **Purge soft-deleted cache rows** — when soft-delete appears; local sync cache; ≠ held/TT wipe. | Clear when/what; no Dexie in UI. | **not run** |
 | UX-SET-RESET-ONE | Maintenance → **Danger zone** only. Tasks/Notes have no Reset. | One **Reset local sync cache**; vault + TickTick intact. | **not run** |
 | UX-SET-SYNCED-LISTS-LAYOUT | GTD Synced lists full-width; Remove on stale/unknown entries. | Layout usable; numbered/stale removable. | **not run** |
