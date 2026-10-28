@@ -1,9 +1,10 @@
 /**
  * BUG-208-REMATCH — rewrite missing vault markers from Dexie/TickTick tasks
  * without deleting anything on TickTick.
+ *
+ * No `@/db/dexie` import here — keeps phases → rematch off the Dexie cycle (#209 CI).
  */
 import type { ITask } from '@/api/types/Task';
-import { db } from '@/db/dexie';
 import type { PlannedDeletion } from '@/sync/massDeleteGuard';
 import log from '@/utils/logger';
 
@@ -15,14 +16,7 @@ export interface RematchLiveTask {
 
 export interface RematchVaultDeps {
 	synchronizeToVault: (file: string, tasks: ITask[], updating: boolean) => Promise<unknown>;
-	/** Defaults to Dexie `tasks` by taskId. Injected in unit tests. */
-	loadLiveTask?: (taskId: string) => Promise<RematchLiveTask | null | undefined>;
-}
-
-async function defaultLoadLiveTask(taskId: string): Promise<RematchLiveTask | null> {
-	const row = await db.tasks.where('taskId').equals(taskId).first();
-	if (!row) return null;
-	return { taskId: row.taskId, deleted: row.deleted, task: row.task };
+	loadLiveTask: (taskId: string) => Promise<RematchLiveTask | null | undefined>;
 }
 
 export async function rematchVaultFromPlanned(
@@ -32,7 +26,6 @@ export async function rematchVaultFromPlanned(
 	let written = 0;
 	let skipped = 0;
 	const byFile = new Map<string, ITask[]>();
-	const load = deps.loadLiveTask ?? defaultLoadLiveTask;
 
 	for (const item of planned) {
 		const taskId = item.taskId ?? item.id;
@@ -41,7 +34,7 @@ export async function rematchVaultFromPlanned(
 			skipped += 1;
 			continue;
 		}
-		const row = await load(taskId);
+		const row = await deps.loadLiveTask(taskId);
 		const task = row?.task;
 		if (!task || row?.deleted) {
 			skipped += 1;

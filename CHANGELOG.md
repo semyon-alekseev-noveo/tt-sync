@@ -1,3 +1,13 @@
+### Iteration 2026-10-28 11:57 UTC
+
+- Context: #209 merged but CI failed on new rematch→dexie import cycle.
+- Target: Break cycle; rematch loads tasks via taskRepository from the phase.
+- Actions log: Dropped `@/db/dexie` from `rematchVault.ts`; phase injects `loadLiveTask`.
+- Validation: `npm run check:cycles` OK; rematch + massDeleteGuard tests 16 pass.
+- Problems: Tip still needs Rematch pilot prove ×2 (`open`).
+- To Be Done: PR cycle fix; tip reload; Rematch on held modal; prove ×2; then close #208.
+- References: #208, #209, `src/sync/rematchVault.ts`, `CHANGELOG.md`
+
 ### Iteration 2026-10-28 11:41 UTC
 
 - Context: Owner «гоу #208» + asked why Active Zone inline tasks vanished (thought agent deleted them).
