@@ -1,9 +1,13 @@
 <script lang="ts">
 	import { settingsStore } from '@/ui/settings/settingsstore';
-	import { updateSettings } from '@/settings';
+	import { getSettings, updateSettings } from '@/settings';
 	import type TickTickSync from '@/main';
 	import { LINK_BEHAVIOR, LINK_VISIBILITY } from '@/ui/settings/svelte/constants.svelte.js';
 	import { resetTasks } from '@/ui/settings/utils/ResetSynchronization';
+	import {
+		hideKeepTickTickFolders,
+		hideStripTickTickOnReset,
+	} from '@/ui/settings/settingsUxVisibility';
 	import './SettingsStyles.css';
 
 	export let plugin: TickTickSync;
@@ -63,6 +67,9 @@
 	$: editingTag = $settingsStore.taskDisplay?.editing?.tag ?? true;
 	$: stopInjectingTickTickTag = $settingsStore.stopInjectingTickTickTag ?? false;
 	$: stripTickTickTagOnReset = $settingsStore.stripTickTickTagOnReset ?? false;
+	$: schemeEnabled = $settingsStore.projectSchemeEnabled ?? getSettings().projectSchemeEnabled ?? false;
+	$: keepFoldersHidden = hideKeepTickTickFolders({ projectSchemeEnabled: schemeEnabled });
+	$: stripOnResetHidden = hideStripTickTickOnReset();
 
 	// Remove noteLink from options if needed
 	$: if (!syncNotes) {
@@ -173,6 +180,7 @@
 	{/if}
 
 	<div class="task-settings ">
+		{#if !keepFoldersHidden}
 		<div class="setting-item">
 			<div class="setting-item-info">
 				<div class="setting-item-name">Organize tasks by TickTick folders</div>
@@ -189,6 +197,7 @@
 				/>
 			</div>
 		</div>
+		{/if}
 
 		<div class="setting-item">
 			<div class="setting-item-info">
@@ -335,6 +344,7 @@
 			</div>
 		</div>
 
+		{#if !stripOnResetHidden}
 		<div class="setting-item">
 			<div class="setting-item-info">
 				<div class="setting-item-name">Strip the ticktick tag on reset</div>
@@ -353,6 +363,7 @@
 				/>
 			</div>
 		</div>
+		{/if}
 
 	</div>
 </div>

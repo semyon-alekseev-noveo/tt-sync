@@ -264,3 +264,16 @@ label.checkbox-container {
 .tts-maint-secondary {
 	/* secondary housekeeping: no mod-cta accent */
 }
+.tts-ux-merged-note {
+	margin: 0.75em 0;
+	padding: 0.5em 0.75em;
+	border-left: 3px solid var(--text-muted);
+	color: var(--text-muted);
+	font-size: var(--font-ui-small);
+}
+.tts-ux-inactive-banner {
+	opacity: 0.92;
+}
+.tts-ux-inactive-banner .setting-item-name {
+	color: var(--text-muted);
+}

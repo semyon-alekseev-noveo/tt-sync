@@ -1,3 +1,13 @@
+### Iteration 2026-10-28 07:10 UTC
+
+- Context: Owner merged Phase 1 PR #196; Settings UX Phase 2 [#192](https://github.com/semyon-alekseev-noveo/tt-sync/issues/192) (epic [#189](https://github.com/semyon-alekseev-noveo/tt-sync/issues/189)). Visibility/merge only.
+- Target: Hide Defaults folder twin, Extra filters, hub, strip-on-reset, Keep TickTick folders; inactive GTD stage→list when status→list SoT.
+- Actions log: Added `settingsUxVisibility.ts`; wired Defaults / SyncControl / Limit / GTD / Tasks; unit `uxSetPhase2.settingsVisibility.test.ts`; TEST_PLAN / AF / pilot `29`.
+- Validation: `npx vitest run` 835 pass; `npm run build` ok.
+- Problems: Pilot Settings UI still **not run** (`open`).
+- To Be Done: Owner merges PR; pilot smoke UX-SET-HIDE-DEFAULTS / EXTRA-FILTERS / STATUS-VS-STAGE; Phase 3 [#193](https://github.com/semyon-alekseev-noveo/tt-sync/issues/193) later.
+- References: `src/ui/settings/settingsUxVisibility.ts`, `docs/pilot/results/UX-OBS-TT-SOAK/29-settings-ux-phase2.md`, `TEST_PLAN.md`, `CHANGELOG.md`
+
 ### Iteration 2026-10-28 06:42 UTC
 
 - Context: Owner go after Phase 0 PR #195; Settings UX Phase 1 [#191](https://github.com/semyon-alekseev-noveo/tt-sync/issues/191) (epic [#189](https://github.com/semyon-alekseev-noveo/tt-sync/issues/189)). Copy/layout only.

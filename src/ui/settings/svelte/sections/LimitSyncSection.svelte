@@ -6,6 +6,7 @@
 	import { TAGS_BEHAVIOR } from '@/ui/settings/svelte/constants.svelte.js';
 	import { settingsStore } from '@/ui/settings/settingsstore';
 	import { getSettings } from '@/settings';
+	import { hideExtraFilters } from '@/ui/settings/settingsUxVisibility';
 
 	export let open = false;
 	export let plugin;
@@ -30,7 +31,12 @@
 
 	$: selectedSyncProject = $settingsStore.SyncProject ?? '';
 	$: tagAndOr = $settingsStore.tagAndOr ?? 1;
-	$: gtdListsActive = ($settingsStore.syncedLists?.length ?? 0) > 0 || (getSettings().syncedLists?.length ?? 0) > 0;
+	$: syncedLists =
+		($settingsStore.syncedLists?.length ?? 0) > 0
+			? $settingsStore.syncedLists
+			: (getSettings().syncedLists ?? []);
+	/** UX-SET-EXTRA-FILTERS — parent SyncControlSettings omits this section when true. */
+	$: gtdListsActive = hideExtraFilters({ syncedLists });
 	$: sectionTitle = gtdListsActive ? 'Extra filters (advanced)' : 'Limit synchronization';
 	$: sectionShortDesc = gtdListsActive
 		? 'Legacy filters within allow-listed lists'

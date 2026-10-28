@@ -6,9 +6,9 @@ Manual cases for behavior changes. Automated tests do not replace a row here.
 
 Pilot means `<pilot-vault>`, manual **Synchronize**, plugin id `tickticksync-abyss`. Do not use `<live-vault>`. A cloud agent does not mark a row passed. Status stays **not run** until a person or a local agent on that Obsidian records what they saw.
 
-## UX-SET — Settings UX redesign (epic #189 / Phase 1 #191)
+## UX-SET — Settings UX redesign (epic #189 / Phase 1 #191 / Phase 2 #192)
 
-Phase 1 implements **copy / layout / visibility only** (no sync logic change). Glossary source: `docs/pilot/results/UX-OBS-TT-SOAK/27-settings-ux-redesign-plan.md`. Catalog: `ABYSS_FIRST_CASES.md` `UX-SET-*`. Unit: `src/test/uxSetPhase1.settingsCopy.test.ts`. Pilot stays **not run** until Settings UI is installed and exercised on the pilot vault.
+Phase 1: **copy / layout**. Phase 2 (#192): **visibility / merge** when Abyss/GTD mode is active (no sync logic change). Glossary/plan: `docs/pilot/results/UX-OBS-TT-SOAK/27-settings-ux-redesign-plan.md`. Catalog: `ABYSS_FIRST_CASES.md` `UX-SET-*`. Units: `uxSetPhase1.settingsCopy.test.ts`, `uxSetPhase2.settingsVisibility.test.ts`. Pilot stays **not run** until Settings UI is installed and exercised on the pilot vault.
 
 | Case | Steps | Expected | Pilot |
 |------|-------|----------|-------|
@@ -18,9 +18,9 @@ Phase 1 implements **copy / layout / visibility only** (no sync logic change). G
 | UX-SET-RESET-ONE | Maintenance → **Danger zone** only. Confirm Tasks / Notes tabs have no Reset control. | One **Reset local sync database**; vault + TickTick stay intact (copy). | **not run** |
 | UX-SET-SYNCED-LISTS-HELP | Read Synced lists help under GTD. | Allow-list; empty → nothing pulled; new TT list ≠ synced until ticked. | **not run** |
 | UX-SET-MAINT-SYNC-PRIMARY | Open Maintenance. | **Synchronize** is the sole primary (`mod-cta`); Check / Backup / Purge secondary. | **not run** |
-| UX-SET-HIDE-DEFAULTS | Abyss/GTD path on (UX-STUB-1 predicate). Open Settings (after #192). | Defaults Tasks folder hidden or non-primary. | **not run** |
-| UX-SET-EXTRA-FILTERS | Same Abyss mode (after #192). | Extra filters folded/hidden when redundant. | **not run** |
-| UX-SET-STATUS-VS-STAGE | `statusListMappings` set (after #192). | Stage→list UI inactive/hidden; status→list remains. | **not run** |
+| UX-SET-HIDE-DEFAULTS | Abyss/GTD path on (UX-STUB-1: `projectSchemeEnabled` + `abyssTasksFormat` + non-empty `syncScopeFolders`). Open Sync Control → Defaults. | Default folder location hidden; note points to GTD **Tasks folder** (same key). | unit **pass**; pilot **not run** |
+| UX-SET-EXTRA-FILTERS | Non-empty `syncedLists`. Open Sync Control. | Extra filters / Limit sync section omitted (not a competing allow-list). | unit **pass**; pilot **not run** |
+| UX-SET-STATUS-VS-STAGE | Non-empty `statusListMappings`. Open GTD. | Stage→list shows inactive banner (no editable twin); Status → list under Notes remains. | unit **pass**; pilot **not run** |
 | UX-SET-SYNC-NOTES | Scan Sync Notes label (after #193). | Distinguishable from Notebook / NOTE-BODY. | **not run** |
 | UX-SET-NOTEBOOK-WARN | Open Notebook-related settings (after #193). | Notebook ≠ Inbox warning visible. | **not run** |
 | UX-SET-BKUP-DEFAULT | Check backup folder default (after #193). | Sane for Abyss pilots or warned. | **not run** |
