@@ -104,7 +104,8 @@ Canonical expected behavior: `ABYSS_FIRST_CASES.md`. Manual steps: `TEST_PLAN.md
 - [x] Case IDs in `ABYSS_FIRST_CASES.md` + `TEST_PLAN.md` stubs (**not run**)
 - [x] This plan + INDEX row; links #189–#194
 - [ ] Owner 30s glossary check recorded on #190 / #189
-- [ ] Phase 1+ Settings UI (blocked until DoR accepted / this PR merged)
+- [x] Phase 0 DoR merged (#195)
+- [ ] Phase 1 Settings UI — see `28-settings-ux-phase1.md` / #191 (unit pass; pilot not run)
 
 ## Conclusion
 

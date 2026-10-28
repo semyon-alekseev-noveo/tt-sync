@@ -196,3 +196,71 @@ label.checkbox-container {
 }
 .local-modal-content { padding: 2em; }
 .local-modal-actions { text-align: right; margin-top: 2em; }
+
+/* UX-SET Phase 1 (#191) */
+.tts-pull-all-badge {
+	display: inline-block;
+	margin-left: 0.4em;
+	padding: 0.05em 0.45em;
+	font-size: 0.75em;
+	font-weight: 600;
+	letter-spacing: 0.02em;
+	border-radius: 4px;
+	background: var(--interactive-accent);
+	color: var(--text-on-accent, var(--text-normal));
+	vertical-align: middle;
+}
+.tts-deletion-glossary {
+	margin: 0.75em 0 1.25em;
+	padding: 0.75em 1em;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 6px;
+	background: var(--background-secondary);
+}
+.tts-glossary-chips {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.35em;
+	margin: 0.5em 0;
+}
+.tts-glossary-chip {
+	display: inline-block;
+	padding: 0.15em 0.55em;
+	font-size: 0.8em;
+	border-radius: 999px;
+	border: 1px solid var(--background-modifier-border);
+	background: var(--background-primary);
+	color: var(--text-muted);
+	cursor: help;
+}
+.tts-glossary-table {
+	width: 100%;
+	border-collapse: collapse;
+	font-size: 0.85em;
+	margin-top: 0.5em;
+}
+.tts-glossary-table th,
+.tts-glossary-table td {
+	border: 1px solid var(--background-modifier-border);
+	padding: 0.35em 0.5em;
+	text-align: left;
+	vertical-align: top;
+}
+.tts-glossary-table th {
+	background: var(--background-tertiary);
+}
+.tts-danger-zone {
+	margin-top: 1.5em;
+	padding: 1em;
+	border: 1px solid var(--text-error, #c00);
+	border-radius: 6px;
+	background: var(--background-secondary);
+}
+.tts-danger-zone-title {
+	color: var(--text-error, #c00);
+	font-weight: 600;
+	margin-bottom: 0.5em;
+}
+.tts-maint-secondary {
+	/* secondary housekeeping: no mod-cta accent */
+}

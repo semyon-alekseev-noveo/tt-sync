@@ -6,18 +6,18 @@ Manual cases for behavior changes. Automated tests do not replace a row here.
 
 Pilot means `<pilot-vault>`, manual **Synchronize**, plugin id `tickticksync-abyss`. Do not use `<live-vault>`. A cloud agent does not mark a row passed. Status stays **not run** until a person or a local agent on that Obsidian records what they saw.
 
-## UX-SET — Settings UX redesign (epic #189 / Phase 0 #190)
+## UX-SET — Settings UX redesign (epic #189 / Phase 1 #191)
 
-Analyst stubs / DoR only in the Phase 0 PR. **No Settings UI code** here. Glossary: `docs/pilot/results/UX-OBS-TT-SOAK/27-settings-ux-redesign-plan.md`. Catalog: `ABYSS_FIRST_CASES.md` `UX-SET-*`. Implementing PRs (#191–#194) exercise these rows and keep pilot honest (**not run** until seen).
+Phase 1 implements **copy / layout / visibility only** (no sync logic change). Glossary source: `docs/pilot/results/UX-OBS-TT-SOAK/27-settings-ux-redesign-plan.md`. Catalog: `ABYSS_FIRST_CASES.md` `UX-SET-*`. Unit: `src/test/uxSetPhase1.settingsCopy.test.ts`. Pilot stays **not run** until Settings UI is installed and exercised on the pilot vault.
 
 | Case | Steps | Expected | Pilot |
 |------|-------|----------|-------|
-| UX-SET-GLOSSARY | Read glossary in `27-settings-ux-redesign-plan.md` (or Settings Maintenance/Guard link after Phase 1). State Skip vs Cancel vs Manage Deleted aloud. | Correct distinctions in ≤30s; comment on #190/#189. | **not run** |
-| UX-SET-SYNCTAG-EMPTY | Open Settings with SyncTag empty. Hover/read badge/tooltip (after #191). | Empty = pull **all** allow-listed lists; not “filter safely off.” | **not run** |
-| UX-SET-MANAGE-DELETED | Find Manage Deleted (or renamed) control. Compare to held-deletions modal copy. | Name/help ≠ held / Apply once; purge soft-deleted Dexie only. | **not run** |
-| UX-SET-RESET-ONE | Open Settings Danger / reset area (after #191). | One primary **Reset local sync database**; no competing Reset stories. | **not run** |
-| UX-SET-SYNCED-LISTS-HELP | Read Synced lists help (after #191). | Short help: allow-list; empty → nothing pulled. | **not run** |
-| UX-SET-MAINT-SYNC-PRIMARY | Open Maintenance (after #191). | **Synchronize** is the primary action. | **not run** |
+| UX-SET-GLOSSARY | Open Settings → **Maintenance** (full glossary) and Sync Control → **Deletion guard** (compact chips). Or read `27-…plan.md`. State Skip vs Cancel vs Purge trash (DB) aloud. | Correct distinctions in ≤30s; comment on #191/#189. | **not run** |
+| UX-SET-SYNCTAG-EMPTY | Sync Control → GTD: clear **Pull filter tag**. Read badge `pull ALL` / tooltip. | Empty = pull **all** allow-listed lists; not “filter safely off.” | **not run** |
+| UX-SET-MANAGE-DELETED | Maintenance: find **Purge trash (DB)**. Compare to held-deletions modal copy. | Name/help ≠ held / Apply once; purge soft-deleted Dexie only. | **not run** |
+| UX-SET-RESET-ONE | Maintenance → **Danger zone** only. Confirm Tasks / Notes tabs have no Reset control. | One **Reset local sync database**; vault + TickTick stay intact (copy). | **not run** |
+| UX-SET-SYNCED-LISTS-HELP | Read Synced lists help under GTD. | Allow-list; empty → nothing pulled; new TT list ≠ synced until ticked. | **not run** |
+| UX-SET-MAINT-SYNC-PRIMARY | Open Maintenance. | **Synchronize** is the sole primary (`mod-cta`); Check / Backup / Purge secondary. | **not run** |
 | UX-SET-HIDE-DEFAULTS | Abyss/GTD path on (UX-STUB-1 predicate). Open Settings (after #192). | Defaults Tasks folder hidden or non-primary. | **not run** |
 | UX-SET-EXTRA-FILTERS | Same Abyss mode (after #192). | Extra filters folded/hidden when redundant. | **not run** |
 | UX-SET-STATUS-VS-STAGE | `statusListMappings` set (after #192). | Stage→list UI inactive/hidden; status→list remains. | **not run** |
@@ -34,7 +34,7 @@ Regression (still **not run** here): `UX-RESET-1`, `BUG-RESET-CACHE-DELETE`, `EM
 
 ## UX-RESET-1 — Reset local sync database (this PR)
 
-Settings → Tasks (or Notes) → **Reset local sync database**. Pilot only. Do not use DevTools IndexedDB delete for the restore sequence.
+Settings → **Maintenance** → Danger zone → **Reset local sync database** (Phase 1 #191 moved Reset here; not Tasks/Notes). Pilot only. Do not use DevTools IndexedDB delete for the restore sequence.
 
 | Case | Steps | Expected | Pilot |
 |------|-------|----------|-------|
