@@ -27,6 +27,7 @@ import {
 	runPullPhase,
 	runPushPhase,
 	runRegisterPhase,
+	runRematchPhase,
 	runSubtasksPhase,
 	runSyncFilesPhase,
 	runVaultReconcilePhase,
@@ -296,6 +297,7 @@ export class TickTickService {
 					await timePhase('deletionGuard', () => runDeletionGuardPhase(lockedDeps));
 					await timePhase('push', () => runPushPhase(lockedDeps));
 					await timePhase('pull', () => runPullPhase(lockedDeps));
+					await timePhase('rematch', () => runRematchPhase(lockedDeps));
 					await timePhase('vaultReconcile', () => runVaultReconcilePhase(lockedDeps));
 					await timePhase('subtasks', () => runSubtasksPhase(lockedDeps));
 				}

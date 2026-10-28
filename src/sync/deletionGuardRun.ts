@@ -10,6 +10,7 @@ import {
 	guardDecisionRecord,
 	guardNotice,
 	isEmptyTickTickSnapshot,
+	looksLikeTickTickWipe,
 	massDeleteSettingsFrom,
 	planRemoteCommentDeletions,
 	planRemoteTaskDeletions,
@@ -17,6 +18,7 @@ import {
 	planVaultCommentDeletions,
 	planVaultTaskDeletions,
 	pullOptionsForMode,
+	rematchCandidates,
 	setGuardRun,
 	settleGuardChoice,
 	writeDeletionReport,
@@ -38,6 +40,8 @@ export interface GuardedPull {
 	advanceCheckpoint: boolean;
 	prefetched?: { update: ITask[]; delete: string[] };
 	restoreCheckpoint?: number;
+	/** BUG-208-REMATCH: write these Dexie tasks back into vault lines (no TT delete). */
+	rematch?: PlannedDeletion[];
 }
 
 export async function prepareDeletionGuard(
@@ -69,14 +73,21 @@ export async function prepareDeletionGuard(
 	]);
 	const live = locals.filter(row => !row.deleted && row.taskId);
 	const dexieTaskCount = live.length;
-	const ticktickSnapshotEmpty = isEmptyTickTickSnapshot(fullSync, since, delta.update.length);
+	const deleteIds = (delta.delete ?? []).map(deletionIdOf).filter((id): id is string => !!id);
+	const ticktickSnapshotEmpty = isEmptyTickTickSnapshot(fullSync, since, delta.update.length)
+		|| looksLikeTickTickWipe({
+			updateCount: delta.update.length,
+			deleteCount: deleteIds.length,
+			dexieTaskCount,
+			taskCountThreshold: settings.taskCountThreshold,
+			taskPercentThreshold: settings.taskPercentThreshold,
+		});
 	const remoteAction: DeletionAction = getSettings().onTickTickDeletion === 'cancel' ? 'detach' : 'mark-cancelled';
 	const localById = new Map(live.map(row => [row.taskId, {
 		title: row.task?.title,
 		file: row.file,
 		deleted: row.deleted,
 	}]));
-	const deleteIds = (delta.delete ?? []).map(deletionIdOf).filter((id): id is string => !!id);
 	const taskFile = new Map<string, string>();
 	for (const row of live) if (row.file) taskFile.set(row.taskId, row.file);
 	const planned: PlannedDeletion[] = [
@@ -162,13 +173,15 @@ export async function prepareDeletionGuard(
 
 	const mode = deletionConfirmModeOf(choice, decision.block);
 	const pull = pullOptionsForMode(mode);
-	const run: GuardRunState = { trigger, decision, choice, planned, reportPath, mode };
+	const rematch = choice === 'rematch' ? rematchCandidates(planned) : undefined;
+	const run: GuardRunState = { trigger, decision, choice, planned, reportPath, mode, rematch };
 	setGuardRun(run);
 	if (!pull.advanceCheckpoint) api.checkpoint = previousCheckpoint;
 	return {
 		...pull,
 		prefetched: delta,
 		restoreCheckpoint: previousCheckpoint,
+		rematch,
 	};
 }
 

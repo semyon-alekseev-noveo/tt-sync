@@ -19,7 +19,8 @@ export type GuardReason =
 	| 'empty-ticktick'
 	| 'empty-dexie'
 	| 'incomplete-index';
-export type GuardChoice = 'allow' | 'apply-once' | 'skip' | 'open-report' | 'notify-only';
+/** `rematch` = rewrite missing vault lines from Dexie/TT; never Apply TT deletes (#208). */
+export type GuardChoice = 'allow' | 'apply-once' | 'skip' | 'open-report' | 'notify-only' | 'rematch';
 export type DeletionConfirmMode = 'normal' | 'force' | 'skip';
 
 export interface PlannedDeletion {
@@ -101,6 +102,68 @@ export function massDeleteSettingsFrom(source: {
 /** Full snapshot only. A delta that happens to contain no rows is not an empty TickTick. */
 export function isEmptyTickTickSnapshot(fullSync: boolean, since: number, taskCount: number): boolean {
 	return (fullSync || since === 0) && taskCount === 0;
+}
+
+/**
+ * BUG-208-EMPTY-TT-NO-AZ-STRIP: a delta with no surviving updates that clears
+ * more than the mass-delete count+percent of Dexie looks like a TickTick wipe —
+ * even when `since > 0`. A single remote delete must not trip this (normal path).
+ */
+export function looksLikeTickTickWipe(args: {
+	updateCount: number;
+	deleteCount: number;
+	dexieTaskCount: number;
+	taskCountThreshold?: number;
+	taskPercentThreshold?: number;
+}): boolean {
+	if (args.dexieTaskCount <= 0) return false;
+	if (args.updateCount > 0) return false;
+	if (args.deleteCount <= 0) return false;
+	const countTh = args.taskCountThreshold ?? DEFAULT_MASS_DELETE_GUARD.taskCountThreshold;
+	const pctTh = args.taskPercentThreshold ?? DEFAULT_MASS_DELETE_GUARD.taskPercentThreshold;
+	const percent = (args.deleteCount / args.dexieTaskCount) * 100;
+	return args.deleteCount > countTh && percent > pctTh;
+}
+
+/**
+ * BUG-208-HELD-LABEL: owner-facing line for the held modal / report.
+ * `vault-to-ticktick` + delete = TickTick would be wiped for tasks missing vault markers.
+ */
+export function formatPlannedDeletionLabel(item: PlannedDeletion): string {
+	const title = item.title || item.id;
+	const file = item.file ? ` (${item.file})` : '';
+	if (item.kind === 'task' && item.direction === 'vault-to-ticktick' && item.action === 'delete') {
+		return `Would delete from TickTick — missing vault line/marker — ${title}${file}`;
+	}
+	if (item.kind === 'task' && item.direction === 'ticktick-to-vault') {
+		const verb = item.action === 'detach' || item.action === 'mark-cancelled'
+			? 'Would detach/cancel vault line'
+			: 'Would remove vault line';
+		return `${verb} — gone from TickTick — ${title}${file}`;
+	}
+	if (item.kind === 'comment' && item.direction === 'vault-to-ticktick') {
+		return `Would delete TickTick comment — missing in vault — ${title}${file}`;
+	}
+	if (item.kind === 'comment' && item.direction === 'ticktick-to-vault') {
+		return `Would remove vault comment — gone from TickTick — ${title}${file}`;
+	}
+	return [item.direction, item.kind, item.action, title, item.file].filter(Boolean).join(' — ');
+}
+
+/** Offer Rematch when every planned *task* delete is vault→TickTick (post-restore empty AZ). */
+export function canOfferRematch(planned: readonly PlannedDeletion[]): boolean {
+	const tasks = planned.filter(item => item.kind === 'task');
+	return tasks.length > 0 && tasks.every(item => item.direction === 'vault-to-ticktick');
+}
+
+export function rematchCandidates(planned: readonly PlannedDeletion[]): PlannedDeletion[] {
+	return planned.filter(item =>
+		item.kind === 'task'
+		&& item.direction === 'vault-to-ticktick'
+		&& item.action === 'delete'
+		&& !!item.taskId
+		&& !!item.file,
+	);
 }
 
 export function deletionIdOf(item: unknown): string | null {
@@ -390,6 +453,7 @@ export function previewItems(items: readonly PlannedDeletion[], count: number): 
 export function deletionConfirmModeOf(choice: GuardChoice, blocked: boolean): DeletionConfirmMode {
 	if (!blocked) return 'normal';
 	if (choice === 'apply-once') return 'force';
+	// rematch / skip / open-report / notify-only: never apply the held deletes
 	return 'skip';
 }
 
@@ -402,13 +466,15 @@ export function pullOptionsForMode(mode: DeletionConfirmMode): { applyDeletions:
 export async function settleGuardChoice(
 	trigger: SyncRunTrigger,
 	decision: GuardDecision,
-	prompt: () => Promise<'apply-once' | 'skip' | 'open-report'>,
+	prompt: () => Promise<'apply-once' | 'skip' | 'open-report' | 'rematch'>,
 ): Promise<GuardChoice> {
 	if (!decision.block) return 'allow';
 	if (trigger !== 'manual') return 'notify-only';
 	try {
 		const choice = await prompt();
-		if (choice === 'apply-once' || choice === 'skip' || choice === 'open-report') return choice;
+		if (choice === 'apply-once' || choice === 'skip' || choice === 'open-report' || choice === 'rematch') {
+			return choice;
+		}
 	} catch {
 		// A broken dialog must not apply deletions.
 	}
@@ -418,7 +484,9 @@ export async function settleGuardChoice(
 export function guardNotice(decision: GuardDecision, choice: GuardChoice): string {
 	const held = choice === 'apply-once'
 		? 'Applying these deletions once.'
-		: 'Nothing destructive was applied. Checkpoint unchanged.';
+		: choice === 'rematch'
+			? 'Rematching into vault (TickTick kept). Deletions skipped.'
+			: 'Nothing destructive was applied. Checkpoint unchanged.';
 	return `TickTickSync: ${decision.taskDeletions} task deletion(s) and ${decision.commentDeletions} comment deletion(s) held (${decision.reason}). ${held}`;
 }
 
@@ -451,12 +519,12 @@ export function formatDeletionReport(input: {
 		'',
 		'## Planned deletions',
 		'',
-		'| Direction | Kind | Action | Id | Task | Title | File |',
+		'| Label | Kind | Action | Id | Task | Title | File |',
 		'| --- | --- | --- | --- | --- | --- | --- |',
 	];
 	const cell = (value: string | undefined) => (value ?? '').replace(/\|/g, '\\|').replace(/\n/g, ' ');
 	for (const item of input.planned) {
-		lines.push(`| ${item.direction} | ${item.kind} | ${item.action} | ${cell(item.id)} | ${cell(item.taskId)} | ${cell(item.title)} | ${cell(item.file)} |`);
+		lines.push(`| ${cell(formatPlannedDeletionLabel(item))} | ${item.kind} | ${item.action} | ${cell(item.id)} | ${cell(item.taskId)} | ${cell(item.title)} | ${cell(item.file)} |`);
 	}
 	if (input.planned.length === 0) lines.push('| | | | | | | |');
 	lines.push('');
@@ -516,6 +584,8 @@ export interface GuardRunState {
 	planned: PlannedDeletion[];
 	reportPath?: string;
 	mode: DeletionConfirmMode;
+	/** BUG-208-REMATCH: vault←TT materialize targets (no TT wipe). */
+	rematch?: PlannedDeletion[];
 }
 
 let currentRun: GuardRunState | null = null;
