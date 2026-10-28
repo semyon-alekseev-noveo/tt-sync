@@ -6,6 +6,32 @@ Manual cases for behavior changes. Automated tests do not replace a row here.
 
 Pilot means `<pilot-vault>`, manual **Synchronize**, plugin id `tickticksync-abyss`. Do not use `<live-vault>`. A cloud agent does not mark a row passed. Status stays **not run** until a person or a local agent on that Obsidian records what they saw.
 
+## UX-SET — Settings UX redesign (epic #189 / Phase 0 #190)
+
+Analyst stubs / DoR only in the Phase 0 PR. **No Settings UI code** here. Glossary: `docs/pilot/results/UX-OBS-TT-SOAK/27-settings-ux-redesign-plan.md`. Catalog: `ABYSS_FIRST_CASES.md` `UX-SET-*`. Implementing PRs (#191–#194) exercise these rows and keep pilot honest (**not run** until seen).
+
+| Case | Steps | Expected | Pilot |
+|------|-------|----------|-------|
+| UX-SET-GLOSSARY | Read glossary in `27-settings-ux-redesign-plan.md` (or Settings Maintenance/Guard link after Phase 1). State Skip vs Cancel vs Manage Deleted aloud. | Correct distinctions in ≤30s; comment on #190/#189. | **not run** |
+| UX-SET-SYNCTAG-EMPTY | Open Settings with SyncTag empty. Hover/read badge/tooltip (after #191). | Empty = pull **all** allow-listed lists; not “filter safely off.” | **not run** |
+| UX-SET-MANAGE-DELETED | Find Manage Deleted (or renamed) control. Compare to held-deletions modal copy. | Name/help ≠ held / Apply once; purge soft-deleted Dexie only. | **not run** |
+| UX-SET-RESET-ONE | Open Settings Danger / reset area (after #191). | One primary **Reset local sync database**; no competing Reset stories. | **not run** |
+| UX-SET-SYNCED-LISTS-HELP | Read Synced lists help (after #191). | Short help: allow-list; empty → nothing pulled. | **not run** |
+| UX-SET-MAINT-SYNC-PRIMARY | Open Maintenance (after #191). | **Synchronize** is the primary action. | **not run** |
+| UX-SET-HIDE-DEFAULTS | Abyss/GTD path on (UX-STUB-1 predicate). Open Settings (after #192). | Defaults Tasks folder hidden or non-primary. | **not run** |
+| UX-SET-EXTRA-FILTERS | Same Abyss mode (after #192). | Extra filters folded/hidden when redundant. | **not run** |
+| UX-SET-STATUS-VS-STAGE | `statusListMappings` set (after #192). | Stage→list UI inactive/hidden; status→list remains. | **not run** |
+| UX-SET-SYNC-NOTES | Scan Sync Notes label (after #193). | Distinguishable from Notebook / NOTE-BODY. | **not run** |
+| UX-SET-NOTEBOOK-WARN | Open Notebook-related settings (after #193). | Notebook ≠ Inbox warning visible. | **not run** |
+| UX-SET-BKUP-DEFAULT | Check backup folder default (after #193). | Sane for Abyss pilots or warned. | **not run** |
+| UX-SET-LEAN-WARN | Lean project template setting (after #193). | Warn present; no full MOC engine required. | **not run** |
+| UX-SET-COLD-START | Fresh-eyes Settings scan (after #194). | Synchronize + SyncTag/Abyss cues findable without docs hunt. | **not run** |
+| UX-SET-DEVICE-PRUNE | Device prune UI (after #194). | Wording clear. | **not run** |
+| UX-SET-INTERVAL-ZERO | Set sync interval = 0 (after #194). | Progress presentation grey / non-active per PR. | **not run** |
+| UX-SET-PW-CONFIRM | If password shown plaintext (after #194). | Confirm/warn present. | **not run** |
+
+Regression (still **not run** here): `UX-RESET-1`, `BUG-RESET-CACHE-DELETE`, `EMPTY-SIDE-GUARD` / held modal Skip path (`26`), `DEL-1` / `DEL-3`, `AF-1` empty `syncedLists`.
+
 ## UX-RESET-1 — Reset local sync database (this PR)
 
 Settings → Tasks (or Notes) → **Reset local sync database**. Pilot only. Do not use DevTools IndexedDB delete for the restore sequence.

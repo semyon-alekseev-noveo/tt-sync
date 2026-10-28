@@ -33,6 +33,7 @@
 | 24 | Post-Reset orphan vault-line modal | `24-post-reset-delete-modal.md` | **fail** observed; fixed in #187 |
 | 25 | Post-#187 Reset cache-delete prove | `25-reset-cache-delete-prove.md` | **install pass**; Reset-path prove **blocked** (owner Reset → Sync ×2) |
 | 26 | Held deletions after Reset (owner screenshot) | `26-held-deletions-after-reset.md` | **DO NOT APPLY** — Skip; false vault-absent |
+| 27 | Settings UX redesign plan (epic #189) | `27-settings-ux-redesign-plan.md` | **plan / DoR** — Phase 0 #190; children #191–#194 |
 | 185 | #185 status source (analyst spec) | [`../../UX-ABYSS-STATUS-SRC.md`](../../UX-ABYSS-STATUS-SRC.md) | **spec only (not run)**; not DoR |
 
 ## Rules
