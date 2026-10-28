@@ -1,3 +1,13 @@
+### Iteration 2026-10-28 14:17 UTC
+
+- Context: Owner Rematch on tip: journal choice=rematch but AZ stayed empty; synchronizeToVault(add) returned false.
+- Target: Vault-only rematch (no Comments/updateTask); honest written counts.
+- Actions log: Rewrote rematchVault insert under Active Zone; phase uses vault.read/modify; unit tests; pilot note got one manual probe line.
+- Validation: check:cycles OK; rematch+guard tests 17 pass.
+- Problems: Need tip rematch re-prove ×2 after install (`open`).
+- To Be Done: PR; tip install; Rematch again; verify AZ markers on two projects.
+- References: #208, `src/sync/rematchVault.ts`, `CHANGELOG.md`
+
 ### Iteration 2026-10-28 11:57 UTC
 
 - Context: #209 merged but CI failed on new rematch→dexie import cycle.
