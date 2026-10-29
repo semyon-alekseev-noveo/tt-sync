@@ -1,11 +1,31 @@
+### Iteration 2026-10-29 07:21 UTC
+
+- Context: Continue «гоу» — live prove #215 archive/TT-gone after #223 pass.
+- Target: Checklist text kept on Архив + live 303 after Synchronize ×2.
+- Actions log: Tip eval sync ×2; snip checks on three fixtures; update `215-p0-safety.md` / AF / TEST_PLAN.
+- Validation: prove1/2 `pass` (`textKept` true; sync ok).
+- Problems: empty-TT AZ strip live still **not run** (`open`); #216 Rematch live open.
+- To Be Done: empty-TT prove or defer under #208; #216 Rematch prove; #217 UX.
+- References: #215, `215-p0-safety.md`, `CHANGELOG.md`
+
+### Iteration 2026-10-29 07:15 UTC
+
+- Context: Owner «гоу» — live prove #223 after tip #224.
+- Target: `ID-TAG-ONLY-NO-WIPE` live pass ×2 (Selectel + second tag-only).
+- Actions log: Tip reload; `tts-sync` ×2; eval planned-absent; MCP TT alive; pilot/AF/TEST_PLAN update.
+- Validation: prove1/2 `pass` (`plannedCount` 0; Selectel + Гоша alive).
+- Problems: #215 archive prove done 07:21; empty-TT / #216 still open (`open`).
+- To Be Done: empty-TT / #216 Rematch; #217 UX.
+- References: #223, `223-tag-only-no-wipe.md`, `CHANGELOG.md`
+
 ### Iteration 2026-10-29 06:10 UTC
 
 - Context: After #216 merge, Confirm Deletion for Selectel (tag `obsidian`, no vault line, Unknown).
 - Target: `ID-TAG-ONLY-NO-WIPE` — tag alone never vault→TT wipe; require vault file in push scope.
 - Actions log: Drop tag eligibility in `planVaultTaskDeletions` + `collectTaskIdsAbsentFromVault`; AF/TEST_PLAN/pilot #223.
 - Validation: `npx vitest run` 890 pass; `npm run build` ok; `check:cycles` OK.
-- Problems: Live Synchronize prove ×2 open (`open`).
-- To Be Done: PR; tip; Cancel until tip; Synchronize — Selectel must not Confirm.
+- Problems: Live Synchronize prove ×2 resolved 07:15 (`resolved`).
+- To Be Done: — (live prove done).
 - References: #223, #214, #208, `223-tag-only-no-wipe.md`, `CHANGELOG.md`
 
 ### Iteration 2026-10-29 05:47 UTC
