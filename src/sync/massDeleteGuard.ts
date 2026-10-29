@@ -67,6 +67,8 @@ export interface LocalDeletionCandidate {
 	file?: string;
 	deleted?: boolean;
 	isParent?: boolean;
+	/** ID-NOTEBOOK-RESTORE-SAFE / BUG-NOTEBOOK-NO-DELETE: NOTE kind or Notebook list. */
+	isNotebook?: boolean;
 	tags?: string[];
 	/** False when the task's file is outside push scope. */
 	inPushScope?: boolean;
@@ -356,6 +358,8 @@ export function planVaultTaskDeletions(args: {
 	const out: PlannedDeletion[] = [];
 	for (const task of args.tasks) {
 		if (!task.taskId || task.deleted || task.isParent) continue;
+		// ID-NOTEBOOK-RESTORE-SAFE (#234): never plan vault→TT delete / rematch wipe for Notebook.
+		if (task.isNotebook) continue;
 		if (task.file && args.untrustedFiles.has(task.file)) continue;
 		if (args.presentIds.has(task.taskId)) continue;
 		// ID-TAG-ONLY-NO-WIPE (#223): tag `obsidian` alone must not authorize

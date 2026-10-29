@@ -1,3 +1,13 @@
+### Iteration 2026-10-29 11:30 UTC
+
+- Context: Owner merged #240; tip #233; start #234 Notebook restore-safe.
+- Target: NOTE ids out of vault→TT rematch delete / rebind set; keep BUG-NOTEBOOK-NO-DELETE.
+- Actions log: `isNotebook` on planVaultTaskDeletions; skip NOTE in rebind; tests + gate file.
+- Validation: vitest idNotebookRestoreSafe + bugNotebookNoDelete + idRebind 15 pass; build ok.
+- Problems: empty-TT still open (`open`).
+- To Be Done: merge #234; empty-TT OK/deferral; epic #214 hygiene.
+- References: #234, #160, `234-notebook-restore-safe.md`, `CHANGELOG.md`
+
 ### Iteration 2026-10-29 11:12 UTC
 
 - Context: Owner «гоу» — skip empty-TT wipe; start P2 #233 honesty.

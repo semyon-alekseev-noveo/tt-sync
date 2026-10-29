@@ -9,6 +9,7 @@ import type { ITask } from '@/api/types/Task';
 import { insertRematchLines } from '@/sync/rematchVault';
 import type { RematchLiveTask, RematchVaultDeps } from '@/sync/rematchVault';
 import { isConflictCopyPath, type PlannedDeletion } from '@/sync/massDeleteGuard';
+import { isNotebookTask } from '@/sync/notebookGuard';
 import log from '@/utils/logger';
 
 /** TickTick ids are usually 24 hex; allow alnum so unit fixtures stay readable. */
@@ -168,6 +169,11 @@ export async function rebindVaultFromPlanned(
 		if (!task || row?.deleted) {
 			skipped += 1;
 			log.warn(`TickTickSync rebind: no live Dexie task for ${taskId}`);
+			continue;
+		}
+		// ID-NOTEBOOK-RESTORE-SAFE: never rewrite/insert Notebook via rematch set.
+		if (isNotebookTask(task)) {
+			skipped += 1;
 			continue;
 		}
 		if (task.id) liveIds.add(task.id);

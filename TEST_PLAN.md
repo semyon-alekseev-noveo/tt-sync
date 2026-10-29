@@ -618,7 +618,7 @@ Gate file: `docs/pilot/results/ID-CHAIN-REBIND/228-matrix-analyst.md`. Each stub
 | TP-ID-TEXT-NO-MARKER | Unmarked line matches TT | No Apply; Rebind binds | unit **pass**; live **pass** ×2 (#231/#233) |
 | TP-ID-MISSING-FROM-TT-BACKUP | Never in TT backup | Detach + honest UX; no invent | unit **pass**; live **not run** (#233) |
 | TP-ID-PROJECT-FM-NOT-PRESENTIDS | FM parent vs child markers | FM alone ≠ children present | unit **pass**; live **not run** (#232) |
-| TP-ID-NOTEBOOK-RESTORE-SAFE | Notebook during restore | No vault→TT delete Notebook | **not run** |
+| TP-ID-NOTEBOOK-RESTORE-SAFE | Notebook during restore | No vault→TT delete Notebook | unit **pass**; live **not run** (#234) |
 
 Empty-TT live remains under **TP-BUG-208-EMPTY-TT-NO-AZ-STRIP** / #215 (still **not run**).
 
