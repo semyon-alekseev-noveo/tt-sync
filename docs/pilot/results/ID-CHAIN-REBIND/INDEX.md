@@ -20,7 +20,7 @@
 |---|-------|------|--------|
 | 0 | #214 | `214-plan-taxonomy-rebind.md` | **plan / DoR** |
 | 1 | [#215](https://github.com/semyon-alekseev-noveo/tt-sync/issues/215) | `215-p0-safety.md` | archive/TT-gone live **pass** ×2; empty-TT **not run** |
-| 2 | [#216](https://github.com/semyon-alekseev-noveo/tt-sync/issues/216) | `216-p1-rebind.md` | **merged**; live prove **not run** |
+| 2 | [#216](https://github.com/semyon-alekseev-noveo/tt-sync/issues/216) | `216-p1-rebind.md` | **live pass** ×2 |
 | 2b | [#223](https://github.com/semyon-alekseev-noveo/tt-sync/issues/223) | `223-tag-only-no-wipe.md` | **live pass** ×2 (tip #224) |
 | 3 | [#217](https://github.com/semyon-alekseev-noveo/tt-sync/issues/217) | `217-p2-ux.md` | **not run** (scaffold) |
 | 4 | [#218](https://github.com/semyon-alekseev-noveo/tt-sync/issues/218) | `218-p3-deletion-policy.md` | **not run** (scaffold) |

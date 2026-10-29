@@ -1,11 +1,21 @@
+### Iteration 2026-10-29 07:53 UTC
+
+- Context: Owner «гоу» — live prove #216 Rematch/rebind.
+- Target: Stale markers rebound by title on Rematch; no dup lines; no TT wipe.
+- Actions log: Stale PKM+Годовые ids; threshold 0; Rematch click; sync ×2; restore guard; docs.
+- Validation: prove1/2 `pass` (rebound+dedup; reports Decision rematch @ 07:52 / 07:53Z).
+- Problems: empty-TT live still open; #217 UX not started (`open`).
+- To Be Done: #217 UX copy; empty-TT residual / #208; epic #214 close criteria.
+- References: #216, `216-p1-rebind.md`, `CHANGELOG.md`
+
 ### Iteration 2026-10-29 07:21 UTC
 
 - Context: Continue «гоу» — live prove #215 archive/TT-gone after #223 pass.
 - Target: Checklist text kept on Архив + live 303 after Synchronize ×2.
 - Actions log: Tip eval sync ×2; snip checks on three fixtures; update `215-p0-safety.md` / AF / TEST_PLAN.
 - Validation: prove1/2 `pass` (`textKept` true; sync ok).
-- Problems: empty-TT AZ strip live still **not run** (`open`); #216 Rematch live open.
-- To Be Done: empty-TT prove or defer under #208; #216 Rematch prove; #217 UX.
+- Problems: empty-TT AZ strip live still **not run** (`open`); #216 Rematch resolved 07:53.
+- To Be Done: #217 UX; empty-TT residual.
 - References: #215, `215-p0-safety.md`, `CHANGELOG.md`
 
 ### Iteration 2026-10-29 07:15 UTC
