@@ -575,16 +575,15 @@ Expected: **no** Confirm Deletion modal that deletes checklists; notice may say 
 ### TP-ID-REBIND-RESTORE — vault-wide rebind after TT restore (#216)
 
 1. After TT backup restore (new ids) + Dexie refill, with some vault lines still on old ids and/or empty AZ.
-2. Run **Rebind** (product name may still say Rematch until P2).
+2. Held modal → **Rematch into vault (keep TickTick)** (Rebind).
 
-Expected: in-scope markers match current Dexie/TT ids (rewrite preferred); no TT task deletes for vault-absent; next sync quiet or small. Pilot: **not run**.
+Expected: markers rewritten in place when title matches; insert only if no line; no TT deletes. Unit: `idRebindVault.test.ts`. Pilot: **not run**.
 
 ### TP-ID-REBIND-DEDUP — no duplicate checkbox after rebind (#216)
 
-1. Same fixture as restore with an old-id line still present.
-2. Rebind once.
+1. Note has `- [ ] Title %%[ticktick_id:: old]%%`; Dexie has new id same title; Rematch/Rebind.
 
-Expected: one checkbox per live task (no stale-id twin + new insert). Pilot: **not run**.
+Expected: one checkbox; marker is new id. Unit pass; pilot: **not run**.
 
 ### TP-ID-REBIND-UX — copy / no Apply nudge (#217)
 
