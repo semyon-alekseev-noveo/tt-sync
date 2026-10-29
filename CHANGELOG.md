@@ -1,13 +1,3 @@
-### Iteration 2026-10-29 09:15 UTC
-
-- Context: Owner accepted #228 DoR («ок, гоу»); start P1 #230 Reset+dual-zero.
-- Target: Lock A2/B4–B6 AF with named unit tests; empty-TT live waits owner OK to empty TT.
-- Actions log: DoR accept on #235; AF tests in `massDeleteGuard.test.ts`; `230-reset-dual-zero.md`; comments #215/#228.
-- Validation: `npx vitest run` (ID-CHAIN #230 cases).
-- Problems: empty-TT live needs controlled TT empty — will not wipe without OK (`open`).
-- To Be Done: tip + live Reset prove ×2 for #230; owner empty-TT OK or deferral.
-- References: #230, #228, #215, `230-reset-dual-zero.md`, `CHANGELOG.md`
-
 ### Iteration 2026-10-29 08:53 UTC
 
 - Context: Owner «собери аналитиков» for full ID-CHAIN matrix (#228).
