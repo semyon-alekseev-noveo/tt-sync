@@ -63,14 +63,14 @@ export type DeletionGlossaryTerm = {
 
 export const DELETION_GLOSSARY_HEADING = 'Deletion glossary';
 export const DELETION_GLOSSARY_INTRO =
-	'Safe exits: Skip · Rebind (no TT deletes) · Cancel (Confirm). After restore prefer Rebind/Skip — not Apply once. Orphans → Check Database.';
+	'Safe exits: Skip · Rebind (no TT deletes) · Cancel (Confirm). Unmarked lines bind only via Rebind (not silent auto-bind). Gone from TT / not in backup → detach markers, keep text — never invent TickTick from vault. After restore prefer Rebind/Skip — not Apply once.';
 
 export const DELETION_GLOSSARY_TERMS: readonly DeletionGlossaryTerm[] = [
 	{
 		term: 'Held → Skip / Rebind',
 		summary:
-			'After Synchronize: big delete plan is held. Skip = keep as-is; Rebind = rewrite vault markers (no TT deletes). Apply once = delete in TickTick — avoid after restore.',
-		not: 'Not Purge; not Reset.',
+			'After Synchronize: big delete plan is held. Skip = keep as-is; Rebind = rewrite/bind vault markers incl. unmarked titles (no TT deletes). Apply once = delete in TickTick — avoid after restore.',
+		not: 'Not Purge; not Reset; not silent auto-bind.',
 	},
 	{
 		term: 'Confirm → Cancel',

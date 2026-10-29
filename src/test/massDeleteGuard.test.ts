@@ -323,7 +323,7 @@ describe('EMPTY-SIDE-GUARD', () => {
 			title: 'Gone',
 			file: 'n.md',
 		});
-		expect(remote).toContain('gone from TickTick');
+		expect(remote).toContain('gone from TickTick (deleted or not in backup)');
 	});
 
 	it('BUG-208-REMATCH: rematch choice skips deletes and lists vault rewrite candidates', async () => {

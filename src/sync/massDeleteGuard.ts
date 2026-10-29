@@ -139,7 +139,8 @@ export function formatPlannedDeletionLabel(item: PlannedDeletion): string {
 		const verb = item.action === 'detach' || item.action === 'mark-cancelled'
 			? 'Would detach/cancel vault line'
 			: 'Would remove vault line';
-		return `${verb} — gone from TickTick — ${title}${file}`;
+		// ID-MISSING-FROM-TT-BACKUP / ID-TT-RESTORE-OMITTED: honest — not invent TT.
+		return `${verb} — gone from TickTick (deleted or not in backup) — ${title}${file}`;
 	}
 	if (item.kind === 'comment' && item.direction === 'vault-to-ticktick') {
 		return `Would delete TickTick comment — missing in vault — ${title}${file}`;
@@ -158,6 +159,21 @@ export const REBIND_VAULT_WIPE_HINT =
 	'Lines labeled “Would delete from TickTick” mean the vault is missing line markers — Apply once would wipe those tasks in TickTick. After a restore, prefer Skip or Rebind — not Apply once.';
 export const REBIND_GUARD_NOTICE =
 	'Rebinding vault markers (TickTick kept). Deletions skipped.';
+
+/** ID-TEXT-NO-MARKER (#233): unmarked checkboxes bind only via Rebind — never silent auto-bind. */
+export const TEXT_NO_MARKER_POLICY =
+	'Unmarked checkboxes that match TickTick are not auto-bound on Synchronize. Use Rebind (or insert on Rematch) — never Apply once to “fix” missing markers.';
+
+/**
+ * ID-TT-GONE-DETACH / ID-MISSING-FROM-TT-BACKUP / ID-TT-RESTORE-OMITTED (#233):
+ * detach markers, keep checklist text; never invent TickTick tasks from vault.
+ */
+export const TT_GONE_DETACH_NOTICE =
+	'task(s) gone from TickTick (deleted or not in backup) — markers detached, text kept. TickTick was not recreated from the vault.';
+
+export function formatTtGoneDetachNotice(detachedCount: number): string {
+	return `TickTickSync: ${detachedCount} ${TT_GONE_DETACH_NOTICE}`;
+}
 
 /**
  * Offer Rematch/Rebind when any vault→TickTick task delete is planned

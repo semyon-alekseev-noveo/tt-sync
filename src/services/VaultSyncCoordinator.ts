@@ -15,7 +15,7 @@ import { vaultLineBehindTask } from '@/sync/vault-pull/vaultLineBehind';
 import { clearLocalLwwWins, consumeLocalLwwWin, defineLocalLwwRewrite, isLocalLwwRewrite } from '@/sync/localLwwWin';
 import { db } from "@/db/dexie";
 import { getSettings } from '@/settings';
-import { deletionConfirmMode } from '@/sync/massDeleteGuard';
+import { deletionConfirmMode, formatTtGoneDetachNotice } from '@/sync/massDeleteGuard';
 import { shouldPreserveVaultLinesOnRemoteDelete } from '@/sync/historicalVaultMarkers';
 import { getAllProjects } from '@/db/projects';
 import { tagsForCurrentList } from '@/listMapping';
@@ -455,10 +455,7 @@ export class VaultSyncCoordinator {
 				detached += mine.length;
 			}
 			if (detached && getSettings().onTickTickDeletion === 'ask') {
-				new Notice(
-					`TickTickSync: ${detached} task(s) gone from TickTick — markers detached, text kept.`,
-					8000,
-				);
+				new Notice(formatTtGoneDetachNotice(detached), 10000);
 			}
 			return true;
 		}
