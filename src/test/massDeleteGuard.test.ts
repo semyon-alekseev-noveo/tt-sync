@@ -396,3 +396,112 @@ describe('EMPTY-SIDE-GUARD', () => {
 		)).toContain(REBIND_GUARD_NOTICE);
 	});
 });
+
+describe('ID-CHAIN #230 Reset + dual-zero', () => {
+	it('ID-DEXIE-RESET-NO-WIPE: empty Dexie / checkPoint 0 skips orphan strip; refill false vault-absent is held + Rebind', () => {
+		expect(shouldSkipOrphanVaultLineDelete({ dexieTaskCount: 0, checkPoint: 99 })).toBe(true);
+		expect(shouldSkipOrphanVaultLineDelete({ dexieTaskCount: 40, checkPoint: 0 })).toBe(true);
+		expect(shouldSkipOrphanVaultLineDelete({
+			dexieTaskCount: 40,
+			checkPoint: 99,
+			syncBootstrapSkip: true,
+		})).toBe(true);
+
+		const empty = evaluateMassDeleteGuard(tasks(12), side({ dexieTaskCount: 0, vaultTrackedCount: 40 }), cfg);
+		expect(empty.block).toBe(true);
+		expect(empty.reason).toBe('empty-dexie');
+		expect(pullOptionsForMode('skip')).toEqual({ applyDeletions: false, advanceCheckpoint: false });
+
+		// After TT refill: Dexie live, vault markers missing → hold; offer Rebind (not Apply).
+		const postRefill = planVaultTaskDeletions({
+			tasks: Array.from({ length: 12 }, (_, i) => ({
+				taskId: `r${i}`,
+				title: `R${i}`,
+				file: 'n.md',
+				inPushScope: true,
+			})),
+			presentIds: new Set(),
+			untrustedFiles: new Set(),
+			indexIncomplete: false,
+		});
+		expect(postRefill).toHaveLength(12);
+		const held = evaluateMassDeleteGuard(postRefill, side({
+			vaultTrackedCount: 0,
+			dexieTaskCount: 12,
+		}), cfg);
+		expect(held.block).toBe(true);
+		expect(held.reason).toBe('empty-vault');
+		expect(canOfferRematch(postRefill)).toBe(true);
+		expect(isRestoreShapedHold(postRefill)).toBe(true);
+	});
+
+	it('ID-DUALZERO-VAULT-DEXIE-EMPTY: no Dexie rows → no vault→TT plan; invented deletes blocked empty-dexie', () => {
+		expect(planVaultTaskDeletions({
+			tasks: [],
+			presentIds: new Set(),
+			untrustedFiles: new Set(),
+			indexIncomplete: false,
+		})).toEqual([]);
+		const invented = evaluateMassDeleteGuard(tasks(5), side({
+			vaultTrackedCount: 0,
+			dexieTaskCount: 0,
+			ticktickSnapshotEmpty: false,
+		}), cfg);
+		expect(invented.block).toBe(true);
+		expect(invented.reason).toBe('empty-dexie');
+	});
+
+	it('ID-DUALZERO-STALE-DEXIE: vault+TT empty while Dexie live → empty-vault / empty-ticktick hold; no allow', () => {
+		const vaultAbsent = planVaultTaskDeletions({
+			tasks: [
+				{ taskId: 'stale-1', title: 'Stale', file: 'gone.md', inPushScope: true },
+				{ taskId: 'stale-2', title: 'Stale2', file: 'gone.md', inPushScope: true },
+			],
+			presentIds: new Set(),
+			untrustedFiles: new Set(),
+			indexIncomplete: false,
+		});
+		const fromVault = evaluateMassDeleteGuard(vaultAbsent, side({
+			vaultTrackedCount: 0,
+			dexieTaskCount: 2,
+			ticktickSnapshotEmpty: true,
+		}), cfg);
+		expect(fromVault.block).toBe(true);
+		expect(fromVault.reason).toBe('empty-vault');
+
+		const remote = planRemoteTaskDeletions(
+			['stale-1', 'stale-2'],
+			new Map([
+				['stale-1', { title: 'Stale', file: 'gone.md' }],
+				['stale-2', { title: 'Stale2', file: 'gone.md' }],
+			]),
+			'detach',
+		);
+		const fromTt = evaluateMassDeleteGuard(remote, side({
+			vaultTrackedCount: 0,
+			dexieTaskCount: 2,
+			ticktickSnapshotEmpty: true,
+		}), cfg);
+		expect(fromTt.block).toBe(true);
+		// empty-vault trips first when vaultTrackedCount=0; either reason is fail-closed.
+		expect(['empty-vault', 'empty-ticktick']).toContain(fromTt.reason);
+	});
+
+	it('ID-DUALZERO-VAULT-ONLY: empty Dexie+TT does not strip vault via orphan path or Apply', () => {
+		expect(shouldSkipOrphanVaultLineDelete({ dexieTaskCount: 0, checkPoint: 50 })).toBe(true);
+		const remote = planRemoteTaskDeletions(
+			['gone'],
+			new Map([['gone', { title: 'Gone', file: 'n.md' }]]),
+			'detach',
+		);
+		// No Dexie live rows → remote plan empty (cannot detach from missing local).
+		expect(planRemoteTaskDeletions(['gone'], new Map(), 'detach')).toEqual([]);
+		const held = evaluateMassDeleteGuard(remote, side({
+			vaultTrackedCount: 5,
+			dexieTaskCount: 0,
+			ticktickSnapshotEmpty: true,
+		}), cfg);
+		expect(held.block).toBe(true);
+		expect(held.reason).toBe('empty-dexie');
+	});
+});
