@@ -1,7 +1,32 @@
 import { classifyFileRead, obsidianSyncFileState, vaultIndexReady, type FileTrust } from '@/sync/massDeleteGuard';
 import { syncCachedRead } from '@/sync/vault-io';
 
+/** Inline line markers only — not YAML `ticktick_id:`. */
 const TASK_ID = /%%\[ticktick_id::\s*([a-zA-Z0-9]+)\]%%/gi;
+
+/**
+ * Drop leading YAML frontmatter so project-parent `ticktick_id:` (and any
+ * accidental `%%…%%` inside `---`) never enter deletion-guard `presentIds`.
+ * ID-PROJECT-FM-NOT-PRESENTIDS (#232 / E16).
+ */
+export function stripYamlFrontmatter(text: string): string {
+	return text.replace(/^---\r?\n[\s\S]*?\r?\n---\r?\n?/, '');
+}
+
+/**
+ * Collect vault line markers for the mass-delete guard index.
+ * YAML FM `ticktick_id:` alone must not count — parent identity ≠ child present.
+ */
+export function collectLineMarkerPresentIds(text: string): Set<string> {
+	const presentIds = new Set<string>();
+	const body = stripYamlFrontmatter(text);
+	TASK_ID.lastIndex = 0;
+	let match: RegExpExecArray | null;
+	while ((match = TASK_ID.exec(body))) {
+		if (match[1]) presentIds.add(match[1]);
+	}
+	return presentIds;
+}
 
 export interface VaultDeletionScan {
 	presentIds: Set<string>;
@@ -67,11 +92,7 @@ export async function scanVaultForDeletionGuard(app: {
 			continue;
 		}
 		fileText.set(file.path, text);
-		TASK_ID.lastIndex = 0;
-		let match: RegExpExecArray | null;
-		while ((match = TASK_ID.exec(text))) {
-			if (match[1]) presentIds.add(match[1]);
-		}
+		for (const id of collectLineMarkerPresentIds(text)) presentIds.add(id);
 	}
 	return {
 		presentIds,

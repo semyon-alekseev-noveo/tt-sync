@@ -6,7 +6,7 @@
 | Epic | [#214](https://github.com/semyon-alekseev-noveo/tt-sync/issues/214) |
 | Vault | Thinkpad-tts-test (pilot only) |
 | Goal | Survive wipe/restore without mass Apply or archive strip; Rematch-as-intended = **rebind tt-ids** |
-| Status | #231 vault-restore unit in flight; #230 Reset live **pass** ×2; empty-TT still #215 |
+| Status | #232 FM presentIds unit; #231 text-only live **pass** ×2; empty-TT still #215 |
 
 ## Related
 
@@ -27,6 +27,7 @@
 | — | [#228](https://github.com/semyon-alekseev-noveo/tt-sync/issues/228) | `228-matrix-analyst.md` | **DoR accepted** |
 | 1b | [#230](https://github.com/semyon-alekseev-noveo/tt-sync/issues/230) | `230-reset-dual-zero.md` | **unit pass**; Reset live **pass** ×2; dual-zero live **not run** |
 | 1c | [#231](https://github.com/semyon-alekseev-noveo/tt-sync/issues/231) | `231-vault-restore.md` | **unit pass**; text-only live **pass** ×2 |
+| 1d | [#232](https://github.com/semyon-alekseev-noveo/tt-sync/issues/232) | `232-fm-presentids.md` | **unit pass**; live **not run** |
 
 ## Rules
 

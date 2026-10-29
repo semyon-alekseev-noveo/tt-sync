@@ -1,3 +1,13 @@
+### Iteration 2026-10-29 10:19 UTC
+
+- Context: Owner merged #238; tip #231; start #232 FM ≠ presentIds.
+- Target: Lock E16 — YAML parent id never clears child vault→TT plans.
+- Actions log: `stripYamlFrontmatter` + `collectLineMarkerPresentIds`; tests; `232-fm-presentids.md`.
+- Validation: vitest idProjectFmNotPresentIds 3 pass; `npm run build` ok.
+- Problems: live tip optional; empty-TT still open (`open`).
+- To Be Done: merge #232 PR; empty-TT OK or deferral; P2 #233/#234.
+- References: #232, #228, `232-fm-presentids.md`, `CHANGELOG.md`
+
 ### Iteration 2026-10-29 09:56 UTC
 
 - Context: Owner «гоу» after #237; start #231 vault restore identity.
