@@ -565,6 +565,13 @@ Gate: `docs/pilot/results/ID-CHAIN-REBIND/`. Epic [#214](https://github.com/semy
 
 Expected: no **Confirm Deletion** wipe of those archive checklists; text remains (detach or leave marker). Unit: `historicalVaultMarkers.test.ts`. Pilot: **not run**.
 
+### TP-ID-TT-GONE-DETACH — TT-gone never Confirm-wipes live notes (#215)
+
+1. Live note under `30 Tasks/303…` (not Архив) with old `%%[ticktick_id::]%%` absent from TickTick (post-wipe stale).
+2. Synchronize on tip.
+
+Expected: **no** Confirm Deletion modal that deletes checklists; notice may say markers detached / text kept; checkbox text still on disk. Unit: `VaultSyncCoordinator` confirmDeletions. Pilot: **not run**.
+
 ### TP-ID-REBIND-RESTORE — vault-wide rebind after TT restore (#216)
 
 1. After TT backup restore (new ids) + Dexie refill, with some vault lines still on old ids and/or empty AZ.

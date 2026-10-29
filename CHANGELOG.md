@@ -1,3 +1,13 @@
+### Iteration 2026-10-29 05:40 UTC
+
+- Context: After #220 merge, owner Synchronize again saw Confirm Deletion — on live `30 Tasks/303…` stale ids, not only Архив.
+- Target: TT-gone → always detach (keep text); never ask-wipe; orphan 404 never strips lines.
+- Actions log: `confirmDeletions` always detach; push orphan skip strip; AF `ID-TT-GONE-DETACH`; tip pending.
+- Validation: `npx vitest run` 882 pass; `npm run build` ok; `check:cycles` OK.
+- Problems: Live prove still open (`open`).
+- To Be Done: PR; tip; owner Synchronize — expect notice not Confirm wipe.
+- References: #215, #214, `VaultSyncCoordinator.ts`, `CHANGELOG.md`
+
 ### Iteration 2026-10-29 05:14 UTC
 
 - Context: Owner priority = epic #214 ID sync; start P0 #215 archive Confirm wipe.

@@ -303,15 +303,27 @@ describe('VaultSyncCoordinator', () => {
 	});
 
 	describe('confirmDeletions', () => {
-		const coordinatorPrivates = (): {
+		type Privates = {
 			confirmDeletions(fileGroups: Map<string, unknown>, movedTaskIds?: Set<string>): Promise<boolean>;
-			plugin: { fileMetadataService: { getDeletionItems: Mock } };
-		} => coordinator as unknown as {
-			confirmDeletions(fileGroups: Map<string, unknown>, movedTaskIds?: Set<string>): Promise<boolean>;
-			plugin: { fileMetadataService: { getDeletionItems: Mock } };
+			detachRemoteGoneTasks: Mock;
+			plugin: Record<string, unknown>;
+			app: { vault: { getAbstractFileByPath: Mock } };
 		};
+		const privates = (): Privates => coordinator as unknown as Privates;
 
-		it('should exclude moved task IDs from confirmation', async () => {
+		beforeEach(() => {
+			vi.spyOn(privates(), 'detachRemoteGoneTasks').mockResolvedValue(undefined);
+			vi.mocked(getSettings).mockReturnValue({
+				SyncTag: undefined,
+				SyncProject: undefined,
+				tagAndOr: 0,
+				defaultProjectId: 'default-project-id',
+				keepProjectFolders: false,
+				onTickTickDeletion: 'ask',
+			} as ReturnType<typeof getSettings>);
+		});
+
+		it('ID-TT-GONE-DETACH: detaches remote-gone lines; skips moved ids; no wipe modal', async () => {
 			const movedTask = { id: 'moved-1' } as ITask;
 			const deletedTask = { id: 'deleted-1' } as ITask;
 
@@ -320,77 +332,44 @@ describe('VaultSyncCoordinator', () => {
 				toAdd: [],
 				toUpdate: [],
 				toDelete: [movedTask, deletedTask],
-				toRemoveForMove: [],
 			});
 
-			const movedTaskIds = new Set(['moved-1']);
-
-			coordinatorPrivates().plugin = {
-				fileMetadataService: {
-					getDeletionItems: vi.fn().mockResolvedValue([
-						{ title: 'Deleted task', filePath: 'OldFile.md' },
-					]),
-				},
-			};
-
-			const result = await coordinatorPrivates().confirmDeletions(fileGroups as Map<string, unknown>, movedTaskIds);
+			const result = await privates().confirmDeletions(fileGroups as Map<string, unknown>, new Set(['moved-1']));
 
 			expect(result).toBe(true);
-
-			// Verify only the deleted task (not the moved one) was passed to getDeletionItems
-			const getDeletionItems = coordinatorPrivates().plugin.fileMetadataService.getDeletionItems;
-			expect(getDeletionItems).toHaveBeenCalledWith(['deleted-1']);
+			expect(privates().detachRemoteGoneTasks).toHaveBeenCalledTimes(1);
+			const mine = privates().detachRemoteGoneTasks.mock.calls[0]?.[2] as ITask[];
+			expect(mine.map(t => t.id)).toEqual(['deleted-1']);
 		});
 
-		it('should skip modal when all toDelete are moved tasks', async () => {
+		it('should no-op when all toDelete are moved tasks', async () => {
 			const movedTask = { id: 'moved-1' } as ITask;
-
 			const fileGroups = new Map();
 			fileGroups.set('OldFile.md', {
 				toAdd: [],
 				toUpdate: [],
 				toDelete: [movedTask],
-				toRemoveForMove: [],
 			});
 
-			const movedTaskIds = new Set(['moved-1']);
+			const result = await privates().confirmDeletions(fileGroups as Map<string, unknown>, new Set(['moved-1']));
 
-			coordinatorPrivates().plugin = {
-				fileMetadataService: {
-					getDeletionItems: vi.fn(),
-				},
-			};
-
-			const result = await coordinatorPrivates().confirmDeletions(fileGroups as Map<string, unknown>, movedTaskIds);
-
-			// Should return true immediately without calling getDeletionItems
 			expect(result).toBe(true);
-			expect(coordinatorPrivates().plugin.fileMetadataService.getDeletionItems).not.toHaveBeenCalled();
+			expect(privates().detachRemoteGoneTasks).not.toHaveBeenCalled();
 		});
 
-		it('should treat missing movedTaskIds as empty set', async () => {
+		it('ID-TT-GONE-DETACH: detaches when movedTaskIds omitted', async () => {
 			const deletedTask = { id: 'deleted-1' } as ITask;
-
 			const fileGroups = new Map<string, unknown>();
 			fileGroups.set('File.md', {
 				toAdd: [],
 				toUpdate: [],
 				toDelete: [deletedTask],
-				toRemoveForMove: [],
 			});
 
-			coordinatorPrivates().plugin = {
-				fileMetadataService: {
-					getDeletionItems: vi.fn().mockResolvedValue([
-						{ title: 'Deleted task', filePath: 'File.md' },
-					]),
-				},
-			};
-
-			const result = await coordinatorPrivates().confirmDeletions(fileGroups);
+			const result = await privates().confirmDeletions(fileGroups);
 
 			expect(result).toBe(true);
-			expect(coordinatorPrivates().plugin.fileMetadataService.getDeletionItems).toHaveBeenCalledWith(['deleted-1']);
+			expect(privates().detachRemoteGoneTasks).toHaveBeenCalled();
 		});
 	});
 });

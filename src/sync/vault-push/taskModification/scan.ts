@@ -115,32 +115,14 @@ export class TaskModificationScan {
 				return false;
 			}
 
-			// ID-ARCHIVE-NO-STRIP: never queue Confirm wipe for archive / historical notes.
-			if (shouldPreserveVaultLinesOnRemoteDelete(filepath)) {
-				log.warn(
-					`ID-ARCHIVE-NO-STRIP: skip vault remove for ${taskId} in ${filepath} ` +
-						`(historical path; leave checklist text)`,
-				);
-				return false;
-			}
-
-			if (pendingDeletions) {
-				log.error(`Task ${taskId} not found on TickTick. Queueing for deletion from file ${filepath}`);
-				const file = this.app.vault.getAbstractFileByPath(filepath!);
-				if (!(file instanceof TFile)) { return false; }
-				const lineTask = (await this.plugin.taskParser?.convertLineToTask(lineText, lineNumber!, filepath!, fileMap, taskRecord));
-				if (lineTask) {
-					pendingDeletions.push({ file, filepath: filepath!, lineTask });
-				}
-				return false;
-			}
-
-			log.error(`Task ${taskId} not found on TickTick. Deleting from file ${filepath}`);
-			new Notice(`Task not found. It will be removed from the file.`);
-			const file = this.app.vault.getAbstractFileByPath(filepath!);
-			if (!(file instanceof TFile)) { return false; }
-			const lineTask = (await this.plugin.taskParser?.convertLineToTask(lineText, lineNumber!, filepath!, fileMap, taskRecord));
-			await this.plugin.fileOperation?.deleteTaskFromSpecificFile(file, lineTask, true);
+			// ID-TT-GONE-DETACH (#215): marker in vault, id missing from Dexie + TT 404 —
+			// never Confirm-wipe / strip checklist text (rebind #216 will rewrite ids).
+			log.warn(
+				`ID-TT-GONE-DETACH: skip vault remove for ${taskId} in ${filepath} ` +
+					`(not in Dexie/TT; leave checklist text` +
+					(shouldPreserveVaultLinesOnRemoteDelete(filepath) ? '; historical path' : '') +
+					`)`,
+			);
 			return false;
 		}
 

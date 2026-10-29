@@ -1,6 +1,6 @@
 import { stripFileLinks } from '@/projectScheme';
 import { idsPresentInVault } from '@/utils/vaultIdScan';
-import { detachInContent, enrichDeletionItems, childIdsInContent } from '@/detach';
+import { detachInContent, childIdsInContent } from '@/detach';
 import { markerName } from '@/taskParser';
 /**
  * VaultSyncCoordinator - Coordinates syncing between database and vault files
@@ -21,7 +21,6 @@ import { getAllProjects } from '@/db/projects';
 import { tagsForCurrentList } from '@/listMapping';
 import { deleteFile, upsertFile } from '@/db/files';
 import { allowVaultUpdate, fileForNewTickTickTask, isListAllowed, isParkedVaultPath, listStubFilesEnabled, normalizeSyncTag, resolveSyncedListIds, taskMatchesSyncLimit, unmatchedEntries } from '@/syncScope';
-import { TaskDeletionModal } from '@/modals/TaskDeletionModal';
 import { FolderSyncService } from '@/services/FolderSyncService';
 import log from '@/utils/logger';
 import { commitVaultText, readNoteForWrite, syncCachedRead, syncRead } from '@/sync/vault-io';
@@ -439,64 +438,30 @@ export class VaultSyncCoordinator {
 			return true;
 		}
 
-		// ID-ARCHIVE-NO-STRIP (#215): archive / historical paths — detach, never Confirm wipe.
+		// ID-TT-GONE-DETACH (#215): task gone from TickTick → detach markers, keep checklist text.
+		// Never Confirm-wipe vault lines (ask used to delete lines — wrong after wipe/restore).
+		// Archive paths still go through the same detach (ID-ARCHIVE-NO-STRIP).
 		{
-			const preserved = new Set<string>();
-			for (const [filePath, group] of fileGroups) {
-				if (!shouldPreserveVaultLinesOnRemoteDelete(filePath)) continue;
-				const mine = group.toDelete.filter(t => {
-					const id = (t.id || (t as { taskId?: string }).taskId) ?? '';
-					return id && !movedTaskIds.has(id);
-				});
-				if (!mine.length) continue;
-				for (const t of mine) {
-					const id = (t.id || (t as { taskId?: string }).taskId) ?? '';
-					if (id) preserved.add(id);
-				}
-				log.info(
-					`ID-ARCHIVE-NO-STRIP: detach ${mine.length} remote-gone line(s) under historical path ${filePath}`,
-				);
-				await this.detachRemoteGoneTasks(filePath, group, mine, preserved);
-			}
-			if (preserved.size) {
-				for (let i = tasksToConfirmDeletionIds.length - 1; i >= 0; i--) {
-					if (preserved.has(tasksToConfirmDeletionIds[i]!)) tasksToConfirmDeletionIds.splice(i, 1);
-				}
-			}
-			if (tasksToConfirmDeletionIds.length === 0) {
-				return true;
-			}
-		}
-
-		if (getSettings().onTickTickDeletion === 'cancel') {
-			// No modal: detach these lines ([-], no id) and drop them from the delete lists.
 			const ids = new Set(tasksToConfirmDeletionIds);
+			let detached = 0;
 			for (const [filePath, group] of fileGroups) {
 				const mine = group.toDelete.filter(t => ids.has((t.id || (t as { taskId?: string }).taskId) ?? ''));
 				if (!mine.length) continue;
+				const hist = shouldPreserveVaultLinesOnRemoteDelete(filePath);
+				log.info(
+					`${hist ? 'ID-ARCHIVE-NO-STRIP' : 'ID-TT-GONE-DETACH'}: detach ${mine.length} remote-gone line(s) in ${filePath}`,
+				);
 				await this.detachRemoteGoneTasks(filePath, group, mine, ids);
+				detached += mine.length;
+			}
+			if (detached && getSettings().onTickTickDeletion === 'ask') {
+				new Notice(
+					`TickTickSync: ${detached} task(s) gone from TickTick — markers detached, text kept.`,
+					8000,
+				);
 			}
 			return true;
 		}
-
-		if (deletionConfirmMode() === 'force') {
-			return true;
-		}
-
-		const items = await enrichDeletionItems(this.app, await this.plugin.fileMetadataService.getDeletionItems(tasksToConfirmDeletionIds));
-		const modal = new TaskDeletionModal(
-			this.app,
-			items,
-			'tasks deleted from TickTick',
-			() => {}
-		);
-		const prompt = await modal.showModal();
-
-		if (!prompt.confirmed && !prompt.suppressedPending) {
-			new Notice('Tasks will not be deleted from vault.', 5000);
-		}
-
-		return prompt.confirmed;
 	}
 
 	private fileMtime(filePath: string): number | undefined {
