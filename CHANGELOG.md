@@ -1,3 +1,13 @@
+### Iteration 2026-10-29 09:45 UTC
+
+- Context: Owner merged #235/#236; tip install; live Reset prove for #230.
+- Target: `ID-DEXIE-RESET-NO-WIPE` live **pass** ×2 on pilot.
+- Actions log: Tip to Thinkpad-tts-test; two Dexie-clear+cp0 cycles + Synchronize; markers kept; evidence updated.
+- Validation: markers 10/7 after both cycles; no new deletion reports; Dexie refill 159.
+- Problems: dual-zero live + empty-TT still open (`open`).
+- To Be Done: narrow #230; empty-TT #215 OK or deferral; then #231/#232.
+- References: #230, #236, `230-reset-dual-zero.md`, `CHANGELOG.md`
+
 ### Iteration 2026-10-29 08:53 UTC
 
 - Context: Owner «собери аналитиков» for full ID-CHAIN matrix (#228).
