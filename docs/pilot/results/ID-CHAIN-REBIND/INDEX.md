@@ -6,7 +6,7 @@
 | Epic | [#214](https://github.com/semyon-alekseev-noveo/tt-sync/issues/214) |
 | Vault | Thinkpad-tts-test (pilot only) |
 | Goal | Survive wipe/restore without mass Apply or archive strip; Rematch-as-intended = **rebind tt-ids** |
-| Status | **DoR / plan** — no P0–P1 code in scaffold PR |
+| Status | P0/P1 code merged (#215/#216); residual [#223](https://github.com/semyon-alekseev-noveo/tt-sync/issues/223) tag-only wipe |
 
 ## Related
 
@@ -19,10 +19,9 @@
 | # | Issue | File | Status |
 |---|-------|------|--------|
 | 0 | #214 | `214-plan-taxonomy-rebind.md` | **plan / DoR** |
-| 1 | [#215](https://github.com/semyon-alekseev-noveo/tt-sync/issues/215) | `215-p0-safety.md` | **unit pass**; live **not run** |
-
-| 2 | [#216](https://github.com/semyon-alekseev-noveo/tt-sync/issues/216) | `216-p1-rebind.md` | **unit pass**; live **not run** |
-
+| 1 | [#215](https://github.com/semyon-alekseev-noveo/tt-sync/issues/215) | `215-p0-safety.md` | **merged**; live prove **not run** |
+| 2 | [#216](https://github.com/semyon-alekseev-noveo/tt-sync/issues/216) | `216-p1-rebind.md` | **merged**; live prove **not run** |
+| 2b | [#223](https://github.com/semyon-alekseev-noveo/tt-sync/issues/223) | `223-tag-only-no-wipe.md` | **unit pass**; live **not run** |
 | 3 | [#217](https://github.com/semyon-alekseev-noveo/tt-sync/issues/217) | `217-p2-ux.md` | **not run** (scaffold) |
 | 4 | [#218](https://github.com/semyon-alekseev-noveo/tt-sync/issues/218) | `218-p3-deletion-policy.md` | **not run** (scaffold) |
 

@@ -282,6 +282,21 @@ describe('EMPTY-SIDE-GUARD', () => {
 		expect(decision.reason).toBe('empty-ticktick');
 	});
 
+	it('ID-TAG-ONLY-NO-WIPE: obsidian tag without vault file does not plan TT delete', () => {
+		expect(planVaultTaskDeletions({
+			tasks: [
+				{ taskId: 'selectel', title: 'Selectel - JavaScript course', tags: ['obsidian', 'course', 'wip'] },
+				{ taskId: 'with-file', title: 'Has home', file: '30 Tasks/n.md', inPushScope: true, tags: ['obsidian'] },
+				{ taskId: 'out-scope', title: 'Out', file: 'zz-parked/n.md', inPushScope: false, tags: ['obsidian'] },
+			],
+			presentIds: new Set(),
+			untrustedFiles: new Set(),
+			indexIncomplete: false,
+		})).toEqual([
+			expect.objectContaining({ taskId: 'with-file', direction: 'vault-to-ticktick', action: 'delete' }),
+		]);
+	});
+
 	it('BUG-208-HELD-LABEL: vault-to-ticktick delete names wipe TickTick', () => {
 		const label = formatPlannedDeletionLabel({
 			id: 'a1',

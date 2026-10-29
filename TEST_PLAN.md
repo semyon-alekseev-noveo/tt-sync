@@ -591,6 +591,13 @@ Expected: one checkbox; marker is new id. Unit pass; pilot: **not run**.
 
 Expected: wording is Rebind / keep TickTick; Apply once is not the recommended path. Pilot: **not run**.
 
+### TP-ID-TAG-ONLY-NO-WIPE — obsidian tag without vault file (#223)
+
+1. Tip after #223. TT/Dexie has a task tagged `obsidian` with **no** vault markdown line (e.g. Selectel course — only backup CSV mentions).
+2. **Synchronize**.
+
+Expected: **no** Task Deletion Confirmation for that id under Unknown / Unknown File. Task remains in TickTick. Unit: `massDeleteGuard.test.ts` `ID-TAG-ONLY-NO-WIPE`. Pilot: **not run**.
+
 ### TP-MASS-DELETE-THRESHOLD — count and percent together
 
 1. With the defaults (more than 10 and more than 20%), delete 11 lines that are more than 20% of the tracked tasks. **Synchronize**.
