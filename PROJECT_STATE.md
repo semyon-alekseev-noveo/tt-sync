@@ -16,6 +16,7 @@
 
 ## Target
 
+- **Priority (2026-10-29):** Epic [#214](https://github.com/semyon-alekseev-noveo/tt-sync/issues/214) ID-CHAIN (tt-id vault↔Dexie↔TT) **first** — P0 [#215](https://github.com/semyon-alekseev-noveo/tt-sync/issues/215) then P1 [#216](https://github.com/semyon-alekseev-noveo/tt-sync/issues/216). Settings UX [#189](https://github.com/semyon-alekseev-noveo/tt-sync/issues/189) / [#205](https://github.com/semyon-alekseev-noveo/tt-sync/issues/205) secondary until identity P0/P1 land.
 - **Direction (2026-10-16):** **Abyss-first** — tasks stay where Abyss puts them; TickTick mirrors tags/lists and project parents. See `ABYSS_FIRST_PLAN.md` (topology R / CASE-T4 parked).
 - **Still valid:** TT **Projects** ↔ project notes under `10 Projects/`; safety: `syncedLists`, `syncScopeFolders`, manual sync.
 - **Next execution order:** Steps 1–8 in `ABYSS_FIRST_PLAN.md`. Comment gate **pass** through **2.0.76**. Editor-safety [#15](https://github.com/semyon-alekseev-noveo/tt-sync/issues/15) and Step 7 AF soak [#20](https://github.com/semyon-alekseev-noveo/tt-sync/issues/20) **closed**. [#19](https://github.com/semyon-alekseev-noveo/tt-sync/issues/19) Active Zone shuffle: **pass** ×2 on tip after [#134](https://github.com/semyon-alekseev-noveo/tt-sync/pull/134). Step 8 live vault still closed. Abyss Inbox stage tag `#inbox` (§3.1); untagged Inbox still open. Birth tag `#obsidian` stays.

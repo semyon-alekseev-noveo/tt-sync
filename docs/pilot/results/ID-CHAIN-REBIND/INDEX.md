@@ -19,7 +19,8 @@
 | # | Issue | File | Status |
 |---|-------|------|--------|
 | 0 | #214 | `214-plan-taxonomy-rebind.md` | **plan / DoR** |
-| 1 | [#215](https://github.com/semyon-alekseev-noveo/tt-sync/issues/215) | `215-p0-safety.md` | **not run** (scaffold) |
+| 1 | [#215](https://github.com/semyon-alekseev-noveo/tt-sync/issues/215) | `215-p0-safety.md` | **unit pass**; live **not run** |
+
 | 2 | [#216](https://github.com/semyon-alekseev-noveo/tt-sync/issues/216) | `216-p1-rebind.md` | **not run** (scaffold) |
 | 3 | [#217](https://github.com/semyon-alekseev-noveo/tt-sync/issues/217) | `217-p2-ux.md` | **not run** (scaffold) |
 | 4 | [#218](https://github.com/semyon-alekseev-noveo/tt-sync/issues/218) | `218-p3-deletion-policy.md` | **not run** (scaffold) |
