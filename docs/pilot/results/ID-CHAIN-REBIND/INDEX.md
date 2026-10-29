@@ -6,7 +6,7 @@
 | Epic | [#214](https://github.com/semyon-alekseev-noveo/tt-sync/issues/214) |
 | Vault | Thinkpad-tts-test (pilot only) |
 | Goal | Survive wipe/restore without mass Apply or archive strip; Rematch-as-intended = **rebind tt-ids** |
-| Status | #233 honesty unit; #232/#231 done; empty-TT still #215 |
+| Status | #234 Notebook restore-safe unit; empty-TT still #215 |
 
 ## Related
 
@@ -29,6 +29,7 @@
 | 1c | [#231](https://github.com/semyon-alekseev-noveo/tt-sync/issues/231) | `231-vault-restore.md` | **unit pass**; text-only live **pass** ×2 |
 | 1d | [#232](https://github.com/semyon-alekseev-noveo/tt-sync/issues/232) | `232-fm-presentids.md` | **unit pass**; live **not run** |
 | 2c | [#233](https://github.com/semyon-alekseev-noveo/tt-sync/issues/233) | `233-text-omit-honesty.md` | **unit pass**; TEXT-NO-MARKER live via #231 |
+| 2d | [#234](https://github.com/semyon-alekseev-noveo/tt-sync/issues/234) | `234-notebook-restore-safe.md` | **unit pass**; live **not run** |
 
 ## Rules
 

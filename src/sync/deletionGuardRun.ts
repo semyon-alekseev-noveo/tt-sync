@@ -31,6 +31,7 @@ import {
 } from '@/sync/massDeleteGuard';
 import { scanVaultForDeletionGuard } from '@/sync/vaultDeletionScan';
 import { isPathInPushScope } from '@/syncScope';
+import { isNotebookTask } from '@/sync/notebookGuard';
 import log from '@/utils/logger';
 import type { TickTickRestAPI } from '@/services/TicktickRestAPI';
 import type { PluginContext } from '@/pluginContext';
@@ -98,6 +99,8 @@ export async function prepareDeletionGuard(
 				file: row.file,
 				deleted: row.deleted,
 				isParent: plugin.projectScheme?.isParentTask(row.task) || plugin.projectScheme?.isParentId(row.taskId),
+				// ID-NOTEBOOK-RESTORE-SAFE: kind NOTE out of vault→TT / rematch delete set.
+				isNotebook: isNotebookTask(row.task),
 				tags: row.task?.tags,
 				inPushScope: row.file ? isPathInPushScope(row.file) : false,
 			})),
