@@ -1,3 +1,23 @@
+### Iteration 2026-10-29 05:47 UTC
+
+- Context: Owner «гоу дальше» after #221; P1 #216 vault-wide rebind.
+- Target: Rematch rewrites stale markers by title; insert only if missing; offer Rematch on mixed held plans.
+- Actions log: `rebindVault.ts`; rematchPhase → rebind; `canOfferRematch` any vault→TT candidate; units ID-REBIND-*; tip build.
+- Validation: `npx vitest run` 889 pass; `npm run build` ok; `check:cycles` OK.
+- Problems: Live Rematch prove ×2 still open (`open`).
+- To Be Done: PR; tip; owner held Rematch on restore-shaped plan; prove ×2.
+- References: #216, #214, `src/sync/rebindVault.ts`, `216-p1-rebind.md`, `CHANGELOG.md`
+
+### Iteration 2026-10-29 05:47 UTC
+
+- Context: Owner «гоу дальше» after #221; P1 #216 vault-wide rebind.
+- Target: Rematch rewrites stale markers by title; insert only if missing; offer Rematch on mixed held plans.
+- Actions log: `rebindVault.ts`; rematchPhase → rebind; `canOfferRematch` any vault→TT candidate; units ID-REBIND-*; tip build.
+- Validation: `npx vitest run` 889 pass; `npm run build` ok; `check:cycles` OK.
+- Problems: Live Rematch prove ×2 still open (`open`).
+- To Be Done: PR; tip; owner held Rematch on restore-shaped plan; prove ×2.
+- References: #216, #214, `src/sync/rebindVault.ts`, `216-p1-rebind.md`, `CHANGELOG.md`
+
 ### Iteration 2026-10-29 05:40 UTC
 
 - Context: After #220 merge, owner Synchronize again saw Confirm Deletion — on live `30 Tasks/303…` stale ids, not only Архив.

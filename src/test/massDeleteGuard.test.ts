@@ -317,11 +317,16 @@ describe('EMPTY-SIDE-GUARD', () => {
 			indexIncomplete: false,
 		});
 		expect(canOfferRematch(planned)).toBe(true);
+		// #216: still offer Rematch when mixed with held ticktick→vault rows
 		expect(canOfferRematch([
 			...planned,
 			{ id: 'x', kind: 'task', direction: 'ticktick-to-vault', action: 'detach' },
-		])).toBe(false);
+		])).toBe(true);
 		expect(rematchCandidates(planned)).toHaveLength(2);
+		expect(rematchCandidates([
+			...planned,
+			{ id: 'x', kind: 'task', direction: 'ticktick-to-vault', action: 'detach' },
+		])).toHaveLength(2);
 		const blocked = evaluateMassDeleteGuard(planned, side({
 			vaultTrackedCount: 0,
 			dexieTaskCount: 2,

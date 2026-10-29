@@ -150,10 +150,13 @@ export function formatPlannedDeletionLabel(item: PlannedDeletion): string {
 	return [item.direction, item.kind, item.action, title, item.file].filter(Boolean).join(' — ');
 }
 
-/** Offer Rematch when every planned *task* delete is vault→TickTick (post-restore empty AZ). */
+/**
+ * Offer Rematch/Rebind when any vault→TickTick task delete is planned
+ * (post-restore missing markers). Mixed plans may still include held
+ * ticktick→vault rows — rematchCandidates only takes vault→TT (#216).
+ */
 export function canOfferRematch(planned: readonly PlannedDeletion[]): boolean {
-	const tasks = planned.filter(item => item.kind === 'task');
-	return tasks.length > 0 && tasks.every(item => item.direction === 'vault-to-ticktick');
+	return rematchCandidates(planned).length > 0;
 }
 
 export function rematchCandidates(planned: readonly PlannedDeletion[]): PlannedDeletion[] {
