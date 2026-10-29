@@ -575,7 +575,7 @@ Expected: **no** Confirm Deletion modal that deletes checklists; notice may say 
 ### TP-ID-REBIND-RESTORE — vault-wide rebind after TT restore (#216)
 
 1. After TT backup restore (new ids) + Dexie refill, with some vault lines still on old ids and/or empty AZ.
-2. Held modal → **Rematch into vault (keep TickTick)** (Rebind).
+2. Held modal → **Rebind vault to TickTick (no TT deletes)** (legacy label was Rematch).
 
 Expected: markers rewritten in place when title matches; insert only if no line; no TT deletes. Unit: `idRebindVault.test.ts`. Pilot: **pass** ×2 (`216-p1-rebind.md` — PKM + Годовые stale→Rematch).
 
@@ -587,9 +587,10 @@ Expected: one checkbox; marker is new id. Unit pass; pilot: **pass** ×2 (`216-p
 
 ### TP-ID-REBIND-UX — copy / no Apply nudge (#217)
 
-1. Open held modal on a restore-shaped vault→TT plan (or read glossary).
+1. Tip after #217. Open held modal on a restore-shaped vault→TT plan (or Settings deletion glossary).
+2. Optional: stale a marker → Synchronize with threshold hold.
 
-Expected: wording is Rebind / keep TickTick; Apply once is not the recommended path. Pilot: **not run**.
+Expected: primary button **Rebind vault to TickTick (no TT deletes)** (CTA); hint prefers Skip/Rebind not Apply once; Apply once not warning-styled when vault→TT dominates. Glossary: Held → Skip / Rebind. Unit: `ID-REBIND-UX` in `massDeleteGuard.test.ts`. Pilot owner 30s: **not run** (`217-glossary-rebind.md`).
 
 ### TP-ID-TAG-ONLY-NO-WIPE — obsidian tag without vault file (#223)
 

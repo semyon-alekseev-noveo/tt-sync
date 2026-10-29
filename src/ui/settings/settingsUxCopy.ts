@@ -63,12 +63,13 @@ export type DeletionGlossaryTerm = {
 
 export const DELETION_GLOSSARY_HEADING = 'Deletion glossary';
 export const DELETION_GLOSSARY_INTRO =
-	'Three safe exits: Skip (held modal) · Cancel (Confirm Deletion) · leave Purge alone. Orphans → Check Database help below.';
+	'Safe exits: Skip · Rebind (no TT deletes) · Cancel (Confirm). After restore prefer Rebind/Skip — not Apply once. Orphans → Check Database.';
 
 export const DELETION_GLOSSARY_TERMS: readonly DeletionGlossaryTerm[] = [
 	{
-		term: 'Held → Skip',
-		summary: 'After Synchronize: big delete plan is held. Skip = keep tasks; Apply once = delete in TickTick.',
+		term: 'Held → Skip / Rebind',
+		summary:
+			'After Synchronize: big delete plan is held. Skip = keep as-is; Rebind = rewrite vault markers (no TT deletes). Apply once = delete in TickTick — avoid after restore.',
 		not: 'Not Purge; not Reset.',
 	},
 	{

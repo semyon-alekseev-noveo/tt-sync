@@ -10,7 +10,12 @@ import {
 	evaluateMassDeleteGuard,
 	formatDeletionReport,
 	guardDecisionRecord,
+	guardNotice,
 	canOfferRematch,
+	isRestoreShapedHold,
+	REBIND_BUTTON_LABEL,
+	REBIND_GUARD_NOTICE,
+	REBIND_VAULT_WIPE_HINT,
 	deletionConfirmModeOf,
 	formatPlannedDeletionLabel,
 	isEmptyTickTickSnapshot,
@@ -351,5 +356,43 @@ describe('EMPTY-SIDE-GUARD', () => {
 		expect(await settleGuardChoice('manual', blocked, prompt)).toBe('rematch');
 		expect(deletionConfirmModeOf('rematch', true)).toBe('skip');
 		expect(pullOptionsForMode('skip')).toEqual({ applyDeletions: false, advanceCheckpoint: false });
+	});
+
+	it('ID-REBIND-UX: restore-shaped hold + Rebind copy (no Apply nudge)', () => {
+		const vaultTt: PlannedDeletion[] = [
+			{
+				id: 'a',
+				taskId: 'a',
+				kind: 'task',
+				direction: 'vault-to-ticktick',
+				action: 'delete',
+				title: 'A',
+				file: 'p.md',
+			},
+			{
+				id: 'b',
+				taskId: 'b',
+				kind: 'task',
+				direction: 'vault-to-ticktick',
+				action: 'delete',
+				title: 'B',
+				file: 'p.md',
+			},
+		];
+		expect(isRestoreShapedHold(vaultTt)).toBe(true);
+		expect(isRestoreShapedHold([
+			...vaultTt,
+			{ id: 'x', kind: 'task', direction: 'ticktick-to-vault', action: 'detach' },
+		])).toBe(true);
+		expect(isRestoreShapedHold([
+			{ id: 'x', kind: 'task', direction: 'ticktick-to-vault', action: 'detach' },
+		])).toBe(false);
+		expect(REBIND_BUTTON_LABEL.toLowerCase()).toContain('rebind');
+		expect(REBIND_BUTTON_LABEL.toLowerCase()).toContain('no tt deletes');
+		expect(REBIND_VAULT_WIPE_HINT.toLowerCase()).toMatch(/not apply once/);
+		expect(guardNotice(
+			{ block: true, reason: 'threshold', taskDeletions: 2, commentDeletions: 0, percent: 50, trackedTasks: 4 },
+			'rematch',
+		)).toContain(REBIND_GUARD_NOTICE);
 	});
 });

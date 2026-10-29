@@ -1,3 +1,13 @@
+### Iteration 2026-10-29 08:20 UTC
+
+- Context: Owner merged #226; next #217 Rebind UX.
+- Target: Held modal / glossary say Rebind (no TT deletes); no Apply nudge on restore-shaped holds.
+- Actions log: `REBIND_*` copy; `isRestoreShapedHold`; modal + Settings glossary; `217-glossary-rebind.md`; units.
+- Validation: `npx vitest run` 891 pass; `npm run build` ok; `check:cycles` OK.
+- Problems: Owner 30s check open (`open`).
+- To Be Done: PR; tip; owner glance held/Settings; then empty-TT / #218 / close #214.
+- References: #217, #214, `217-p2-ux.md`, `CHANGELOG.md`
+
 ### Iteration 2026-10-29 07:53 UTC
 
 - Context: Owner «гоу» — live prove #216 Rematch/rebind.

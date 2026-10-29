@@ -16,7 +16,7 @@
 
 ## Target
 
-- **Priority (2026-10-29):** Epic [#214](https://github.com/semyon-alekseev-noveo/tt-sync/issues/214) ID-CHAIN **first**. #223 / #215 archive / #216 Rematch live **pass** ×2. Next: [#217](https://github.com/semyon-alekseev-noveo/tt-sync/issues/217) UX; empty-TT residual. Settings UX [#189](https://github.com/semyon-alekseev-noveo/tt-sync/issues/189) secondary.
+- **Priority (2026-10-29):** Epic [#214](https://github.com/semyon-alekseev-noveo/tt-sync/issues/214) ID-CHAIN **first**. #223 / #215 archive / #216 live **pass** ×2. [#217](https://github.com/semyon-alekseev-noveo/tt-sync/issues/217) Rebind UX in flight. Empty-TT residual. Settings UX [#189](https://github.com/semyon-alekseev-noveo/tt-sync/issues/189) secondary.
 - **Direction (2026-10-16):** **Abyss-first** — tasks stay where Abyss puts them; TickTick mirrors tags/lists and project parents. See `ABYSS_FIRST_PLAN.md` (topology R / CASE-T4 parked).
 - **Still valid:** TT **Projects** ↔ project notes under `10 Projects/`; safety: `syncedLists`, `syncScopeFolders`, manual sync.
 - **Next execution order:** Steps 1–8 in `ABYSS_FIRST_PLAN.md`. Comment gate **pass** through **2.0.76**. Editor-safety [#15](https://github.com/semyon-alekseev-noveo/tt-sync/issues/15) and Step 7 AF soak [#20](https://github.com/semyon-alekseev-noveo/tt-sync/issues/20) **closed**. [#19](https://github.com/semyon-alekseev-noveo/tt-sync/issues/19) Active Zone shuffle: **pass** ×2 on tip after [#134](https://github.com/semyon-alekseev-noveo/tt-sync/pull/134). Step 8 live vault still closed. Abyss Inbox stage tag `#inbox` (§3.1); untagged Inbox still open. Birth tag `#obsidian` stays.
@@ -55,7 +55,7 @@
 
 ## To Be Done
 
-0. **#214 ID-CHAIN:** #223/#215 archive/#216 done. Next **#217** UX; empty-TT residual / #208. Keep #208 open until labels + empty-TT clear.
+0. **#214 ID-CHAIN:** #217 Rebind UX tip next; owner 30s; empty-TT / #208; optional #218.
 0a. **#208 Rematch insert:** prove 2 still open if needed for insert path; do **not** Apply held deletes.
 0b. **BUG-RESET-CACHE-DELETE:** Cancel open modal if any; tip installed; prove ×2 Reset→Synchronize without vault-line cache-miss delete (`25-reset-cache-delete-prove.md` — owner Reset click).
 0c. **Settings UX #189:** Owner 30s glossary check (#190); Phase 1–3 merged (#196/#197/#198); Phase 4 cold-start/polish [#194](https://github.com/semyon-alekseev-noveo/tt-sync/issues/194) (unit; pilot not run). Epic phases code-complete after #194 merge — owner closes after pilot Settings smoke (do not invent live pass).

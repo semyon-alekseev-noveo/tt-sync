@@ -150,6 +150,15 @@ export function formatPlannedDeletionLabel(item: PlannedDeletion): string {
 	return [item.direction, item.kind, item.action, title, item.file].filter(Boolean).join(' — ');
 }
 
+/** ID-REBIND-UX (#217) — held modal / notices */
+export const REBIND_BUTTON_LABEL = 'Rebind vault to TickTick (no TT deletes)';
+export const REBIND_BUTTON_DESC =
+	'Rewrite stale or missing vault markers from TickTick/local cache. Does not delete TickTick tasks.';
+export const REBIND_VAULT_WIPE_HINT =
+	'Lines labeled “Would delete from TickTick” mean the vault is missing line markers — Apply once would wipe those tasks in TickTick. After a restore, prefer Skip or Rebind — not Apply once.';
+export const REBIND_GUARD_NOTICE =
+	'Rebinding vault markers (TickTick kept). Deletions skipped.';
+
 /**
  * Offer Rematch/Rebind when any vault→TickTick task delete is planned
  * (post-restore missing markers). Mixed plans may still include held
@@ -167,6 +176,17 @@ export function rematchCandidates(planned: readonly PlannedDeletion[]): PlannedD
 		&& !!item.taskId
 		&& !!item.file,
 	);
+}
+
+/**
+ * ID-REBIND-UX: vault→TT deletes dominate the held plan (typical post-restore).
+ * UI must not nudge Apply once — Rebind/Skip are the safe path.
+ */
+export function isRestoreShapedHold(planned: readonly PlannedDeletion[]): boolean {
+	const vaultTt = rematchCandidates(planned).length;
+	if (vaultTt === 0) return false;
+	const taskOps = planned.filter(item => item.kind === 'task').length;
+	return vaultTt >= Math.max(1, Math.ceil(taskOps / 2));
 }
 
 export function deletionIdOf(item: unknown): string | null {
@@ -489,7 +509,7 @@ export function guardNotice(decision: GuardDecision, choice: GuardChoice): strin
 	const held = choice === 'apply-once'
 		? 'Applying these deletions once.'
 		: choice === 'rematch'
-			? 'Rematching into vault (TickTick kept). Deletions skipped.'
+			? REBIND_GUARD_NOTICE
 			: 'Nothing destructive was applied. Checkpoint unchanged.';
 	return `TickTickSync: ${decision.taskDeletions} task deletion(s) and ${decision.commentDeletions} comment deletion(s) held (${decision.reason}). ${held}`;
 }
