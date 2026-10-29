@@ -599,6 +599,28 @@ Expected: primary button **Rebind vault to TickTick (no TT deletes)** (CTA); hin
 
 Expected: **no** Task Deletion Confirmation for that id under Unknown / Unknown File. Task remains in TickTick. Unit: `massDeleteGuard.test.ts` `ID-TAG-ONLY-NO-WIPE`. Pilot: **pass** ×2 (`docs/pilot/results/ID-CHAIN-REBIND/223-tag-only-no-wipe.md` — Selectel + Гоша - школа; tip #224).
 
+### TP-ID-CHAIN-MATRIX (#228 DoR stubs — pilot **not run**)
+
+Gate file: `docs/pilot/results/ID-CHAIN-REBIND/228-matrix-analyst.md`. Each stub: Synchronize on tip; **Skip/Rebind/Cancel only** — never Apply after wipe/restore.
+
+| TP | Case | Expected (short) | Pilot |
+|----|------|------------------|-------|
+| TP-ID-DEXIE-RESET-NO-WIPE | Reset → Synchronize | No Apply wipe TT; markers kept | **not run** |
+| TP-ID-EMPTY-VAULT-NO-TT-WIPE | 0 vault markers; TT live | No Apply TT wipe | **not run** |
+| TP-ID-DUALZERO-VAULT-DEXIE-EMPTY | Vault+Dexie empty; TT live | Dexie refill; no TT wipe | **not run** |
+| TP-ID-DUALZERO-STALE-DEXIE | Vault+TT empty; Dexie stale | Fail closed; Reset; no invent | **not run** |
+| TP-ID-DUALZERO-VAULT-ONLY | Dexie+TT empty; vault text | Text kept; detach; no invent TT | **not run** |
+| TP-ID-TT-RESTORE-SAME-IDS | TT restore same ids | Quiet align; no mass Apply | **not run** |
+| TP-ID-TT-RESTORE-OMITTED | TT restore omits tasks | Detach + keep text; no invent | **not run** |
+| TP-ID-VAULT-RESTORE-MATCH | Vault restore matches TT | Sync aligns; no wipe | **not run** |
+| TP-ID-VAULT-RESTORE-TEXT-ONLY | Vault text-only checkboxes | Rebind binds; no TT wipe | **not run** |
+| TP-ID-VAULT-RESTORE-CONFLICT | Conflict / dup titles | No dual-bind; no TT wipe | **not run** |
+| TP-ID-TEXT-NO-MARKER | Unmarked line matches TT | No Apply; Rebind binds | **not run** |
+| TP-ID-PROJECT-FM-NOT-PRESENTIDS | FM parent vs child markers | FM alone ≠ children present | **not run** |
+| TP-ID-NOTEBOOK-RESTORE-SAFE | Notebook during restore | No vault→TT delete Notebook | **not run** |
+
+Empty-TT live remains under **TP-BUG-208-EMPTY-TT-NO-AZ-STRIP** / #215 (still **not run**).
+
 ### TP-MASS-DELETE-THRESHOLD — count and percent together
 
 1. With the defaults (more than 10 and more than 20%), delete 11 lines that are more than 20% of the tracked tasks. **Synchronize**.
