@@ -163,9 +163,9 @@ export class TaskDeletionHandler {
 				log.info(`TickTickSync: BUG-NOTEBOOK-NO-DELETE skip orphan delete for ${lt.taskId} (Notebook)`);
 				continue;
 			}
-			const eligible = (lt.file && isPathInPushScope(lt.file))
-				|| (lt.task?.tags ?? []).includes('obsidian');
-			if (eligible) out.push(lt.taskId);
+			// ID-TAG-ONLY-NO-WIPE (#223): never Confirm-wipe TT for tag-only
+			// orphans (no vault file). Tag `obsidian` means enter-vault, not delete.
+			if (lt.file && isPathInPushScope(lt.file)) out.push(lt.taskId);
 		}
 		return out;
 	}

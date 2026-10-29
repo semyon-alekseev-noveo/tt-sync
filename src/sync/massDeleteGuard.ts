@@ -68,7 +68,7 @@ export interface LocalDeletionCandidate {
 	deleted?: boolean;
 	isParent?: boolean;
 	tags?: string[];
-	/** False when the task's file is outside push scope and the task has no obsidian tag. */
+	/** False when the task's file is outside push scope. */
 	inPushScope?: boolean;
 }
 
@@ -322,9 +322,10 @@ export function planVaultTaskDeletions(args: {
 		if (!task.taskId || task.deleted || task.isParent) continue;
 		if (task.file && args.untrustedFiles.has(task.file)) continue;
 		if (args.presentIds.has(task.taskId)) continue;
-		const tagged = (task.tags ?? []).includes('obsidian');
-		if (task.inPushScope === false && !tagged) continue;
-		if (!task.file && !tagged) continue;
+		// ID-TAG-ONLY-NO-WIPE (#223): tag `obsidian` alone must not authorize
+		// vault→TT delete. Require a known vault file in push scope; otherwise
+		// Confirm Deletion appears under "Unknown" for never-synced / restore orphans.
+		if (!task.file || task.inPushScope === false) continue;
 		out.push({
 			id: task.taskId,
 			kind: 'task',

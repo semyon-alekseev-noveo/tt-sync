@@ -1,12 +1,12 @@
-### Iteration 2026-10-29 05:47 UTC
+### Iteration 2026-10-29 06:10 UTC
 
-- Context: Owner «гоу дальше» after #221; P1 #216 vault-wide rebind.
-- Target: Rematch rewrites stale markers by title; insert only if missing; offer Rematch on mixed held plans.
-- Actions log: `rebindVault.ts`; rematchPhase → rebind; `canOfferRematch` any vault→TT candidate; units ID-REBIND-*; tip build.
-- Validation: `npx vitest run` 889 pass; `npm run build` ok; `check:cycles` OK.
-- Problems: Live Rematch prove ×2 still open (`open`).
-- To Be Done: PR; tip; owner held Rematch on restore-shaped plan; prove ×2.
-- References: #216, #214, `src/sync/rebindVault.ts`, `216-p1-rebind.md`, `CHANGELOG.md`
+- Context: After #216 merge, Confirm Deletion for Selectel (tag `obsidian`, no vault line, Unknown).
+- Target: `ID-TAG-ONLY-NO-WIPE` — tag alone never vault→TT wipe; require vault file in push scope.
+- Actions log: Drop tag eligibility in `planVaultTaskDeletions` + `collectTaskIdsAbsentFromVault`; AF/TEST_PLAN/pilot #223.
+- Validation: `npx vitest run` 890 pass; `npm run build` ok; `check:cycles` OK.
+- Problems: Live Synchronize prove ×2 open (`open`).
+- To Be Done: PR; tip; Cancel until tip; Synchronize — Selectel must not Confirm.
+- References: #223, #214, #208, `223-tag-only-no-wipe.md`, `CHANGELOG.md`
 
 ### Iteration 2026-10-29 05:47 UTC
 
