@@ -6,7 +6,7 @@
 | Epic | [#214](https://github.com/semyon-alekseev-noveo/tt-sync/issues/214) |
 | Vault | Thinkpad-tts-test (pilot only) |
 | Goal | Survive wipe/restore without mass Apply or archive strip; Rematch-as-intended = **rebind tt-ids** |
-| Status | Analyst matrix DoR: [`228-matrix-analyst.md`](228-matrix-analyst.md) (#228) |
+| Status | #230 Reset live **pass** ×2; dual-zero live open; empty-TT still #215 |
 
 ## Related
 
@@ -24,7 +24,8 @@
 | 2b | [#223](https://github.com/semyon-alekseev-noveo/tt-sync/issues/223) | `223-tag-only-no-wipe.md` | **live pass** ×2 (tip #224) |
 | 3 | [#217](https://github.com/semyon-alekseev-noveo/tt-sync/issues/217) | `217-p2-ux.md` + `217-glossary-rebind.md` | **unit pass**; owner 30s **not run** |
 | 4 | [#218](https://github.com/semyon-alekseev-noveo/tt-sync/issues/218) | `218-p3-deletion-policy.md` | **not run** (scaffold) |
-| — | [#228](https://github.com/semyon-alekseev-noveo/tt-sync/issues/228) | `228-matrix-analyst.md` | **DoR accepted** — eng #230 next; empty-TT still #215 |
+| — | [#228](https://github.com/semyon-alekseev-noveo/tt-sync/issues/228) | `228-matrix-analyst.md` | **DoR accepted** |
+| 1b | [#230](https://github.com/semyon-alekseev-noveo/tt-sync/issues/230) | `230-reset-dual-zero.md` | **unit pass**; Reset live **pass** ×2; dual-zero live **not run** |
 
 ## Rules
 
