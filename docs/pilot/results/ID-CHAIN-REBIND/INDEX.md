@@ -26,7 +26,7 @@
 | 4 | [#218](https://github.com/semyon-alekseev-noveo/tt-sync/issues/218) | `218-p3-deletion-policy.md` | **not run** (scaffold) |
 | — | [#228](https://github.com/semyon-alekseev-noveo/tt-sync/issues/228) | `228-matrix-analyst.md` | **DoR accepted** |
 | 1b | [#230](https://github.com/semyon-alekseev-noveo/tt-sync/issues/230) | `230-reset-dual-zero.md` | **unit pass**; Reset live **pass** ×2; dual-zero live **not run** |
-| 1c | [#231](https://github.com/semyon-alekseev-noveo/tt-sync/issues/231) | `231-vault-restore.md` | **unit pass**; live **not run** |
+| 1c | [#231](https://github.com/semyon-alekseev-noveo/tt-sync/issues/231) | `231-vault-restore.md` | **unit pass**; text-only live **pass** ×2 |
 
 ## Rules
 

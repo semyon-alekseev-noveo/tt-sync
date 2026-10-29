@@ -4,15 +4,16 @@
 |-------|--------|
 | Issue | [#231](https://github.com/semyon-alekseev-noveo/tt-sync/issues/231) |
 | Epic | [#214](https://github.com/semyon-alekseev-noveo/tt-sync/issues/214) / [#228](https://github.com/semyon-alekseev-noveo/tt-sync/issues/228) |
-| Status | **unit pass**; live **not run** |
+| Status | **unit pass**; live text-only / Rebind **pass** ×2 |
+| Tip | branch `fix/id-chain-231-vault-restore` tip-installed on pilot |
 | Inputs | `228-matrix-analyst.md` D10–D13; #216 rebind |
 
 ## AF coverage
 
 | AF ID | Unit | Live |
 |-------|------|------|
-| `ID-VAULT-RESTORE-MATCH` | **pass** | **not run** |
-| `ID-VAULT-RESTORE-TEXT-ONLY` / `ID-TEXT-NO-MARKER` | **pass** | **not run** |
+| `ID-VAULT-RESTORE-MATCH` | **pass** | **not run** (happy-path smoke) |
+| `ID-VAULT-RESTORE-TEXT-ONLY` / `ID-TEXT-NO-MARKER` | **pass** | **pass** ×2 (below) |
 | `ID-VAULT-RESTORE-CONFLICT` | **pass** | **not run** |
 
 ## Code
@@ -21,15 +22,23 @@
 - `rebindVaultFromPlanned`: skip `(Conflicted copy)` / `.sync-conflict-` paths.
 - Guard: matching `presentIds` → no vault→TT plan; unmarked → hold + Rebind (`idVaultRestore231.test.ts`).
 
-## Live plan
+## Live prove ×2 — `ID-VAULT-RESTORE-TEXT-ONLY`
 
-1. Tip install. Fixture A: markers match TT → Synchronize quiet (D10) ×2 notes.
-2. Fixture B: strip markers leave titles → held → Rebind → markers rebound, no TT wipe (D12) ×2.
-3. Never Apply after restore.
+Pilot Thinkpad-tts-test. Tip: #231 branch. Strip markers on two project notes → Synchronize → **Rebind** (not Apply).
+
+Fixtures: `10 Projects/PKM - journaling.md` (`6ae17a048f0871a7dbb8c8da`), `10 Projects/Годовые задачи.md` (`6ae17a048f0871a7dbb8c8d5`).
+
+| Prove | When (UTC) | Decision | Planned | After |
+|-------|------------|----------|---------|-------|
+| 1 | 09:57:19 | **rematch** | 2 vault→TT (механикой + областями) | markers restored same ids; dedup |
+| 2 | 09:57:27 | **rematch** | same 2 | markers kept; no Apply |
+
+Reports: `.tickticksync/reports/deletions-2026-10-29T09-57-19-421Z.md`, `…09-57-27-444Z.md` (vault-local). Apply never. Checkpoint held.
 
 ## Checklist
 
 - [x] AF-named unit tests
 - [x] TEST_PLAN stubs updated
-- [ ] Live prove ×2
-- [ ] Comment #231 with tip evidence
+- [x] Live text-only Rebind prove ×2
+- [ ] D10 / D13 live (optional smoke)
+- [x] Comment #231 with tip evidence
