@@ -547,12 +547,43 @@ Expected: each vault→TT task row reads **Would delete from TickTick — missin
 
 Expected: guard reason `empty-ticktick` (or threshold). No mass `tt→obs` line deletes emptying Active Zone. Unit: `massDeleteGuard.test.ts` (`looksLikeTickTickWipe`). Pilot: **not run**.
 
-### TP-BUG-208-REMATCH — rematch vault from restored TickTick
+### TP-BUG-208-REMATCH — rematch vault from restored TickTick (legacy insert)
 
 1. After TT restore + empty/stale AZ markers, Synchronize until the held modal lists only vault→TT deletes.
 2. Choose **Rematch into vault (keep TickTick)** (not Apply once).
 
-Expected: missing checkboxes/`%%[ticktick_id::]%%` lines are rewritten from Dexie/TT into the named project notes; TickTick task count unchanged; no Apply wipe. Next Synchronize is quiet or only small diffs. Unit: `bug208RematchVault.test.ts`. Pilot: **pass** prove 1 (`35-bug-208-rematch-prove.md` @ 15:10Z); prove 2 **blocked** by Notebook create `File already exists` on `00 Inbox/.cursorrules (dbb8c8ff).md` until notebookVault tip (this PR).
+Expected: missing checkboxes/`%%[ticktick_id::]%%` lines are **inserted** from Dexie/TT into the named project notes; TickTick task count unchanged; no Apply wipe. Does **not** rewrite stale archive markers (see TP-ID-ARCHIVE-NO-STRIP / TP-ID-REBIND-RESTORE). Unit: `bug208RematchVault.test.ts`. Pilot: **pass** prove 1 (`35-bug-208-rematch-prove.md` @ 15:10Z); prove 2 **not run**.
+
+## PR — epic #214 ID-CHAIN-REBIND (DoR; code in child PRs)
+
+Gate: `docs/pilot/results/ID-CHAIN-REBIND/`. Epic [#214](https://github.com/semyon-alekseev-noveo/tt-sync/issues/214).
+
+### TP-ID-ARCHIVE-NO-STRIP — stale/archive markers must not wipe vault text (#215)
+
+1. Pilot note under archive or completed section with `%%[ticktick_id::]%%` whose id is absent from TickTick.
+2. Synchronize (Cancel any Confirm Deletion if still shown on old tip).
+
+Expected (after P0 tip): checklist text remains; marker detach or no-op — **not** Confirm wipe of lines. Pilot: **not run**.
+
+### TP-ID-REBIND-RESTORE — vault-wide rebind after TT restore (#216)
+
+1. After TT backup restore (new ids) + Dexie refill, with some vault lines still on old ids and/or empty AZ.
+2. Run **Rebind** (product name may still say Rematch until P2).
+
+Expected: in-scope markers match current Dexie/TT ids (rewrite preferred); no TT task deletes for vault-absent; next sync quiet or small. Pilot: **not run**.
+
+### TP-ID-REBIND-DEDUP — no duplicate checkbox after rebind (#216)
+
+1. Same fixture as restore with an old-id line still present.
+2. Rebind once.
+
+Expected: one checkbox per live task (no stale-id twin + new insert). Pilot: **not run**.
+
+### TP-ID-REBIND-UX — copy / no Apply nudge (#217)
+
+1. Open held modal on a restore-shaped vault→TT plan (or read glossary).
+
+Expected: wording is Rebind / keep TickTick; Apply once is not the recommended path. Pilot: **not run**.
 
 ### TP-MASS-DELETE-THRESHOLD — count and percent together
 

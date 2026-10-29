@@ -36,7 +36,8 @@
 
 ## Problems
 
-- **BUG-208** ([#208](https://github.com/semyon-alekseev-noveo/tt-sync/issues/208)) — Rematch prove 1 pass (`35`); prove 2 blocked by Notebook `File already exists` on `.cursorrules` NOTE until notebookVault tip (`open`).
+- **ID-CHAIN / Rematch gap** — Epic [#214](https://github.com/semyon-alekseev-noveo/tt-sync/issues/214): shipped #208 Rematch = insert-only; owner need = vault-wide rebind + archive no-strip. P0 [#215](https://github.com/semyon-alekseev-noveo/tt-sync/issues/215), P1 [#216](https://github.com/semyon-alekseev-noveo/tt-sync/issues/216). DoR: `docs/pilot/results/ID-CHAIN-REBIND/` (`open`).
+- **BUG-208** ([#208](https://github.com/semyon-alekseev-noveo/tt-sync/issues/208)) — Rematch prove 1 pass (`35`); prove 2 **not run**; do not close on insert alone (`open`).
 - **BUG-RESET-CACHE-DELETE** — post-Reset Synchronize proposed vault-line deletes for pre-wipe ids (DON-253); owner **Cancel** only. Fix on tip/PR; pilot prove ×2 pending (`UX-OBS-TT-SOAK/24-post-reset-delete-modal.md`) (`open` until prove).
 - Pilot Abyss `taskIgnoreQuery: #ticktick` leftover from superseded Option B — blocks Abyss edit on TT-origin project notes (`open`; brief `UX-OBS-TT-SOAK/06-decision-ticktick-vs-abyss.md`).
 - List stub mirrors under `TickTickTasksFilePath` / Dexie recreate into `zz-parked-*` — **resolved** on tip #179: code skip + pilot cleanup + prove ×2 (`UX-OBS-TT-SOAK/08-stub-cleanup-prove.md`). Optional Dexie parked-row dump not probed.
@@ -53,9 +54,10 @@
 
 ## To Be Done
 
-0. **#208 / BUG-208-***: merge PR; tip reload; Skip held → Rematch into vault (keep TickTick); prove ×2 on different project notes (`34`, TP-BUG-208-*). Do **not** Apply held deletes.
-0a. **BUG-RESET-CACHE-DELETE:** Cancel open modal if any; tip installed; prove ×2 Reset→Synchronize without vault-line cache-miss delete (`25-reset-cache-delete-prove.md` — owner Reset click).
-0b. **Settings UX #189:** Owner 30s glossary check (#190); Phase 1–3 merged (#196/#197/#198); Phase 4 cold-start/polish [#194](https://github.com/semyon-alekseev-noveo/tt-sync/issues/194) (unit; pilot not run). Epic phases code-complete after #194 merge — owner closes after pilot Settings smoke (do not invent live pass).
+0. **#214 ID-CHAIN:** DoR landed; next code **#215 P0 safety** then **#216 rebind**. Keep #208 open until scope clear; Cancel archive Confirm Deletion until P0 tip.
+0a. **#208 Rematch insert:** prove 2 still open if needed for insert path; do **not** Apply held deletes.
+0b. **BUG-RESET-CACHE-DELETE:** Cancel open modal if any; tip installed; prove ×2 Reset→Synchronize without vault-line cache-miss delete (`25-reset-cache-delete-prove.md` — owner Reset click).
+0c. **Settings UX #189:** Owner 30s glossary check (#190); Phase 1–3 merged (#196/#197/#198); Phase 4 cold-start/polish [#194](https://github.com/semyon-alekseev-noveo/tt-sync/issues/194) (unit; pilot not run). Epic phases code-complete after #194 merge — owner closes after pilot Settings smoke (do not invent live pass).
 1. Owner decides UX Decision #1 (Abyss vs `#ticktick`) — prefer clear ignore on pilot; optional TTS stop note-level `ticktick` stamp later (`06-decision-ticktick-vs-abyss.md`).
 2. **[done]** UX-STUB-1 / BUG-LIST-STUB-RECREATE pilot cleanup + prove ×2 after #179 (`08-stub-cleanup-prove.md`).
 2b. **[done]** UX-STATUS-MAP-1/2 prove ×2 after #182 (`16-status-map-prove.md`); MAP-3/4/PULL + Abyss customs still open; version bump when owner asks.
