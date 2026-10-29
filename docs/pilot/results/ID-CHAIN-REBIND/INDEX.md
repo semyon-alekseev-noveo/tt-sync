@@ -6,13 +6,13 @@
 | Epic | [#214](https://github.com/semyon-alekseev-noveo/tt-sync/issues/214) |
 | Vault | Thinkpad-tts-test (pilot only) |
 | Goal | Survive wipe/restore without mass Apply or archive strip; Rematch-as-intended = **rebind tt-ids** |
-| Status | P0/P1 code merged (#215/#216); residual [#223](https://github.com/semyon-alekseev-noveo/tt-sync/issues/223) tag-only wipe |
+| Status | P0–P2 code path landed; next analyst matrix [#228](https://github.com/semyon-alekseev-noveo/tt-sync/issues/228) |
 
 ## Related
 
 - [#208](https://github.com/semyon-alekseev-noveo/tt-sync/issues/208) Rematch insert (prove 1 in `UX-OBS-TT-SOAK/35`; prove 2 open)
 - `UX-OBS-TT-SOAK/34` AZ wipe root cause (`tt→obs` during empty TT)
-- Analysts: dual brief 2026-10-29 (taxonomy + rebind plan)
+- Analysts: dual brief 2026-10-29 (taxonomy + rebind plan); full matrix [#228](https://github.com/semyon-alekseev-noveo/tt-sync/issues/228)
 
 ## Phases
 
@@ -24,6 +24,7 @@
 | 2b | [#223](https://github.com/semyon-alekseev-noveo/tt-sync/issues/223) | `223-tag-only-no-wipe.md` | **live pass** ×2 (tip #224) |
 | 3 | [#217](https://github.com/semyon-alekseev-noveo/tt-sync/issues/217) | `217-p2-ux.md` + `217-glossary-rebind.md` | **unit pass**; owner 30s **not run** |
 | 4 | [#218](https://github.com/semyon-alekseev-noveo/tt-sync/issues/218) | `218-p3-deletion-policy.md` | **not run** (scaffold) |
+| — | [#228](https://github.com/semyon-alekseev-noveo/tt-sync/issues/228) | *(pending)* `228-matrix-analyst.md` | **DoR open** — wipe / dual-zero / TT+vault backups |
 
 ## Rules
 
