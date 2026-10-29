@@ -1,3 +1,13 @@
+### Iteration 2026-10-29 11:12 UTC
+
+- Context: Owner «гоу» — skip empty-TT wipe; start P2 #233 honesty.
+- Target: TEXT-NO-MARKER policy + omit-from-backup detach copy; no invent TT.
+- Actions log: honest labels/notice; glossary; `idChain233Honesty.test.ts`; gate `233-text-omit-honesty.md`.
+- Validation: vitest idChain233Honesty + massDeleteGuard pass; `npm run build` ok.
+- Problems: empty-TT still needs OK; omit live optional (`open`).
+- To Be Done: merge #233 PR; then #234 or empty-TT deferral.
+- References: #233, #231, `233-text-omit-honesty.md`, `CHANGELOG.md`
+
 ### Iteration 2026-10-29 10:19 UTC
 
 - Context: Owner merged #238; tip #231; start #232 FM ≠ presentIds.
