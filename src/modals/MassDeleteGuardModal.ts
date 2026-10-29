@@ -3,7 +3,11 @@ import { deletionPromptTimeoutMs } from '@/modals/TaskDeletionModal';
 import {
 	canOfferRematch,
 	formatPlannedDeletionLabel,
+	isRestoreShapedHold,
 	previewItems,
+	REBIND_BUTTON_DESC,
+	REBIND_BUTTON_LABEL,
+	REBIND_VAULT_WIPE_HINT,
 	type GuardDecision,
 	type PlannedDeletion,
 } from '@/sync/massDeleteGuard';
@@ -33,15 +37,14 @@ export class MassDeleteGuardModal extends Modal {
 		const vaultWipeTt = this.items.some(
 			item => item.kind === 'task' && item.direction === 'vault-to-ticktick' && item.action === 'delete',
 		);
+		const restoreShaped = isRestoreShapedHold(this.items);
 		contentEl.createEl('p', {
 			text: `${this.decision.taskDeletions} task deletion(s) and ${this.decision.commentDeletions} comment deletion(s) (${this.decision.reason}). `
 				+ `${this.decision.percent.toFixed(1)}% of ${this.decision.trackedTasks} tracked task(s). `
 				+ 'Creates and updates still run. The checkpoint stays until you apply deletions.',
 		});
 		if (vaultWipeTt) {
-			contentEl.createEl('p', {
-				text: 'Lines labeled “Would delete from TickTick” mean the vault is missing line markers — Apply would wipe those tasks in TickTick. Prefer Skip or Rematch after a restore.',
-			});
+			contentEl.createEl('p', { text: REBIND_VAULT_WIPE_HINT });
 		}
 		const shown = previewItems(this.items, this.previewCount);
 		const list = contentEl.createEl('ul');
@@ -62,17 +65,23 @@ export class MassDeleteGuardModal extends Modal {
 			});
 		if (canOfferRematch(this.items)) {
 			new Setting(contentEl)
-				.setDesc('Rewrite missing vault lines from TickTick/local cache. Does not delete TickTick tasks.')
+				.setDesc(REBIND_BUTTON_DESC)
 				.addButton(button => {
-					button.setButtonText('Rematch into vault (keep TickTick)');
+					button.setButtonText(REBIND_BUTTON_LABEL);
 					button.setCta();
 					button.onClick(() => this.finish('rematch'));
 				});
 		}
 		new Setting(contentEl)
+			.setDesc(
+				restoreShaped
+					? 'Not recommended after restore/reset — wipes TickTick for missing vault markers.'
+					: '',
+			)
 			.addButton(button => {
 				button.setButtonText('Apply once');
-				button.setWarning();
+				// ID-REBIND-UX: never warn/CTA Apply when vault→TT (restore-shaped) dominates
+				if (!restoreShaped) button.setWarning();
 				button.onClick(() => this.finish('apply-once'));
 			});
 	}
