@@ -5,7 +5,7 @@
 | Issue | [#228](https://github.com/semyon-alekseev-noveo/tt-sync/issues/228) |
 | Epic | [#214](https://github.com/semyon-alekseev-noveo/tt-sync/issues/214) |
 | When | 2026-10-29 |
-| Status | **DoR ready** — AF stubs + child issues; **no live pass** from this file |
+| Status | **DoR accepted** (owner 2026-10-29 «ок, гоу») — AF stubs + children #230–#234; **no live pass** from this file |
 | Inputs | `214-plan-taxonomy-rebind.md`; #215–#217/#223 evidence; #208; dual-analyst briefs A/B/C |
 
 ## Chain truth (1 screen)
@@ -113,7 +113,7 @@ Glossary: `217-glossary-rebind.md`.
 - [x] Gap list + children  
 - [x] Comment on #214 / #228 linking this file  
 - [x] Child issues opened (#230–#234)  
-- [ ] Owner accepts DoR  
+- [x] Owner accepts DoR (2026-10-29)  
 
 ## Conclusion
 

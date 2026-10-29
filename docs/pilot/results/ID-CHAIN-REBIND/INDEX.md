@@ -24,7 +24,7 @@
 | 2b | [#223](https://github.com/semyon-alekseev-noveo/tt-sync/issues/223) | `223-tag-only-no-wipe.md` | **live pass** ×2 (tip #224) |
 | 3 | [#217](https://github.com/semyon-alekseev-noveo/tt-sync/issues/217) | `217-p2-ux.md` + `217-glossary-rebind.md` | **unit pass**; owner 30s **not run** |
 | 4 | [#218](https://github.com/semyon-alekseev-noveo/tt-sync/issues/218) | `218-p3-deletion-policy.md` | **not run** (scaffold) |
-| — | [#228](https://github.com/semyon-alekseev-noveo/tt-sync/issues/228) | `228-matrix-analyst.md` | **DoR ready** — children #230–#234; owner accept |
+| — | [#228](https://github.com/semyon-alekseev-noveo/tt-sync/issues/228) | `228-matrix-analyst.md` | **DoR accepted** — eng #230 next; empty-TT still #215 |
 
 ## Rules
 
