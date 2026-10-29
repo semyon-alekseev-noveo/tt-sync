@@ -1,3 +1,13 @@
+### Iteration 2026-10-29 04:00 UTC
+
+- Context: Owner asked dual analysts on vault↔cache↔TT id chain; then «гоу» DoR + epic.
+- Target: Taxonomy, AF cases, phased rebind plan, GitHub epic/children — no product code.
+- Actions log: Analyst briefs; epic #214 + #215–#218; gate `docs/pilot/results/ID-CHAIN-REBIND/`; AF `ID-ARCHIVE-NO-STRIP` / `ID-REBIND-*`; TEST_PLAN TP-ID-*; #208 comment; clarify BUG-208-REMATCH = insert-only.
+- Validation: docs-only; no vitest required for scaffold.
+- Problems: P0/P1 code and live prove still open (`open`).
+- To Be Done: Implement #215 then #216; do not close #208 on insert Rematch alone.
+- References: #214, #215, #216, #217, #218, #208, `ID-CHAIN-REBIND/214-plan-taxonomy-rebind.md`, `CHANGELOG.md`
+
 ### Iteration 2026-10-28 15:28 UTC
 
 - Context: After Rematch prove 1, owner Synchronize failed: `File already exists` on Notebook NOTE `.cursorrules` under `00 Inbox` (dotfile often unindexed).

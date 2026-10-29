@@ -42,6 +42,7 @@
 | 33 | #205 smoke feedback impl | `33-settings-ux-205-smoke-feedback.md` | **unit pass**; pilot re-smoke not run |
 | 34 | #208 held post-restore + AZ wipe root cause | `34-held-post-restore-az-wipe.md` | **root cause**; rematch fix shipped |
 | 35 | #208 Rematch prove ×1 | `35-bug-208-rematch-prove.md` | **pass** prove 1 @ 15:10Z; prove 2 **not run** |
+| — | Identity chain follow-up (rebind epic) | [`../ID-CHAIN-REBIND/`](../ID-CHAIN-REBIND/) | **DoR** epic [#214](https://github.com/semyon-alekseev-noveo/tt-sync/issues/214); Rematch insert ≠ vault-wide rebind |
 | 185 | #185 status source (analyst spec) | [`../../UX-ABYSS-STATUS-SRC.md`](../../UX-ABYSS-STATUS-SRC.md) | **spec only (not run)**; not DoR |
 
 ## Rules
