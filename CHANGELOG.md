@@ -1,3 +1,13 @@
+### Iteration 2026-10-29 09:56 UTC
+
+- Context: Owner «гоу» after #237; start #231 vault restore identity.
+- Target: Lock D10–D13 AF (match / text-only / conflict) with tests + conflict/dup guards.
+- Actions log: `rebindFileContent` title claim; skip conflict paths; `idVaultRestore231.test.ts`; gate `231-vault-restore.md`.
+- Validation: vitest idVaultRestore231 + idRebind + massDeleteGuard 33 pass; `npm run build` ok.
+- Problems: D10/D13 live smoke still open; empty-TT needs OK (`open`).
+- To Be Done: merge #238; empty-TT #215 OK or deferral; then #232.
+- References: #231, #228, `231-vault-restore.md`, `CHANGELOG.md`
+
 ### Iteration 2026-10-29 09:45 UTC
 
 - Context: Owner merged #235/#236; tip install; live Reset prove for #230.

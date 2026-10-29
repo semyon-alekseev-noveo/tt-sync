@@ -612,10 +612,10 @@ Gate file: `docs/pilot/results/ID-CHAIN-REBIND/228-matrix-analyst.md`. Each stub
 | TP-ID-DUALZERO-VAULT-ONLY | Dexie+TT empty; vault text | Text kept; detach; no invent TT | unit **pass**; live **not run** (#230) |
 | TP-ID-TT-RESTORE-SAME-IDS | TT restore same ids | Quiet align; no mass Apply | **not run** |
 | TP-ID-TT-RESTORE-OMITTED | TT restore omits tasks | Detach + keep text; no invent | **not run** |
-| TP-ID-VAULT-RESTORE-MATCH | Vault restore matches TT | Sync aligns; no wipe | **not run** |
-| TP-ID-VAULT-RESTORE-TEXT-ONLY | Vault text-only checkboxes | Rebind binds; no TT wipe | **not run** |
-| TP-ID-VAULT-RESTORE-CONFLICT | Conflict / dup titles | No dual-bind; no TT wipe | **not run** |
-| TP-ID-TEXT-NO-MARKER | Unmarked line matches TT | No Apply; Rebind binds | **not run** |
+| TP-ID-VAULT-RESTORE-MATCH | Vault restore matches TT | Sync aligns; no wipe | unit **pass**; live **not run** (#231) |
+| TP-ID-VAULT-RESTORE-TEXT-ONLY | Vault text-only checkboxes | Rebind binds; no TT wipe | unit **pass**; live **pass** ×2 (#231 / `231-vault-restore.md`) |
+| TP-ID-VAULT-RESTORE-CONFLICT | Conflict / dup titles | No dual-bind; no TT wipe | unit **pass**; live **not run** (#231) |
+| TP-ID-TEXT-NO-MARKER | Unmarked line matches TT | No Apply; Rebind binds | unit **pass**; live **pass** ×2 (#231 / `231-vault-restore.md`) |
 | TP-ID-PROJECT-FM-NOT-PRESENTIDS | FM parent vs child markers | FM alone ≠ children present | **not run** |
 | TP-ID-NOTEBOOK-RESTORE-SAFE | Notebook during restore | No vault→TT delete Notebook | **not run** |
 

@@ -8,7 +8,7 @@
 import type { ITask } from '@/api/types/Task';
 import { insertRematchLines } from '@/sync/rematchVault';
 import type { RematchLiveTask, RematchVaultDeps } from '@/sync/rematchVault';
-import type { PlannedDeletion } from '@/sync/massDeleteGuard';
+import { isConflictCopyPath, type PlannedDeletion } from '@/sync/massDeleteGuard';
 import log from '@/utils/logger';
 
 /** TickTick ids are usually 24 hex; allow alnum so unit fixtures stay readable. */
@@ -89,6 +89,8 @@ export function rebindFileContent(
 	let rebound = 0;
 	let skipped = 0;
 	const needInsert: ITask[] = [];
+	/** ID-VAULT-RESTORE-CONFLICT: one title claim per rebind pass — no second bind/insert. */
+	const claimedTitles = new Set<string>();
 	const textNow = () => lines.join('\n');
 
 	for (const task of tasks) {
@@ -101,6 +103,7 @@ export function rebindFileContent(
 			skipped += 1;
 			continue;
 		}
+		const titleKey = normalizeRebindTitle(task.title ?? '');
 		const idx = findRebindLineIndex(lines, task.title ?? '', id, liveIds);
 		if (idx === -2) {
 			skipped += 1;
@@ -109,9 +112,17 @@ export function rebindFileContent(
 		if (idx >= 0) {
 			lines[idx] = replaceOrAttachMarker(lines[idx]!, id);
 			rebound += 1;
+			if (titleKey) claimedTitles.add(titleKey);
+			continue;
+		}
+		// No line candidate: insert only if this title was not already claimed
+		// (one unmarked line + two same-title TT tasks → bind once, skip invent dup).
+		if (titleKey && claimedTitles.has(titleKey)) {
+			skipped += 1;
 			continue;
 		}
 		needInsert.push(task);
+		if (titleKey) claimedTitles.add(titleKey);
 	}
 
 	return {
@@ -168,6 +179,12 @@ export async function rebindVaultFromPlanned(
 	let files = 0;
 	for (const [file, tasks] of byFile) {
 		try {
+			// ID-VAULT-RESTORE-CONFLICT: never rewrite Obsidian Sync conflict copies.
+			if (isConflictCopyPath(file)) {
+				skipped += tasks.length;
+				log.warn(`TickTickSync rebind: skip conflict path ${file}`);
+				continue;
+			}
 			const snapshot = await deps.readFile(file);
 			if (snapshot == null) {
 				skipped += tasks.length;
