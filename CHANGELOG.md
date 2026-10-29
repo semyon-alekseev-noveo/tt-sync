@@ -1,3 +1,13 @@
+### Iteration 2026-10-29 08:53 UTC
+
+- Context: Owner «собери аналитиков» for full ID-CHAIN matrix (#228).
+- Target: DoR — wipe/dual-zero/TT+vault backup cases as AF + gate file; child eng issues.
+- Actions log: Three analyst briefs; `228-matrix-analyst.md`; AF/TEST_PLAN stubs; INDEX; child issues.
+- Validation: docs-only PR; no new sync code.
+- Problems: empty-TT live still open on #215 (`open`).
+- To Be Done: Owner accept DoR; empty-TT live or deferral; then P1 children.
+- References: #228, #214, `228-matrix-analyst.md`, `CHANGELOG.md`
+
 ### Iteration 2026-10-29 08:20 UTC
 
 - Context: Owner merged #226; next #217 Rebind UX.
