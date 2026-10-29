@@ -605,11 +605,11 @@ Gate file: `docs/pilot/results/ID-CHAIN-REBIND/228-matrix-analyst.md`. Each stub
 
 | TP | Case | Expected (short) | Pilot |
 |----|------|------------------|-------|
-| TP-ID-DEXIE-RESET-NO-WIPE | Reset → Synchronize | No Apply wipe TT; markers kept | **not run** |
-| TP-ID-EMPTY-VAULT-NO-TT-WIPE | 0 vault markers; TT live | No Apply TT wipe | **not run** |
-| TP-ID-DUALZERO-VAULT-DEXIE-EMPTY | Vault+Dexie empty; TT live | Dexie refill; no TT wipe | **not run** |
-| TP-ID-DUALZERO-STALE-DEXIE | Vault+TT empty; Dexie stale | Fail closed; Reset; no invent | **not run** |
-| TP-ID-DUALZERO-VAULT-ONLY | Dexie+TT empty; vault text | Text kept; detach; no invent TT | **not run** |
+| TP-ID-DEXIE-RESET-NO-WIPE | Reset → Synchronize | No Apply wipe TT; markers kept | unit **pass**; live **not run** (#230) |
+| TP-ID-EMPTY-VAULT-NO-TT-WIPE | 0 vault markers; TT live | No Apply TT wipe | unit **pass** (empty-vault); live **not run** |
+| TP-ID-DUALZERO-VAULT-DEXIE-EMPTY | Vault+Dexie empty; TT live | Dexie refill; no TT wipe | unit **pass**; live **not run** (#230) |
+| TP-ID-DUALZERO-STALE-DEXIE | Vault+TT empty; Dexie stale | Fail closed; Reset; no invent | unit **pass**; live **not run** (#230) |
+| TP-ID-DUALZERO-VAULT-ONLY | Dexie+TT empty; vault text | Text kept; detach; no invent TT | unit **pass**; live **not run** (#230) |
 | TP-ID-TT-RESTORE-SAME-IDS | TT restore same ids | Quiet align; no mass Apply | **not run** |
 | TP-ID-TT-RESTORE-OMITTED | TT restore omits tasks | Detach + keep text; no invent | **not run** |
 | TP-ID-VAULT-RESTORE-MATCH | Vault restore matches TT | Sync aligns; no wipe | **not run** |
