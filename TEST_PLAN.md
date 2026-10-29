@@ -596,7 +596,7 @@ Expected: wording is Rebind / keep TickTick; Apply once is not the recommended p
 1. Tip after #223. TT/Dexie has a task tagged `obsidian` with **no** vault markdown line (e.g. Selectel course — only backup CSV mentions).
 2. **Synchronize**.
 
-Expected: **no** Task Deletion Confirmation for that id under Unknown / Unknown File. Task remains in TickTick. Unit: `massDeleteGuard.test.ts` `ID-TAG-ONLY-NO-WIPE`. Pilot: **not run**.
+Expected: **no** Task Deletion Confirmation for that id under Unknown / Unknown File. Task remains in TickTick. Unit: `massDeleteGuard.test.ts` `ID-TAG-ONLY-NO-WIPE`. Pilot: **pass** ×2 (`docs/pilot/results/ID-CHAIN-REBIND/223-tag-only-no-wipe.md` — Selectel + Гоша - школа; tip #224).
 
 ### TP-MASS-DELETE-THRESHOLD — count and percent together
 

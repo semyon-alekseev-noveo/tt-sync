@@ -1,11 +1,21 @@
+### Iteration 2026-10-29 07:15 UTC
+
+- Context: Owner «гоу» — live prove #223 after tip #224.
+- Target: `ID-TAG-ONLY-NO-WIPE` live pass ×2 (Selectel + second tag-only).
+- Actions log: Tip reload; `tts-sync` ×2; eval planned-absent; MCP TT alive; pilot/AF/TEST_PLAN update.
+- Validation: prove1/2 `pass` (`plannedCount` 0; Selectel + Гоша alive).
+- Problems: #215/#216 live proves still open (`open`).
+- To Be Done: Live prove #215 TT-gone/archive; then #216 Rematch if held; #217 UX.
+- References: #223, `223-tag-only-no-wipe.md`, `CHANGELOG.md`
+
 ### Iteration 2026-10-29 06:10 UTC
 
 - Context: After #216 merge, Confirm Deletion for Selectel (tag `obsidian`, no vault line, Unknown).
 - Target: `ID-TAG-ONLY-NO-WIPE` — tag alone never vault→TT wipe; require vault file in push scope.
 - Actions log: Drop tag eligibility in `planVaultTaskDeletions` + `collectTaskIdsAbsentFromVault`; AF/TEST_PLAN/pilot #223.
 - Validation: `npx vitest run` 890 pass; `npm run build` ok; `check:cycles` OK.
-- Problems: Live Synchronize prove ×2 open (`open`).
-- To Be Done: PR; tip; Cancel until tip; Synchronize — Selectel must not Confirm.
+- Problems: Live Synchronize prove ×2 resolved 07:15 (`resolved`).
+- To Be Done: — (live prove done).
 - References: #223, #214, #208, `223-tag-only-no-wipe.md`, `CHANGELOG.md`
 
 ### Iteration 2026-10-29 05:47 UTC
