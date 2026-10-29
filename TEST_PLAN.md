@@ -560,10 +560,10 @@ Gate: `docs/pilot/results/ID-CHAIN-REBIND/`. Epic [#214](https://github.com/semy
 
 ### TP-ID-ARCHIVE-NO-STRIP — stale/archive markers must not wipe vault text (#215)
 
-1. Pilot note under archive or completed section with `%%[ticktick_id::]%%` whose id is absent from TickTick.
-2. Synchronize (Cancel any Confirm Deletion if still shown on old tip).
+1. Pilot note under `…/Архив/…` (or `Archive/`) with `%%[ticktick_id::]%%` whose id is absent from TickTick.
+2. Synchronize on tip with #215.
 
-Expected (after P0 tip): checklist text remains; marker detach or no-op — **not** Confirm wipe of lines. Pilot: **not run**.
+Expected: no **Confirm Deletion** wipe of those archive checklists; text remains (detach or leave marker). Unit: `historicalVaultMarkers.test.ts`. Pilot: **not run**.
 
 ### TP-ID-REBIND-RESTORE — vault-wide rebind after TT restore (#216)
 

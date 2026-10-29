@@ -16,6 +16,7 @@ import { clearLocalLwwWins, consumeLocalLwwWin, defineLocalLwwRewrite, isLocalLw
 import { db } from "@/db/dexie";
 import { getSettings } from '@/settings';
 import { deletionConfirmMode } from '@/sync/massDeleteGuard';
+import { shouldPreserveVaultLinesOnRemoteDelete } from '@/sync/historicalVaultMarkers';
 import { getAllProjects } from '@/db/projects';
 import { tagsForCurrentList } from '@/listMapping';
 import { deleteFile, upsertFile } from '@/db/files';
@@ -367,6 +368,48 @@ export class VaultSyncCoordinator {
 	}
 
 	/**
+	 * Detach vault lines for remote-gone tasks (keep checklist text; clear Dexie link).
+	 * Used by `onTickTickDeletion=cancel` and ID-ARCHIVE-NO-STRIP historical paths.
+	 */
+	private async detachRemoteGoneTasks(
+		filePath: string,
+		group: { toDelete: ITask[] },
+		mine: ITask[],
+		alreadyHeldIds: ReadonlySet<string>,
+	): Promise<void> {
+		if (!mine.length) return;
+		group.toDelete = group.toDelete.filter(t => !mine.includes(t));
+		const f = this.app.vault.getAbstractFileByPath(filePath);
+		const content = f instanceof TFile ? await syncRead(this.app.vault, f) : '';
+		const kidIds = new Set<string>();
+		for (const t of mine) {
+			const pid = (t.id || (t as { taskId?: string }).taskId) ?? '';
+			if (this.plugin.projectScheme?.isParentId(pid)) continue;
+			for (const k of childIdsInContent(content, pid)) {
+				if (!alreadyHeldIds.has(k)) kidIds.add(k);
+			}
+		}
+		for (const k of kidIds) {
+			const pr = await this.plugin.taskRepository.getProjectIdForTask(k);
+			try {
+				if (pr) await this.plugin.tickTickRestAPI?.deleteTask(k, pr);
+			} catch (e) {
+				log.warn('child delete failed', k, e);
+			}
+		}
+		const allIds = [...mine.map(t => (t.id || (t as { taskId?: string }).taskId) ?? ''), ...kidIds];
+		for (const id of allIds) {
+			await this.plugin.fileMetadataService.clearTaskFile(id);
+			await this.plugin.taskRepository.deleteTask(id);
+			if (f instanceof TFile) {
+				const snapshot = await readNoteForWrite(this.app, f);
+				const next = detachInContent(snapshot, id, markerName());
+				if (next && next !== snapshot) await commitVaultText(this.app, f, snapshot, next);
+			}
+		}
+	}
+
+	/**
 	 * Confirm deletions with the user
 	 */
 	private async confirmDeletions(
@@ -396,36 +439,42 @@ export class VaultSyncCoordinator {
 			return true;
 		}
 
+		// ID-ARCHIVE-NO-STRIP (#215): archive / historical paths — detach, never Confirm wipe.
+		{
+			const preserved = new Set<string>();
+			for (const [filePath, group] of fileGroups) {
+				if (!shouldPreserveVaultLinesOnRemoteDelete(filePath)) continue;
+				const mine = group.toDelete.filter(t => {
+					const id = (t.id || (t as { taskId?: string }).taskId) ?? '';
+					return id && !movedTaskIds.has(id);
+				});
+				if (!mine.length) continue;
+				for (const t of mine) {
+					const id = (t.id || (t as { taskId?: string }).taskId) ?? '';
+					if (id) preserved.add(id);
+				}
+				log.info(
+					`ID-ARCHIVE-NO-STRIP: detach ${mine.length} remote-gone line(s) under historical path ${filePath}`,
+				);
+				await this.detachRemoteGoneTasks(filePath, group, mine, preserved);
+			}
+			if (preserved.size) {
+				for (let i = tasksToConfirmDeletionIds.length - 1; i >= 0; i--) {
+					if (preserved.has(tasksToConfirmDeletionIds[i]!)) tasksToConfirmDeletionIds.splice(i, 1);
+				}
+			}
+			if (tasksToConfirmDeletionIds.length === 0) {
+				return true;
+			}
+		}
+
 		if (getSettings().onTickTickDeletion === 'cancel') {
 			// No modal: detach these lines ([-], no id) and drop them from the delete lists.
 			const ids = new Set(tasksToConfirmDeletionIds);
 			for (const [filePath, group] of fileGroups) {
 				const mine = group.toDelete.filter(t => ids.has((t.id || (t as { taskId?: string }).taskId) ?? ''));
 				if (!mine.length) continue;
-				group.toDelete = group.toDelete.filter(t => !mine.includes(t));
-				const f = this.app.vault.getAbstractFileByPath(filePath);
-				// subtasks of a deleted parent go with it (TickTick UI does the same)
-				const content = f instanceof TFile ? await syncRead(this.app.vault, f) : '';
-				const kidIds = new Set<string>();
-				for (const t of mine) {
-					const pid = (t.id || (t as { taskId?: string }).taskId) ?? '';
-					if (this.plugin.projectScheme?.isParentId(pid)) continue;
-					for (const k of childIdsInContent(content, pid)) if (!ids.has(k)) kidIds.add(k);
-				}
-				for (const k of kidIds) {
-					const pr = await this.plugin.taskRepository.getProjectIdForTask(k);
-					try { if (pr) await this.plugin.tickTickRestAPI?.deleteTask(k, pr); } catch (e) { log.warn('child delete failed', k, e); }
-				}
-				const allIds = [...mine.map(t => (t.id || (t as { taskId?: string }).taskId) ?? ''), ...kidIds];
-				for (const id of allIds) {
-					await this.plugin.fileMetadataService.clearTaskFile(id);
-					await this.plugin.taskRepository.deleteTask(id);
-					if (f instanceof TFile) {
-						const snapshot = await readNoteForWrite(this.app, f);
-						const next = detachInContent(snapshot, id, markerName());
-						if (next && next !== snapshot) await commitVaultText(this.app, f, snapshot, next);
-					}
-				}
+				await this.detachRemoteGoneTasks(filePath, group, mine, ids);
 			}
 			return true;
 		}

@@ -4,7 +4,7 @@
 |-------|--------|
 | Issue | [#215](https://github.com/semyon-alekseev-noveo/tt-sync/issues/215) |
 | Epic | [#214](https://github.com/semyon-alekseev-noveo/tt-sync/issues/214) |
-| Status | **not run** (scaffold) |
+| Status | **unit pass** (archive path); live prove **not run** |
 | Inputs | `214-plan-taxonomy-rebind.md`, `UX-OBS-TT-SOAK/34` |
 
 ## Goal
@@ -14,15 +14,17 @@
 
 ## Evidence
 
-- None yet.
+- Code: `src/sync/historicalVaultMarkers.ts`; `VaultSyncCoordinator.confirmDeletions` auto-detach on historical paths; push orphan scan skips archive strip.
+- Unit: `npx vitest run src/test/historicalVaultMarkers.test.ts` — pass.
+- Live: **not run** (owner tip + Synchronize on `399 Архив` fixture; empty-TT live ×2 still open).
 
 ## Conclusion
 
-Await implementation PR.
+Archive Confirm wipe closed in code for `Архив`/`Archive`/`zz-parked*`. Tip + live prove still required before #215 close. Empty-TT live prove remains open (unit already on #208).
 
 ## Checklist
 
-- [ ] Unit for archive/stale policy
+- [x] Unit for archive/stale policy
 - [ ] Live empty-TT / wipe-shaped ×2
 - [ ] Archive fixture prove
-- [ ] TEST_PLAN updated in code PR
+- [x] TEST_PLAN updated in code PR

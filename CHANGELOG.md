@@ -1,3 +1,13 @@
+### Iteration 2026-10-29 05:14 UTC
+
+- Context: Owner priority = epic #214 ID sync; start P0 #215 archive Confirm wipe.
+- Target: Historical / Архив paths never Confirm-wipe vault checklists when TT id gone; detach or no-op.
+- Actions log: `historicalVaultMarkers`; `VaultSyncCoordinator` auto-detach; push orphan skip; units; tip build; priority note in PROJECT_STATE; #214/#189 comments.
+- Validation: `npx vitest run` 882 pass; `npm run build` ok; `check:cycles` OK.
+- Problems: Live archive prove + empty-TT live ×2 still open (`open`).
+- To Be Done: PR; tip install; owner Synchronize on `399 Архив` (expect no Confirm wipe); then #216 rebind.
+- References: #214, #215, `src/sync/historicalVaultMarkers.ts`, `215-p0-safety.md`, `CHANGELOG.md`
+
 ### Iteration 2026-10-29 04:00 UTC
 
 - Context: Owner asked dual analysts on vault↔cache↔TT id chain; then «гоу» DoR + epic.

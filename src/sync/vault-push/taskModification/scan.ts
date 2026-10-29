@@ -9,6 +9,7 @@ import { getAllProjects } from '@/db/projects';
 import { stageNeedsPushDespiteHash } from '@/listMapping';
 import { isPathInPushScope, normalizeSyncTag, resolveSyncedListIds, tickTickTaskEntersVault, vaultParentMeaningfullyChanged, type TaskSyncLimitOptions } from '@/syncScope';
 import { shouldSkipOrphanVaultLineDelete } from '@/sync/massDeleteGuard';
+import { shouldPreserveVaultLinesOnRemoteDelete } from '@/sync/historicalVaultMarkers';
 import log from '@/utils/logger';
 import type { TaskModificationDetector } from '@/sync/vault-push/taskModification/TaskModificationDetector';
 import type { PendingTickTickDeletion } from '@/sync/vault-push/taskModification/types';
@@ -110,6 +111,15 @@ export class TaskModificationScan {
 				log.warn(
 					`BUG-RESET-CACHE-DELETE: skip vault remove for ${taskId} in ${filepath} ` +
 						`(empty/reset bootstrap; leave marker for re-link)`,
+				);
+				return false;
+			}
+
+			// ID-ARCHIVE-NO-STRIP: never queue Confirm wipe for archive / historical notes.
+			if (shouldPreserveVaultLinesOnRemoteDelete(filepath)) {
+				log.warn(
+					`ID-ARCHIVE-NO-STRIP: skip vault remove for ${taskId} in ${filepath} ` +
+						`(historical path; leave checklist text)`,
 				);
 				return false;
 			}
