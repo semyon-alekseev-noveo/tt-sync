@@ -563,14 +563,14 @@ Gate: `docs/pilot/results/ID-CHAIN-REBIND/`. Epic [#214](https://github.com/semy
 1. Pilot note under `…/Архив/…` (or `Archive/`) with `%%[ticktick_id::]%%` whose id is absent from TickTick.
 2. Synchronize on tip with #215.
 
-Expected: no **Confirm Deletion** wipe of those archive checklists; text remains (detach or leave marker). Unit: `historicalVaultMarkers.test.ts`. Pilot: **not run**.
+Expected: no **Confirm Deletion** wipe of those archive checklists; text remains (detach or leave marker). Unit: `historicalVaultMarkers.test.ts`. Pilot: **pass** ×2 (`215-p0-safety.md` — убрать-мусор + Написать_первую_статью).
 
 ### TP-ID-TT-GONE-DETACH — TT-gone never Confirm-wipes live notes (#215)
 
 1. Live note under `30 Tasks/303…` (not Архив) with old `%%[ticktick_id::]%%` absent from TickTick (post-wipe stale).
 2. Synchronize on tip.
 
-Expected: **no** Confirm Deletion modal that deletes checklists; notice may say markers detached / text kept; checkbox text still on disk. Unit: `VaultSyncCoordinator` confirmDeletions. Pilot: **not run**.
+Expected: **no** Confirm Deletion modal that deletes checklists; notice may say markers detached / text kept; checkbox text still on disk. Unit: `VaultSyncCoordinator` confirmDeletions. Pilot: **pass** ×2 text-keep (`215-p0-safety.md` — сарай-построить-лестницу-и-юбку); empty-TT AZ strip still **not run**.
 
 ### TP-ID-REBIND-RESTORE — vault-wide rebind after TT restore (#216)
 
