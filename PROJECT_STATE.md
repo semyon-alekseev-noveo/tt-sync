@@ -36,7 +36,7 @@
 
 ## Problems
 
-- **BUG-208** ([#208](https://github.com/semyon-alekseev-noveo/tt-sync/issues/208)) — post-restore held false vault→TT deletes; AZ emptied earlier by `tt→obs` line deletes during TT wipe (`34-held-post-restore-az-wipe.md`). Code on branch: held labels + wipe-shaped empty-TT fail-closed + Rematch into vault. Live prove ×2 **not run** (`open`).
+- **BUG-208** ([#208](https://github.com/semyon-alekseev-noveo/tt-sync/issues/208)) — Rematch prove 1 pass (`35`); prove 2 blocked by Notebook `File already exists` on `.cursorrules` NOTE until notebookVault tip (`open`).
 - **BUG-RESET-CACHE-DELETE** — post-Reset Synchronize proposed vault-line deletes for pre-wipe ids (DON-253); owner **Cancel** only. Fix on tip/PR; pilot prove ×2 pending (`UX-OBS-TT-SOAK/24-post-reset-delete-modal.md`) (`open` until prove).
 - Pilot Abyss `taskIgnoreQuery: #ticktick` leftover from superseded Option B — blocks Abyss edit on TT-origin project notes (`open`; brief `UX-OBS-TT-SOAK/06-decision-ticktick-vs-abyss.md`).
 - List stub mirrors under `TickTickTasksFilePath` / Dexie recreate into `zz-parked-*` — **resolved** on tip #179: code skip + pilot cleanup + prove ×2 (`UX-OBS-TT-SOAK/08-stub-cleanup-prove.md`). Optional Dexie parked-row dump not probed.

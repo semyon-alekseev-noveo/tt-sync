@@ -1,3 +1,13 @@
+### Iteration 2026-10-28 15:28 UTC
+
+- Context: After Rematch prove 1, owner Synchronize failed: `File already exists` on Notebook NOTE `.cursorrules` under `00 Inbox` (dotfile often unindexed).
+- Target: Notebook create must not abort Synchronize; basenames must not start with `.`.
+- Actions log: `sanitizeNotebookBasename` strips leading dots; create catches exists and skips; unit tests; TEST_PLAN/AF BUG-NOTEBOOK-CREATE-EXISTS; note on rematch prove 2 block.
+- Validation: `npx vitest run` 878 pass; `npm run build` ok; tip copied to pilot plugin folder.
+- Problems: Rematch prove 2 still needs Obsidian reload + Synchronize (`open`).
+- To Be Done: Owner reload + Synchronize (Skip if held) for prove 2; merge #212.
+- References: #208, #212, `src/sync/notebookVault.ts`, `35-bug-208-rematch-prove.md`, `CHANGELOG.md`
+
 ### Iteration 2026-10-28 14:17 UTC
 
 - Context: Owner Rematch on tip: journal choice=rematch but AZ stayed empty; synchronizeToVault(add) returned false.

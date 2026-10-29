@@ -26,11 +26,12 @@ function vaultPath(...parts: string[]): string {
 		.replace(/^\/+|\/+$/g, '');
 }
 
-/** Safe single-segment basename (no path separators). */
+/** Safe single-segment basename (no path separators). Leading dots stripped — Obsidian hides dotfiles. */
 export function sanitizeNotebookBasename(title: string, id: string): string {
 	const raw = (title || 'untitled').trim() || 'untitled';
 	const cleaned = raw
 		.replace(/[/\\?%*:|"<>]/g, '-')
+		.replace(/^\.+/, '')
 		.replace(/\s+/g, ' ')
 		.trim()
 		.slice(0, 80);
@@ -150,16 +151,28 @@ export async function syncNotebooksToVault(
 			const path = notebookVaultPath(folder, task.title ?? '', task.id);
 			const parent = path.includes('/') ? path.slice(0, path.lastIndexOf('/')) : '';
 			if (parent) await ensureFolder(app, parent);
+			// Dotfiles / race: vault index may miss a file that already exists on disk
+			// (`File already exists`) — do not fail the whole Synchronize (#208 follow-up).
+			const tryCreate = async (target: string) => {
+				try {
+					await app.vault.create(target, next);
+					return true;
+				} catch (error) {
+					const msg = error instanceof Error ? error.message : String(error);
+					if (!msg.includes('File already exists')) throw error;
+					log.warn(`Notebook MVP: ${target} already on disk; skipping create`, task.id);
+					return false;
+				}
+			};
 			if (app.vault.getAbstractFileByPath(path)) {
 				const alt = vaultPath(
 					folder,
 					`${sanitizeNotebookBasename(task.title ?? '', task.id)}-${task.id.slice(0, 6)}.md`,
 				);
-				await app.vault.create(alt, next);
-			} else {
-				await app.vault.create(path, next);
+				if (await tryCreate(alt)) changed++;
+			} else if (await tryCreate(path)) {
+				changed++;
 			}
-			changed++;
 			log.debug('notebook vault create', path, task.id);
 		}
 	}

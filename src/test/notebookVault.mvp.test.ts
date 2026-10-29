@@ -24,10 +24,36 @@ describe('FEAT-NOTEBOOK-MVP-1 render / path', () => {
 		expect(sanitizeNotebookBasename('a/b:c', 'abcdefghijklmnop')).toBe('a-b-c (ijklmnop)');
 	});
 
+	it('sanitizeNotebookBasename strips leading dots so notes are not Obsidian-hidden', () => {
+		expect(sanitizeNotebookBasename('.cursorrules', '6ae17a048f0871a7dbb8c8ff')).toBe(
+			'cursorrules (dbb8c8ff)',
+		);
+	});
+
 	it('notebookVaultPath nests under folder', () => {
 		expect(notebookVaultPath('TickTick Notebook', 'Hello', '6adf147e8f08f3950543e3aa')).toBe(
 			'TickTick Notebook/Hello (0543e3aa).md',
 		);
+	});
+
+	it('syncNotebooksToVault does not fail Synchronize when create hits File already exists', async () => {
+		const app = {
+			vault: {
+				getAbstractFileByPath: () => null,
+				createFolder: vi.fn(),
+				create: vi.fn(async () => {
+					throw new Error('File already exists.');
+				}),
+				getMarkdownFiles: () => [],
+			},
+			metadataCache: { getFileCache: () => null },
+		};
+		const n = await syncNotebooksToVault(app as never, [NOTE], {
+			enabled: true,
+			folder: '00 Inbox',
+		});
+		expect(n).toBe(0);
+		expect(app.vault.create).toHaveBeenCalled();
 	});
 
 	it('FEAT-NOTEBOOK-MVP-1: render has frontmatter id, kind, title, body', () => {
