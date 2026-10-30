@@ -16,7 +16,7 @@
 
 ## Target
 
-- **Priority (2026-10-29):** Epic [#214](https://github.com/semyon-alekseev-noveo/tt-sync/issues/214) ID-CHAIN **first**. #223 / #215 archive / #216 live **pass** ×2. [#217](https://github.com/semyon-alekseev-noveo/tt-sync/issues/217) Rebind UX tip + owner 30s. [#228](https://github.com/semyon-alekseev-noveo/tt-sync/issues/228) matrix DoR ready. Empty-TT residual (#215). Settings UX [#189](https://github.com/semyon-alekseev-noveo/tt-sync/issues/189) secondary.
+- **Priority (2026-10-30):** Epic [#214](https://github.com/semyon-alekseev-noveo/tt-sync/issues/214) ID-CHAIN — #215 empty-TT + archive live **pass** ×2; #216/#223/#228/#230–#234 eng shipped. Residual: #217 owner 30s; optional dual-zero/FM live; #218. Settings UX [#189](https://github.com/semyon-alekseev-noveo/tt-sync/issues/189) secondary.
 - **Direction (2026-10-16):** **Abyss-first** — tasks stay where Abyss puts them; TickTick mirrors tags/lists and project parents. See `ABYSS_FIRST_PLAN.md` (topology R / CASE-T4 parked).
 - **Still valid:** TT **Projects** ↔ project notes under `10 Projects/`; safety: `syncedLists`, `syncScopeFolders`, manual sync.
 - **Next execution order:** Steps 1–8 in `ABYSS_FIRST_PLAN.md`. Comment gate **pass** through **2.0.76**. Editor-safety [#15](https://github.com/semyon-alekseev-noveo/tt-sync/issues/15) and Step 7 AF soak [#20](https://github.com/semyon-alekseev-noveo/tt-sync/issues/20) **closed**. [#19](https://github.com/semyon-alekseev-noveo/tt-sync/issues/19) Active Zone shuffle: **pass** ×2 on tip after [#134](https://github.com/semyon-alekseev-noveo/tt-sync/pull/134). Step 8 live vault still closed. Abyss Inbox stage tag `#inbox` (§3.1); untagged Inbox still open. Birth tag `#obsidian` stays.
@@ -37,7 +37,7 @@
 
 ## Problems
 
-- **ID-CHAIN / Rematch gap** — Epic [#214](https://github.com/semyon-alekseev-noveo/tt-sync/issues/214): #223/#215 archive/#216 Rematch live **pass** ×2; #217 Rebind UX shipped (owner 30s); empty-TT live open; matrix DoR [`228-matrix-analyst.md`](docs/pilot/results/ID-CHAIN-REBIND/228-matrix-analyst.md). Gate: `docs/pilot/results/ID-CHAIN-REBIND/`.
+- **ID-CHAIN** — Epic [#214](https://github.com/semyon-alekseev-noveo/tt-sync/issues/214): #215 empty-TT + archive **pass** ×2; #216/#223 Rematch/tag-only **pass** ×2; #217 UX shipped (owner 30s open); matrix DoR [`228-matrix-analyst.md`](docs/pilot/results/ID-CHAIN-REBIND/228-matrix-analyst.md). Gate: `docs/pilot/results/ID-CHAIN-REBIND/`.
 - **BUG-208** ([#208](https://github.com/semyon-alekseev-noveo/tt-sync/issues/208)) — Rematch prove 1 pass (`35`); prove 2 **not run**; do not close on insert alone (`open`).
 - **BUG-RESET-CACHE-DELETE** — post-Reset Synchronize proposed vault-line deletes for pre-wipe ids (DON-253); owner **Cancel** only. Fix on tip/PR; pilot prove ×2 pending (`UX-OBS-TT-SOAK/24-post-reset-delete-modal.md`) (`open` until prove).
 - Pilot Abyss `taskIgnoreQuery: #ticktick` leftover from superseded Option B — blocks Abyss edit on TT-origin project notes (`open`; brief `UX-OBS-TT-SOAK/06-decision-ticktick-vs-abyss.md`).
@@ -55,7 +55,7 @@
 
 ## To Be Done
 
-0. **#214 ID-CHAIN:** Owner accept #228 DoR; empty-TT live ×2 (#215) or written deferral; then Reset/dual-zero + vault-restore + FM-guard children; #217 owner 30s; optional #218.
+0. **#214 ID-CHAIN:** Close #215 after docs PR; #217 owner 30s; optional dual-zero/FM live + #218; epic hygiene.
 0a. **#208 Rematch insert:** prove 2 still open if needed for insert path; do **not** Apply held deletes.
 0b. **BUG-RESET-CACHE-DELETE:** Cancel open modal if any; tip installed; prove ×2 Reset→Synchronize without vault-line cache-miss delete (`25-reset-cache-delete-prove.md` — owner Reset click).
 0c. **Settings UX #189:** Owner 30s glossary check (#190); Phase 1–3 merged (#196/#197/#198); Phase 4 cold-start/polish [#194](https://github.com/semyon-alekseev-noveo/tt-sync/issues/194) (unit; pilot not run). Epic phases code-complete after #194 merge — owner closes after pilot Settings smoke (do not invent live pass).
