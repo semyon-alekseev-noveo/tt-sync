@@ -1,3 +1,13 @@
+### Iteration 2026-10-30 05:00 UTC
+
+- Context: Owner «делай» — empty-TT live prove for #215 / BUG-208-EMPTY-TT-NO-AZ-STRIP.
+- Target: backup → empty synced TT → Skip ×2 with AZ intact → restore; prove ×2.
+- Actions log: Wiped 195 synced-list tasks; sync Skip×2; recreated 195; rebound vault markers via idMap; updated gate/AF/TEST_PLAN.
+- Validation: Journal `empty-ticktick` Skip @ 04:54Z + 04:55Z; AZ sha unchanged (dish 7 / год 5 / PKM 3); `_prove215-empty-result.json` pass.
+- Problems: New TT ids after recreate; trash may hold old deletes — do not restore trash (`mitigated`).
+- To Be Done: Merge docs PR; owner empty TT trash; epic #214 hygiene / optional residual live cases.
+- References: #215, `215-p0-safety.md`, `CHANGELOG.md`
+
 ### Iteration 2026-10-29 11:30 UTC
 
 - Context: Owner merged #240; tip #233; start #234 Notebook restore-safe.
