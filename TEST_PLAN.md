@@ -545,7 +545,7 @@ Expected: each vault→TT task row reads **Would delete from TickTick — missin
 1. With Dexie holding N≥10 tasks and vault AZ still showing those line markers, simulate or observe a TickTick wipe delta (many deletes, zero updates) on Synchronize — pilot only; do not wipe a production account.
 2. Choose **Skip** if prompted.
 
-Expected: guard reason `empty-ticktick` (or threshold). No mass `tt→obs` line deletes emptying Active Zone. Unit: `massDeleteGuard.test.ts` (`looksLikeTickTickWipe`). Pilot: **not run**.
+Expected: guard reason `empty-ticktick` (or threshold). No mass `tt→obs` line deletes emptying Active Zone. Unit: `massDeleteGuard.test.ts` (`looksLikeTickTickWipe`). Pilot: **pass** ×2 (`215-p0-safety.md` 2026-10-30 — Skip×2, AZ unchanged).
 
 ### TP-BUG-208-REMATCH — rematch vault from restored TickTick (legacy insert)
 
@@ -620,7 +620,7 @@ Gate file: `docs/pilot/results/ID-CHAIN-REBIND/228-matrix-analyst.md`. Each stub
 | TP-ID-PROJECT-FM-NOT-PRESENTIDS | FM parent vs child markers | FM alone ≠ children present | unit **pass**; live **not run** (#232) |
 | TP-ID-NOTEBOOK-RESTORE-SAFE | Notebook during restore | No vault→TT delete Notebook | unit **pass**; live **not run** (#234) |
 
-Empty-TT live remains under **TP-BUG-208-EMPTY-TT-NO-AZ-STRIP** / #215 (still **not run**).
+Empty-TT live under **TP-BUG-208-EMPTY-TT-NO-AZ-STRIP** / #215: **pass** ×2 (`215-p0-safety.md` 2026-10-30).
 
 ### TP-MASS-DELETE-THRESHOLD — count and percent together
 
@@ -674,7 +674,7 @@ Pilot status for each: **not run**.
 
 | ID | Pilot status | Evidence |
 |----|----------------|----------|
-| TP-EMPTY-SIDE-GUARD | **pass** empty-vault (**2.0.89**); empty-ticktick **not run** | Evidence: `PILOT-BATCH-EDITOR-SAFETY/17-empty-side-guard-2.0.89.md`. Guard reason `empty-vault`, skip, checkpoint held, 0 deletes. |
+| TP-EMPTY-SIDE-GUARD | **pass** empty-vault (**2.0.89**); empty-ticktick **pass** ×2 (2026-10-30) | empty-vault: `PILOT-BATCH-EDITOR-SAFETY/17-empty-side-guard-2.0.89.md`. empty-ticktick: `ID-CHAIN-REBIND/215-p0-safety.md`. |
 | TP-MASS-DELETE-THRESHOLD | not run | |
 | TP-MASS-DELETE-APPLY-ONCE | not run | |
 | TP-UNREADABLE-FILE-NO-DELETE | not run | |
