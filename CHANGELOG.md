@@ -1,3 +1,13 @@
+### Iteration 2026-11-02 05:20 UTC
+
+- Context: Owner OK to hygiene OPEN ID-CHAIN children after #215 close + trash clear.
+- Target: Close shipped eng/analyst issues; leave #208 prove 2 and #218 optional.
+- Actions log: Closed #228/#230–#234; comments on #208/#214; INDEX status refresh.
+- Validation: `gh issue list` — children closed; epic #214 still open.
+- Problems: Dual-zero/FM/Notebook live deferred on close comments (`mitigated`).
+- To Be Done: Owner call on #208 prove 2 vs supersede; optional #218; then epic #214.
+- References: #214, #208, `ID-CHAIN-REBIND/INDEX.md`, `CHANGELOG.md`
+
 ### Iteration 2026-10-30 05:00 UTC
 
 - Context: Owner «делай» — empty-TT live prove for #215 / BUG-208-EMPTY-TT-NO-AZ-STRIP.
