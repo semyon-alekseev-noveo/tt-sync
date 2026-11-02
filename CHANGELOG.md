@@ -1,12 +1,12 @@
-### Iteration 2026-11-02 05:35 UTC
+### Iteration 2026-11-02 05:20 UTC
 
-- Context: Owner chose prove 2 for #208 Rematch (second live check that missing checkboxes come back).
-- Target: Close #208 after prove ×2; update gate docs.
-- Actions log: Strip PKM/Годовые markers → Rematch; idMap cleanup; docs `35` / INDEX / AF / TEST_PLAN.
-- Validation: Decision rematch @ 05:32:13Z; markers restored; no Notebook `File already exists`.
-- Problems: Dexie ghost ids after empty-TT — cleaned via idMap (`mitigated`).
-- To Be Done: Merge PR; close #208; optional #218 / epic #214.
-- References: #208, `UX-OBS-TT-SOAK/35`, `CHANGELOG.md`
+- Context: Owner OK to hygiene OPEN ID-CHAIN children after #215 close + trash clear.
+- Target: Close shipped eng/analyst issues; leave #208 prove 2 and #218 optional.
+- Actions log: Closed #228/#230–#234; comments on #208/#214; INDEX status refresh.
+- Validation: `gh issue list` — children closed; epic #214 still open.
+- Problems: Dual-zero/FM/Notebook live deferred on close comments (`mitigated`).
+- To Be Done: Owner call on #208 prove 2 vs supersede; optional #218; then epic #214.
+- References: #214, #208, `ID-CHAIN-REBIND/INDEX.md`, `CHANGELOG.md`
 
 ### Iteration 2026-10-30 05:00 UTC
 
