@@ -10,7 +10,7 @@
 
 ## Related
 
-- [#208](https://github.com/semyon-alekseev-noveo/tt-sync/issues/208) Rematch insert (prove 1 in `UX-OBS-TT-SOAK/35`; prove 2 open)
+- [#208](https://github.com/semyon-alekseev-noveo/tt-sync/issues/208) Rematch (insert missing lines) — live **pass** ×2 (`UX-OBS-TT-SOAK/35`)
 - `UX-OBS-TT-SOAK/34` AZ wipe root cause (`tt→obs` during empty TT)
 - Analysts: dual brief 2026-10-29 (taxonomy + rebind plan); full matrix [#228](https://github.com/semyon-alekseev-noveo/tt-sync/issues/228)
 

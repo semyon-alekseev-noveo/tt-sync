@@ -552,7 +552,7 @@ Expected: guard reason `empty-ticktick` (or threshold). No mass `tt→obs` line 
 1. After TT restore + empty/stale AZ markers, Synchronize until the held modal lists only vault→TT deletes.
 2. Choose **Rematch into vault (keep TickTick)** (not Apply once).
 
-Expected: missing checkboxes/`%%[ticktick_id::]%%` lines are **inserted** from Dexie/TT into the named project notes; TickTick task count unchanged; no Apply wipe. Does **not** rewrite stale archive markers (see TP-ID-ARCHIVE-NO-STRIP / TP-ID-REBIND-RESTORE). Unit: `bug208RematchVault.test.ts`. Pilot: **pass** prove 1 (`35-bug-208-rematch-prove.md` @ 15:10Z); prove 2 **not run**.
+Expected: missing checkboxes/`%%[ticktick_id::]%%` lines are **inserted** from Dexie/TT into the named project notes; TickTick task count unchanged; no Apply wipe. Does **not** rewrite stale archive markers (see TP-ID-ARCHIVE-NO-STRIP / TP-ID-REBIND-RESTORE). Unit: `bug208RematchVault.test.ts`. Pilot: **pass** ×2 (`35-bug-208-rematch-prove.md` — prove 1 @ 15:10Z 2026-10-28; prove 2 @ 05:32Z 2026-11-02 on PKM/Годовые).
 
 ## PR — epic #214 ID-CHAIN-REBIND (DoR; code in child PRs)
 
@@ -1516,7 +1516,7 @@ Opt-in `syncNotebook` + `notebookFolder`. One-way TickTick NOTE → markdown. De
 1. Notebook sync on; folder contains an on-disk NOTE file Obsidian may not index (leading `.` in basename), or create races with an existing path.
 2. Synchronize while TT still has that NOTE.
 
-Expected: Synchronize does **not** abort with `File already exists`. Create either skips with a warn or writes a sanitized basename (leading dots stripped). Unit: `notebookVault.mvp.test.ts`. Pilot: **not run** (blocked rematch prove 2).
+Expected: Synchronize does **not** abort with `File already exists`. Create either skips with a warn or writes a sanitized basename (leading dots stripped). Unit: `notebookVault.mvp.test.ts`. Pilot: covered during #208 prove 2 (2026-11-02) — no `File already exists`.
 
 ## PR — PROC-RELEASE-GATE (#30)
 Workflow and docs only. No vault sync change. Do not push a tag or run **Release Obsidian plugin** unless the owner asked for that publish. Rows stay **not run** until someone does.
