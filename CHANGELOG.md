@@ -1,3 +1,13 @@
+### Iteration 2026-11-02 05:35 UTC
+
+- Context: Owner chose prove 2 for #208 Rematch (second live check that missing checkboxes come back).
+- Target: Close #208 after prove ×2; update gate docs.
+- Actions log: Strip PKM/Годовые markers → Rematch; idMap cleanup; docs `35` / INDEX / AF / TEST_PLAN.
+- Validation: Decision rematch @ 05:32:13Z; markers restored; no Notebook `File already exists`.
+- Problems: Dexie ghost ids after empty-TT — cleaned via idMap (`mitigated`).
+- To Be Done: Merge PR; close #208; optional #218 / epic #214.
+- References: #208, `UX-OBS-TT-SOAK/35`, `CHANGELOG.md`
+
 ### Iteration 2026-10-30 05:00 UTC
 
 - Context: Owner «делай» — empty-TT live prove for #215 / BUG-208-EMPTY-TT-NO-AZ-STRIP.
