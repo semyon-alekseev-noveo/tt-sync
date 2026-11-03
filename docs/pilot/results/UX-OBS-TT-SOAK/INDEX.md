@@ -42,7 +42,8 @@
 | 33 | #205 smoke feedback impl | `33-settings-ux-205-smoke-feedback.md` | **unit pass** (#206); tip ready; **owner re-smoke checklist 32** |
 | 36 | Modal/notice copy review | `36-modal-notice-copy-review.md` | orphan iter 2 owner OK; skip-completed import unit |
 | 37 | Sync conflict refactor debate (A×B → agree) | `37-sync-intent-identity-debate.md` | **agreed** — identity-before-plan + typed intents; no code yet |
-| 38 | Sync intent × identity plan (epic [#255](https://github.com/semyon-alekseev-noveo/tt-sync/issues/255)) | `38-sync-intent-identity-plan.md` | **plan / DoR** — #256–#260 unit landed; remaining #261 prove ×2 |
+| 38 | Sync intent × identity plan (epic [#255](https://github.com/semyon-alekseev-noveo/tt-sync/issues/255)) | `38-sync-intent-identity-plan.md` | **plan / DoR** — #256–#260 unit landed; #261 prove ×2 **live pass** |
+| 39 | ARCH-SYNC #261 pilot prove ×2 | `39-arch-sync-261-prove.md` | **live pass** ×2 @`3729c0b` (after #267); fixtures PKM+Годовые |
 | 34 | #208 held post-restore + AZ wipe root cause | `34-held-post-restore-az-wipe.md` | **root cause**; rematch fix shipped |
 | 35 | #208 Rematch prove ×2 | `35-bug-208-rematch-prove.md` | **pass** prove 1+2; issue closed |
 | — | Identity chain follow-up (rebind epic) | [`../ID-CHAIN-REBIND/`](../ID-CHAIN-REBIND/) | **DoR** epic [#214](https://github.com/semyon-alekseev-noveo/tt-sync/issues/214); Rematch insert ≠ vault-wide rebind |

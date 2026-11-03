@@ -37,7 +37,7 @@
 
 ## Problems
 
-- **ARCH-SYNC-INTENT-IDENTITY** — Rebind loop + Rebind→Confirm false wipe; debate #37 agreed; epic [#255](https://github.com/semyon-alekseev-noveo/tt-sync/issues/255). **#256–#260** landed (types → Check enumerator); remaining #261 pilot prove ×2 (`open`; plan `UX-OBS-TT-SOAK/38-…`).
+- **ARCH-SYNC-INTENT-IDENTITY** — debate #37 agreed; epic [#255](https://github.com/semyon-alekseev-noveo/tt-sync/issues/255). **#256–#260** landed; **#261 live pass** ×2 (`UX-OBS-TT-SOAK/39-…` @`3729c0b`). Close #261/#255 after docs PR merges (`resolved` eng+pilot; GitHub close pending merge).
 - **ID-CHAIN** — Epic [#214](https://github.com/semyon-alekseev-noveo/tt-sync/issues/214): eng children closed; #208 Rematch prove ×2 **pass**/closed; optional [#218](https://github.com/semyon-alekseev-noveo/tt-sync/issues/218) keeps epic open.
 - **UX-NOTICE** — create vs reattach Notices + modal cache wording: unit this tip; pilot strip-marker prove **not run** (`open`).
 - **BUG-RESET-CACHE-DELETE** — post-Reset Synchronize proposed vault-line deletes for pre-wipe ids (DON-253); owner **Cancel** only. Fix on tip/PR; pilot prove ×2 pending (`UX-OBS-TT-SOAK/24-post-reset-delete-modal.md`) (`open` until prove).
@@ -56,7 +56,7 @@
 
 ## To Be Done
 
-0. **ARCH-SYNC #255:** Docs merged (#262); implement #256→#261 in order; pilot prove ×2 before epic close.
+0. **ARCH-SYNC #255:** Code #256–#260 + prove #261 live pass ×2 — merge docs close PR, then close #261/#255 (no release unless asked).
 0a. **Settings #205 / checklist 32:** Owner re-smoke after tip; then close #205 → #189.
 0b. **UX-NOTICE-***: After merge, tip + strip-marker reattach toast prove; Orphan modal glance (`36-…`).
 0c. **#214:** Optional #218 only; else close epic when owner ready.
