@@ -1,3 +1,13 @@
+### Iteration 2026-11-03 10:22 UTC
+
+- Context: Owner merged #259 (PR #266); start #260 Check same intent enumerator.
+- Target: Check sync cache reuses Synchronize `enumerateSyncPlannedDeletions`; fail-closed residual; remote-gone → DetachMarker.
+- Actions log: Added `enumerateSyncIntents.ts`; wired deletionGuardRun + checkDatabase; #260 unit cases; AF/TEST_PLAN.
+- Validation: focused + full vitest/build/cycles in this PR.
+- Problems: Pilot prove ×2 (#261) still `open`.
+- To Be Done: PR #260 → abyss-mapping; then #261 (owner/pilot).
+- References: #255, #260, `enumerateSyncIntents.ts`, `CHANGELOG.md`
+
 ### Iteration 2026-11-03 10:15 UTC
 
 - Context: Owner merged #258 (PR #265); start #259 Sync discrepancies UI.

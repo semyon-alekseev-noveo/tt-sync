@@ -21,7 +21,14 @@ import {
 	resolveOrphanAddFilepath,
 } from '@/sync/vaultImportEligibility';
 import { resolveSyncedListIds } from '@/syncScope';
+import { applyDetachMarkerPlanned } from '@/sync/applyDetachMarkers';
+import {
+	enumerateSyncPlannedDeletions,
+	residualDestructivesForApply,
+} from '@/sync/enumerateSyncIntents';
+import { plannedDeletionToSyncIntent } from '@/sync/syncIntent';
 import { Notice, TFile } from 'obsidian';
+import { markerName } from '@/taskParser';
 import log from '@/utils/logger';
 
 const LOCK_TASKS = 'LOCK_TASKS';
@@ -486,33 +493,97 @@ export async function runCheckDatabase(host: CheckDatabaseHost): Promise<void> {
 		}
 
 		if (tasksToDelete.length > 0) {
-			log.debug(`[checkDB] Showing TaskDeletionModal for ${tasksToDelete.length} tasks: ${tasksToDelete.map(t => `${t.taskId} (${t.title})`).join(', ')}`);
-			const items = tasksToDelete.map(t => ({
-				title: host.plugin.taskParser.stripOBSUrl(t.title),
-				filePath: t.filepath
-			}));
-			const modal = new TaskDeletionModal(host.plugin.app, items, 'they are deleted in TickTick or marked as deleted in the local sync cache.', (result) => { });
-			const prompt = await modal.showModal();
-			log.debug(`[checkDB] User confirmed deletion: ${prompt.confirmed}`);
-			if (prompt.confirmed) {
+			// ARCH-SYNC #260 — same enumerator as Synchronize: remote-gone → DetachMarker
+			// (снять id, текст оставить), not a second vault-line wipe dialect.
+			const remoteAction = getSettings().onTickTickDeletion === 'cancel' ? 'detach' : 'mark-cancelled';
+			const localById = new Map(
+				tasksToDelete.map(t => [t.taskId, { title: t.title, file: t.filepath, deleted: false }]),
+			);
+			const planned = enumerateSyncPlannedDeletions({
+				vaultTasks: [],
+				presentIds: new Set<string>(),
+				untrustedFiles: new Set<string>(),
+				indexIncomplete: false,
+				remoteDeleteIds: tasksToDelete.map(t => t.taskId),
+				localById,
+				remoteAction,
+			});
+			let dexieTaskCount = 0;
+			try {
+				dexieTaskCount = (await db.tasks.toArray()).filter(r => !r.deleted && r.taskId).length;
+			} catch {
+				dexieTaskCount = 0;
+			}
+			const checkPoint = getSettings().checkPoint ?? 0;
+			const residual = residualDestructivesForApply(planned, { dexieTaskCount, checkPoint });
+			const detachRows = planned.filter(p => plannedDeletionToSyncIntent(p).kind === 'DetachMarker');
+			log.debug(
+				`[checkDB] #260 enumerator: planned=${planned.length} DetachMarker=${detachRows.length} `
+					+ `residualDestructives=${residual.length} (failClosed dexie=${dexieTaskCount} cp=${checkPoint})`,
+			);
+
+			if (detachRows.length > 0) {
 				await doWithLock(LOCK_TASKS, async () => {
-					const byFile: Record<string, Set<string>> = {};
-					for (const t of tasksToDelete) {
-						if (!byFile[t.filepath]) byFile[t.filepath] = new Set();
-						byFile[t.filepath].add(t.taskId);
-					}
-					for (const [path, taskIdSet] of Object.entries(byFile)) {
-						const taskIds = Array.from(taskIdSet);
-						const file = host.plugin.app.vault.getAbstractFileByPath(path);
-						if (file instanceof TFile) {
-							log.debug(`Deleting ${taskIds.length} tasks from ${path}`);
-							await host.plugin.fileOperation?.deleteTasksFromSpecificFile(file, taskIds.map(id => ({ id } as ITask)), false);
-						}
-						for (const taskId of taskIds) {
-							await host.plugin.fileMetadataService?.removeTaskFromFile(path, taskId);
-						}
-					}
+					const result = await applyDetachMarkerPlanned(
+						{
+							app: host.plugin.app,
+							markerName: markerName(),
+							clearTaskFile: (id) => host.plugin.fileMetadataService!.clearTaskFile(id),
+							deleteTask: (id) => host.plugin.taskRepository!.deleteTask(id),
+						},
+						detachRows,
+					);
+					log.info(`[checkDB] DetachMarker applied=${result.applied} skipped=${result.skipped}`);
 				});
+				new Notice(
+					`TickTickSync: detached ${detachRows.length} gone-from-TT marker(s) (text kept). Same as Synchronize.`,
+					8000,
+				);
+			}
+
+			// Residual PullStripVault / PushDeleteTT only when not fail-closed — same Sync discrepancies surface.
+			if (residual.length > 0) {
+				log.debug(`[checkDB] Showing Sync discrepancies for ${residual.length} residual destructives`);
+				const items = residual.map(t => ({
+					title: host.plugin.taskParser.stripOBSUrl(t.title || t.id),
+					filePath: t.file,
+					id: t.taskId || t.id,
+				}));
+				const modal = new TaskDeletionModal(
+					host.plugin.app,
+					items,
+					'residual destructive plan after Check scan (same enumerator as Synchronize).',
+					() => { },
+				);
+				const prompt = await modal.showModal();
+				log.debug(`[checkDB] User confirmed residual destructives: ${prompt.confirmed}`);
+				if (prompt.confirmed) {
+					await doWithLock(LOCK_TASKS, async () => {
+						const byFile: Record<string, Set<string>> = {};
+						for (const t of residual) {
+							const path = t.file || '';
+							const id = t.taskId || t.id;
+							if (!path || !id) continue;
+							if (!byFile[path]) byFile[path] = new Set();
+							byFile[path].add(id);
+						}
+						for (const [path, taskIdSet] of Object.entries(byFile)) {
+							const taskIds = Array.from(taskIdSet);
+							const file = host.plugin.app.vault.getAbstractFileByPath(path);
+							if (file instanceof TFile) {
+								log.debug(`Deleting ${taskIds.length} residual tasks from ${path}`);
+								await host.plugin.fileOperation?.deleteTasksFromSpecificFile(
+									file,
+									taskIds.map(id => ({ id } as ITask)),
+									false,
+								);
+							}
+							for (const taskId of taskIds) {
+								await host.plugin.fileMetadataService?.removeTaskFromFile(path, taskId);
+							}
+						}
+					});
+				}
 			}
 		}
 

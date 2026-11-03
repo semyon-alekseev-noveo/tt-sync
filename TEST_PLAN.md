@@ -23,7 +23,7 @@ Review: `docs/pilot/results/UX-OBS-TT-SOAK/36-modal-notice-copy-review.md`. Unit
 | BUG-ORPHAN-STALE-REMATCH | After Rematch: vault lines have new ids; Check lists old titles (e.g. Подумать над… / Румяна). Run Check again (no Add). | Modal empty or without those titles; no duplicate lines; completed (Румяна) not listed. | **not run** |
 | BUG-ORPHAN-NO-SETTINGS-CYCLE | `npm run check:cycles` after orphan eligibility module changes. | No new cycle via `vaultImportEligibility` ↔ `settings`. | unit **pass** (2.0.96) |
 | UX-SYNC-ONE-FLOW | Tip. Read Maintenance Synchronize vs Check help. Manual Synchronize when a large mismatch holds. | Sync help = day-to-day; Check = rare. Modal title **Sync discrepancies**; primary safe = Don’t delete / Rebind. Toast-only (scheduled) says run Synchronize. | **not run** |
-| ARCH-SYNC-INTENT-IDENTITY | Unit: types (#256) + tombstones (#257) + Detach drain (#258) + Sync discrepancies UI (#259) in `archSyncIntentIdentity.test.ts`. Live prove ×2 — #261; Check enumerator — #260. | Link ≻ … ≻ PushDeleteTT; held+Confirm list residual destructives only; Rebind = Link (+ InsertLine); Don’t delete / Apply once shared copy. | unit **pass** (#256–#259); live **not run** |
+| ARCH-SYNC-INTENT-IDENTITY | Unit: types (#256) + tombstones (#257) + Detach (#258) + Sync discrepancies UI (#259) + Check enumerator (#260) in `archSyncIntentIdentity.test.ts`. Live prove ×2 — #261. | Link ≻ … ≻ PushDeleteTT; Check = same `enumerateSyncPlannedDeletions`; empty Dexie / checkPoint 0 fail-closed residual. | unit **pass** (#256–#260); live **not run** |
 | UX-NOTICE-MODAL-COPY | Maintenance → Check sync cache (or open Orphan / Clean up cache if offered). | Orphan Leave alone / Add may duplicate / Delete; cleanup = local sync cache. | **not run** |
 
 ## UX-SET — Settings UX redesign (epic #189 / Phase 1 #191 / Phase 2 #192 / Phase 3 #193 / Phase 4 #194)
@@ -1813,3 +1813,19 @@ Expected: unit **pass**. Live prove ×2 — #261.
 | Case | Pilot | Notes |
 |------|-------|-------|
 | ARCH-SYNC-INTENT-IDENTITY (#259 Sync discrepancies UI) | unit **pass**; live **not run** | `selectResidualDestructivePlanned`, MassDeleteGuardModal, TaskDeletionModal |
+
+## PR — ARCH-SYNC #260 Check same intent enumerator
+
+Epic [#255](https://github.com/semyon-alekseev-noveo/tt-sync/issues/255); child [#260](https://github.com/semyon-alekseev-noveo/tt-sync/issues/260). Case `ARCH-SYNC-INTENT-IDENTITY`. Plan step 5.
+
+### Steps
+1. Check sync cache classifies remote-gone / vault-absent via `enumerateSyncPlannedDeletions` (same as Synchronize).
+2. Fixture residual destructives match Synchronize vs Check (unit).
+3. Empty Dexie / checkPoint 0 → `residualDestructivesForApply` empty (fail-closed).
+4. Check applies DetachMarker for remote-gone (keep text) — not a second vault-line wipe dialect.
+
+Expected: unit **pass**. Live prove ×2 — #261.
+
+| Case | Pilot | Notes |
+|------|-------|-------|
+| ARCH-SYNC-INTENT-IDENTITY (#260 Check enumerator) | unit **pass**; live **not run** | `enumerateSyncIntents.ts`, `checkDatabase.ts`, `deletionGuardRun.ts` |
