@@ -3,6 +3,9 @@
  * TT restore: rewrite markers in place when a line matches by title; insert only
  * when no candidate. Never deletes TickTick tasks.
  *
+ * ARCH-SYNC #257: returns `displacedIds` (вытесненные id) when Link rewrites a
+ * marker so callers can stamp Link tombstones (rewrite ≠ user-removed).
+ *
  * No `@/db/dexie` import — call from rematch phase with injected deps.
  */
 import type { ITask } from '@/api/types/Task';
@@ -75,6 +78,8 @@ export interface RebindFileResult {
 	rebound: number;
 	needInsert: ITask[];
 	skipped: number;
+	/** Markers removed by Link rewrite (вытесненные id) — stamp Link tombstones. */
+	displacedIds: string[];
 }
 
 /**
@@ -90,6 +95,7 @@ export function rebindFileContent(
 	let rebound = 0;
 	let skipped = 0;
 	const needInsert: ITask[] = [];
+	const displacedIds: string[] = [];
 	/** ID-VAULT-RESTORE-CONFLICT: one title claim per rebind pass — no second bind/insert. */
 	const claimedTitles = new Set<string>();
 	const textNow = () => lines.join('\n');
@@ -111,7 +117,13 @@ export function rebindFileContent(
 			continue;
 		}
 		if (idx >= 0) {
-			lines[idx] = replaceOrAttachMarker(lines[idx]!, id);
+			const prev = lines[idx]!;
+			const prevMarker = prev.match(MARKER_FULL);
+			const oldId = prevMarker?.[1];
+			if (oldId && oldId.toLowerCase() !== id.toLowerCase()) {
+				displacedIds.push(oldId);
+			}
+			lines[idx] = replaceOrAttachMarker(prev, id);
 			rebound += 1;
 			if (titleKey) claimedTitles.add(titleKey);
 			continue;
@@ -131,6 +143,7 @@ export function rebindFileContent(
 		rebound,
 		needInsert,
 		skipped,
+		displacedIds,
 	};
 }
 
@@ -140,22 +153,36 @@ export interface RebindVaultResult {
 	inserted: number;
 	skipped: number;
 	files: number;
+	/** Union of Link-displaced marker ids across written files. */
+	displacedIds: string[];
+}
+
+export interface RebindVaultOptions {
+	/**
+	 * All non-deleted Dexie/TT ids for this run. When set, markers whose id is
+	 * still live are not treated as stale (avoids stealing a live marker).
+	 */
+	allLiveIds?: ReadonlySet<string>;
 }
 
 /**
  * Rematch-as-intended: for held vault→TT candidates, rewrite stale markers by title
  * in the named files, then insert only what is still missing.
+ *
+ * Identity authority (#257): Link/Insert only — never PushDeleteTT.
  */
 export async function rebindVaultFromPlanned(
 	planned: readonly PlannedDeletion[],
 	deps: RematchVaultDeps,
+	opts?: RebindVaultOptions,
 ): Promise<RebindVaultResult> {
 	let written = 0;
 	let rebound = 0;
 	let inserted = 0;
 	let skipped = 0;
+	const displacedIds: string[] = [];
 	const byFile = new Map<string, ITask[]>();
-	const liveIds = new Set<string>();
+	const liveIds = new Set<string>(opts?.allLiveIds ?? []);
 
 	for (const item of planned) {
 		const taskId = item.taskId ?? item.id;
@@ -214,6 +241,7 @@ export async function rebindVaultFromPlanned(
 			inserted += insertLines.length;
 			skipped += partial.skipped;
 			written += partial.rebound + insertLines.length;
+			displacedIds.push(...partial.displacedIds);
 			files += 1;
 		} catch (error) {
 			skipped += tasks.length;
@@ -221,5 +249,5 @@ export async function rebindVaultFromPlanned(
 		}
 	}
 
-	return { written, rebound, inserted, skipped, files };
+	return { written, rebound, inserted, skipped, files, displacedIds };
 }

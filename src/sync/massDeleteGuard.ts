@@ -5,12 +5,17 @@
  * comments) before it applies any of them. Over the threshold, or when one
  * side looks empty, nothing destructive runs and the checkpoint stays put.
  *
- * ARCH-SYNC-INTENT-IDENTITY (#256): threshold (порог mass-delete) counts
+ * ARCH-SYNC-INTENT-IDENTITY (#256/#257): threshold (порог mass-delete) counts
  * **destructive** intents only (PullStripVault / PushDeleteTT) — not Link,
- * DetachMarker, or InsertLine. See `syncIntent.ts` for typed intents + precedence.
+ * DetachMarker, or InsertLine. Link tombstones (пометка вытесненного id) skip
+ * vault→TT plans for displaced ids. See `syncIntent.ts`.
  */
 
-import { countDestructiveFromPlanned } from '@/sync/syncIntent';
+import {
+	clearLinkTombstones,
+	countDestructiveFromPlanned,
+	isLinkTombstoned,
+} from '@/sync/syncIntent';
 
 export type DeletionDirection = 'vault-to-ticktick' | 'ticktick-to-vault';
 export type DeletionKind = 'task' | 'comment';
@@ -377,6 +382,8 @@ export function planVaultTaskDeletions(args: {
 		if (task.isNotebook) continue;
 		if (task.file && args.untrustedFiles.has(task.file)) continue;
 		if (args.presentIds.has(task.taskId)) continue;
+		// ARCH-SYNC #257: Link tombstone (пометка вытесненного id) ≠ user-removed.
+		if (isLinkTombstoned(task.taskId)) continue;
 		// ID-TAG-ONLY-NO-WIPE (#223): tag `obsidian` alone must not authorize
 		// vault→TT delete. Require a known vault file in push scope; otherwise
 		// Confirm Deletion appears under "Unknown" for never-synced / restore orphans.
@@ -661,6 +668,8 @@ export function getGuardRun(): GuardRunState | null {
 
 export function clearGuardRun(): void {
 	currentRun = null;
+	// Session Link tombstones live only for one Synchronize (#257).
+	clearLinkTombstones();
 }
 
 /** No active run means the small confirm dialog, same as before this guard. */

@@ -5,7 +5,7 @@
 | Gate | UX-OBS-TT-SOAK |
 | Phase | 38 (plan / DoR) |
 | Case | `ARCH-SYNC-INTENT-IDENTITY` |
-| Status | **plan** — docs + canvas; code via child issues |
+| Status | **plan** — docs + canvas; **#256+#257** code landed (unit); #258–#261 open |
 | Debate | [`37-sync-intent-identity-debate.md`](./37-sync-intent-identity-debate.md) (**agreed**) |
 | Canvas | IDE: `~/.cursor/projects/.../canvases/sync-intent-identity.canvas.tsx`; repo copy: [`sync-intent-identity.canvas.tsx`](./sync-intent-identity.canvas.tsx) |
 | Epic | [#255](https://github.com/semyon-alekseev-noveo/tt-sync/issues/255) |

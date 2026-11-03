@@ -23,7 +23,7 @@ Review: `docs/pilot/results/UX-OBS-TT-SOAK/36-modal-notice-copy-review.md`. Unit
 | BUG-ORPHAN-STALE-REMATCH | After Rematch: vault lines have new ids; Check lists old titles (e.g. Подумать над… / Румяна). Run Check again (no Add). | Modal empty or without those titles; no duplicate lines; completed (Румяна) not listed. | **not run** |
 | BUG-ORPHAN-NO-SETTINGS-CYCLE | `npm run check:cycles` after orphan eligibility module changes. | No new cycle via `vaultImportEligibility` ↔ `settings`. | unit **pass** (2.0.96) |
 | UX-SYNC-ONE-FLOW | Tip. Read Maintenance Synchronize vs Check help. Manual Synchronize when a large mismatch holds. | Sync help = day-to-day; Check = rare. Modal title **Sync discrepancies**; primary safe = Don’t delete / Rebind. Toast-only (scheduled) says run Synchronize. | **not run** |
-| ARCH-SYNC-INTENT-IDENTITY | Unit: intent kinds + precedence + destructive-only threshold (`archSyncIntentIdentity.test.ts`). Live identity pass / Rebind drain / Confirm wipe — later children #257–#261. | Link ≻ DetachMarker ≻ InsertLine ≻ PullStripVault ≻ PushDeleteTT; Detach volume does not trip mass-delete threshold; mismatch ≠ auto PushDeleteTT. | unit **pass** (#256); live **not run** |
+| ARCH-SYNC-INTENT-IDENTITY | Unit: types/threshold (#256) + Link tombstones / post-identity residual (#257) in `archSyncIntentIdentity.test.ts`. Live Detach drain / Sync discrepancies / prove ×2 — #258–#261. | Link ≻ … ≻ PushDeleteTT; Detach volume ≠ threshold; displaced id after Rebind ≠ Confirm/PushDeleteTT same run; mismatch ≠ auto PushDeleteTT. | unit **pass** (#256+#257); live **not run** |
 | UX-NOTICE-MODAL-COPY | Maintenance → Check sync cache (or open Orphan / Clean up cache if offered). | Orphan Leave alone / Add may duplicate / Delete; cleanup = local sync cache. | **not run** |
 
 ## UX-SET — Settings UX redesign (epic #189 / Phase 1 #191 / Phase 2 #192 / Phase 3 #193 / Phase 4 #194)
@@ -1766,3 +1766,19 @@ Expected: unit **pass**. Live Synchronize identity pass / Rebind drain / Confirm
 | ID | Pilot status | Evidence |
 |----|----------------|----------|
 | ARCH-SYNC-INTENT-IDENTITY (#256 types) | unit **pass**; live **not run** | `src/test/archSyncIntentIdentity.test.ts`, `src/sync/syncIntent.ts` |
+
+## PR — ARCH-SYNC #257 Identity/Link pass + Link tombstones
+
+Epic [#255](https://github.com/semyon-alekseev-noveo/tt-sync/issues/255); child [#257](https://github.com/semyon-alekseev-noveo/tt-sync/issues/257). Case `ARCH-SYNC-INTENT-IDENTITY`. Plan step 2.
+
+### Unit (this PR)
+
+1. `npx vitest run src/test/archSyncIntentIdentity.test.ts` (and full suite before merge).
+2. Confirm: `rebindFileContent` reports `displacedIds`; Link tombstones block PushDeleteTT / `planVaultTaskDeletions` for displaced ids; `compileResidualDestructivesAfterIdentity` drops linked + tombstoned PushDeleteTT but keeps DetachMarker.
+3. Rematch phase stamps tombstones, re-scans `presentIds`, updates residual guard plan; `TaskDeletionHandler` skips Confirm wipe for tombstoned ids.
+
+Expected: unit **pass**. Live Rebind→Confirm prove ×2 and DetachMarker drain — **not** this PR (#258 / #261).
+
+| ID | Pilot status | Evidence |
+|----|----------------|----------|
+| ARCH-SYNC-INTENT-IDENTITY (#257 identity/tombstones) | unit **pass**; live **not run** | `archSyncIntentIdentity.test.ts`, `syncIntent.ts`, `rebindVault.ts`, `rematchPhase.ts`, `TaskDeletionHandler.ts` |
