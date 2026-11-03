@@ -1,3 +1,13 @@
+### Iteration 2026-11-03 09:21 UTC
+
+- Context: Owner merged docs PR #262; start ARCH-SYNC epic with child #256 (types only).
+- Target: Sync Intent types + precedence + destructive-only threshold; unit `ARCH-SYNC-INTENT-IDENTITY`; no identity-pass wiring (#257).
+- Actions log: Added `src/sync/syncIntent.ts`; `evaluateMassDeleteGuard` counts PullStripVault/PushDeleteTT only; test + AF/TEST_PLAN.
+- Validation: `npx vitest run` 937 pass; `npm run build` ok; `check:cycles` OK.
+- Problems: Full Synchronize identity pass / Detach drain / Confirm wipe still open (#257–#261) — status `open`.
+- To Be Done: Merge #256; implement #257 next.
+- References: #255, #256, `syncIntent.ts`, `38-sync-intent-identity-plan.md`, `CHANGELOG.md`
+
 ### Iteration 2026-11-03 09:10 UTC
 
 - Context: Sync conflict stack broken (Rebind loop; Rebind→Confirm false TT wipe); debate #37 agreed; owner «гоу» for plan + issues.
