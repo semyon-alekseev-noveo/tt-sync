@@ -208,8 +208,9 @@ export function listLinkTombstoneIds(): string[] {
 
 /**
  * Drop PushDeleteTT (удалить в TickTick) rows blocked by Link tombstones or by
- * post-identity `presentIds` (marker now bound). Non-destructive rows
- * (DetachMarker / etc.) pass through for later steps (#258).
+ * post-identity `presentIds` (marker now bound). DetachMarker rows still pass
+ * through here; rematchPhase (#258) applies them then strips via
+ * `withoutDetachMarkerPlanned`.
  */
 export function compileResidualDestructivesAfterIdentity<T extends PlannedDeletionLike>(
 	planned: readonly T[],

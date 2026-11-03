@@ -1,3 +1,13 @@
+### Iteration 2026-11-03 10:01 UTC
+
+- Context: Owner «гоу» for #258 DetachMarker drain after #257 merge.
+- Target: Rematch applies DetachMarker (снять id, текст оставить) for remote-gone and strips them from residual hold.
+- Actions log: Added `applyDetachMarkers.ts`; rematchPhase drains DetachMarker even when Link list empty; #258 unit cases; AF/TEST_PLAN/plan #38.
+- Validation: focused + full vitest/build/cycles in this PR.
+- Problems: Sync discrepancies UI (#259), Check enumerator (#260), pilot prove ×2 (#261) still `open`.
+- To Be Done: PR #258 → abyss-mapping; then #259.
+- References: #255, #258, `applyDetachMarkers.ts`, `38-sync-intent-identity-plan.md`, `CHANGELOG.md`
+
 ### Iteration 2026-11-03 09:30 UTC
 
 - Context: Owner merged #256 (PR #263); start #257 identity/Link pass + Link tombstones.

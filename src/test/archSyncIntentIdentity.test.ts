@@ -1,7 +1,13 @@
 /**
- * ARCH-SYNC-INTENT-IDENTITY (#256 types + #257 identity/Link tombstones).
+ * ARCH-SYNC-INTENT-IDENTITY (#256 types + #257 tombstones + #258 DetachMarker drain).
  */
+import { readFileSync } from 'fs';
+import { join } from 'path';
 import { beforeEach, describe, expect, it } from 'vitest';
+import {
+	selectDetachMarkerPlanned,
+	withoutDetachMarkerPlanned,
+} from '@/sync/applyDetachMarkers';
 import {
 	DEFAULT_MASS_DELETE_GUARD,
 	evaluateMassDeleteGuard,
@@ -256,7 +262,7 @@ describe('ARCH-SYNC-INTENT-IDENTITY (#257 identity / Link tombstones)', () => {
 		expect(fromPlanner).toEqual([]);
 	});
 
-	it('post-identity presentIds drop successfully Linked PushDeleteTT; DetachMarker kept', () => {
+	it('post-identity presentIds drop successfully Linked PushDeleteTT; DetachMarker kept until drain', () => {
 		const linked = 'live01live01live01live01li';
 		const stillMissing = 'miss01miss01miss01miss01mi';
 		const planned: PlannedDeletion[] = [
@@ -271,5 +277,45 @@ describe('ARCH-SYNC-INTENT-IDENTITY (#257 identity / Link tombstones)', () => {
 		expect(residual.map(p => p.id).sort()).toEqual(['miss01miss01miss01miss01mi', 'remote-gone-1'].sort());
 		expect(plannedDeletionToSyncIntent(residual.find(p => p.id === stillMissing)!).kind).toBe('PushDeleteTT');
 		expect(plannedDeletionToSyncIntent(residual.find(p => p.id === 'remote-gone-1')!).kind).toBe('DetachMarker');
+	});
+});
+
+describe('ARCH-SYNC-INTENT-IDENTITY (#258 DetachMarker drain)', () => {
+	it('selectDetachMarkerPlanned / withoutDetachMarkerPlanned split remote-gone from PushDeleteTT', () => {
+		const planned: PlannedDeletion[] = [
+			pushDelete('still-missing-id-00000001'),
+			detach('remote-gone-aaaaaaaaaaaa'),
+			detach('remote-gone-bbbbbbbbbbbb'),
+		];
+		const det = selectDetachMarkerPlanned(planned);
+		expect(det).toHaveLength(2);
+		expect(det.every(p => plannedDeletionToSyncIntent(p).kind === 'DetachMarker')).toBe(true);
+		const rest = withoutDetachMarkerPlanned(planned);
+		expect(rest).toHaveLength(1);
+		expect(plannedDeletionToSyncIntent(rest[0]!).kind).toBe('PushDeleteTT');
+	});
+
+	it('after Link residual + withoutDetachMarkerPlanned, hold bag has no DetachMarker (drain)', () => {
+		const linked = 'live02live02live02live02li';
+		const planned: PlannedDeletion[] = [
+			pushDelete(linked),
+			pushDelete('miss02miss02miss02miss02mi'),
+			detach('remote-gone-cccccccccccc'),
+		];
+		const afterIdentity = compileResidualDestructivesAfterIdentity(
+			planned,
+			new Set([linked]),
+		);
+		const residual = withoutDetachMarkerPlanned(afterIdentity);
+		expect(residual.map(p => p.id)).toEqual(['miss02miss02miss02miss02mi']);
+		expect(residual.every(p => plannedDeletionToSyncIntent(p).kind === 'PushDeleteTT')).toBe(true);
+	});
+
+	it('rematchPhase runs DetachMarker drain even when Link candidate list is empty', () => {
+		const src = readFileSync(join(__dirname, '../sync/phases/rematchPhase.ts'), 'utf8');
+		expect(src).toContain('rematchLink === undefined');
+		expect(src).toContain('applyDetachMarkerPlanned');
+		expect(src).toContain('withoutDetachMarkerPlanned');
+		expect(src).toContain('#258');
 	});
 });
