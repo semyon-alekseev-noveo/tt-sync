@@ -35,8 +35,9 @@ export const PURGE_TRASH_DB_HELP =
 /** UX-SET-MAINT-SYNC-PRIMARY */
 export const MAINT_SYNC_PRIMARY_LABEL = 'Synchronize';
 export const MAINT_SYNC_PRIMARY_NAME = 'Synchronize';
+/** UX-SYNC-ONE-FLOW: Sync is the day-to-day path for mismatches (Skip / Rebind). */
 export const MAINT_SYNC_PRIMARY_HELP =
-	'Run sync now (same as the Synchronize command). Rules for what syncs live under Sync Control.';
+	'Day-to-day sync (same as the Synchronize command). If vault markers and TickTick disagree, Synchronize offers Don’t delete / Rebind — you usually do not need Check sync cache. Rules for what syncs live under Sync Control.';
 /** Obsidian primary CTA class — only Synchronize should use this in Maintenance. */
 export const MAINT_PRIMARY_CTA_CLASS = 'mod-cta';
 
@@ -67,10 +68,10 @@ export const DELETION_GLOSSARY_INTRO =
 
 export const DELETION_GLOSSARY_TERMS: readonly DeletionGlossaryTerm[] = [
 	{
-		term: 'Held → Skip / Rebind',
+		term: 'Sync discrepancies (held) → Don’t delete / Rebind',
 		summary:
-			'After Synchronize: big delete plan is held. Skip = keep as-is; Rebind = rewrite/bind vault markers incl. unmarked titles (no TT deletes). Apply once = delete in TickTick — avoid after restore.',
-		not: 'Not Purge; not Reset; not silent auto-bind.',
+			'After Synchronize: id/marker mismatch paused as a discrepancy dialog (held plan, not a silent wipe). Don’t delete (Skip) = keep as-is; Rebind = rewrite/bind vault markers (no TT deletes). Apply once = delete in TickTick — avoid after restore. Check sync cache is rare diagnostic, not a second sync.',
+		not: 'Not Purge; not Reset; not silent auto-bind; not Check sync cache.',
 	},
 	{
 		term: 'Confirm → Cancel',
@@ -92,8 +93,9 @@ export const DELETION_GLOSSARY_TERMS: readonly DeletionGlossaryTerm[] = [
 /** Check Database / Orphaned TickTick Tasks — what to press */
 export const CHECK_DATABASE_LABEL = `Check ${LOCAL_SYNC_CACHE}`;
 export const CHECK_DATABASE_BUTTON = 'Check sync cache';
+/** UX-SYNC-ONE-FLOW: Check is rare; Synchronize handles day-to-day discrepancies. */
 export const CHECK_DATABASE_HELP =
-	`Looks for sync/file mismatches in the ${LOCAL_SYNC_CACHE}. May open «No vault link…» for TickTick tasks with no matching id in notes/cache.`;
+	`Rare diagnostic for stubborn ${LOCAL_SYNC_CACHE} ghosts — not a second Synchronize. Day-to-day marker/id mismatches → Synchronize (Don’t delete / Rebind). This scan may open «No vault link…» for TickTick tasks with no matching id in notes/cache.`;
 export const CHECK_DATABASE_ORPHAN_HELP =
 	'Orphans = TT tasks with no matching id in vault/cache (titles may already exist with new ids). Leave alone = usual after restore. Add may duplicate. Delete removes in TickTick.';
 

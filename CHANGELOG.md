@@ -1,3 +1,13 @@
+### Iteration 2026-11-03 08:28 UTC
+
+- Context: Owner chose Option A — one Sync flow for day-to-day mismatches; Check stays rare; clarify UX (don’t cut surfaces).
+- Target: UX-SYNC-ONE-FLOW copy: Sync discrepancies modal + Settings Synchronize/Check/glossary; notify-only toast → run Synchronize.
+- Actions log: `SYNC_DISCREPANCY_*` in massDeleteGuard; MassDeleteGuardModal; settingsUxCopy; AF/TEST_PLAN; unit `uxSyncOneFlow.test.ts`.
+- Validation: `npx vitest run` 932 pass; `npm run build` ok; `check:cycles` OK.
+- Problems: No changes.
+- To Be Done: PR; tip; owner glance Maintenance help + one held Sync.
+- References: `UX-SYNC-ONE-FLOW`, `CHANGELOG.md`
+
 ### Iteration 2026-11-03 07:19 UTC
 
 - Context: Tag **2.0.95** release job failed `check:cycles` — new cycle via `vaultImportEligibility` → `@/settings`.

@@ -158,9 +158,18 @@ export const REBIND_BUTTON_LABEL = 'Rebind vault to TickTick (no TT deletes)';
 export const REBIND_BUTTON_DESC =
 	'Rewrite stale or missing vault markers from TickTick/local cache. Does not delete TickTick tasks.';
 export const REBIND_VAULT_WIPE_HINT =
-	'Lines labeled “Would delete from TickTick” mean the vault is missing line markers — Apply once would wipe those tasks in TickTick. After a restore, prefer Skip or Rebind — not Apply once.';
+	'Lines labeled “Would delete from TickTick” mean the vault is missing line markers — Apply once would wipe those tasks in TickTick. After a restore, prefer Don’t delete or Rebind — not Apply once.';
 export const REBIND_GUARD_NOTICE =
 	'Rebinding vault markers (TickTick kept). Deletions skipped.';
+
+/** UX-SYNC-ONE-FLOW — guard modal framed as Sync discrepancies (day-to-day vs Check). */
+export const SYNC_DISCREPANCY_MODAL_TITLE = 'Sync discrepancies';
+export const SYNC_DISCREPANCY_MODAL_LEAD =
+	'Synchronize paused a large delete plan because vault markers and TickTick disagree. Mismatch ≠ auto-delete. Creates and updates still run; the checkpoint stays until you apply deletions.';
+export const SYNC_DISCREPANCY_SKIP_LABEL = 'Don’t delete (keep as-is)';
+export const SYNC_DISCREPANCY_REPORT_LABEL = 'Open details';
+export const SYNC_DISCREPANCY_NOTIFY_HINT =
+	'Run Synchronize for Don’t delete / Rebind choices.';
 
 /** ID-TEXT-NO-MARKER (#233): unmarked checkboxes bind only via Rebind — never silent auto-bind. */
 export const TEXT_NO_MARKER_POLICY =
@@ -530,7 +539,9 @@ export function guardNotice(decision: GuardDecision, choice: GuardChoice): strin
 		? 'Applying these deletions once.'
 		: choice === 'rematch'
 			? REBIND_GUARD_NOTICE
-			: 'Nothing destructive was applied. Checkpoint unchanged.';
+			: choice === 'notify-only'
+				? `Nothing destructive was applied. Checkpoint unchanged. ${SYNC_DISCREPANCY_NOTIFY_HINT}`
+				: 'Nothing destructive was applied. Checkpoint unchanged.';
 	return `TickTickSync: ${decision.taskDeletions} task deletion(s) and ${decision.commentDeletions} comment deletion(s) held (${decision.reason}). ${held}`;
 }
 
