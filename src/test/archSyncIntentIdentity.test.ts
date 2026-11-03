@@ -9,6 +9,10 @@ import {
 	withoutDetachMarkerPlanned,
 } from '@/sync/applyDetachMarkers';
 import {
+	enumerateSyncPlannedDeletions,
+	residualDestructivesForApply,
+} from '@/sync/enumerateSyncIntents';
+import {
 	DEFAULT_MASS_DELETE_GUARD,
 	evaluateMassDeleteGuard,
 	planVaultTaskDeletions,
@@ -326,6 +330,90 @@ describe('ARCH-SYNC-INTENT-IDENTITY (#258 DetachMarker drain)', () => {
 		expect(src).toContain('applyDetachMarkerPlanned');
 		expect(src).toContain('withoutDetachMarkerPlanned');
 		expect(src).toContain('#258');
+	});
+});
+
+describe('ARCH-SYNC-INTENT-IDENTITY (#260 Check same enumerator)', () => {
+	it('Synchronize and Check classify the same fixture to the same residual destructives', () => {
+		const liveId = 'live03live03live03live03li';
+		const goneId = 'gone03gone03gone03gone03go';
+		const missingVault = 'miss03miss03miss03miss03mi';
+		const input = {
+			vaultTasks: [
+				{
+					taskId: missingVault,
+					title: 'Missing vault',
+					file: 'n.md',
+					inPushScope: true,
+				},
+				{
+					taskId: goneId,
+					title: 'Gone from TT',
+					file: 'n.md',
+					inPushScope: true,
+				},
+			],
+			// Marker still in vault for goneId; remote delete → DetachMarker (not vault-absent PushDeleteTT).
+			presentIds: new Set([liveId, goneId]),
+			untrustedFiles: new Set<string>(),
+			indexIncomplete: false,
+			remoteDeleteIds: [goneId],
+			localById: new Map([
+				[goneId, { title: 'Gone from TT', file: 'n.md', deleted: false }],
+				[missingVault, { title: 'Missing vault', file: 'n.md', deleted: false }],
+			]),
+			remoteAction: 'detach' as const,
+		};
+		// Same pure enumerator — Synchronize (deletionGuardRun) and Check sync cache.
+		const asSynchronize = enumerateSyncPlannedDeletions(input);
+		const asCheck = enumerateSyncPlannedDeletions(input);
+		expect(asCheck.map(p => `${p.id}:${plannedDeletionToSyncIntent(p).kind}`).sort()).toEqual(
+			asSynchronize.map(p => `${p.id}:${plannedDeletionToSyncIntent(p).kind}`).sort(),
+		);
+		const syncResidual = residualDestructivesForApply(asSynchronize, {
+			dexieTaskCount: 40,
+			checkPoint: 99,
+		});
+		const checkResidual = residualDestructivesForApply(asCheck, {
+			dexieTaskCount: 40,
+			checkPoint: 99,
+		});
+		expect(checkResidual.map(p => p.id).sort()).toEqual(syncResidual.map(p => p.id).sort());
+		expect(syncResidual.every(p => isDestructivePlannedDeletion(p))).toBe(true);
+		expect(plannedDeletionToSyncIntent(asSynchronize.find(p => p.id === goneId)!).kind).toBe('DetachMarker');
+		expect(plannedDeletionToSyncIntent(asSynchronize.find(p => p.id === missingVault)!).kind).toBe('PushDeleteTT');
+	});
+
+	it('empty Dexie / checkPoint 0 fail-closed clears residual destructives for Check and Synchronize', () => {
+		const planned = enumerateSyncPlannedDeletions({
+			vaultTasks: [{
+				taskId: 'miss04miss04miss04miss04mi',
+				title: 'x',
+				file: 'n.md',
+				inPushScope: true,
+			}],
+			presentIds: new Set(),
+			untrustedFiles: new Set(),
+			indexIncomplete: false,
+			remoteDeleteIds: [],
+			localById: new Map(),
+			remoteAction: 'detach',
+		});
+		expect(planned.length).toBeGreaterThan(0);
+		expect(residualDestructivesForApply(planned, { dexieTaskCount: 0, checkPoint: 99 })).toEqual([]);
+		expect(residualDestructivesForApply(planned, { dexieTaskCount: 40, checkPoint: 0 })).toEqual([]);
+		expect(residualDestructivesForApply(planned, { dexieTaskCount: 40, checkPoint: 99 }).length).toBeGreaterThan(0);
+	});
+
+	it('checkDatabase and deletionGuardRun wire the shared enumerator', () => {
+		const checkSrc = readFileSync(join(__dirname, '../services/checkDatabase.ts'), 'utf8');
+		const guardSrc = readFileSync(join(__dirname, '../sync/deletionGuardRun.ts'), 'utf8');
+		expect(checkSrc).toContain('enumerateSyncPlannedDeletions');
+		expect(checkSrc).toContain('residualDestructivesForApply');
+		expect(checkSrc).toContain('applyDetachMarkerPlanned');
+		expect(checkSrc).toContain('#260');
+		expect(guardSrc).toContain('enumerateSyncPlannedDeletions');
+		expect(guardSrc).toContain('#260');
 	});
 });
 
