@@ -1,3 +1,13 @@
+### Iteration 2026-11-03 09:10 UTC
+
+- Context: Sync conflict stack broken (Rebind loop; Rebind→Confirm false TT wipe); debate #37 agreed; owner «гоу» for plan + issues.
+- Target: Docs/canvas plan for ARCH-SYNC-INTENT-IDENTITY; epic + child issues; no sync code in this PR.
+- Actions log: Canvas `sync-intent-identity.canvas.tsx`; plan `38-…`; AF stub; INDEX; GitHub epic #255 + #256–#261.
+- Validation: Canvas SDK typecheck clean; issues filed on `tt-sync`; branch `docs/arch-sync-intent-identity-plan`.
+- Problems: Implementation still open (children #256–#261) — status `open`.
+- To Be Done: Owner merges docs PR; implement #256→#261 in order; pilot prove ×2 before epic close.
+- References: #255–#261, `37-sync-intent-identity-debate.md`, `38-sync-intent-identity-plan.md`, `CHANGELOG.md`
+
 ### Iteration 2026-11-03 08:28 UTC
 
 - Context: Owner chose Option A — one Sync flow for day-to-day mismatches; Check stays rare; clarify UX (don’t cut surfaces).
