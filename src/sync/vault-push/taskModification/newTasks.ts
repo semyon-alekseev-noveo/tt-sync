@@ -18,6 +18,7 @@ import { getSettings } from '@/settings';
 import { isPathInPushScope } from '@/syncScope';
 import log from '@/utils/logger';
 import type { TaskModificationDetector } from '@/sync/vault-push/taskModification/TaskModificationDetector';
+import { formatTaskCreatedNotice, formatTaskReattachedNotice } from '@/ui/notices/taskLifecycleNotices';
 
 /** Create / re-attach new vault tasks into TickTick and write markers back. */
 export class TaskModificationNewTasks {
@@ -81,7 +82,7 @@ export class TaskModificationNewTasks {
 				// Marker removed by hand? Re-attach to the TickTick task that used to live here (same title+file).
 				const orphan = await this.findOrphanByTitle(fileMap.getFilePath(), currentTask.title, fileMap);
 				if (orphan) log.warn(`Re-attaching line to existing TickTick task ${orphan.id} (marker was removed)`);
-				// Create task in TickTick
+				// Create task in TickTick (or reuse orphan)
 				const newTask = (orphan ?? await this.plugin.tickTickRestAPI?.createTask(currentTask)) as ITask | null;
 				if (!newTask) {
 					// createTask already surfaced the API error in a Notice.
@@ -98,7 +99,12 @@ export class TaskModificationNewTasks {
 					}
 				}
 
-				new Notice(`New task created: ${newTask.title} (ID: ${newTask.id})`);
+				// UX-NOTICE-REATTACH: orphan path must not say «created»
+				new Notice(
+					orphan
+						? formatTaskReattachedNotice(newTask.title, newTask.id)
+						: formatTaskCreatedNotice(newTask.title, newTask.id),
+				);
 
 				// If task was created as completed, close it in TickTick
 				if (currentTask.status != 0) {

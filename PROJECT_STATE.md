@@ -16,12 +16,12 @@
 
 ## Target
 
-- **Priority (2026-11-02):** Epic [#214](https://github.com/semyon-alekseev-noveo/tt-sync/issues/214) ID-CHAIN — P0/P1 children closed (#215/#216/#223/#228/#230–#234). Residual: [#208](https://github.com/semyon-alekseev-noveo/tt-sync/issues/208) Rematch prove 2; optional [#218](https://github.com/semyon-alekseev-noveo/tt-sync/issues/218). Settings UX [#189](https://github.com/semyon-alekseev-noveo/tt-sync/issues/189) secondary.
+- **Priority (2026-11-03):** Settings UX [#189](https://github.com/semyon-alekseev-noveo/tt-sync/issues/189) — phases closed; open **#205** re-smoke + checklist 32. Notice honesty **UX-NOTICE-*** on tip after merge. Epic [#214](https://github.com/semyon-alekseev-noveo/tt-sync/issues/214) parked for optional [#218](https://github.com/semyon-alekseev-noveo/tt-sync/issues/218) (#208 closed).
 - **Direction (2026-10-16):** **Abyss-first** — tasks stay where Abyss puts them; TickTick mirrors tags/lists and project parents. See `ABYSS_FIRST_PLAN.md` (topology R / CASE-T4 parked).
 - **Still valid:** TT **Projects** ↔ project notes under `10 Projects/`; safety: `syncedLists`, `syncScopeFolders`, manual sync.
 - **Next execution order:** Steps 1–8 in `ABYSS_FIRST_PLAN.md`. Comment gate **pass** through **2.0.76**. Editor-safety [#15](https://github.com/semyon-alekseev-noveo/tt-sync/issues/15) and Step 7 AF soak [#20](https://github.com/semyon-alekseev-noveo/tt-sync/issues/20) **closed**. [#19](https://github.com/semyon-alekseev-noveo/tt-sync/issues/19) Active Zone shuffle: **pass** ×2 on tip after [#134](https://github.com/semyon-alekseev-noveo/tt-sync/pull/134). Step 8 live vault still closed. Abyss Inbox stage tag `#inbox` (§3.1); untagged Inbox still open. Birth tag `#obsidian` stays.
 - **UX soak (2026-10-27):** `docs/pilot/results/UX-OBS-TT-SOAK/` — qualitative; Decision #1 brief in `06-decision-ticktick-vs-abyss.md`. Tag **2.0.94** notes in `15-…`; tip status→list prove in `16-status-map-prove.md` (MAP-1/2 **pass** ×2).
-- **Settings UX redesign (2026-10-28):** Epic [#189](https://github.com/semyon-alekseev-noveo/tt-sync/issues/189) — **code-complete** phases 0–4 (PRs #195–#199; tip `6038e8d`). Pilot Settings smoke for all `UX-SET-*`: `32-settings-ux-smoke-checklist.md` (**not run**). Do not close epic / mark live pass until owner smoke.
+- **Settings UX redesign (2026-11-03):** Epic [#189](https://github.com/semyon-alekseev-noveo/tt-sync/issues/189) — phases 0–4 eng closed (#190–#194); #205 copy shipped (#206). Remaining: owner checklist 32 / #205 re-smoke. Modal/notice review: `36-modal-notice-copy-review.md` (UX-NOTICE-*).
 - **Sync research (2026-10-20):** `docs/TICKTICK_DELTA_API.md` — delta has no comments; echo suppression in `pull.ts` uses `etag`; idle sync does not call `getTaskById` per quiet task.
 - **Deletion guard (2026-10-20):** over-threshold or empty-side deletions are held and the checkpoint stays. Defaults: guard on, more than 10 tasks and more than 20%, startup delay 30s. Pilot cases in `TEST_PLAN.md` are not run.
 - **Redo:** journal `<vault>/.tickticksync/journal/`; palette undo previews then applies `planUndo`. Not soaked on the live vault.
@@ -37,8 +37,8 @@
 
 ## Problems
 
-- **ID-CHAIN** — Epic [#214](https://github.com/semyon-alekseev-noveo/tt-sync/issues/214): eng/analyst children closed 2026-11-02; gate [`ID-CHAIN-REBIND/INDEX.md`](docs/pilot/results/ID-CHAIN-REBIND/INDEX.md). Open: #208 prove 2, #218 optional.
-- **BUG-208** ([#208](https://github.com/semyon-alekseev-noveo/tt-sync/issues/208)) — Rematch prove 1 pass (`35`); prove 2 **not run**; do not close on insert alone (`open`).
+- **ID-CHAIN** — Epic [#214](https://github.com/semyon-alekseev-noveo/tt-sync/issues/214): eng children closed; #208 Rematch prove ×2 **pass**/closed; optional [#218](https://github.com/semyon-alekseev-noveo/tt-sync/issues/218) keeps epic open.
+- **UX-NOTICE** — create vs reattach Notices + modal cache wording: unit this tip; pilot strip-marker prove **not run** (`open`).
 - **BUG-RESET-CACHE-DELETE** — post-Reset Synchronize proposed vault-line deletes for pre-wipe ids (DON-253); owner **Cancel** only. Fix on tip/PR; pilot prove ×2 pending (`UX-OBS-TT-SOAK/24-post-reset-delete-modal.md`) (`open` until prove).
 - Pilot Abyss `taskIgnoreQuery: #ticktick` leftover from superseded Option B — blocks Abyss edit on TT-origin project notes (`open`; brief `UX-OBS-TT-SOAK/06-decision-ticktick-vs-abyss.md`).
 - List stub mirrors under `TickTickTasksFilePath` / Dexie recreate into `zz-parked-*` — **resolved** on tip #179: code skip + pilot cleanup + prove ×2 (`UX-OBS-TT-SOAK/08-stub-cleanup-prove.md`). Optional Dexie parked-row dump not probed.
@@ -55,10 +55,10 @@
 
 ## To Be Done
 
-0. **#214 ID-CHAIN:** Decide #208 prove 2 vs supersede by #216; defer/close #218; then close epic.
-0a. **#208 Rematch insert:** prove 2 still open if needed for insert path; do **not** Apply held deletes.
-0b. **BUG-RESET-CACHE-DELETE:** Cancel open modal if any; tip installed; prove ×2 Reset→Synchronize without vault-line cache-miss delete (`25-reset-cache-delete-prove.md` — owner Reset click).
-0c. **Settings UX #189:** Owner 30s glossary check (#190); Phase 1–3 merged (#196/#197/#198); Phase 4 cold-start/polish [#194](https://github.com/semyon-alekseev-noveo/tt-sync/issues/194) (unit; pilot not run). Epic phases code-complete after #194 merge — owner closes after pilot Settings smoke (do not invent live pass).
+0. **Settings #205 / checklist 32:** Owner re-smoke after tip; then close #205 → #189.
+0a. **UX-NOTICE-***: After merge, tip + strip-marker reattach toast prove; Orphan modal glance (`36-…`).
+0b. **#214:** Optional #218 only; else close epic when owner ready.
+0c. **BUG-RESET-CACHE-DELETE:** prove ×2 Reset→Synchronize still owner-gated (`25-…`).
 1. Owner decides UX Decision #1 (Abyss vs `#ticktick`) — prefer clear ignore on pilot; optional TTS stop note-level `ticktick` stamp later (`06-decision-ticktick-vs-abyss.md`).
 2. **[done]** UX-STUB-1 / BUG-LIST-STUB-RECREATE pilot cleanup + prove ×2 after #179 (`08-stub-cleanup-prove.md`).
 2b. **[done]** UX-STATUS-MAP-1/2 prove ×2 after #182 (`16-status-map-prove.md`); MAP-3/4/PULL + Abyss customs still open; version bump when owner asks.

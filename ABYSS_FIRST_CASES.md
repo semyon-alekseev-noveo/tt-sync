@@ -157,8 +157,10 @@ Preconditions for every AF row: plugin `tickticksync-abyss`, manual sync, `fileL
 | UX-SET-DEVICE-PRUNE | **Phase 4 #194.** Known devices prune: Remove stale (non-current); clearer labels. Unit covered. Pilot **not run**. |
 | UX-SET-INTERVAL-ZERO | **Phase 4 #194.** Sync interval = 0 → progress-on-scheduled grey/disabled. Unit covered. Pilot **not run**. |
 | UX-SET-PW-CONFIRM | **Phase 4 #194.** Explicit plaintext confirm before storing Regular Login password. Unit covered. Pilot **not run**. |
+| UX-NOTICE-REATTACH | Vault line missing `ticktick_id` but same title+file still in local sync cache / TickTick: notice says **Reattached existing…**, not «New … created». True `createTask` still says created. Unit: `uxNoticeReattach.test.ts`. Pilot **not run**. |
+| UX-NOTICE-MODAL-COPY | Orphan + cleanup modals / Check-cache Notices use **local sync cache** (no bare «database»); Orphan Cancel = leave TT; Add to vault & cache; Delete from TickTick. Review: `UX-OBS-TT-SOAK/36-modal-notice-copy-review.md`. Unit covered. Pilot **not run**. |
 
-Unit tests cover parts of AF-1, AF-5, AF-8, UX-STATUS-MAP-*, UX-RESET-1 / BUG-RESET-TASKS-PARTIAL / BUG-RESET-CACHE-DELETE, UX-SET Phase 1–4 Settings UX (`uxSetPhase1`…`uxSetPhase4`), comments, a failed pull, and PERF-INDEX / PERF-CACHE / PERF-COUNTERS. They do not replace the live gate. Settings UX Phase 1–4 are copy/layout/visibility/names/polish only — pilot UX-SET-* still **not run**.
+Unit tests cover parts of AF-1, AF-5, AF-8, UX-STATUS-MAP-*, UX-RESET-1 / BUG-RESET-TASKS-PARTIAL / BUG-RESET-CACHE-DELETE, UX-SET Phase 1–4 Settings UX (`uxSetPhase1`…`uxSetPhase4`), UX-NOTICE-*, comments, a failed pull, and PERF-INDEX / PERF-CACHE / PERF-COUNTERS. They do not replace the live gate. Settings UX Phase 1–4 are copy/layout/visibility/names/polish only — pilot UX-SET-* still **not run**.
 
 ## Old ids
 

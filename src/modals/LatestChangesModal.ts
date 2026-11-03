@@ -2,7 +2,7 @@ import { App, Component, MarkdownRenderer, Modal, Setting } from 'obsidian';
 
 
 export class LatestChangesModal extends Modal {
-	title = 'TicTickSync -- Latest Changes.';
+	title = 'TickTickSync — Latest Changes';
 	cancelLabel = 'Cancel';
 	confirmLabel = 'Got it.';
 	message = '';

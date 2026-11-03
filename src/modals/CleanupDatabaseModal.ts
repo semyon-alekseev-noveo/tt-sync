@@ -1,4 +1,9 @@
 import { App, Modal, Setting } from 'obsidian';
+import {
+	CLEANUP_CACHE_FILES_CONFIRM,
+	CLEANUP_CACHE_FILES_MESSAGE,
+	CLEANUP_CACHE_FILES_TITLE,
+} from '@/ui/settings/settingsUxCopy';
 
 export class CleanupDatabaseModal extends Modal {
 	resolvePromise!: (value: boolean) => void;
@@ -10,9 +15,9 @@ export class CleanupDatabaseModal extends Modal {
 	onOpen() {
 		const { titleEl, contentEl } = this;
 
-		titleEl.setText('Clean up database');
+		titleEl.setText(CLEANUP_CACHE_FILES_TITLE);
 
-		contentEl.createEl('p', { text: 'The following files are still present in the database but no longer exist in your vault. Remove them from the database?' });
+		contentEl.createEl('p', { text: CLEANUP_CACHE_FILES_MESSAGE });
 
 		const listEl = contentEl.createDiv({ attr: { style: 'max-height: 400px; overflow-y: auto; margin-bottom: 10px;' } });
 		for (const file of this.files) {
@@ -31,7 +36,7 @@ export class CleanupDatabaseModal extends Modal {
 			.addButton(confirmBtn => {
 				confirmBtn.setClass('ts_button');
 				confirmBtn.buttonEl.addClass('mod-destructive');
-				confirmBtn.setButtonText(`Clean up database (${this.files.length})`);
+				confirmBtn.setButtonText(CLEANUP_CACHE_FILES_CONFIRM(this.files.length));
 				confirmBtn.onClick(() => {
 					this.resolvePromise(true);
 					this.close();

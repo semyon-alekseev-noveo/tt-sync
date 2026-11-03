@@ -95,7 +95,25 @@ export const CHECK_DATABASE_BUTTON = 'Check sync cache';
 export const CHECK_DATABASE_HELP =
 	`Looks for sync/file mismatches in the ${LOCAL_SYNC_CACHE}. May open Orphaned TickTick Tasks (in TickTick, missing from vault/cache).`;
 export const CHECK_DATABASE_ORPHAN_HELP =
-	'Orphans: Cancel = leave TickTick alone (usual after Reset). Add to file & db = import into vault. Delete from ticktick = remove in TickTick — avoid unless sure.';
+	'Orphans: Cancel = leave TickTick alone (usual after Reset). Add to vault & cache = import into vault. Delete from TickTick = remove in TickTick — avoid unless sure.';
+
+/** Orphaned TickTick Tasks modal (Check sync cache) — UX-NOTICE-MODAL-COPY */
+export const ORPHAN_MODAL_TITLE = 'Orphaned TickTick Tasks';
+export const ORPHAN_MODAL_MESSAGE =
+	`These tasks exist in TickTick but were not found in the vault or ${LOCAL_SYNC_CACHE}:`;
+export const ORPHAN_MODAL_PROMPT = 'What should happen to these TickTick tasks?';
+export const ORPHAN_CANCEL_LABEL = 'Cancel (leave TickTick alone)';
+export const ORPHAN_ADD_LABEL = 'Add to vault & cache';
+export const ORPHAN_DELETE_LABEL = 'Delete from TickTick';
+
+/** Cleanup / purge modals — same «local sync cache» wording as Settings */
+export const CLEANUP_CACHE_FILES_TITLE = `Clean up ${LOCAL_SYNC_CACHE}`;
+export const CLEANUP_CACHE_FILES_MESSAGE =
+	`These files are still listed in the ${LOCAL_SYNC_CACHE} but no longer exist in the vault. Remove those cache rows?`;
+export const CLEANUP_CACHE_FILES_CONFIRM = (n: number) => `Clean up cache (${n})`;
+export const CLEANUP_SOFT_DELETED_TITLE = 'Permanently remove soft-deleted cache rows';
+export const CLEANUP_SOFT_DELETED_MESSAGE =
+	`Select soft-deleted rows to remove permanently from the ${LOCAL_SYNC_CACHE} (not live TickTick tasks):`;
 
 /** Defaults dual-mode (#205 §7) */
 export const DEFAULTS_ABYSS_ON_HELP =
