@@ -1,3 +1,13 @@
+### Iteration 2026-11-03 07:05 UTC
+
+- Context: Owner Add→Check still shows same orphan modal (Подумать… / Румяна) after Rematch — vault already has new ids for those titles.
+- Target: Auto-prune stale rematch orphans; skip completed on metadata orphan path; Add must not duplicate rematched titles.
+- Actions log: `fileHasSameTitleOtherId` / `vaultLinkedTitles`; prune in checkDatabase; AF `BUG-ORPHAN-STALE-REMATCH`; TEST_PLAN row.
+- Validation: `npx vitest run` 928 pass; `npm run build` ok; tip hash synced to pilot plugin folder.
+- Problems: Add cannot “stick” when title is already rematched — correct action is prune, not Add (`resolved` by this change).
+- To Be Done: Tip Check×2 — modal without those titles; no duplicate lines.
+- References: `BUG-ORPHAN-STALE-REMATCH`, `UX-ORPHAN-SKIP-DONE`, `CHANGELOG.md`
+
 ### Iteration 2026-11-03 06:45 UTC
 
 - Context: Owner chose **Add to vault**, not Leave alone — still saw “new” orphans each Check.

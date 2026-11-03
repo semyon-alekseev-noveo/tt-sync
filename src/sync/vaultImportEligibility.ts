@@ -50,3 +50,24 @@ export async function resolveOrphanAddFilepath(input: {
 	if (trim(input.abyssCaptureFile)) return trim(input.abyssCaptureFile);
 	return ABYSS_CAPTURE_FALLBACK;
 }
+
+/**
+ * BUG-ORPHAN-STALE-REMATCH — after empty-TT / Rematch the vault often already has the
+ * same title under a **new** ticktick_id. Old Dexie/metadata ids still look like orphans;
+ * Add would duplicate. Detect title already linked with another id.
+ */
+export function normalizeVaultImportTitle(title: string): string {
+	return title.trim().toLowerCase().replace(/\s+/g, ' ');
+}
+
+export function fileHasSameTitleOtherId(
+	lines: Array<{ id: string; title: string }>,
+	orphanId: string,
+	orphanTitle: string,
+): boolean {
+	const want = normalizeVaultImportTitle(orphanTitle);
+	if (!want || !orphanId) return false;
+	return lines.some(
+		(l) => l.id !== orphanId && normalizeVaultImportTitle(l.title) === want,
+	);
+}

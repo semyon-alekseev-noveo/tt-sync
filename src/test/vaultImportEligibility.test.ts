@@ -1,10 +1,12 @@
 /**
- * BUG-SYNC-SKIP-COMPLETED-IMPORT / UX-ORPHAN-SKIP-DONE
+ * BUG-SYNC-SKIP-COMPLETED-IMPORT / UX-ORPHAN-SKIP-DONE / BUG-ORPHAN-STALE-REMATCH
  */
 import { describe, expect, it } from 'vitest';
 import {
 	ABYSS_CAPTURE_FALLBACK,
+	fileHasSameTitleOtherId,
 	isOpenTaskEligibleForVaultImport,
+	normalizeVaultImportTitle,
 	resolveOrphanAddFilepath,
 } from '@/sync/vaultImportEligibility';
 import { readFileSync } from 'fs';
@@ -55,5 +57,44 @@ describe('BUG-ORPHAN-ADD-STICKY', () => {
 		expect(checkDb).toContain('resolveOrphanAddFilepath');
 		expect(checkDb).toContain('db.tasks.toArray');
 		expect(checkDb).toContain('BUG-ORPHAN-ADD-STICKY');
+	});
+});
+
+describe('BUG-ORPHAN-STALE-REMATCH', () => {
+	it('fileHasSameTitleOtherId detects rematched title under a new id', () => {
+		expect(normalizeVaultImportTitle('  Подумать над механикой  ')).toBe('подумать над механикой');
+		expect(fileHasSameTitleOtherId(
+			[{ id: 'new-id', title: 'Подумать над механикой' }],
+			'old-id',
+			'Подумать над механикой',
+		)).toBe(true);
+		expect(fileHasSameTitleOtherId(
+			[{ id: 'old-id', title: 'Подумать над механикой' }],
+			'old-id',
+			'Подумать над механикой',
+		)).toBe(false);
+		expect(fileHasSameTitleOtherId(
+			[{ id: 'other', title: 'Different' }],
+			'old-id',
+			'Подумать над механикой',
+		)).toBe(false);
+	});
+
+	it('checkDatabase prunes stale rematch on metadata path and TT-scan', () => {
+		const checkDb = readFileSync(join(__dirname, '../services/checkDatabase.ts'), 'utf8');
+		expect(checkDb).toContain('BUG-ORPHAN-STALE-REMATCH');
+		expect(checkDb).toContain('fileHasSameTitleOtherId');
+		expect(checkDb).toContain('vaultLinkedTitles');
+		expect(checkDb).toContain('STALE-REMATCH prune');
+	});
+
+	it('metadata orphan path applies isOpenTaskEligibleForVaultImport', () => {
+		const checkDb = readFileSync(join(__dirname, '../services/checkDatabase.ts'), 'utf8');
+		// eligibility must run before tasksToResolve.push on the getTaskById path
+		const orphanBlock = checkDb.slice(
+			checkDb.indexOf('getTaskById(taskId)'),
+			checkDb.indexOf('tasksToResolve.push', checkDb.indexOf('getTaskById(taskId)')),
+		);
+		expect(orphanBlock).toContain('isOpenTaskEligibleForVaultImport');
 	});
 });
