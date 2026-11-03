@@ -14,7 +14,8 @@ import { db } from '@/db/dexie';
 import { getAllFiles, getFile, upsertFile } from '@/db/files';
 import { getDefaultFolder, getSettings } from '@/settings';
 import { doWithLock } from '@/utils/locks';
-import { isOpenTaskEligibleForVaultImport } from '@/sync/vaultImportEligibility';
+import { isOpenTaskEligibleForVaultImport, resolveOrphanAddFilepath } from '@/sync/vaultImportEligibility';
+import { resolveSyncedListIds } from '@/syncScope';
 import { Notice, TFile } from 'obsidian';
 import log from '@/utils/logger';
 
@@ -262,6 +263,14 @@ export async function runCheckDatabase(host: CheckDatabaseHost): Promise<void> {
 		});
 		log.debug(`Finished checking database for ${markdownFiles.length} markdown files and ${dbFiles.length} DB entries.`);
 		log.debug(`Found ${tasksToDelete.length} tasks to be deleted.`);
+		// BUG-ORPHAN-ADD-STICKY: include Dexie-only ids (Add may have upserted before vault write).
+		try {
+			for (const lt of await db.tasks.toArray()) {
+				if (lt.taskId) allLocalIds.add(lt.taskId);
+			}
+		} catch (e) {
+			log.warn('[checkDB] could not seed allLocalIds from Dexie tasks', e);
+		}
 		log.debug(`Known local task IDs: ${allLocalIds.size}.`);
 
 		// Offer to clean up DB entries for files that no longer exist in the vault
@@ -278,36 +287,46 @@ export async function runCheckDatabase(host: CheckDatabaseHost): Promise<void> {
 			}
 		}
 
-		// Scan TickTick for tasks that have no local reference at all
+		// Scan TickTick for tasks with no local reference — only syncedLists (AF-1 / UX-ORPHAN-SYNCED-LISTS).
 		try {
-			const allTickTickData = (await host.plugin.tickTickRestAPI?.getAllTasks()) as unknown as { update: ITask[] } | undefined;
-			const allTickTickTasks = (allTickTickData?.update || []) as Array<ITask & { taskId?: string }>;
-			log.debug(`[checkDB] TickTick-wide scan: got ${allTickTickTasks.length} live tasks from API`);
-			if (allTickTickTasks.length > 0) {
-				const resolveIds = new Set(tasksToResolve.map(t => t.taskId));
-				for (const ttTask of allTickTickTasks) {
-					const ttId = ttTask.id || ttTask.taskId;
-					if (!ttId) { log.debug(`[checkDB] TT-scan: skip task with no id`); continue; }
-					if (ttTask.deleted === 1) { log.debug(`[checkDB] TT-scan: skip ${ttId} — deleted on TickTick`); continue; }
-					// UX-ORPHAN-SKIP-DONE: completed / abandoned / recurrence instances / Notebook ≠ Add-to-vault orphans
-					if (!isOpenTaskEligibleForVaultImport(ttTask)) {
-						log.debug(`[checkDB] TT-scan: skip ${ttId} — not eligible for vault import (status=${ttTask.status}, kind=${ttTask.kind}, repeatTaskId=${(ttTask as { repeatTaskId?: string }).repeatTaskId ?? ''})`);
-						continue;
+			const syncedEntries = getSettings().syncedLists ?? [];
+			const allowedListIds = resolveSyncedListIds(syncedEntries, allProjects);
+			if (!allowedListIds.size) {
+				log.debug('[checkDB] TT-scan skipped: syncedLists empty — nothing to orphan-import (same as Synchronize).');
+			} else {
+				const allTickTickData = (await host.plugin.tickTickRestAPI?.getAllTasks()) as unknown as { update: ITask[] } | undefined;
+				const allTickTickTasks = (allTickTickData?.update || []) as Array<ITask & { taskId?: string }>;
+				log.debug(`[checkDB] TickTick-wide scan: got ${allTickTickTasks.length} live tasks from API; allow-list size=${allowedListIds.size}`);
+				if (allTickTickTasks.length > 0) {
+					const resolveIds = new Set(tasksToResolve.map(t => t.taskId));
+					for (const ttTask of allTickTickTasks) {
+						const ttId = ttTask.id || ttTask.taskId;
+						if (!ttId) { log.debug(`[checkDB] TT-scan: skip task with no id`); continue; }
+						if (ttTask.deleted === 1) { log.debug(`[checkDB] TT-scan: skip ${ttId} — deleted on TickTick`); continue; }
+						if (!allowedListIds.has(ttTask.projectId)) {
+							log.debug(`[checkDB] TT-scan: skip ${ttId} — list ${ttTask.projectId} not in syncedLists`);
+							continue;
+						}
+						// UX-ORPHAN-SKIP-DONE: completed / abandoned / recurrence instances / Notebook ≠ Add-to-vault orphans
+						if (!isOpenTaskEligibleForVaultImport(ttTask)) {
+							log.debug(`[checkDB] TT-scan: skip ${ttId} — not eligible for vault import (status=${ttTask.status}, kind=${ttTask.kind}, repeatTaskId=${(ttTask as { repeatTaskId?: string }).repeatTaskId ?? ''})`);
+							continue;
+						}
+						if (allLocalIds.has(ttId)) { log.debug(`[checkDB] TT-scan: skip ${ttId} — already in local IDs`); continue; }
+						if (resolveIds.has(ttId)) { log.debug(`[checkDB] TT-scan: skip ${ttId} — already in resolve list`); continue; }
+						const filepath = await host.plugin.fileMetadataService?.getFilepathForProjectId(ttTask.projectId) || '';
+						log.debug(`[checkDB] TT-scan: ORPHAN ${ttId} — no local reference (title="${ttTask.title}", projectId=${ttTask.projectId}, filepath="${filepath}")`);
+						tasksToResolve.push({
+							filepath,
+							taskId: ttId,
+							title: ttTask.title || ttId,
+							projectId: ttTask.projectId,
+							task: ttTask,
+							inFile: false
+						});
 					}
-					if (allLocalIds.has(ttId)) { log.debug(`[checkDB] TT-scan: skip ${ttId} — already in local IDs`); continue; }
-					if (resolveIds.has(ttId)) { log.debug(`[checkDB] TT-scan: skip ${ttId} — already in resolve list`); continue; }
-					const filepath = await host.plugin.fileMetadataService?.getFilepathForProjectId(ttTask.projectId) || '';
-					log.debug(`[checkDB] TT-scan: ORPHAN ${ttId} — no local reference (title="${ttTask.title}", projectId=${ttTask.projectId}, filepath="${filepath}")`);
-					tasksToResolve.push({
-						filepath,
-						taskId: ttId,
-						title: ttTask.title || ttId,
-						projectId: ttTask.projectId,
-						task: ttTask,
-						inFile: false
-					});
+					log.debug(`[checkDB] TickTick-wide scan complete: ${tasksToResolve.length} total orphaned tasks.`);
 				}
-				log.debug(`[checkDB] TickTick-wide scan complete: ${tasksToResolve.length} total orphaned tasks.`);
 			}
 		} catch (err) {
 			log.error('Error scanning all TickTick tasks:', err);
@@ -331,20 +350,54 @@ export async function runCheckDatabase(host: CheckDatabaseHost): Promise<void> {
 			const action = await modal.showModal();
 			log.debug(`[checkDB] User chose action "${action}" for orphaned tasks`);
 			if (action === 'add') {
+				let wrote = 0;
+				let dexieOnly = 0;
 				await doWithLock(LOCK_TASKS, async () => {
+					let abyssCapture: string | undefined;
+					try {
+						const raw = await host.plugin.app.vault.adapter.read('.obsidian/plugins/abyss-tasks/data.json');
+						const path = (JSON.parse(raw) as { taskFilePath?: unknown }).taskFilePath;
+						if (typeof path === 'string' && path.trim()) abyssCapture = path.trim();
+					} catch { /* default via resolveOrphanAddFilepath */ }
+
 					for (const t of tasksToResolve) {
-						const targetFilepath = t.filepath || (await host.plugin.fileMetadataService?.getFilepathForProjectId(t.projectId)) || '';
+						const parentNote = t.task.parentId
+							? host.plugin.projectScheme?.noteForParent?.(t.task.parentId)
+							: undefined;
+						const projectMapped = await host.plugin.fileMetadataService?.getFilepathForProjectId(t.projectId);
+						const defaultMapped = getSettings().defaultProjectId
+							? await host.plugin.fileMetadataService?.getFilepathForProjectId(getSettings().defaultProjectId)
+							: undefined;
+						const targetFilepath = await resolveOrphanAddFilepath({
+							filepath: t.filepath,
+							projectId: t.projectId,
+							parentNote,
+							projectMappedFile: projectMapped,
+							defaultProjectFile: defaultMapped,
+							abyssCaptureFile: abyssCapture,
+						});
+						await upsertFile(targetFilepath, t.projectId);
 						await host.plugin.taskRepository.upsertTask(t.task, targetFilepath, Date.now());
 						if (!t.inFile && targetFilepath) {
 							try {
-								await host.plugin.fileOperation?.synchronizeToVault(targetFilepath, [t.task], false);
+								const ok = await host.plugin.fileOperation?.synchronizeToVault(targetFilepath, [t.task], false);
+								if (ok) wrote++;
+								else dexieOnly++;
 							} catch (err) {
-								log.warn(`Could not add task ${t.taskId} to file ${t.filepath}:`, err);
+								dexieOnly++;
+								log.warn(`Could not add task ${t.taskId} to file ${targetFilepath}:`, err);
 							}
+						} else if (t.inFile) {
+							wrote++;
+						} else {
+							dexieOnly++;
 						}
 					}
 				});
-				new Notice(`Added ${tasksToResolve.length} orphaned task(s) to vault and local sync cache.`);
+				new Notice(
+					`Added ${tasksToResolve.length} orphaned task(s) (${wrote} to vault lines, ${dexieOnly} cache-only).`,
+					8000,
+				);
 			} else if (action === 'delete') {
 				await doWithLock(LOCK_TASKS, async () => {
 					for (const t of tasksToResolve) {

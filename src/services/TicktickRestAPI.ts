@@ -485,25 +485,26 @@ export class TickTickRestAPI {
 		return null;
 	}
 
-	//TODO: Will need interpretation
+	/**
+	 * Full TickTick task dump for Check sync cache / orphan scan.
+	 * Must use API checkpoint 0 and must NOT advance settings.checkPoint
+	 * (BUG-CHECK-CACHE-CHECKPOINT — incremental + persist made every Check look “new”).
+	 */
 	async getAllTasks(): Promise<unknown[]> {
 		await this.initializeAPI();
-		const oldCheckPoint = this._checkpoint;
-		this._checkpoint = 0;
-
+		const oldRestCp = this._checkpoint;
 		try {
-			//This returns the SyncBean object, which has ALL the task details
-			const result = await this.api?.getTaskDetails();
+			// fromCheckpoint=0, persistCheckpoint=false — full bean, sync cursor unchanged
+			const result = await this.api?.getTaskDetails(0, false);
 			if (!result || result.length === 0 && (this.api?.lastError as { statusCode?: number } | undefined)?.statusCode != 200) {
 				throw new Error('No Results.');
 			}
-			this._checkpoint = oldCheckPoint;
-			return (result);
-
+			return result;
 		} catch (error) {
 			log.error('Error get all Tasks', error);
-			this._checkpoint = oldCheckPoint;
 			return [];
+		} finally {
+			this._checkpoint = oldRestCp;
 		}
 	}
 

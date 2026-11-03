@@ -1,3 +1,33 @@
+### Iteration 2026-11-03 06:45 UTC
+
+- Context: Owner chose **Add to vault**, not Leave alone — still saw “new” orphans each Check.
+- Target: Sticky Add on Abyss (filepath fallback + Dexie ids in allLocalIds) + prior checkpoint fix.
+- Actions log: `resolveOrphanAddFilepath`; seed `db.tasks` into allLocalIds; honest Add notice.
+- Validation: vitest vaultImportEligibility + bugCheckCacheCheckpoint; build ok; 925 tests pass.
+- Problems: No changes.
+- To Be Done: Push #250; tip Add once → second Check clean of those ids.
+- References: `BUG-ORPHAN-ADD-STICKY`, `BUG-CHECK-CACHE-CHECKPOINT`, `CHANGELOG.md`
+
+### Iteration 2026-11-03 06:35 UTC
+
+- Context: Owner: every Check finds “new” tasks; logs → Check used incremental checkpoint and advanced it.
+- Target: `getAllTasks` = full dump at cp 0 without persisting checkPoint (BUG-CHECK-CACHE-CHECKPOINT).
+- Actions log: `getTaskDetails(0, false)`; unit test; AF/TEST_PLAN on #250 branch.
+- Validation: vitest bugCheckCacheCheckpoint; full suite + build ok.
+- Problems: Stale metadata-id orphans on Leave alone may still reappear (`open`).
+- To Be Done: Push #250; tip Check×2 stable; checkPoint unchanged.
+- References: `BUG-CHECK-CACHE-CHECKPOINT`, `CHANGELOG.md`
+
+### Iteration 2026-11-03 06:20 UTC
+
+- Context: Owner: Check cache showed HappyBirthdays though list unticked in Synced lists.
+- Target: Orphan TT-scan honor `syncedLists` like Synchronize (AF-1).
+- Actions log: `resolveSyncedListIds` in checkDatabase; AF `UX-ORPHAN-SYNCED-LISTS`; test assert.
+- Validation: `npx vitest run` vaultImportEligibility + checkDatabase.extract pass; build ok.
+- Problems: No changes.
+- To Be Done: Merge; tip re-Check — HappyBirthdays absent.
+- References: `UX-ORPHAN-SYNCED-LISTS`, `CHANGELOG.md`
+
 ### Iteration 2026-11-03 05:27 UTC
 
 - Context: Owner OK orphan modal iter 2; completed recurring (Румяна status=2) still offered as orphan / vault import.

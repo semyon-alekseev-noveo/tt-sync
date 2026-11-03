@@ -411,7 +411,14 @@ export class Tick {
 	}
 
 	// TASKS =====================================================================
-	async getTaskDetails(): Promise<ITask[]> {
+	/**
+	 * Fetch syncTaskBean from a checkpoint.
+	 * @param fromCheckpoint optional override (e.g. 0 = full dump for Check cache).
+	 * @param persistCheckpoint when false, do not write settings.checkPoint (Check must not advance sync).
+	 */
+	async getTaskDetails(fromCheckpoint?: number, persistCheckpoint = true): Promise<ITask[]> {
+		const savedCheckpoint = this._checkpoint;
+		if (fromCheckpoint !== undefined) this._checkpoint = fromCheckpoint;
 		try {
 			let retry = 10;
 			while (retry > 0) {
@@ -421,10 +428,13 @@ export class Tick {
 					const r = response as { checkPoint: number; syncTaskBean: { update: ITask[] } };
 					const numReturns = r.syncTaskBean.update.length;
 					if (numReturns > 0) {
-						if (getSettings().checkPoint != r.checkPoint) {
+						if (persistCheckpoint && getSettings().checkPoint != r.checkPoint) {
 							this._checkpoint = r.checkPoint;
 							getSettings().checkPoint = this._checkpoint;
 							updateSettings({ checkPoint: this._checkpoint });
+						} else if (!persistCheckpoint) {
+							// Restore caller's checkpoint; full dump must not move sync cursor.
+							this._checkpoint = savedCheckpoint;
 						}
 						return r.syncTaskBean as unknown as ITask[];
 					} else {
@@ -441,6 +451,8 @@ export class Tick {
 			log.error('Get Tasks Details failed: ', e);
 			tickSetError(this, 'Get Tasks', null, e);
 			return [];
+		} finally {
+			if (!persistCheckpoint) this._checkpoint = savedCheckpoint;
 		}
 	}
 
