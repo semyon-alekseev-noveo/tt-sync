@@ -1,3 +1,13 @@
+### Iteration 2026-11-03 07:19 UTC
+
+- Context: Tag **2.0.95** release job failed `check:cycles` — new cycle via `vaultImportEligibility` → `@/settings`.
+- Target: Break cycle (pass `newTasksFile` from caller); bump **2.0.96** (no retag of 2.0.95).
+- Actions log: Dropped `getSettings` from eligibility module; wired `newTasksFile` in checkDatabase Add; version bump.
+- Validation: `npm run check:cycles` OK; `npx vitest run` 928 pass; `npm run build` ok (`dist` 2.0.96).
+- Problems: 2.0.95 tag exists without GitHub Release (`mitigated` by 2.0.96).
+- To Be Done: Merge bump; tag **2.0.96** once.
+- References: `vaultImportEligibility.ts`, `CHANGELOG.md`
+
 ### Iteration 2026-11-03 07:12 UTC
 
 - Context: Owner asked for a release; **2.0.94** already published — cannot retag.

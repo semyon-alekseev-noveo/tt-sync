@@ -57,6 +57,12 @@ describe('BUG-ORPHAN-ADD-STICKY', () => {
 		expect(checkDb).toContain('resolveOrphanAddFilepath');
 		expect(checkDb).toContain('db.tasks.toArray');
 		expect(checkDb).toContain('BUG-ORPHAN-ADD-STICKY');
+		expect(checkDb).toContain('newTasksFile: getSettings().newTasksFile');
+	});
+
+	it('BUG-ORPHAN-NO-SETTINGS-CYCLE: eligibility module does not import @/settings', () => {
+		const src = readFileSync(join(__dirname, '../sync/vaultImportEligibility.ts'), 'utf8');
+		expect(src).not.toMatch(/from ['"]@\/settings['"]/);
 	});
 });
 

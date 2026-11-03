@@ -5,9 +5,10 @@
  * Completed (status 2), abandoned (-1), soft-deleted, Notebook notes, and
  * completed recurrence instances (`repeatTaskId`) must not flood the vault
  * or the orphan «Add» modal. Open series masters (status 0 + repeatFlag) still import.
+ *
+ * Keep this module free of `@/settings` imports — otherwise checkDatabase →
+ * vaultImportEligibility → settings closes a cycle (release gate check:cycles).
  */
-
-import { getSettings } from '@/settings';
 
 export type VaultImportTaskShape = {
 	status?: number | null;
@@ -44,7 +45,7 @@ export async function resolveOrphanAddFilepath(input: {
 	if (trim(input.filepath)) return trim(input.filepath);
 	if (trim(input.parentNote)) return trim(input.parentNote);
 	if (trim(input.projectMappedFile)) return trim(input.projectMappedFile);
-	const hub = trim(input.newTasksFile ?? getSettings().newTasksFile);
+	const hub = trim(input.newTasksFile);
 	if (hub) return hub.endsWith('.md') ? hub : `${hub}.md`;
 	if (trim(input.defaultProjectFile)) return trim(input.defaultProjectFile);
 	if (trim(input.abyssCaptureFile)) return trim(input.abyssCaptureFile);
