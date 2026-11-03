@@ -14,6 +14,7 @@ import { db } from '@/db/dexie';
 import { getAllFiles, getFile, upsertFile } from '@/db/files';
 import { getDefaultFolder, getSettings } from '@/settings';
 import { doWithLock } from '@/utils/locks';
+import { isOpenTaskEligibleForVaultImport } from '@/sync/vaultImportEligibility';
 import { Notice, TFile } from 'obsidian';
 import log from '@/utils/logger';
 
@@ -288,6 +289,11 @@ export async function runCheckDatabase(host: CheckDatabaseHost): Promise<void> {
 					const ttId = ttTask.id || ttTask.taskId;
 					if (!ttId) { log.debug(`[checkDB] TT-scan: skip task with no id`); continue; }
 					if (ttTask.deleted === 1) { log.debug(`[checkDB] TT-scan: skip ${ttId} — deleted on TickTick`); continue; }
+					// UX-ORPHAN-SKIP-DONE: completed / abandoned / recurrence instances / Notebook ≠ Add-to-vault orphans
+					if (!isOpenTaskEligibleForVaultImport(ttTask)) {
+						log.debug(`[checkDB] TT-scan: skip ${ttId} — not eligible for vault import (status=${ttTask.status}, kind=${ttTask.kind}, repeatTaskId=${(ttTask as { repeatTaskId?: string }).repeatTaskId ?? ''})`);
+						continue;
+					}
 					if (allLocalIds.has(ttId)) { log.debug(`[checkDB] TT-scan: skip ${ttId} — already in local IDs`); continue; }
 					if (resolveIds.has(ttId)) { log.debug(`[checkDB] TT-scan: skip ${ttId} — already in resolve list`); continue; }
 					const filepath = await host.plugin.fileMetadataService?.getFilepathForProjectId(ttTask.projectId) || '';

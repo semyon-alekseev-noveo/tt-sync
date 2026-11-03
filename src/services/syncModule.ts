@@ -22,6 +22,7 @@ import { getAllProjects } from '@/db/projects';
 import { isPathInPushScope, normalizeSyncTag, resolveSyncedListIds, taskMatchesSyncLimit, type TaskSyncLimitOptions } from '@/syncScope';
 import { timePhase } from '@/sync/perf';
 import { commitVaultText, readNoteForWrite } from '@/sync/vault-io';
+import { isOpenTaskEligibleForVaultImport } from '@/sync/vaultImportEligibility';
 
 export class SyncMan {
 	private readonly app: App;
@@ -187,6 +188,9 @@ export class SyncMan {
 			} else {
 				newTickTickTasks = tasksFromTickTic.filter(task => !tasksInCache.some(t => t.id === task.id));
 			}
+			// BUG-SYNC-SKIP-COMPLETED-IMPORT: do not invent vault lines for done/abandoned/
+			// completed recurrence instances / Notebook — open series masters still import.
+			newTickTickTasks = newTickTickTasks.filter(task => isOpenTaskEligibleForVaultImport(task));
 
 			// this.dumpArray('== Add to Obsidian:', newTickTickTasks);
 			//download remote only tasks to Obsidian

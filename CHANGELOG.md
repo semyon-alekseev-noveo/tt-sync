@@ -1,3 +1,13 @@
+### Iteration 2026-11-03 05:27 UTC
+
+- Context: Owner OK orphan modal iter 2; completed recurring (Румяна status=2) still offered as orphan / vault import.
+- Target: Clearer orphan modal + skip completed/abandoned/NOTE/repeatTaskId for new vault lines and orphan Add list.
+- Actions log: OrphanTaskModal iter 2; `vaultImportEligibility.ts`; wire checkDatabase + syncModule; AF/TEST_PLAN.
+- Validation: `npx vitest run` 919 pass; `npm run build` ok; tip installed.
+- Problems: Open status=0 ghost dups after empty-TT still possible (`open`).
+- To Be Done: Merge; tip Check cache — Румяна gone from orphan; Settings #205 continue.
+- References: `UX-ORPHAN-SKIP-DONE`, `BUG-SYNC-SKIP-COMPLETED-IMPORT`, `CHANGELOG.md`
+
 ### Iteration 2026-11-03 04:44 UTC
 
 - Context: Owner toast storm after tip reload; `New task created` on orphan re-attach; asked for modal/notice copy review.

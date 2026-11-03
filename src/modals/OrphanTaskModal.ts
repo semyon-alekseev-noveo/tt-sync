@@ -4,7 +4,9 @@ import {
 	ORPHAN_CANCEL_LABEL,
 	ORPHAN_DELETE_LABEL,
 	ORPHAN_MODAL_MESSAGE,
+	ORPHAN_MODAL_PATHS_HEADING,
 	ORPHAN_MODAL_PROMPT,
+	ORPHAN_MODAL_RESTORE_HINT,
 	ORPHAN_MODAL_TITLE,
 } from '@/ui/settings/settingsUxCopy';
 
@@ -35,10 +37,19 @@ export class OrphanTaskModal extends Modal {
 		titleEl.setText(this.title);
 
 		contentEl.createEl('p', { text: this.message });
+		contentEl.createEl('p', {
+			text: ORPHAN_MODAL_RESTORE_HINT,
+			attr: { style: 'opacity: 0.85; font-size: 0.95em;' },
+		});
+
+		contentEl.createEl('strong', {
+			text: ORPHAN_MODAL_PATHS_HEADING,
+			attr: { style: 'display: block; margin-top: 12px;' },
+		});
 
 		const groupedItems: Record<string, string[]> = {};
 		this.items.forEach(item => {
-			const group = item.filePath || item.projectName || 'Unknown';
+			const group = item.filePath || item.projectName || 'Unknown list (no mapped file)';
 			if (!groupedItems[group]) {
 				groupedItems[group] = [];
 			}
@@ -46,9 +57,10 @@ export class OrphanTaskModal extends Modal {
 		});
 
 		for (const [group, titles] of Object.entries(groupedItems)) {
-			if (group !== 'Unknown' || Object.keys(groupedItems).length > 1) {
-				contentEl.createEl('strong', { text: group, attr: { style: 'display: block; margin-top: 10px;' } });
-			}
+			contentEl.createEl('strong', {
+				text: group,
+				attr: { style: 'display: block; margin-top: 10px; font-weight: 600;' },
+			});
 			const unorderedList = contentEl.createEl('ul', { attr: { style: 'margin-top: 5px;' } });
 			titles.forEach((title) => {
 				unorderedList.createEl('li', { text: title });
@@ -59,9 +71,11 @@ export class OrphanTaskModal extends Modal {
 
 		contentEl.createEl('p', { text: ORPHAN_MODAL_PROMPT, attr: { style: 'margin-bottom: 10px;' } });
 
+		// Safe default first (Cancel); destructive middle; Add last and not CTA — avoid accidental import after restore.
 		new Setting(contentEl)
 			.addButton(cancelBtn => {
 				cancelBtn.setClass('ts_button');
+				cancelBtn.setCta();
 				cancelBtn.setButtonText(ORPHAN_CANCEL_LABEL);
 				cancelBtn.onClick(() => {
 					this.action = 'cancel';
@@ -79,7 +93,6 @@ export class OrphanTaskModal extends Modal {
 			})
 			.addButton(addBtn => {
 				addBtn.setClass('ts_button');
-				addBtn.setCta();
 				addBtn.setButtonText(ORPHAN_ADD_LABEL);
 				addBtn.onClick(() => {
 					this.action = 'add';

@@ -4,7 +4,7 @@
 - Date: 2026-11-03
 - Trigger: Owner saw `New task created` toasts for tasks that already existed in TickTick (orphan re-attach).
 - Cases: `UX-NOTICE-REATTACH`, `UX-NOTICE-MODAL-COPY`
-- Status: **unit pass** this PR; pilot **not run**
+- Status: **unit pass**; owner orphan iter 2 «вроде лучше»; follow-up skip-completed in same tip
 
 ## Scope
 Owner-facing **modals** under `src/modals/` plus high-traffic sync Notices that misstate create/delete/cache.

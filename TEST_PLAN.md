@@ -6,15 +6,18 @@ Manual cases for behavior changes. Automated tests do not replace a row here.
 
 Pilot means `<pilot-vault>`, manual **Synchronize**, plugin id `tickticksync-abyss`. Do not use `<live-vault>`. A cloud agent does not mark a row passed. Status stays **not run** until a person or a local agent on that Obsidian records what they saw.
 
-## UX-NOTICE — Modal / create vs re-attach copy (this PR)
+## UX-NOTICE — Modal / create vs re-attach copy + orphan clarity
 
-Review: `docs/pilot/results/UX-OBS-TT-SOAK/36-modal-notice-copy-review.md`. Unit: `uxNoticeReattach.test.ts`.
+Review: `docs/pilot/results/UX-OBS-TT-SOAK/36-modal-notice-copy-review.md`. Units: `uxNoticeReattach.test.ts`, `vaultImportEligibility.test.ts`.
 
 | Case | Steps | Expected | Pilot |
 |------|-------|----------|-------|
 | UX-NOTICE-REATTACH | Tip install. Strip `%%[ticktick_id::…]%%` from one existing line (same title). Sync or settle line so push runs. | Toast **Reattached existing TickTick task…** with old ID — not «created». | **not run** |
 | UX-NOTICE-REATTACH create | New checkbox title never seen in TT. | Toast **New TickTick task created…** with new ID. | **not run** |
-| UX-NOTICE-MODAL-COPY | Maintenance → Check sync cache (or open Orphan / Clean up cache if offered). | Orphan: Cancel (leave TT) / Add to vault & cache / Delete from TickTick; cleanup titles say local sync cache / soft-deleted. | **not run** |
+| UX-NOTICE-ORPHAN-CLEAR | Check sync cache → orphan modal. | Iter 2 copy: no matching id; paths = Add targets; Leave alone. | owner OK «вроде лучше» |
+| UX-ORPHAN-SKIP-DONE | Check sync cache after completed recurring (e.g. Румяна). | Completed / closed occurrences **not** listed as orphans. | **not run** |
+| BUG-SYNC-SKIP-COMPLETED-IMPORT | Synchronize with completed TT-only tasks (no vault id). | No new vault lines for status≠0 / recurrence instances. | **not run** |
+| UX-NOTICE-MODAL-COPY | Maintenance → Check sync cache (or open Orphan / Clean up cache if offered). | Orphan Leave alone / Add may duplicate / Delete; cleanup = local sync cache. | **not run** |
 
 ## UX-SET — Settings UX redesign (epic #189 / Phase 1 #191 / Phase 2 #192 / Phase 3 #193 / Phase 4 #194)
 
