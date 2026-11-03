@@ -171,7 +171,7 @@ describe('UX-SET-GLOSSARY (Phase 1 surface)', () => {
 	it('Check Database help says what to do with orphans', () => {
 		expect(CHECK_DATABASE_ORPHAN_HELP.toLowerCase()).toMatch(/cancel/);
 		expect(CHECK_DATABASE_ORPHAN_HELP.toLowerCase()).toMatch(/delete from ticktick/);
-		expect(CHECK_DATABASE_ORPHAN_HELP.toLowerCase()).toMatch(/add to file/);
+		expect(CHECK_DATABASE_ORPHAN_HELP.toLowerCase()).toMatch(/add to vault/);
 		const maint = readFileSync(join(SETTINGS_SVELTE_ROOT, 'svelte/ManualSyncOperations.svelte'), 'utf8');
 		expect(maint).toContain('CHECK_DATABASE_ORPHAN_HELP');
 	});

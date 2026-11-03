@@ -1,4 +1,12 @@
 import { App, Modal, Setting } from 'obsidian';
+import {
+	ORPHAN_ADD_LABEL,
+	ORPHAN_CANCEL_LABEL,
+	ORPHAN_DELETE_LABEL,
+	ORPHAN_MODAL_MESSAGE,
+	ORPHAN_MODAL_PROMPT,
+	ORPHAN_MODAL_TITLE,
+} from '@/ui/settings/settingsUxCopy';
 
 export interface OrphanItem {
 	title: string;
@@ -9,9 +17,9 @@ export interface OrphanItem {
 export type OrphanAction = 'add' | 'delete' | 'cancel';
 
 export class OrphanTaskModal extends Modal {
-	title = 'Orphaned TickTick Tasks';
+	title = ORPHAN_MODAL_TITLE;
 
-	message = 'The following tasks exist in TickTick but were not found in the local vault or database:';
+	message = ORPHAN_MODAL_MESSAGE;
 	items: OrphanItem[] = [];
 	action: OrphanAction = 'cancel';
 	resolvePromise!: (value: OrphanAction) => void;
@@ -49,12 +57,12 @@ export class OrphanTaskModal extends Modal {
 
 		contentEl.createEl('hr');
 
-		contentEl.createEl('p', { text: 'What would you like to do with these tasks?', attr: { style: 'margin-bottom: 10px;' } });
+		contentEl.createEl('p', { text: ORPHAN_MODAL_PROMPT, attr: { style: 'margin-bottom: 10px;' } });
 
 		new Setting(contentEl)
 			.addButton(cancelBtn => {
 				cancelBtn.setClass('ts_button');
-				cancelBtn.setButtonText('Cancel');
+				cancelBtn.setButtonText(ORPHAN_CANCEL_LABEL);
 				cancelBtn.onClick(() => {
 					this.action = 'cancel';
 					this.close();
@@ -63,7 +71,7 @@ export class OrphanTaskModal extends Modal {
 			.addButton(deleteBtn => {
 				deleteBtn.setClass('ts_button');
 				deleteBtn.buttonEl.addClass('mod-destructive');
-				deleteBtn.setButtonText('Delete from ticktick');
+				deleteBtn.setButtonText(ORPHAN_DELETE_LABEL);
 				deleteBtn.onClick(() => {
 					this.action = 'delete';
 					this.close();
@@ -72,7 +80,7 @@ export class OrphanTaskModal extends Modal {
 			.addButton(addBtn => {
 				addBtn.setClass('ts_button');
 				addBtn.setCta();
-				addBtn.setButtonText('Add to file & db');
+				addBtn.setButtonText(ORPHAN_ADD_LABEL);
 				addBtn.onClick(() => {
 					this.action = 'add';
 					this.close();

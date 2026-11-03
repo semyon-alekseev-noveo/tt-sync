@@ -34,14 +34,15 @@
 | 25 | Post-#187 Reset cache-delete prove | `25-reset-cache-delete-prove.md` | **install pass**; Reset-path prove **blocked** (owner Reset → Sync ×2) |
 | 26 | Held deletions after Reset (owner screenshot) | `26-held-deletions-after-reset.md` | **DO NOT APPLY** — Skip; false vault-absent |
 | 27 | Settings UX redesign plan (epic #189) | `27-settings-ux-redesign-plan.md` | **plan / DoR** — Phase 0 #190 merged (#195) |
-| 28 | Settings UX Phase 1 (#191) | `28-settings-ux-phase1.md` | **unit pass**; pilot Settings **not run** |
-| 29 | Settings UX Phase 2 (#192) | `29-settings-ux-phase2.md` | **unit pass**; pilot Settings **not run** |
-| 30 | Settings UX Phase 3 (#193) | `30-settings-ux-phase3.md` | **unit pass**; pilot Settings **not run** |
-| 31 | Settings UX Phase 4 (#194) | `31-settings-ux-phase4.md` | **unit pass**; pilot Settings **not run**; code merged #199 |
+| 28 | Settings UX Phase 1 (#191) | `28-settings-ux-phase1.md` | **unit pass**; eng closed #191; pilot → checklist 32 |
+| 29 | Settings UX Phase 2 (#192) | `29-settings-ux-phase2.md` | **unit pass**; eng closed #192; pilot → checklist 32 |
+| 30 | Settings UX Phase 3 (#193) | `30-settings-ux-phase3.md` | **unit pass**; eng closed #193; pilot → checklist 32 |
+| 31 | Settings UX Phase 4 (#194) | `31-settings-ux-phase4.md` | **unit pass**; eng closed #194; code #199; pilot → checklist 32 |
 | 32 | Settings UX smoke (эпик #189) | `32-settings-ux-smoke-checklist.md` | **частично** — owner ✗ §3–9 → #205 |
-| 33 | #205 smoke feedback impl | `33-settings-ux-205-smoke-feedback.md` | **unit pass**; pilot re-smoke not run |
+| 33 | #205 smoke feedback impl | `33-settings-ux-205-smoke-feedback.md` | **unit pass** (#206); tip ready; **owner re-smoke checklist 32** |
+| 36 | Modal/notice copy review | `36-modal-notice-copy-review.md` | **unit pass** UX-NOTICE-*; pilot **not run** |
 | 34 | #208 held post-restore + AZ wipe root cause | `34-held-post-restore-az-wipe.md` | **root cause**; rematch fix shipped |
-| 35 | #208 Rematch prove ×1 | `35-bug-208-rematch-prove.md` | **pass** prove 1 @ 15:10Z; prove 2 **not run** |
+| 35 | #208 Rematch prove ×2 | `35-bug-208-rematch-prove.md` | **pass** prove 1+2; issue closed |
 | — | Identity chain follow-up (rebind epic) | [`../ID-CHAIN-REBIND/`](../ID-CHAIN-REBIND/) | **DoR** epic [#214](https://github.com/semyon-alekseev-noveo/tt-sync/issues/214); Rematch insert ≠ vault-wide rebind |
 | 185 | #185 status source (analyst spec) | [`../../UX-ABYSS-STATUS-SRC.md`](../../UX-ABYSS-STATUS-SRC.md) | **spec only (not run)**; not DoR |
 

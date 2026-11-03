@@ -1,3 +1,13 @@
+### Iteration 2026-11-03 04:44 UTC
+
+- Context: Owner toast storm after tip reload; `New task created` on orphan re-attach; asked for modal/notice copy review.
+- Target: Honest create vs reattach notices; align orphan/cleanup modals with local sync cache; publish review.
+- Actions log: `taskLifecycleNotices.ts`; Orphan/Cleanup* copy; checkDatabase Notices; `36-modal-notice-copy-review.md`; AF/TEST_PLAN.
+- Validation: `npx vitest run` 915 pass; `npm run build` ok.
+- Problems: Pilot reattach prove still **not run** (`open`).
+- To Be Done: Merge PR; tip; owner strip-marker prove + Orphan glance; continue Settings #205 smoke.
+- References: `UX-NOTICE-REATTACH`, `36-modal-notice-copy-review.md`, `CHANGELOG.md`
+
 ### Iteration 2026-11-02 05:20 UTC
 
 - Context: Owner OK to hygiene OPEN ID-CHAIN children after #215 close + trash clear.

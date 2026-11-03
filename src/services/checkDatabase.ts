@@ -273,7 +273,7 @@ export async function runCheckDatabase(host: CheckDatabaseHost): Promise<void> {
 					log.debug(`Removing DB entry for non-existent file: ${filepath}`);
 					await host.plugin.fileMetadataService.deleteFileMetadata(filepath);
 				}
-				new Notice(`Removed ${deletedFiles.length} non-existent file(s) from the database.`);
+				new Notice(`Removed ${deletedFiles.length} non-existent file(s) from the local sync cache.`);
 			}
 		}
 
@@ -338,7 +338,7 @@ export async function runCheckDatabase(host: CheckDatabaseHost): Promise<void> {
 						}
 					}
 				});
-				new Notice(`Added ${tasksToResolve.length} orphaned task(s) to vault and database.`);
+				new Notice(`Added ${tasksToResolve.length} orphaned task(s) to vault and local sync cache.`);
 			} else if (action === 'delete') {
 				await doWithLock(LOCK_TASKS, async () => {
 					for (const t of tasksToResolve) {
@@ -369,7 +369,7 @@ export async function runCheckDatabase(host: CheckDatabaseHost): Promise<void> {
 				title: host.plugin.taskParser.stripOBSUrl(t.title),
 				filePath: t.filepath
 			}));
-			const modal = new TaskDeletionModal(host.plugin.app, items, 'they are deleted in TickTick or marked as deleted in the database.', (result) => { });
+			const modal = new TaskDeletionModal(host.plugin.app, items, 'they are deleted in TickTick or marked as deleted in the local sync cache.', (result) => { });
 			const prompt = await modal.showModal();
 			log.debug(`[checkDB] User confirmed deletion: ${prompt.confirmed}`);
 			if (prompt.confirmed) {
@@ -395,7 +395,7 @@ export async function runCheckDatabase(host: CheckDatabaseHost): Promise<void> {
 		}
 
 		await host.plugin.saveSettings();
-		new Notice(`Database check completed.`);
+		new Notice(`Local sync cache check completed.`);
 		log.debug('Done checking data.');
 		});
 }

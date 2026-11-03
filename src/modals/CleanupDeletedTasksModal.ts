@@ -1,5 +1,9 @@
 import { App, ButtonComponent, Modal, Setting } from 'obsidian';
 import type { LocalTask } from '@/db/schema';
+import {
+	CLEANUP_SOFT_DELETED_MESSAGE,
+	CLEANUP_SOFT_DELETED_TITLE,
+} from '@/ui/settings/settingsUxCopy';
 
 export class CleanupDeletedTasksModal extends Modal {
 	items: { task: LocalTask; selected: boolean }[] = [];
@@ -13,12 +17,12 @@ export class CleanupDeletedTasksModal extends Modal {
 	onOpen() {
 		const { titleEl, contentEl } = this;
 
-		titleEl.setText('Permanently delete deleted tasks');
+		titleEl.setText(CLEANUP_SOFT_DELETED_TITLE);
 
-		contentEl.createEl('p', { text: 'Select tasks to permanently remove from the database:' });
+		contentEl.createEl('p', { text: CLEANUP_SOFT_DELETED_MESSAGE });
 
 		if (this.items.length === 0) {
-			contentEl.createEl('p', { text: 'No deleted tasks found.' });
+			contentEl.createEl('p', { text: 'No soft-deleted cache rows found.' });
 			new Setting(contentEl).addButton(btn => {
 				btn.setButtonText('Close');
 				btn.onClick(() => {
