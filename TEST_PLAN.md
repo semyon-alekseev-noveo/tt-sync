@@ -32,19 +32,19 @@ Phase 1: **copy / layout**. Phase 2 (#192): **visibility / merge** when Abyss/GT
 
 | Case | Steps | Expected | Pilot |
 |------|-------|----------|-------|
-| UX-SET-GLOSSARY | Maintenance: ~4-row **Deletion glossary** + Guard chips. Also read **Check Database** orphan help (Cancel / Add / Delete). State Skip vs Cancel vs leave Purge alone. | ≤30s; orphans actionable from Maintenance copy. | **not run** |
+| UX-SET-GLOSSARY | Maintenance: ~4-row **Deletion glossary** (Sync discrepancies / Don’t delete / Rebind / Purge soft-deleted / Reset) + Guard chips. Also **Check sync cache** orphan help. | ≤30s; no Dexie / no «Purge trash (DB)» / no Skip-only held jargon. | **not run** (checklist `32` rewritten) |
 | UX-SET-SYNCTAG-EMPTY | Sync Control → GTD: clear **Pull filter tag**. Read badge `pull ALL` / tooltip. | Empty = pull **all** allow-listed lists; not “filter safely off.” | **not run** |
 | BUG-SYNC-TAG-CLEAR | Clear Pull filter tag; wait 1s; reload plugin / reopen Settings. | Field stays empty; data.json `SyncTag` is `""`; no bounce to old value. | **not run** |
-| UX-SET-MANAGE-DELETED | Maintenance: **Purge soft-deleted cache rows** — when soft-delete appears; local sync cache; ≠ held/TT wipe. | Clear when/what; no Dexie in UI. | **not run** |
-| UX-SET-RESET-ONE | Maintenance → **Danger zone** only. Tasks/Notes have no Reset. | One **Reset local sync cache**; vault + TickTick intact. | **not run** |
-| UX-SET-SYNCED-LISTS-LAYOUT | GTD Synced lists full-width; Remove on stale/unknown entries. | Layout usable; numbered/stale removable. | **not run** |
-| UX-SET-TAB-OWNERSHIP | Maintenance vs Sync Control tab intros; Full vault under Sync Control as rule. | Roles clear. | **not run** |
-| UX-SET-DEFAULTS-MODE | Defaults: Abyss ON/OFF blurb; Default Project (fallback list). | Dual-mode text present. | **not run** |
+| UX-SET-MANAGE-DELETED | Maintenance: **Purge soft-deleted cache rows** — when soft-delete appears; local sync cache; ≠ held/TT wipe. | Clear when/what; no Dexie in UI. | **not run** (see checklist `32` A4) |
+| UX-SET-RESET-ONE | Maintenance → **Danger zone** only. Tasks/Notes have no Reset. | One **Reset local sync cache**; vault + TickTick intact. | **not run** (checklist `32` A5) |
+| UX-SET-SYNCED-LISTS-LAYOUT | GTD Synced lists full-width; **Remove from allow-list** on stale/unknown. | Layout usable; stale removable. | **not run** (checklist `32` B2) |
+| UX-SET-TAB-OWNERSHIP | Maintenance vs Sync Control tab intros; Full vault under Sync Control as rule. | Roles clear. | **not run** (checklist `32` A1/B1/B10) |
+| UX-SET-DEFAULTS-MODE | Defaults: Abyss ON/OFF blurb; Default Project (fallback list). | Dual-mode text present. | **not run** (checklist `32` B4) |
 | UX-SET-SYNCED-LISTS-HELP | Read Synced lists help under GTD. | Allow-list; empty → nothing pulled; new TT list ≠ synced until ticked. | **not run** |
 | UX-SET-MAINT-SYNC-PRIMARY | Open Maintenance. | **Synchronize** is the sole primary (`mod-cta`); Check / Backup / Purge secondary. | **not run** |
 | UX-SET-HIDE-DEFAULTS | Abyss/GTD path on (UX-STUB-1: `projectSchemeEnabled` + `abyssTasksFormat` + non-empty `syncScopeFolders`). Open Sync Control → Defaults. | Default folder location hidden; note points to GTD **Tasks folder** (same key). | unit **pass**; pilot **not run** |
 | UX-SET-EXTRA-FILTERS | Non-empty `syncedLists`. Open Sync Control. | Extra filters / Limit sync section omitted (not a competing allow-list). | unit **pass**; pilot **not run** |
-| UX-SET-STATUS-VS-STAGE | Non-empty `statusListMappings`. Open GTD. | Stage→list shows inactive banner (no editable twin); Status → list under Notes remains. | unit **pass**; pilot **not run** |
+| UX-SET-STATUS-VS-STAGE | Non-empty `statusListMappings`. Open GTD. | **GTD tag → list mapping (inactive)** banner (no «stage» jargon); Status → list remains SoT. | unit **pass**; pilot **not run** (checklist `32` B6) |
 | UX-SET-SYNC-NOTES | Notes: find **Sync task descriptions** (was Sync Notes). Compare to Sync TickTick Notebook. | Label ≠ Notebook; help mentions NOTE-BODY / descriptions. | unit **pass**; pilot **not run** |
 | UX-SET-NOTEBOOK-WARN | Enable Sync TickTick Notebook; set Notebook folder to `00 Inbox` (or Inbox/capture). | Warning: Notebook ≠ Inbox/capture; prefer dedicated folder. No forced rewrite of existing path. | unit **pass**; pilot **not run** |
 | UX-SET-BKUP-DEFAULT | New install / DEFAULT: backup folder. Existing vault with `/`: open Maintenance → Backup folder. | Default `TickTickSync/backups`; warn when value is vault root `/`. | unit **pass**; pilot **not run** |
