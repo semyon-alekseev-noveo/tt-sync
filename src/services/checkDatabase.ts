@@ -14,7 +14,12 @@ import { db } from '@/db/dexie';
 import { getAllFiles, getFile, upsertFile } from '@/db/files';
 import { getDefaultFolder, getSettings } from '@/settings';
 import { doWithLock } from '@/utils/locks';
-import { isOpenTaskEligibleForVaultImport, resolveOrphanAddFilepath } from '@/sync/vaultImportEligibility';
+import {
+	fileHasSameTitleOtherId,
+	isOpenTaskEligibleForVaultImport,
+	normalizeVaultImportTitle,
+	resolveOrphanAddFilepath,
+} from '@/sync/vaultImportEligibility';
 import { resolveSyncedListIds } from '@/syncScope';
 import { Notice, TFile } from 'obsidian';
 import log from '@/utils/logger';
@@ -42,6 +47,8 @@ export async function runCheckDatabase(host: CheckDatabaseHost): Promise<void> {
 		const tasksToResolve: { filepath: string, taskId: string, title: string, projectId: string, task: ITask, inFile: boolean }[] = [];
 		const deletedFiles: string[] = [];
 		const allLocalIds = new Set<string>();
+		/** Titles already linked in vault — BUG-ORPHAN-STALE-REMATCH TT-scan guard. */
+		const vaultLinkedTitles = new Set<string>();
 
 		await doWithLock(LOCK_TASKS, async () => {
 			// 0. Fetch fresh project groups and verify file locations against projects/groups
@@ -151,6 +158,14 @@ export async function runCheckDatabase(host: CheckDatabaseHost): Promise<void> {
 				const allTaskIds = Array.from(new Set([...dbTaskIds, ...physicalTaskIds]));
 				for (const id of allTaskIds) allLocalIds.add(id);
 
+				const physicalTitleLines: Array<{ id: string; title: string }> = physicalTaskIds.map((pid) => {
+					const line = fileMap.getTaskString(pid) || '';
+					const title = host.plugin.taskParser?.getTaskContentFromLineText(line) ?? '';
+					const norm = normalizeVaultImportTitle(title);
+					if (norm) vaultLinkedTitles.add(norm);
+					return { id: pid, title };
+				});
+
 				// Track whether any task in this file needs an Obsidian URL update
 				let needsUrlUpdate = false;
 
@@ -182,6 +197,24 @@ export async function runCheckDatabase(host: CheckDatabaseHost): Promise<void> {
 							// getTaskById may not return parentId; supplement from local DB if needed
 							if (!tickTickTask.parentId && taskObject?.parentId) {
 								tickTickTask.parentId = taskObject.parentId;
+							}
+							// UX-ORPHAN-SKIP-DONE on metadata path (not only TT-scan)
+							if (!isOpenTaskEligibleForVaultImport(tickTickTask)) {
+								log.debug(`[checkDB] SKIP orphan ${taskId} — not eligible for vault import (status=${tickTickTask.status})`);
+								if (!inFile) {
+									await host.plugin.fileMetadataService?.removeTaskFromFile(filepath, taskId);
+								}
+								continue;
+							}
+							// BUG-ORPHAN-STALE-REMATCH: same title already linked with a newer id in this file
+							if (!inFile && fileHasSameTitleOtherId(
+								physicalTitleLines,
+								taskId,
+								host.plugin.taskParser?.stripOBSUrl(tickTickTask.title || '') || tickTickTask.title || '',
+							)) {
+								log.debug(`[checkDB] STALE-REMATCH prune ${taskId} — title already in file under another id`);
+								await host.plugin.fileMetadataService?.removeTaskFromFile(filepath, taskId);
+								continue;
 							}
 							// Task is alive on TickTick — treat as orphan and let user decide
 							log.debug(`[checkDB] ORPHAN task ${taskId} — alive on TickTick (title="${tickTickTask.title}", projectId=${tickTickTask.projectId}), adding to resolve list`);
@@ -314,6 +347,15 @@ export async function runCheckDatabase(host: CheckDatabaseHost): Promise<void> {
 						}
 						if (allLocalIds.has(ttId)) { log.debug(`[checkDB] TT-scan: skip ${ttId} — already in local IDs`); continue; }
 						if (resolveIds.has(ttId)) { log.debug(`[checkDB] TT-scan: skip ${ttId} — already in resolve list`); continue; }
+						// BUG-ORPHAN-STALE-REMATCH: title already on a vault line with another id
+						{
+							const ttTitle = host.plugin.taskParser?.stripOBSUrl(ttTask.title || '') || ttTask.title || '';
+							const norm = normalizeVaultImportTitle(ttTitle);
+							if (norm && vaultLinkedTitles.has(norm)) {
+								log.debug(`[checkDB] TT-scan: skip ${ttId} — title already linked in vault (stale rematch)`);
+								continue;
+							}
+						}
 						const filepath = await host.plugin.fileMetadataService?.getFilepathForProjectId(ttTask.projectId) || '';
 						log.debug(`[checkDB] TT-scan: ORPHAN ${ttId} — no local reference (title="${ttTask.title}", projectId=${ttTask.projectId}, filepath="${filepath}")`);
 						tasksToResolve.push({
@@ -376,6 +418,26 @@ export async function runCheckDatabase(host: CheckDatabaseHost): Promise<void> {
 							defaultProjectFile: defaultMapped,
 							abyssCaptureFile: abyssCapture,
 						});
+						// BUG-ORPHAN-STALE-REMATCH: do not Add a duplicate when the target already has the title
+						if (targetFilepath && !t.inFile) {
+							const targetFile = vault.getAbstractFileByPath(targetFilepath);
+							if (targetFile instanceof TFile) {
+								const map = new NewFileMap(host.plugin.app, host.plugin, targetFile);
+								await map.init();
+								const lines = map.getTasks().map((pid) => ({
+									id: pid,
+									title: host.plugin.taskParser?.getTaskContentFromLineText(map.getTaskString(pid) || '') ?? '',
+								}));
+								const orphanTitle = host.plugin.taskParser?.stripOBSUrl(t.title) || t.title;
+								if (fileHasSameTitleOtherId(lines, t.taskId, orphanTitle)) {
+									log.debug(`[checkDB] STALE-REMATCH skip Add ${t.taskId} — title already in ${targetFilepath}`);
+									if (t.filepath) {
+										await host.plugin.fileMetadataService?.removeTaskFromFile(t.filepath, t.taskId);
+									}
+									continue;
+								}
+							}
+						}
 						await upsertFile(targetFilepath, t.projectId);
 						await host.plugin.taskRepository.upsertTask(t.task, targetFilepath, Date.now());
 						if (!t.inFile && targetFilepath) {

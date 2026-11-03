@@ -20,6 +20,7 @@ Review: `docs/pilot/results/UX-OBS-TT-SOAK/36-modal-notice-copy-review.md`. Unit
 | UX-ORPHAN-SYNCED-LISTS | Synced lists: HappyBirthdays (or any) **unticked**. Check sync cache. | That list’s tasks do **not** appear in orphan modal. | **not run** |
 | BUG-CHECK-CACHE-CHECKPOINT | Note `checkPoint` in data.json. Check sync cache twice (Leave alone both times). | Same orphan set (or empty); `checkPoint` unchanged by Check. | **not run** |
 | BUG-ORPHAN-ADD-STICKY | Check → Add to vault for orphans. Check again. | Same ids not re-listed; lines appear under capture/abyss-active (or mapped project note). | **not run** |
+| BUG-ORPHAN-STALE-REMATCH | After Rematch: vault lines have new ids; Check lists old titles (e.g. Подумать над… / Румяна). Run Check again (no Add). | Modal empty or without those titles; no duplicate lines; completed (Румяна) not listed. | **not run** |
 | UX-NOTICE-MODAL-COPY | Maintenance → Check sync cache (or open Orphan / Clean up cache if offered). | Orphan Leave alone / Add may duplicate / Delete; cleanup = local sync cache. | **not run** |
 
 ## UX-SET — Settings UX redesign (epic #189 / Phase 1 #191 / Phase 2 #192 / Phase 3 #193 / Phase 4 #194)
