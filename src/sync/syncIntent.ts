@@ -148,6 +148,17 @@ export function isDestructivePlannedDeletion(item: PlannedDeletionLike): boolean
 }
 
 /**
+ * ARCH-SYNC #259 — Sync discrepancies (окно расхождений) lists residual
+ * **destructives** only (PullStripVault / PushDeleteTT). DetachMarker / Link /
+ * InsertLine stay out of the held+Confirm wipe dialect.
+ */
+export function selectResidualDestructivePlanned<T extends PlannedDeletionLike>(
+	planned: readonly T[],
+): T[] {
+	return planned.filter(item => isDestructivePlannedDeletion(item));
+}
+
+/**
  * Threshold counters from a mixed plan: identity intents (Link / Detach / Insert)
  * and DetachMarker rows from legacy planners do not inflate these numbers.
  */

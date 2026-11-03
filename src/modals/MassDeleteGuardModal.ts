@@ -8,6 +8,7 @@ import {
 	REBIND_BUTTON_DESC,
 	REBIND_BUTTON_LABEL,
 	REBIND_VAULT_WIPE_HINT,
+	SYNC_DISCREPANCY_APPLY_LABEL,
 	SYNC_DISCREPANCY_MODAL_LEAD,
 	SYNC_DISCREPANCY_MODAL_TITLE,
 	SYNC_DISCREPANCY_REPORT_LABEL,
@@ -15,13 +16,14 @@ import {
 	type GuardDecision,
 	type PlannedDeletion,
 } from '@/sync/massDeleteGuard';
+import { selectResidualDestructivePlanned } from '@/sync/syncIntent';
 
 export type MassDeletePromptChoice = 'apply-once' | 'skip' | 'open-report' | 'rematch';
 
 /**
  * Manual sync only. Timeout skips, same as the single-task deletion dialog:
  * a missed prompt must not delete.
- * UX-SYNC-ONE-FLOW: titled Sync discrepancies — day-to-day path vs Check sync cache.
+ * UX-SYNC-ONE-FLOW / ARCH-SYNC #259: Sync discrepancies — residual destructives only.
  */
 export class MassDeleteGuardModal extends Modal {
 	private choice: MassDeletePromptChoice = 'skip';
@@ -30,6 +32,7 @@ export class MassDeleteGuardModal extends Modal {
 	constructor(
 		app: App,
 		private readonly decision: GuardDecision,
+		/** Full planned bag (Rebind uses Link candidates; DetachMarker drain on Rematch). */
 		private readonly items: PlannedDeletion[],
 		private readonly previewCount: number,
 	) {
@@ -39,7 +42,9 @@ export class MassDeleteGuardModal extends Modal {
 	onOpen() {
 		const { titleEl, contentEl } = this;
 		titleEl.setText(SYNC_DISCREPANCY_MODAL_TITLE);
-		const vaultWipeTt = this.items.some(
+		// #259 — list residual destructives only (PullStripVault / PushDeleteTT).
+		const residual = selectResidualDestructivePlanned(this.items);
+		const vaultWipeTt = residual.some(
 			item => item.kind === 'task' && item.direction === 'vault-to-ticktick' && item.action === 'delete',
 		);
 		const restoreShaped = isRestoreShapedHold(this.items);
@@ -51,13 +56,13 @@ export class MassDeleteGuardModal extends Modal {
 		if (vaultWipeTt) {
 			contentEl.createEl('p', { text: REBIND_VAULT_WIPE_HINT });
 		}
-		const shown = previewItems(this.items, this.previewCount);
+		const shown = previewItems(residual, this.previewCount);
 		const list = contentEl.createEl('ul');
 		for (const item of shown) {
 			list.createEl('li', { text: formatPlannedDeletionLabel(item) });
 		}
-		if (this.items.length > shown.length) {
-			contentEl.createEl('p', { text: `And ${this.items.length - shown.length} more. Open details lists all of them.` });
+		if (residual.length > shown.length) {
+			contentEl.createEl('p', { text: `And ${residual.length - shown.length} more. Open details lists all of them.` });
 		}
 		new Setting(contentEl)
 			.addButton(button => {
@@ -84,7 +89,7 @@ export class MassDeleteGuardModal extends Modal {
 					: '',
 			)
 			.addButton(button => {
-				button.setButtonText('Apply once');
+				button.setButtonText(SYNC_DISCREPANCY_APPLY_LABEL);
 				// ID-REBIND-UX: never warn/CTA Apply when vault→TT (restore-shaped) dominates
 				if (!restoreShaped) button.setWarning();
 				button.onClick(() => this.finish('apply-once'));

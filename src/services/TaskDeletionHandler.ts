@@ -440,8 +440,8 @@ export class TaskDeletionHandler {
 		if (!prompt.confirmed) {
 			if (!prompt.suppressedPending) {
 				const msg = prompt.timedOut
-					? 'TickTickSync: TickTick tasks were not deleted (dialog timed out). Run sync again and choose Confirm Deletion.'
-					: 'TickTickSync: TickTick tasks were not deleted. Choose Confirm Deletion on the dialog, restore the task lines in Obsidian, or delete the tasks in TickTick manually.';
+					? 'TickTickSync: TickTick tasks were not deleted (dialog timed out). Run Synchronize again and choose Apply once on Sync discrepancies.'
+					: 'TickTickSync: TickTick tasks were not deleted. Choose Apply once on Sync discrepancies, restore the task lines in Obsidian, or delete the tasks in TickTick manually.';
 				new Notice(msg, 8000);
 			}
 			return [];

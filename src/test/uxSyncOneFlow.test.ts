@@ -7,6 +7,7 @@ import { join } from 'path';
 import { describe, expect, it } from 'vitest';
 import {
 	guardNotice,
+	SYNC_DISCREPANCY_APPLY_LABEL,
 	SYNC_DISCREPANCY_MODAL_LEAD,
 	SYNC_DISCREPANCY_MODAL_TITLE,
 	SYNC_DISCREPANCY_NOTIFY_HINT,
@@ -31,13 +32,15 @@ describe('UX-SYNC-ONE-FLOW', () => {
 
 	it('discrepancy modal copy is clear and wired into MassDeleteGuardModal', () => {
 		expect(SYNC_DISCREPANCY_MODAL_TITLE.toLowerCase()).toContain('discrepan');
-		expect(SYNC_DISCREPANCY_MODAL_LEAD.toLowerCase()).toMatch(/mismatch|disagree/);
+		expect(SYNC_DISCREPANCY_MODAL_LEAD.toLowerCase()).toMatch(/mismatch|destructive|residual/);
 		expect(SYNC_DISCREPANCY_SKIP_LABEL.toLowerCase()).toMatch(/don.?t delete/);
+		expect(SYNC_DISCREPANCY_APPLY_LABEL.toLowerCase()).toContain('apply once');
 		expect(SYNC_DISCREPANCY_REPORT_LABEL.toLowerCase()).toMatch(/detail/);
 		const modal = readFileSync(join(__dirname, '../modals/MassDeleteGuardModal.ts'), 'utf8');
 		expect(modal).toContain('SYNC_DISCREPANCY_MODAL_TITLE');
 		expect(modal).toContain('SYNC_DISCREPANCY_SKIP_LABEL');
-		expect(modal).toContain('UX-SYNC-ONE-FLOW');
+		expect(modal).toContain('SYNC_DISCREPANCY_APPLY_LABEL');
+		expect(modal).toMatch(/UX-SYNC-ONE-FLOW|ARCH-SYNC #259/);
 	});
 
 	it('notify-only toast points back to Synchronize choices', () => {

@@ -1,4 +1,10 @@
 import { App, Modal, Notice, Setting } from 'obsidian';
+import {
+	SYNC_DISCREPANCY_APPLY_LABEL,
+	SYNC_DISCREPANCY_CONFIRM_LEAD,
+	SYNC_DISCREPANCY_MODAL_TITLE,
+	SYNC_DISCREPANCY_SKIP_LABEL,
+} from '@/sync/massDeleteGuard';
 
 /** Prompts never block the sync queue: unanswered within this time = skip (nothing deleted). */
 /** Large vault-wide batches need time to read the list; cap at 3 minutes. */
@@ -30,12 +36,16 @@ export interface DeletionItem {
 	line?: string;
 }
 
+/**
+ * ARCH-SYNC #259 — Confirm PushDeleteTT shares Sync discrepancies (окно расхождений)
+ * copy with the held modal (Don’t delete / Apply once).
+ */
 export class TaskDeletionModal extends Modal {
-	title = 'Task Deletion Confirmation';
+	title = SYNC_DISCREPANCY_MODAL_TITLE;
 
-	message = 'The following Task(s) will be deleted because: ';
-	cancelLabel = 'Cancel';
-	confirmLabel = 'Confirm Deletion';
+	message = `${SYNC_DISCREPANCY_CONFIRM_LEAD} Reason: `;
+	cancelLabel = SYNC_DISCREPANCY_SKIP_LABEL;
+	confirmLabel = SYNC_DISCREPANCY_APPLY_LABEL;
 	items: DeletionItem [] = [];
 	result!: boolean;
 	reason: string;
