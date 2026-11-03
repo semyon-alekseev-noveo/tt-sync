@@ -1,9 +1,19 @@
+### Iteration 2026-11-03 06:45 UTC
+
+- Context: Owner chose **Add to vault**, not Leave alone — still saw “new” orphans each Check.
+- Target: Sticky Add on Abyss (filepath fallback + Dexie ids in allLocalIds) + prior checkpoint fix.
+- Actions log: `resolveOrphanAddFilepath`; seed `db.tasks` into allLocalIds; honest Add notice.
+- Validation: vitest vaultImportEligibility + bugCheckCacheCheckpoint; build ok; 925 tests pass.
+- Problems: No changes.
+- To Be Done: Push #250; tip Add once → second Check clean of those ids.
+- References: `BUG-ORPHAN-ADD-STICKY`, `BUG-CHECK-CACHE-CHECKPOINT`, `CHANGELOG.md`
+
 ### Iteration 2026-11-03 06:35 UTC
 
 - Context: Owner: every Check finds “new” tasks; logs → Check used incremental checkpoint and advanced it.
 - Target: `getAllTasks` = full dump at cp 0 without persisting checkPoint (BUG-CHECK-CACHE-CHECKPOINT).
 - Actions log: `getTaskDetails(0, false)`; unit test; AF/TEST_PLAN on #250 branch.
-- Validation: vitest bugCheckCacheCheckpoint; full suite + build (pending).
+- Validation: vitest bugCheckCacheCheckpoint; full suite + build ok.
 - Problems: Stale metadata-id orphans on Leave alone may still reappear (`open`).
 - To Be Done: Push #250; tip Check×2 stable; checkPoint unchanged.
 - References: `BUG-CHECK-CACHE-CHECKPOINT`, `CHANGELOG.md`

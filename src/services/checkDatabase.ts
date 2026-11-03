@@ -14,7 +14,7 @@ import { db } from '@/db/dexie';
 import { getAllFiles, getFile, upsertFile } from '@/db/files';
 import { getDefaultFolder, getSettings } from '@/settings';
 import { doWithLock } from '@/utils/locks';
-import { isOpenTaskEligibleForVaultImport } from '@/sync/vaultImportEligibility';
+import { isOpenTaskEligibleForVaultImport, resolveOrphanAddFilepath } from '@/sync/vaultImportEligibility';
 import { resolveSyncedListIds } from '@/syncScope';
 import { Notice, TFile } from 'obsidian';
 import log from '@/utils/logger';
@@ -263,6 +263,14 @@ export async function runCheckDatabase(host: CheckDatabaseHost): Promise<void> {
 		});
 		log.debug(`Finished checking database for ${markdownFiles.length} markdown files and ${dbFiles.length} DB entries.`);
 		log.debug(`Found ${tasksToDelete.length} tasks to be deleted.`);
+		// BUG-ORPHAN-ADD-STICKY: include Dexie-only ids (Add may have upserted before vault write).
+		try {
+			for (const lt of await db.tasks.toArray()) {
+				if (lt.taskId) allLocalIds.add(lt.taskId);
+			}
+		} catch (e) {
+			log.warn('[checkDB] could not seed allLocalIds from Dexie tasks', e);
+		}
 		log.debug(`Known local task IDs: ${allLocalIds.size}.`);
 
 		// Offer to clean up DB entries for files that no longer exist in the vault
@@ -342,20 +350,54 @@ export async function runCheckDatabase(host: CheckDatabaseHost): Promise<void> {
 			const action = await modal.showModal();
 			log.debug(`[checkDB] User chose action "${action}" for orphaned tasks`);
 			if (action === 'add') {
+				let wrote = 0;
+				let dexieOnly = 0;
 				await doWithLock(LOCK_TASKS, async () => {
+					let abyssCapture: string | undefined;
+					try {
+						const raw = await host.plugin.app.vault.adapter.read('.obsidian/plugins/abyss-tasks/data.json');
+						const path = (JSON.parse(raw) as { taskFilePath?: unknown }).taskFilePath;
+						if (typeof path === 'string' && path.trim()) abyssCapture = path.trim();
+					} catch { /* default via resolveOrphanAddFilepath */ }
+
 					for (const t of tasksToResolve) {
-						const targetFilepath = t.filepath || (await host.plugin.fileMetadataService?.getFilepathForProjectId(t.projectId)) || '';
+						const parentNote = t.task.parentId
+							? host.plugin.projectScheme?.noteForParent?.(t.task.parentId)
+							: undefined;
+						const projectMapped = await host.plugin.fileMetadataService?.getFilepathForProjectId(t.projectId);
+						const defaultMapped = getSettings().defaultProjectId
+							? await host.plugin.fileMetadataService?.getFilepathForProjectId(getSettings().defaultProjectId)
+							: undefined;
+						const targetFilepath = await resolveOrphanAddFilepath({
+							filepath: t.filepath,
+							projectId: t.projectId,
+							parentNote,
+							projectMappedFile: projectMapped,
+							defaultProjectFile: defaultMapped,
+							abyssCaptureFile: abyssCapture,
+						});
+						await upsertFile(targetFilepath, t.projectId);
 						await host.plugin.taskRepository.upsertTask(t.task, targetFilepath, Date.now());
 						if (!t.inFile && targetFilepath) {
 							try {
-								await host.plugin.fileOperation?.synchronizeToVault(targetFilepath, [t.task], false);
+								const ok = await host.plugin.fileOperation?.synchronizeToVault(targetFilepath, [t.task], false);
+								if (ok) wrote++;
+								else dexieOnly++;
 							} catch (err) {
-								log.warn(`Could not add task ${t.taskId} to file ${t.filepath}:`, err);
+								dexieOnly++;
+								log.warn(`Could not add task ${t.taskId} to file ${targetFilepath}:`, err);
 							}
+						} else if (t.inFile) {
+							wrote++;
+						} else {
+							dexieOnly++;
 						}
 					}
 				});
-				new Notice(`Added ${tasksToResolve.length} orphaned task(s) to vault and local sync cache.`);
+				new Notice(
+					`Added ${tasksToResolve.length} orphaned task(s) (${wrote} to vault lines, ${dexieOnly} cache-only).`,
+					8000,
+				);
 			} else if (action === 'delete') {
 				await doWithLock(LOCK_TASKS, async () => {
 					for (const t of tasksToResolve) {
