@@ -43,6 +43,14 @@ describe('UX-SYNC-ONE-FLOW', () => {
 		expect(modal).toMatch(/UX-SYNC-ONE-FLOW|ARCH-SYNC #259/);
 	});
 
+	it('Confirm under-threshold also wires Don’t delete / Rebind / Apply (UX-SYNC-CONFIRM-REBIND)', () => {
+		const confirm = readFileSync(join(__dirname, '../modals/TaskDeletionModal.ts'), 'utf8');
+		expect(confirm).toContain('SYNC_DISCREPANCY_MODAL_TITLE');
+		expect(confirm).toContain('REBIND_BUTTON_LABEL');
+		expect(confirm).toContain('confirmOffersRematch');
+		expect(confirm).toContain('UX-SYNC-CONFIRM-REBIND');
+	});
+
 	it('notify-only toast points back to Synchronize choices', () => {
 		const notice = guardNotice(
 			{ block: true, reason: 'threshold', taskDeletions: 40, commentDeletions: 0, percent: 50, trackedTasks: 80 },

@@ -450,12 +450,17 @@ describe('ARCH-SYNC-INTENT-IDENTITY (#259 Sync discrepancies UI)', () => {
 		const held = readFileSync(join(__dirname, '../modals/MassDeleteGuardModal.ts'), 'utf8');
 		expect(held).toContain('selectResidualDestructivePlanned');
 		expect(held).toContain('SYNC_DISCREPANCY_APPLY_LABEL');
+		expect(held).toContain('REBIND_BUTTON_LABEL');
 		expect(held).toContain('#259');
 
 		const confirm = readFileSync(join(__dirname, '../modals/TaskDeletionModal.ts'), 'utf8');
 		expect(confirm).toContain('SYNC_DISCREPANCY_MODAL_TITLE');
 		expect(confirm).toContain('SYNC_DISCREPANCY_SKIP_LABEL');
 		expect(confirm).toContain('SYNC_DISCREPANCY_APPLY_LABEL');
+		expect(confirm).toContain('REBIND_BUTTON_LABEL');
+		expect(confirm).toContain('confirmOffersRematch');
 		expect(confirm).toContain('#259');
+		expect(confirm).toContain('UX-SYNC-CONFIRM-REBIND');
 	});
 });
+

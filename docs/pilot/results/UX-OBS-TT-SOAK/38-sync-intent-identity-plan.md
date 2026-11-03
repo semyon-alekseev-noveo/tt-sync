@@ -71,6 +71,7 @@ Process: `DEV_FLOW.md` / `AGENTS.md` — AF case before code; PR into `abyss-map
 - Single window for residual **destructives** (held + Confirm): PullStripVault / PushDeleteTT only.
 - Align copy with UX-SYNC-ONE-FLOW / glossary (Sync discrepancies = окно расхождений).
 - Don’t delete / Rebind / Apply semantics stay; Rebind = Link (+ InsertLine) mode, not a separate wipe dialect.
+- **Post-#259 gap:** Confirm initially shared title/skip/apply only; Rebind button landed later as `UX-SYNC-CONFIRM-REBIND` (see [`40-confirm-rebind-gap.md`](./40-confirm-rebind-gap.md)).
 
 ### Step 5 — Check cache same enumerator
 

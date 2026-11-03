@@ -10,6 +10,7 @@ import { NewFileMap } from '@/services/NewFileMap';
 import { CleanupDatabaseModal } from '@/modals/CleanupDatabaseModal';
 import { TaskDeletionModal } from '@/modals/TaskDeletionModal';
 import { OrphanTaskModal, type OrphanItem } from '@/modals/OrphanTaskModal';
+import { applyConfirmRematch } from '@/sync/confirmRematch';
 import { db } from '@/db/dexie';
 import { getAllFiles, getFile, upsertFile } from '@/db/files';
 import { getDefaultFolder, getSettings } from '@/settings';
@@ -556,8 +557,18 @@ export async function runCheckDatabase(host: CheckDatabaseHost): Promise<void> {
 					() => { },
 				);
 				const prompt = await modal.showModal();
-				log.debug(`[checkDB] User confirmed residual destructives: ${prompt.confirmed}`);
-				if (prompt.confirmed) {
+				log.debug(
+					`[checkDB] residual Sync discrepancies: confirmed=${prompt.confirmed} rematch=${!!prompt.rematch}`,
+				);
+				if (prompt.rematch) {
+					// UX-SYNC-CONFIRM-REBIND: Link markers; skip PullStripVault / PushDeleteTT deletes.
+					try {
+						await applyConfirmRematch(host.plugin, items);
+					} catch (error) {
+						log.error('[checkDB] Confirm Rebind failed', error);
+						new Notice('TickTickSync: Rebind failed — nothing deleted. See console.', 8000);
+					}
+				} else if (prompt.confirmed) {
 					await doWithLock(LOCK_TASKS, async () => {
 						const byFile: Record<string, Set<string>> = {};
 						for (const t of residual) {
