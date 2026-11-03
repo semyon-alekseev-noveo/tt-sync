@@ -37,6 +37,7 @@
 
 ## Problems
 
+- **ARCH-SYNC-INTENT-IDENTITY** — Rebind loop + Rebind→Confirm false wipe; debate #37 agreed; epic [#255](https://github.com/semyon-alekseev-noveo/tt-sync/issues/255) children #256–#261 (`open`; plan `UX-OBS-TT-SOAK/38-…`).
 - **ID-CHAIN** — Epic [#214](https://github.com/semyon-alekseev-noveo/tt-sync/issues/214): eng children closed; #208 Rematch prove ×2 **pass**/closed; optional [#218](https://github.com/semyon-alekseev-noveo/tt-sync/issues/218) keeps epic open.
 - **UX-NOTICE** — create vs reattach Notices + modal cache wording: unit this tip; pilot strip-marker prove **not run** (`open`).
 - **BUG-RESET-CACHE-DELETE** — post-Reset Synchronize proposed vault-line deletes for pre-wipe ids (DON-253); owner **Cancel** only. Fix on tip/PR; pilot prove ×2 pending (`UX-OBS-TT-SOAK/24-post-reset-delete-modal.md`) (`open` until prove).
@@ -55,10 +56,11 @@
 
 ## To Be Done
 
-0. **Settings #205 / checklist 32:** Owner re-smoke after tip; then close #205 → #189.
-0a. **UX-NOTICE-***: After merge, tip + strip-marker reattach toast prove; Orphan modal glance (`36-…`).
-0b. **#214:** Optional #218 only; else close epic when owner ready.
-0c. **BUG-RESET-CACHE-DELETE:** prove ×2 Reset→Synchronize still owner-gated (`25-…`).
+0. **ARCH-SYNC #255:** Merge docs PR; implement #256→#261 in order; pilot prove ×2 before epic close.
+0a. **Settings #205 / checklist 32:** Owner re-smoke after tip; then close #205 → #189.
+0b. **UX-NOTICE-***: After merge, tip + strip-marker reattach toast prove; Orphan modal glance (`36-…`).
+0c. **#214:** Optional #218 only; else close epic when owner ready.
+0d. **BUG-RESET-CACHE-DELETE:** prove ×2 Reset→Synchronize still owner-gated (`25-…`).
 1. Owner decides UX Decision #1 (Abyss vs `#ticktick`) — prefer clear ignore on pilot; optional TTS stop note-level `ticktick` stamp later (`06-decision-ticktick-vs-abyss.md`).
 2. **[done]** UX-STUB-1 / BUG-LIST-STUB-RECREATE pilot cleanup + prove ×2 after #179 (`08-stub-cleanup-prove.md`).
 2b. **[done]** UX-STATUS-MAP-1/2 prove ×2 after #182 (`16-status-map-prove.md`); MAP-3/4/PULL + Abyss customs still open; version bump when owner asks.
