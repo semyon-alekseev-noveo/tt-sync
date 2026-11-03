@@ -417,6 +417,7 @@ export async function runCheckDatabase(host: CheckDatabaseHost): Promise<void> {
 							projectMappedFile: projectMapped,
 							defaultProjectFile: defaultMapped,
 							abyssCaptureFile: abyssCapture,
+							newTasksFile: getSettings().newTasksFile,
 						});
 						// BUG-ORPHAN-STALE-REMATCH: do not Add a duplicate when the target already has the title
 						if (targetFilepath && !t.inFile) {
