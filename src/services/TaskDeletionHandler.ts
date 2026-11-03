@@ -25,6 +25,7 @@ import { classifyFileRead, deletionConfirmMode, obsidianSyncFileState } from '@/
 import { isNotebookProtectedFromVaultDelete, isNotebookTask } from '@/sync/notebookGuard';
 import { getProjectById } from '@/db/projects';
 import type { SyncRunContext } from '@/sync/SyncRunContext';
+import { linkTombstoneBlocksPushDeleteTT } from '@/sync/syncIntent';
 import log from '@/utils/logger';
 
 export class TaskDeletionHandler {
@@ -158,6 +159,7 @@ export class TaskDeletionHandler {
 		const out: string[] = [];
 		for (const lt of candidates) {
 			if (scan.presentIds.has(lt.taskId)) continue;
+			if (linkTombstoneBlocksPushDeleteTT(lt.taskId)) continue;
 			if (lt.file && scan.untrustedFiles.has(lt.file)) continue;
 			if (await this.isNotebookProtectedLocal(lt.task)) {
 				log.info(`TickTickSync: BUG-NOTEBOOK-NO-DELETE skip orphan delete for ${lt.taskId} (Notebook)`);
@@ -211,6 +213,12 @@ export class TaskDeletionHandler {
 		for (const id of [...taskIds]) {
 			if (ctx.isPendingMarker(id)) {
 				log.info(`TickTickSync: skipping deletion prompt for ${id}; vault marker write is still pending`);
+				taskIds.delete(id);
+				continue;
+			}
+			// ARCH-SYNC #257: Link tombstone (пометка вытесненного id) — rewrite ≠ user-removed.
+			if (linkTombstoneBlocksPushDeleteTT(id)) {
+				log.info(`TickTickSync: skipping Confirm wipe for ${id}; Link-tombstoned this run`);
 				taskIds.delete(id);
 			}
 		}

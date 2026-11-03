@@ -1,3 +1,13 @@
+### Iteration 2026-11-03 09:30 UTC
+
+- Context: Owner merged #256 (PR #263); start #257 identity/Link pass + Link tombstones.
+- Target: Rematch/Rebind stamps displaced-id tombstones; re-scan `presentIds`; residual PushDeleteTT excludes linked/tombstoned; Confirm skips tombstones.
+- Actions log: Extended `syncIntent.ts` tombstones + residual compile; `rebindVault` `displacedIds` + `allLiveIds`; rematchPhase identity wiring; TaskDeletionHandler / planVaultTaskDeletions filters; AF/TEST_PLAN.
+- Validation: focused vitest green; full suite + build + cycles in this PR.
+- Problems: DetachMarker hold drain (#258), Sync discrepancies UI (#259), Check enumerator (#260), pilot prove ×2 (#261) still `open`.
+- To Be Done: PR #257 → abyss-mapping; then #258.
+- References: #255, #257, `38-sync-intent-identity-plan.md`, `CHANGELOG.md`
+
 ### Iteration 2026-11-03 09:21 UTC
 
 - Context: Owner merged docs PR #262; start ARCH-SYNC epic with child #256 (types only).

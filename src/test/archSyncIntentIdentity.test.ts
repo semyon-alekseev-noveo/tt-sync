@@ -1,25 +1,31 @@
 /**
- * ARCH-SYNC-INTENT-IDENTITY (#256) — intent types, precedence, destructive-only threshold.
- * Identity-before-plan / Link tombstones: #257 (out of scope here).
+ * ARCH-SYNC-INTENT-IDENTITY (#256 types + #257 identity/Link tombstones).
  */
-import { describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 import {
 	DEFAULT_MASS_DELETE_GUARD,
 	evaluateMassDeleteGuard,
+	planVaultTaskDeletions,
 	type PlannedDeletion,
 	type SideSnapshot,
 } from '@/sync/massDeleteGuard';
+import { rebindFileContent } from '@/sync/rebindVault';
 import {
 	SYNC_INTENT_PRECEDENCE,
+	clearLinkTombstones,
 	compareSyncIntentsByPrecedence,
+	compileResidualDestructivesAfterIdentity,
 	countDestructiveFromPlanned,
 	countDestructiveSyncIntents,
 	isDestructivePlannedDeletion,
 	isDestructiveSyncIntent,
+	isLinkTombstoned,
+	linkTombstoneBlocksPushDeleteTT,
 	mismatchImpliesAutoPushDeleteTT,
 	plannedDeletionToSyncIntent,
 	plannedDeletionsToSyncIntents,
 	sortSyncIntentsByPrecedence,
+	stampLinkTombstones,
 	syncIntentPrecedenceRank,
 	type SyncIntent,
 	type SyncIntentKind,
@@ -187,5 +193,83 @@ describe('ARCH-SYNC-INTENT-IDENTITY', () => {
 		];
 		expect(countDestructiveSyncIntents(identity)).toBe(0);
 		expect(identity.every(i => !isDestructiveSyncIntent(i.kind))).toBe(true);
+	});
+});
+
+describe('ARCH-SYNC-INTENT-IDENTITY (#257 identity / Link tombstones)', () => {
+	beforeEach(() => {
+		clearLinkTombstones();
+	});
+
+	it('Link rewrite reports displacedIds (вытесненные id)', () => {
+		const newId = 'newid01newid01newid01new1';
+		const oldId = 'oldid01oldid01oldid01old1';
+		const live = new Set([newId]);
+		const snapshot = [
+			'# P',
+			'## Active Zone',
+			`- [ ] Mixer %%[ticktick_id:: ${oldId}]%%`,
+			'',
+		].join('\n');
+		const r = rebindFileContent(
+			snapshot,
+			[{ id: newId, title: 'Mixer', projectId: 'p', content: '', items: [] }] as never,
+			live,
+		);
+		expect(r.rebound).toBe(1);
+		expect(r.displacedIds).toEqual([oldId]);
+		expect(r.next).toContain(`ticktick_id:: ${newId}`);
+		expect(r.next).not.toContain(oldId);
+	});
+
+	it('Link tombstones block PushDeleteTT / Confirm for displaced id same run', () => {
+		const displaced = 'oldid01oldid01oldid01old1';
+		const linked = 'newid01newid01newid01new1';
+		stampLinkTombstones([displaced], 'rewrite');
+		expect(isLinkTombstoned(displaced)).toBe(true);
+		expect(linkTombstoneBlocksPushDeleteTT(displaced)).toBe(true);
+		expect(linkTombstoneBlocksPushDeleteTT(linked)).toBe(false);
+
+		const planned: PlannedDeletion[] = [
+			pushDelete(displaced),
+			pushDelete(linked),
+			detach('keep-detach'),
+		];
+		// After identity: linked id is present; displaced is tombstoned.
+		const residual = compileResidualDestructivesAfterIdentity(
+			planned,
+			new Set([linked]),
+		);
+		expect(residual.map(p => p.id)).toEqual(['keep-detach']);
+		expect(residual.every(p => plannedDeletionToSyncIntent(p).kind !== 'PushDeleteTT')).toBe(true);
+
+		// Delete planner must not offer tombstoned id as vault→TT wipe.
+		const fromPlanner = planVaultTaskDeletions({
+			tasks: [
+				{ taskId: displaced, title: 'Old', file: 'n.md', inPushScope: true },
+				{ taskId: linked, title: 'New', file: 'n.md', inPushScope: true },
+			],
+			presentIds: new Set([linked]),
+			untrustedFiles: new Set(),
+			indexIncomplete: false,
+		});
+		expect(fromPlanner).toEqual([]);
+	});
+
+	it('post-identity presentIds drop successfully Linked PushDeleteTT; DetachMarker kept', () => {
+		const linked = 'live01live01live01live01li';
+		const stillMissing = 'miss01miss01miss01miss01mi';
+		const planned: PlannedDeletion[] = [
+			pushDelete(linked),
+			pushDelete(stillMissing),
+			detach('remote-gone-1'),
+		];
+		const residual = compileResidualDestructivesAfterIdentity(
+			planned,
+			new Set([linked]),
+		);
+		expect(residual.map(p => p.id).sort()).toEqual(['miss01miss01miss01miss01mi', 'remote-gone-1'].sort());
+		expect(plannedDeletionToSyncIntent(residual.find(p => p.id === stillMissing)!).kind).toBe('PushDeleteTT');
+		expect(plannedDeletionToSyncIntent(residual.find(p => p.id === 'remote-gone-1')!).kind).toBe('DetachMarker');
 	});
 });

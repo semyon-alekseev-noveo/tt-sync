@@ -1,13 +1,14 @@
 /**
- * ARCH-SYNC-INTENT-IDENTITY (#256) — typed sync intents + precedence +
- * destructive-only threshold helpers.
- *
- * Full identity-before-plan wiring is #257; this module is the shared vocabulary
- * planners can adopt gradually.
+ * ARCH-SYNC-INTENT-IDENTITY (#256 types, #257 identity/tombstones) — typed sync
+ * intents + precedence + destructive-only threshold + Link tombstones.
  *
  * Precedence (приоритет): Link ≻ DetachMarker ≻ InsertLine ≻ PullStripVault ≻ PushDeleteTT.
  * Threshold (порог mass-delete) counts **destructive** intents only.
  * Invariant: mismatch ≠ auto PushDeleteTT (удалить в TickTick).
+ *
+ * Identity pass (проход идентичности до удалений): Link/rewrite with provenance
+ * before residual destructive compile. Link tombstones (пометка вытесненного id)
+ * block same-run PushDeleteTT / Confirm for displaced ids (rewrite ≠ user-removed).
  */
 
 /** Subject of an intent: task line or comment sibling. */
@@ -159,4 +160,83 @@ export function countDestructiveFromPlanned(planned: readonly PlannedDeletionLik
 		taskDeletions: countDestructiveSyncIntents(intents, 'task'),
 		commentDeletions: countDestructiveSyncIntents(intents, 'comment'),
 	};
+}
+
+// --- Link tombstones (пометка вытесненного id) — session, one Synchronize ---
+
+/** Lowercased ids displaced by Link/rewrite in the current sync run. */
+const linkTombstones = new Map<string, SyncIntentProvenance>();
+
+export function clearLinkTombstones(): void {
+	linkTombstones.clear();
+}
+
+export function stampLinkTombstone(
+	id: string,
+	provenance: SyncIntentProvenance = 'rewrite',
+): void {
+	const key = id?.trim().toLowerCase();
+	if (!key) return;
+	linkTombstones.set(key, provenance);
+}
+
+/** Stamp many displaced ids (вытесненные id) after a Link/rebind pass. */
+export function stampLinkTombstones(
+	ids: readonly string[],
+	provenance: SyncIntentProvenance = 'rewrite',
+): void {
+	for (const id of ids) stampLinkTombstone(id, provenance);
+}
+
+export function isLinkTombstoned(id: string): boolean {
+	const key = id?.trim().toLowerCase();
+	return !!key && linkTombstones.has(key);
+}
+
+export function linkTombstoneProvenance(id: string): SyncIntentProvenance | undefined {
+	const key = id?.trim().toLowerCase();
+	return key ? linkTombstones.get(key) : undefined;
+}
+
+export function linkTombstoneCount(): number {
+	return linkTombstones.size;
+}
+
+export function listLinkTombstoneIds(): string[] {
+	return [...linkTombstones.keys()];
+}
+
+/**
+ * Drop PushDeleteTT (удалить в TickTick) rows blocked by Link tombstones or by
+ * post-identity `presentIds` (marker now bound). Non-destructive rows
+ * (DetachMarker / etc.) pass through for later steps (#258).
+ */
+export function compileResidualDestructivesAfterIdentity<T extends PlannedDeletionLike>(
+	planned: readonly T[],
+	presentIds: ReadonlySet<string>,
+): T[] {
+	const presentLower = new Set(
+		[...presentIds].map(id => id.toLowerCase()).filter(Boolean),
+	);
+	return planned.filter(item => {
+		const intent = plannedDeletionToSyncIntent(item);
+		if (intent.kind !== 'PushDeleteTT') {
+			// DetachMarker / PullStripVault / etc. — leave for later steps (#258+).
+			return true;
+		}
+		const idKey = (item.id || '').toLowerCase();
+		// Displaced by Link this run — never residual PushDeleteTT / Confirm wipe.
+		if (isLinkTombstoned(item.id) || (item.taskId != null && isLinkTombstoned(item.taskId))) {
+			return false;
+		}
+		// Successfully Linked — marker present after identity re-scan.
+		if (idKey && presentLower.has(idKey)) return false;
+		if (item.taskId && presentLower.has(item.taskId.toLowerCase())) return false;
+		return true;
+	});
+}
+
+/** True when a Confirm / PushDeleteTT target must be blocked by a Link tombstone. */
+export function linkTombstoneBlocksPushDeleteTT(id: string): boolean {
+	return isLinkTombstoned(id);
 }
