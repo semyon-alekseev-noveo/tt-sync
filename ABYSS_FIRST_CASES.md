@@ -163,6 +163,7 @@ Preconditions for every AF row: plugin `tickticksync-abyss`, manual sync, `fileL
 | UX-ORPHAN-SKIP-DONE | Orphan scan skips completed (status≠0), abandoned, Notebook, `repeatTaskId` instances. Unit: `vaultImportEligibility.test.ts`. Pilot **not run**. |
 | BUG-SYNC-SKIP-COMPLETED-IMPORT | Synchronize does not invent vault lines for completed / abandoned / Notebook / recurrence instances; open series (status 0) still import. Unit covered. Pilot **not run**. |
 | UX-ORPHAN-SYNCED-LISTS | Check sync cache orphan scan only considers tasks in **Synced lists** (same allow-list as Synchronize / AF-1). Unticked list (e.g. HappyBirthdays) must not appear. Empty `syncedLists` → no TT-wide orphan import. Unit: `vaultImportEligibility.test.ts`. Pilot **not run**. |
+| BUG-CHECK-CACHE-CHECKPOINT | Check cache `getAllTasks` must fetch from checkpoint **0** and **must not** persist/advance `settings.checkPoint`. Otherwise each Check sees a new delta and looks like “new orphans every time”. Unit: `bugCheckCacheCheckpoint.test.ts`. Pilot **not run**. |
 
 Unit tests cover parts of AF-1, AF-5, AF-8, UX-STATUS-MAP-*, UX-RESET-1 / BUG-RESET-TASKS-PARTIAL / BUG-RESET-CACHE-DELETE, UX-SET Phase 1–4 Settings UX (`uxSetPhase1`…`uxSetPhase4`), UX-NOTICE-*, vault-import eligibility, comments, a failed pull, and PERF-INDEX / PERF-CACHE / PERF-COUNTERS. They do not replace the live gate. Settings UX Phase 1–4 are copy/layout/visibility/names/polish only — pilot UX-SET-* still **not run**.
 

@@ -1,3 +1,13 @@
+### Iteration 2026-11-03 06:35 UTC
+
+- Context: Owner: every Check finds “new” tasks; logs → Check used incremental checkpoint and advanced it.
+- Target: `getAllTasks` = full dump at cp 0 without persisting checkPoint (BUG-CHECK-CACHE-CHECKPOINT).
+- Actions log: `getTaskDetails(0, false)`; unit test; AF/TEST_PLAN on #250 branch.
+- Validation: vitest bugCheckCacheCheckpoint; full suite + build (pending).
+- Problems: Stale metadata-id orphans on Leave alone may still reappear (`open`).
+- To Be Done: Push #250; tip Check×2 stable; checkPoint unchanged.
+- References: `BUG-CHECK-CACHE-CHECKPOINT`, `CHANGELOG.md`
+
 ### Iteration 2026-11-03 06:20 UTC
 
 - Context: Owner: Check cache showed HappyBirthdays though list unticked in Synced lists.
