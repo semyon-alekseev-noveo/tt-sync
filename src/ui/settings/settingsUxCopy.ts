@@ -93,19 +93,26 @@ export const DELETION_GLOSSARY_TERMS: readonly DeletionGlossaryTerm[] = [
 export const CHECK_DATABASE_LABEL = `Check ${LOCAL_SYNC_CACHE}`;
 export const CHECK_DATABASE_BUTTON = 'Check sync cache';
 export const CHECK_DATABASE_HELP =
-	`Looks for sync/file mismatches in the ${LOCAL_SYNC_CACHE}. May open Orphaned TickTick Tasks (in TickTick, missing from vault/cache).`;
+	`Looks for sync/file mismatches in the ${LOCAL_SYNC_CACHE}. May open «No vault link…» for TickTick tasks with no matching id in notes/cache.`;
 export const CHECK_DATABASE_ORPHAN_HELP =
-	'Orphans: Cancel = leave TickTick alone (usual after Reset). Add to vault & cache = import into vault. Delete from TickTick = remove in TickTick — avoid unless sure.';
+	'Orphans = TT tasks with no matching id in vault/cache (titles may already exist with new ids). Leave alone = usual after restore. Add may duplicate. Delete removes in TickTick.';
 
-/** Orphaned TickTick Tasks modal (Check sync cache) — UX-NOTICE-MODAL-COPY */
-export const ORPHAN_MODAL_TITLE = 'Orphaned TickTick Tasks';
+/**
+ * Orphan modal (Check sync cache) — UX-NOTICE-ORPHAN-CLEAR (iter 2).
+ * Paths are suggested Add targets, not proof the lines exist in those files.
+ */
+export const ORPHAN_MODAL_TITLE = 'No vault link for these TickTick tasks';
 export const ORPHAN_MODAL_MESSAGE =
-	`These tasks exist in TickTick but were not found in the vault or ${LOCAL_SYNC_CACHE}:`;
-export const ORPHAN_MODAL_PROMPT = 'What should happen to these TickTick tasks?';
-export const ORPHAN_CANCEL_LABEL = 'Cancel (leave TickTick alone)';
-export const ORPHAN_ADD_LABEL = 'Add to vault & cache';
-export const ORPHAN_DELETE_LABEL = 'Delete from TickTick';
-
+	`What this means: they are live in TickTick, but this plugin has no matching ticktick_id in vault lines or the ${LOCAL_SYNC_CACHE}.`;
+export const ORPHAN_MODAL_RESTORE_HINT =
+	'After empty-TT / Rematch you may already have the same titles with new ids — then choose Leave alone (do not Add).';
+export const ORPHAN_MODAL_PATHS_HEADING =
+	'Where Add would put them (not where they already are in the vault)';
+export const ORPHAN_MODAL_PROMPT =
+	'Leave alone = keep TickTick as-is. Add = write lines (may duplicate). Delete = remove these tasks in TickTick.';
+export const ORPHAN_CANCEL_LABEL = 'Leave TickTick alone';
+export const ORPHAN_ADD_LABEL = 'Add to vault — may duplicate';
+export const ORPHAN_DELETE_LABEL = 'Delete in TickTick';
 /** Cleanup / purge modals — same «local sync cache» wording as Settings */
 export const CLEANUP_CACHE_FILES_TITLE = `Clean up ${LOCAL_SYNC_CACHE}`;
 export const CLEANUP_CACHE_FILES_MESSAGE =

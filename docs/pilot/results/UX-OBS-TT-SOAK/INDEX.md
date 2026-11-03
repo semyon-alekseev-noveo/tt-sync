@@ -40,7 +40,7 @@
 | 31 | Settings UX Phase 4 (#194) | `31-settings-ux-phase4.md` | **unit pass**; eng closed #194; code #199; pilot → checklist 32 |
 | 32 | Settings UX smoke (эпик #189) | `32-settings-ux-smoke-checklist.md` | **частично** — owner ✗ §3–9 → #205 |
 | 33 | #205 smoke feedback impl | `33-settings-ux-205-smoke-feedback.md` | **unit pass** (#206); tip ready; **owner re-smoke checklist 32** |
-| 36 | Modal/notice copy review | `36-modal-notice-copy-review.md` | **unit pass** UX-NOTICE-*; pilot **not run** |
+| 36 | Modal/notice copy review | `36-modal-notice-copy-review.md` | orphan iter 2 owner OK; skip-completed import unit |
 | 34 | #208 held post-restore + AZ wipe root cause | `34-held-post-restore-az-wipe.md` | **root cause**; rematch fix shipped |
 | 35 | #208 Rematch prove ×2 | `35-bug-208-rematch-prove.md` | **pass** prove 1+2; issue closed |
 | — | Identity chain follow-up (rebind epic) | [`../ID-CHAIN-REBIND/`](../ID-CHAIN-REBIND/) | **DoR** epic [#214](https://github.com/semyon-alekseev-noveo/tt-sync/issues/214); Rematch insert ≠ vault-wide rebind |

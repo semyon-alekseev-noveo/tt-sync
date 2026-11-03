@@ -40,7 +40,7 @@ Vault: Thinkpad-tts-test · Сборка: tip после #199 · Статус: *
 
 - [ ] **Где:** `Maintenance` → `Check Database`  
   **Смотри:** help под кнопкой (не жми, если не готов к модалке).  
-  **Ок если:** написано явно: модалка `Orphaned TickTick Tasks` → **Cancel (leave TickTick alone)** = оставить в TT (обычно после Reset); `Add to vault & cache` = забрать в vault; `Delete from TickTick` = удалить в TT (не жать без нужды).  
+  **Ок если:** модалка **No vault link…** — ясно: нет matching id; пути = куда положит Add (не «уже в vault»); **Leave TickTick alone** обычно после restore; Add may duplicate; Delete in TickTick. Completed/closed repeats not listed.  
   **Плохо если:** Check Database молчит про орфанов или непонятно, что жать.  
   *(не отдельный UX-SET; follow-up к Maintenance / #189)*
 

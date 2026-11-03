@@ -44,6 +44,25 @@ describe('UX-NOTICE-REATTACH', () => {
 	});
 });
 
+describe('UX-NOTICE-ORPHAN-CLEAR', () => {
+	it('orphan modal explains id mismatch and that paths are Add targets', () => {
+		expect(ORPHAN_MODAL_MESSAGE.toLowerCase()).toMatch(/ticktick_id|matching/);
+		expect(ORPHAN_MODAL_MESSAGE).toContain(LOCAL_SYNC_CACHE);
+		expect(ORPHAN_MODAL_MESSAGE.toLowerCase()).not.toMatch(/\bdatabase\b/);
+		expect(ORPHAN_CANCEL_LABEL.toLowerCase()).toContain('leave');
+		expect(ORPHAN_ADD_LABEL.toLowerCase()).toMatch(/duplicate/);
+		expect(ORPHAN_DELETE_LABEL).toMatch(/TickTick/);
+	});
+
+	it('modal source includes paths heading and restore hint', () => {
+		const orphan = readFileSync(join(__dirname, '../modals/OrphanTaskModal.ts'), 'utf8');
+		expect(orphan).toContain('ORPHAN_MODAL_PATHS_HEADING');
+		expect(orphan).toContain('ORPHAN_MODAL_RESTORE_HINT');
+		expect(orphan).toContain('setCta()');
+		expect(orphan).toMatch(/cancelBtn[\s\S]*setCta/);
+	});
+});
+
 describe('UX-NOTICE-MODAL-COPY', () => {
 	it('orphan modal copy uses cache wording and clear Cancel', () => {
 		expect(ORPHAN_MODAL_MESSAGE).toContain(LOCAL_SYNC_CACHE);
