@@ -23,6 +23,7 @@ Review: `docs/pilot/results/UX-OBS-TT-SOAK/36-modal-notice-copy-review.md`. Unit
 | BUG-ORPHAN-STALE-REMATCH | After Rematch: vault lines have new ids; Check lists old titles (e.g. Подумать над… / Румяна). Run Check again (no Add). | Modal empty or without those titles; no duplicate lines; completed (Румяна) not listed. | **not run** |
 | BUG-ORPHAN-NO-SETTINGS-CYCLE | `npm run check:cycles` after orphan eligibility module changes. | No new cycle via `vaultImportEligibility` ↔ `settings`. | unit **pass** (2.0.96) |
 | UX-SYNC-ONE-FLOW | Tip. Read Maintenance Synchronize vs Check help. Manual Synchronize when a large mismatch holds. | Sync help = day-to-day; Check = rare. Modal title **Sync discrepancies**; primary safe = Don’t delete / Rebind. Toast-only (scheduled) says run Synchronize. | **not run** |
+| ARCH-SYNC-INTENT-IDENTITY | Unit: intent kinds + precedence + destructive-only threshold (`archSyncIntentIdentity.test.ts`). Live identity pass / Rebind drain / Confirm wipe — later children #257–#261. | Link ≻ DetachMarker ≻ InsertLine ≻ PullStripVault ≻ PushDeleteTT; Detach volume does not trip mass-delete threshold; mismatch ≠ auto PushDeleteTT. | unit **pass** (#256); live **not run** |
 | UX-NOTICE-MODAL-COPY | Maintenance → Check sync cache (or open Orphan / Clean up cache if offered). | Orphan Leave alone / Add may duplicate / Delete; cleanup = local sync cache. | **not run** |
 
 ## UX-SET — Settings UX redesign (epic #189 / Phase 1 #191 / Phase 2 #192 / Phase 3 #193 / Phase 4 #194)
@@ -1750,3 +1751,18 @@ Expected: sync does **not** recreate `== Added by … ==` files under `zz-parked
 | BUG-LIST-STUB-RECREATE | **unit pass**; pilot **pass** ×2 | same + parked drop; live `08-stub-cleanup-prove.md` |
 | Classic stubs when predicate off | **unit pass**; pilot **not run** | existing G1 tests |
 
+
+## PR — ARCH-SYNC #256 Intent types + destructive-only threshold
+
+Epic [#255](https://github.com/semyon-alekseev-noveo/tt-sync/issues/255); child [#256](https://github.com/semyon-alekseev-noveo/tt-sync/issues/256). Case `ARCH-SYNC-INTENT-IDENTITY`. Plan: `docs/pilot/results/UX-OBS-TT-SOAK/38-sync-intent-identity-plan.md` step 1.
+
+### Unit (this PR)
+
+1. `npx vitest run src/test/archSyncIntentIdentity.test.ts` (and full suite before merge).
+2. Confirm: five intents with precedence Link ≻ DetachMarker ≻ InsertLine ≻ PullStripVault ≻ PushDeleteTT; DetachMarker volume does not trip `evaluateMassDeleteGuard` threshold; mismatch ≠ auto PushDeleteTT.
+
+Expected: unit **pass**. Live Synchronize identity pass / Rebind drain / Confirm wipe — **not** this PR (#257+).
+
+| ID | Pilot status | Evidence |
+|----|----------------|----------|
+| ARCH-SYNC-INTENT-IDENTITY (#256 types) | unit **pass**; live **not run** | `src/test/archSyncIntentIdentity.test.ts`, `src/sync/syncIntent.ts` |

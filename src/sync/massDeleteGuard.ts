@@ -4,7 +4,13 @@
  * A sync run plans vault→TickTick and TickTick→vault deletions (tasks and
  * comments) before it applies any of them. Over the threshold, or when one
  * side looks empty, nothing destructive runs and the checkpoint stays put.
+ *
+ * ARCH-SYNC-INTENT-IDENTITY (#256): threshold (порог mass-delete) counts
+ * **destructive** intents only (PullStripVault / PushDeleteTT) — not Link,
+ * DetachMarker, or InsertLine. See `syncIntent.ts` for typed intents + precedence.
  */
+
+import { countDestructiveFromPlanned } from '@/sync/syncIntent';
 
 export type DeletionDirection = 'vault-to-ticktick' | 'ticktick-to-vault';
 export type DeletionKind = 'task' | 'comment';
@@ -304,8 +310,8 @@ export function evaluateMassDeleteGuard(
 	side: SideSnapshot,
 	settings: MassDeleteGuardConfig,
 ): GuardDecision {
-	const taskDeletions = planned.filter(item => item.kind === 'task').length;
-	const commentDeletions = planned.filter(item => item.kind === 'comment').length;
+	// Destructive-only: DetachMarker (снять id, текст оставить) must not inflate threshold.
+	const { taskDeletions, commentDeletions } = countDestructiveFromPlanned(planned);
 	const trackedTasks = side.dexieTaskCount;
 	const percent = trackedTasks > 0 ? (taskDeletions / trackedTasks) * 100 : 0;
 	const base = { taskDeletions, commentDeletions, trackedTasks, percent };
