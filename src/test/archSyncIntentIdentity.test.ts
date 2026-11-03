@@ -30,12 +30,21 @@ import {
 	mismatchImpliesAutoPushDeleteTT,
 	plannedDeletionToSyncIntent,
 	plannedDeletionsToSyncIntents,
+	selectResidualDestructivePlanned,
 	sortSyncIntentsByPrecedence,
 	stampLinkTombstones,
 	syncIntentPrecedenceRank,
 	type SyncIntent,
 	type SyncIntentKind,
 } from '@/sync/syncIntent';
+import {
+	REBIND_BUTTON_DESC,
+	SYNC_DISCREPANCY_APPLY_LABEL,
+	SYNC_DISCREPANCY_CONFIRM_LEAD,
+	SYNC_DISCREPANCY_MODAL_LEAD,
+	SYNC_DISCREPANCY_MODAL_TITLE,
+	SYNC_DISCREPANCY_SKIP_LABEL,
+} from '@/sync/massDeleteGuard';
 
 const cfg = { ...DEFAULT_MASS_DELETE_GUARD };
 
@@ -317,5 +326,48 @@ describe('ARCH-SYNC-INTENT-IDENTITY (#258 DetachMarker drain)', () => {
 		expect(src).toContain('applyDetachMarkerPlanned');
 		expect(src).toContain('withoutDetachMarkerPlanned');
 		expect(src).toContain('#258');
+	});
+});
+
+describe('ARCH-SYNC-INTENT-IDENTITY (#259 Sync discrepancies UI)', () => {
+	it('selectResidualDestructivePlanned drops DetachMarker from discrepancy list', () => {
+		const planned: PlannedDeletion[] = [
+			pushDelete('wipe01wipe01wipe01wipe01wi'),
+			detach('remote-gone-dddddddddddd'),
+			{
+				id: 'strip01strip01strip01strip01',
+				kind: 'task',
+				direction: 'ticktick-to-vault',
+				action: 'delete',
+				taskId: 'strip01strip01strip01strip01',
+			},
+		];
+		const residual = selectResidualDestructivePlanned(planned);
+		expect(residual.map(p => p.id).sort()).toEqual(
+			['strip01strip01strip01strip01', 'wipe01wipe01wipe01wipe01wi'].sort(),
+		);
+		expect(residual.every(p => isDestructivePlannedDeletion(p))).toBe(true);
+		expect(residual.some(p => plannedDeletionToSyncIntent(p).kind === 'DetachMarker')).toBe(false);
+	});
+
+	it('held + Confirm share Sync discrepancies Don’t delete / Apply once / Rebind=Link copy', () => {
+		expect(SYNC_DISCREPANCY_MODAL_TITLE.toLowerCase()).toContain('discrepan');
+		expect(SYNC_DISCREPANCY_SKIP_LABEL.toLowerCase()).toMatch(/don.?t delete/);
+		expect(SYNC_DISCREPANCY_APPLY_LABEL.toLowerCase()).toContain('apply once');
+		expect(SYNC_DISCREPANCY_MODAL_LEAD.toLowerCase()).toMatch(/residual|destructive|pullstrip|pushdelete/);
+		expect(SYNC_DISCREPANCY_CONFIRM_LEAD.toLowerCase()).toMatch(/pushdelete|ticktick/);
+		expect(REBIND_BUTTON_DESC.toLowerCase()).toMatch(/link/);
+		expect(mismatchImpliesAutoPushDeleteTT()).toBe(false);
+
+		const held = readFileSync(join(__dirname, '../modals/MassDeleteGuardModal.ts'), 'utf8');
+		expect(held).toContain('selectResidualDestructivePlanned');
+		expect(held).toContain('SYNC_DISCREPANCY_APPLY_LABEL');
+		expect(held).toContain('#259');
+
+		const confirm = readFileSync(join(__dirname, '../modals/TaskDeletionModal.ts'), 'utf8');
+		expect(confirm).toContain('SYNC_DISCREPANCY_MODAL_TITLE');
+		expect(confirm).toContain('SYNC_DISCREPANCY_SKIP_LABEL');
+		expect(confirm).toContain('SYNC_DISCREPANCY_APPLY_LABEL');
+		expect(confirm).toContain('#259');
 	});
 });

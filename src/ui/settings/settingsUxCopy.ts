@@ -64,19 +64,19 @@ export type DeletionGlossaryTerm = {
 
 export const DELETION_GLOSSARY_HEADING = 'Deletion glossary';
 export const DELETION_GLOSSARY_INTRO =
-	'Safe exits: Skip · Rebind (no TT deletes) · Cancel (Confirm). Unmarked lines bind only via Rebind (not silent auto-bind). Gone from TT / not in backup → detach markers, keep text — never invent TickTick from vault. After restore prefer Rebind/Skip — not Apply once.';
+	'Safe exits: Don’t delete · Rebind (Link, no TT deletes) · Apply once only when authorizing a wipe. Unmarked lines bind only via Rebind (not silent auto-bind). Gone from TT / not in backup → detach markers, keep text — never invent TickTick from vault. After restore prefer Rebind/Don’t delete — not Apply once.';
 
 export const DELETION_GLOSSARY_TERMS: readonly DeletionGlossaryTerm[] = [
 	{
-		term: 'Sync discrepancies (held) → Don’t delete / Rebind',
+		term: 'Sync discrepancies → Don’t delete / Rebind / Apply once',
 		summary:
-			'After Synchronize: id/marker mismatch paused as a discrepancy dialog (held plan, not a silent wipe). Don’t delete (Skip) = keep as-is; Rebind = rewrite/bind vault markers (no TT deletes). Apply once = delete in TickTick — avoid after restore. Check sync cache is rare diagnostic, not a second sync.',
+			'One window (held + Confirm) for residual destructives after identity work. Don’t delete = keep as-is; Rebind = Link (+ InsertLine), no TT deletes; Apply once = PushDeleteTT wipe — avoid after restore. List shows wipe candidates only (not DetachMarker). Check sync cache is rare diagnostic, not a second sync.',
 		not: 'Not Purge; not Reset; not silent auto-bind; not Check sync cache.',
 	},
 	{
-		term: 'Confirm → Cancel',
-		summary: 'Dialog wants to remove a vault line (or similar). Cancel = leave the file alone.',
-		not: 'Not Skip on held; not Purge.',
+		term: 'Confirm (PushDeleteTT) → Don’t delete',
+		summary: 'Same Sync discrepancies surface when authorizing TickTick deletes. Don’t delete leaves TickTick alone.',
+		not: 'Not Skip-only held wording; not Purge.',
 	},
 	{
 		term: 'Purge soft-deleted',

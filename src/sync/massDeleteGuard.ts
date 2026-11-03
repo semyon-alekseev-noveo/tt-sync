@@ -166,21 +166,26 @@ export function formatPlannedDeletionLabel(item: PlannedDeletion): string {
 
 /** ID-REBIND-UX (#217) — held modal / notices */
 export const REBIND_BUTTON_LABEL = 'Rebind vault to TickTick (no TT deletes)';
+/** ARCH-SYNC #259: Rebind = Link (+ InsertLine); not a PushDeleteTT dialect. */
 export const REBIND_BUTTON_DESC =
-	'Rewrite stale or missing vault markers from TickTick/local cache. Does not delete TickTick tasks.';
+	'Link (привязка маркера): rewrite/bind vault markers from TickTick/local cache; insert a line only when none matches. Does not delete TickTick tasks.';
 export const REBIND_VAULT_WIPE_HINT =
 	'Lines labeled “Would delete from TickTick” mean the vault is missing line markers — Apply once would wipe those tasks in TickTick. After a restore, prefer Don’t delete or Rebind — not Apply once.';
 export const REBIND_GUARD_NOTICE =
 	'Rebinding vault markers (TickTick kept). Deletions skipped.';
 
-/** UX-SYNC-ONE-FLOW — guard modal framed as Sync discrepancies (day-to-day vs Check). */
+/** UX-SYNC-ONE-FLOW / ARCH-SYNC #259 — held + Confirm framed as Sync discrepancies. */
 export const SYNC_DISCREPANCY_MODAL_TITLE = 'Sync discrepancies';
 export const SYNC_DISCREPANCY_MODAL_LEAD =
-	'Synchronize paused a large delete plan because vault markers and TickTick disagree. Mismatch ≠ auto-delete. Creates and updates still run; the checkpoint stays until you apply deletions.';
+	'Synchronize paused residual destructive deletes (PullStripVault / PushDeleteTT) after identity work. Mismatch ≠ auto-delete. List below is wipe candidates only — not DetachMarker (снять id, текст оставить). Creates and updates still run; the checkpoint stays until you apply deletions.';
 export const SYNC_DISCREPANCY_SKIP_LABEL = 'Don’t delete (keep as-is)';
+export const SYNC_DISCREPANCY_APPLY_LABEL = 'Apply once';
 export const SYNC_DISCREPANCY_REPORT_LABEL = 'Open details';
 export const SYNC_DISCREPANCY_NOTIFY_HINT =
 	'Run Synchronize for Don’t delete / Rebind choices.';
+/** Confirm (PushDeleteTT authorize) shares the same Sync discrepancies surface. */
+export const SYNC_DISCREPANCY_CONFIRM_LEAD =
+	'Authorize deleting these tasks in TickTick (PushDeleteTT). Mismatch ≠ auto-delete. Don’t delete keeps TickTick as-is.';
 
 /** ID-TEXT-NO-MARKER (#233): unmarked checkboxes bind only via Rebind — never silent auto-bind. */
 export const TEXT_NO_MARKER_POLICY =

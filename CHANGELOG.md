@@ -1,3 +1,13 @@
+### Iteration 2026-11-03 10:15 UTC
+
+- Context: Owner merged #258 (PR #265); start #259 Sync discrepancies UI.
+- Target: Held + Confirm share Sync discrepancies copy; residual list = destructives only; Rebind = Link (+ InsertLine).
+- Actions log: `selectResidualDestructivePlanned`; MassDeleteGuardModal residual filter; TaskDeletionModal Don’t delete / Apply once; glossary; #259 unit cases; AF/TEST_PLAN.
+- Validation: focused + full vitest/build/cycles in this PR.
+- Problems: Check enumerator (#260), pilot prove ×2 (#261) still `open`.
+- To Be Done: PR #259 → abyss-mapping; then #260.
+- References: #255, #259, `38-sync-intent-identity-plan.md`, `CHANGELOG.md`
+
 ### Iteration 2026-11-03 10:01 UTC
 
 - Context: Owner «гоу» for #258 DetachMarker drain after #257 merge.
