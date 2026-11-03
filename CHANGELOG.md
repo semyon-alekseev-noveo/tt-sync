@@ -1,3 +1,13 @@
+### Iteration 2026-11-03 11:00 UTC
+
+- Context: Owner «гоу» for #261 prove ×2; #260 PR #267 still open.
+- Target: Tip #260 stack to pilot; attempt prove ×2; honest status (no false live pass).
+- Actions log: Tip install to Thinkpad-tts-test; CLI Rematch prove flaky; phase `39-arch-sync-261-prove.md` scaffold.
+- Validation: tip copied; structured prove ×2 **not** pass — blocked on #267 + re-prove.
+- Problems: CLI Sync discrepancies click / sync timeouts — status `open`.
+- To Be Done: Merge #267; tip from abyss-mapping; complete prove ×2.
+- References: #255, #261, `39-arch-sync-261-prove.md`, `CHANGELOG.md`
+
 ### Iteration 2026-11-03 10:15 UTC
 
 - Context: Owner merged #258 (PR #265); start #259 Sync discrepancies UI.
