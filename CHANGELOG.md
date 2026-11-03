@@ -1,3 +1,13 @@
+### Iteration 2026-11-03 06:20 UTC
+
+- Context: Owner: Check cache showed HappyBirthdays though list unticked in Synced lists.
+- Target: Orphan TT-scan honor `syncedLists` like Synchronize (AF-1).
+- Actions log: `resolveSyncedListIds` in checkDatabase; AF `UX-ORPHAN-SYNCED-LISTS`; test assert.
+- Validation: `npx vitest run` vaultImportEligibility + checkDatabase.extract pass; build ok.
+- Problems: No changes.
+- To Be Done: Merge; tip re-Check — HappyBirthdays absent.
+- References: `UX-ORPHAN-SYNCED-LISTS`, `CHANGELOG.md`
+
 ### Iteration 2026-11-03 05:27 UTC
 
 - Context: Owner OK orphan modal iter 2; completed recurring (Румяна status=2) still offered as orphan / vault import.

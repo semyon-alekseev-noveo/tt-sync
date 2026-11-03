@@ -17,6 +17,7 @@ Review: `docs/pilot/results/UX-OBS-TT-SOAK/36-modal-notice-copy-review.md`. Unit
 | UX-NOTICE-ORPHAN-CLEAR | Check sync cache → orphan modal. | Iter 2 copy: no matching id; paths = Add targets; Leave alone. | owner OK «вроде лучше» |
 | UX-ORPHAN-SKIP-DONE | Check sync cache after completed recurring (e.g. Румяна). | Completed / closed occurrences **not** listed as orphans. | **not run** |
 | BUG-SYNC-SKIP-COMPLETED-IMPORT | Synchronize with completed TT-only tasks (no vault id). | No new vault lines for status≠0 / recurrence instances. | **not run** |
+| UX-ORPHAN-SYNCED-LISTS | Synced lists: HappyBirthdays (or any) **unticked**. Check sync cache. | That list’s tasks do **not** appear in orphan modal. | **not run** |
 | UX-NOTICE-MODAL-COPY | Maintenance → Check sync cache (or open Orphan / Clean up cache if offered). | Orphan Leave alone / Add may duplicate / Delete; cleanup = local sync cache. | **not run** |
 
 ## UX-SET — Settings UX redesign (epic #189 / Phase 1 #191 / Phase 2 #192 / Phase 3 #193 / Phase 4 #194)

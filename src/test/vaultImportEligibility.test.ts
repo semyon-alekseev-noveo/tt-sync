@@ -24,3 +24,12 @@ describe('BUG-SYNC-SKIP-COMPLETED-IMPORT', () => {
 		expect(sync).toMatch(/newTickTickTasks\s*=\s*newTickTickTasks\.filter/);
 	});
 });
+
+describe('UX-ORPHAN-SYNCED-LISTS', () => {
+	it('checkDatabase TT-scan respects syncedLists allow-list', () => {
+		const checkDb = readFileSync(join(__dirname, '../services/checkDatabase.ts'), 'utf8');
+		expect(checkDb).toContain('resolveSyncedListIds');
+		expect(checkDb).toContain('allowedListIds.has(ttTask.projectId)');
+		expect(checkDb).toMatch(/syncedLists empty/);
+	});
+});
