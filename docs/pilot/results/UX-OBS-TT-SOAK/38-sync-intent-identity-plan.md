@@ -5,7 +5,7 @@
 | Gate | UX-OBS-TT-SOAK |
 | Phase | 38 (plan / DoR) |
 | Case | `ARCH-SYNC-INTENT-IDENTITY` |
-| Status | **plan** — docs + canvas; **#256–#260** code landed (unit); #261 open (pilot prove ×2) |
+| Status | **plan done** — **#256–#260** unit landed; #261 pilot prove ×2 **live pass** (`39-arch-sync-261-prove.md`) |
 | Debate | [`37-sync-intent-identity-debate.md`](./37-sync-intent-identity-debate.md) (**agreed**) |
 | Canvas | IDE: `~/.cursor/projects/.../canvases/sync-intent-identity.canvas.tsx`; repo copy: [`sync-intent-identity.canvas.tsx`](./sync-intent-identity.canvas.tsx) |
 | Epic | [#255](https://github.com/semyon-alekseev-noveo/tt-sync/issues/255) |
@@ -83,6 +83,7 @@ Process: `DEV_FLOW.md` / `AGENTS.md` — AF case before code; PR into `abyss-map
 - Two independent live/pilot checks on `<pilot-vault>` (prefer different fixtures): mixed hold after Rebind must not Confirm-wipe rebound/displaced ids; DetachMarker drains hold.
 - Update `ABYSS_FIRST_CASES.md`, `TEST_PLAN.md`, phase evidence under this folder; link both proofs on the epic before close (`bug-prove-twice.mdc`).
 - Unit/integration green alone does **not** replace the second live proof.
+- **Done 2026-11-03:** prove ×2 **live pass** — `39-arch-sync-261-prove.md` (tip @`3729c0b` after #267).
 
 ## Done criteria
 

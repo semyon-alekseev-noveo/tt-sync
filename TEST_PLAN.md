@@ -23,7 +23,7 @@ Review: `docs/pilot/results/UX-OBS-TT-SOAK/36-modal-notice-copy-review.md`. Unit
 | BUG-ORPHAN-STALE-REMATCH | After Rematch: vault lines have new ids; Check lists old titles (e.g. Подумать над… / Румяна). Run Check again (no Add). | Modal empty or without those titles; no duplicate lines; completed (Румяна) not listed. | **not run** |
 | BUG-ORPHAN-NO-SETTINGS-CYCLE | `npm run check:cycles` after orphan eligibility module changes. | No new cycle via `vaultImportEligibility` ↔ `settings`. | unit **pass** (2.0.96) |
 | UX-SYNC-ONE-FLOW | Tip. Read Maintenance Synchronize vs Check help. Manual Synchronize when a large mismatch holds. | Sync help = day-to-day; Check = rare. Modal title **Sync discrepancies**; primary safe = Don’t delete / Rebind. Toast-only (scheduled) says run Synchronize. | **not run** |
-| ARCH-SYNC-INTENT-IDENTITY | Unit: types (#256) + tombstones (#257) + Detach (#258) + Sync discrepancies UI (#259) + Check enumerator (#260) in `archSyncIntentIdentity.test.ts`. Live prove ×2 — #261. | Link ≻ … ≻ PushDeleteTT; Check = same `enumerateSyncPlannedDeletions`; empty Dexie / checkPoint 0 fail-closed residual. | unit **pass** (#256–#260); live **not run** |
+| ARCH-SYNC-INTENT-IDENTITY | Unit: types (#256) + tombstones (#257) + Detach (#258) + Sync discrepancies UI (#259) + Check enumerator (#260) in `archSyncIntentIdentity.test.ts`. Live prove ×2 — #261. | Link ≻ … ≻ PushDeleteTT; Check = same `enumerateSyncPlannedDeletions`; empty Dexie / checkPoint 0 fail-closed residual. | unit **pass** (#256–#260); live **pass** ×2 (`39-arch-sync-261-prove.md`) |
 | UX-NOTICE-MODAL-COPY | Maintenance → Check sync cache (or open Orphan / Clean up cache if offered). | Orphan Leave alone / Add may duplicate / Delete; cleanup = local sync cache. | **not run** |
 
 ## UX-SET — Settings UX redesign (epic #189 / Phase 1 #191 / Phase 2 #192 / Phase 3 #193 / Phase 4 #194)
@@ -1828,4 +1828,20 @@ Expected: unit **pass**. Live prove ×2 — #261.
 
 | Case | Pilot | Notes |
 |------|-------|-------|
-| ARCH-SYNC-INTENT-IDENTITY (#260 Check enumerator) | unit **pass**; live **not run** | `enumerateSyncIntents.ts`, `checkDatabase.ts`, `deletionGuardRun.ts` |
+| ARCH-SYNC-INTENT-IDENTITY (#260 Check enumerator) | unit **pass**; live **pass** ×2 (#261) | `enumerateSyncIntents.ts`, `checkDatabase.ts`, `deletionGuardRun.ts` |
+
+## PR — ARCH-SYNC #261 Pilot prove ×2 + AF/TEST_PLAN close
+
+Epic [#255](https://github.com/semyon-alekseev-noveo/tt-sync/issues/255); child [#261](https://github.com/semyon-alekseev-noveo/tt-sync/issues/261). Case `ARCH-SYNC-INTENT-IDENTITY`. Plan step 6.
+
+### Steps
+1. Tip install from `abyss-mapping` after #267 merge (`3729c0b`, plugin **2.0.96**).
+2. Prove 1: stale markers on PKM «Подумать над механикой» + Годовые «Подумать над областями» → Sync discrepancies → Rebind; Decision **rematch**; rebound+dedup; TT ids still live (MCP).
+3. Prove 2 (independent titles): PKM «Подумать над шаблонами» + Годовые «Перевести в цифру» — same asserts.
+4. Evidence `docs/pilot/results/UX-OBS-TT-SOAK/39-arch-sync-261-prove.md`; AF results log + INDEX + plan #38 status.
+
+Expected: live **pass** ×2. Do not mark pass after a single run (`bug-prove-twice.mdc`).
+
+| Case | Pilot | Notes |
+|------|-------|-------|
+| ARCH-SYNC-INTENT-IDENTITY (#261 prove ×2) | live **pass** ×2 | `39-arch-sync-261-prove.md`; tip @`3729c0b` |

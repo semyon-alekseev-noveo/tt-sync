@@ -1,3 +1,13 @@
+### Iteration 2026-11-03 11:17 UTC
+
+- Context: Owner merged #260 (PR #267) and scaffold #268; structured #261 prove ×2 on tip.
+- Target: Close ARCH-SYNC-INTENT-IDENTITY live with two independent Rebind proofs; AF/TEST_PLAN/evidence.
+- Actions log: Tip @`3729c0b` → pilot plugin; prove1 механикой+областями; prove2 шаблонами+Перевести; MCP TT still live; rewrite `39-…`; AF/TEST_PLAN/INDEX/plan #38/PROJECT_STATE.
+- Validation: prove1 report `…11-14-14…` rematch; prove2 `…11-16-15…` rematch; four TT ids via MCP.
+- Problems: Epic #255 / #261 GitHub close after this docs PR merges — status `open` until merge.
+- To Be Done: PR → abyss-mapping; comment #261/#255; owner merge then close issues (no release unless asked).
+- References: #255, #261, `39-arch-sync-261-prove.md`, `CHANGELOG.md`
+
 ### Iteration 2026-11-03 10:22 UTC
 
 - Context: Owner merged #259 (PR #266); start #260 Check same intent enumerator.
