@@ -3,7 +3,7 @@
 ## Meta
 - Issue: [#205](https://github.com/semyon-alekseev-noveo/tt-sync/issues/205) under epic [#189](https://github.com/semyon-alekseev-noveo/tt-sync/issues/189)
 - Date: 2026-10-28
-- Status: **unit pass**; pilot Settings smoke **not run**
+- Status: **unit pass**; checklist `32` rewritten 2026-11-03 for tip labels; pilot Settings re-smoke **not run**
 
 ## Inputs
 - Owner fails on checklist `32` §3–9 (Purge / terms / Synced lists / tabs / Defaults / stage)
@@ -22,5 +22,5 @@ Addresses #205 acceptance draft except live pilot re-smoke and truncated §10.
 
 ## Checklist
 - [x] Unit green
-- [ ] Owner tip reload + re-check §3–9 on Thinkpad-tts-test
-- [ ] §10 owner note when provided
+- [ ] Owner tip reload + re-smoke rewritten checklist `32` (esp. A4–A5, B1–B2, B4, B6 = old §3–9)
+- [x] §10 — not needed (owner 2026-10-28); dropped from checklist 32

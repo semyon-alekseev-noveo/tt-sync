@@ -1,3 +1,13 @@
+### Iteration 2026-11-03 11:38 UTC
+
+- Context: Owner asked to rewrite Settings smoke checklist after tip Settings copy rewrite.
+- Target: Checklist `32` matches tip labels (#206 + ARCH-SYNC glossary); ready for owner re-smoke #205/#189.
+- Actions log: Rewrote `32-settings-ux-smoke-checklist.md` (tabs A/B/C; Don’t delete/Rebind; local sync cache; GTD tag→list); INDEX/33/TEST_PLAN/AF glossary.
+- Validation: Labels cross-checked against `settingsUxCopy.ts` / Names / Visibility / Polish.
+- Problems: Live owner re-smoke still `open`.
+- To Be Done: PR → abyss-mapping; owner walk checklist 32; then close #205 → #189.
+- References: #189, #205, `32-settings-ux-smoke-checklist.md`, `CHANGELOG.md`
+
 ### Iteration 2026-11-03 11:22 UTC
 
 - Context: Owner merged #261 docs PR #269; close ARCH-SYNC epic.
