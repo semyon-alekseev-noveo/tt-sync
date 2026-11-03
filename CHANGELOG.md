@@ -1,3 +1,13 @@
+### Iteration 2026-11-03 07:10 UTC
+
+- Context: Owner «снова» — same orphan modal; tip had been copied to repo `tickticksync-abyss/`, not the Obsidian plugin dir.
+- Target: Install prune build into pilot plugin path; owner reload then Check×2.
+- Actions log: Copied `dist/{main.js,manifest.json,styles.css}` → `…/plugins/tickticksync-abyss/`; confirmed `STALE-REMATCH` in vault `main.js`; Румяна on TT is status=2.
+- Validation: vault plugin hash = dist `6c66f0645bd3ea0f`.
+- Problems: Wrong tip target path (`resolved`); live Check after reload still pending.
+- To Be Done: Owner reload plugin → Check×2 without Add.
+- References: `BUG-ORPHAN-STALE-REMATCH`, PR #251, `CHANGELOG.md`
+
 ### Iteration 2026-11-03 07:05 UTC
 
 - Context: Owner Add→Check still shows same orphan modal (Подумать… / Румяна) after Rematch — vault already has new ids for those titles.
