@@ -147,18 +147,18 @@ describe('UX-SET-MAINT-SYNC-PRIMARY', () => {
 });
 
 describe('UX-SET-GLOSSARY (Phase 1 surface)', () => {
-	it('glossary stays short (≤4) and covers Held/Skip/Rebind, Confirm/Cancel, Purge, Reset', () => {
+	it('glossary stays short (≤4) and covers Sync discrepancies/held, Confirm/Cancel, Purge, Reset', () => {
 		expect(DELETION_GLOSSARY_TERMS.length).toBeLessThanOrEqual(4);
 		const terms = DELETION_GLOSSARY_TERMS.map((t) => t.term.toLowerCase()).join(' | ');
-		expect(terms).toMatch(/held/);
-		expect(terms).toMatch(/skip/);
-		expect(terms).toMatch(/rebind/);
+		expect(terms).toMatch(/held|discrepan/);
+		expect(terms).toMatch(/rebind|don.?t delete/);
 		expect(terms).toMatch(/confirm|cancel/);
 		expect(terms).toMatch(/purge/);
 		expect(terms).toMatch(/reset/);
-		const held = DELETION_GLOSSARY_TERMS.find((t) => /held/i.test(t.term));
+		const held = DELETION_GLOSSARY_TERMS.find((t) => /held|discrepan/i.test(t.term));
 		expect(held?.summary.toLowerCase()).toMatch(/rebind/);
 		expect(held?.summary.toLowerCase()).toMatch(/avoid after restore|not apply|apply once/);
+		expect(held?.summary.toLowerCase()).toMatch(/check sync cache|not a second sync/);
 	});
 
 	it('Maintenance and Guard mount DeletionGlossary', () => {

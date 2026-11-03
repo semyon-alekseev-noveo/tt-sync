@@ -8,6 +8,10 @@ import {
 	REBIND_BUTTON_DESC,
 	REBIND_BUTTON_LABEL,
 	REBIND_VAULT_WIPE_HINT,
+	SYNC_DISCREPANCY_MODAL_LEAD,
+	SYNC_DISCREPANCY_MODAL_TITLE,
+	SYNC_DISCREPANCY_REPORT_LABEL,
+	SYNC_DISCREPANCY_SKIP_LABEL,
 	type GuardDecision,
 	type PlannedDeletion,
 } from '@/sync/massDeleteGuard';
@@ -17,6 +21,7 @@ export type MassDeletePromptChoice = 'apply-once' | 'skip' | 'open-report' | 're
 /**
  * Manual sync only. Timeout skips, same as the single-task deletion dialog:
  * a missed prompt must not delete.
+ * UX-SYNC-ONE-FLOW: titled Sync discrepancies — day-to-day path vs Check sync cache.
  */
 export class MassDeleteGuardModal extends Modal {
 	private choice: MassDeletePromptChoice = 'skip';
@@ -33,15 +38,15 @@ export class MassDeleteGuardModal extends Modal {
 
 	onOpen() {
 		const { titleEl, contentEl } = this;
-		titleEl.setText('TickTickSync held deletions');
+		titleEl.setText(SYNC_DISCREPANCY_MODAL_TITLE);
 		const vaultWipeTt = this.items.some(
 			item => item.kind === 'task' && item.direction === 'vault-to-ticktick' && item.action === 'delete',
 		);
 		const restoreShaped = isRestoreShapedHold(this.items);
+		contentEl.createEl('p', { text: SYNC_DISCREPANCY_MODAL_LEAD });
 		contentEl.createEl('p', {
 			text: `${this.decision.taskDeletions} task deletion(s) and ${this.decision.commentDeletions} comment deletion(s) (${this.decision.reason}). `
-				+ `${this.decision.percent.toFixed(1)}% of ${this.decision.trackedTasks} tracked task(s). `
-				+ 'Creates and updates still run. The checkpoint stays until you apply deletions.',
+				+ `${this.decision.percent.toFixed(1)}% of ${this.decision.trackedTasks} tracked task(s).`,
 		});
 		if (vaultWipeTt) {
 			contentEl.createEl('p', { text: REBIND_VAULT_WIPE_HINT });
@@ -52,15 +57,15 @@ export class MassDeleteGuardModal extends Modal {
 			list.createEl('li', { text: formatPlannedDeletionLabel(item) });
 		}
 		if (this.items.length > shown.length) {
-			contentEl.createEl('p', { text: `And ${this.items.length - shown.length} more. The report lists all of them.` });
+			contentEl.createEl('p', { text: `And ${this.items.length - shown.length} more. Open details lists all of them.` });
 		}
 		new Setting(contentEl)
 			.addButton(button => {
-				button.setButtonText('Skip deletions this run');
+				button.setButtonText(SYNC_DISCREPANCY_SKIP_LABEL);
 				button.onClick(() => this.finish('skip'));
 			})
 			.addButton(button => {
-				button.setButtonText('Open report');
+				button.setButtonText(SYNC_DISCREPANCY_REPORT_LABEL);
 				button.onClick(() => this.finish('open-report'));
 			});
 		if (canOfferRematch(this.items)) {
@@ -99,7 +104,7 @@ export class MassDeleteGuardModal extends Modal {
 			const timer = window.setTimeout(() => {
 				if (done) return;
 				this.choice = 'skip';
-				new Notice('TickTickSync: deletion guard closed with no answer. Deletions skipped.', 8000);
+				new Notice('TickTickSync: discrepancy dialog closed with no answer. Deletions skipped.', 8000);
 				this.close();
 			}, deletionPromptTimeoutMs(this.items.length));
 			this.resolvePromise = choice => {
