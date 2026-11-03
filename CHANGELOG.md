@@ -1,3 +1,13 @@
+### Iteration 2026-11-03 07:12 UTC
+
+- Context: Owner asked for a release; **2.0.94** already published — cannot retag.
+- Target: Bump **2.0.95** on `abyss-mapping` stack (#248–#251 orphan/Check fixes); tag after bump PR merges.
+- Actions log: `npm version 2.0.95`; version files + `versions.json`; ships orphan modal clarity, synced-lists TT-scan, checkpoint-safe Check, sticky Add path, rematch-stale prune.
+- Validation: `npx vitest run` 928 pass; `npm run build` ok (`dist` 2.0.95); `TAG=2.0.95` version script pass.
+- Problems: No changes.
+- To Be Done: Merge bump PR; tag **2.0.95** once on `abyss-mapping` tip; BRAT.
+- References: PR #248–#251, `BUG-ORPHAN-STALE-REMATCH`, `CHANGELOG.md`
+
 ### Iteration 2026-11-03 07:05 UTC
 
 - Context: Owner Add→Check still shows same orphan modal (Подумать… / Румяна) after Rematch — vault already has new ids for those titles.
