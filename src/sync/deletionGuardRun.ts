@@ -12,11 +12,6 @@ import {
 	isEmptyTickTickSnapshot,
 	looksLikeTickTickWipe,
 	massDeleteSettingsFrom,
-	planRemoteCommentDeletions,
-	planRemoteTaskDeletions,
-	planVanishedListDeletions,
-	planVaultCommentDeletions,
-	planVaultTaskDeletions,
 	pullOptionsForMode,
 	rematchCandidates,
 	setGuardRun,
@@ -29,6 +24,7 @@ import {
 	type PlannedDeletion,
 	type SyncRunTrigger,
 } from '@/sync/massDeleteGuard';
+import { enumerateSyncPlannedDeletions } from '@/sync/enumerateSyncIntents';
 import { scanVaultForDeletionGuard } from '@/sync/vaultDeletionScan';
 import { isPathInPushScope } from '@/syncScope';
 import { isNotebookTask } from '@/sync/notebookGuard';
@@ -91,40 +87,38 @@ export async function prepareDeletionGuard(
 	}]));
 	const taskFile = new Map<string, string>();
 	for (const row of live) if (row.file) taskFile.set(row.taskId, row.file);
-	const planned: PlannedDeletion[] = [
-		...planVaultTaskDeletions({
-			tasks: live.map(row => ({
-				taskId: row.taskId,
-				title: row.task?.title,
-				file: row.file,
-				deleted: row.deleted,
-				isParent: plugin.projectScheme?.isParentTask(row.task) || plugin.projectScheme?.isParentId(row.taskId),
-				// ID-NOTEBOOK-RESTORE-SAFE: kind NOTE out of vault→TT / rematch delete set.
-				isNotebook: isNotebookTask(row.task),
-				tags: row.task?.tags,
-				inPushScope: row.file ? isPathInPushScope(row.file) : false,
-			})),
-			presentIds: scan.presentIds,
-			untrustedFiles: scan.untrustedFiles,
-			indexIncomplete: scan.incomplete,
-		}),
-		...planRemoteTaskDeletions(deleteIds, localById, remoteAction),
-		...planVanishedListDeletions(projects, live.map(row => ({
+	// ARCH-SYNC #260 — same enumerator as Check sync cache.
+	const planned: PlannedDeletion[] = enumerateSyncPlannedDeletions({
+		vaultTasks: live.map(row => ({
+			taskId: row.taskId,
+			title: row.task?.title,
+			file: row.file,
+			deleted: row.deleted,
+			isParent: plugin.projectScheme?.isParentTask(row.task) || plugin.projectScheme?.isParentId(row.taskId),
+			// ID-NOTEBOOK-RESTORE-SAFE: kind NOTE out of vault→TT / rematch delete set.
+			isNotebook: isNotebookTask(row.task),
+			tags: row.task?.tags,
+			inPushScope: row.file ? isPathInPushScope(row.file) : false,
+		})),
+		presentIds: scan.presentIds,
+		untrustedFiles: scan.untrustedFiles,
+		indexIncomplete: scan.incomplete,
+		remoteDeleteIds: deleteIds,
+		localById,
+		remoteAction,
+		vanishedProjects: projects,
+		vanishedLive: live.map(row => ({
 			taskId: row.taskId,
 			deleted: row.deleted,
 			projectId: row.task?.projectId,
 			title: row.task?.title,
 			file: row.file,
-		})), remoteAction),
-		...planVaultCommentDeletions({
-			maps,
-			taskFile,
-			fileText: scan.fileText,
-			untrustedFiles: scan.untrustedFiles,
-			indexIncomplete: scan.incomplete,
-		}),
-		...planRemoteCommentDeletions(maps, delta.update),
-	];
+		})),
+		commentMaps: maps,
+		taskFile,
+		fileText: scan.fileText,
+		remoteCommentUpdates: delta.update,
+	});
 	const decision = evaluateMassDeleteGuard(planned, {
 		vaultTrackedCount: scan.trackedCount,
 		dexieTaskCount,

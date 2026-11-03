@@ -1,12 +1,12 @@
-### Iteration 2026-11-03 11:00 UTC
+### Iteration 2026-11-03 10:22 UTC
 
-- Context: Owner «гоу» for #261 prove ×2; #260 PR #267 still open.
-- Target: Tip #260 stack to pilot; attempt prove ×2; honest status (no false live pass).
-- Actions log: Tip install to Thinkpad-tts-test; CLI Rematch prove flaky; phase `39-arch-sync-261-prove.md` scaffold.
-- Validation: tip copied; structured prove ×2 **not** pass — blocked on #267 + re-prove.
-- Problems: CLI Sync discrepancies click / sync timeouts — status `open`.
-- To Be Done: Merge #267; tip from abyss-mapping; complete prove ×2.
-- References: #255, #261, `39-arch-sync-261-prove.md`, `CHANGELOG.md`
+- Context: Owner merged #259 (PR #266); start #260 Check same intent enumerator.
+- Target: Check sync cache reuses Synchronize `enumerateSyncPlannedDeletions`; fail-closed residual; remote-gone → DetachMarker.
+- Actions log: Added `enumerateSyncIntents.ts`; wired deletionGuardRun + checkDatabase; #260 unit cases; AF/TEST_PLAN.
+- Validation: focused + full vitest/build/cycles in this PR.
+- Problems: Pilot prove ×2 (#261) still `open`.
+- To Be Done: PR #260 → abyss-mapping; then #261 (owner/pilot).
+- References: #255, #260, `enumerateSyncIntents.ts`, `CHANGELOG.md`
 
 ### Iteration 2026-11-03 10:15 UTC
 
