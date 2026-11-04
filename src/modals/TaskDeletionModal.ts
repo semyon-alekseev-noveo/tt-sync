@@ -8,7 +8,7 @@ import {
 	REBIND_BUTTON_LABEL,
 	REBIND_VAULT_WIPE_HINT,
 } from '@/sync/massDeleteGuard';
-import { confirmOffersRematch } from '@/sync/confirmRematch';
+import { confirmOffersRematch } from '@/sync/confirmRematchOffer';
 
 /** Prompts never block the sync queue: unanswered within this time = skip (nothing deleted). */
 /** Large vault-wide batches need time to read the list; cap at 3 minutes. */

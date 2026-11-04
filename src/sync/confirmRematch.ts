@@ -5,51 +5,41 @@
  * Converts Confirm deletion items → PlannedDeletion vault→TT candidates and
  * runs `rebindVaultFromPlanned` (no TickTick deletes).
  */
-import { Notice, TFile } from 'obsidian';
-import type { PluginContext } from '@/pluginContext';
+import { Notice, TFile, type App } from 'obsidian';
+import type { ITask } from '@/api/types/Task';
 import {
-	canOfferRematch,
 	REBIND_GUARD_NOTICE,
-	type PlannedDeletion,
 } from '@/sync/massDeleteGuard';
 import { rebindVaultFromPlanned } from '@/sync/rebindVault';
 import { stampLinkTombstones } from '@/sync/syncIntent';
 import { commitVaultText, syncRead } from '@/sync/vault-io';
 import log from '@/utils/logger';
+import {
+	plannedFromConfirmDeletionItems,
+	type ConfirmDeletionItem,
+} from '@/sync/confirmRematchOffer';
 
-/** Minimal Confirm modal row (avoids circular import with TaskDeletionModal). */
-export type ConfirmDeletionItem = {
-	title: string;
-	filePath?: string;
-	id?: string;
-	line?: string;
+export type { ConfirmDeletionItem } from '@/sync/confirmRematchOffer';
+export {
+	confirmOffersRematch,
+	plannedFromConfirmDeletionItems,
+} from '@/sync/confirmRematchOffer';
+
+/** Narrow deps — avoid importing PluginContext (cycle via TaskDeletionHandler). */
+export type ConfirmRematchHost = {
+	app: App;
+	taskRepository?: {
+		loadLocalTaskById: (taskId: string) => Promise<{
+			taskId: string;
+			deleted?: boolean;
+			task?: ITask | null;
+		} | null>;
+		loadAllLocalTasks: () => Promise<Array<{ taskId?: string; deleted?: boolean }>>;
+	};
+	taskParser?: {
+		convertTaskToLine: (task: ITask, parentTabs: number) => string | Promise<string>;
+	};
 };
-
-/** Map Confirm list rows to rematchCandidates shape (vault→TT delete). */
-export function plannedFromConfirmDeletionItems(
-	items: readonly ConfirmDeletionItem[],
-): PlannedDeletion[] {
-	const out: PlannedDeletion[] = [];
-	for (const it of items) {
-		const id = (it.id ?? '').trim();
-		const file = (it.filePath ?? '').trim();
-		if (!id || !file) continue;
-		out.push({
-			id,
-			taskId: id,
-			kind: 'task',
-			direction: 'vault-to-ticktick',
-			action: 'delete',
-			title: it.title,
-			file,
-		});
-	}
-	return out;
-}
-
-export function confirmOffersRematch(items: readonly ConfirmDeletionItem[]): boolean {
-	return canOfferRematch(plannedFromConfirmDeletionItems(items));
-}
 
 export type ConfirmRematchResult = {
 	rebound: number;
@@ -62,7 +52,7 @@ export type ConfirmRematchResult = {
  * Link / InsertLine for Confirm Rebind. Never deletes TickTick tasks.
  */
 export async function applyConfirmRematch(
-	plugin: PluginContext,
+	plugin: ConfirmRematchHost,
 	items: readonly ConfirmDeletionItem[],
 ): Promise<ConfirmRematchResult> {
 	const rematchLink = plannedFromConfirmDeletionItems(items);
@@ -111,7 +101,8 @@ export async function applyConfirmRematch(
 					log.warn(`TickTickSync confirm rematch: deferred write for ${path}`);
 				}
 			},
-			convertTaskToLine: (task, tabs) => plugin.taskParser!.convertTaskToLine(task, tabs),
+			convertTaskToLine: async (task, tabs) =>
+				plugin.taskParser!.convertTaskToLine(task, tabs),
 		},
 		{ allLiveIds },
 	);
