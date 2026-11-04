@@ -6,7 +6,7 @@
 | Phase | 45 (cleanup + prevention audit) |
 | Cases | `BUG-TT-CREATE-PATH-BYPASS` (code); manual TT delete (owner-authorized) |
 | Status | Cleanup **done**; create-path units **pass**; ProjectScheme live prove **not run** |
-| Related | #279 / #280 create prevention; #276 Deduplicate **deferred** (owner OK) |
+| Related | #279 / #280 / #281 create prevention; #276 Deduplicate **won't-fix** (closed) |
 
 ## Meta
 
@@ -48,7 +48,7 @@ Already gone / not deleted: `…eed586`, `…eed587` (stale parent `childIds` on
 | Confirm InsertLine / Rematch | Vault markers only | No TT create (N/A) |
 | `redo` wrap | Journal wrapper | Not an entrypoint |
 
-#276 Deduplicate: acknowledged as safety net; **not** implemented this phase (prevention first).
+#276 Deduplicate: **won't-fix** — owner closed after prevention + this cleanup; no Sync discrepancies Deduplicate UI.
 
 ## Checklist
 

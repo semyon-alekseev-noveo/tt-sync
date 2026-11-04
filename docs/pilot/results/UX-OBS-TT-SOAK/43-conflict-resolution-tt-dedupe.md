@@ -5,7 +5,7 @@
 | Gate | UX-OBS-TT-SOAK |
 | Phase | 43 (analyst DoR / conflict catalog extension) |
 | Cases | `UX-SYNC-TT-DEDUPE`, `UX-SYNC-TT-DEDUPE-NO-KEEPER`, `ARCH-SYNC-CONFLICT-CATALOG` |
-| Status | **DoR green (analyst locked)** — choices **1A / 2A / 3A**; code still **blocked** until failing tests → fix PR (DEV_FLOW); docs follow-up after [#277](https://github.com/semyon-alekseev-noveo/tt-sync/pull/277) |
+| Status | **won't-fix / cancelled** (owner 2026-11-04) — DoR **1A / 2A / 3A** remain historical; [#276](https://github.com/semyon-alekseev-noveo/tt-sync/issues/276) closed not planned after prevention tip + orphan cleanup; no Deduplicate UI |
 | Related | debate [`37`](./37-sync-intent-identity-debate.md), plan [`38`](./38-sync-intent-identity-plan.md), Confirm gap [`40`](./40-confirm-rebind-gap.md), InsertLine dups [`41`](./41-confirm-rebind-dup-fail.md), open-note Confirm [`42`](./42-opennote-delete-confirm.md), epic [#255](https://github.com/semyon-alekseev-noveo/tt-sync/issues/255) (closed), issue [#276](https://github.com/semyon-alekseev-noveo/tt-sync/issues/276), glossary `settingsUxCopy.ts` |
 | Owner clarif. | 2026-11-04: duplicates live **only in TickTick**; vault has **no** lines for those orphan ids; Synchronize does **not** propose Create/Add |
 | Analyst lock | 2026-11-04 08:59 UTC — **1A** parent key; **2A** hide Deduplicate when no vault keeper; **3A** fourth Sync discrepancies peer action |
@@ -200,9 +200,9 @@ Reviewer: single thorough pass (Analyst A catalog + B safety), 2026-11-04. Scena
 - [x] INDEX updated
 - [x] **Analyst sign-off** locked: **(1A)** parent key = `parentId` else list id for roots; **(2A)** no vault keeper → **hide Deduplicate** (v1); **(3A)** button = **fourth** Sync discrepancies peer action
 - [x] GitHub issue DoR checklist ticked (comment + boxes on [#276](https://github.com/semyon-alekseev-noveo/tt-sync/issues/276)); docs PR [#278](https://github.com/semyon-alekseev-noveo/tt-sync/pull/278)
-- [ ] Code only after this docs lock merges — **DEV_FLOW:** case → failing test → fix
+- [x] Code **won't-fix** — owner closed #276 after prevention (#279+#280+#281) + historical orphan cleanup (prevention first / no костыль UI)
 
-**Verdict:** DoR choices **1A / 2A / 3A** are **locked**. Docs follow-up PR [#278](https://github.com/semyon-alekseev-noveo/tt-sync/pull/278) after #277. **Code still blocked** until failing tests land in a later PR. Live prove ×2 after code.
+**Verdict:** DoR choices **1A / 2A / 3A** were **locked** then **superseded**. Spec stays historical. **No Deduplicate code.** Issue [#276](https://github.com/semyon-alekseev-noveo/tt-sync/issues/276) closed not planned.
 
 ## Checklist
 
@@ -213,7 +213,7 @@ Reviewer: single thorough pass (Analyst A catalog + B safety), 2026-11-04. Scena
 - [x] Analyst adversarial table (dry-run)
 - [x] Analyst lock **1A / 2A / 3A** + decision log
 - [x] GitHub #276 DoR boxes ticked; PR #278 opened
-- [ ] Code + prove ×2 (later PR)
+- [x] Owner close won't-fix — no code / no prove
 
 ## References
 

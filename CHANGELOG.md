@@ -1,3 +1,13 @@
+### Iteration 2026-11-04 13:25 UTC
+
+- Context: Owner «close» for Deduplicate #276 after prevention tip + orphan cleanup — no Sync discrepancies Deduplicate UI (prevention first / unnecessary костыль).
+- Target: Close #276 won't-fix; tip docs catalog matches cancelled AF status; docs PR into abyss-mapping; no code / no release.
+- Actions log: Closed #276 not planned with prevention-first comment; marked `UX-SYNC-TT-DEDUPE*` / catalog cancelled in AF, INDEX, PROJECT_STATE, TEST_PLAN, `43`/`44`/`45`; local dedupe stash noted ignore.
+- Validation: Issue state closed; docs cross-check vs #279+#280+#281 tip + `45` cleanup evidence.
+- Problems: No open Deduplicate work — status `resolved` (won't-fix).
+- To Be Done: Merge this docs PR; leave `stash@{0}` feat dedupe HOLD unless owner asks drop.
+- References: #276, `43-conflict-resolution-tt-dedupe.md`, `ABYSS_FIRST_CASES.md`, `CHANGELOG.md`
+
 ### Iteration 2026-11-04 12:13 UTC
 
 - Context: Owner «убери / ок / гоу» — delete PKM journaling TT orphans; #276 Deduplicate deferred; audit remaining createTask paths for same invariant as #279/#280.

@@ -65,7 +65,7 @@ Vault-local runner JSON (not committed): `.tickticksync/_prove44-1.json`, `_prov
 
 ## Deduplicate still needed?
 
-**Yes, as safety net — after prevention.** Owner lock: do not ship Deduplicate as the hero PR first. Prevention stops new waves; already-created TT-only extras (`6ae82055…`, `6ae9baf1…`, `6aeae53f…`, `6aeafcb0…`, …) still need `UX-SYNC-TT-DEDUPE` (#276).
+**No — won't-fix.** Prevention tip + owner-authorized orphan cleanup closed the gap. Owner closed [#276](https://github.com/semyon-alekseev-noveo/tt-sync/issues/276) as unnecessary костыль (prevention first). Historical DoR remains in [`43-…`](./43-conflict-resolution-tt-dedupe.md).
 
 ## Checklist
 
