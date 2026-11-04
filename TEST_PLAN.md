@@ -27,9 +27,9 @@ Review: `docs/pilot/results/UX-OBS-TT-SOAK/36-modal-notice-copy-review.md`. Unit
 | UX-SYNC-CONFIRM-REBIND | Tip. Under-threshold PushDeleteTT Confirm with vault lines that still have id+filePath (or Check residual Confirm). | Sync discrepancies shows **Rebind**; choosing it rebinds markers and does **not** delete TickTick. No id/filePath → no Rebind. Same-title live sibling → Link displace (`BUG-CONFIRM-REBIND-DUP`). | unit **pass**; live **not run** |
 | BUG-CONFIRM-REBIND-DUP | Tip after this PR. Confirm PushDeleteTT «missing marker» where note already has same-title lines with other live markers → choose **Rebind**. | Markers **Link-displaced** (one line per title); no InsertLine twins; displaced ids Link-tombstoned; TT tasks not deleted. Held Rematch still does not steal for true multi-task same-title. | unit **pass**; live fail recorded (`41-…`); re-prove **not run** |
 | ARCH-SYNC-INTENT-IDENTITY | Unit: types (#256) + tombstones (#257) + Detach (#258) + Sync discrepancies UI (#259) + Check enumerator (#260) in `archSyncIntentIdentity.test.ts`. Live prove ×2 — #261. Confirm Rebind gap → `UX-SYNC-CONFIRM-REBIND`. | Link ≻ … ≻ PushDeleteTT; Check = same `enumerateSyncPlannedDeletions`; empty Dexie / checkPoint 0 fail-closed residual; Confirm offers Rebind when rematchable. | unit **pass** (#256–#260 + confirm-rebind); live **pass** ×2 (`39-…`); Confirm Rebind live **not run** |
-| ARCH-SYNC-CONFLICT-CATALOG | Read `UX-OBS-TT-SOAK/43-conflict-resolution-tt-dedupe.md` conflict table. | Classes map to Don’t delete / Rebind / Apply once / DetachMarker / Deduplicate unlinked TT; TT-only dups ≠ vault Confirm. | docs **not run** (analyst review) |
-| UX-SYNC-TT-DEDUPE | Tip **after code PR** (not this docs PR). TT has ≥2 live same-title+parent tasks; vault marker links exactly one keeper; extras have no vault lines; Synchronize does not offer Add. Open Sync discrepancies → **Delete unlinked TT duplicates** → confirm. | Non-keeper TT ids deleted; keeper + vault marker unchanged; no InsertLine/Add; ≠ Apply once plan. Prove ×2 different fixtures. | docs DoR; code **not run**; pilot **not run** |
-| UX-SYNC-TT-DEDUPE-NO-KEEPER | Tip after code. Same-title+parent TT cluster; **no** vault marker for title. | No silent delete; Deduplicate hidden or requires explicit keeper pick; Cancel leaves TT intact. Two vault ids same title → no offer. | docs DoR; pilot **not run** |
+| ARCH-SYNC-CONFLICT-CATALOG | Read `UX-OBS-TT-SOAK/43-conflict-resolution-tt-dedupe.md` conflict table + locked **1A/2A/3A**. | Classes map to Don’t delete / Rebind / Apply once / DetachMarker / Deduplicate unlinked TT (fourth peer when vault keeper); TT-only dups ≠ vault Confirm. | docs DoR **locked**; pilot **not run** |
+| UX-SYNC-TT-DEDUPE | Tip **after code PR**. TT has ≥2 live same-title+**1A** parent tasks; vault marker links exactly one keeper; extras have no vault lines; Synchronize does not offer Add. Open Sync discrepancies → **3A** fourth peer **Delete unlinked TT duplicates** → confirm. | Non-keeper TT ids deleted; keeper + vault marker unchanged; no InsertLine/Add; ≠ Apply once plan. Prove ×2 different fixtures. | docs DoR **locked 1A/3A**; code **not run**; pilot **not run** |
+| UX-SYNC-TT-DEDUPE-NO-KEEPER | Tip after code. Same-title+**1A** parent TT cluster; **no** vault marker for title. | **2A:** Deduplicate **hidden**; no silent delete; TT intact. Two vault ids same title → no offer. | docs DoR **locked 2A**; pilot **not run** |
 | UX-NOTICE-MODAL-COPY | Maintenance → Check sync cache (or open Orphan / Clean up cache if offered). | Orphan Leave alone / Add may duplicate / Delete; cleanup = local sync cache. | **not run** |
 
 ## UX-SET — Settings UX redesign (epic #189 / Phase 1 #191 / Phase 2 #192 / Phase 3 #193 / Phase 4 #194)
@@ -1892,25 +1892,25 @@ Expected: unit **pass**. Live re-prove **not run**.
 
 ## PR — UX-SYNC-TT-DEDUPE docs / conflict catalog DoR (no code)
 
-Analyst DoR only. Owner: TT duplicates live **only in TickTick**; vault has no lines for orphan ids; Synchronize does not propose Add. Cleanup belongs in Sync discrepancies conflict resolution — **not** vault Confirm PushDeleteTT, not Rebind, not InsertLine.
+Analyst DoR. Owner: TT duplicates live **only in TickTick**; vault has no lines for orphan ids; Synchronize does not propose Add. Cleanup belongs in Sync discrepancies conflict resolution — **not** vault Confirm PushDeleteTT, not Rebind, not InsertLine.
 
 Spec: `docs/pilot/results/UX-OBS-TT-SOAK/43-conflict-resolution-tt-dedupe.md`.
 
-### Steps (this docs PR)
+### Steps (docs PRs)
 1. Read conflict class table + keeper / fail-closed rules in `43-…`.
 2. Confirm AF cases `ARCH-SYNC-CONFLICT-CATALOG`, `UX-SYNC-TT-DEDUPE`, `UX-SYNC-TT-DEDUPE-NO-KEEPER` exist.
 3. Analyst dry-run scenarios S1–S10 in `43-…` (expected outcomes only — no live pass).
-4. Sign-off open DoR items before any code PR: parent key; no-keeper v1 UX; button placement.
+4. **Analyst locked 2026-11-04 08:59 UTC:** **1A** parent key; **2A** hide Deduplicate when no vault keeper; **3A** fourth Sync discrepancies peer. Tick #276 DoR boxes.
 
-### Steps (later code PR — not this PR)
-1. Failing unit tests named by case id → detect clusters; keeper deletes; no-keeper fail-closed; Notebook/empty Dexie skip.
-2. Wire Deduplicate on Sync discrepancies (held + enumerator); confirm UI; glossary.
+### Steps (later code PR — not docs)
+1. Failing unit tests named by case id → detect **1A** clusters; keeper deletes; **2A** no-keeper hide; Notebook/empty Dexie skip.
+2. Wire Deduplicate as **3A** fourth Sync discrepancies peer (held + enumerator); dedicated confirm; glossary.
 3. Pilot prove ×2 on `<pilot-vault>` different fixtures (`bug-prove-twice`).
 
-Expected this PR: docs only. Pilot **not run**. Code **not shipped**.
+Expected docs PRs: docs only. Pilot **not run**. Code **not shipped**.
 
 | Case | Pilot | Notes |
 |------|-------|-------|
-| ARCH-SYNC-CONFLICT-CATALOG | docs; **not run** | `43-conflict-resolution-tt-dedupe.md` |
-| UX-SYNC-TT-DEDUPE | docs DoR; code **not run** | blocked on sign-off |
-| UX-SYNC-TT-DEDUPE-NO-KEEPER | docs DoR; **not run** | fail-closed / pick-keeper |
+| ARCH-SYNC-CONFLICT-CATALOG | docs DoR **locked**; **not run** | `43-conflict-resolution-tt-dedupe.md` |
+| UX-SYNC-TT-DEDUPE | docs **1A/3A** locked; code **not run** | ready for failing tests |
+| UX-SYNC-TT-DEDUPE-NO-KEEPER | docs **2A** locked hide; **not run** | pick-keeper deferred |
