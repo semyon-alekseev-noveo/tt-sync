@@ -133,6 +133,39 @@ describe('project scheme helpers', () => {
 			{ type: 'createNote', parent: { id: 'n', title: 'New', done: false } },
 		]);
 	});
+
+	it('BUG-TT-CREATE-PATH-BYPASS: unique same-title parent → reattachParent (no createTask)', () => {
+		const acts = planProjects(
+			[{ path: 'pkm.md', title: 'PKM - journaling', done: false }],
+			[{ id: '6ae17a048f0871a7dbb8c8ca', title: 'PKM - journaling', done: false }],
+			{},
+		);
+		expect(acts).toEqual([
+			{
+				type: 'reattachParent',
+				note: { path: 'pkm.md', title: 'PKM - journaling', done: false },
+				parentId: '6ae17a048f0871a7dbb8c8ca',
+			},
+		]);
+	});
+
+	it('BUG-TT-CREATE-PATH-BYPASS: multi same-title parents → skipCreateParent', () => {
+		const acts = planProjects(
+			[{ path: 'pkm.md', title: 'PKM - journaling', done: false }],
+			[
+				{ id: 'aaaaaaaaaaaaaaaaaaaaaaaa', title: 'PKM - journaling', done: false },
+				{ id: 'bbbbbbbbbbbbbbbbbbbbbbbb', title: 'PKM - journaling', done: false },
+			],
+			{},
+		);
+		expect(acts).toEqual([
+			{
+				type: 'skipCreateParent',
+				note: { path: 'pkm.md', title: 'PKM - journaling', done: false },
+				reason: 'ambiguous-same-title-parents',
+			},
+		]);
+	});
 });
 
 describe('project note from user template (no Templater)', () => {

@@ -353,17 +353,64 @@ export function planTitle(noteTitle: string, ttTitle: string, last: string | und
 }
 export type Action =
 	| { type: 'createParent'; note: NoteSide }
+	| { type: 'reattachParent'; note: NoteSide; parentId: string }
+	| { type: 'skipCreateParent'; note: NoteSide; reason: 'ambiguous-same-title-parents' }
 	| { type: 'createNote'; parent: ParentSide }
 	| { type: 'setParentDone'; id: string; done: boolean }
 	| { type: 'setNoteDone'; path: string; done: boolean };
+
+/** Normalize project / parent titles for same-title create prevention. */
+export function normalizeProjectTitle(title: string | undefined | null): string {
+	return stripFileLinks(title ?? '').trim().toLowerCase();
+}
+
+/**
+ * BUG-TT-CREATE-PATH-BYPASS — project note without `ticktick_id` must not
+ * `createParent` when an open unclaimed same-title parent already exists.
+ * Unique → reattach; multi → skip (fail-closed); zero → create.
+ */
+export function decideCreateOrReattachParent(
+	note: NoteSide,
+	openUnclaimedParents: readonly ParentSide[],
+):
+	| { action: 'create' }
+	| { action: 'reattach'; parentId: string }
+	| { action: 'skip'; reason: 'ambiguous-same-title-parents'; peerIds: string[] } {
+	const want = normalizeProjectTitle(note.title);
+	if (!want) return { action: 'create' };
+	const peers = openUnclaimedParents.filter(p => normalizeProjectTitle(p.title) === want);
+	if (peers.length === 1) return { action: 'reattach', parentId: peers[0]!.id };
+	if (peers.length > 1) {
+		return {
+			action: 'skip',
+			reason: 'ambiguous-same-title-parents',
+			peerIds: peers.map(p => p.id),
+		};
+	}
+	return { action: 'create' };
+}
 
 /** Decide project-level sync actions. Status: side that changed since snapshot wins; note wins ties. */
 export function planProjects(notes: NoteSide[], parents: ParentSide[], snap: Record<string, Snap>): Action[] {
 	const acts: Action[] = [];
 	const byId = new Map(parents.map(p => [p.id, p]));
-	const known = new Set(notes.filter(n => n.id).map(n => n.id as string));
+	const claimed = new Set(notes.filter(n => n.id).map(n => n.id as string));
 	for (const n of notes) {
-		if (!n.id) { acts.push({ type: 'createParent', note: n }); continue; }
+		if (!n.id) {
+			const openUnclaimed = parents.filter(p => !p.done && !claimed.has(p.id));
+			const decision = decideCreateOrReattachParent(n, openUnclaimed);
+			if (decision.action === 'reattach') {
+				acts.push({ type: 'reattachParent', note: n, parentId: decision.parentId });
+				claimed.add(decision.parentId);
+			} else if (decision.action === 'create') {
+				acts.push({ type: 'createParent', note: n });
+			} else {
+				acts.push({ type: 'skipCreateParent', note: n, reason: decision.reason });
+				// Hold peers so createNote does not also spawn same-title vault twins.
+				for (const id of decision.peerIds) claimed.add(id);
+			}
+			continue;
+		}
 		const p = byId.get(n.id);
 		if (!p || n.done === p.done) continue;
 		const s = snap[n.id];
@@ -372,6 +419,6 @@ export function planProjects(notes: NoteSide[], parents: ParentSide[], snap: Rec
 		if (noteChanged || !ttChanged) acts.push({ type: 'setParentDone', id: n.id, done: n.done });
 		else acts.push({ type: 'setNoteDone', path: n.path, done: p.done });
 	}
-	for (const p of parents) if (!known.has(p.id) && !p.done) acts.push({ type: 'createNote', parent: p });
+	for (const p of parents) if (!claimed.has(p.id) && !p.done) acts.push({ type: 'createNote', parent: p });
 	return acts;
 }
