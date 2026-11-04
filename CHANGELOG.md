@@ -1,3 +1,13 @@
+### Iteration 2026-11-04 14:03 UTC
+
+- Context: Owner «сам проверь 32» — Settings UX smoke on tip after #282.
+- Target: Walk checklist 32 on Thinkpad-tts-test without dangerous actions; record honest ☑/✗; leave #189 open for owner accept.
+- Actions log: Built/deployed tip `5be067d` → pilot 2.0.96 + reload; Obsidian SettingPage scrape (Maintenance / Sync Control folds / Notes / Access); filled `32-…`, INDEX, `33-…`, PROJECT_STATE.
+- Validation: A1–A6, B1–B10, C1 live UI ☑; C2 banner live + `UX-SET-PW-CONFIRM` unit ☑ (live modal not automated via eval); no Sync/Purge/Reset/Apply once.
+- Problems: C2 live dialog path blocked by Svelte bind under CLI eval — status `mitigated` (banner+unit).
+- To Be Done: Owner glance/accept → close epic #189; optional C2 Cancel once by hand.
+- References: `32-settings-ux-smoke-checklist.md`, #189, #205, `CHANGELOG.md`
+
 ### Iteration 2026-11-04 13:25 UTC
 
 - Context: Owner «close» for Deduplicate #276 after prevention tip + orphan cleanup — no Sync discrepancies Deduplicate UI (prevention first / unnecessary костыль).

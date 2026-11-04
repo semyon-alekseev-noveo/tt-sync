@@ -38,8 +38,8 @@
 | 29 | Settings UX Phase 2 (#192) | `29-settings-ux-phase2.md` | **unit pass**; eng closed #192; pilot → checklist 32 |
 | 30 | Settings UX Phase 3 (#193) | `30-settings-ux-phase3.md` | **unit pass**; eng closed #193; pilot → checklist 32 |
 | 31 | Settings UX Phase 4 (#194) | `31-settings-ux-phase4.md` | **unit pass**; eng closed #194; code #199; pilot → checklist 32 |
-| 32 | Settings UX smoke (эпик #189) | `32-settings-ux-smoke-checklist.md` | **rewritten 2026-11-03** (tip labels post-#206/#270); **owner re-smoke** |
-| 33 | #205 smoke feedback impl | `33-settings-ux-205-smoke-feedback.md` | **unit pass** (#206); checklist 32 rewritten; **owner re-smoke** |
+| 32 | Settings UX smoke (эпик #189) | `32-settings-ux-smoke-checklist.md` | **agent smoke 2026-11-04** tip `5be067d` / 2.0.96 — A–C ☑ (C2 banner+unit; live modal not automated); epic #189 open for owner accept |
+| 33 | #205 smoke feedback impl | `33-settings-ux-205-smoke-feedback.md` | **unit pass** (#206); checklist 32 **agent re-smoke** 2026-11-04 |
 | 36 | Modal/notice copy review | `36-modal-notice-copy-review.md` | orphan iter 2 owner OK; skip-completed import unit |
 | 37 | Sync conflict refactor debate (A×B → agree) | `37-sync-intent-identity-debate.md` | **agreed** — identity-before-plan + typed intents; no code yet |
 | 38 | Sync intent × identity plan (epic [#255](https://github.com/semyon-alekseev-noveo/tt-sync/issues/255)) | `38-sync-intent-identity-plan.md` | **plan / DoR** — #256–#260 unit landed; #261 prove ×2 **live pass** |
