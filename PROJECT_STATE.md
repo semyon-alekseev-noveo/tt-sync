@@ -40,6 +40,7 @@
 - **ARCH-SYNC-INTENT-IDENTITY** — **resolved** epic [#255](https://github.com/semyon-alekseev-noveo/tt-sync/issues/255) closed 2026-11-03; #256–#261 done; prove ×2 in `UX-OBS-TT-SOAK/39-…` (tip after [#269](https://github.com/semyon-alekseev-noveo/tt-sync/pull/269)). No release unless owner asks.
 - **UX-SYNC-CONFIRM-REBIND** — Confirm offers Rebind (#273); live prove **not run** (`40-confirm-rebind-gap.md`).
 - **BUG-CONFIRM-REBIND-DUP** — post-#273 live fail: Confirm Rebind InsertLine dups beside live same-title siblings; fix `allowDisplaceLiveSameTitle` on Confirm path (unit); re-prove **not run** (`41-confirm-rebind-dup-fail.md`).
+- **BUG-OPENNOTE-DELETE-CONFIRM** — Delete/Backspace mid-edit opened PushDeleteTT Confirm (not the 5s open-note push). Fix: drop keyup `deletedTaskCheck`; re-prove **not run** (`42-opennote-delete-confirm.md`).
 - **ID-CHAIN** — Epic [#214](https://github.com/semyon-alekseev-noveo/tt-sync/issues/214): eng children closed; #208 Rematch prove ×2 **pass**/closed; optional [#218](https://github.com/semyon-alekseev-noveo/tt-sync/issues/218) keeps epic open.
 - **UX-NOTICE** — create vs reattach Notices + modal cache wording: unit this tip; pilot strip-marker prove **not run** (`open`).
 - **BUG-RESET-CACHE-DELETE** — post-Reset Synchronize proposed vault-line deletes for pre-wipe ids (DON-253); owner **Cancel** only. Fix on tip/PR; pilot prove ×2 pending (`UX-OBS-TT-SOAK/24-post-reset-delete-modal.md`) (`open` until prove).
@@ -60,6 +61,7 @@
 
 0. **Settings #205 / checklist 32:** Owner re-smoke after tip; then close #205 → #189.
 0a. **BUG-CONFIRM-REBIND-DUP / UX-SYNC-CONFIRM-REBIND:** merge displace fix; owner tip + Confirm Rebind prove ×2 (different fixtures); optional manual dup cleanup on journaling note.
+0a2. **BUG-OPENNOTE-DELETE-CONFIRM:** merge keyup fix; owner Don’t delete if modal open; tip + prove ×2 line-delete does not Confirm.
 0b. **UX-NOTICE-***: After merge, tip + strip-marker reattach toast prove; Orphan modal glance (`36-…`).
 0c. **#214:** Optional #218 only; else close epic when owner ready.
 0d. **BUG-RESET-CACHE-DELETE:** prove ×2 Reset→Synchronize still owner-gated (`25-…`).

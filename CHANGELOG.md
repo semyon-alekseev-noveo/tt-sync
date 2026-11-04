@@ -1,3 +1,13 @@
+### Iteration 2026-11-04 08:29 UTC
+
+- Context: Owner deleted Active Zone lines on tip after #274; Sync discrepancies Confirm (PushDeleteTT) popped immediately with «Updating open note…» toast — contradicts open-note identifiedOnly analysis.
+- Target: Editor Delete/Backspace never Confirm PushDeleteTT; vault→TT deletes only on Synchronize (UX-SYNC-ONE-FLOW).
+- Actions log: Root cause = keyup → `deletedTaskCheck` (not open-note push); remove Delete/Backspace Confirm path; AF `BUG-OPENNOTE-DELETE-CONFIRM`; unit + `42-opennote-delete-confirm.md`; TEST_PLAN.
+- Validation: focused + full `npx vitest run` + `npm run build` (this PR).
+- Problems: Live re-prove ×2 still `open` (fail recorded only).
+- To Be Done: PR → abyss-mapping; owner tip; click Don’t delete now if modal still open; re-prove ×2 after tip.
+- References: `BUG-OPENNOTE-DELETE-CONFIRM`, `UX-SYNC-ONE-FLOW`, `42-opennote-delete-confirm.md`, `CHANGELOG.md`
+
 ### Iteration 2026-11-04 05:56 UTC
 
 - Context: Owner Confirm Rebind after #273 on `PKM - journaling.md` InsertLine-duplicated 3 same-title lines beside live sibling markers.

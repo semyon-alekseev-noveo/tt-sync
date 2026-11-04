@@ -70,18 +70,9 @@ export class EventHandlerService {
 				await this.plugin.lineNumberCheck();
 			}
 
-			// Handle deletion keys
-			if (['Delete', 'Backspace'].includes(evt.key)) {
-				try {
-					if (!this.plugin.checkModuleClass()) {
-						return;
-					}
-					await this.plugin.service.deletedTaskCheck(null);
-					await this.plugin.saveSettings();
-				} catch (error) {
-					log.warn(`An error occurred while deleting tasks: ${String(error)}`);
-				}
-			}
+			// BUG-OPENNOTE-DELETE-CONFIRM / UX-SYNC-ONE-FLOW: do not call deletedTaskCheck
+			// on Delete/Backspace. That opened Sync discrepancies Confirm (PushDeleteTT)
+			// while editing. Vault→TT deletes wait for manual Synchronize.
 		});
 	}
 
