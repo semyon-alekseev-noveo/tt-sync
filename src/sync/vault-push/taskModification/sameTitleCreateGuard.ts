@@ -50,10 +50,38 @@ export function vaultHasMarkedSameTitleLine(
 	return false;
 }
 
+function isOpenSameTitleTask(
+	t: SameTitleLiveTask,
+	wantTitleKey: string,
+): boolean {
+	const id = (t.id ?? '').trim();
+	if (!id) return false;
+	if (t.deleted && t.deleted !== 0) return false;
+	if (t.status != null && t.status !== 0) return false;
+	return normalizeRebindTitle(t.title ?? '') === wantTitleKey;
+}
+
+function orphanDecision(
+	orphans: readonly SameTitleLiveTask[],
+): SameTitleCreateDecision | null {
+	if (orphans.length === 1) {
+		return { action: 'reattach', taskId: orphans[0]!.id };
+	}
+	if (orphans.length > 1) {
+		return { action: 'skip', reason: 'ambiguous-orphans' };
+	}
+	return null;
+}
+
 /**
  * Decide whether an unmarked in-scope line may create a TickTick task.
  *
- * - Exactly one Dexie orphan (same title+parent, id absent from vault) → reattach.
+ * `liveTasks` is file-scoped (Dexie rows for the note). Parent key prefers
+ * 1A matches, then falls back to any same-title file orphan — strip→sync often
+ * infers inbox/`root:` while historical peers stay under the project parent
+ * (live fail 2026-11-04 09:36Z → `6aeafcb0…`).
+ *
+ * - Exactly one orphan (prefer parent-matched) → reattach.
  * - Multiple orphans → skip (ambiguous; no silent third TT).
  * - Zero orphans but vault already has a marked same-title sibling → skip.
  * - Otherwise → create.
@@ -69,32 +97,30 @@ export function decideSameTitleCreate(opts: {
 	const wantTitleKey = normalizeRebindTitle(opts.wantTitle);
 	if (!wantTitleKey) return { action: 'create' };
 
-	const peers = opts.liveTasks.filter(t => {
-		const id = (t.id ?? '').trim();
-		if (!id) return false;
-		if (t.deleted && t.deleted !== 0) return false;
-		if (t.status != null && t.status !== 0) return false;
-		if (normalizeRebindTitle(t.title ?? '') !== wantTitleKey) return false;
+	const titlePeers = opts.liveTasks.filter(t => isOpenSameTitleTask(t, wantTitleKey));
+
+	const parentPeers = titlePeers.filter(t => {
 		const pk = sameTitleParentKey(t);
 		if (opts.wantParentKey && pk && pk !== opts.wantParentKey) return false;
 		if (opts.wantParentKey && !pk) return false;
 		return true;
 	});
 
-	const orphans = peers.filter(t => !opts.vaultText.includes(t.id));
-	if (orphans.length === 1) {
-		return { action: 'reattach', taskId: orphans[0]!.id };
-	}
-	if (orphans.length > 1) {
-		return { action: 'skip', reason: 'ambiguous-orphans' };
-	}
+	const parentOrphans = parentPeers.filter(t => !opts.vaultText.includes(t.id));
+	const parentHit = orphanDecision(parentOrphans);
+	if (parentHit) return parentHit;
+
+	// File-scoped fallback: ignore parent mismatch (inbox inference vs project orphans).
+	const titleOrphans = titlePeers.filter(t => !opts.vaultText.includes(t.id));
+	const titleHit = orphanDecision(titleOrphans);
+	if (titleHit) return titleHit;
 
 	const hasMarkedSibling = vaultHasMarkedSameTitleLine(
 		opts.vaultLines,
 		wantTitleKey,
 		opts.currentLineIndex,
 	);
-	const hasPresentPeer = peers.some(t => opts.vaultText.includes(t.id));
+	const hasPresentPeer = titlePeers.some(t => opts.vaultText.includes(t.id));
 	if (hasMarkedSibling || hasPresentPeer) {
 		return { action: 'skip', reason: 'already-linked-same-title' };
 	}
