@@ -27,6 +27,7 @@ Review: `docs/pilot/results/UX-OBS-TT-SOAK/36-modal-notice-copy-review.md`. Unit
 | UX-SYNC-CONFIRM-REBIND | Tip. Under-threshold PushDeleteTT Confirm with vault lines that still have id+filePath (or Check residual Confirm). | Sync discrepancies shows **Rebind**; choosing it rebinds markers and does **not** delete TickTick. No id/filePath → no Rebind. Same-title live sibling → Link displace (`BUG-CONFIRM-REBIND-DUP`). | unit **pass**; live **not run** |
 | BUG-CONFIRM-REBIND-DUP | Tip after this PR. Confirm PushDeleteTT «missing marker» where note already has same-title lines with other live markers → choose **Rebind**. | Markers **Link-displaced** (one line per title); no InsertLine twins; displaced ids Link-tombstoned; TT tasks not deleted. Held Rematch still does not steal for true multi-task same-title. | unit **pass**; live fail recorded (`41-…`); re-prove **not run** |
 | BUG-TT-DUP-CREATE-ON-STRIP-SYNC | Tip after this PR. On `PKM - journaling.md` (or throwaway): strip `ticktick_id` from one line while another same-title live marker remains **or** leave multi Dexie orphans for the title; Synchronize. Also: brand-new unique title checkbox. | No new TT id for same-title peer cases — **Reattached** (unique orphan) or **Skipped creating…** Notice (incl. inbox-inferred parent vs project orphans). Unique new title still **created**. Prove ×2 different fixtures. | unit **pass**; live **pass** ×2 `44-…` (after parent-bypass fix; tip@`8528baa` first prove fail) |
+| BUG-TT-CREATE-PATH-BYPASS | Tip after this PR. (A) Project note without frontmatter `ticktick_id` while exactly one open same-title Projects-list parent exists → Synchronize. (B) Same with ≥2 same-title open parents. (C) Confirm strip→`checkFileForNewTasks` still skip/reattach (no new path). | (A) frontmatter reattached to existing parent id — **no** new TT parent. (B) no createParent; Notice skipped. (C) same as BUG-TT-DUP-CREATE-ON-STRIP-SYNC. | unit **pass**; pilot **not run** |
 | ARCH-SYNC-INTENT-IDENTITY | Unit: types (#256) + tombstones (#257) + Detach (#258) + Sync discrepancies UI (#259) + Check enumerator (#260) in `archSyncIntentIdentity.test.ts`. Live prove ×2 — #261. Confirm Rebind gap → `UX-SYNC-CONFIRM-REBIND`. | Link ≻ … ≻ PushDeleteTT; Check = same `enumerateSyncPlannedDeletions`; empty Dexie / checkPoint 0 fail-closed residual; Confirm offers Rebind when rematchable. | unit **pass** (#256–#260 + confirm-rebind); live **pass** ×2 (`39-…`); Confirm Rebind live **not run** |
 | ARCH-SYNC-CONFLICT-CATALOG | Read `UX-OBS-TT-SOAK/43-conflict-resolution-tt-dedupe.md` conflict table + locked **1A/2A/3A**. | Classes map to Don’t delete / Rebind / Apply once / DetachMarker / Deduplicate unlinked TT (fourth peer when vault keeper); TT-only dups ≠ vault Confirm. | docs DoR **locked**; pilot **not run** |
 | UX-SYNC-TT-DEDUPE | Tip **after code PR**. TT has ≥2 live same-title+**1A** parent tasks; vault marker links exactly one keeper; extras have no vault lines; Synchronize does not offer Add. Open Sync discrepancies → **3A** fourth peer **Delete unlinked TT duplicates** → confirm. | Non-keeper TT ids deleted; keeper + vault marker unchanged; no InsertLine/Add; ≠ Apply once plan. Prove ×2 different fixtures. | docs DoR **locked 1A/3A**; code **not run**; pilot **not run** |
@@ -1936,3 +1937,32 @@ Journal: Confirm Rebind 05:43Z InsertLine = **vault twins only** (existing TT id
 | Case | Pilot | Notes |
 |------|-------|-------|
 | BUG-TT-DUP-CREATE-ON-STRIP-SYNC | unit **pass**; live **pass** ×2 `44-…` | tip@`8528baa` first prove **fail** (`6aeafcb0…` inbox); parent-bypass fix then механикой + интеграцией |
+
+## PR — BUG-TT-CREATE-PATH-BYPASS (create-path inventory + residual guards)
+
+After #279/#280, audit every production `createTask` call. Prevention first — no Deduplicate UI (#276 stays deferred).
+
+### Audit findings
+| Path | Role | Guard |
+|------|------|-------|
+| `addNewTask` / `checkFileForNewTasks` / `lineSettledCheck` | unmarked line → TT | `resolveSameTitleCreate` (#279/#280) |
+| `ProjectSchemeService` `createParent` | project note without `ticktick_id` | **this PR:** reattach unique same-title parent / skip multi |
+| `SyncMan.syncTickTickToObsidian` recreate loop | legacy cache→TT | **this PR:** no `createTask`; caller already commented out |
+| Confirm InsertLine / Rematch | vault markers only | no TT create |
+| `redo` wrap | journal wrapper | not a create entrypoint |
+
+### Steps
+1. Tip this PR.
+2. Project note: clear frontmatter `ticktick_id` while one open same-title Projects parent exists → Synchronize.
+3. (Optional second fixture) two open same-title parents + note without id → Synchronize.
+4. Smoke strip→`checkFileForNewTasks` still skip/reattach (no regression vs `44-…`).
+
+### Expected
+- Step 2: note reattaches existing parent id; **no** new TT parent.
+- Step 3: skip create; Notice; no new TT parent / no same-title note twins from createNote.
+- Step 4: same as BUG-TT-DUP-CREATE-ON-STRIP-SYNC.
+- Manual TT orphan cleanup under PKM journaling (owner-authorized) recorded in `45-create-path-audit.md` — not a product Deduplicate ship.
+
+| Case | Pilot | Notes |
+|------|-------|-------|
+| BUG-TT-CREATE-PATH-BYPASS | unit **pass**; pilot **not run** | inventory + ProjectScheme + SyncMan inert |

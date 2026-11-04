@@ -295,17 +295,16 @@ export class SyncMan {
 			}
 
 
-			// Check for new tasks in Obsidian
+			// BUG-TT-CREATE-PATH-BYPASS: never recreate via createTask here.
+			// Unmarked / new vault lines must go through addNewTask → resolveSameTitleCreate
+			// (#279/#280). This legacy SyncMan path is also unreachable (caller commented
+			// out in services/index.ts); keeping the loop would be a silent create bypass.
 			const newObsidianTasks = tasksInCache.filter(task => !tasksFromTickTic.some(t => t.id === task.id));
 			const reallyNewObsidianTasks = newObsidianTasks.filter(task => reallyDeletedTickTickTasks.some(t => (t as unknown as { taskId: string }).taskId === task.id));
-			//this.dumpArray('== Add to TickTick:', reallyNewObsidianTasks);
-			//upload local only tasks to TickTick
-
-			for (const task of reallyNewObsidianTasks) {
-				const created = await this.plugin.tickTickRestAPI?.createTask(task);
-				if (created) {
-					bModifiedFileSystem = true;
-				}
+			if (reallyNewObsidianTasks.length > 0) {
+				log.warn(
+					`SyncMan: skipping ${reallyNewObsidianTasks.length} cache-only recreate(s); use TaskModificationDetector.addNewTask (same-title guard).`,
+				);
 			}
 
 

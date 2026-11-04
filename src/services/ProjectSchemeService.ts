@@ -1,5 +1,5 @@
 // IO side of the pilot project scheme (see src/projectScheme.ts).
-import { TFile, type App } from 'obsidian';
+import { Notice, TFile, type App } from 'obsidian';
 import type { PluginContext } from '@/pluginContext';
 import type { ITask } from '@/api/types/Task';
 import { getSettings, updateSettings } from '@/settings';
@@ -12,6 +12,7 @@ import {
 	isProjectNote, isSchemeParentTask, isProjectParentDuplicateLine, linkTarget, isDoneStatus, planProjects, renderProjectNote, renderProjectTemplate, sanitizeTitle, pickProjectNote, planTitle,
 	STATUS_ACTIVE, STATUS_DONE, repairProjectNoteTasks, type NoteSide, type ParentSide, type Snap, stripFileLinks,
 } from '@/projectScheme';
+import { formatTaskCreateSkippedNotice, formatTaskReattachedNotice } from '@/ui/notices/taskLifecycleNotices';
 
 export class ProjectSchemeService {
 	/** parent task id -> project note path */
@@ -198,7 +199,24 @@ export class ProjectSchemeService {
 		const snap: Record<string, Snap> = { ...(getSettings().projectSnapshot ?? {}) };
 		for (const a of planProjects(notes, parents, snap)) {
 			try {
-				if (a.type === 'createParent') {
+				if (a.type === 'skipCreateParent') {
+					log.warn(
+						`ProjectScheme: skipped createParent for «${a.note.title}» (${a.reason})`,
+					);
+					new Notice(formatTaskCreateSkippedNotice(a.note.title, 'ambiguous-orphans'), 10000);
+				} else if (a.type === 'reattachParent') {
+					// BUG-TT-CREATE-PATH-BYPASS: note lost frontmatter id but same-title parent lives.
+					const f = this.app.vault.getAbstractFileByPath(a.note.path);
+					if (f instanceof TFile) await commitFrontMatter(this.app, f, fm => {
+						fm.ticktick_id = a.parentId;
+						const tags = Array.isArray(fm.tags) ? fm.tags.map(String) : [];
+						if (!tags.includes('obsidian') && !tags.includes('ticktick')) fm.tags = [...tags, 'obsidian'];
+					});
+					this.parents.set(a.parentId, a.note.path);
+					snap[a.parentId] = { noteDone: a.note.done, ttDone: a.note.done };
+					log.warn(`ProjectScheme: reattached note «${a.note.title}» to existing parent ${a.parentId}`);
+					new Notice(formatTaskReattachedNotice(a.note.title, a.parentId));
+				} else if (a.type === 'createParent') {
 					const created = await api?.createTask({
 						title: a.note.title, projectId: this.listId, tags: this.tags(), content: '', desc: '',
 						items: [], status: 0, priority: 0, parentId: '', childIds: [],

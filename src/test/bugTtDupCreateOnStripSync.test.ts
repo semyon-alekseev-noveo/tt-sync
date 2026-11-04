@@ -179,4 +179,28 @@ describe('BUG-TT-DUP-CREATE-ON-STRIP-SYNC', () => {
 		expect(src).toMatch(/decision\.action === 'skip'/);
 		expect(src).toMatch(/orphan \?\? await this\.plugin\.tickTickRestAPI\?\.createTask/);
 	});
+
+	it('BUG-TT-CREATE-PATH-BYPASS: production createTask sites stay guarded or inert', () => {
+		const root = join(__dirname, '..');
+		const newTasks = readFileSync(join(root, 'sync/vault-push/taskModification/newTasks.ts'), 'utf8');
+		const scheme = readFileSync(join(root, 'services/ProjectSchemeService.ts'), 'utf8');
+		const syncMan = readFileSync(join(root, 'services/syncModule.ts'), 'utf8');
+		const indexSvc = readFileSync(join(root, 'services/index.ts'), 'utf8');
+
+		// Line / file new-task path: guard before create.
+		expect(newTasks).toContain('resolveSameTitleCreate');
+		expect(newTasks.indexOf('resolveSameTitleCreate')).toBeLessThan(
+			newTasks.indexOf('createTask'),
+		);
+
+		// Project-scheme parent create: reattach / skip before createParent createTask.
+		expect(scheme).toContain('reattachParent');
+		expect(scheme).toContain('skipCreateParent');
+		expect(scheme).toMatch(/a\.type === 'createParent'/);
+
+		// Legacy SyncMan must not call createTask (dead + was an unguarded bypass).
+		expect(syncMan).not.toMatch(/tickTickRestAPI\?\.createTask/);
+		expect(syncMan).toContain('BUG-TT-CREATE-PATH-BYPASS');
+		expect(indexSvc).toMatch(/\/\/\s*return this\.tickTickSync\.syncTickTickToObsidian/);
+	});
 });

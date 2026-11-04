@@ -1,3 +1,13 @@
+### Iteration 2026-11-04 12:13 UTC
+
+- Context: Owner «убери / ок / гоу» — delete PKM journaling TT orphans; #276 Deduplicate deferred; audit remaining createTask paths for same invariant as #279/#280.
+- Target: Live TT cleanup under vault keepers; fail-closed residual create bypasses (ProjectScheme createParent + SyncMan landmine); no Deduplicate UI / no release.
+- Actions log: MCP deleted non-keeper same-title siblings; `decideCreateOrReattachParent` + SyncMan createTask removed; AF `BUG-TT-CREATE-PATH-BYPASS`; units; `45-create-path-audit.md`; TEST_PLAN.
+- Validation: `npx vitest run` + `npm run build` (this PR); MCP verify deleted ids 404 / keepers live.
+- Problems: Pilot prove for ProjectScheme reattach still `open`; #276 safety net still deferred — status `mitigated`.
+- To Be Done: Merge PR; tip optional; prove ProjectScheme reattach ×2 when convenient; keep #276 parked.
+- References: `45-create-path-audit.md`, `BUG-TT-CREATE-PATH-BYPASS`, #276, #279, #280, `CHANGELOG.md`
+
 ### Iteration 2026-11-04 09:52 UTC
 
 - Context: Owner «сам проверь» prove ×2 on tip@`8528baa` / 2.0.96; first strip→flush created `6aeafcb0…` (inbox parent bypassed peer filter).
