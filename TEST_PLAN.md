@@ -22,8 +22,9 @@ Review: `docs/pilot/results/UX-OBS-TT-SOAK/36-modal-notice-copy-review.md`. Unit
 | BUG-ORPHAN-ADD-STICKY | Check → Add to vault for orphans. Check again. | Same ids not re-listed; lines appear under capture/abyss-active (or mapped project note). | **not run** |
 | BUG-ORPHAN-STALE-REMATCH | After Rematch: vault lines have new ids; Check lists old titles (e.g. Подумать над… / Румяна). Run Check again (no Add). | Modal empty or without those titles; no duplicate lines; completed (Румяна) not listed. | **not run** |
 | BUG-ORPHAN-NO-SETTINGS-CYCLE | `npm run check:cycles` after orphan eligibility module changes. | No new cycle via `vaultImportEligibility` ↔ `settings`. | unit **pass** (2.0.96) |
-| UX-SYNC-ONE-FLOW | Tip. Read Maintenance Synchronize vs Check help. Manual Synchronize when a large mismatch holds. | Sync help = day-to-day; Check = rare. Modal title **Sync discrepancies**; primary safe = Don’t delete / Rebind. Toast-only (scheduled) says run Synchronize. | **not run** |
-| ARCH-SYNC-INTENT-IDENTITY | Unit: types (#256) + tombstones (#257) + Detach (#258) + Sync discrepancies UI (#259) + Check enumerator (#260) in `archSyncIntentIdentity.test.ts`. Live prove ×2 — #261. | Link ≻ … ≻ PushDeleteTT; Check = same `enumerateSyncPlannedDeletions`; empty Dexie / checkPoint 0 fail-closed residual. | unit **pass** (#256–#260); live **pass** ×2 (`39-arch-sync-261-prove.md`) |
+| UX-SYNC-ONE-FLOW | Tip. Read Maintenance Synchronize vs Check help. Manual Synchronize when a large mismatch holds. | Sync help = day-to-day; Check = rare. Modal title **Sync discrepancies**; primary safe = Don’t delete / Rebind on **held and Confirm**. Toast-only (scheduled) says run Synchronize. | **not run** |
+| UX-SYNC-CONFIRM-REBIND | Tip. Under-threshold PushDeleteTT Confirm with vault lines that still have id+filePath (or Check residual Confirm). | Sync discrepancies shows **Rebind**; choosing it rebinds markers and does **not** delete TickTick. No id/filePath → no Rebind. | unit **pass**; live **not run** |
+| ARCH-SYNC-INTENT-IDENTITY | Unit: types (#256) + tombstones (#257) + Detach (#258) + Sync discrepancies UI (#259) + Check enumerator (#260) in `archSyncIntentIdentity.test.ts`. Live prove ×2 — #261. Confirm Rebind gap → `UX-SYNC-CONFIRM-REBIND`. | Link ≻ … ≻ PushDeleteTT; Check = same `enumerateSyncPlannedDeletions`; empty Dexie / checkPoint 0 fail-closed residual; Confirm offers Rebind when rematchable. | unit **pass** (#256–#260 + confirm-rebind); live **pass** ×2 (`39-…`); Confirm Rebind live **not run** |
 | UX-NOTICE-MODAL-COPY | Maintenance → Check sync cache (or open Orphan / Clean up cache if offered). | Orphan Leave alone / Add may duplicate / Delete; cleanup = local sync cache. | **not run** |
 
 ## UX-SET — Settings UX redesign (epic #189 / Phase 1 #191 / Phase 2 #192 / Phase 3 #193 / Phase 4 #194)
@@ -1810,6 +1811,8 @@ Epic [#255](https://github.com/semyon-alekseev-noveo/tt-sync/issues/255); child 
 
 Expected: unit **pass**. Live prove ×2 — #261.
 
+**Gap (post-#259):** Confirm only shared title/skip/apply constants; Rebind stayed held-only until `UX-SYNC-CONFIRM-REBIND`. See PR section below and `40-confirm-rebind-gap.md`.
+
 | Case | Pilot | Notes |
 |------|-------|-------|
 | ARCH-SYNC-INTENT-IDENTITY (#259 Sync discrepancies UI) | unit **pass**; live **not run** | `selectResidualDestructivePlanned`, MassDeleteGuardModal, TaskDeletionModal |
@@ -1845,3 +1848,20 @@ Expected: live **pass** ×2. Do not mark pass after a single run (`bug-prove-twi
 | Case | Pilot | Notes |
 |------|-------|-------|
 | ARCH-SYNC-INTENT-IDENTITY (#261 prove ×2) | live **pass** ×2 | `39-arch-sync-261-prove.md`; tip @`3729c0b` |
+
+## PR — UX-SYNC-CONFIRM-REBIND (Confirm Sync discrepancies Rebind)
+
+Closes the #259 / plan #38 step-4 gap: under-threshold Confirm and Check residual Confirm must offer Rebind=Link, not only Don’t delete / Apply once.
+
+### Steps
+1. Unit: `plannedFromConfirmDeletionItems` / `confirmOffersRematch` — id+filePath → offer; missing id or file → no offer.
+2. Unit: `TaskDeletionModal` source contains `REBIND_BUTTON_LABEL` + `confirmOffersRematch` (tightens weak #259 copy-only assert).
+3. Unit: `applyConfirmRematch` calls `rebindVaultFromPlanned` and never TT/repo delete.
+4. Unit: `TaskDeletionHandler` + `checkDatabase` rematch path skips deletes.
+5. Pilot (optional later): under-threshold PushDeleteTT Confirm with unmarked/stale vault lines → Rebind → markers rebound; TT ids still live. Prefer two fixtures (`bug-prove-twice`).
+
+Expected: unit **pass**. Live **not run** in this PR.
+
+| Case | Pilot | Notes |
+|------|-------|-------|
+| UX-SYNC-CONFIRM-REBIND | unit **pass**; live **not run** | `uxSyncConfirmRebind.test.ts`, `confirmRematch.ts`, `TaskDeletionModal.ts`, `checkDatabase.ts` |

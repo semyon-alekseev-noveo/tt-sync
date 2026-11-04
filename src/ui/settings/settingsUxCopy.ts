@@ -74,9 +74,10 @@ export const DELETION_GLOSSARY_TERMS: readonly DeletionGlossaryTerm[] = [
 		not: 'Not Purge; not Reset; not silent auto-bind; not Check sync cache.',
 	},
 	{
-		term: 'Confirm (PushDeleteTT) → Don’t delete',
-		summary: 'Same Sync discrepancies surface when authorizing TickTick deletes. Don’t delete leaves TickTick alone.',
-		not: 'Not Skip-only held wording; not Purge.',
+		term: 'Confirm (PushDeleteTT) → Don’t delete / Rebind / Apply once',
+		summary:
+			'Same Sync discrepancies surface under threshold: Don’t delete; Rebind = Link (+ InsertLine) when vault→TT rows have id+filePath (no TT deletes); Apply once = PushDeleteTT. Check residual Confirm uses the same buttons.',
+		not: 'Not Skip-only held wording; not Purge; Rebind is not held-only.',
 	},
 	{
 		term: 'Purge soft-deleted',

@@ -22,6 +22,7 @@ import { syncCachedRead } from '@/sync/vault-io';
 import { isPathInPushScope } from '@/syncScope';
 import { db } from '@/db/dexie';
 import { classifyFileRead, deletionConfirmMode, obsidianSyncFileState } from '@/sync/massDeleteGuard';
+import { applyConfirmRematch } from '@/sync/confirmRematch';
 import { isNotebookProtectedFromVaultDelete, isNotebookTask } from '@/sync/notebookGuard';
 import { getProjectById } from '@/db/projects';
 import type { SyncRunContext } from '@/sync/SyncRunContext';
@@ -437,11 +438,15 @@ export class TaskDeletionHandler {
 		// Get confirmation from user. Apply-once already confirmed in the guard dialog.
 		if (!opts?.skipConfirm && deletionConfirmMode() !== 'force') {
 		const prompt = await this.confirmDeletion(taskIds, reason);
+		if (prompt.rematch) {
+			// UX-SYNC-CONFIRM-REBIND: align markers; do not PushDeleteTT.
+			return [];
+		}
 		if (!prompt.confirmed) {
 			if (!prompt.suppressedPending) {
 				const msg = prompt.timedOut
 					? 'TickTickSync: TickTick tasks were not deleted (dialog timed out). Run Synchronize again and choose Apply once on Sync discrepancies.'
-					: 'TickTickSync: TickTick tasks were not deleted. Choose Apply once on Sync discrepancies, restore the task lines in Obsidian, or delete the tasks in TickTick manually.';
+					: 'TickTickSync: TickTick tasks were not deleted. Choose Don’t delete / Rebind on Sync discrepancies, restore the task lines in Obsidian, or delete the tasks in TickTick manually.';
 				new Notice(msg, 8000);
 			}
 			return [];
@@ -479,7 +484,8 @@ export class TaskDeletionHandler {
 	}
 
 	/**
-	 * Confirm deletion with user via modal
+	 * Confirm deletion with user via modal.
+	 * UX-SYNC-CONFIRM-REBIND: Rebind=Link runs here when chosen (no TT deletes).
 	 */
 	private async confirmDeletion(taskIds: string[], reason: string): Promise<DeletionPromptResult> {
 		const items = await this.fileTaskQueries.getDeletionItems(taskIds);
@@ -491,7 +497,16 @@ export class TaskDeletionHandler {
 			() => {}
 		);
 
-		return await modal.showModal();
+		const prompt = await modal.showModal();
+		if (prompt.rematch) {
+			try {
+				await applyConfirmRematch(this.plugin, items);
+			} catch (error) {
+				log.error('TickTickSync: Confirm Rebind failed', error);
+				new Notice('TickTickSync: Rebind failed — TickTick was not deleted. See console.', 8000);
+			}
+		}
+		return prompt;
 	}
 
 	/**

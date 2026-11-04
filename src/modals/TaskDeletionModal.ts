@@ -4,7 +4,11 @@ import {
 	SYNC_DISCREPANCY_CONFIRM_LEAD,
 	SYNC_DISCREPANCY_MODAL_TITLE,
 	SYNC_DISCREPANCY_SKIP_LABEL,
+	REBIND_BUTTON_DESC,
+	REBIND_BUTTON_LABEL,
+	REBIND_VAULT_WIPE_HINT,
 } from '@/sync/massDeleteGuard';
+import { confirmOffersRematch } from '@/sync/confirmRematchOffer';
 
 /** Prompts never block the sync queue: unanswered within this time = skip (nothing deleted). */
 /** Large vault-wide batches need time to read the list; cap at 3 minutes. */
@@ -18,6 +22,8 @@ export const pendingDeletions: DeletionItem[] = [];
 
 export type DeletionPromptResult = {
 	confirmed: boolean;
+	/** Owner chose Rebind=Link instead of PushDeleteTT (UX-SYNC-CONFIRM-REBIND). */
+	rematch?: boolean;
 	/** Modal not shown: these ids were skipped earlier (timeout) in this session. */
 	suppressedPending?: boolean;
 	timedOut?: boolean;
@@ -37,8 +43,9 @@ export interface DeletionItem {
 }
 
 /**
- * ARCH-SYNC #259 — Confirm PushDeleteTT shares Sync discrepancies (окно расхождений)
- * copy with the held modal (Don’t delete / Apply once).
+ * ARCH-SYNC #259 + UX-SYNC-CONFIRM-REBIND — Confirm PushDeleteTT shares Sync
+ * discrepancies (окно расхождений) with held: Don’t delete / Rebind / Apply once
+ * when vault→TT rematch candidates exist.
  */
 export class TaskDeletionModal extends Modal {
 	title = SYNC_DISCREPANCY_MODAL_TITLE;
@@ -48,6 +55,7 @@ export class TaskDeletionModal extends Modal {
 	confirmLabel = SYNC_DISCREPANCY_APPLY_LABEL;
 	items: DeletionItem [] = [];
 	result!: boolean;
+	rematchChosen = false;
 	reason: string;
 	onSubmit: (result: boolean) => void;
 	resolvePromise!: (value: (PromiseLike<boolean> | boolean)) => void;
@@ -69,6 +77,11 @@ export class TaskDeletionModal extends Modal {
 		titleEl.setText(this.title);
 
 		contentEl.createEl('p', { text: `${this.message}${this.reason}` });
+
+		const offerRematch = confirmOffersRematch(this.items);
+		if (offerRematch) {
+			contentEl.createEl('p', { text: REBIND_VAULT_WIPE_HINT });
+		}
 
 		// Group items by filePath
 		const groupedItems: Record<string, DeletionItem[]> = {};
@@ -97,22 +110,40 @@ export class TaskDeletionModal extends Modal {
 			cancelBtn.setClass('ts_button');
 			cancelBtn.setButtonText(this.cancelLabel);
 			cancelBtn.onClick(() => {
+				this.rematchChosen = false;
 				this.result = false;
 				this.onSubmit(this.result);
 				this.close();
 			});
-		})
-			.addButton(confirmBtn => {
-				confirmBtn.setClass('ts_button');
-				confirmBtn.buttonEl.addClass('mod-destructive');
-				confirmBtn.setButtonText(this.confirmLabel);
-				confirmBtn.onClick(() => {
-					this.result = true;
-					this.onSubmit(this.result);
-					this.close();
+		});
 
+		if (offerRematch) {
+			new Setting(contentEl)
+				.setDesc(REBIND_BUTTON_DESC)
+				.addButton(button => {
+					button.setButtonText(REBIND_BUTTON_LABEL);
+					button.setCta();
+					button.onClick(() => {
+						this.rematchChosen = true;
+						this.result = false;
+						this.onSubmit(this.result);
+						this.close();
+					});
 				});
+		}
+
+		new Setting(contentEl).addButton(confirmBtn => {
+			confirmBtn.setClass('ts_button');
+			confirmBtn.buttonEl.addClass('mod-destructive');
+			confirmBtn.setButtonText(this.confirmLabel);
+			confirmBtn.onClick(() => {
+				this.rematchChosen = false;
+				this.result = true;
+				this.onSubmit(this.result);
+				this.close();
+
 			});
+		});
 
 	}
 
@@ -136,6 +167,7 @@ export class TaskDeletionModal extends Modal {
 			let done = false;
 			const timer = window.setTimeout(() => {
 				if (done) return;
+				this.rematchChosen = false;
 				this.result = false;
 				for (const it of this.items) if (!pendingDeletions.some(p => p.id === it.id)) pendingDeletions.push(it);
 				new Notice(`TickTickSync: deletion of ${this.items.length} task(s) skipped (no answer within ${PROMPT_TIMEOUT_MS.value / 1000}s). Sync again to retry.`, 10000);
@@ -147,7 +179,8 @@ export class TaskDeletionModal extends Modal {
 				window.clearTimeout(timer);
 				resolve({
 					confirmed: Boolean(v),
-					timedOut: !v && this.items.some(it => pendingDeletions.some(p => p.id === it.id)),
+					rematch: this.rematchChosen,
+					timedOut: !v && !this.rematchChosen && this.items.some(it => pendingDeletions.some(p => p.id === it.id)),
 				});
 			};
 		});

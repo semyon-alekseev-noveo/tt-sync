@@ -159,6 +159,10 @@ describe('UX-SET-GLOSSARY (Phase 1 surface)', () => {
 		expect(held?.summary.toLowerCase()).toMatch(/rebind/);
 		expect(held?.summary.toLowerCase()).toMatch(/avoid after restore|not apply|apply once/);
 		expect(held?.summary.toLowerCase()).toMatch(/check sync cache|not a second sync/);
+		const confirm = DELETION_GLOSSARY_TERMS.find((t) => /confirm/i.test(t.term));
+		expect(confirm?.term.toLowerCase()).toMatch(/rebind/);
+		expect(confirm?.summary.toLowerCase()).toMatch(/rebind/);
+		expect(confirm?.summary.toLowerCase()).toMatch(/link|no tt delete/);
 	});
 
 	it('Maintenance and Guard mount DeletionGlossary', () => {

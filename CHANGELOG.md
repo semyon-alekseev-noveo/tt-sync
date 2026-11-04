@@ -1,3 +1,13 @@
+### Iteration 2026-11-03 11:51 UTC
+
+- Context: Owner hit under-threshold Confirm without Rebind; #259 acceptance said Don’t delete / Rebind / Apply on one Sync discrepancies UI.
+- Target: Confirm + Check residual offer Rebind=Link when id+filePath; no TT deletes; solid UX-SYNC-CONFIRM-REBIND unit coverage.
+- Actions log: `confirmRematch.ts`; TaskDeletionModal rematch; TaskDeletionHandler + checkDatabase rematch path; AF/TEST_PLAN/glossary; gap note `40-confirm-rebind-gap.md`; tighten #259 assert.
+- Validation: `npx vitest run` + `npm run build` (this PR).
+- Problems: Live Confirm Rebind prove still `open` (pilot **not run**).
+- To Be Done: PR → abyss-mapping; optional live prove ×2 later.
+- References: `UX-SYNC-CONFIRM-REBIND`, #259, `40-confirm-rebind-gap.md`, `CHANGELOG.md`
+
 ### Iteration 2026-11-03 11:38 UTC
 
 - Context: Owner asked to rewrite Settings smoke checklist after tip Settings copy rewrite.
