@@ -129,19 +129,35 @@ describe('BUG-TT-DUP-CREATE-ON-STRIP-SYNC', () => {
 		expect(d).toEqual({ action: 'create' });
 	});
 
-	it('different parent key does not block create', () => {
-		const text = '- [ ] Подумать над механикой #obsidian\n';
+	it('file-scoped orphan under other parent → reattach (strip→inbox inference)', () => {
+		// Live fail: convertLineToTask inferred inbox/root while Dexie orphans stay under project parent.
+		const text = '- [ ] Подумать над механикой #obsidian #inbox\n';
 		const d = decideSameTitleCreate({
 			wantTitle: 'Подумать над механикой',
-			wantParentKey: `parent:${PARENT}`,
+			wantParentKey: `root:inbox130382745`,
+			vaultText: text,
+			vaultLines: text.split('\n'),
+			currentLineIndex: 0,
+			liveTasks: [task({ id: '6ae82055d07c7a23f9eed591', parentId: PARENT })],
+		});
+		expect(d).toEqual({ action: 'reattach', taskId: '6ae82055d07c7a23f9eed591' });
+	});
+
+	it('file-scoped multi orphan + inbox wantParent → skip (09:36Z regression)', () => {
+		const text = '- [ ] Подумать над механикой #obsidian #inbox\n';
+		const d = decideSameTitleCreate({
+			wantTitle: 'Подумать над механикой',
+			wantParentKey: `root:inbox130382745`,
 			vaultText: text,
 			vaultLines: text.split('\n'),
 			currentLineIndex: 0,
 			liveTasks: [
-				task({ id: 'otherparenttask0000000001', parentId: 'differentparent0000000001' }),
+				task({ id: '6ae82055d07c7a23f9eed591' }),
+				task({ id: '6ae9baf1eec3d823f964606e' }),
+				task({ id: '6aeae53f64633723f94008aa' }),
 			],
 		});
-		expect(d).toEqual({ action: 'create' });
+		expect(d).toEqual({ action: 'skip', reason: 'ambiguous-orphans' });
 	});
 
 	it('skip notice never says created; create/reattach notices unchanged', () => {

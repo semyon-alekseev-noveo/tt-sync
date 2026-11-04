@@ -1,3 +1,13 @@
+### Iteration 2026-11-04 09:52 UTC
+
+- Context: Owner «сам проверь» prove ×2 on tip@`8528baa` / 2.0.96; first strip→flush created `6aeafcb0…` (inbox parent bypassed peer filter).
+- Target: File-scoped same-title orphan fallback so wrong `wantParentKey` cannot invent another TT; live prove ×2 pass.
+- Actions log: Tip prove fail recorded; `decideSameTitleCreate` title-orphan fallback; regression units; deploy tip; prove механикой + интеграцией via `checkFileForNewTasks`+sync; docs `44-…` / AF / TEST_PLAN.
+- Validation: `npx vitest run src/test/bugTtDupCreateOnStripSync.test.ts` 10 pass; `npm run build`; live journal no `task`/`create` on prove1/2; MCP before ids unchanged as set.
+- Problems: tip@`8528baa` hole `resolved` this iteration; TT-only extras still need #276 Deduplicate — status `mitigated`.
+- To Be Done: Merge fix PR into abyss-mapping; keep #276 for cleanup; no release unless owner asks.
+- References: `44-tt-dup-create-prevention.md`, `BUG-TT-DUP-CREATE-ON-STRIP-SYNC`, #279, #276, `CHANGELOG.md`
+
 ### Iteration 2026-11-04 09:14 UTC
 
 - Context: Owner asked why same-title TT duplicates appeared under PKM journaling — fix **creation**, not only post-hoc Deduplicate (#276).
