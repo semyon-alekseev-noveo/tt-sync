@@ -46,6 +46,7 @@
 | 39 | ARCH-SYNC #261 pilot prove ×2 | `39-arch-sync-261-prove.md` | **live pass** ×2 @`3729c0b` (after #267); fixtures PKM+Годовые |
 | 40 | Confirm Rebind gap (#259 / plan #38 step 4) | `40-confirm-rebind-gap.md` | **documented**; fix `UX-SYNC-CONFIRM-REBIND` (unit; live **not run**) |
 | 41 | Confirm Rebind InsertLine dups after #273 | `41-confirm-rebind-dup-fail.md` | **live fail**; unit fix `BUG-CONFIRM-REBIND-DUP`; pilot re-prove **not run** |
+| 42 | Open-note Delete/Backspace Confirm PushDeleteTT | `42-opennote-delete-confirm.md` | **live fail** post-#274; unit fix `BUG-OPENNOTE-DELETE-CONFIRM`; re-prove **not run** |
 | 34 | #208 held post-restore + AZ wipe root cause | `34-held-post-restore-az-wipe.md` | **root cause**; rematch fix shipped |
 | 35 | #208 Rematch prove ×2 | `35-bug-208-rematch-prove.md` | **pass** prove 1+2; issue closed |
 | — | Identity chain follow-up (rebind epic) | [`../ID-CHAIN-REBIND/`](../ID-CHAIN-REBIND/) | **DoR** epic [#214](https://github.com/semyon-alekseev-noveo/tt-sync/issues/214); Rematch insert ≠ vault-wide rebind |

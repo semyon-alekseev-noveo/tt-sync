@@ -413,9 +413,13 @@ export class TickTickService {
 		return await loadTasksFromCache();
 	}
 
+	/**
+	 * Infer vault→TT deletions for one file and Confirm. Prefer Synchronize
+	 * (`processSyncRemovedTasks`). Editor Delete/Backspace must not call this
+	 * (BUG-OPENNOTE-DELETE-CONFIRM).
+	 */
 	async deletedTaskCheck(filePath: string | null) {
 		return await doWithLock(LOCK_TASKS, async () => {
-			//NEW: Use TaskDeletionHandler
 			await this.plugin.taskDeletionHandler.checkFileForDeletedTasks(filePath);
 		});
 	}

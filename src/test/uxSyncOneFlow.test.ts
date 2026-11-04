@@ -59,4 +59,9 @@ describe('UX-SYNC-ONE-FLOW', () => {
 		expect(notice).toContain(SYNC_DISCREPANCY_NOTIFY_HINT);
 		expect(notice.toLowerCase()).toMatch(/synchronize/);
 	});
+
+	it('editor keyup does not Confirm PushDeleteTT (BUG-OPENNOTE-DELETE-CONFIRM)', () => {
+		const events = readFileSync(join(__dirname, '../services/EventHandlerService.ts'), 'utf8');
+		expect(events).not.toMatch(/deletedTaskCheck\s*\(/);
+	});
 });
