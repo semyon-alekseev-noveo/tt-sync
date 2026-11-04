@@ -1,3 +1,13 @@
+### Iteration 2026-11-04 05:56 UTC
+
+- Context: Owner Confirm Rebind after #273 on `PKM - journaling.md` InsertLine-duplicated 3 same-title lines beside live sibling markers.
+- Target: Confirm Rebind Link-displaces same-title live markers (+ Link tombstone); no InsertLine twins; held multi-task DEDUP unchanged.
+- Actions log: `allowDisplaceLiveSameTitle` on Confirm rematch; `findRebindLineIndex` reclaim; AF `BUG-CONFIRM-REBIND-DUP`; tests; `41-confirm-rebind-dup-fail.md`; TEST_PLAN.
+- Validation: focused + full `npx vitest run` + `npm run build` (this PR).
+- Problems: Pilot re-prove ×2 still `open` (live fail recorded only).
+- To Be Done: PR → abyss-mapping; owner tip + Confirm Rebind prove ×2; optional manual vault dup cleanup.
+- References: `BUG-CONFIRM-REBIND-DUP`, #273, `41-confirm-rebind-dup-fail.md`, `CHANGELOG.md`
+
 ### Iteration 2026-11-03 11:51 UTC
 
 - Context: Owner hit under-threshold Confirm without Rebind; #259 acceptance said Don’t delete / Rebind / Apply on one Sync discrepancies UI.

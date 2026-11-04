@@ -183,6 +183,34 @@ describe('UX-SYNC-CONFIRM-REBIND applyConfirmRematch', () => {
 		expect(deleteTaskRepo).not.toHaveBeenCalled();
 	});
 
+	it('BUG-CONFIRM-REBIND-DUP: Confirm rematch opts into allowDisplaceLiveSameTitle', async () => {
+		const plugin = {
+			taskRepository: {
+				loadLocalTaskById: vi.fn(),
+				loadAllLocalTasks: vi.fn(async () => [
+					{ taskId: '6ae82058d07c7a23f9eed592', deleted: false },
+					{ taskId: '6ae82058d07c7a23f9eed586', deleted: false },
+				]),
+			},
+			taskParser: { convertTaskToLine: vi.fn() },
+			app: { vault: { getAbstractFileByPath: vi.fn() } },
+		} as unknown as PluginContext;
+
+		await applyConfirmRematch(plugin, [
+			{
+				title: 'journaling',
+				id: '6ae82058d07c7a23f9eed592',
+				filePath: '10 Projects/PKM - journaling.md',
+			},
+		]);
+
+		expect(rebindVaultFromPlanned).toHaveBeenCalledTimes(1);
+		const opts = rebindVaultFromPlanned.mock.calls[0][2];
+		expect(opts).toMatchObject({ allowDisplaceLiveSameTitle: true });
+		expect(opts.allLiveIds.has('6ae82058d07c7a23f9eed592')).toBe(true);
+		expect(opts.allLiveIds.has('6ae82058d07c7a23f9eed586')).toBe(true);
+	});
+
 	it('no-ops without calling rebind when items lack id+filePath', async () => {
 		const plugin = {
 			taskRepository: {
