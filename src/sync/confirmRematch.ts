@@ -79,6 +79,8 @@ export async function applyConfirmRematch(
 		}
 	}
 
+	// BUG-CONFIRM-REBIND-DUP: Confirm reclaim may Link-displace a same-title live
+	// sibling marker (tombstone displaced id). Held Rematch leaves this off.
 	const result = await rebindVaultFromPlanned(
 		rematchLink,
 		{
@@ -104,7 +106,7 @@ export async function applyConfirmRematch(
 			convertTaskToLine: async (task, tabs) =>
 				plugin.taskParser!.convertTaskToLine(task, tabs),
 		},
-		{ allLiveIds },
+		{ allLiveIds, allowDisplaceLiveSameTitle: true },
 	);
 
 	stampLinkTombstones(result.displacedIds, 'rewrite');

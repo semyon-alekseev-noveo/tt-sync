@@ -23,7 +23,8 @@ Review: `docs/pilot/results/UX-OBS-TT-SOAK/36-modal-notice-copy-review.md`. Unit
 | BUG-ORPHAN-STALE-REMATCH | After Rematch: vault lines have new ids; Check lists old titles (e.g. Подумать над… / Румяна). Run Check again (no Add). | Modal empty or without those titles; no duplicate lines; completed (Румяна) not listed. | **not run** |
 | BUG-ORPHAN-NO-SETTINGS-CYCLE | `npm run check:cycles` after orphan eligibility module changes. | No new cycle via `vaultImportEligibility` ↔ `settings`. | unit **pass** (2.0.96) |
 | UX-SYNC-ONE-FLOW | Tip. Read Maintenance Synchronize vs Check help. Manual Synchronize when a large mismatch holds. | Sync help = day-to-day; Check = rare. Modal title **Sync discrepancies**; primary safe = Don’t delete / Rebind on **held and Confirm**. Toast-only (scheduled) says run Synchronize. | **not run** |
-| UX-SYNC-CONFIRM-REBIND | Tip. Under-threshold PushDeleteTT Confirm with vault lines that still have id+filePath (or Check residual Confirm). | Sync discrepancies shows **Rebind**; choosing it rebinds markers and does **not** delete TickTick. No id/filePath → no Rebind. | unit **pass**; live **not run** |
+| UX-SYNC-CONFIRM-REBIND | Tip. Under-threshold PushDeleteTT Confirm with vault lines that still have id+filePath (or Check residual Confirm). | Sync discrepancies shows **Rebind**; choosing it rebinds markers and does **not** delete TickTick. No id/filePath → no Rebind. Same-title live sibling → Link displace (`BUG-CONFIRM-REBIND-DUP`). | unit **pass**; live **not run** |
+| BUG-CONFIRM-REBIND-DUP | Tip after this PR. Confirm PushDeleteTT «missing marker» where note already has same-title lines with other live markers → choose **Rebind**. | Markers **Link-displaced** (one line per title); no InsertLine twins; displaced ids Link-tombstoned; TT tasks not deleted. Held Rematch still does not steal for true multi-task same-title. | unit **pass**; live fail recorded (`41-…`); re-prove **not run** |
 | ARCH-SYNC-INTENT-IDENTITY | Unit: types (#256) + tombstones (#257) + Detach (#258) + Sync discrepancies UI (#259) + Check enumerator (#260) in `archSyncIntentIdentity.test.ts`. Live prove ×2 — #261. Confirm Rebind gap → `UX-SYNC-CONFIRM-REBIND`. | Link ≻ … ≻ PushDeleteTT; Check = same `enumerateSyncPlannedDeletions`; empty Dexie / checkPoint 0 fail-closed residual; Confirm offers Rebind when rematchable. | unit **pass** (#256–#260 + confirm-rebind); live **pass** ×2 (`39-…`); Confirm Rebind live **not run** |
 | UX-NOTICE-MODAL-COPY | Maintenance → Check sync cache (or open Orphan / Clean up cache if offered). | Orphan Leave alone / Add may duplicate / Delete; cleanup = local sync cache. | **not run** |
 
@@ -1865,3 +1866,22 @@ Expected: unit **pass**. Live **not run** in this PR.
 | Case | Pilot | Notes |
 |------|-------|-------|
 | UX-SYNC-CONFIRM-REBIND | unit **pass**; live **not run** | `uxSyncConfirmRebind.test.ts`, `confirmRematch.ts`, `TaskDeletionModal.ts`, `checkDatabase.ts` |
+
+## PR — BUG-CONFIRM-REBIND-DUP (Confirm Rebind Link displace, not InsertLine)
+
+Post-#273 live fail on Thinkpad-tts-test `PKM - journaling.md`: Confirm Rebind inserted duplicate same-title lines beside live sibling markers instead of Link rewrite.
+
+### Rule
+Confirm rematch sets `allowDisplaceLiveSameTitle`. Same-title checkbox in the planned file → Link displace + Link tombstone for displaced id. Held Rematch leaves the flag off (ID-REBIND-DEDUP multi-task safe).
+
+### Steps
+1. Unit: `findRebindLineIndex` default refuses live same-title; with flag reclaims.
+2. Unit: `rebindFileContent` / `rebindVaultFromPlanned` with flag → rebound=1, inserted=0, displacedIds set; without flag → needInsert.
+3. Unit: `applyConfirmRematch` passes `allowDisplaceLiveSameTitle: true`.
+4. Pilot re-prove ×2 after tip (**not run** this PR). Evidence of live fail: `UX-OBS-TT-SOAK/41-confirm-rebind-dup-fail.md`.
+
+Expected: unit **pass**. Live re-prove **not run**.
+
+| Case | Pilot | Notes |
+|------|-------|-------|
+| BUG-CONFIRM-REBIND-DUP | unit **pass**; live fail recorded; re-prove **not run** | `idRebindVault.test.ts`, `uxSyncConfirmRebind.test.ts`, `rebindVault.ts`, `confirmRematch.ts` |

@@ -43,19 +43,33 @@ export function replaceOrAttachMarker(line: string, newId: string): string {
 	return `${line.replace(/\s+$/, '')} ${marker}`;
 }
 
+export type FindRebindLineOptions = {
+	/**
+	 * BUG-CONFIRM-REBIND-DUP / Confirm Rebind only: when a same-title checkbox
+	 * already has a live other marker, reclaim that line (Link displace) instead
+	 * of falling through to InsertLine. Held Rematch leaves this off so true
+	 * multi-task same-title cases keep distinct lines (ID-REBIND-DEDUP).
+	 */
+	allowDisplaceLiveSameTitle?: boolean;
+};
+
 /**
  * Prefer a line whose title matches and whose marker is missing or not in liveIds
  * (stale post-restore id). Returns -2 if the new task id is already on a line.
+ * With `allowDisplaceLiveSameTitle`, a live same-title sibling is a last-resort
+ * Link target (unmarked ≻ stale ≻ live displace).
  */
 export function findRebindLineIndex(
 	lines: readonly string[],
 	taskTitle: string,
 	taskId: string,
 	liveIds: ReadonlySet<string>,
+	opts?: FindRebindLineOptions,
 ): number {
 	const want = normalizeRebindTitle(taskTitle);
 	if (!want) return -1;
-	let fallback = -1;
+	let unmarkedFallback = -1;
+	let liveFallback = -1;
 	for (let i = 0; i < lines.length; i++) {
 		const line = lines[i]!;
 		if (!lineHasCheckbox(line)) continue;
@@ -63,14 +77,17 @@ export function findRebindLineIndex(
 		if (normalizeRebindTitle(line) !== want) continue;
 		const m = line.match(MARKER_FULL);
 		if (!m) {
-			if (fallback < 0) fallback = i;
+			if (unmarkedFallback < 0) unmarkedFallback = i;
 			continue;
 		}
 		const oldId = m[1]!;
 		if (!liveIds.has(oldId)) return i; // stale id → rewrite
-		// live other task with same title — do not steal
+		// live other task with same title — steal only when Confirm reclaim opted in
+		if (opts?.allowDisplaceLiveSameTitle && liveFallback < 0) {
+			liveFallback = i;
+		}
 	}
-	return fallback;
+	return unmarkedFallback >= 0 ? unmarkedFallback : liveFallback;
 }
 
 export interface RebindFileResult {
@@ -90,6 +107,7 @@ export function rebindFileContent(
 	snapshot: string,
 	tasks: readonly ITask[],
 	liveIds: ReadonlySet<string>,
+	opts?: FindRebindLineOptions,
 ): RebindFileResult {
 	const lines = snapshot.split('\n');
 	let rebound = 0;
@@ -111,7 +129,7 @@ export function rebindFileContent(
 			continue;
 		}
 		const titleKey = normalizeRebindTitle(task.title ?? '');
-		const idx = findRebindLineIndex(lines, task.title ?? '', id, liveIds);
+		const idx = findRebindLineIndex(lines, task.title ?? '', id, liveIds, opts);
 		if (idx === -2) {
 			skipped += 1;
 			continue;
@@ -160,9 +178,12 @@ export interface RebindVaultResult {
 export interface RebindVaultOptions {
 	/**
 	 * All non-deleted Dexie/TT ids for this run. When set, markers whose id is
-	 * still live are not treated as stale (avoids stealing a live marker).
+	 * still live are not treated as stale (avoids stealing a live marker),
+	 * unless `allowDisplaceLiveSameTitle` is set (Confirm Rebind reclaim).
 	 */
 	allLiveIds?: ReadonlySet<string>;
+	/** BUG-CONFIRM-REBIND-DUP — Confirm path only; see FindRebindLineOptions. */
+	allowDisplaceLiveSameTitle?: boolean;
 }
 
 /**
@@ -224,7 +245,9 @@ export async function rebindVaultFromPlanned(
 				log.warn(`TickTickSync rebind: missing file ${file}`);
 				continue;
 			}
-			const partial = rebindFileContent(snapshot, tasks, liveIds);
+			const partial = rebindFileContent(snapshot, tasks, liveIds, {
+				allowDisplaceLiveSameTitle: opts?.allowDisplaceLiveSameTitle,
+			});
 			const insertLines: string[] = [];
 			for (const task of partial.needInsert) {
 				insertLines.push(await deps.convertTaskToLine(task, 0));
