@@ -18,7 +18,16 @@ import { getSettings } from '@/settings';
 import { isPathInPushScope } from '@/syncScope';
 import log from '@/utils/logger';
 import type { TaskModificationDetector } from '@/sync/vault-push/taskModification/TaskModificationDetector';
-import { formatTaskCreatedNotice, formatTaskReattachedNotice } from '@/ui/notices/taskLifecycleNotices';
+import {
+	formatTaskCreatedNotice,
+	formatTaskCreateSkippedNotice,
+	formatTaskReattachedNotice,
+} from '@/ui/notices/taskLifecycleNotices';
+import {
+	decideSameTitleCreate,
+	sameTitleParentKey,
+} from '@/sync/vault-push/taskModification/sameTitleCreateGuard';
+import { normalizeRebindTitle } from '@/sync/rebindVault';
 
 /** Create / re-attach new vault tasks into TickTick and write markers back. */
 export class TaskModificationNewTasks {
@@ -79,8 +88,21 @@ export class TaskModificationNewTasks {
 					null
 				);
 
-				// Marker removed by hand? Re-attach to the TickTick task that used to live here (same title+file).
-				const orphan = await this.findOrphanByTitle(fileMap.getFilePath(), currentTask.title, fileMap);
+				// BUG-TT-DUP-CREATE-ON-STRIP-SYNC: fail-closed vs same-title live peers.
+				const decision = await this.resolveSameTitleCreate(
+					fileMap.getFilePath(),
+					currentTask,
+					fileMap,
+					line,
+				);
+				if (decision.action === 'skip') {
+					log.warn(
+						`Skipping TickTick create for «${currentTask.title}» (${decision.reason})`,
+					);
+					new Notice(formatTaskCreateSkippedNotice(currentTask.title, decision.reason), 10000);
+					return;
+				}
+				const orphan = decision.action === 'reattach' ? decision.task : undefined;
 				if (orphan) log.warn(`Re-attaching line to existing TickTick task ${orphan.id} (marker was removed)`);
 				// Create task in TickTick (or reuse orphan)
 				const newTask = (orphan ?? await this.plugin.tickTickRestAPI?.createTask(currentTask)) as ITask | null;
@@ -152,6 +174,10 @@ export class TaskModificationNewTasks {
 		}
 	}
 
+	/**
+	 * Legacy single-orphan reattach (title+file). Prefer `resolveSameTitleCreate`
+	 * which also fail-closes multi-orphan / already-linked same-title under parent.
+	 */
 	async findOrphanByTitle(this: TaskModificationDetector, filepath: string, title: string, fileMap: NewFileMap): Promise<ITask | undefined> {
 		const want = stripFileLinks(title ?? '').trim().toLowerCase();
 		if (!want) return undefined;
@@ -162,6 +188,48 @@ export class TaskModificationNewTasks {
 		const hits = (rows ?? []).filter(t => t?.id && !text.includes(t.id)
 			&& stripFileLinks(t.title ?? '').trim().toLowerCase() === want);
 		return hits.length === 1 ? hits[0] : undefined;
+	}
+
+	/**
+	 * BUG-TT-DUP-CREATE-ON-STRIP-SYNC — reattach unique orphan, else skip create
+	 * when same-title live peers exist under the same parent (or vault keeper).
+	 */
+	async resolveSameTitleCreate(
+		this: TaskModificationDetector,
+		filepath: string,
+		currentTask: ITask,
+		fileMap: NewFileMap,
+		lineIndex: number,
+	): Promise<
+		| { action: 'create' }
+		| { action: 'reattach'; task: ITask }
+		| { action: 'skip'; reason: 'ambiguous-orphans' | 'already-linked-same-title' }
+	> {
+		const f = this.app.vault.getAbstractFileByPath(filepath);
+		if (!(f instanceof TFile)) return { action: 'create' };
+		const text = await syncCachedRead(this.app.vault, f);
+		const vaultLines = text.split('\n');
+		const rows = await this.plugin.taskRepository.loadTasksForFile(filepath);
+		const decision = decideSameTitleCreate({
+			wantTitle: currentTask.title ?? '',
+			wantParentKey: sameTitleParentKey(currentTask),
+			vaultText: text,
+			vaultLines,
+			currentLineIndex: lineIndex,
+			liveTasks: rows ?? [],
+		});
+		if (decision.action === 'reattach') {
+			const task = (rows ?? []).find(t => t?.id === decision.taskId);
+			if (task) return { action: 'reattach', task };
+			// Dexie race: fall through to legacy single-orphan path.
+			const legacy = await this.findOrphanByTitle(filepath, currentTask.title ?? '', fileMap);
+			if (legacy) return { action: 'reattach', task: legacy };
+			log.warn(
+				`Same-title reattach id ${decision.taskId} missing from Dexie file rows; skip create (${normalizeRebindTitle(currentTask.title ?? '')})`,
+			);
+			return { action: 'skip', reason: 'ambiguous-orphans' };
+		}
+		return decision;
 	}
 
 	/**

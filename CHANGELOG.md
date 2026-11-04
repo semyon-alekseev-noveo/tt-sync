@@ -1,3 +1,13 @@
+### Iteration 2026-11-04 09:14 UTC
+
+- Context: Owner asked why same-title TT duplicates appeared under PKM journaling — fix **creation**, not only post-hoc Deduplicate (#276).
+- Target: Fail-closed `addNewTask` so strip+Sync / multi-orphan history cannot invent another TT id; separate PR from dedupe.
+- Actions log: Journal timeline (`44-…`); guard `sameTitleCreateGuard` + `resolveSameTitleCreate`; AF `BUG-TT-DUP-CREATE-ON-STRIP-SYNC`; unit + TEST_PLAN.
+- Validation: `npx vitest run` + `npm run build` (this PR).
+- Problems: Live prove ×2 still `open`; existing TT-only extras still need Deduplicate safety net — status `mitigated` for new creates.
+- To Be Done: Merge create-prevention PR; tip; prove ×2; keep #276 dedupe for cleanup.
+- References: `44-tt-dup-create-prevention.md`, `BUG-TT-DUP-CREATE-ON-STRIP-SYNC`, #276, `CHANGELOG.md`
+
 ### Iteration 2026-11-04 08:59 UTC
 
 - Context: Owner deferred DoR picks on #276 to analyst («лучшая логика, понятная и стабильно работающая»); #277 already merged with open 1/2/3 choices.
