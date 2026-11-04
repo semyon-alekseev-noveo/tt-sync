@@ -43,7 +43,7 @@
 - **BUG-OPENNOTE-DELETE-CONFIRM** — Delete/Backspace mid-edit opened PushDeleteTT Confirm (not the 5s open-note push). Fix: drop keyup `deletedTaskCheck`; re-prove **not run** (`42-opennote-delete-confirm.md`).
 - **BUG-TT-DUP-CREATE-ON-STRIP-SYNC** — primary create path for same-title TT dups: multi-orphan `findOrphanByTitle` → `createTask` (journal waves 11-02/03/04). Fail-closed reattach/skip + file-scoped parent fallback; tip@`8528baa` live **fail** then **pass** ×2 (`44-tt-dup-create-prevention.md`). Confirm InsertLine = vault twins only (`41-…`).
 - **BUG-TT-CREATE-PATH-BYPASS** — post-#280 create-path audit: ProjectScheme `createParent` reattach/skip; SyncMan recreate loop inert; inventory unit. Manual PKM orphan cleanup done (MCP). Pilot path-guard **not run** (`45-create-path-audit.md`).
-- **UX-SYNC-TT-DEDUPE** — TT-only same-title unlinked siblings (vault has no lines for orphans; no Add proposal). DoR **locked 1A/2A/3A** in `UX-OBS-TT-SOAK/43-…` (2026-11-04); **deferred** (owner OK; prevention first). Safety net after create-prevention.
+- **UX-SYNC-TT-DEDUPE** — **won't-fix / cancelled** (owner closed [#276](https://github.com/semyon-alekseev-noveo/tt-sync/issues/276)): Deduplicate UI not shipping after prevention (#279+#280+#281) + orphan cleanup; DoR **1A/2A/3A** in `43-…` remains historical.
 - **ID-CHAIN** — Epic [#214](https://github.com/semyon-alekseev-noveo/tt-sync/issues/214): eng children closed; #208 Rematch prove ×2 **pass**/closed; optional [#218](https://github.com/semyon-alekseev-noveo/tt-sync/issues/218) keeps epic open.
 - **UX-NOTICE** — create vs reattach Notices + modal cache wording: unit this tip; pilot strip-marker prove **not run** (`open`).
 - **BUG-RESET-CACHE-DELETE** — post-Reset Synchronize proposed vault-line deletes for pre-wipe ids (DON-253); owner **Cancel** only. Fix on tip/PR; pilot prove ×2 pending (`UX-OBS-TT-SOAK/24-post-reset-delete-modal.md`) (`open` until prove).
@@ -66,7 +66,7 @@
 0a. **BUG-CONFIRM-REBIND-DUP / UX-SYNC-CONFIRM-REBIND:** merge displace fix; owner tip + Confirm Rebind prove ×2 (different fixtures); optional manual dup cleanup on journaling note.
 0a2. **BUG-OPENNOTE-DELETE-CONFIRM:** merge keyup fix; owner Don’t delete if modal open; tip + prove ×2 line-delete does not Confirm.
 0a3. **BUG-TT-DUP-CREATE-ON-STRIP-SYNC:** merge parent-bypass fix PR; tip already proved ×2 pass on `44-…`; unique title create still unit-covered.
-0a4. **UX-SYNC-TT-DEDUPE:** merge analyst lock docs (1A/2A/3A); tick #276; then code PR (failing tests → Deduplicate fourth Sync discrepancies peer; hide no-keeper); prove ×2 — cleans already-created extras.
+0a4. **UX-SYNC-TT-DEDUPE:** **done / won't-fix** — #276 closed not planned; catalog docs cancelled; local `feat/ux-sync-tt-dedupe` stash ignore.
 0b. **UX-NOTICE-***: After merge, tip + strip-marker reattach toast prove; Orphan modal glance (`36-…`).
 0c. **#214:** Optional #218 only; else close epic when owner ready.
 0d. **BUG-RESET-CACHE-DELETE:** prove ×2 Reset→Synchronize still owner-gated (`25-…`).
