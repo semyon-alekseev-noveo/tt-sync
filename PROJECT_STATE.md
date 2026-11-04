@@ -62,7 +62,7 @@
 
 ## To Be Done
 
-0. **Settings #205 / checklist 32:** Owner re-smoke after tip; then close #205 → #189.
+0. **Settings #205 / checklist 32:** Agent re-smoke 2026-11-04 on tip `5be067d` / 2.0.96 (`32-…` all A–C ☑; C2 banner+unit). Owner accept → close #189 ( #205 already closed).
 0a. **BUG-CONFIRM-REBIND-DUP / UX-SYNC-CONFIRM-REBIND:** merge displace fix; owner tip + Confirm Rebind prove ×2 (different fixtures); optional manual dup cleanup on journaling note.
 0a2. **BUG-OPENNOTE-DELETE-CONFIRM:** merge keyup fix; owner Don’t delete if modal open; tip + prove ×2 line-delete does not Confirm.
 0a3. **BUG-TT-DUP-CREATE-ON-STRIP-SYNC:** merge parent-bypass fix PR; tip already proved ×2 pass on `44-…`; unique title create still unit-covered.
