@@ -26,6 +26,7 @@ Review: `docs/pilot/results/UX-OBS-TT-SOAK/36-modal-notice-copy-review.md`. Unit
 | BUG-OPENNOTE-DELETE-CONFIRM | Tip after this PR. Open in-scope note; delete one marked Active Zone line (Backspace/Delete). Wait for optional «Updating open note…» toast. | No Sync discrepancies / PushDeleteTT Confirm. TT tasks unchanged. Deletion Confirm only after manual Synchronize. | unit **pass**; live fail post-#274; re-prove **not run** |
 | UX-SYNC-CONFIRM-REBIND | Tip. Under-threshold PushDeleteTT Confirm with vault lines that still have id+filePath (or Check residual Confirm). | Sync discrepancies shows **Rebind**; choosing it rebinds markers and does **not** delete TickTick. No id/filePath → no Rebind. Same-title live sibling → Link displace (`BUG-CONFIRM-REBIND-DUP`). | unit **pass**; live **not run** |
 | BUG-CONFIRM-REBIND-DUP | Tip after this PR. Confirm PushDeleteTT «missing marker» where note already has same-title lines with other live markers → choose **Rebind**. | Markers **Link-displaced** (one line per title); no InsertLine twins; displaced ids Link-tombstoned; TT tasks not deleted. Held Rematch still does not steal for true multi-task same-title. | unit **pass**; live fail recorded (`41-…`); re-prove **not run** |
+| BUG-TT-DUP-CREATE-ON-STRIP-SYNC | Tip after this PR. On `PKM - journaling.md` (or throwaway): strip `ticktick_id` from one line while another same-title live marker remains **or** leave multi Dexie orphans for the title; Synchronize. Also: brand-new unique title checkbox. | No new TT id for same-title peer cases — **Reattached** (unique orphan) or **Skipped creating…** Notice. Unique new title still **created**. Prove ×2 different fixtures. | unit **pass**; journal root cause `44-…`; live prove **not run** |
 | ARCH-SYNC-INTENT-IDENTITY | Unit: types (#256) + tombstones (#257) + Detach (#258) + Sync discrepancies UI (#259) + Check enumerator (#260) in `archSyncIntentIdentity.test.ts`. Live prove ×2 — #261. Confirm Rebind gap → `UX-SYNC-CONFIRM-REBIND`. | Link ≻ … ≻ PushDeleteTT; Check = same `enumerateSyncPlannedDeletions`; empty Dexie / checkPoint 0 fail-closed residual; Confirm offers Rebind when rematchable. | unit **pass** (#256–#260 + confirm-rebind); live **pass** ×2 (`39-…`); Confirm Rebind live **not run** |
 | ARCH-SYNC-CONFLICT-CATALOG | Read `UX-OBS-TT-SOAK/43-conflict-resolution-tt-dedupe.md` conflict table + locked **1A/2A/3A**. | Classes map to Don’t delete / Rebind / Apply once / DetachMarker / Deduplicate unlinked TT (fourth peer when vault keeper); TT-only dups ≠ vault Confirm. | docs DoR **locked**; pilot **not run** |
 | UX-SYNC-TT-DEDUPE | Tip **after code PR**. TT has ≥2 live same-title+**1A** parent tasks; vault marker links exactly one keeper; extras have no vault lines; Synchronize does not offer Add. Open Sync discrepancies → **3A** fourth peer **Delete unlinked TT duplicates** → confirm. | Non-keeper TT ids deleted; keeper + vault marker unchanged; no InsertLine/Add; ≠ Apply once plan. Prove ×2 different fixtures. | docs DoR **locked 1A/3A**; code **not run**; pilot **not run** |
@@ -1914,3 +1915,24 @@ Expected docs PRs: docs only. Pilot **not run**. Code **not shipped**.
 | ARCH-SYNC-CONFLICT-CATALOG | docs DoR **locked**; **not run** | `43-conflict-resolution-tt-dedupe.md` |
 | UX-SYNC-TT-DEDUPE | docs **1A/3A** locked; code **not run** | ready for failing tests |
 | UX-SYNC-TT-DEDUPE-NO-KEEPER | docs **2A** locked hide; **not run** | pick-keeper deferred |
+
+## PR — BUG-TT-DUP-CREATE-ON-STRIP-SYNC (fail-closed create prevention)
+
+Creation root cause of same-title TT duplicates under PKM journaling — separate from post-hoc Deduplicate (`UX-SYNC-TT-DEDUPE` / #276).
+
+Journal: Confirm Rebind 05:43Z InsertLine = **vault twins only** (existing TT ids). Real TT creates: `checkFileForNewTasks` → `addNewTask` on 2026-11-02 / 11-03 / 11-04 07:56Z when `findOrphanByTitle` required exactly one Dexie orphan and multi-orphan history fell through to `createTask`.
+
+### Steps
+1. Tip after this PR.
+2. Fixture A: strip one marker while another same-title live marker remains (or multi Dexie orphans for title under same parent). Synchronize.
+3. Fixture B (different note/title): brand-new unique checkbox title. Synchronize.
+4. Optional: Confirm Rebind on missing-marker plan where same-title live siblings exist — still Link-displace (`BUG-CONFIRM-REBIND-DUP`), no new TT.
+
+### Expected
+- Fixture A: **no** new TickTick id; Notice **Reattached…** (unique orphan) or **Skipped creating…** (ambiguous / already linked).
+- Fixture B: **New TickTick task created…**
+- Prove ×2 (`bug-prove-twice`). Deduplicate (#276) still useful as safety net for already-created TT-only extras.
+
+| Case | Pilot | Notes |
+|------|-------|-------|
+| BUG-TT-DUP-CREATE-ON-STRIP-SYNC | unit **pass**; journal root cause `44-…`; live prove **not run** | `bugTtDupCreateOnStripSync.test.ts`, `sameTitleCreateGuard.ts`, `newTasks.ts` |
