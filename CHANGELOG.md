@@ -1,3 +1,13 @@
+### Iteration 2026-11-04 08:50 UTC
+
+- Context: Owner wants TT duplicate-orphan cleanup inside conflict-resolution docs; analysts must review/test docs before code. Clarification: dups live **only in TT**, vault has no lines, sync does not propose Add.
+- Target: Canonical DoR phase `43-conflict-resolution-tt-dedupe.md` + AF/TEST_PLAN stubs + GitHub issue; docs-only PR; no code until sign-off.
+- Actions log: Wrote conflict catalog + DeduplicateUnlinkedTT rules/keeper/fail-closed; AF `UX-SYNC-TT-DEDUPE*`, `ARCH-SYNC-CONFLICT-CATALOG`; INDEX; TEST_PLAN stubs; PROJECT_STATE.
+- Validation: Doc cross-check vs #37/#38/#40–#42 + glossary terms; dry-run scenario table (no invented live pass).
+- Problems: DoR open choices (parent key, no-keeper v1 UX, button placement) — status `open` until analyst/owner sign-off; code blocked.
+- To Be Done: PR → abyss-mapping; open/link issue; owner/analyst tick DoR; then case → failing test → fix in a later PR.
+- References: `43-conflict-resolution-tt-dedupe.md`, `UX-SYNC-TT-DEDUPE`, `CHANGELOG.md`
+
 ### Iteration 2026-11-04 08:29 UTC
 
 - Context: Owner deleted Active Zone lines on tip after #274; Sync discrepancies Confirm (PushDeleteTT) popped immediately with «Updating open note…» toast — contradicts open-note identifiedOnly analysis.
