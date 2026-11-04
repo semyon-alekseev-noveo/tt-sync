@@ -1,3 +1,13 @@
+### Iteration 2026-11-04 08:59 UTC
+
+- Context: Owner deferred DoR picks on #276 to analyst («лучшая логика, понятная и стабильно работающая»); #277 already merged with open 1/2/3 choices.
+- Target: Lock **1A / 2A / 3A** in `43-…`; close open questions; AF/TEST_PLAN wording match; comment + tick #276; docs PR (no code).
+- Actions log: Analyst decision log; parent key **1A**, no-keeper hide **2A**, fourth Sync discrepancies peer **3A**; updated AF/TEST_PLAN/INDEX/PROJECT_STATE.
+- Validation: Dry-run S1–S10 rewritten to locked outcomes; cross-check UX-SYNC-ONE-FLOW + fail-closed + TT-only no-Add fixture.
+- Problems: Code still blocked until failing tests — status `mitigated` (DoR open choices resolved).
+- To Be Done: Merge docs PR; tick #276; then case → failing test → Deduplicate code PR; prove ×2.
+- References: `43-conflict-resolution-tt-dedupe.md`, #276, #277, `UX-SYNC-TT-DEDUPE`, `CHANGELOG.md`
+
 ### Iteration 2026-11-04 08:50 UTC
 
 - Context: Owner wants TT duplicate-orphan cleanup inside conflict-resolution docs; analysts must review/test docs before code. Clarification: dups live **only in TT**, vault has no lines, sync does not propose Add.
