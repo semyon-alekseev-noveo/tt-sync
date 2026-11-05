@@ -50,7 +50,8 @@
 | 43 | Conflict resolution: TT-only same-title dedupe DoR | `43-conflict-resolution-tt-dedupe.md` | **won't-fix / cancelled** — DoR **1A/2A/3A** historical; [#276](https://github.com/semyon-alekseev-noveo/tt-sync/issues/276) closed after prevention; no Deduplicate UI |
 | 44 | Same-title TT duplicate **creation** prevention | `44-tt-dup-create-prevention.md` | **live pass** ×2 (after parent-bypass fix); tip@`8528baa` first prove **fail** (inbox); Deduplicate **won't-fix** |
 | 45 | TT orphan cleanup + create-path audit | `45-create-path-audit.md` | Cleanup **done**; units **pass**; ProjectScheme prove **not run**; #276 **closed** won't-fix |
-| 47 | List-root `note/*` must not createNote ([#284](https://github.com/semyon-alekseev-noveo/tt-sync/issues/284)) | `47-listroot-note-promote.md` | **live pass** ×2 @`358690e` / 2.0.96; prevention `BUG-LISTROOT-NOTE-PROMOTE`; dirty dishwasher MOCs = owner recovery |
+| 47 | List-root `note/*` must not createNote ([#284](https://github.com/semyon-alekseev-noveo/tt-sync/issues/284)) | `47-listroot-note-promote.md` | **live pass** ×2 @`358690e` / 2.0.96; prevention `BUG-LISTROOT-NOTE-PROMOTE` |
+| 48 | Dishwasher / workplace hierarchy recovery (post-#285) | `48-dishwasher-workplace-hierarchy-recovery.md` | **recovery pass** ×2 (TT reparent + vault park + sync); tip 2.0.96 |
 | 34 | #208 held post-restore + AZ wipe root cause | `34-held-post-restore-az-wipe.md` | **root cause**; rematch fix shipped |
 | 35 | #208 Rematch prove ×2 | `35-bug-208-rematch-prove.md` | **pass** prove 1+2; issue closed |
 | — | Identity chain follow-up (rebind epic) | [`../ID-CHAIN-REBIND/`](../ID-CHAIN-REBIND/) | **DoR** epic [#214](https://github.com/semyon-alekseev-noveo/tt-sync/issues/214); Rematch insert ≠ vault-wide rebind |

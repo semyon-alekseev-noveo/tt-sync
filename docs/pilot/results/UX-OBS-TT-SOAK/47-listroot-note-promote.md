@@ -50,11 +50,11 @@
 | 2 | TT Projects root `BUG-LISTROOT-PROVE-B workplace-slug style` (`6aebe1f78f08f1480307bfad`), tags `obsidian` + `note/bug-listroot-prove-b` → Synchronize | **pass** — no MOC; id **absent** from `parents` |
 | Smoke | `PKM - journaling` note-free/`obsidian` root | **kept** — vault MOC still present; id in `parents` |
 
-Dirty dishwasher/workplace wrongly promoted notes (`нарисовать схему коммуникаций.md`, workplace children, etc.) still exist and still bind those TT ids in `parents` — **owner recovery**, not re-created this tip. No Apply once / mass-delete / vault wipe.
+Dirty dishwasher/workplace wrongly promoted notes were **not** re-created this tip. Recovery of those twins is recorded in `48-dishwasher-workplace-hierarchy-recovery.md` (**recovery pass** ×2). No Apply once / mass-delete / vault wipe on the prevention prove.
 
 ## Conclusion
 
-Creation path closed and **live-proved ×2** on clean note/* fixtures after tip `358690e` / **2.0.96**. Existing wrongly promoted pilot notes remain until owner cleans.
+Creation path closed and **live-proved ×2** on clean note/* fixtures after tip `358690e` / **2.0.96**. Existing wrongly promoted pilot notes recovered in phase 48.
 
 ## Checklist
 
@@ -64,4 +64,4 @@ Creation path closed and **live-proved ×2** on clean note/* fixtures after tip 
 - [x] TEST_PLAN + CHANGELOG in same PR (fix) + this docs PR (live)
 - [x] Live prove ×2 on clean fixtures
 - [ ] Deduplicate UI — **not** shipping
-- [ ] Owner: manual cleanup of dishwasher/workplace vault twins
+- [x] Owner recovery of dishwasher/workplace vault twins → `48-…`

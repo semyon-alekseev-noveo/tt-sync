@@ -1,3 +1,13 @@
+### Iteration 2026-11-05 02:20 UTC
+
+- Context: Owner «fix that» after #285 tip — recover dirty dishwasher / workplace hierarchy on pilot.
+- Target: TT reparent orphans; vault parent ids + park spurious project notes; Synchronize without Apply once; prove ×2; docs; no release.
+- Actions log: MCP `batch_update_tasks` parentId (7+3); park ten notes under `zz-parked-listroot-promote-20261105/`; fix parent `ticktick_id`; sync; delete ten same-title dups from first unmarked sync; rebind original ids; sync prove ×2; docs 48/INDEX/47.
+- Validation: TT `childIds` correct; AZ markers = original ids; `projectScheme.parents` has both parents not children; no new note/* promote.
+- Problems: First sync created same-title TT dups under parents — status `resolved` (MCP delete + rebind).
+- To Be Done: Merge docs PR #286 (+ recovery); optional owner delete parked folder; no release unless asked.
+- References: #284, `UX-OBS-TT-SOAK/48-dishwasher-workplace-hierarchy-recovery.md`, `CHANGELOG.md`
+
 ### Iteration 2026-11-05 01:57 UTC
 
 - Context: Owner merged #285 (`BUG-LISTROOT-NOTE-PROMOTE`) into abyss-mapping; tip prove required before issue close.
