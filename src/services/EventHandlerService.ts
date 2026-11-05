@@ -6,6 +6,7 @@
 import { App, Editor, type MarkdownFileInfo, MarkdownView, TFile, TFolder } from 'obsidian';
 import type { PluginContext } from '@/pluginContext';
 import { getSettings } from '@/settings';
+import { isAutomaticSyncEnabled } from '@/sync/syncEnabled';
 import { isPathInPushScope } from '@/syncScope';
 import {
 	ABYSS_VAULT_MODIFY_PUSH_MS,
@@ -113,6 +114,8 @@ export class EventHandlerService {
 			this.app.workspace.on('editor-change', (_editor, info) => {
 				const filepath = info?.file?.path;
 				if (!filepath || !getSettings().token) return;
+				// UX-SET-SYNC-MASTER-OFF: do not schedule open-note push when master off.
+				if (!isAutomaticSyncEnabled(getSettings())) return;
 				noteEditorActivity(filepath);
 				this.activeFilePush.notify(filepath);
 			}),
@@ -120,6 +123,8 @@ export class EventHandlerService {
 	}
 
 	private async flushActiveFilePush(filepath: string): Promise<void> {
+		// UX-SET-SYNC-MASTER-OFF: reactive open-note flush.
+		if (!isAutomaticSyncEnabled(getSettings())) return;
 		// BUG-COMMENT-ABYSS-VIEW: do not require getActiveFile() === filepath. Abyss view
 		// (and switching leaves before the 5s quiet period) still need the notified path pushed.
 		const file = this.app.vault.getAbstractFileByPath(filepath);
@@ -214,6 +219,10 @@ export class EventHandlerService {
 			this.app.vault.on('modify', async (file) => {
 				try {
 					if (!getSettings().token) {
+						return;
+					}
+					// UX-SET-SYNC-MASTER-OFF: vault.modify push / new-task scan are reactive.
+					if (!isAutomaticSyncEnabled(getSettings())) {
 						return;
 					}
 

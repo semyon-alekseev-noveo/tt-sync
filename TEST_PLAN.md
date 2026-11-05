@@ -6,6 +6,17 @@ Manual cases for behavior changes. Automated tests do not replace a row here.
 
 Pilot means `<pilot-vault>`, manual **Synchronize**, plugin id `tickticksync-abyss`. Do not use `<live-vault>`. A cloud agent does not mark a row passed. Status stays **not run** until a person or a local agent on that Obsidian records what they saw.
 
+## UX-SET-SYNC-MASTER-OFF — Sync off kill switch (this PR)
+
+Issue [#287](https://github.com/semyon-alekseev-noveo/tt-sync/issues/287). Case `UX-SET-SYNC-MASTER-OFF`. Unit: `src/test/uxSetSyncMasterOff.test.ts`. Pilot stub: `docs/pilot/results/UX-OBS-TT-SOAK/49-ux-set-sync-master-off.md`.
+
+| Case | Steps | Expected | Pilot |
+|------|-------|----------|-------|
+| UX-SET-SYNC-MASTER-OFF off | Sync Control → Automatic sync → uncheck **Enable automatic and reactive sync**. Edit an identified task in an open in-scope note; wait ≥5s. Reload/disable-enable plugin. | No «Updating open note…»; no startup full sync; scheduled timer does not fire even if interval ≥20. | **not run** |
+| UX-SET-SYNC-MASTER-OFF manual | With master still **off**, run Maintenance **Synchronize** (or Synchronize command). | Sync completes (vault↔TT as usual). | **not run** |
+| UX-SET-SYNC-MASTER-OFF on | Re-check **Enable automatic and reactive sync**. Edit open note; wait ≥5s (or reload with interval ≥20). | Open-note / scheduled / startup paths work again. | **not run** |
+| UX-SET-INTERVAL-ZERO (regression) | Master **on**, interval = 0. | Progress-on-scheduled grey; open-note/startup still allowed (interval alone ≠ Sync off). | unit **pass**; pilot **not run** |
+
 ## UX-NOTICE — Modal / create vs re-attach copy + orphan clarity
 
 Review: `docs/pilot/results/UX-OBS-TT-SOAK/36-modal-notice-copy-review.md`. Units: `uxNoticeReattach.test.ts`, `vaultImportEligibility.test.ts`.
@@ -60,7 +71,8 @@ Phase 1: **copy / layout**. Phase 2 (#192): **visibility / merge** when Abyss/GT
 | UX-SET-LEAN-WARN | GTD → Project note template = `60 templates/MOC.md`. | Lean/MOC warn (soak P0 / 1/2/3); empty or lean path has no warn. No MOC engine. | unit **pass**; pilot **not run** |
 | UX-SET-COLD-START | Open Sync Control. Read cold-start strip. | Projects note + `#system/project` + Active Zone + Synchronize; new TT list must be ticked. | unit **pass**; pilot **not run** |
 | UX-SET-DEVICE-PRUNE | Sync Control → Device Identity → Known devices. | Clear labels; **Remove** prunes non-current only. | unit **pass**; pilot **not run** |
-| UX-SET-INTERVAL-ZERO | Set automatic sync interval = 0. | Progress-on-scheduled grey/disabled + hint. | unit **pass**; pilot **not run** |
+| UX-SET-INTERVAL-ZERO | Set automatic sync interval = 0. | Progress-on-scheduled grey/disabled + hint. Interval help still notes open-note/startup unless master off. | unit **pass**; pilot **not run** |
+| UX-SET-SYNC-MASTER-OFF | Sync Control → Automatic sync: uncheck **Enable automatic and reactive sync**. Edit open note; reload plugin; leave interval > 0 if set. Then run Maintenance **Synchronize**. | No open-note toast / no startup sync / no scheduled runs while off. Synchronize still completes. Re-enable restores reactive paths. | unit **pass**; pilot **not run** (`UX-OBS-TT-SOAK/49-…`) |
 | UX-SET-PW-CONFIRM | Access Control → enter/change Regular Login password. | Explicit plaintext confirm before store; cancel does not save. | unit **pass**; pilot **not run** |
 
 Regression (still **not run** here): `UX-RESET-1`, `BUG-RESET-CACHE-DELETE`, `EMPTY-SIDE-GUARD` / held modal Skip path (`26`), `DEL-1` / `DEL-3`, `AF-1` empty `syncedLists`.

@@ -44,6 +44,7 @@
 - **BUG-TT-DUP-CREATE-ON-STRIP-SYNC** — primary create path for same-title TT dups: multi-orphan `findOrphanByTitle` → `createTask` (journal waves 11-02/03/04). Fail-closed reattach/skip + file-scoped parent fallback; tip@`8528baa` live **fail** then **pass** ×2 (`44-tt-dup-create-prevention.md`). Confirm InsertLine = vault twins only (`41-…`).
 - **BUG-TT-CREATE-PATH-BYPASS** — post-#280 create-path audit: ProjectScheme `createParent` reattach/skip; SyncMan recreate loop inert; inventory unit. Manual PKM orphan cleanup done (MCP). Pilot path-guard **not run** (`45-create-path-audit.md`).
 - **BUG-LISTROOT-NOTE-PROMOTE** — Projects list-roots with `note/<slug>` and no `project` tag were promoted to `#system/project` notes (`isListRoot` without tag gate). Prevention merged #285 (`358690e` / 2.0.96): `isSchemeParentTask` rejects note-context-without-project. Live **pass** ×2 on clean fixtures (`47-listroot-note-promote.md`). Dirty dishwasher/workplace hierarchy **recovered** on pilot (`48-…`; TT nested + AZ rebound) — status `resolved`.
+- **UX-SET-SYNC-MASTER-OFF** — Interval 0 ≠ sync off (open-note / startup still ran). Kill switch `syncEnabled` + Sync Control toggle; automatic/reactive gated; Synchronize stays. Issue [#287](https://github.com/semyon-alekseev-noveo/tt-sync/issues/287); unit this tip; live **not run** (`49-ux-set-sync-master-off.md`) (`open` until prove).
 - **UX-SYNC-TT-DEDUPE** — **won't-fix / cancelled** (owner closed [#276](https://github.com/semyon-alekseev-noveo/tt-sync/issues/276)): Deduplicate UI not shipping after prevention (#279+#280+#281) + orphan cleanup; DoR **1A/2A/3A** in `43-…` remains historical.
 - **ID-CHAIN** — Epic [#214](https://github.com/semyon-alekseev-noveo/tt-sync/issues/214): eng children closed; #208 Rematch prove ×2 **pass**/closed; optional [#218](https://github.com/semyon-alekseev-noveo/tt-sync/issues/218) keeps epic open.
 - **UX-NOTICE** — create vs reattach Notices + modal cache wording: unit this tip; pilot strip-marker prove **not run** (`open`).
@@ -69,6 +70,7 @@
 0a3. **BUG-TT-DUP-CREATE-ON-STRIP-SYNC:** merge parent-bypass fix PR; tip already proved ×2 pass on `44-…`; unique title create still unit-covered.
 0a4. **UX-SYNC-TT-DEDUPE:** **done / won't-fix** — #276 closed not planned; catalog docs cancelled; local `feat/ux-sync-tt-dedupe` stash ignore.
 0a5. **BUG-LISTROOT-NOTE-PROMOTE:** tip prove ×2 **done** (`47-…`); pilot hierarchy recovery **done** (`48-…`); #284 already closed. Optional delete `zz-parked-listroot-promote-20261105/`. No release unless asked.
+0a6. **UX-SET-SYNC-MASTER-OFF:** merge #287 PR; tip; pilot prove off silence + Synchronize still works (`49-…`).
 0b. **UX-NOTICE-***: After merge, tip + strip-marker reattach toast prove; Orphan modal glance (`36-…`).
 0c. **#214:** Optional #218 only; else close epic when owner ready.
 0d. **BUG-RESET-CACHE-DELETE:** prove ×2 Reset→Synchronize still owner-gated (`25-…`).
