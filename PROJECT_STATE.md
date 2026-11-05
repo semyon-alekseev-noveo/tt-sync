@@ -45,6 +45,8 @@
 - **BUG-TT-CREATE-PATH-BYPASS** — post-#280 create-path audit: ProjectScheme `createParent` reattach/skip; SyncMan recreate loop inert; inventory unit. Manual PKM orphan cleanup done (MCP). Pilot path-guard **not run** (`45-create-path-audit.md`).
 - **BUG-LISTROOT-NOTE-PROMOTE** — Projects list-roots with `note/<slug>` and no `project` tag were promoted to `#system/project` notes (`isListRoot` without tag gate). Prevention merged #285 (`358690e` / 2.0.96): `isSchemeParentTask` rejects note-context-without-project. Live **pass** ×2 on clean fixtures (`47-listroot-note-promote.md`). Dirty dishwasher/workplace hierarchy **recovered** on pilot (`48-…`; TT nested + AZ rebound) — status `resolved`.
 - **UX-SET-SYNC-MASTER-OFF** — Interval 0 ≠ sync off. Kill switch `syncEnabled` + Sync Control toggle; automatic/reactive gated; Synchronize stays. [#287](https://github.com/semyon-alekseev-noveo/tt-sync/issues/287) / [#288](https://github.com/semyon-alekseev-noveo/tt-sync/pull/288); unit + **owner live pass** (`49-ux-set-sync-master-off.md`) (`resolved`).
+- **BUG-GHOST-MARKER-AFTER-RESET** — After Reset, vault `ticktick_id`s absent from TT stayed fake-live (DON-253). Fix: vault-only + TT miss → detach. Issue [#290](https://github.com/semyon-alekseev-noveo/tt-sync/issues/290); unit this tip; live re-prove **not run** (`open`).
+- **BUG-CREATE-MATCH-UNDEF** — Open-note create dual Notice (created + `.match` Failed). Fix: editor-path `fileMap.replaceLines` + abyssRegionEnd guard. Issue [#291](https://github.com/semyon-alekseev-noveo/tt-sync/issues/291); unit this tip; live re-prove **not run** (`open`).
 - **UX-SYNC-TT-DEDUPE** — **won't-fix / cancelled** (owner closed [#276](https://github.com/semyon-alekseev-noveo/tt-sync/issues/276)): Deduplicate UI not shipping after prevention (#279+#280+#281) + orphan cleanup; DoR **1A/2A/3A** in `43-…` remains historical.
 - **ID-CHAIN** — Epic [#214](https://github.com/semyon-alekseev-noveo/tt-sync/issues/214): eng children closed; #208 Rematch prove ×2 **pass**/closed; optional [#218](https://github.com/semyon-alekseev-noveo/tt-sync/issues/218) keeps epic open.
 - **UX-NOTICE** — create vs reattach Notices + modal cache wording: unit this tip; pilot strip-marker prove **not run** (`open`).
@@ -71,9 +73,10 @@
 0a4. **UX-SYNC-TT-DEDUPE:** **done / won't-fix** — #276 closed not planned; catalog docs cancelled; local `feat/ux-sync-tt-dedupe` stash ignore.
 0a5. **BUG-LISTROOT-NOTE-PROMOTE:** tip prove ×2 **done** (`47-…`); pilot hierarchy recovery **done** (`48-…`); #284 already closed. Optional delete `zz-parked-listroot-promote-20261105/`. No release unless asked.
 0a6. **UX-SET-SYNC-MASTER-OFF:** **done** — #288 merged; owner live pass (`49-…`); close #287.
+0a7. **BUG-GHOST-MARKER-AFTER-RESET / BUG-CREATE-MATCH-UNDEF:** merge this fix PR; tip; live prove ×2 (detach ghosts + clean create Notice); owner strip remaining DON-253 `6ad332…` if still present (keep `6aec9007…`); no Apply once.
 0b. **UX-NOTICE-***: Owner strip-marker reattach toast + Orphan glance — checklist `50-…` / `36-…`.
 0c. **#214:** Optional #218 only; else close epic when owner ready.
-0d. **BUG-RESET-CACHE-DELETE:** Owner Reset→Synchronize ×2 — checklist `50-…` / `25-…`.
+0d. **BUG-RESET-CACHE-DELETE:** Owner Reset→Synchronize ×2 — checklist `50-…` / `25-…` (ghost detach now expected honesty).
 1. Decision #1 Abyss vs `#ticktick`: **parked** (still valid; tip unchanged) — clear `taskIgnoreQuery` when Abyss+TT-origin hurts / before Step 8 (`06-…`).
 2. **[done]** UX-STUB-1 / BUG-LIST-STUB-RECREATE pilot cleanup + prove ×2 after #179 (`08-stub-cleanup-prove.md`).
 2b. **[done]** UX-STATUS-MAP-1/2 prove ×2 after #182 (`16-status-map-prove.md`); MAP-3/4/PULL + Abyss customs still open; version bump when owner asks.

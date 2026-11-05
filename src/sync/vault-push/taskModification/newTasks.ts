@@ -78,6 +78,7 @@ export class TaskModificationNewTasks {
 				log.warn('Skipping unfinished task line:', lineTxt);
 				return;
 			}
+			let createdRemote = false;
 			try {
 				// Convert markdown to task object
 				const currentTask = await this.plugin.taskParser.convertLineToTask(
@@ -110,6 +111,7 @@ export class TaskModificationNewTasks {
 					// createTask already surfaced the API error in a Notice.
 					return;
 				}
+				createdRemote = !orphan;
 
 				// Handle parent-child relationship
 				if (currentTask.parentId) {
@@ -140,11 +142,12 @@ export class TaskModificationNewTasks {
 				// Update the markdown line with TickTick ID
 				await this.updateTaskLineInFile(newTask, lineTxt, editor, cursor, line, fileMap);
 
-				// Calculate hash for change detection
+				// Calculate hash for change detection (skip if fileMap miss / deferred write)
 				const taskRecord = fileMap.getTaskRecord(newTask.id);
-				const taskString = taskRecord.task;
-				const stringToHash = taskString + this.plugin.taskParser.getNoteString(taskRecord, newTask.id);
-				newTask.lineHash = (await this.plugin.taskParser?.getLineHash(stringToHash))!;
+				if (taskRecord?.task && typeof taskRecord.task === 'string' && taskRecord.task.length > 0) {
+					const stringToHash = taskRecord.task + this.plugin.taskParser.getNoteString(taskRecord, newTask.id);
+					newTask.lineHash = (await this.plugin.taskParser?.getLineHash(stringToHash))!;
+				}
 
 				// Save to database
 				await this.plugin.taskRepository.upsertTask(newTask, fileMap.getFilePath());
@@ -166,10 +169,18 @@ export class TaskModificationNewTasks {
 			} catch (error) {
 				log.error('Error adding task:', error);
 				log.error(`The error occurred in file: ${fileMap.getFilePath()}`);
-				new Notice(
-					`Failed to add task to TickTick: ${error instanceof Error ? error.message : String(error)}. The task was not modified.`,
-					8000
-				);
+				// BUG-CREATE-MATCH-UNDEF: after a successful TT create, never claim «not modified».
+				if (createdRemote) {
+					new Notice(
+						`TickTick task created but vault marker/hash update failed: ${error instanceof Error ? error.message : String(error)}`,
+						8000,
+					);
+				} else {
+					new Notice(
+						`Failed to add task to TickTick: ${error instanceof Error ? error.message : String(error)}. The task was not modified.`,
+						8000
+					);
+				}
 			}
 		}
 	}
@@ -314,6 +325,10 @@ export class TaskModificationNewTasks {
 					const commit = await commitVaultText(this.app, file, snapshot, next);
 					if (commit.status === 'deferred') {
 						registerPendingMarkerTaskId(newTask.id);
+					} else {
+						// BUG-CREATE-MATCH-UNDEF: keep fileMap in sync so post-create
+						// getTaskRecord(newId) does not hit index -1 → indentWidth(undefined).match.
+						fileMap.replaceLines(start, 1 + noteLineCount, decoratedText);
 					}
 				}
 			} else if (line !== null) {

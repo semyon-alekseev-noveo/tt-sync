@@ -1,3 +1,13 @@
+### Iteration 2026-11-05 14:49 UTC
+
+- Context: Owner Reset→Sync item 2 — DON-253 ghost markers after Dexie wipe + open-note create dual Notice (`.match`).
+- Target: `BUG-GHOST-MARKER-AFTER-RESET` (#290) detach vault-only TT-gone; `BUG-CREATE-MATCH-UNDEF` (#291) no false Failed after create; AF/TEST_PLAN; PR into abyss-mapping; no release.
+- Actions log: Failing units; scan detach on Dexie miss + TT null; editor-path `fileMap.replaceLines`; abyssRegionEnd/indentWidth guards; post-create Notice wording; docs `51-…`.
+- Validation: `npx vitest run` + `npm run build` (this PR); live prove **not run**.
+- Problems: Live ×2 still required before issue close — status `open`.
+- To Be Done: Merge; tip; prove ×2 detach + create; owner strip leftover DON-253 ghosts if needed; no release unless asked.
+- References: #290, #291, `bugGhostMarkerAfterReset.test.ts`, `bugCreateMatchUndef.test.ts`, `CHANGELOG.md`
+
 ### Iteration 2026-11-05 14:05 UTC
 
 - Context: Owner needs live checklist for Reset + NOTICE tails; analyst re-check Decision #1; Sync off already verified live OK.

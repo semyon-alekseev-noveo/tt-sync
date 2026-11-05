@@ -3,13 +3,15 @@ import { abyssLinesToNote, isAbyssNoteLine } from '@/abyssFormat';
 import { syncAbyssCommentsToTickTick, useAbyssCommentsApi } from '@/abyssCommentSync';
 import { Notice, TFile } from 'obsidian';
 import { NewFileMap } from '@/services/NewFileMap';
-import { readNoteForWrite } from '@/sync/vault-io';
+import { commitVaultText, readNoteForWrite } from '@/sync/vault-io';
 import { getSettings } from '@/settings';
 import { getAllProjects } from '@/db/projects';
 import { stageNeedsPushDespiteHash } from '@/listMapping';
 import { isPathInPushScope, normalizeSyncTag, resolveSyncedListIds, tickTickTaskEntersVault, vaultParentMeaningfullyChanged, type TaskSyncLimitOptions } from '@/syncScope';
-import { shouldSkipOrphanVaultLineDelete } from '@/sync/massDeleteGuard';
+import { formatTtGoneDetachNotice, shouldSkipOrphanVaultLineDelete } from '@/sync/massDeleteGuard';
 import { shouldPreserveVaultLinesOnRemoteDelete } from '@/sync/historicalVaultMarkers';
+import { detachInContent } from '@/detach';
+import { markerName } from '@/taskParser';
 import log from '@/utils/logger';
 import type { TaskModificationDetector } from '@/sync/vault-push/taskModification/TaskModificationDetector';
 import type { PendingTickTickDeletion } from '@/sync/vault-push/taskModification/types';
@@ -92,37 +94,58 @@ export class TaskModificationScan {
 			// Task not in local DB — check TickTick API before deleting.
 			// Handles the race where a file syncs to this device via external
 			// sync before the pull phase fetched the task from TickTick.
-			const remoteTask = await this.plugin.tickTickRestAPI?.getTaskById(taskId, undefined);
+			let remoteTask: Awaited<ReturnType<NonNullable<typeof this.plugin.tickTickRestAPI>['getTaskById']>> = null;
+			try {
+				remoteTask = await this.plugin.tickTickRestAPI?.getTaskById(taskId, undefined);
+			} catch (e) {
+				log.warn(`ID-TT-GONE-DETACH: getTaskById failed for ${taskId}; leave marker`, e);
+				return false;
+			}
 			if (remoteTask) {
 				log.warn(`Task ${taskId} not in local DB but exists on TickTick. Importing.`);
 				await this.plugin.taskRepository.upsertTask(remoteTask, filepath, Date.now());
 				return false;
 			}
 
-			// BUG-RESET-CACHE-DELETE: empty Dexie / post-Reset must not strip vault
-			// lines whose pre-wipe ids 404 on TickTick (mass-delete guard does not
-			// cover this vault-text path). Prefer Cancel if a modal still appears.
+			// BUG-RESET-CACHE-DELETE: never Confirm-wipe / deleteTaskFromSpecificFile
+			// for vault lines after empty Dexie / post-Reset.
+			// BUG-GHOST-MARKER-AFTER-RESET / ID-TT-GONE-DETACH (#215/#290): vault-only
+			// marker + TT absent → detach (%%tt-detached%%, text kept). Never invent TT;
+			// never leave a fake-live marker that blocks create.
 			const dexieTaskCount = await this.plugin.taskRepository.getTaskCount();
-			if (shouldSkipOrphanVaultLineDelete({
+			const resetBootstrap = shouldSkipOrphanVaultLineDelete({
 				dexieTaskCount,
 				checkPoint: getSettings().checkPoint ?? 0,
 				syncBootstrapSkip: options?.skipOrphanVaultLineDeletes,
-			})) {
-				log.warn(
-					`BUG-RESET-CACHE-DELETE: skip vault remove for ${taskId} in ${filepath} ` +
-						`(empty/reset bootstrap; leave marker for re-link)`,
-				);
-				return false;
-			}
-
-			// ID-TT-GONE-DETACH (#215): marker in vault, id missing from Dexie + TT 404 —
-			// never Confirm-wipe / strip checklist text (rebind #216 will rewrite ids).
+			});
+			const hist = shouldPreserveVaultLinesOnRemoteDelete(filepath);
 			log.warn(
-				`ID-TT-GONE-DETACH: skip vault remove for ${taskId} in ${filepath} ` +
-					`(not in Dexie/TT; leave checklist text` +
-					(shouldPreserveVaultLinesOnRemoteDelete(filepath) ? '; historical path' : '') +
-					`)`,
+				`${resetBootstrap ? 'BUG-GHOST-MARKER-AFTER-RESET' : 'ID-TT-GONE-DETACH'}: ` +
+					`detach vault-only gone ${taskId} in ${filepath}` +
+					(hist ? ' (historical path)' : ''),
 			);
+			try {
+				const mapIdx = fileMap.getTaskIndex(taskId);
+				const f = this.app.vault.getAbstractFileByPath(filepath!);
+				if (f instanceof TFile) {
+					const snapshot = await readNoteForWrite(this.app, f);
+					const next = detachInContent(snapshot, taskId, markerName());
+					if (next && next !== snapshot) {
+						await commitVaultText(this.app, f, snapshot, next);
+						if (mapIdx >= 0) {
+							const detachedLine = next.split('\n')[mapIdx];
+							if (detachedLine) fileMap.modifyTask(detachedLine, mapIdx);
+						}
+						if (getSettings().onTickTickDeletion === 'ask') {
+							new Notice(formatTtGoneDetachNotice(1), 10000);
+						}
+					}
+				}
+				await this.plugin.fileMetadataService?.clearTaskFile?.(taskId);
+				await this.plugin.taskRepository.deleteTask?.(taskId);
+			} catch (e) {
+				log.warn(`BUG-GHOST-MARKER-AFTER-RESET: detach failed for ${taskId}`, e);
+			}
 			return false;
 		}
 
