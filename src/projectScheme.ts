@@ -147,10 +147,21 @@ export function pickProjectNote(target: string, projectPaths: string[]): string 
 	return hits.length === 1 ? hits[0] : undefined;
 }
 
-/** Root task of the Projects list: it is a project, whether or not it carries the `project` tag. */
+/** Root task of the Projects list (structural only — no tag gate). */
 export function isListRoot(t: { projectId?: string; parentId?: string | null }, listId: string): boolean {
 	if (!listId || t.projectId !== listId) return false;
 	return !t.parentId;
+}
+
+/**
+ * BUG-LISTROOT-NOTE-PROMOTE: a list-root that mirrors a vault note (`note/<slug>` / `note-…`)
+ * without an explicit `project` tag must not become a `#system/project` note via createNote.
+ * True project roots keep `project` (and/or have no note-context tag, e.g. PKM with only `obsidian`).
+ */
+export function isNoteContextWithoutProjectTag(tags: string[] | null | undefined): boolean {
+	const normalized = (tags ?? []).map(t => String(t).toLowerCase().replace(/^#/, '').trim()).filter(Boolean);
+	if (normalized.some(t => t === 'project')) return false;
+	return normalized.some(t => t.startsWith('note/') || t.startsWith('note-'));
 }
 
 /** Root parent in the scheme Projects list that passes syncedLists + SyncTag/SyncProject limits. */
@@ -159,7 +170,7 @@ export function isSchemeParentTask(
 	listId: string,
 	limit: TaskSyncLimitOptions,
 ): boolean {
-	return isListRoot(t, listId) && taskMatchesSyncLimit(t, limit);
+	return isListRoot(t, listId) && !isNoteContextWithoutProjectTag(t.tags) && taskMatchesSyncLimit(t, limit);
 }
 
 const PLACEHOLDER_ACTIVE_ZONE = /^- \[[ xX]\] \d+\s*$/;

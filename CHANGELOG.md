@@ -1,3 +1,13 @@
+### Iteration 2026-11-05 01:35 UTC
+
+- Context: Owner «go» after dishwasher/workplace hierarchy collapse — former subtasks became `#system/project` notes.
+- Target: Prevent `createNote` for Projects list-roots with `note/*` and no `project` tag (`BUG-LISTROOT-NOTE-PROMOTE`); no Deduplicate UI / no mass wipe.
+- Actions log: Gate in `isSchemeParentTask` via `isNoteContextWithoutProjectTag`; AF + unit + TEST_PLAN; pilot stub `47-…`; GitHub issue + PR into abyss-mapping.
+- Validation: `npx vitest run` + `npm run build` (this PR); live prove ×2 **not run**.
+- Problems: Existing wrongly promoted pilot notes remain until owner recovery — status `open` (prevention only).
+- To Be Done: Merge PR; tip; live prove ×2 on clean fixtures; owner cleans dishwasher/workplace vault twins.
+- References: `BUG-LISTROOT-NOTE-PROMOTE`, `UX-OBS-TT-SOAK/47-listroot-note-promote.md`, `CHANGELOG.md`
+
 ### Iteration 2026-11-04 14:03 UTC
 
 - Context: Owner «сам проверь 32» — Settings UX smoke on tip after #282.

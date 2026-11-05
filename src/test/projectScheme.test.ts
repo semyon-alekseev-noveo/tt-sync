@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { isProjectNote, isListRoot, isSchemeParentTask, isProjectParentDuplicateLine, linkTarget, isDoneStatus, planProjects, renderProjectNote, renderProjectTemplate, activeZoneInsertLine, sanitizeTitle, stripActiveZonePlaceholders, stripProjectParentDuplicateLines, repairProjectNoteTasks, fmTags } from '@/projectScheme';
+import { isProjectNote, isListRoot, isSchemeParentTask, isNoteContextWithoutProjectTag, isProjectParentDuplicateLine, linkTarget, isDoneStatus, planProjects, renderProjectNote, renderProjectTemplate, activeZoneInsertLine, sanitizeTitle, stripActiveZonePlaceholders, stripProjectParentDuplicateLines, repairProjectNoteTasks, fmTags } from '@/projectScheme';
 
 describe('project scheme helpers', () => {
 	it('repairs project note: hoist children into Active Zone, drop parent line', () => {
@@ -97,12 +97,36 @@ describe('project scheme helpers', () => {
 		expect(activeZoneInsertLine(['## Active Zone', ''])).toBe(1);
 		expect(activeZoneInsertLine(['# none'])).toBe(-1);
 	});
-	it('treats every root task in the Projects list as a project', () => {
+	it('treats every root task in the Projects list as a structural list root', () => {
 		expect(isListRoot({ projectId: 'P', parentId: '' }, 'P')).toBe(true);
 		expect(isListRoot({ projectId: 'P', parentId: null }, 'P')).toBe(true);
 		expect(isListRoot({ projectId: 'P', parentId: 'parent' }, 'P')).toBe(false);
 		expect(isListRoot({ projectId: 'other', parentId: '' }, 'P')).toBe(false);
 		expect(isListRoot({ projectId: 'P' }, '')).toBe(false);
+	});
+
+	it('BUG-LISTROOT-NOTE-PROMOTE: note/* without project is not a scheme parent', () => {
+		const limit = { allowedListIds: new Set(['P']) };
+		expect(isNoteContextWithoutProjectTag(['obsidian', 'note/подключение-посудомойки'])).toBe(true);
+		expect(isNoteContextWithoutProjectTag(['obsidian', 'note-workplace'])).toBe(true);
+		expect(isNoteContextWithoutProjectTag(['project', 'obsidian', 'note/foo'])).toBe(false);
+		expect(isNoteContextWithoutProjectTag(['obsidian'])).toBe(false);
+		expect(isNoteContextWithoutProjectTag(['project', 'obsidian'])).toBe(false);
+
+		const noteOnly = { projectId: 'P', parentId: '', tags: ['obsidian', 'note/подключение-посудомойки'] };
+		expect(isListRoot(noteOnly, 'P')).toBe(true);
+		expect(isSchemeParentTask(noteOnly, 'P', limit)).toBe(false);
+
+		const workplace = { projectId: 'P', parentId: '', tags: ['obsidian', 'note/оборудовать-рабочее-место'] };
+		expect(isSchemeParentTask(workplace, 'P', limit)).toBe(false);
+
+		expect(isSchemeParentTask({ projectId: 'P', parentId: '', tags: ['project', 'obsidian'] }, 'P', limit)).toBe(true);
+		expect(isSchemeParentTask({ projectId: 'P', parentId: '', tags: ['obsidian'] }, 'P', limit)).toBe(true);
+		expect(isSchemeParentTask(
+			{ projectId: 'P', parentId: '', tags: ['project', 'obsidian', 'note/legacy'] },
+			'P',
+			limit,
+		)).toBe(true);
 	});
 
 	it('scheme parent requires list root + sync limits', () => {
