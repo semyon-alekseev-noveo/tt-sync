@@ -5,9 +5,10 @@
 | Gate | UX-OBS-TT-SOAK |
 | Phase | 47 (root cause / prevention) |
 | Case | `BUG-LISTROOT-NOTE-PROMOTE` |
-| Status | **unit pass**; live prove ×2 **not run** |
+| Status | **live pass** ×2 (clean fixtures); unit **pass** |
 | Issue | [#284](https://github.com/semyon-alekseev-noveo/tt-sync/issues/284) |
 | Related | Hierarchy collapse on dishwasher / workplace; Deduplicate **won't-fix** (prevention first) |
+| Tip | `358690e` (merge #285) / plugin **2.0.96** |
 
 ## Meta
 
@@ -22,34 +23,45 @@
 ## Inputs
 
 - Critical-thinking skill: prevention before Deduplicate / mass wipe.
-- Owner «go» after diagnosis (this chat).
-- TT sample (MCP): e.g. «нарисовать схему коммуникаций» `6ae42394…575c` — root, tags `obsidian` + `note/подключение-посудомойки`.
+- Owner merged #285 into `abyss-mapping` (`358690e`).
+- Tip install: `npm run build` → pilot `tickticksync-abyss`; `plugin:reload` → eval version **2.0.96**.
+- Dirty dishwasher/workplace MOCs left untouched (owner recovery). Clean TT fixtures created for prove ×2.
 
 ## Evidence
 
 ### Unit
 
 - `projectScheme.test.ts` — `BUG-LISTROOT-NOTE-PROMOTE: note/* without project is not a scheme parent`
-- Commands: `npx vitest run` + `npm run build` (see CHANGELOG iteration)
+- Commands: `npx vitest run` (merge PR) + re-check `npx vitest run src/test/projectScheme.test.ts -t BUG-LISTROOT-NOTE-PROMOTE` → **pass**; `npm run build` → **pass**
+
+### Tip install
+
+| Step | Result |
+|------|--------|
+| PR #285 MERGED | merge commit `358690eb5d12546909b56a67a6bc395a3f9b4c56` |
+| `git pull --ff-only` abyss-mapping | tip = merge commit |
+| Deploy dist + `plugin:reload` | enabled **2.0.96** (`tickticksync-abyss`) |
 
 ### Live / pilot
 
 | Prove | Fixture | Result |
 |-------|---------|--------|
-| 1 | Clean note/* root without `project` | **not run** |
-| 2 | Second title/slug (workplace vs dishwasher) | **not run** |
+| 1 | TT Projects root `BUG-LISTROOT-PROVE-A clean note-only` (`6aebe1d08f08b205a8b0d08a`), tags `obsidian` + `note/bug-listroot-prove-a` (no `project`) → Synchronize | **pass** — no `10 Projects/BUG-LISTROOT-PROVE-A…` MOC; id **absent** from `projectScheme.parents` |
+| 2 | TT Projects root `BUG-LISTROOT-PROVE-B workplace-slug style` (`6aebe1f78f08f1480307bfad`), tags `obsidian` + `note/bug-listroot-prove-b` → Synchronize | **pass** — no MOC; id **absent** from `parents` |
+| Smoke | `PKM - journaling` note-free/`obsidian` root | **kept** — vault MOC still present; id in `parents` |
 
-Do **not** invent pass. Dirty vault twins from prior promote are **owner recovery**, not this PR.
+Dirty dishwasher/workplace wrongly promoted notes were **not** re-created this tip. Recovery of those twins is recorded in `48-dishwasher-workplace-hierarchy-recovery.md` (**recovery pass** ×2). No Apply once / mass-delete / vault wipe on the prevention prove.
 
 ## Conclusion
 
-Creation path closed in code: note-context list-roots without `project` no longer enter `planProjects` `createNote`. Existing wrongly promoted notes stay until owner cleans; prove ×2 still required before live **pass** / issue close.
+Creation path closed and **live-proved ×2** on clean note/* fixtures after tip `358690e` / **2.0.96**. Existing wrongly promoted pilot notes recovered in phase 48.
 
 ## Checklist
 
 - [x] Creation vs cleanup? → **creation** (`isSchemeParentTask` gate)
 - [x] AF case `BUG-LISTROOT-NOTE-PROMOTE`
 - [x] Failing-then-green unit named by ID
-- [x] TEST_PLAN + CHANGELOG in same PR
-- [ ] Live prove ×2 on clean fixtures
+- [x] TEST_PLAN + CHANGELOG in same PR (fix) + this docs PR (live)
+- [x] Live prove ×2 on clean fixtures
 - [ ] Deduplicate UI — **not** shipping
+- [x] Owner recovery of dishwasher/workplace vault twins → `48-…`
