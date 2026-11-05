@@ -1,3 +1,13 @@
+### Iteration 2026-11-05 01:57 UTC
+
+- Context: Owner merged #285 (`BUG-LISTROOT-NOTE-PROMOTE`) into abyss-mapping; tip prove required before issue close.
+- Target: Tip install 2.0.96; live prove ×2 on clean note/* fixtures; record evidence; no release.
+- Actions log: ff-only pull tip `358690e`; build+deploy+reload; MCP clean fixtures A/B; Synchronize ×2; docs 47/INDEX/TEST_PLAN/AF/PROJECT_STATE; comment #284.
+- Validation: unit `BUG-LISTROOT-NOTE-PROMOTE` **pass**; eval plugin **2.0.96**; live **pass** ×2 (no MOCs; ids not in `parents`); PKM smoke kept.
+- Problems: Dirty dishwasher/workplace wrongly promoted notes remain — status `open` (owner recovery only).
+- To Be Done: Owner cleanup of dishwasher/workplace vault twins; close #284 when ready; no release unless asked.
+- References: #284, #285, `UX-OBS-TT-SOAK/47-listroot-note-promote.md`, `CHANGELOG.md`
+
 ### Iteration 2026-11-05 01:35 UTC
 
 - Context: Owner «go» after dishwasher/workplace hierarchy collapse — former subtasks became `#system/project` notes.
