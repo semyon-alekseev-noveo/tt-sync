@@ -28,6 +28,7 @@ Review: `docs/pilot/results/UX-OBS-TT-SOAK/36-modal-notice-copy-review.md`. Unit
 | BUG-CONFIRM-REBIND-DUP | Tip after this PR. Confirm PushDeleteTT «missing marker» where note already has same-title lines with other live markers → choose **Rebind**. | Markers **Link-displaced** (one line per title); no InsertLine twins; displaced ids Link-tombstoned; TT tasks not deleted. Held Rematch still does not steal for true multi-task same-title. | unit **pass**; live fail recorded (`41-…`); re-prove **not run** |
 | BUG-TT-DUP-CREATE-ON-STRIP-SYNC | Tip after this PR. On `PKM - journaling.md` (or throwaway): strip `ticktick_id` from one line while another same-title live marker remains **or** leave multi Dexie orphans for the title; Synchronize. Also: brand-new unique title checkbox. | No new TT id for same-title peer cases — **Reattached** (unique orphan) or **Skipped creating…** Notice (incl. inbox-inferred parent vs project orphans). Unique new title still **created**. Prove ×2 different fixtures. | unit **pass**; live **pass** ×2 `44-…` (after parent-bypass fix; tip@`8528baa` first prove fail) |
 | BUG-TT-CREATE-PATH-BYPASS | Tip after this PR. (A) Project note without frontmatter `ticktick_id` while exactly one open same-title Projects-list parent exists → Synchronize. (B) Same with ≥2 same-title open parents. (C) Confirm strip→`checkFileForNewTasks` still skip/reattach (no new path). | (A) frontmatter reattached to existing parent id — **no** new TT parent. (B) no createParent; Notice skipped. (C) same as BUG-TT-DUP-CREATE-ON-STRIP-SYNC. | unit **pass**; pilot **not run** |
+| BUG-LISTROOT-NOTE-PROMOTE | Tip after this PR. On pilot Projects list: flat roots with `note/<slug>` + no `project` (e.g. dishwasher/workplace former subtasks); Synchronize. Also a true `project`-tagged root and an `obsidian`-only root (PKM). | Note-context roots do **not** get new `#system/project` notes. `project`-tagged / note-free roots still promote. No Deduplicate UI / no mass wipe. Prove ×2 on clean fixtures. | unit **pass**; live **not run** |
 | ARCH-SYNC-INTENT-IDENTITY | Unit: types (#256) + tombstones (#257) + Detach (#258) + Sync discrepancies UI (#259) + Check enumerator (#260) in `archSyncIntentIdentity.test.ts`. Live prove ×2 — #261. Confirm Rebind gap → `UX-SYNC-CONFIRM-REBIND`. | Link ≻ … ≻ PushDeleteTT; Check = same `enumerateSyncPlannedDeletions`; empty Dexie / checkPoint 0 fail-closed residual; Confirm offers Rebind when rematchable. | unit **pass** (#256–#260 + confirm-rebind); live **pass** ×2 (`39-…`); Confirm Rebind live **not run** |
 | ARCH-SYNC-CONFLICT-CATALOG | Read `UX-OBS-TT-SOAK/43-conflict-resolution-tt-dedupe.md` conflict table + locked **1A/2A/3A** (historical). | Catalog documents Don’t delete / Rebind / Apply once / DetachMarker; Deduplicate fourth peer was proposed then **won't-fix**. | docs **cancelled** with #276; pilot **not run** |
 | UX-SYNC-TT-DEDUPE | **Cancelled.** No Deduplicate UI after prevention tip + orphan cleanup. Spec `43-…` historical. | N/A — case closed won't-fix ([#276](https://github.com/semyon-alekseev-noveo/tt-sync/issues/276)). | **won't-fix / cancelled** |
@@ -1962,3 +1963,22 @@ After #279/#280, audit every production `createTask` call. Prevention first — 
 | Case | Pilot | Notes |
 |------|-------|-------|
 | BUG-TT-CREATE-PATH-BYPASS | unit **pass**; pilot **not run** | inventory + ProjectScheme + SyncMan inert |
+
+## PR — BUG-LISTROOT-NOTE-PROMOTE (note/* list-root must not createNote)
+
+Prevention first (no Deduplicate UI). After hierarchy collapse, former subtasks sit as Projects list roots with `note/<slug>` and no `project` tag; `isListRoot` alone was enough for `createNote`.
+
+### Steps
+1. Install tip. Confirm unit `BUG-LISTROOT-NOTE-PROMOTE` in `projectScheme.test.ts`.
+2. (Live prove 1) Clean fixture: Projects-list open root with `note/<slug>` + `obsidian`, no `project` — Synchronize.
+3. (Live prove 2) Different title / slug (or workplace vs dishwasher) — Synchronize.
+4. Smoke: true parent with `project` tag still creates/keeps `#system/project` note; `obsidian`-only PKM-style root still promotes.
+
+### Expected
+- Steps 2–3: **no** new MOC under `10 Projects/` for those titles; task stays ordinary (not scheme parent).
+- Step 4: project / note-free roots unchanged.
+- Existing wrongly promoted notes: owner manual recovery — not this PR.
+
+| Case | Pilot | Notes |
+|------|-------|-------|
+| BUG-LISTROOT-NOTE-PROMOTE | unit **pass**; live **not run** | stub `UX-OBS-TT-SOAK/47-listroot-note-promote.md` |
