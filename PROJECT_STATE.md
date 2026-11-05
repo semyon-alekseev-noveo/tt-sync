@@ -45,6 +45,8 @@
 - **BUG-TT-CREATE-PATH-BYPASS** — post-#280 create-path audit: ProjectScheme `createParent` reattach/skip; SyncMan recreate loop inert; inventory unit. Manual PKM orphan cleanup done (MCP). Pilot path-guard **not run** (`45-create-path-audit.md`).
 - **BUG-LISTROOT-NOTE-PROMOTE** — Projects list-roots with `note/<slug>` and no `project` tag were promoted to `#system/project` notes (`isListRoot` without tag gate). Prevention merged #285 (`358690e` / 2.0.96): `isSchemeParentTask` rejects note-context-without-project. Live **pass** ×2 on clean fixtures (`47-listroot-note-promote.md`). Dirty dishwasher/workplace hierarchy **recovered** on pilot (`48-…`; TT nested + AZ rebound) — status `resolved`.
 - **UX-SET-SYNC-MASTER-OFF** — Interval 0 ≠ sync off (open-note / startup still ran). Kill switch `syncEnabled` + Sync Control toggle; automatic/reactive gated; Synchronize stays. Issue [#287](https://github.com/semyon-alekseev-noveo/tt-sync/issues/287); unit this tip; live **not run** (`49-ux-set-sync-master-off.md`) (`open` until prove).
+- **BUG-GHOST-MARKER-AFTER-RESET** — After Reset (Dexie empty), vault `ticktick_id`s absent from TT stay fake-live (DON-253 `6ad332…` MCP 404); Sync neither detaches nor creates until owner strips id. Issue [#290](https://github.com/semyon-alekseev-noveo/tt-sync/issues/290) (`open`).
+- **BUG-CREATE-MATCH-UNDEF** — Open-note create can toast «created» and `Failed to add… reading 'match'` on tip 2.0.96 (DON-253 tcp-services). Issue [#291](https://github.com/semyon-alekseev-noveo/tt-sync/issues/291) (`open`).
 - **UX-SYNC-TT-DEDUPE** — **won't-fix / cancelled** (owner closed [#276](https://github.com/semyon-alekseev-noveo/tt-sync/issues/276)): Deduplicate UI not shipping after prevention (#279+#280+#281) + orphan cleanup; DoR **1A/2A/3A** in `43-…` remains historical.
 - **ID-CHAIN** — Epic [#214](https://github.com/semyon-alekseev-noveo/tt-sync/issues/214): eng children closed; #208 Rematch prove ×2 **pass**/closed; optional [#218](https://github.com/semyon-alekseev-noveo/tt-sync/issues/218) keeps epic open.
 - **UX-NOTICE** — create vs reattach Notices + modal cache wording: unit this tip; pilot strip-marker prove **not run** (`open`).
@@ -71,6 +73,7 @@
 0a4. **UX-SYNC-TT-DEDUPE:** **done / won't-fix** — #276 closed not planned; catalog docs cancelled; local `feat/ux-sync-tt-dedupe` stash ignore.
 0a5. **BUG-LISTROOT-NOTE-PROMOTE:** tip prove ×2 **done** (`47-…`); pilot hierarchy recovery **done** (`48-…`); #284 already closed. Optional delete `zz-parked-listroot-promote-20261105/`. No release unless asked.
 0a6. **UX-SET-SYNC-MASTER-OFF:** merge #287 PR; tip; pilot prove off silence + Synchronize still works (`49-…`).
+0a7. **BUG-GHOST-MARKER-AFTER-RESET / BUG-CREATE-MATCH-UNDEF:** #290/#291 — owner strip remaining DON-253 ghosts (keep `6aec9007…`); developer fix + prove ×2; Reset×2 not pass until ghost path honest.
 0b. **UX-NOTICE-***: After merge, tip + strip-marker reattach toast prove; Orphan modal glance (`36-…`).
 0c. **#214:** Optional #218 only; else close epic when owner ready.
 0d. **BUG-RESET-CACHE-DELETE:** prove ×2 Reset→Synchronize still owner-gated (`25-…`).

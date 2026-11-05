@@ -1,3 +1,13 @@
+### Iteration 2026-11-05 14:25 UTC
+
+- Context: Owner Reset→Sync item 2 — DON-253 looked synced but TT missing; strip id → create; dual Notice with `.match`.
+- Target: Investigate tip 2.0.96; file bugs; AF + TEST_PLAN; no Apply once; no fix code until root cause clear.
+- Actions log: Read pilot DON-253 + screenshots; MCP 404 on `6ad332…`, live `6aec9007…`; journal/write-trace; issues #290/#291; AF cases.
+- Validation: MCP `get_task_by_id` / `filter_tasks` tag `note/don-253`; journal create `14:17:43Z`; no vitest this docs PR.
+- Problems: Ghost markers after empty Dexie (`open` #290); create `.match` toast after successful create (`open` #291).
+- To Be Done: Owner recovery strip remaining `6ad332…` (or Rebind after TT restore); developer fix PRs; prove ×2; Reset×2 not full pass until #290 closed.
+- References: #290, #291, `BUG-GHOST-MARKER-AFTER-RESET`, `BUG-CREATE-MATCH-UNDEF`, `CHANGELOG.md`
+
 ### Iteration 2026-11-05 12:58 UTC
 
 - Context: Owner pain — interval 0 still leaves open-note / plugin-load sync; wants a real Sync off (#287).
