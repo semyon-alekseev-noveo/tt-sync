@@ -37,5 +37,5 @@ Owner-facing **modals** under `src/modals/` plus high-traffic sync Notices that 
 ## Checklist
 - [x] Analyst cases in `ABYSS_FIRST_CASES.md`
 - [x] Unit `uxNoticeReattach.test.ts`
-- [ ] Owner tip: force one re-attach (strip marker) → toast says Reattached, not Created
-- [ ] Owner: open Orphan / Cleanup modals once after Check sync cache (labels match)
+- [ ] Owner tip: force one re-attach (strip marker) → toast says Reattached, not Created — steps in [`50-owner-live-tails-checklist.md`](50-owner-live-tails-checklist.md) §B
+- [ ] Owner: open Orphan / Cleanup modals once after Check sync cache (labels match) — same `50` §B

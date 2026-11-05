@@ -1,3 +1,13 @@
+### Iteration 2026-11-05 14:05 UTC
+
+- Context: Owner needs live checklist for Reset + NOTICE tails; analyst re-check Decision #1; Sync off already verified live OK.
+- Target: Owner RU checklist (`50`); Decision #1 relevance park; record #287 owner pass in `49` / INDEX / TEST_PLAN; small docs PR; no release.
+- Actions log: Wrote `50-owner-live-tails-checklist.md` from `24`/`25`/`36`/TEST_PLAN; re-read tip stamp + ignore; updated `06` Relevance; marked `49` owner pass.
+- Validation: Docs-only; tip still stamps note `#ticktick` (`projectScheme` / `stampSourceTags`); Reset path still Maintenance Danger zone.
+- Problems: Decision #1 not tip-mitigated — status `parked` (config A before Step 8). Re-enable Sync off path not separately logged — status `mitigated`.
+- To Be Done: Owner runs checklist `50` (Reset×2 + NOTICE); close #287 after merge; no release unless asked.
+- References: `50-…`, `06-…`, `49-…`, #287, `CHANGELOG.md`
+
 ### Iteration 2026-11-05 12:58 UTC
 
 - Context: Owner pain — interval 0 still leaves open-note / plugin-load sync; wants a real Sync off (#287).

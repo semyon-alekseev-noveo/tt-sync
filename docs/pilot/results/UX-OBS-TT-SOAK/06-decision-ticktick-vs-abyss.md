@@ -7,7 +7,7 @@
 | Plugin (soak) | tickticksync-abyss **2.0.94** |
 | Abyss (soak) | **2.2.3** |
 | Vault | Thinkpad-tts-test (pilot) |
-| Status | **done** (analysis; owner chooses) |
+| Status | **done** (analysis); **parked** until after Reset/NOTICE live + before Step 8 (see Relevance 2026-11-05) |
 | When | 2026-10-27 |
 
 ## Meta
@@ -162,13 +162,26 @@ Vault: 10 Projects/<title>.md
 
 ---
 
+## Relevance 2026-11-05 (analyst re-check)
+
+| Question | Verdict |
+|----------|---------|
+| Tip still stamps note-level `#ticktick`? | **Yes** — `renderProjectNote` / `ensureProjectNote` / `stampSourceTags` unchanged. |
+| Does `stopInjectingTickTickTag` / `abyssTasksFormat` / `projectSchemeEnabled` remove the collide? | **No** — stopInject only skips pushing the marker **into TickTick**; scheme still writes frontmatter `ticktick`. |
+| Abyss Option A `#inbox`? | Still the inbox path; Option B ignore remains an obsolete vault leftover if `taskIgnoreQuery: #ticktick` is set. |
+| Blocking current pilot tails (Reset / NOTICE / Sync off)? | **No** — Obs↔TT sync and those proves do not require Abyss edit on TT-origin notes. |
+| Mitigated in tip? | **Not mitigated** (config A still unapplied; code B not shipped). |
+| Park until after Step 8 (`ABYSS_FIRST_PLAN` live vault)? | **Yes for code B**; config **A** can wait until owner next needs Abyss edit on a TT-pulled project, and must be decided **before** Step 8 prod gate. |
+
+**Owner one-liner:** Decision #1 still valid, not tip-fixed — park product work; clear Abyss `taskIgnoreQuery` on pilot when you next edit a TT-origin project in Abyss (before Step 8).
+
 ## Рекомендация
 
-**Preferred: A сейчас (+ D если stubs шумят в Abyss Tasks), B в бэклог продукта.**
+**Preferred: A when Abyss+TT-origin hurts (+ D если stubs шумят), B в бэклог продукта; сейчас park vs Reset/NOTICE.**
 
-1. **Pilot (сегодня):** очистить `taskIgnoreQuery` (пусто) **или** заменить на path ignore stubs (`30 Tasks/TickTick` / parked) — **A∪D**. Inbox уже `#inbox` — Option B не нужна.
+1. **Pilot (когда понадобится Abyss edit на TT-origin):** очистить `taskIgnoreQuery` (пусто) **или** заменить на path ignore stubs (`30 Tasks/TickTick` / parked) — **A∪D**. Inbox уже `#inbox` — Option B не нужна.
 2. **Smoke (два независимых proof на bug-fix style):** (1) Abyss add task на live TT-origin tip parent → строка в `## Active Zone`; (2) другой TT-origin / Obs-origin note + Sync → TT child. Записать в pilot results.
-3. **Prod TTS (отдельный PR):** **B** — не писать frontmatter `ticktick` на project notes (provenance = `Source::` / другой tag); line marker оставить. Обновить ABYSS_FIRST / TEST_PLAN / cases A4.
+3. **Prod TTS (отдельный PR, after Step 8 ok):** **B** — не писать frontmatter `ticktick` на project notes (provenance = `Source::` / другой tag); line marker оставить. Обновить ABYSS_FIRST / TEST_PLAN / cases A4.
 4. **C** — только если owner явно говорит «Abyss не для project edit».
 
 ### Что ещё спросить у owner
