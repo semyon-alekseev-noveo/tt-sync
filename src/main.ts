@@ -28,6 +28,7 @@ import { installWriteTraceWatch } from '@/services/writeTrace';
 //settings
 import { getSettings, mergeDeviceLists, updateSettings } from './settings';
 import { formatPluginLoadedNotice, formatSyncResultNotice, type SyncRunResult } from '@/sync/result';
+import { isAutomaticSyncEnabled } from '@/sync/syncEnabled';
 import { waitForStartupSync } from '@/sync/startupDelay';
 import {
 	buildPersistedSettings,
@@ -227,7 +228,12 @@ export default class TickTickSync extends Plugin implements PluginContext {
 			window.clearInterval(this.syncIntervalId);
 			this.syncIntervalId = undefined;
 		}
-		const timeout = getSettings().automaticSynchronizationInterval * 1000;
+		const settings = getSettings();
+		// UX-SET-SYNC-MASTER-OFF: kill switch stops the timer even when interval > 0.
+		if (!isAutomaticSyncEnabled(settings)) {
+			return;
+		}
+		const timeout = settings.automaticSynchronizationInterval * 1000;
 		if (timeout === 0) {
 			return;
 		}
@@ -496,19 +502,23 @@ export default class TickTickSync extends Plugin implements PluginContext {
 			return false;
 		}
 		// Layout is ready (onload waits for it). Wait again for Obsidian Sync, then the startup delay.
-		await waitForStartupSync({
-			ensureLayoutReady: async () => {
-				if (this.app.workspace.layoutReady) return;
-				await new Promise<void>(resolve => { this.app.workspace.onLayoutReady(() => resolve()); });
-			},
-			waitForObsidianSync: () => waitForObsidianSync(this.app),
-			delaySeconds: getSettings().startupSyncDelaySeconds,
-		});
-		const loadedSync = await this.service.synchronization(true, 'startup');
-		await this.autoCleanupDeletedTasks();
-
-		new Notice(formatPluginLoadedNotice(!!getSettings().skipBackup));
-		if (!loadedSync.ok) new Notice(formatSyncResultNotice(loadedSync));
+		// UX-SET-SYNC-MASTER-OFF: skip startup sync when master off (interval 0 alone does not).
+		if (isAutomaticSyncEnabled(getSettings())) {
+			await waitForStartupSync({
+				ensureLayoutReady: async () => {
+					if (this.app.workspace.layoutReady) return;
+					await new Promise<void>(resolve => { this.app.workspace.onLayoutReady(() => resolve()); });
+				},
+				waitForObsidianSync: () => waitForObsidianSync(this.app),
+				delaySeconds: getSettings().startupSyncDelaySeconds,
+			});
+			const loadedSync = await this.service.synchronization(true, 'startup');
+			await this.autoCleanupDeletedTasks();
+			new Notice(formatPluginLoadedNotice(!!getSettings().skipBackup));
+			if (!loadedSync.ok) new Notice(formatSyncResultNotice(loadedSync));
+		} else {
+			new Notice(formatPluginLoadedNotice(!!getSettings().skipBackup));
+		}
 		return true;
 	}
 
@@ -570,6 +580,9 @@ export default class TickTickSync extends Plugin implements PluginContext {
 		if (!target.classList.contains('task-list-item-checkbox')) {
 			return;
 		}
+
+		// UX-SET-SYNC-MASTER-OFF: checkbox→TT is reactive; skip when master off.
+		if (!isAutomaticSyncEnabled(getSettings())) return;
 
 		// Checkbox in a file outside syncScopeFolders: do not touch TickTick.
 		if (!isPathInPushScope(this.app.workspace.getActiveFile()?.path)) return;
@@ -643,6 +656,10 @@ export default class TickTickSync extends Plugin implements PluginContext {
 	async scheduledSynchronization(fullSync: boolean = false, trigger: 'manual' | 'scheduled' | 'startup' = 'manual'): Promise<SyncRunResult> {
 		if (!this.checkModuleClass()) {
 			return { ok: false, error: 'TickTickSync is not ready.' };
+		}
+		// UX-SET-SYNC-MASTER-OFF: scheduled/startup honor kill switch; manual Synchronize does not.
+		if (trigger !== 'manual' && !isAutomaticSyncEnabled(getSettings())) {
+			return { ok: true };
 		}
 
 		await waitForObsidianSync(this.app);

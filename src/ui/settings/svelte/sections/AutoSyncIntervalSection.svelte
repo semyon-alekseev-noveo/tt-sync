@@ -7,12 +7,16 @@
 		SCHEDULED_PROGRESS_DISABLED_HINT,
 		SCHEDULED_PROGRESS_HELP,
 		SCHEDULED_PROGRESS_LABEL,
+		SYNC_INTERVAL_HELP,
+		SYNC_MASTER_OFF_HELP,
+		SYNC_MASTER_OFF_LABEL,
 		scheduledProgressControlEnabled,
 	} from '@/ui/settings/settingsUxPolish';
 
 	export let open = false;
 	export let plugin;
 
+	let syncEnabled: boolean = getSettings().syncEnabled !== false;
 	let automaticSynchronizationInterval: number = getSettings().automaticSynchronizationInterval;
 	let showSyncProgressOnScheduledSync: boolean = getSettings().showSyncProgressOnScheduledSync;
 	$: automaticSynchronizationIntervalString = automaticSynchronizationInterval.toString();
@@ -22,6 +26,15 @@
 
 	function handleHeaderClick() {
 		dispatch('toggle');
+	}
+
+	async function handleSyncEnabledChange() {
+		updateSettings({ syncEnabled });
+		await plugin.saveSettings();
+		plugin.reloadInterval();
+		new Notice(syncEnabled
+			? 'Automatic and reactive sync enabled.'
+			: 'Sync off: automatic and reactive paths stopped. Synchronize still works.');
 	}
 
 	async function handleAutomaticSynchronizationIntervalChange(value: string) {
@@ -44,16 +57,28 @@
 
 <CollapsibleSection
 	title="Automatic sync interval time"
-	shortDesc="Sync interval setting"
+	shortDesc="Sync off + interval"
 	open={open}
 	on:headerClick={handleHeaderClick}
 >
 	<div class="setting-item">
 		<div class="setting-item-info">
+			<div class="setting-item-name">{SYNC_MASTER_OFF_LABEL}</div>
+			<div class="setting-item-description">{SYNC_MASTER_OFF_HELP}</div>
+		</div>
+		<div class="setting-item-control">
+			<input
+				type="checkbox"
+				bind:checked={syncEnabled}
+				aria-label={SYNC_MASTER_OFF_LABEL}
+				on:change={async () => { await handleSyncEnabledChange(); }}
+			/>
+		</div>
+	</div>
+	<div class="setting-item">
+		<div class="setting-item-info">
 			<div class="setting-item-name">Automatic sync interval time</div>
-			<div class="setting-item-description">Seconds between automatic syncs. 0 means no automatic sync
-				(default). Use Sync now when you want a sync. A repeating interval cannot be lower than 20 seconds.
-			</div>
+			<div class="setting-item-description">{SYNC_INTERVAL_HELP}</div>
 		</div>
 		<div class="setting-item-control">
 			<input

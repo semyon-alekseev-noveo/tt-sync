@@ -19,6 +19,12 @@ export interface ITickTickSyncSettings {
 	version?: string;
 
 	automaticSynchronizationInterval: number;
+	/**
+	 * UX-SET-SYNC-MASTER-OFF: when false, automatic/reactive sync is off (startup, interval,
+	 * open-note, file-modify, checkbox→TT). Explicit Synchronize still runs. Default true.
+	 * Interval 0 only disables the timer — use this for a real kill switch.
+	 */
+	syncEnabled: boolean;
 	/** When false (default), scheduled interval sync runs without the full-sync progress modal. */
 	showSyncProgressOnScheduledSync: boolean;
 	enableFullVaultSync: boolean;
@@ -138,7 +144,8 @@ export interface ITickTickSyncSettings {
 
 export const DEFAULT_SETTINGS: ITickTickSyncSettings = {
 	baseURL: 'ticktick.com',
-	automaticSynchronizationInterval: 0, // 0 = no automatic sync; user starts a sync from settings or the command
+	automaticSynchronizationInterval: 0, // 0 = no scheduled timer; open-note / startup still sync unless syncEnabled is false
+	syncEnabled: true, // UX-SET-SYNC-MASTER-OFF: false = kill automatic/reactive paths; Synchronize still works
 	showSyncProgressOnScheduledSync: false,
 	enableFullVaultSync: false,
 	tagAndOr: 1,

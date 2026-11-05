@@ -1,3 +1,13 @@
+### Iteration 2026-11-05 12:58 UTC
+
+- Context: Owner pain — interval 0 still leaves open-note / plugin-load sync; wants a real Sync off (#287).
+- Target: `UX-SET-SYNC-MASTER-OFF` — `syncEnabled` kill switch; automatic/reactive gated; Synchronize stays; docs + PR into abyss-mapping; no release.
+- Actions log: Issue #287; AF + unit; gate startup/scheduled/open-note/modify/checkbox/line-settled; Sync Control toggle + interval copy; TEST_PLAN + pilot stub 49.
+- Validation: `npx vitest run` + `npm run build` (this PR); live prove **not run**.
+- Problems: Interval 0 ≠ sync off was undocumented for owners — status `mitigated` (copy + toggle).
+- To Be Done: Merge PR; tip; pilot prove (off silence + Synchronize still works); no release unless asked.
+- References: #287, `UX-SET-SYNC-MASTER-OFF`, `UX-OBS-TT-SOAK/49-ux-set-sync-master-off.md`, `CHANGELOG.md`
+
 ### Iteration 2026-11-05 02:20 UTC
 
 - Context: Owner «fix that» after #285 tip — recover dirty dishwasher / workplace hierarchy on pilot.

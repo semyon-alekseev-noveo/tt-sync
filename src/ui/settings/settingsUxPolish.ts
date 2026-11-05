@@ -49,7 +49,14 @@ export const SCHEDULED_PROGRESS_LABEL = 'Show progress during scheduled sync';
 export const SCHEDULED_PROGRESS_HELP =
 	'When off (default), automatic interval sync runs silently. Manual Sync and inline updates still show a top-right progress notice.';
 export const SCHEDULED_PROGRESS_DISABLED_HINT =
-	'Interval is 0 (no automatic sync) — this toggle is inactive until you set an interval of 20 seconds or more.';
+	'Interval is 0 (no scheduled timer) — this toggle is inactive until you set an interval of 20 seconds or more.';
+
+/** UX-SET-SYNC-MASTER-OFF — kill switch copy (interval 0 ≠ sync off). */
+export const SYNC_MASTER_OFF_LABEL = 'Enable automatic and reactive sync';
+export const SYNC_MASTER_OFF_HELP =
+	'When off, startup sync, the scheduled timer, open-note push, and other background sync paths stop. Interval 0 only disables the repeating timer — use this for a real Sync off. Maintenance Synchronize and the Synchronize command still work.';
+export const SYNC_INTERVAL_HELP =
+	'Seconds between scheduled syncs. 0 means no repeating timer (default). Open-note push and startup sync still run unless you turn off «Enable automatic and reactive sync» above. A repeating interval cannot be lower than 20 seconds.';
 
 /** UX-SET-PW-CONFIRM — explicit plaintext confirm before store. */
 export const PASSWORD_PLAINTEXT_CONFIRM_TITLE = 'Store password in plaintext?';
@@ -100,6 +107,7 @@ export type DebugDumpSettingsSlice = {
 	statusListMappings?: unknown[];
 	statusMappings?: unknown[];
 	automaticSynchronizationInterval?: number;
+	syncEnabled?: boolean;
 	showSyncProgressOnScheduledSync?: boolean;
 };
 
@@ -131,6 +139,7 @@ export function buildSettingsDebugDump(
 			tagAndOr: settings.tagAndOr,
 			SyncTag: settings.SyncTag,
 			automaticSynchronizationInterval: settings.automaticSynchronizationInterval,
+			syncEnabled: settings.syncEnabled,
 			showSyncProgressOnScheduledSync: settings.showSyncProgressOnScheduledSync,
 		},
 		noteSetting: {
