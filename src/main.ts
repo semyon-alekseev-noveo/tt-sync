@@ -25,7 +25,6 @@ import '@/static/styles.css';
 import { type Editor, MarkdownView, Notice, Plugin } from 'obsidian';
 import { installWriteTraceWatch } from '@/services/writeTrace';
 
-//settings
 import { getSettings, mergeDeviceLists, updateSettings } from './settings';
 import { formatPluginLoadedNotice, formatSyncResultNotice, type SyncRunResult } from '@/sync/result';
 import { isAutomaticSyncEnabled } from '@/sync/syncEnabled';
@@ -39,15 +38,10 @@ import {
 } from '@/settingsMerge';
 
 import { TickTickService } from '@/services';
-//TickTick api
 import { TickTickRestAPI } from '@/services/TicktickRestAPI';
-//task parser
 import { TaskParser } from './taskParser';
-//cache task read and write
-//file operation
 import { FileOperation } from './fileOperation';
 
-//import modals
 import { LatestChangesModal } from './modals/LatestChangesModal';
 
 import { TickTickSyncSettingTab } from './ui/settings';
@@ -57,14 +51,11 @@ import store from '@/store';
 import { DateMan } from '@/dateMan';
 import { NewFileMap } from '@/services/NewFileMap';
 
-//logging
 import log from '@/utils/logger';
 
-//database
 import { initDB } from '@/db/dexie';
 import type { DeviceInfo } from '@/db/schema';
 
-//NEW: Repository layer
 import { FileMetadataService } from '@/repositories/FileMetadataService';
 import { TaskRepository } from '@/repositories/TaskRepository';
 import { FileTaskQueries } from '@/repositories/FileTaskQueries';
@@ -73,7 +64,6 @@ import { TaskCache } from '@/repositories/TaskCache';
 import { ProjectGroupRepository } from '@/repositories/ProjectGroupRepository';
 import type { FileTaskQueriesPort, SyncMetaPort, TaskRepositoryPort } from '@/repositories/ports';
 
-//NEW: Service layer
 import { ProjectSyncService } from '@/services/ProjectSyncService';
 import { EventHandlerService } from '@/services/EventHandlerService';
 import { VaultSyncCoordinator } from '@/services/VaultSyncCoordinator';
@@ -691,55 +681,6 @@ export default class TickTickSync extends Plugin implements PluginContext {
 			log.error('Auto-cleanup error:', error);
 		}
 	}
-
-
-	// async oldCheckboxEventhandle(evt: MouseEvent) {
-	// 	if (!(this.checkModuleClass())) {
-	// 		return;
-	// 	}
-	//
-	//
-	// 	const target = evt.target as HTMLInputElement;
-	// 	const bOpenTask = target.checked;
-	// 	log.debug('Second: Checked: ', bOpenTask);
-	//
-	// 	//This breaks for subtasks if Tasks is installed. See: https://github.com/obsidian-tasks-group/obsidian-tasks/discussions/2685
-	// 	//hence the else.
-	// 	const taskElement = target.closest('div');
-	// 	if (taskElement) {
-	// 		const taskLine = taskElement.textContent;
-	// 		const taskId = this.taskParser?.getTickTickId(taskLine);
-	// 		if (taskId) {
-	// 			// let task = this.taskParser?.convertTextToTickTickTaskObject(tas)
-	// 			if (bOpenTask) {
-	// 				log.debug('it\'s open, close it.');
-	// 				this.tickTickSync?.closeTask(taskId);
-	// 			} else {
-	// 				log.debug('it\'s closed, open it.');
-	// 				this.tickTickSync?.reopenTask(taskId);
-	// 			}
-	// 		}
-	// 	} else {
-	// 		log.debug('#### TickTick_id not found -- do it the hard way.');
-	// 		//Start full-text search and check status updates
-	// 		try {
-	// 			log.debug('#### Full text modified??');
-	// 			let file = this.app.workspace.getActiveFile();
-	// 			let filePath = null;
-	// 			if (file instanceof TFile) {
-	// 				filePath = file.path;
-	// 			}
-	//
-	// 			if (!await this.checkAndHandleSyncLock()) return;
-	// 			await this.tickTickSync?.fullTextModifiedTaskCheck(filePath);
-	// 			await this.unlockSynclock();
-	// 		} catch (error) {
-	// 			log.error(`An error occurred while check modified tasks in the file: ${error}`);
-	// 			await this.unlockSynclock();
-	//
-	// 		}
-	// 	}
-	// }
 
 	async saveProjectsToCache(): Promise<boolean> {
 		if (!this.checkModuleClass()) {
