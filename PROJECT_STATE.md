@@ -44,14 +44,12 @@
 - **BUG-TT-DUP-CREATE-ON-STRIP-SYNC** — primary create path for same-title TT dups: multi-orphan `findOrphanByTitle` → `createTask` (journal waves 11-02/03/04). Fail-closed reattach/skip + file-scoped parent fallback; tip@`8528baa` live **fail** then **pass** ×2 (`44-tt-dup-create-prevention.md`). Confirm InsertLine = vault twins only (`41-…`).
 - **BUG-TT-CREATE-PATH-BYPASS** — post-#280 create-path audit: ProjectScheme `createParent` reattach/skip; SyncMan recreate loop inert; inventory unit. Manual PKM orphan cleanup done (MCP). Pilot path-guard **not run** (`45-create-path-audit.md`).
 - **BUG-LISTROOT-NOTE-PROMOTE** — Projects list-roots with `note/<slug>` and no `project` tag were promoted to `#system/project` notes (`isListRoot` without tag gate). Prevention merged #285 (`358690e` / 2.0.96): `isSchemeParentTask` rejects note-context-without-project. Live **pass** ×2 on clean fixtures (`47-listroot-note-promote.md`). Dirty dishwasher/workplace hierarchy **recovered** on pilot (`48-…`; TT nested + AZ rebound) — status `resolved`.
-- **UX-SET-SYNC-MASTER-OFF** — Interval 0 ≠ sync off (open-note / startup still ran). Kill switch `syncEnabled` + Sync Control toggle; automatic/reactive gated; Synchronize stays. Issue [#287](https://github.com/semyon-alekseev-noveo/tt-sync/issues/287); unit this tip; live **not run** (`49-ux-set-sync-master-off.md`) (`open` until prove).
-- **BUG-GHOST-MARKER-AFTER-RESET** — After Reset (Dexie empty), vault `ticktick_id`s absent from TT stay fake-live (DON-253 `6ad332…` MCP 404); Sync neither detaches nor creates until owner strips id. Issue [#290](https://github.com/semyon-alekseev-noveo/tt-sync/issues/290) (`open`).
-- **BUG-CREATE-MATCH-UNDEF** — Open-note create can toast «created» and `Failed to add… reading 'match'` on tip 2.0.96 (DON-253 tcp-services). Issue [#291](https://github.com/semyon-alekseev-noveo/tt-sync/issues/291) (`open`).
+- **UX-SET-SYNC-MASTER-OFF** — Interval 0 ≠ sync off. Kill switch `syncEnabled` + Sync Control toggle; automatic/reactive gated; Synchronize stays. [#287](https://github.com/semyon-alekseev-noveo/tt-sync/issues/287) / [#288](https://github.com/semyon-alekseev-noveo/tt-sync/pull/288); unit + **owner live pass** (`49-ux-set-sync-master-off.md`) (`resolved`).
 - **UX-SYNC-TT-DEDUPE** — **won't-fix / cancelled** (owner closed [#276](https://github.com/semyon-alekseev-noveo/tt-sync/issues/276)): Deduplicate UI not shipping after prevention (#279+#280+#281) + orphan cleanup; DoR **1A/2A/3A** in `43-…` remains historical.
 - **ID-CHAIN** — Epic [#214](https://github.com/semyon-alekseev-noveo/tt-sync/issues/214): eng children closed; #208 Rematch prove ×2 **pass**/closed; optional [#218](https://github.com/semyon-alekseev-noveo/tt-sync/issues/218) keeps epic open.
 - **UX-NOTICE** — create vs reattach Notices + modal cache wording: unit this tip; pilot strip-marker prove **not run** (`open`).
 - **BUG-RESET-CACHE-DELETE** — post-Reset Synchronize proposed vault-line deletes for pre-wipe ids (DON-253); owner **Cancel** only. Fix on tip/PR; pilot prove ×2 pending (`UX-OBS-TT-SOAK/24-post-reset-delete-modal.md`) (`open` until prove).
-- Pilot Abyss `taskIgnoreQuery: #ticktick` leftover from superseded Option B — blocks Abyss edit on TT-origin project notes (`open`; brief `UX-OBS-TT-SOAK/06-decision-ticktick-vs-abyss.md`).
+- Pilot Abyss `taskIgnoreQuery: #ticktick` leftover from superseded Option B — blocks Abyss edit on TT-origin project notes (`parked` until owner needs Abyss on TT-origin / before Step 8; tip still stamps note `#ticktick`; `UX-OBS-TT-SOAK/06-…`).
 - List stub mirrors under `TickTickTasksFilePath` / Dexie recreate into `zz-parked-*` — **resolved** on tip #179: code skip + pilot cleanup + prove ×2 (`UX-OBS-TT-SOAK/08-stub-cleanup-prove.md`). Optional Dexie parked-row dump not probed.
 - **BUG-COMMENT-DUP-STAMP** ([#25](https://github.com/semyon-alekseev-noveo/tt-sync/issues/25)): **resolved** on **2.0.76** (unit + pilot; 4 plain Comments on `task-11-16`).
 - **BUG-COMMENT-VAULT-DUP-KEY** ([#27](https://github.com/semyon-alekseev-noveo/tt-sync/issues/27)): **resolved** on **2.0.80** (unit + pilot; twins stay collapsed after release smoke).
@@ -72,12 +70,11 @@
 0a3. **BUG-TT-DUP-CREATE-ON-STRIP-SYNC:** merge parent-bypass fix PR; tip already proved ×2 pass on `44-…`; unique title create still unit-covered.
 0a4. **UX-SYNC-TT-DEDUPE:** **done / won't-fix** — #276 closed not planned; catalog docs cancelled; local `feat/ux-sync-tt-dedupe` stash ignore.
 0a5. **BUG-LISTROOT-NOTE-PROMOTE:** tip prove ×2 **done** (`47-…`); pilot hierarchy recovery **done** (`48-…`); #284 already closed. Optional delete `zz-parked-listroot-promote-20261105/`. No release unless asked.
-0a6. **UX-SET-SYNC-MASTER-OFF:** merge #287 PR; tip; pilot prove off silence + Synchronize still works (`49-…`).
-0a7. **BUG-GHOST-MARKER-AFTER-RESET / BUG-CREATE-MATCH-UNDEF:** #290/#291 — owner strip remaining DON-253 ghosts (keep `6aec9007…`); developer fix + prove ×2; Reset×2 not pass until ghost path honest.
-0b. **UX-NOTICE-***: After merge, tip + strip-marker reattach toast prove; Orphan modal glance (`36-…`).
+0a6. **UX-SET-SYNC-MASTER-OFF:** **done** — #288 merged; owner live pass (`49-…`); close #287.
+0b. **UX-NOTICE-***: Owner strip-marker reattach toast + Orphan glance — checklist `50-…` / `36-…`.
 0c. **#214:** Optional #218 only; else close epic when owner ready.
-0d. **BUG-RESET-CACHE-DELETE:** prove ×2 Reset→Synchronize still owner-gated (`25-…`).
-1. Owner decides UX Decision #1 (Abyss vs `#ticktick`) — prefer clear ignore on pilot; optional TTS stop note-level `ticktick` stamp later (`06-decision-ticktick-vs-abyss.md`).
+0d. **BUG-RESET-CACHE-DELETE:** Owner Reset→Synchronize ×2 — checklist `50-…` / `25-…`.
+1. Decision #1 Abyss vs `#ticktick`: **parked** (still valid; tip unchanged) — clear `taskIgnoreQuery` when Abyss+TT-origin hurts / before Step 8 (`06-…`).
 2. **[done]** UX-STUB-1 / BUG-LIST-STUB-RECREATE pilot cleanup + prove ×2 after #179 (`08-stub-cleanup-prove.md`).
 2b. **[done]** UX-STATUS-MAP-1/2 prove ×2 after #182 (`16-status-map-prove.md`); MAP-3/4/PULL + Abyss customs still open; version bump when owner asks.
 3. **[done] Step 7 AF soak** [#20](https://github.com/semyon-alekseev-noveo/tt-sync/issues/20) / [#76](https://github.com/semyon-alekseev-noveo/tt-sync/issues/76) **closed**. **[done] #19**. Step 8 live vault still closed. **AF-NEST-1** **pass**. **AF-GTD-TAG-ADD** residual on **2.0.90** (Abyss sort dropped mover; full sync only) — fix on `fix/af-gtd-stage-winner-dnd` (mover-wins + 1.2s Abyss push); re-prove×2 pending.
