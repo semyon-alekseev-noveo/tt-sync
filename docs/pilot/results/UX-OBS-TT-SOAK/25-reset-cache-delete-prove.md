@@ -52,14 +52,17 @@ This smoke does **not** count as BUG-RESET-CACHE-DELETE live pass (Dexie not emp
 
 ## Expected owner prove ×2 (manual Reset)
 
-1. Settings → TickTickSync (Abyss) → Tasks/Notes → **Reset local sync database** → confirm.
-2. Notice: local DB cleared; vault notes remain; `checkPoint` → `0`.
-3. **Synchronize** (CLI `tickticksync-abyss:tts-sync` or ribbon).
+Owner checklist (current UI): [`50-owner-live-tails-checklist.md`](50-owner-live-tails-checklist.md) §A.
+
+1. Settings → **Maintenance** → **Danger zone** → **Reset local sync cache** → confirm.  
+   (Post–Settings UX: Reset is **not** under Tasks/Notes.)
+2. Notice: local sync cache cleared; vault notes remain; `checkPoint` → `0`.
+3. **Synchronize** (Maintenance / ribbon / command).
 4. Expect: **no** modal «task not found in local cache» / Confirm Deletion for vault lines; DON-253 markers stay.
 5. **Synchronize** again (second independent proof).
 6. Same expect; then normal day-to-day Synchronize (system inbox remap already in `data.json`).
 
-If a modal still appears → **Cancel** only; record fail in this file / reopen.
+If a modal still appears → **Cancel** only; record fail in this file / reopen. Do **not** Apply once on held Sync discrepancies (`26`).
 
 ## Conclusion
 
