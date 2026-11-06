@@ -59,18 +59,19 @@ describe('UX-SET-SYNC-MASTER-OFF', () => {
 		expect(main).toContain('isAutomaticSyncEnabled');
 		expect(main).toMatch(/reloadInterval[\s\S]*isAutomaticSyncEnabled/);
 		expect(main).toMatch(/startup[\s\S]*isAutomaticSyncEnabled|isAutomaticSyncEnabled[\s\S]*startup/);
-		expect(main).toMatch(/checkboxEventhandler[\s\S]*isAutomaticSyncEnabled/);
+		expect(main).toMatch(/checkboxEventhandler\([\s\S]*reconcileSyncEnabledFromDisk/);
 
 		const service = readFileSync(join(SRC_ROOT, 'services/index.ts'), 'utf8');
 		expect(service).toContain('isAutomaticSyncTrigger');
 		expect(service).toMatch(/async synchronization\([\s\S]*isAutomaticSyncTrigger/);
-		expect(service).toMatch(/async pushSettledActiveFile\([\s\S]*isAutomaticSyncEnabled/);
-		expect(service).toMatch(/async fullTextNewTaskCheck\([\s\S]*isAutomaticSyncEnabled/);
-		expect(service).toMatch(/async lineSettledCheck\([\s\S]*isAutomaticSyncEnabled/);
+		expect(service).toMatch(/async pushSettledActiveFile\([\s\S]*reconcileSyncEnabledFromDisk/);
+		expect(service).toMatch(/async fullTextNewTaskCheck\([\s\S]*reconcileSyncEnabledFromDisk/);
+		expect(service).toMatch(/async lineSettledCheck\([\s\S]*reconcileSyncEnabledFromDisk/);
+		expect(service).toMatch(/async lineModifiedTaskCheck\([\s\S]*reconcileSyncEnabledFromDisk/);
 
 		const events = readFileSync(join(SRC_ROOT, 'services/EventHandlerService.ts'), 'utf8');
 		expect(events).toMatch(/editor-change[\s\S]*isAutomaticSyncEnabled/);
-		expect(events).toMatch(/flushActiveFilePush[\s\S]*isAutomaticSyncEnabled/);
+		expect(events).toMatch(/flushActiveFilePush\([\s\S]*isAutomaticSyncEnabled/);
 		expect(events).toMatch(/vault\.on\('modify'[\s\S]*isAutomaticSyncEnabled/);
 	});
 });

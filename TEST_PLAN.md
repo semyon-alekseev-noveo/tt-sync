@@ -6,13 +6,23 @@ Manual cases for behavior changes. Automated tests do not replace a row here.
 
 Pilot means `<pilot-vault>`, manual **Synchronize**, plugin id `tickticksync-abyss`. Do not use `<live-vault>`. A cloud agent does not mark a row passed. Status stays **not run** until a person or a local agent on that Obsidian records what they saw.
 
-## UX-SET-SYNC-MASTER-OFF — Sync off kill switch (this PR)
+## BUG-SYNC-OFF-REACTIVE-CREATE — Sync off must not create/update TT (this PR)
+
+Issue [#295](https://github.com/semyon-alekseev-noveo/tt-sync/issues/295). Residual after `UX-SET-SYNC-MASTER-OFF` (#287/#288). Unit: `src/test/bugSyncOffReactiveCreate.test.ts`. Evidence stub: `docs/pilot/results/UX-OBS-TT-SOAK/52-sync-off-reactive-create.md`.
+
+| Case | Steps | Expected | Pilot |
+|------|-------|----------|-------|
+| BUG-SYNC-OFF-REACTIVE-CREATE off | Master **off** (`syncEnabled: false`). On DON-253 (or throwaway): edit/add in-scope checkbox / tags; leave line; wait ≥5s. Do **not** run Synchronize. | No TT create; no `Task … updated: tags`; no `#status/…` conflict toast from push. Journal has no new `edit-` create/update. | **fail** observed 2026-11-06 (`52-…`); tip re-prove **not run** |
+| BUG-SYNC-OFF-REACTIVE-CREATE manual | Master still **off**. Maintenance **Synchronize**. | Sync still runs (create/update allowed under `syncRunning`). | unit covers `mayPush…(syncRunning)`; live **not run** |
+| UX-SET-SYNC-MASTER-OFF (regression) | Toggle Sync off/on as in #288. | Off silences reactive; Synchronize stays. | prior **owner pass** (`49-…`) |
+
+## UX-SET-SYNC-MASTER-OFF — Sync off kill switch
 
 Issue [#287](https://github.com/semyon-alekseev-noveo/tt-sync/issues/287). Case `UX-SET-SYNC-MASTER-OFF`. Unit: `src/test/uxSetSyncMasterOff.test.ts`. Pilot stub: `docs/pilot/results/UX-OBS-TT-SOAK/49-ux-set-sync-master-off.md`.
 
 | Case | Steps | Expected | Pilot |
 |------|-------|----------|-------|
-| UX-SET-SYNC-MASTER-OFF off | Sync Control → Automatic sync → uncheck **Enable automatic and reactive sync**. Edit an identified task in an open in-scope note; wait ≥5s. Reload/disable-enable plugin. | No «Updating open note…»; no startup full sync; scheduled timer does not fire even if interval ≥20. | **owner pass** (`49-…`) |
+| UX-SET-SYNC-MASTER-OFF off | Sync Control → Automatic sync → uncheck **Enable automatic and reactive sync**. Edit an identified task in an open in-scope note; wait ≥5s. Reload/disable-enable plugin. | No «Updating open note…»; no startup full sync; scheduled timer does not fire even if interval ≥20. | **owner pass** (`49-…`); residual create → #295 |
 | UX-SET-SYNC-MASTER-OFF manual | With master still **off**, run Maintenance **Synchronize** (or Synchronize command). | Sync completes (vault↔TT as usual). | **owner pass** (`49-…`) |
 | UX-SET-SYNC-MASTER-OFF on | Re-check **Enable automatic and reactive sync**. Edit open note; wait ≥5s (or reload with interval ≥20). | Open-note / scheduled / startup paths work again. | owner overall OK; re-enable not separately logged |
 | UX-SET-INTERVAL-ZERO (regression) | Master **on**, interval = 0. | Progress-on-scheduled grey; open-note/startup still allowed (interval alone ≠ Sync off). | unit **pass**; pilot **not run** |

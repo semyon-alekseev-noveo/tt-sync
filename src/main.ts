@@ -27,7 +27,7 @@ import { installWriteTraceWatch } from '@/services/writeTrace';
 
 import { getSettings, mergeDeviceLists, updateSettings } from './settings';
 import { formatPluginLoadedNotice, formatSyncResultNotice, type SyncRunResult } from '@/sync/result';
-import { isAutomaticSyncEnabled } from '@/sync/syncEnabled';
+import { isAutomaticSyncEnabled, reconcileSyncEnabledFromDisk } from '@/sync/syncEnabled';
 import { waitForStartupSync } from '@/sync/startupDelay';
 import {
 	buildPersistedSettings,
@@ -283,6 +283,20 @@ export default class TickTickSync extends Plugin implements PluginContext {
 	private pendingExternal = false;
 	async onExternalSettingsChange() {
 		this.pendingExternal = true;
+		// BUG-SYNC-OFF-REACTIVE-CREATE: apply kill switch immediately even mid-sync /
+		// before full hydrate — LiveSync/hand-edit must stop reactive creates now.
+		try {
+			const data = await this.loadData() as Record<string, unknown> | null;
+			if (data && data.syncEnabled === false && getSettings().syncEnabled !== false) {
+				updateSettings({ syncEnabled: false }, { persist: false });
+				this.reloadInterval();
+			} else if (data && data.syncEnabled === true && getSettings().syncEnabled === false) {
+				updateSettings({ syncEnabled: true }, { persist: false });
+				this.reloadInterval();
+			}
+		} catch (e) {
+			log.warn('Immediate syncEnabled adopt from disk failed', e);
+		}
 		if (!this.syncRunning) await this.applyExternalSettings();
 	}
 	async applyExternalSettings() {
@@ -571,8 +585,10 @@ export default class TickTickSync extends Plugin implements PluginContext {
 			return;
 		}
 
-		// UX-SET-SYNC-MASTER-OFF: checkbox→TT is reactive; skip when master off.
-		if (!isAutomaticSyncEnabled(getSettings())) return;
+		// UX-SET-SYNC-MASTER-OFF / BUG-SYNC-OFF-REACTIVE-CREATE: checkbox→TT reactive.
+		if (!(await reconcileSyncEnabledFromDisk(() => this.loadData() as Promise<{ syncEnabled?: boolean } | null>))) {
+			return;
+		}
 
 		// Checkbox in a file outside syncScopeFolders: do not touch TickTick.
 		if (!isPathInPushScope(this.app.workspace.getActiveFile()?.path)) return;

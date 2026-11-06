@@ -15,6 +15,7 @@ import type { ITask } from '@/api/types/Task';
 import { NewFileMap } from '@/services/NewFileMap';
 import { commitVaultText, registerPendingMarkerTaskId, syncCachedRead } from '@/sync/vault-io';
 import { getSettings } from '@/settings';
+import { mayPushTickTickReactively } from '@/sync/syncEnabled';
 import { isPathInPushScope } from '@/syncScope';
 import log from '@/utils/logger';
 import type { TaskModificationDetector } from '@/sync/vault-push/taskModification/TaskModificationDetector';
@@ -62,6 +63,12 @@ export class TaskModificationNewTasks {
 		fileMap: NewFileMap
 	): Promise<void> {
 		if (!lineTxt || lineTxt.length == 0) {
+			return;
+		}
+
+		// BUG-SYNC-OFF-REACTIVE-CREATE: detector-level kill switch (manual Synchronize sets syncRunning).
+		if (!mayPushTickTickReactively({ syncRunning: this.plugin.syncRunning })) {
+			log.debug('Skipping addNewTask: sync master off');
 			return;
 		}
 
