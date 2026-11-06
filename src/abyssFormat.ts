@@ -7,7 +7,8 @@
 export const COMMENTS_HEADER = 'Comments:';
 
 export function indentWidth(line: string): number {
-	return ((line.match(/^[\t ]*/) ?? [''])[0]).replace(/\t/g, '    ').length;
+	// BUG-CREATE-MATCH-UNDEF: callers may pass undefined when taskIdx is -1.
+	return ((((line ?? '') as string).match(/^[\t ]*/) ?? [''])[0]).replace(/\t/g, '    ').length;
 }
 
 const isCheckbox = (s: string) => /^[-*+] \[.\]/.test(s.trimStart());
@@ -145,6 +146,8 @@ const ITEM_ID = /%%(?!\[ticktick_id::\s)[a-f0-9]{24}%%/;
 
 /** End index (inclusive) of the Abyss child region of the task at taskIdx. */
 export function abyssRegionEnd(lines: string[], taskIdx: number): number {
+	// BUG-CREATE-MATCH-UNDEF: invalid index must not call indentWidth(undefined).
+	if (taskIdx < 0 || taskIdx >= lines.length) return taskIdx;
 	const w = indentWidth(lines[taskIdx]);
 	let j = taskIdx + 1;
 	while (j < lines.length && lines[j].trim() !== '' && indentWidth(lines[j]) > w && !TT_ID.test(lines[j])) j++;

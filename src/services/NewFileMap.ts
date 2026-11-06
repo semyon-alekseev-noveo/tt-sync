@@ -535,6 +535,13 @@ export class NewFileMap {
 
 	private getTaskLinesByIdx(taskIdx: number, taskRecord: ITaskRecord) {
 		const taskLines: string[] = [];
+		// BUG-CREATE-MATCH-UNDEF: missing id → findIndex -1; do not walk undefined lines.
+		if (taskIdx < 0 || taskIdx >= this.fileLines.length) {
+			taskRecord.task = '';
+			taskRecord.taskLines = [];
+			taskRecord.parentId = null;
+			return taskRecord;
+		}
 		const taskLine = this.fileLines[taskIdx];
 		const taskTabs = this.plugin.taskParser.getTabs(taskLine);
 		const numTabs = taskTabs.length;
