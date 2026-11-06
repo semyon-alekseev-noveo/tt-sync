@@ -1,3 +1,13 @@
+### Iteration 2026-11-06 06:57 UTC
+
+- Context: Owner merged #293; tip prove for DON-253 ghost detach ×2.
+- Target: Deploy tip; live prove ×2 ghost detach; update `51`/INDEX/AF/TEST_PLAN; comment #290/#291; docs PR; no release.
+- Actions log: FF `abyss-mapping` @`a1946a6`; build+deploy pilot; `plugin:reload`; Synchronize prove1 DON-253; plant+sync prove2 Законспектировать…; docs update.
+- Validation: Deploy `main.js` has `BUG-GHOST-MARKER` / vault-only detach; prove1 nine ghosts → `%%tt-detached%%`, keep `6aec9007…`; prove2 planted 404 → detach; journal no invent TT.
+- Problems: Create `.match` live prove skipped this session — status `open` (#291).
+- To Be Done: Close #290 after docs PR; owner optional create Notice prove for #291; no release unless asked.
+- References: #290, #291, #293, `docs/pilot/results/UX-OBS-TT-SOAK/51-don253-reset-ghost-match.md`, `CHANGELOG.md`
+
 ### Iteration 2026-11-05 14:49 UTC
 
 - Context: Owner Reset→Sync item 2 — DON-253 ghost markers after Dexie wipe + open-note create dual Notice (`.match`).
