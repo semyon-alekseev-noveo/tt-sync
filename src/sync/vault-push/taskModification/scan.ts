@@ -1,3 +1,4 @@
+import { mayPushTickTickReactively } from '@/sync/syncEnabled';
 import { fencedLines } from '@/utils/vaultIdScan';
 import { abyssLinesToNote, isAbyssNoteLine } from '@/abyssFormat';
 import { syncAbyssCommentsToTickTick, useAbyssCommentsApi } from '@/abyssCommentSync';
@@ -40,6 +41,10 @@ export class TaskModificationScan {
 		pushLimit?: TaskSyncLimitOptions,
 		options?: TaskModificationScanOptions,
 	): Promise<boolean> {
+		// BUG-SYNC-OFF-REACTIVE-CREATE: no tag/status push while master off (unless Synchronize).
+		if (!mayPushTickTickReactively({ syncRunning: this.plugin.syncRunning })) {
+			return false;
+		}
 		// Outside syncScopeFolders: no update, no completion, no deletion push.
 		if (!isPathInPushScope(filepath)) {
 			return false;
@@ -263,6 +268,10 @@ export class TaskModificationScan {
 		pendingDeletions?: PendingTickTickDeletion[],
 		options?: TaskModificationScanOptions,
 	): Promise<void> {
+		// BUG-SYNC-OFF-REACTIVE-CREATE: open-note / pre-pull push while master off.
+		if (!mayPushTickTickReactively({ syncRunning: this.plugin.syncRunning })) {
+			return;
+		}
 		if (!filepath || !isPathInPushScope(filepath)) {
 			return;
 		}

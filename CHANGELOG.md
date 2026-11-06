@@ -1,3 +1,23 @@
+### Iteration 2026-11-06 10:51 UTC
+
+- Context: Owner Sync off on pilot but DON-253 line pushed to TT (toasts create/update tags).
+- Target: `BUG-SYNC-OFF-REACTIVE-CREATE` (#295) — seal reactive create/update when `syncEnabled` false; docs + PR; no release.
+- Actions log: Journal/`get_task_by_id` prove create then tag update via `edit-`; detector `mayPushTickTickReactively`; disk reconcile; external kill-switch adopt; AF/TEST_PLAN/`52-…`.
+- Validation: `npx vitest run` (997) + `npm run build` pass; live tip re-prove **not run**.
+- Problems: Sync off leak after #288 owner pass — status `open` until prove ×2.
+- To Be Done: Merge PR; tip deploy; prove ×2 Sync off silence + Synchronize-while-off; no release unless asked.
+- References: #295, `bugSyncOffReactiveCreate.test.ts`, `docs/pilot/results/UX-OBS-TT-SOAK/52-sync-off-reactive-create.md`, `CHANGELOG.md`
+
+### Iteration 2026-11-06 10:51 UTC
+
+- Context: Owner Sync off on pilot but DON-253 line still hit TickTick (toasts create/update tags).
+- Target: Classify create vs update; seal `BUG-SYNC-OFF-REACTIVE-CREATE` (#295); PR into abyss-mapping; no release.
+- Actions log: Read screenshot; MCP task + journal `edit-` create/update; `syncEnabled=false` on disk; detector `mayPushTickTickReactively` + `reconcileSyncEnabledFromDisk`; external settings immediate kill-switch; AF/TEST_PLAN/`52-…`.
+- Validation: `npx vitest run` (997) + `npm run build` (this PR); live tip re-prove **not run**.
+- Problems: Memory/disk lag + ungated detector paths under Sync off — status `mitigated` (unit); live ×2 still required — status `open`.
+- To Be Done: Merge; tip; prove ×2 Sync off silence + Synchronize-while-off; no release unless asked.
+- References: #295, `bugSyncOffReactiveCreate.test.ts`, `docs/pilot/results/UX-OBS-TT-SOAK/52-sync-off-reactive-create.md`, `CHANGELOG.md`
+
 ### Iteration 2026-11-06 06:57 UTC
 
 - Context: Owner merged #293; tip prove for DON-253 ghost detach ×2.

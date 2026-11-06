@@ -36,7 +36,11 @@ import { runSyncFilesPass } from '@/sync/phases/syncFilesPass';
 import { runCheckDatabase } from '@/services/checkDatabase';
 import { pathsForPrePullPush } from '@/sync/vault-push/pushLocalPaths';
 import type { SyncRunResult } from '@/sync/result';
-import { isAutomaticSyncEnabled, isAutomaticSyncTrigger } from '@/sync/syncEnabled';
+import {
+	isAutomaticSyncEnabled,
+	isAutomaticSyncTrigger,
+	reconcileSyncEnabledFromDisk,
+} from '@/sync/syncEnabled';
 import { db, initDB } from "@/db/dexie";
 import { getAllProjects, getProjectById, upsertProjects } from '@/db/projects';
 import { loadTasksFromCache } from "@/db/tasks";
@@ -218,8 +222,10 @@ export class TickTickService {
 		opts?: { identifiedOnly?: boolean },
 	): Promise<void> {
 		if (!filepath || !isPathInPushScope(filepath)) return;
-		// UX-SET-SYNC-MASTER-OFF: open-note / Abyss debounce push is reactive.
-		if (!isAutomaticSyncEnabled(getSettings())) return;
+		// UX-SET-SYNC-MASTER-OFF + BUG-SYNC-OFF-REACTIVE-CREATE: honor disk kill switch.
+		if (!(await reconcileSyncEnabledFromDisk(() => this.plugin.loadData() as Promise<{ syncEnabled?: boolean } | null>))) {
+			return;
+		}
 		if (this.plugin.syncRunning) {
 			deferActiveFilePush(filepath);
 			return;
@@ -517,7 +523,9 @@ export class TickTickService {
 	}
 
 	async fullTextNewTaskCheck(filepath: string) {
-		if (!isAutomaticSyncEnabled(getSettings())) return;
+		if (!(await reconcileSyncEnabledFromDisk(() => this.plugin.loadData() as Promise<{ syncEnabled?: boolean } | null>))) {
+			return;
+		}
 		await this.plugin.syncActivity.runInline('Pushing new tasks…', async () => {
 			await doWithLock(LOCK_TASKS, async () => {
 				await this.plugin.taskModificationDetector.checkFileForNewTasks(filepath);
@@ -526,7 +534,9 @@ export class TickTickService {
 	}
 
 	async lineNewContentTaskCheck(editor: Editor, info: MarkdownView | MarkdownFileInfo) {
-		if (!isAutomaticSyncEnabled(getSettings())) return false;
+		if (!(await reconcileSyncEnabledFromDisk(() => this.plugin.loadData() as Promise<{ syncEnabled?: boolean } | null>))) {
+			return false;
+		}
 		return await this.plugin.syncActivity.runInline('Creating task…', async () => {
 			return await doWithLock(LOCK_TASKS, async () => {
 				await this.plugin.taskModificationDetector.checkLineForNewTask(editor, info);
@@ -536,7 +546,9 @@ export class TickTickService {
 
 	/** The caret left this line, so the line is finished enough to create or update. */
 	async lineSettledCheck(filepath: string, lastLineText: string, lastLine: number): Promise<boolean> {
-		if (!isAutomaticSyncEnabled(getSettings())) return false;
+		if (!(await reconcileSyncEnabledFromDisk(() => this.plugin.loadData() as Promise<{ syncEnabled?: boolean } | null>))) {
+			return false;
+		}
 		return await this.plugin.syncActivity.runInline('Updating task…', async () => {
 			return await doWithLock(LOCK_TASKS, async () => {
 				const file = this.plugin.app.vault.getAbstractFileByPath(filepath);
@@ -559,6 +571,10 @@ export class TickTickService {
 	}
 
 	async lineModifiedTaskCheck(filepath: string, lastLineText: string, lastLine: number): Promise<boolean> {
+		// UX-SET-SYNC-MASTER-OFF / BUG-SYNC-OFF-REACTIVE-CREATE: was ungated (dead caller; still seal).
+		if (!(await reconcileSyncEnabledFromDisk(() => this.plugin.loadData() as Promise<{ syncEnabled?: boolean } | null>))) {
+			return false;
+		}
 		return await this.plugin.syncActivity.runInline('Updating task…', async () => {
 			return await doWithLock(LOCK_TASKS, async () => {
 				const file = this.plugin.app.vault.getAbstractFileByPath(filepath);
