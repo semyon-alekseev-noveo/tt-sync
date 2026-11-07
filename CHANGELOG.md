@@ -1,3 +1,13 @@
+### Iteration 2026-11-06 15:06 UTC
+
+- Context: Owner merged #296; deploy tip and re-prove #295 Sync-off reactive create/update on pilot.
+- Target: Fast-forward, build/deploy merged tip; prove two fixtures; record honest evidence and docs PR; no release.
+- Actions log: FF @`76cf71c`; 997 tests + build; deployed bundle; first hot-swap fail; full vault reload; unmarked-line and marked-tag-edit silence; fixed-runtime reload check; docs update.
+- Validation: Initialized tip **pass ×2**: no TT create for DON-253 unmarked line; no TT tag/etag/mtime change for `6aedaecd…`; no new `edit-` journal; fixed-runtime reload also silent.
+- Problems: First `plugin:reload` from pre-fix runtime allowed stale-handler create `6aedeaa7…` (deleted) — `mitigated` for fully initialized runtime; arbitrary unload/reload interleavings untested.
+- To Be Done: Comment/close #295 with both proofs and initial-fail caveat; docs PR into abyss-mapping; owner merge; #291 separate/not run; no release.
+- References: #295, #296, `docs/pilot/results/UX-OBS-TT-SOAK/52-sync-off-reactive-create.md`, `TEST_PLAN.md`, `CHANGELOG.md`
+
 ### Iteration 2026-11-06 10:51 UTC
 
 - Context: Owner Sync off on pilot but DON-253 line pushed to TT (toasts create/update tags).

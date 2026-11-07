@@ -6,14 +6,14 @@ Manual cases for behavior changes. Automated tests do not replace a row here.
 
 Pilot means `<pilot-vault>`, manual **Synchronize**, plugin id `tickticksync-abyss`. Do not use `<live-vault>`. A cloud agent does not mark a row passed. Status stays **not run** until a person or a local agent on that Obsidian records what they saw.
 
-## BUG-SYNC-OFF-REACTIVE-CREATE — Sync off must not create/update TT (this PR)
+## BUG-SYNC-OFF-REACTIVE-CREATE — Sync off must not create/update TT (#296)
 
-Issue [#295](https://github.com/semyon-alekseev-noveo/tt-sync/issues/295). Residual after `UX-SET-SYNC-MASTER-OFF` (#287/#288). Unit: `src/test/bugSyncOffReactiveCreate.test.ts`. Evidence stub: `docs/pilot/results/UX-OBS-TT-SOAK/52-sync-off-reactive-create.md`.
+Issue [#295](https://github.com/semyon-alekseev-noveo/tt-sync/issues/295). Residual after `UX-SET-SYNC-MASTER-OFF` (#287/#288). Unit: `src/test/bugSyncOffReactiveCreate.test.ts`. Evidence: `docs/pilot/results/UX-OBS-TT-SOAK/52-sync-off-reactive-create.md`.
 
 | Case | Steps | Expected | Pilot |
 |------|-------|----------|-------|
-| BUG-SYNC-OFF-REACTIVE-CREATE off | Master **off** (`syncEnabled: false`). On DON-253 (or throwaway): edit/add in-scope checkbox / tags; leave line; wait ≥5s. Do **not** run Synchronize. | No TT create; no `Task … updated: tags`; no `#status/…` conflict toast from push. Journal has no new `edit-` create/update. | **fail** observed 2026-11-06 (`52-…`); tip re-prove **not run** |
-| BUG-SYNC-OFF-REACTIVE-CREATE manual | Master still **off**. Maintenance **Synchronize**. | Sync still runs (create/update allowed under `syncRunning`). | unit covers `mayPush…(syncRunning)`; live **not run** |
+| BUG-SYNC-OFF-REACTIVE-CREATE off | Master **off** (`syncEnabled: false`). On DON-253 (or throwaway): edit/add in-scope checkbox / tags; leave line; wait ≥5s. Do **not** run Synchronize. | No TT create; no `Task … updated: tags`; no `#status/…` conflict toast from push. Journal has no new `edit-` create/update. | tip@`76cf71c` **pass ×2** on fully initialized runtime (unmarked line + marked tag edit) + reload-from-fixed silence. Initial hot-swap **fail** from stale pre-fix handler retained (`52-…`); use full vault reload for that upgrade proof. |
+| BUG-SYNC-OFF-REACTIVE-CREATE manual | Master still **off**. Maintenance **Synchronize**. | Sync still runs (create/update allowed under `syncRunning`). | unit covers `mayPush…(syncRunning)`; optional live **not run** this session |
 | UX-SET-SYNC-MASTER-OFF (regression) | Toggle Sync off/on as in #288. | Off silences reactive; Synchronize stays. | prior **owner pass** (`49-…`) |
 
 ## UX-SET-SYNC-MASTER-OFF — Sync off kill switch
