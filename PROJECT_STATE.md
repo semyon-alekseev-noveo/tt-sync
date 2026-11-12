@@ -33,7 +33,7 @@ Project stage is a separate axis: **pilot soak → Step 8 live gate**. The live 
 | Stage | Pilot soak on `<pilot-vault>`; Step 8 live-vault gate **closed** |
 | Pilot build | **tip `ec91fec` declared as the test-vault build** (pilot-only, not a release; supersedes `00ff923` / `945d182`, all CI-green) |
 | Last release | **2.0.96**, 2026-11-03 (non-prerelease) |
-| Branch tip | `abyss-mapping` @ `ec91fec` — **unreleased** |
+| Branch tip | `abyss-mapping` @ `b417848` — **unreleased** (docs-only merge of #304 on top of code tip `ec91fec`) |
 | CI on tip | **GREEN** on `ec91fec`, `00ff923`, `945d182`; `PROC-CI-CYCLES-RED` fixed (#300, allowlist 118 → 56) |
 | Unit tests | **1005 passed / 141 files** |
 | Open issues | 16 |
@@ -98,7 +98,7 @@ Open UX / product:
 
 Open analysis / perf / process:
 
-- **abyssTasksFormat OFF matrix** [#201](https://github.com/semyon-alekseev-noveo/tt-sync/issues/201) — **analysis published 2026-11-12:** `docs/pilot/ABYSS-FORMAT-OFF-MATRIX.md` (ON vs OFF for create / update / pull / structure / stubs / settings). Verdict: OFF is a **lossy downgrade**, not a mode switch — symbols collapse to `[ ]`, `- >` bodies detach, stubs return. Recommendations R1–R6 (warn, rename, read-only table, lossless pull, no structure move, docs). No engine change → `triage` (follow-ups R4/R5 need own issues).
+- **abyssTasksFormat OFF matrix** [#201](https://github.com/semyon-alekseev-noveo/tt-sync/issues/201) — **analysis published 2026-11-12:** `docs/pilot/ABYSS-FORMAT-OFF-MATRIX.md` (ON vs OFF for create / update / pull / structure / stubs / settings). Verdict: OFF is a **lossy downgrade**, not a mode switch — symbols collapse to `[ ]`, `- >` bodies detach, stubs return. Recommendations R1–R6 (warn, rename, read-only table, lossless pull, no structure move, docs). No engine change → `triage`; R4 → engine issue **#305**, R5 → engine issue **#306** (both filed 2026-11-12).
 - **TECH-START-1** [#86](https://github.com/semyon-alekseev-noveo/tt-sync/issues/86) — register scan / defer full pull + full `.md` walk; `RISK-LARGE-VAULT` remainder → `open`.
 - **PILOT-REDO-SOAK** [#78](https://github.com/semyon-alekseev-noveo/tt-sync/issues/78) — redo journal + `Undo last sync` never soaked on a vault → `blocked-owner`.
 - **PROC-RELEASE-GATE** [#172](https://github.com/semyon-alekseev-noveo/tt-sync/issues/172) — enable required status check `CI / test` on `abyss-mapping` → `blocked-owner`.
@@ -137,7 +137,7 @@ Ordered. Do not start Step 8 before 1–3 are green.
 6. **#213** — **merged 2026-11-12** (#301, `00ff923`, CI green) → `merged-tip`. Pilot rows in `TEST_PLAN.md` stay `not run`.
 7. **#202** — **merged 2026-11-12** (#303, `ec91fec`, CI green) → `merged-tip`. Pilot rows stay `not run`.
 8. **#172** enable required `CI / test` on `abyss-mapping` so a red tip cannot be merged again.
-9. **#201** — **analysis published 2026-11-12** (`docs/pilot/ABYSS-FORMAT-OFF-MATRIX.md`). Next: owner picks R1–R3 (warn / rename / read-only table) as one small PR, and files R4/R5 (lossless pull, no structure move) as separate engine issues.
+9. **#201** — **analysis published 2026-11-12** (`docs/pilot/ABYSS-FORMAT-OFF-MATRIX.md`). Next: R4 → engine issue **#305** (lossless pull while OFF); R5 → engine issue **#306** (no structure move while Abyss config present); R1–R3 (Settings warn / rename / read-only table) pending owner pick.
 10. **Optional / parked:** #218 (or close #214), #185, #159, #86, #78, #33.
 11. **Step 8 live gate** — only after 1–3 and after the parked Decision #1 config is cleared (`taskIgnoreQuery`).
 
