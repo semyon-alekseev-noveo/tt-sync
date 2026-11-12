@@ -100,6 +100,7 @@
 | **BUG-CREATE-MATCH-UNDEF** | P1 | **unit-only** ([#291](https://github.com/semyon-alekseev-noveo/tt-sync/issues/291)) | Двойной Notice на create: «created» + «Failed to add … reading 'match'». Фикс влит (#293), live-prove **не прогонялся**. |
 | **BUG-TT-TAGFILTER-INBOX** | P1 | **triage** ([#299](https://github.com/semyon-alekseev-noveo/tt-sync/issues/299)) | Задача, добавленная в TT в отфильтрованном по тегу заметки виде, уезжает в Inbox вместо строки заметки. Триаж 2026-11-12: AF-строка + факты по коду (теги `note/` только на push, на pull маршрутизации нет, fallback `00 Inbox/abyss-active.md`). Нужен ответ продукта: тег — SoT? коллизии slug? `proj/` тоже? |
 | **GTD_ARRAY_KEYS** | P2 | **unit-only** ([#213](https://github.com/semyon-alekseev-noveo/tt-sync/issues/213)) | `statusListMappings` не входил в wipe-guard: пустые дефолты могли затереть настроенную таблицу статус→список. Добавлен в `GTD_ARRAY_KEYS`; `wouldWipeGtdFromDisk` теперь зеркалит `preserveGtdFromDisk` по всем четырём массивам. Юнит `GTD-ARRAY-KEYS`. |
+| **UX-SET-TASKS-FOLDER-COPY** | P3 | **unit-only** ([#202](https://github.com/semyon-alekseev-noveo/tt-sync/issues/202)) | Help у GTD «Tasks folder» читался как классический режим per-list файлов. Теперь на Abyss/GTD пути текст говорит, что list-зеркал нет и папка всегда в push scope; на классическом пути остаётся старый текст. Юнит `uxSetTasksFolderCopy.test.ts`. |
 | **BUG-OPENNOTE-DELETE-CONFIRM** | P1 | **unit-only** | Delete/Backspace в открытой заметке вызывал PushDeleteTT Confirm. Фикс unit, повторный live-prove **не прогонялся** (`42-…`). |
 | **BUG-RESET-CACHE-DELETE** | P1 | **blocked-owner** | После Reset Synchronize предлагал удалить строки vault по pre-wipe id. Теперь ghost detach ожидаем; owner Reset→Synchronize ×2 всё ещё не прогнан (`25-…` / `50-…`). |
 | **UX-NOTICE** | P2 | **blocked-owner** | Тексты create vs reattach и модалки кэша. Unit на верхушке; owner strip-marker prove **не прогонялся** (`36-…` / `50-…`). |
@@ -156,7 +157,7 @@
 4. **#299** `BUG-TT-TAGFILTER-INBOX` — **триаж сделан 2026-11-12** (AF-строка + факты + вопросы в issue). Дальше: один MCP-просмотр `tags`/`parentId` задачи из репро, чтобы выбрать сценарий A (TT сохраняет тег) или B (голая задача), затем ответы на 4 продуктовых вопроса. Кода до этого нет.
 5. **Схлопнуть #243/#244** в один doc/UX-issue; #245 оставить единственным продуктовым решением (parent vs tags-only).
 6. **#213** — **сделано 2026-11-12** (wipe-guard + юнит + TEST_PLAN). Нужен merge; пилотные строки в `TEST_PLAN.md` остаются `not run`.
-7. **#202** — copy «Tasks folder»; в одной пачке с #243/#244.
+7. **#202** — **сделано 2026-11-12** (Abyss vs classic help + юнит + TEST_PLAN). Нужен merge; пилотные строки остаются `not run`.
 8. **#172** — включить обязательный `CI / test` на `abyss-mapping`, чтобы красная верхушка больше не вливалась.
 9. **Опционально / parked:** #218 (или закрыть #214), #185, #159, #201, #86, #78, #33.
 10. **Step 8 (живой vault)** — только после 1–3 и после снятия parked Decision #1 (`taskIgnoreQuery`).

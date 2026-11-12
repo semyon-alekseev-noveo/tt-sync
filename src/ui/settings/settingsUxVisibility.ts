@@ -62,6 +62,18 @@ export function hideOrInactiveGtdStageMapping(s: SettingsUxSlice): boolean {
 export const DEFAULTS_FOLDER_MERGED_NOTE =
 	'Tasks folder is configured under GTD and projects (same setting). Defaults folder is hidden in Abyss/GTD mode.';
 
+/** UX-SET-TASKS-FOLDER-COPY (#202) — classic copy talks about per-list files that the Abyss path never creates. */
+export const TASKS_FOLDER_LABEL = 'Tasks folder';
+export const TASKS_FOLDER_HELP_CLASSIC =
+	'Folder for list files, e.g. 30 Tasks/TickTick. / = vault root. Existing files are not moved (use "Move Existing Files" in Defaults).';
+export const TASKS_FOLDER_HELP_ABYSS =
+	'No per-list files are created in Abyss/GTD mode — tasks stay in the note where you write them. This folder is still always inside the push scope, so lines written here can sync.';
+
+/** Pick the Tasks folder help that matches the active path. */
+export function tasksFolderHelp(s: SettingsUxSlice): string {
+	return isAbyssGtdPathActive(s) ? TASKS_FOLDER_HELP_ABYSS : TASKS_FOLDER_HELP_CLASSIC;
+}
+
 export const EXTRA_FILTERS_HIDDEN_NOTE =
 	'Extra filters (legacy SyncProject / AND-OR) are hidden while synced lists are the allow-list.';
 

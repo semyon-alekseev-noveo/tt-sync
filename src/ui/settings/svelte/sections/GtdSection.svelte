@@ -24,8 +24,10 @@
 		GTD_TAG_LIST_INACTIVE_LABEL,
 		GTD_TAG_LIST_MAPPING_LABEL,
 		HUB_HIDDEN_NOTE,
+		TASKS_FOLDER_LABEL,
 		hideHubSingleTasksFile,
 		hideOrInactiveGtdStageMapping,
+		tasksFolderHelp,
 	} from '@/ui/settings/settingsUxVisibility';
 	import {
 		LEAN_PROJECT_TEMPLATE_WARN,
@@ -400,10 +402,9 @@
 
 	<div class="setting-item">
 		<div class="setting-item-info">
-			<div class="setting-item-name">Tasks folder</div>
+			<div class="setting-item-name">{TASKS_FOLDER_LABEL}</div>
 			<div class="setting-item-description">
-				Folder for list files, e.g. <code>30 Tasks/TickTick</code>. <code>/</code> = vault root. Existing files
-				are not moved (use "Move Existing Files" in Defaults).
+				{tasksFolderHelp(abyssGtdSlice)}
 			</div>
 		</div>
 		<div class="setting-item-control">
