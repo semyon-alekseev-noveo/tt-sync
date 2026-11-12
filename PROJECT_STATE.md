@@ -31,15 +31,15 @@ Project stage is a separate axis: **pilot soak → Step 8 live gate**. The live 
 | Field | Value |
 |-------|-------|
 | Stage | Pilot soak on `<pilot-vault>`; Step 8 live-vault gate **closed** |
-| Pilot build | **tip `00ff923` declared as the test-vault build** (pilot-only, not a release; supersedes `945d182`, both CI-green) |
+| Pilot build | **tip `ec91fec` declared as the test-vault build** (pilot-only, not a release; supersedes `00ff923` / `945d182`, all CI-green) |
 | Last release | **2.0.96**, 2026-11-03 (non-prerelease) |
-| Branch tip | `abyss-mapping` @ `00ff923` — **unreleased** |
-| CI on tip | **GREEN** on `00ff923` and `945d182`; `PROC-CI-CYCLES-RED` fixed (#300, allowlist 118 → 56) |
-| Unit tests | **1001 passed / 140 files** on the tip; **1005 / 141** with #202 re-landing |
+| Branch tip | `abyss-mapping` @ `ec91fec` — **unreleased** |
+| CI on tip | **GREEN** on `ec91fec`, `00ff923`, `945d182`; `PROC-CI-CYCLES-RED` fixed (#300, allowlist 118 → 56) |
+| Unit tests | **1005 passed / 141 files** |
 | Open issues | 16 |
 | Open PRs | 0 |
 
-Consequence: the pilot build is now CI-validated, but no release has been cut since 2026-11-03. #202 was merged into the wrong branch (see `PROC-PR-STACK-MISBASE`); it is re-landed by `a6e46ad`.
+Consequence: the pilot build is CI-validated, but no release has been cut since 2026-11-03. `PROC-PR-STACK-MISBASE` is recorded: #302 merged into the stacked base and was re-landed by #303 (`ec91fec`).
 
 ## Context
 
@@ -91,14 +91,14 @@ Open bugs:
 Open UX / product:
 
 - **UX-NOTICE-*** — create vs reattach Notices + modal cache wording; unit on tip, owner strip-marker prove **not run** (`36-…` / `50-…`) → `blocked-owner`.
-- **UX-SET-TASKS-FOLDER-COPY** [#202](https://github.com/semyon-alekseev-noveo/tt-sync/issues/202) — GTD «Tasks folder» help read like classic per-list mode. **Fixed 2026-11-12:** `tasksFolderHelp()` returns Abyss copy when scheme + Abyss format + push scope are on; classic copy otherwise. Unit `uxSetTasksFolderCopy.test.ts`. PR #302 was merged into the stacked base `fix/issue-213-status-wipe-guard` instead of `abyss-mapping` (see `PROC-PR-STACK-MISBASE`), so it never reached the tip; re-landed by cherry-pick `a6e46ad` → `merged-tip` once that PR merges (pilot rows `not run`).
+- **UX-SET-TASKS-FOLDER-COPY** [#202](https://github.com/semyon-alekseev-noveo/tt-sync/issues/202) — GTD «Tasks folder» help read like classic per-list mode. **Fixed 2026-11-12:** `tasksFolderHelp()` returns Abyss copy when scheme + Abyss format + push scope are on; classic copy otherwise. Unit `uxSetTasksFolderCopy.test.ts`. #302 merged into the stacked base instead of `abyss-mapping` (`PROC-PR-STACK-MISBASE`); **re-landed by #303 (`ec91fec`), CI green** → `merged-tip` (pilot rows `not run`).
 - **Project-identity layers** [#243](https://github.com/semyon-alekseev-noveo/tt-sync/issues/243) / [#244](https://github.com/semyon-alekseev-noveo/tt-sync/issues/244) (duplicate: parent scheme vs `proj/` tags vs GTD stage naming) and [#245](https://github.com/semyon-alekseev-noveo/tt-sync/issues/245) (real product decision: parent vs tags-only mode). Tip has **no** tags-only identity mode; parent scheme is SoT → `triage`.
 - **FEAT-NOTEBOOK** [#159](https://github.com/semyon-alekseev-noveo/tt-sync/issues/159) — MVP live **pass** ×2; bi-directional still open → `triage`.
 - **Abyss status source** [#185](https://github.com/semyon-alekseev-noveo/tt-sync/issues/185) — read `taskStatuses` / `projectStatuses` from the Abyss Tasks plugin settings. Spec only (`docs/pilot/UX-ABYSS-STATUS-SRC.md`), pilot **not run** → `triage`.
 
 Open analysis / perf / process:
 
-- **abyssTasksFormat OFF matrix** [#201](https://github.com/semyon-alekseev-noveo/tt-sync/issues/201) — analysis only; the dangerous combo is *Synchronize while OFF* → `triage`.
+- **abyssTasksFormat OFF matrix** [#201](https://github.com/semyon-alekseev-noveo/tt-sync/issues/201) — **analysis published 2026-11-12:** `docs/pilot/ABYSS-FORMAT-OFF-MATRIX.md` (ON vs OFF for create / update / pull / structure / stubs / settings). Verdict: OFF is a **lossy downgrade**, not a mode switch — symbols collapse to `[ ]`, `- >` bodies detach, stubs return. Recommendations R1–R6 (warn, rename, read-only table, lossless pull, no structure move, docs). No engine change → `triage` (follow-ups R4/R5 need own issues).
 - **TECH-START-1** [#86](https://github.com/semyon-alekseev-noveo/tt-sync/issues/86) — register scan / defer full pull + full `.md` walk; `RISK-LARGE-VAULT` remainder → `open`.
 - **PILOT-REDO-SOAK** [#78](https://github.com/semyon-alekseev-noveo/tt-sync/issues/78) — redo journal + `Undo last sync` never soaked on a vault → `blocked-owner`.
 - **PROC-RELEASE-GATE** [#172](https://github.com/semyon-alekseev-noveo/tt-sync/issues/172) — enable required status check `CI / test` on `abyss-mapping` → `blocked-owner`.
@@ -135,10 +135,11 @@ Ordered. Do not start Step 8 before 1–3 are green.
 4. **#299** `BUG-TT-TAGFILTER-INBOX` — **triaged 2026-11-12** (AF row + code facts + open questions in the issue). Next: one MCP read of the repro task's `tags`/`parentId` to pick scenario A (TT keeps the tag) or B (bare task), then answer the 4 product questions. No code before that.
 5. **Collapse #243/#244** into one doc/UX issue and keep #245 as the single product decision (parent vs tags-only).
 6. **#213** — **merged 2026-11-12** (#301, `00ff923`, CI green) → `merged-tip`. Pilot rows in `TEST_PLAN.md` stay `not run`.
-7. **#202** — **re-landing 2026-11-12**: PR #302 merged into the stacked base, not the tip (`PROC-PR-STACK-MISBASE`). Cherry-pick `a6e46ad` is open for merge; pilot rows stay `not run`.
+7. **#202** — **merged 2026-11-12** (#303, `ec91fec`, CI green) → `merged-tip`. Pilot rows stay `not run`.
 8. **#172** enable required `CI / test` on `abyss-mapping` so a red tip cannot be merged again.
-9. **Optional / parked:** #218 (or close #214), #185, #159, #201, #86, #78, #33.
-10. **Step 8 live gate** — only after 1–3 and after the parked Decision #1 config is cleared (`taskIgnoreQuery`).
+9. **#201** — **analysis published 2026-11-12** (`docs/pilot/ABYSS-FORMAT-OFF-MATRIX.md`). Next: owner picks R1–R3 (warn / rename / read-only table) as one small PR, and files R4/R5 (lossless pull, no structure move) as separate engine issues.
+10. **Optional / parked:** #218 (or close #214), #185, #159, #86, #78, #33.
+11. **Step 8 live gate** — only after 1–3 and after the parked Decision #1 config is cleared (`taskIgnoreQuery`).
 
 ## Doc drift fixed in this rewrite
 
