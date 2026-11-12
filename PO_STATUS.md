@@ -13,6 +13,7 @@
 | Поле | Значение |
 |------|----------|
 | Стадия | Пилотный soak на `<pilot-vault>`; **Step 8 (живой vault) не открыт** |
+| Сборка на пилоте | Верхушка **`945d182`** объявлена сборкой тестового vault (pilot-only, **не релиз**; первый зелёный CI после 2.0.96) |
 | Последний релиз | **2.0.96** (2026-11-03) |
 | Верхушка ветки | `abyss-mapping` @ `41f63b2` — **70 коммитов / 31 PR не в релизе** |
 | CI на верхушке | **КРАСНЫЙ** (циклический импорт из фикса Sync off) → `PROC-CI-CYCLES-RED` |
@@ -97,7 +98,8 @@
 | **ARCH-SYNC-INTENT-IDENTITY** | P0 | **resolved** ([#255](https://github.com/semyon-alekseev-noveo/tt-sync/issues/255)) | Проход идентичности перед разрушительным планом; порог массового удаления считает только destructive. Prove ×2 (`39-…`). |
 | **UX-SYNC-CONFIRM-REBIND** | P1 | **resolved** ([#272](https://github.com/semyon-alekseev-noveo/tt-sync/issues/272)) | Confirm предлагает Rebind. Остаток: `BUG-CONFIRM-REBIND-DUP` — фикс unit, повторный live-prove **не прогонялся** (`41-…`). |
 | **BUG-CREATE-MATCH-UNDEF** | P1 | **unit-only** ([#291](https://github.com/semyon-alekseev-noveo/tt-sync/issues/291)) | Двойной Notice на create: «created» + «Failed to add … reading 'match'». Фикс влит (#293), live-prove **не прогонялся**. |
-| **BUG-TT-TAGFILTER-INBOX** | P1 | **triage** ([#299](https://github.com/semyon-alekseev-noveo/tt-sync/issues/299)) | Задача, добавленная в TT в отфильтрованном по тегу заметки виде, уезжает в Inbox вместо строки заметки. Заведено 2026-11-07, AF-строки и юнита нет. |
+| **BUG-TT-TAGFILTER-INBOX** | P1 | **triage** ([#299](https://github.com/semyon-alekseev-noveo/tt-sync/issues/299)) | Задача, добавленная в TT в отфильтрованном по тегу заметки виде, уезжает в Inbox вместо строки заметки. Триаж 2026-11-12: AF-строка + факты по коду (теги `note/` только на push, на pull маршрутизации нет, fallback `00 Inbox/abyss-active.md`). Нужен ответ продукта: тег — SoT? коллизии slug? `proj/` тоже? |
+| **GTD_ARRAY_KEYS** | P2 | **unit-only** ([#213](https://github.com/semyon-alekseev-noveo/tt-sync/issues/213)) | `statusListMappings` не входил в wipe-guard: пустые дефолты могли затереть настроенную таблицу статус→список. Добавлен в `GTD_ARRAY_KEYS`; `wouldWipeGtdFromDisk` теперь зеркалит `preserveGtdFromDisk` по всем четырём массивам. Юнит `GTD-ARRAY-KEYS`. |
 | **BUG-OPENNOTE-DELETE-CONFIRM** | P1 | **unit-only** | Delete/Backspace в открытой заметке вызывал PushDeleteTT Confirm. Фикс unit, повторный live-prove **не прогонялся** (`42-…`). |
 | **BUG-RESET-CACHE-DELETE** | P1 | **blocked-owner** | После Reset Synchronize предлагал удалить строки vault по pre-wipe id. Теперь ghost detach ожидаем; owner Reset→Synchronize ×2 всё ещё не прогнан (`25-…` / `50-…`). |
 | **UX-NOTICE** | P2 | **blocked-owner** | Тексты create vs reattach и модалки кэша. Unit на верхушке; owner strip-marker prove **не прогонялся** (`36-…` / `50-…`). |
@@ -144,16 +146,16 @@
 Порядок. Step 8 не открывать, пока 1–3 не зелёные.
 
 1. **PROC-CI-CYCLES-RED** — фикс готов на верхушке (allowlist 118 → 56); нужен push + зелёный `CI / test`. Это единственное, что отделяет верхушку от релиза.
-2. **Решение по релизу:** 70 коммитов / 31 PR не выпущены. Либо тег (только owner), либо явно объявить верхушку «pilot-only до X».
+2. **Объявление сборки пилота — сделано (2026-11-12):** верхушка `945d182` (зелёный CI) объявлена сборкой тестового vault. Релиз не режется; живой vault остаётся на 2.0.96. Вернуться к вопросу, когда понадобится тег.
 3. **Закрыть хвосты prove** (owner, `docs/pilot/results/UX-OBS-TT-SOAK/50-owner-live-tails-checklist.md`):
    - `41-…` Confirm Rebind dup — prove ×2 на разных фикстурах.
    - `42-…` Delete/Backspace в открытой заметке — prove ×2.
    - `25-…` Reset → Synchronize ×2 (ghost detach теперь ожидаемая честность).
    - `36-…` strip-marker reattach toast + Orphan glance.
    - #291 живой Notice на create (unit уже зелёный).
-4. **Триаж #299** `BUG-TT-TAGFILTER-INBOX`: AF-строка + ожидаемое поведение, затем падающий юнит по case ID. Самый новый живой баг и единственный без плана.
+4. **#299** `BUG-TT-TAGFILTER-INBOX` — **триаж сделан 2026-11-12** (AF-строка + факты + вопросы в issue). Дальше: один MCP-просмотр `tags`/`parentId` задачи из репро, чтобы выбрать сценарий A (TT сохраняет тег) или B (голая задача), затем ответы на 4 продуктовых вопроса. Кода до этого нет.
 5. **Схлопнуть #243/#244** в один doc/UX-issue; #245 оставить единственным продуктовым решением (parent vs tags-only).
-6. **#213** — wipe-guard для `statusListMappings` (маленький, безопасный, без продуктового решения).
+6. **#213** — **сделано 2026-11-12** (wipe-guard + юнит + TEST_PLAN). Нужен merge; пилотные строки в `TEST_PLAN.md` остаются `not run`.
 7. **#202** — copy «Tasks folder»; в одной пачке с #243/#244.
 8. **#172** — включить обязательный `CI / test` на `abyss-mapping`, чтобы красная верхушка больше не вливалась.
 9. **Опционально / parked:** #218 (или закрыть #214), #185, #159, #201, #86, #78, #33.

@@ -31,6 +31,7 @@ Project stage is a separate axis: **pilot soak → Step 8 live gate**. The live 
 | Field | Value |
 |-------|-------|
 | Stage | Pilot soak on `<pilot-vault>`; Step 8 live-vault gate **closed** |
+| Pilot build | **tip `945d182` declared as the test-vault build** (pilot-only, not a release; first green CI since 2.0.96) |
 | Last release | **2.0.96**, 2026-11-03 (non-prerelease) |
 | Branch tip | `abyss-mapping` @ `41f63b2`, 2026-11-07 — **70 commits ahead of the tag, unreleased** |
 | CI on tip | **RED** on `41f63b2` / `f2d52c4` / `76cf71c` — `PROC-CI-CYCLES-RED`; **fix ready in the working tree** (cycle broken, allowlist 118 → 56), not pushed |
@@ -76,12 +77,12 @@ Release blocker (fix ready, not pushed):
 Open bugs:
 
 - **BUG-CREATE-MATCH-UNDEF** [#291](https://github.com/semyon-alekseev-noveo/tt-sync/issues/291) — dual Notice on open-note create (`created` + `Failed to add … 'match'`). Fix merged (#293, unit `bugCreateMatchUndef.test.ts`). Live re-prove **not run** → `unit-only`.
-- **BUG-TT-TAGFILTER-INBOX** [#299](https://github.com/semyon-alekseev-noveo/tt-sync/issues/299) — task added in a TT tag-filtered view lands in Inbox instead of the linked note. Filed 2026-11-07, no AF row, no unit → `triage`.
+- **BUG-TT-TAGFILTER-INBOX** [#299](https://github.com/semyon-alekseev-noveo/tt-sync/issues/299) — task added in a TT tag-filtered view lands in Inbox instead of the linked note. Filed 2026-11-07. Triage 2026-11-12: AF row written, code facts recorded (context tags are push-only; no pull routing by `note/<slug>`; orphan fallback = `00 Inbox/abyss-active.md`). **Product answer pending** (is the tag SoT, slug collisions, `proj/` too) → `triage`.
 - **BUG-CONFIRM-REBIND-DUP** — post-#273 Confirm Rebind `InsertLine` dups beside live same-title siblings; `allowDisplaceLiveSameTitle` fix is unit-only, pilot re-prove **not run** (`UX-OBS-TT-SOAK/41-…`) → `unit-only`.
 - **BUG-OPENNOTE-DELETE-CONFIRM** — Delete/Backspace mid-edit opened PushDeleteTT Confirm; keyup `deletedTaskCheck` dropped, re-prove **not run** (`UX-OBS-TT-SOAK/42-…`) → `unit-only`.
 - **BUG-TT-CREATE-PATH-BYPASS** — create-path audit units pass; pilot path-guard **not run** (`UX-OBS-TT-SOAK/45-…`) → `unit-only`.
 - **BUG-RESET-CACHE-DELETE** — post-Reset Synchronize proposed vault-line deletes for pre-wipe ids; ghost detach now expected honesty, owner Reset→Synchronize ×2 still pending (`25-…` / `50-…`) → `blocked-owner`.
-- **GTD_ARRAY_KEYS** [#213](https://github.com/semyon-alekseev-noveo/tt-sync/issues/213) — `statusListMappings` missing from the wipe-guard (`src/settingsMerge.ts`). Small, unfixed → `open`.
+- **GTD_ARRAY_KEYS** [#213](https://github.com/semyon-alekseev-noveo/tt-sync/issues/213) — `statusListMappings` was missing from the wipe-guard (`src/settingsMerge.ts`). **Fixed 2026-11-12:** added to `GTD_ARRAY_KEYS`; `wouldWipeGtdFromDisk` now mirrors `preserveGtdFromDisk` over all four arrays. Unit `GTD-ARRAY-KEYS` (3 of 4 new tests fail without the fix) → `unit-only`.
 
 Open UX / product:
 
@@ -120,16 +121,16 @@ Resolved / closed (keep as history, do not re-open):
 Ordered. Do not start Step 8 before 1–3 are green.
 
 1. **PROC-CI-CYCLES-RED:** fix is in the working tree (see Problems). Push it, get `CI / test` green on `abyss-mapping`. Until then the tip is unreleasable.
-2. **Release decision:** 70 commits / **31 merged PRs** are unreleased. Cut a tag (owner only) or explicitly declare the tip "pilot-only until X".
+2. **[done 2026-11-12] Pilot declaration:** tip `945d182` (green CI) is the declared test-vault build. No release is cut; live vault stays on 2.0.96. Revisit when a tag is wanted.
 3. **Close the proof tails** (owner, `docs/pilot/results/UX-OBS-TT-SOAK/50-owner-live-tails-checklist.md`):
    - `41-…` Confirm Rebind dup — prove ×2 on different fixtures.
    - `42-…` open-note Delete/Backspace — prove ×2.
    - `25-…` Reset → Synchronize ×2 (ghost detach is now expected honesty).
    - `36-…` strip-marker reattach toast + Orphan glance.
    - #291 live create Notice (unit already green).
-4. **Triage #299** `BUG-TT-TAGFILTER-INBOX`: add AF row + expected behavior, then a failing unit named by case ID. This is the newest live bug and the only one with no plan.
+4. **#299** `BUG-TT-TAGFILTER-INBOX` — **triaged 2026-11-12** (AF row + code facts + open questions in the issue). Next: one MCP read of the repro task's `tags`/`parentId` to pick scenario A (TT keeps the tag) or B (bare task), then answer the 4 product questions. No code before that.
 5. **Collapse #243/#244** into one doc/UX issue and keep #245 as the single product decision (parent vs tags-only).
-6. **#213** wipe-guard for `statusListMappings` (small, safe, no product decision needed).
+6. **#213** — **done 2026-11-12** (wipe-guard + unit + TEST_PLAN). Needs merge; pilot rows in `TEST_PLAN.md` stay `not run`.
 7. **#202** Tasks-folder copy; same batch as #243/#244 Settings wording.
 8. **#172** enable required `CI / test` on `abyss-mapping` so a red tip cannot be merged again.
 9. **Optional / parked:** #218 (or close #214), #185, #159, #201, #86, #78, #33.

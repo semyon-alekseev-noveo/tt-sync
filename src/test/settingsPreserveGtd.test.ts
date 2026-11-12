@@ -50,6 +50,32 @@ describe('wouldWipeGtdFromDisk', () => {
 	});
 });
 
+describe('GTD-ARRAY-KEYS (#213) statusListMappings survives the GTD guard', () => {
+	const diskStatusMap = [{ char: '!', list: 'TTS-nextAction', listId: '6a1' }];
+
+	it('preserveGtdFromDisk keeps a disk statusListMappings when memory is empty', () => {
+		const memory = { ...DEFAULT_SETTINGS } as ITickTickSyncSettings;
+		const out = preserveGtdFromDisk(memory, { statusListMappings: diskStatusMap });
+		expect(out.statusListMappings).toEqual(diskStatusMap);
+	});
+
+	it('wouldWipeGtdFromDisk reports an empty statusListMappings over a populated disk', () => {
+		const memory = { ...DEFAULT_SETTINGS } as ITickTickSyncSettings;
+		expect(wouldWipeGtdFromDisk(memory, { statusListMappings: diskStatusMap })).toBe(true);
+	});
+
+	it('does not report a wipe when memory already matches the disk mapping', () => {
+		const memory = { ...DEFAULT_SETTINGS, statusListMappings: diskStatusMap } as ITickTickSyncSettings;
+		expect(wouldWipeGtdFromDisk(memory, { statusListMappings: diskStatusMap })).toBe(false);
+	});
+
+	it('buildPersistedSettings writes the disk statusListMappings, not the empty default', () => {
+		const memory = { ...DEFAULT_SETTINGS } as ITickTickSyncSettings;
+		const persisted = buildPersistedSettings(memory, { statusListMappings: diskStatusMap });
+		expect(persisted.statusListMappings).toEqual(diskStatusMap);
+	});
+});
+
 describe('buildPersistedSettings', () => {
 	it('keeps GTD arrays from disk when memory still has plugin defaults (upgrade race)', () => {
 		const memory = { ...DEFAULT_SETTINGS } as ITickTickSyncSettings;

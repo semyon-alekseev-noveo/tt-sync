@@ -387,7 +387,7 @@ export default class TickTickSync extends Plugin implements PluginContext {
 
 			if (wouldWipeGtdFromDisk(inMemorySettings, onDiskData)) {
 				log.error(
-					'Blocked saveSettings: in-memory GTD config is empty but data.json still has syncedLists/tagListMappings',
+					'Blocked saveSettings: in-memory GTD config is empty but data.json still has syncedLists/tagListMappings/syncScopeFolders/statusListMappings',
 				);
 				const healed = preserveGtdFromDisk(inMemorySettings, onDiskData);
 				updateSettings(healed, { persist: false });
