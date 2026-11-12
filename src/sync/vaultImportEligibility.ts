@@ -9,6 +9,7 @@
  * Keep this module free of `@/settings` imports — otherwise checkDatabase →
  * vaultImportEligibility → settings closes a cycle (release gate check:cycles).
  */
+export { contextTagSlug } from '@/contextTags';
 
 export type VaultImportTaskShape = {
 	status?: number | null;
@@ -28,7 +29,7 @@ export function isOpenTaskEligibleForVaultImport(task: VaultImportTaskShape): bo
 
 /**
  * BUG-ORPHAN-ADD-STICKY — Abyss has no per-list stub path; Add must still land somewhere.
- * Prefer known path → newTasksFile/default project file → Abyss capture → abyss-active.
+ * Prefer known path → context-tagged note → newTasksFile/default project file → Abyss capture → abyss-active.
  */
 export const ABYSS_CAPTURE_FALLBACK = '00 Inbox/abyss-active.md';
 
@@ -40,10 +41,12 @@ export async function resolveOrphanAddFilepath(input: {
 	defaultProjectFile?: string | null;
 	abyssCaptureFile?: string | null;
 	newTasksFile?: string | null;
+	contextNoteFile?: string | null;
 }): Promise<string> {
 	const trim = (s: string | null | undefined) => (s ?? '').trim();
 	if (trim(input.filepath)) return trim(input.filepath);
 	if (trim(input.parentNote)) return trim(input.parentNote);
+	if (trim(input.contextNoteFile)) return trim(input.contextNoteFile);
 	if (trim(input.projectMappedFile)) return trim(input.projectMappedFile);
 	const hub = trim(input.newTasksFile);
 	if (hub) return hub.endsWith('.md') ? hub : `${hub}.md`;

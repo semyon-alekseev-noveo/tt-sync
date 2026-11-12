@@ -60,7 +60,7 @@ Consequence: the pilot build is CI-validated, but no release has been cut since 
 ## Validation
 
 - Build: `npm run build` in repo root; CI on `abyss-mapping` via `.github/workflows/ci.yml`.
-- Unit tests: `npx vitest run` — **1012 passed / 142 files** on 2026-11-12 (tip `ec91fec` + fix branches #299/#305). CI also runs `check:cycles` (allowlist may only shrink) and `check:sizes` (≤30 KB or listed).
+- Unit tests: `npx vitest run` — **1008 passed / 141 files** on 2026-11-12 (tip `ec91fec` + fix branch). CI also runs `check:cycles` (allowlist may only shrink) and `check:sizes` (≤30 KB or listed).
 - **`npm run check` (`tsc --noEmit`) is NOT green and is NOT part of CI:** 35 errors on the tip (e.g. `taskModification/newTasks.ts`, `scan.ts`, `syncModule.ts`, `settingsVaultMigrate.ts`). Treat `tsc` as advisory until someone owns that cleanup; the build (esbuild/vite) does not typecheck.
 - Manual pilot: **`SMOKE_TESTS.md`**; palette **Synchronize** only; full TT pull on plugin load. Context tags **2.0.41** (`syncNoteContextTags`).
 - Pilot evidence: `docs/pilot/results/`; index `docs/pilot/results/UX-OBS-TT-SOAK/INDEX.md`.
