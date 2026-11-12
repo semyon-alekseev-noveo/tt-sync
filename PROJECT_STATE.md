@@ -60,7 +60,7 @@ Consequence: the pilot build is CI-validated, but no release has been cut since 
 ## Validation
 
 - Build: `npm run build` in repo root; CI on `abyss-mapping` via `.github/workflows/ci.yml`.
-- Unit tests: `npx vitest run` — **997 passed / 140 files** on 2026-11-12. CI also runs `check:cycles` (allowlist may only shrink) and `check:sizes` (≤30 KB or listed).
+- Unit tests: `npx vitest run` — **1012 passed / 142 files** on 2026-11-12 (tip `ec91fec` + fix branches #299/#305). CI also runs `check:cycles` (allowlist may only shrink) and `check:sizes` (≤30 KB or listed).
 - **`npm run check` (`tsc --noEmit`) is NOT green and is NOT part of CI:** 35 errors on the tip (e.g. `taskModification/newTasks.ts`, `scan.ts`, `syncModule.ts`, `settingsVaultMigrate.ts`). Treat `tsc` as advisory until someone owns that cleanup; the build (esbuild/vite) does not typecheck.
 - Manual pilot: **`SMOKE_TESTS.md`**; palette **Synchronize** only; full TT pull on plugin load. Context tags **2.0.41** (`syncNoteContextTags`).
 - Pilot evidence: `docs/pilot/results/`; index `docs/pilot/results/UX-OBS-TT-SOAK/INDEX.md`.
@@ -81,7 +81,7 @@ Process (open):
 Open bugs:
 
 - **BUG-CREATE-MATCH-UNDEF** [#291](https://github.com/semyon-alekseev-noveo/tt-sync/issues/291) — dual Notice on open-note create (`created` + `Failed to add … 'match'`). Fix merged (#293, unit `bugCreateMatchUndef.test.ts`). Live re-prove **not run** → `unit-only`.
-- **BUG-TT-TAGFILTER-INBOX** [#299](https://github.com/semyon-alekseev-noveo/tt-sync/issues/299) — task added in a TT tag-filtered view lands in Inbox instead of the linked note. Filed 2026-11-07. Triage 2026-11-12: AF row written, code facts recorded (context tags are push-only; no pull routing by `note/<slug>`; orphan fallback = `00 Inbox/abyss-active.md`). **Product answer pending** (is the tag SoT, slug collisions, `proj/` too) → `triage`.
+- **BUG-TT-TAGFILTER-INBOX** [#299](https://github.com/semyon-alekseev-noveo/tt-sync/issues/299) — task added in a TT tag-filtered view lands in Inbox instead of the linked note. Filed 2026-11-07. Triage 2026-11-12: AF row written, code facts recorded (context tags are push-only; no pull routing by `note/<slug>`; orphan fallback = `00 Inbox/abyss-active.md`). Live read 2026-11-12 confirmed **scenario A** (task kept the `note/don-253` tag). **Fix started 2026-11-12:** `contextTagSlug` (`src/contextTags.ts`) + orphan Add context routing (`contextNoteFile` in `resolveOrphanAddFilepath`) + `FileMetadataService.getFilepathForNoteTag`; unit red → green, full suite (1008) + build green. **PR pending merge** → flips to `merged-tip` after owner merge; live pilot prove **not run**.
 - **BUG-CONFIRM-REBIND-DUP** — post-#273 Confirm Rebind `InsertLine` dups beside live same-title siblings; `allowDisplaceLiveSameTitle` fix is unit-only, pilot re-prove **not run** (`UX-OBS-TT-SOAK/41-…`) → `unit-only`.
 - **BUG-OPENNOTE-DELETE-CONFIRM** — Delete/Backspace mid-edit opened PushDeleteTT Confirm; keyup `deletedTaskCheck` dropped, re-prove **not run** (`UX-OBS-TT-SOAK/42-…`) → `unit-only`.
 - **BUG-TT-CREATE-PATH-BYPASS** — create-path audit units pass; pilot path-guard **not run** (`UX-OBS-TT-SOAK/45-…`) → `unit-only`.
@@ -98,7 +98,7 @@ Open UX / product:
 
 Open analysis / perf / process:
 
-- **abyssTasksFormat OFF matrix** [#201](https://github.com/semyon-alekseev-noveo/tt-sync/issues/201) — **analysis published 2026-11-12:** `docs/pilot/ABYSS-FORMAT-OFF-MATRIX.md` (ON vs OFF for create / update / pull / structure / stubs / settings). Verdict: OFF is a **lossy downgrade**, not a mode switch — symbols collapse to `[ ]`, `- >` bodies detach, stubs return. Recommendations R1–R6 (warn, rename, read-only table, lossless pull, no structure move, docs). No engine change → `triage`; R4 → engine issue **#305**, R5 → engine issue **#306** (both filed 2026-11-12).
+- **abyssTasksFormat OFF matrix** [#201](https://github.com/semyon-alekseev-noveo/tt-sync/issues/201) — **analysis published 2026-11-12:** `docs/pilot/ABYSS-FORMAT-OFF-MATRIX.md` (ON vs OFF for create / update / pull / structure / stubs / settings). Verdict: OFF is a **lossy downgrade**, not a mode switch — symbols collapse to `[ ]`, `- >` bodies detach, stubs return. Recommendations R1–R6 (warn, rename, read-only table, lossless pull, no structure move, docs). No engine change → `triage`; **R4 → engine issue #305 fixed 2026-11-12** (list-driven restore in `convertToLine.ts` while OFF; unit red → green, PR pending merge); R5 → engine issue **#306** (no structure move while Abyss config present); R1–R3 (Settings warn / rename / read-only table) pending owner pick.
 - **TECH-START-1** [#86](https://github.com/semyon-alekseev-noveo/tt-sync/issues/86) — register scan / defer full pull + full `.md` walk; `RISK-LARGE-VAULT` remainder → `open`.
 - **PILOT-REDO-SOAK** [#78](https://github.com/semyon-alekseev-noveo/tt-sync/issues/78) — redo journal + `Undo last sync` never soaked on a vault → `blocked-owner`.
 - **PROC-RELEASE-GATE** [#172](https://github.com/semyon-alekseev-noveo/tt-sync/issues/172) — enable required status check `CI / test` on `abyss-mapping` → `blocked-owner`.
@@ -132,12 +132,12 @@ Ordered. Do not start Step 8 before 1–3 are green.
    - `25-…` Reset → Synchronize ×2 (ghost detach is now expected honesty).
    - `36-…` strip-marker reattach toast + Orphan glance.
    - #291 live create Notice (unit already green).
-4. **#299** `BUG-TT-TAGFILTER-INBOX` — **triaged 2026-11-12** (AF row + code facts + open questions in the issue). Next: one MCP read of the repro task's `tags`/`parentId` to pick scenario A (TT keeps the tag) or B (bare task), then answer the 4 product questions. No code before that.
+4. **#299** `BUG-TT-TAGFILTER-INBOX` — **triaged 2026-11-12** (AF row + code facts + open questions in the issue); live MCP read 2026-11-12 confirmed **scenario A** (task `6aee9c60…` kept `note/don-253`); fix implemented 2026-11-12 (context routing, unit red → green, build green). **PR pending merge**; live pilot prove after owner merge still pending → next after merge.
 5. **Collapse #243/#244** into one doc/UX issue and keep #245 as the single product decision (parent vs tags-only).
 6. **#213** — **merged 2026-11-12** (#301, `00ff923`, CI green) → `merged-tip`. Pilot rows in `TEST_PLAN.md` stay `not run`.
 7. **#202** — **merged 2026-11-12** (#303, `ec91fec`, CI green) → `merged-tip`. Pilot rows stay `not run`.
 8. **#172** enable required `CI / test` on `abyss-mapping` so a red tip cannot be merged again.
-9. **#201** — **analysis published 2026-11-12** (`docs/pilot/ABYSS-FORMAT-OFF-MATRIX.md`). Next: R4 → engine issue **#305** (lossless pull while OFF); R5 → engine issue **#306** (no structure move while Abyss config present); R1–R3 (Settings warn / rename / read-only table) pending owner pick.
+9. **#201** — **analysis published 2026-11-12** (`docs/pilot/ABYSS-FORMAT-OFF-MATRIX.md`). Next: **R4 → engine issue #305 fixed 2026-11-12** (lossless pull while OFF — list-driven restore in `convertToLine.ts`; unit red → green; PR #309 pending merge); R5 → engine issue **#306** (no structure move while Abyss config present); R1–R3 (Settings warn / rename / read-only table) pending owner pick.
 10. **Optional / parked:** #218 (or close #214), #185, #159, #86, #78, #33.
 11. **Step 8 live gate** — only after 1–3 and after the parked Decision #1 config is cleared (`taskIgnoreQuery`).
 
