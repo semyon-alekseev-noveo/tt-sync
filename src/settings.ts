@@ -1,5 +1,4 @@
 import type { DeviceInfo } from '@/db/schema';
-import { settingsStore } from '@/ui/settings/settingsstore';
 import { DEFAULT_BKUP_FOLDER } from '@/ui/settings/settingsUxNames';
 
 export interface TaskDisplayModeSettings {
@@ -239,6 +238,25 @@ export const getSettings = (): ITickTickSyncSettings => {
 export const setSettings = (value: ITickTickSyncSettings) => {
 	settings = value;
 };
+
+/**
+ * Narrow surface of the Svelte settings store that `updateSettings` needs.
+ * The store registers itself via `registerSettingsStore` (see ui/settings/settingsstore.ts),
+ * so the import stays one-way (store → settings). Importing the store here created a
+ * settings ↔ store cycle that pulled every module calling `getSettings()` into a
+ * circular import (73 allowlisted cycles before this change).
+ */
+type SettingsStoreLike = {
+	set: (value: ITickTickSyncSettings) => void;
+	update: (updater: (current: ITickTickSyncSettings) => ITickTickSyncSettings) => void;
+};
+
+let settingsStore: SettingsStoreLike | null = null;
+
+/** Called by the Svelte settings store when it is created (settings tab first open). */
+export function registerSettingsStore(store: SettingsStoreLike): void {
+	settingsStore = store;
+}
 
 export type UpdateSettingsOptions = { persist?: boolean };
 

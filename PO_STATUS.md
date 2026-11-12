@@ -1,16 +1,31 @@
 # Product owner brief — TickTickSync Abyss fork (project scheme)
 
-**Обновлено:** 2026-10-28  
+**Обновлено:** 2026-11-12  
 **Audience:** Product owner / decision maker  
 **Repo:** `tickticksync` branch `abyss-mapping`  
 **Test vault:** `<pilot-vault>` (copy only; live vault `<live-vault>` untouched)  
-**Install:** BRAT → `https://github.com/semyon-alekseev-noveo/tt-sync`; plugin id **`tickticksync-abyss`** — `docs/BRAT_INSTALL.md`. Pilot may track **latest** (that track includes pre-releases). Live vault stays **frozen** on the last non-prerelease tag (**2.0.94** after that tag) and must not track pre-releases. Preset: `00 Inbox/TTS-data-preset.json`.
+**Install:** BRAT → `https://github.com/semyon-alekseev-noveo/tt-sync`; plugin id **`tickticksync-abyss`** — `docs/BRAT_INSTALL.md`. Pilot may track **latest** (that track includes pre-releases). Live vault stays **frozen** on the last non-prerelease tag (**2.0.96**) and must not track pre-releases. Preset: `00 Inbox/TTS-data-preset.json`.
 
-История изменений — только в `CHANGELOG.md`; здесь — снимок для PO.
+История изменений — только в `CHANGELOG.md`; здесь — снимок для PO. Канонические значения статусов — в `PROJECT_STATE.md` (§ Status vocabulary).
+
+## Статус (снимок 2026-11-12)
+
+| Поле | Значение |
+|------|----------|
+| Стадия | Пилотный soak на `<pilot-vault>`; **Step 8 (живой vault) не открыт** |
+| Последний релиз | **2.0.96** (2026-11-03) |
+| Верхушка ветки | `abyss-mapping` @ `41f63b2` — **70 коммитов / 31 PR не в релизе** |
+| CI на верхушке | **КРАСНЫЙ** (циклический импорт из фикса Sync off) → `PROC-CI-CYCLES-RED` |
+| Юнит-тесты | 997 / 140 файлов — зелёные |
+| Открытых issue | 16 |
+| Открытых PR | 0 |
+
+Практический вывод: пилот ездит на верхушке, которую CI ни разу не проверял, а релиза нет с 2026-11-03.
+
 
 ## Context
 
-- Релиз **2.0.48** на `abyss-mapping`: PR #1 (fail-closed pull, debounce open-note 5s, BUG-COMMENT-INLINE, интеграционный тест). Релиз **2.0.47**: BUG-COMMENT-1 / BUG-TAG-1.
+- Релиз **2.0.96** на `abyss-mapping` (2026-11-03); после него выпуска не было — см. снимок выше. История релизов 2.0.47–2.0.96 — в `CHANGELOG.md` и в разделе Validation.
 - Abyss-first: задачи живут там, где их кладёт Abyss; TT зеркалит теги/списки и родителей-проекты (`ABYSS_FIRST_PLAN.md`, топология R / CASE-T4 отложена).
 - Комментарии Abyss → TickTick **Comments API** (`syncAbyssCommentsViaApi`, по умолчанию вкл.); описание остаётся в `content`.
 - Живой vault не трогаем; пилот — только `<pilot-vault>`. Ручной синк. Токен `tp_…` из чата — **отозван** (2026-10-25, [#32](https://github.com/semyon-alekseev-noveo/tt-sync/issues/32)).
@@ -21,10 +36,17 @@
 1. **Надёжный sync без тихих сбоев:** любая ошибка pull/push видна пользователю, чекпоинт не обманывает.
 2. **Abyss-комментарии и теги стабильны:** правка дочерней строки и TT-only изменения комментариев доезжают без ручных обходов.
 3. **Безопасный запуск на живом vault:** Step 6 (кейсы AF-*) и Step 8, плюс soak NOTE-L3b на пилоте. Один живой прогон, не отдельный набор.
-4. **Поддерживаемость:** интеграционный тест `synchronizationInner` есть на этой ветке. Цикл `main` ↔ `services` снят (`PluginContext`); sync phases/store ports extracted (#31); god-класс `TickTickService` ещё open.
+4. **Поддерживаемость:** интеграционный тест `synchronizationInner` есть на ветке. Цикл `main` ↔ `services` снят (`PluginContext`); модуляризация #66 (A–G) закрыта, 0 исключений по размеру файла.
+5. **Зелёный CI и релиз:** верхушка проходит `CI / test`, релиз выпускается только с зелёного коммита.
 
 ## Validation
 
+- Релиз **2.0.96** (2026-11-03): фикс цикла после **2.0.95** (тег без релиза — публикация остановилась на `check:cycles`). Верхушка после релиза не выпускалась.
+- **Не в релизе, на верхушке:** Sync off kill switch (#287/#288), seal реактивных create/update (#295, prove ×2), detach ghost-маркеров после Reset (#290, prove ×2), list-root `note/*` не промоутится в `#system/project` (#284, prove ×2), Settings UX epic #189, ARCH-SYNC intent×identity (#255), Confirm Rebind (#272).
+- Релиз **2.0.94** (2026-10-27): PROC-RELEASE-GATE в `release.yml` (#30); GAP-COMMENT-EDIT PUT (#63/#173); локальный LWW переписывает строку vault (#174); подсчёт `tasks.file` drift (#175).
+- Релиз **2.0.93** (2026-10-26): NOTE-BODY-2 (TT body → Abyss `- >` на pull) + FEAT-NOTEBOOK MVP (opt-in TT→vault папка) — оба live **pass** ×2.
+- Релиз **2.0.92** (2026-10-26): #66 слайсы A–G (модуляризация, 0 исключений по размеру); BUG-NOTEBOOK-NO-DELETE (#160); восстановление Synchronize после extract `waitForObsidianSync`.
+- Релиз **2.0.91** (2026-10-25): AF-GTD-PREFIX `#type/…` → `#gtd/…` с автомиграцией; Option A mover-wins для двух stage-тегов; тихий toast вместо шумного Notice.
 - Релиз **2.0.90** (2026-10-25): **AF-GTD-TAG-ADD** Option A + hash-stuck (#140/#141) — last stage tag wins list; vault rewrite; prove×2 pass. Also ships nest/GTD pilot docs. Tag after bump PR merges.
 - Релиз **2.0.89** (2026-10-24): **API-seed comment map** from [#120](https://github.com/semyon-alekseev-noveo/tt-sync/pull/120) (#104) — equal-key link upserts the TickTick id so a later TT delete is a mapped miss (no re-POST). Tip prove×2 (API-seed + vault-first) pass before merge; #104 **closed**. BRAT install after tag.
 - Релиз **2.0.88** (2026-10-24): **F1/F1b** from [#118](https://github.com/semyon-alekseev-noveo/tt-sync/pull/118) (#104). Box re-prove **fail**: API-seed comment re-POSTed, bullet kept, `syncedLists` empty (`104-live-2.0.88-box.md`). #104 **reopened** until [#120](https://github.com/semyon-alekseev-noveo/tt-sync/pull/120). Vault-first tip prove×2 does not cover that path.
@@ -67,6 +89,18 @@
 
 | ID | Приоритет | Статус | Суть |
 |----|-----------|--------|------|
+| **PROC-CI-CYCLES-RED** | P0 | **fixed on tip** (2026-11-12) | `check:cycles` падал на верхушке из-за цикла `pluginContext → EventHandlerService → settings → syncEnabled → settingsstore`. Цикл `settings ↔ settingsstore` разорван (стор регистрируется колбэком); allowlist сокращён **118 → 56**. Tests 997 + build + sizes зелёные. Нужен push + зелёный CI. |
+| **UX-SET-SYNC-MASTER-OFF** | P1 | **resolved** ([#287](https://github.com/semyon-alekseev-noveo/tt-sync/issues/287) / [#288](https://github.com/semyon-alekseev-noveo/tt-sync/pull/288)) | Интервал 0 ≠ выключение синка. Появился kill switch `syncEnabled` + тумблер Sync Control; авто/reactive пути гейтятся, ручной Synchronize работает. Owner live pass (`49-…`). |
+| **BUG-SYNC-OFF-REACTIVE-CREATE** | P0 | **resolved** ([#295](https://github.com/semyon-alekseev-noveo/tt-sync/issues/295)) | При Sync off диск всё равно создавал/обновлял задачу на DON-253. Seal реактивных путей + сверка с диском. Prove ×2 на `76cf71c`; первый hot-swap прогон **fail** сохранён и не зачтён. |
+| **BUG-GHOST-MARKER-AFTER-RESET** | P0 | **resolved** ([#290](https://github.com/semyon-alekseev-noveo/tt-sync/issues/290)) | После Reset / Dexie-miss `ticktick_id` в vault без задачи в TT оставался «живым». Теперь vault-only + TT miss → detach. Prove ×2 @ `a1946a6` (`51-…`). |
+| **BUG-LISTROOT-NOTE-PROMOTE** | P0 | **resolved** ([#284](https://github.com/semyon-alekseev-noveo/tt-sync/issues/284)) | Projects list-root с `note/<slug>` без тега `project` промоутился в `#system/project`. Prevention #285. Prove ×2 @ `358690e` (`47-…`); грязная иерархия восстановлена (`48-…`). |
+| **ARCH-SYNC-INTENT-IDENTITY** | P0 | **resolved** ([#255](https://github.com/semyon-alekseev-noveo/tt-sync/issues/255)) | Проход идентичности перед разрушительным планом; порог массового удаления считает только destructive. Prove ×2 (`39-…`). |
+| **UX-SYNC-CONFIRM-REBIND** | P1 | **resolved** ([#272](https://github.com/semyon-alekseev-noveo/tt-sync/issues/272)) | Confirm предлагает Rebind. Остаток: `BUG-CONFIRM-REBIND-DUP` — фикс unit, повторный live-prove **не прогонялся** (`41-…`). |
+| **BUG-CREATE-MATCH-UNDEF** | P1 | **unit-only** ([#291](https://github.com/semyon-alekseev-noveo/tt-sync/issues/291)) | Двойной Notice на create: «created» + «Failed to add … reading 'match'». Фикс влит (#293), live-prove **не прогонялся**. |
+| **BUG-TT-TAGFILTER-INBOX** | P1 | **triage** ([#299](https://github.com/semyon-alekseev-noveo/tt-sync/issues/299)) | Задача, добавленная в TT в отфильтрованном по тегу заметки виде, уезжает в Inbox вместо строки заметки. Заведено 2026-11-07, AF-строки и юнита нет. |
+| **BUG-OPENNOTE-DELETE-CONFIRM** | P1 | **unit-only** | Delete/Backspace в открытой заметке вызывал PushDeleteTT Confirm. Фикс unit, повторный live-prove **не прогонялся** (`42-…`). |
+| **BUG-RESET-CACHE-DELETE** | P1 | **blocked-owner** | После Reset Synchronize предлагал удалить строки vault по pre-wipe id. Теперь ghost detach ожидаем; owner Reset→Synchronize ×2 всё ещё не прогнан (`25-…` / `50-…`). |
+| **UX-NOTICE** | P2 | **blocked-owner** | Тексты create vs reattach и модалки кэша. Unit на верхушке; owner strip-marker prove **не прогонялся** (`36-…` / `50-…`). |
 | **BUG-COMMENT-1** | P1 | resolved в 2.0.47 | Комментарии не синкались при неизменном hash; нужен live-soak NOTE-L3b |
 | **BUG-TAG-1** | P2 | mitigated в 2.0.47 | Дубли `note/`/`proj/`; на «грязных» задачах нужен один re-sync (CTX-D2) |
 | **BUG-SYNC-SILENT-FAIL** | P1 | fixed on this branch | `getUpdatedTasks` бросает `TickTickPullError`, `syncTickTickWithDexie` пробрасывает, `synchronizationInner` возвращает `{ok:false}`. Notice: «Sync failed: …». Чекпоинт не двигается. Не релиз |
@@ -76,7 +110,7 @@
 | **BUG-COMMENT-ABYSS-VIEW** | P0 | **pass** (**2.0.75**) | Коммент из Abyss view → TT Comments: `vault.modify` планирует 5s push; flush без active markdown leaf. Evidence: `docs/pilot/results/BUG-COMMENT-ABYSS-VIEW/`. Issue #23. |
 | **BUG-COMMENT-DUP-STAMP** | P0 | **pass** (**2.0.76**, on tip **2.0.78**) | После Abyss push: пары stamped+plain в TT Comments на один vault-тред. Fixed: dedupe by key, plain-only POST, skip create when key present. Issue [#25](https://github.com/semyon-alekseev-noveo/tt-sync/issues/25) closed. |
 | **BUG-PULL-COMMENT-STALE** | P2 | fixed on this branch | `vaultLineBehindTask` сравнивает отпечатки Comments API. `getTaskById` только если заголовок/статус/content уже совпали; повторного вызова в цикле vault-sync нет. Комментарии кэшируются на задаче (`_apiComments`) |
-| **RISK-PULL-WINS-LOCAL** | P2 | fixed in code — pilot **not run** ([#174](https://github.com/semyon-alekseev-noveo/tt-sync/issues/174)) | Local LWW win keeps the Dexie task and drops the older remote body. A vault line whose hash differs from that winner is rewritten from the local task (title, status, content). Dirty-flag vs bookkeeping `modifiedTime` stays out of scope. |
+| **RISK-PULL-WINS-LOCAL** | P2 | **risk-accepted** (unit) — pilot **not run** ([#174](https://github.com/semyon-alekseev-noveo/tt-sync/issues/174)) | Local LWW win keeps the Dexie task and drops the older remote body. A vault line whose hash differs from that winner is rewritten from the local task (title, status, content). Dirty-flag vs bookkeeping `modifiedTime` stays out of scope. |
 | **BUG-COMMENT-MAP-ORPHAN** | P2 | fixed on this branch | `deleteCommentMapsForTask` вызывается из `TaskRepository` (delete/hard delete/purge), `markTaskDeleted` и pull при удалённой на TT задаче |
 | **PILOT-GATE-TEST-11-12** | P0 | **pass** (**2.0.74**) | `test-11-12` → TT Comments `comment 1` + `test-new-verision`. Evidence: `docs/pilot/results/PILOT-GATE-TEST-11-12/16-phase-3b-verify.md`. Корневой фикс **BUG-COMMENT-API-POST-500** (#21). Issues #10–#14/#21 closed. |
 | **BUG-COMMENT-NO-PUSH** | P0 | **resolved** on **2.0.89** (also **2.0.85**) | Child comment → TT Comments; vault bullet kept. Evidence: `NOTE-L3B-RECHECK/65-note-l3b-2.0.89.md` (#65). Historical **2.0.51** fail. |
@@ -91,7 +125,7 @@
 | **FEAT-NOTEBOOK** | P2 | open (M–L); MVP live **pass** | MVP TT→vault ×2 — [#159](https://github.com/semyon-alekseev-noveo/tt-sync/issues/159); `166-mvp-tt-to-vault-live.md`. Bi-di still open. |
 | **BUG-NOTEBOOK-NO-DELETE** | P1 | **resolved** (#162) | Vault→TT delete skips Notebook — [#160](https://github.com/semyon-alekseev-noveo/tt-sync/issues/160). |
 | **GAP-COMMENT-EDIT** | P2 | fixed on branch (unit); live not run | Unambiguous comment edit uses `PUT .../comment/{cid}` with `{ title }` and keeps the id. PUT failure falls back to delete+add. Two key changes in one sync are not paired. `origin: remote` is not overwritten. |
-| **RISK-DUAL-STORE** | P2 | unit on this branch — pilot **not run** ([#175](https://github.com/semyon-alekseev-noveo/tt-sync/issues/175)) | Task body lives only in Dexie `tasks`. `files` stores the path and `defaultProjectId`. `FileMetadataService` builds `TickTickTasks` from `tasks.file` and does not persist that list. Each file pass counts and `log.warn`s three drifts for non-deleted tasks: (1) `tasks.file` set and that path missing from `files`; (2) `tasks.file` empty while a note has `%%[ticktick_id:: <24hex>]%%`; (3) that marker only in a different file than `tasks.file`. All three zero: no warning. No write. No auto-repair. |
+| **RISK-DUAL-STORE** | P2 | **risk-accepted** (unit) — pilot **not run** ([#175](https://github.com/semyon-alekseev-noveo/tt-sync/issues/175)) | Task body lives only in Dexie `tasks`. `files` stores the path and `defaultProjectId`. `FileMetadataService` builds `TickTickTasks` from `tasks.file` and does not persist that list. Each file pass counts and `log.warn`s three drifts for non-deleted tasks: (1) `tasks.file` set and that path missing from `files`; (2) `tasks.file` empty while a note has `%%[ticktick_id:: <24hex>]%%`; (3) that marker only in a different file than `tasks.file`. All three zero: no warning. No write. No auto-repair. |
 | **RISK-LARGE-VAULT** | P2 | partial (#62 slice 1) | `idsPresentInVault` + file cache; idle `getTaskById` already 0; idle `getTaskComments` only on count mismatch / unknown count / stamp twins (not every vault thread). `ensureVaultFilesRegistered` still walks all `.md` |
 | **TECH-START-1** | P2 | open | Полный pull на старте блокирует инициализацию |
 | **TECH-API-1** | P1 | partial (playbook + contract via [#66](https://github.com/semyon-alekseev-noveo/tt-sync/issues/66)) | Live TT breakage risk remains; #66 closed for modularization DoD |
@@ -107,20 +141,24 @@
 
 ## To Be Done
 
-1. Editor-safety epic [#15](https://github.com/semyon-alekseev-noveo/tt-sync/issues/15) **closed** (#16 partial; #17/#18/#28/#29 **pass** on **2.0.89**).
-2. [#64](https://github.com/semyon-alekseev-noveo/tt-sync/issues/64) / [#65](https://github.com/semyon-alekseev-noveo/tt-sync/issues/65) **closed** (pass on **2.0.89**). #104 closed; BRAT **2.0.89** on pilot.
-3. `TP-DELTA-*` app UI still **not run** → [#84](https://github.com/semyon-alekseev-noveo/tt-sync/issues/84). Idle-zero **pass** on **2.0.85**.
-4. **BUG-ACTIVEZONE-COMMENT-SHUFFLE** [#19](https://github.com/semyon-alekseev-noveo/tt-sync/issues/19) — **closed**; pilot **pass** ×2 on tip after #134.
-5. Step 7 AF soak [#20](https://github.com/semyon-alekseev-noveo/tt-sync/issues/20) + [#76](https://github.com/semyon-alekseev-noveo/tt-sync/issues/76) **closed** (**pass** on **2.0.89**). Step 8 live vault still closed.
-6. [#63](https://github.com/semyon-alekseev-noveo/tt-sync/issues/63): GAP-COMMENT-EDIT unit on this branch (live PUT **not run**). RISK-PULL-WINS-LOCAL ([#174](https://github.com/semyon-alekseev-noveo/tt-sync/issues/174)) unit on this branch (pilot **not run**). RISK-DUAL-STORE ([#175](https://github.com/semyon-alekseev-noveo/tt-sync/issues/175)) unit on this branch (pilot **not run**, no auto-repair). BUG-TICKTICK-ID-LEAK mitigated in code; pilot re-scan **not run**; manual TickTick title cleanup remains if junk was already pushed. TECH-START-1 → [#86](https://github.com/semyon-alekseev-noveo/tt-sync/issues/86). TECH-API-1 live still open. Owner closes #63. [#66](https://github.com/semyon-alekseev-noveo/tt-sync/issues/66) / [#32](https://github.com/semyon-alekseev-noveo/tt-sync/issues/32) / [#137](https://github.com/semyon-alekseev-noveo/tt-sync/issues/137) **closed**.
-7. AF-NEST-1 nest→TT hierarchy **pass** on pilot — usable; deepen only if Active Zone sibling-nest vs MOC parent matters.
-8. **AF-GTD-PREFIX** + release **2.0.91** — **done** (tagged); [#66](https://github.com/semyon-alekseev-noveo/tt-sync/issues/66) A–G **closed** (cycle/size DoD).
-9. **NOTE-BODY** [#152](https://github.com/semyon-alekseev-noveo/tt-sync/issues/152) — **closed**.
-10. Tag/release **2.0.94** after this bump merges (#173 comment PUT, #176 local LWW vault rewrite, #177 dual-store count + warn, #171 release-gate encode). **2.0.93** is already tagged (BODY-2 + Notebook MVP); do not retag it.
-11. FEAT-NOTEBOOK [#159](https://github.com/semyon-alekseev-noveo/tt-sync/issues/159): MVP live **pass**; bi-di / scope still open.
-12. Optional: DEL-1/DEL-3 modal.
-13. PROC-RELEASE-GATE [#30](https://github.com/semyon-alekseev-noveo/tt-sync/issues/30): Actions gate is in `release.yml` (tests, ancestor, version match, no retag). Owner still turns on required check `CI / test` for `abyss-mapping` (`docs/github-issues/30-proc-release-gate.md`). Leave #30 open until merge and that decision.
-14. **UX-ABYSS-STATUS-SRC** [#185](https://github.com/semyon-alekseev-noveo/tt-sync/issues/185) — P1 label kept; **not DoR** until owner answers overlay / fallback / project-status entity. No code until then.
+Порядок. Step 8 не открывать, пока 1–3 не зелёные.
+
+1. **PROC-CI-CYCLES-RED** — фикс готов на верхушке (allowlist 118 → 56); нужен push + зелёный `CI / test`. Это единственное, что отделяет верхушку от релиза.
+2. **Решение по релизу:** 70 коммитов / 31 PR не выпущены. Либо тег (только owner), либо явно объявить верхушку «pilot-only до X».
+3. **Закрыть хвосты prove** (owner, `docs/pilot/results/UX-OBS-TT-SOAK/50-owner-live-tails-checklist.md`):
+   - `41-…` Confirm Rebind dup — prove ×2 на разных фикстурах.
+   - `42-…` Delete/Backspace в открытой заметке — prove ×2.
+   - `25-…` Reset → Synchronize ×2 (ghost detach теперь ожидаемая честность).
+   - `36-…` strip-marker reattach toast + Orphan glance.
+   - #291 живой Notice на create (unit уже зелёный).
+4. **Триаж #299** `BUG-TT-TAGFILTER-INBOX`: AF-строка + ожидаемое поведение, затем падающий юнит по case ID. Самый новый живой баг и единственный без плана.
+5. **Схлопнуть #243/#244** в один doc/UX-issue; #245 оставить единственным продуктовым решением (parent vs tags-only).
+6. **#213** — wipe-guard для `statusListMappings` (маленький, безопасный, без продуктового решения).
+7. **#202** — copy «Tasks folder»; в одной пачке с #243/#244.
+8. **#172** — включить обязательный `CI / test` на `abyss-mapping`, чтобы красная верхушка больше не вливалась.
+9. **Опционально / parked:** #218 (или закрыть #214), #185, #159, #201, #86, #78, #33.
+10. **Step 8 (живой vault)** — только после 1–3 и после снятия parked Decision #1 (`taskIgnoreQuery`).
+
 
 
 ## Аналитический мит 2026-10-19
