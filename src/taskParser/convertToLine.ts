@@ -54,6 +54,27 @@ export class TaskParserConvertToLine {
 				checkChar = r.char;
 				lineTags = r.tags;
 			}
+		} else if (isStatusListMapActive(statusListMap)) {
+			// AF-FMT-OFF-SYMBOL-LOSS (#305): abyssTasksFormat OFF but the status→list map is set.
+			// The list stays the source of truth for the checkbox symbol — restore from it so pull
+			// does not collapse `[/] [!] [?] [=] [~]` into `[ ]` while the map was designed to carry them.
+			const smap = getSettings().statusMappings;
+			const cancelMap = smap?.filter(m => m.char === '-') ?? [];
+			const projects = await getAllProjects();
+			const r = restoreStatusFromList(
+				task.status,
+				task.tags,
+				task.projectId,
+				statusListMap,
+				projects,
+				(t) => !!isStatusTag(t, cancelMap),
+			);
+			checkChar = r.char;
+			lineTags = r.tags.filter(t => !isStatusTag(t, smap));
+			if (checkChar === ' ' && task.status === 0 && !charForList(task.projectId, statusListMap, projects)) {
+				const fromTag = restoreStatus(task.status, task.tags, smap);
+				if (fromTag.char !== ' ') checkChar = fromTag.char;
+			}
 		}
 		const listMapP = getSettings().tagListMappings;
 		if (listMapP?.length && !this.plugin?.projectScheme?.isParentId?.(task.parentId)) {
