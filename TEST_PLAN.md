@@ -6,6 +6,18 @@ Manual cases for behavior changes. Automated tests do not replace a row here.
 
 Pilot means `<pilot-vault>`, manual **Synchronize**, plugin id `tickticksync-abyss`. Do not use `<live-vault>`. A cloud agent does not mark a row passed. Status stays **not run** until a person or a local agent on that Obsidian records what they saw.
 
+## GTD-ARRAY-KEYS — `statusListMappings` survives the GTD wipe-guard (#213)
+
+Issue [#213](https://github.com/semyon-alekseev-noveo/tt-sync/issues/213). Case `GTD-ARRAY-KEYS`. Unit: `src/test/settingsPreserveGtd.test.ts`. Guard: `src/settingsMerge.ts` (`GTD_ARRAY_KEYS`, `preserveGtdFromDisk`, `wouldWipeGtdFromDisk`, `buildPersistedSettings`).
+
+| Case | Steps | Expected | Pilot |
+|------|-------|----------|-------|
+| GTD-ARRAY-KEYS login race | Configure **Status → list** (`!` → TTS-nextAction). Reload the plugin and let a login / early save run before settings finish loading. Reopen Settings. | Mapping still listed; `data.json` still has the entry; no `Blocked saveSettings` error. | **not run** (unit covers) |
+| GTD-ARRAY-KEYS defaults | data.json has `statusListMappings`; memory still holds `DEFAULT_SETTINGS` (empty). Save settings. | Persisted `data.json` keeps the disk mapping, not the empty default. | **not run** (unit covers) |
+| GTD-ARRAY-KEYS regression | Same as above for `syncedLists`, `tagListMappings`, `syncScopeFolders`. | All four arrays behave the same; no new warning for a matching in-memory copy. | unit **pass** |
+
+Note: an **explicit clear** of the table while `data.json` still has rows is restored by the same guard — identical to `tagListMappings`. Changing that is out of scope for #213.
+
 ## BUG-SYNC-OFF-REACTIVE-CREATE — Sync off must not create/update TT (#296)
 
 Issue [#295](https://github.com/semyon-alekseev-noveo/tt-sync/issues/295). Residual after `UX-SET-SYNC-MASTER-OFF` (#287/#288). Unit: `src/test/bugSyncOffReactiveCreate.test.ts`. Evidence: `docs/pilot/results/UX-OBS-TT-SOAK/52-sync-off-reactive-create.md`.

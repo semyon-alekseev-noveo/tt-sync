@@ -2,7 +2,14 @@ import { DEFAULT_SETTINGS, type ITickTickSyncSettings } from '@/settings';
 import { migrateSyncedLists } from '@/syncScope';
 
 /** GTD arrays that must not be replaced by empty in-memory defaults when disk still has data. */
-export const GTD_ARRAY_KEYS = ['syncedLists', 'tagListMappings', 'syncScopeFolders'] as const;
+export const GTD_ARRAY_KEYS = [
+	'syncedLists',
+	'tagListMappings',
+	'syncScopeFolders',
+	// GTD-ARRAY-KEYS (#213): status→list table from #182 is user config and must survive the
+	// same login / upgrade / early-save races as tagListMappings.
+	'statusListMappings',
+] as const;
 
 /**
  * Scalars restored from disk when memory still equals DEFAULT (upgrade / early-save race).
@@ -91,7 +98,8 @@ export function wouldWipeGtdFromDisk(
 	disk: Record<string, unknown> | null | undefined,
 ): boolean {
 	if (!disk) return false;
-	for (const key of ['syncedLists', 'tagListMappings'] as const) {
+	// GTD-ARRAY-KEYS (#213): mirror preserveGtdFromDisk so every guarded array is also reported.
+	for (const key of GTD_ARRAY_KEYS) {
 		const m = memory[key];
 		const d = disk[key];
 		if (Array.isArray(m) && m.length === 0 && Array.isArray(d) && d.length > 0) {
