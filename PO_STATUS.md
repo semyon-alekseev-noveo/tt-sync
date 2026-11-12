@@ -13,15 +13,15 @@
 | Поле | Значение |
 |------|----------|
 | Стадия | Пилотный soak на `<pilot-vault>`; **Step 8 (живой vault) не открыт** |
-| Сборка на пилоте | Верхушка **`00ff923`** объявлена сборкой тестового vault (pilot-only, **не релиз**; заменяет `945d182`, оба с зелёным CI) |
+| Сборка на пилоте | Верхушка **`ec91fec`** объявлена сборкой тестового vault (pilot-only, **не релиз**; заменяет `00ff923` / `945d182`, все с зелёным CI) |
 | Последний релиз | **2.0.96** (2026-11-03) |
-| Верхушка ветки | `abyss-mapping` @ `00ff923` — **не в релизе** |
-| CI на верхушке | **ЗЕЛЁНЫЙ** (`00ff923`, `945d182`); `PROC-CI-CYCLES-RED` закрыт (#300, allowlist 118 → 56) |
-| Юнит-тесты | 1001 / 140 файлов на верхушке; 1005 / 141 с пере-влитым #202 |
+| Верхушка ветки | `abyss-mapping` @ `ec91fec` — **не в релизе** |
+| CI на верхушке | **ЗЕЛЁНЫЙ** (`ec91fec`, `00ff923`, `945d182`); `PROC-CI-CYCLES-RED` закрыт (#300, allowlist 118 → 56) |
+| Юнит-тесты | 1005 / 141 файл |
 | Открытых issue | 16 |
 | Открытых PR | 0 |
 
-Практический вывод: сборка пилота теперь проверена CI, но релиза нет с 2026-11-03. #202 влит не в ту ветку (`PROC-PR-STACK-MISBASE`) и пере-вливается коммитом `a6e46ad`.
+Практический вывод: сборка пилота проверена CI, но релиза нет с 2026-11-03. `PROC-PR-STACK-MISBASE` зафиксирован: #302 влился в промежуточную ветку и был пере-влит через #303 (`ec91fec`).
 
 
 ## Context
@@ -100,7 +100,8 @@
 | **BUG-CREATE-MATCH-UNDEF** | P1 | **unit-only** ([#291](https://github.com/semyon-alekseev-noveo/tt-sync/issues/291)) | Двойной Notice на create: «created» + «Failed to add … reading 'match'». Фикс влит (#293), live-prove **не прогонялся**. |
 | **BUG-TT-TAGFILTER-INBOX** | P1 | **triage** ([#299](https://github.com/semyon-alekseev-noveo/tt-sync/issues/299)) | Задача, добавленная в TT в отфильтрованном по тегу заметки виде, уезжает в Inbox вместо строки заметки. Триаж 2026-11-12: AF-строка + факты по коду (теги `note/` только на push, на pull маршрутизации нет, fallback `00 Inbox/abyss-active.md`). Нужен ответ продукта: тег — SoT? коллизии slug? `proj/` тоже? |
 | **GTD_ARRAY_KEYS** | P2 | **merged-tip** ([#213](https://github.com/semyon-alekseev-noveo/tt-sync/issues/213)) | `statusListMappings` не входил в wipe-guard: пустые дефолты могли затереть настроенную таблицу статус→список. Добавлен в `GTD_ARRAY_KEYS`; `wouldWipeGtdFromDisk` теперь зеркалит `preserveGtdFromDisk` по всем четырём массивам. Юнит `GTD-ARRAY-KEYS`. Влит #301 (`00ff923`), CI зелёный; пилотные строки `not run`. |
-| **UX-SET-TASKS-FOLDER-COPY** | P3 | **merged-tip** ([#202](https://github.com/semyon-alekseev-noveo/tt-sync/issues/202)) | Help у GTD «Tasks folder» читался как классический режим per-list файлов. Теперь на Abyss/GTD пути текст говорит, что list-зеркал нет и папка всегда в push scope; на классическом пути остаётся старый текст. PR #302 влился в промежуточную ветку, а не в `abyss-mapping` (`PROC-PR-STACK-MISBASE`); пере-влит коммитом `a6e46ad`. Пилотные строки `not run`. |
+| **FMT-OFF-LOSSY** | P2 | **analysis** ([#201](https://github.com/semyon-alekseev-noveo/tt-sync/issues/201)) | Выключение `abyssTasksFormat` на настроенном Abyss-пилоте — не переключение режима, а потеря данных: символы `[/] [!] [?] [=] [~]` схлопываются в `[ ]` при pull, тела `- >` отвязываются и тело в TT может очиститься, заглушки `TTS-*` возвращаются, строка может переехать в другой файл. Матрица ON/OFF: `docs/pilot/ABYSS-FORMAT-OFF-MATRIX.md`. Рекомендации R1–R6; кода пока нет. |
+| **UX-SET-TASKS-FOLDER-COPY** | P3 | **merged-tip** ([#202](https://github.com/semyon-alekseev-noveo/tt-sync/issues/202)) | Help у GTD «Tasks folder» читался как классический режим per-list файлов. Теперь на Abyss/GTD пути текст говорит, что list-зеркал нет и папка всегда в push scope; на классическом пути остаётся старый текст. #302 влился в промежуточную ветку, а не в `abyss-mapping` (`PROC-PR-STACK-MISBASE`); пере-влит #303 (`ec91fec`), CI зелёный. Пилотные строки `not run`. |
 | **BUG-OPENNOTE-DELETE-CONFIRM** | P1 | **unit-only** | Delete/Backspace в открытой заметке вызывал PushDeleteTT Confirm. Фикс unit, повторный live-prove **не прогонялся** (`42-…`). |
 | **BUG-RESET-CACHE-DELETE** | P1 | **blocked-owner** | После Reset Synchronize предлагал удалить строки vault по pre-wipe id. Теперь ghost detach ожидаем; owner Reset→Synchronize ×2 всё ещё не прогнан (`25-…` / `50-…`). |
 | **UX-NOTICE** | P2 | **blocked-owner** | Тексты create vs reattach и модалки кэша. Unit на верхушке; owner strip-marker prove **не прогонялся** (`36-…` / `50-…`). |
@@ -157,10 +158,11 @@
 4. **#299** `BUG-TT-TAGFILTER-INBOX` — **триаж сделан 2026-11-12** (AF-строка + факты + вопросы в issue). Дальше: один MCP-просмотр `tags`/`parentId` задачи из репро, чтобы выбрать сценарий A (TT сохраняет тег) или B (голая задача), затем ответы на 4 продуктовых вопроса. Кода до этого нет.
 5. **Схлопнуть #243/#244** в один doc/UX-issue; #245 оставить единственным продуктовым решением (parent vs tags-only).
 6. **#213** — **влит 2026-11-12** (#301, `00ff923`, CI зелёный) → `merged-tip`. Пилотные строки в `TEST_PLAN.md` остаются `not run`.
-7. **#202** — **пере-вливается 2026-11-12**: PR #302 влился в промежуточную ветку, а не в `abyss-mapping` (`PROC-PR-STACK-MISBASE`). Cherry-pick `a6e46ad` ждёт merge; пилотные строки остаются `not run`.
+7. **#202** — **влит 2026-11-12** (#303, `ec91fec`, CI зелёный) → `merged-tip`. Пилотные строки остаются `not run`.
 8. **#172** — включить обязательный `CI / test` на `abyss-mapping`, чтобы красная верхушка больше не вливалась.
-9. **Опционально / parked:** #218 (или закрыть #214), #185, #159, #201, #86, #78, #33.
-10. **Step 8 (живой vault)** — только после 1–3 и после снятия parked Decision #1 (`taskIgnoreQuery`).
+9. **#201** — **анализ опубликован 2026-11-12** (`docs/pilot/ABYSS-FORMAT-OFF-MATRIX.md`). Вывод: выключение `abyssTasksFormat` — не переключатель режима, а **потеря данных**: символы `[/] [!] [?] [=] [~]` схлопываются в `[ ]`, тела `- >` отвязываются, заглушки `TTS-*` возвращаются. Дальше: owner выбирает R1–R3 (предупреждение / переименование / read-only таблица) одним PR, R4/R5 (безпотерьный pull, без переноса строк) — отдельными issue.
+10. **Опционально / parked:** #218 (или закрыть #214), #185, #159, #86, #78, #33.
+11. **Step 8 (живой vault)** — только после 1–3 и после снятия parked Decision #1 (`taskIgnoreQuery`).
 
 
 
