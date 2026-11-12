@@ -1,6 +1,6 @@
 import type { PluginContext } from '@/pluginContext';
 import { type Writable, writable } from 'svelte/store';
-import { type ITickTickSyncSettings, setSettings, settings } from '@/settings';
+import { type ITickTickSyncSettings, registerSettingsStore, setSettings, settings } from '@/settings';
 
 // New: keep a reference to the plugin instance
 let currentPlugin: PluginContext | null = null;
@@ -43,6 +43,8 @@ export function settingsLoad(plugin: PluginContext) {
 			// Persistence only via plugin.saveSettings() (disk-first merge). Auto-save here caused GTD wipes on upgrade.
 		},
 	};
+	// settings.ts must not import this module (cycle); it calls back through this hook.
+	registerSettingsStore(settingsStore);
 }
 
 /** Re-sync Svelte store after async loadSettings (tab may register before load finishes). */
