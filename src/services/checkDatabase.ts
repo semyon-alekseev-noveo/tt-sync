@@ -418,12 +418,21 @@ export async function runCheckDatabase(host: CheckDatabaseHost): Promise<void> {
 						const defaultMapped = getSettings().defaultProjectId
 							? await host.plugin.fileMetadataService?.getFilepathForProjectId(getSettings().defaultProjectId)
 							: undefined;
+						// BUG-TT-TAGFILTER-INBOX: task created in a TT filtered view carries the context tag (note/<slug> / proj/<slug>).
+						// Route the orphan Add to that note file instead of falling back to the Inbox capture.
+						const contextTag = (t.task.tags ?? []).find(
+							(tag) => tag.startsWith('note/') || tag.startsWith('proj/'),
+						);
+						const contextNoteFile = contextTag
+							? await host.plugin.fileMetadataService?.getFilepathForNoteTag(contextTag)
+							: undefined;
 						const targetFilepath = await resolveOrphanAddFilepath({
 							filepath: t.filepath,
 							projectId: t.projectId,
 							parentNote,
 							projectMappedFile: projectMapped,
 							defaultProjectFile: defaultMapped,
+							contextNoteFile,
 							abyssCaptureFile: abyssCapture,
 							newTasksFile: getSettings().newTasksFile,
 						});

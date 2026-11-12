@@ -6,6 +6,20 @@ Manual cases for behavior changes. Automated tests do not replace a row here.
 
 Pilot means `<pilot-vault>`, manual **Synchronize**, plugin id `tickticksync-abyss`. Do not use `<live-vault>`. A cloud agent does not mark a row passed. Status stays **not run** until a person or a local agent on that Obsidian records what they saw.
 
+## BUG-TT-TAGFILTER-INBOX — task from a TT tag-filtered view lands in the note (#299)
+
+Issue [#299](https://github.com/semyon-alekseev-noveo/tt-sync/issues/299). Case `BUG-TT-TAGFILTER-INBOX`. Live-read verdict 2026-11-12: task `test-task-10-34` (`6aee9c60ec5e9b3831175146`) created in the tag-filtered view of note `don-253` → **scenario A confirmed** (TT kept the filter tag `note/don-253` on the new task; `parentId` null; project inbox).
+
+Unit: `src/test/vaultImportEligibility.test.ts` (`contextTagSlug`, orphan context routing), `src/contextTags.test.ts` (slug map). Fix wiring: `src/contextTags.ts` (`contextTagSlug`), `src/sync/vaultImportEligibility.ts` (`export { contextTagSlug }`, `resolveOrphanAddFilepath({ contextNoteFile })` precedence), `src/services/checkDatabase.ts` (orphan Add computes context note), `src/repositories/FileMetadataService.ts` (`getFilepathForNoteTag`).
+
+| Case | Steps | Expected | Pilot |
+|------|-------|----------|-------|
+| BUG-TT-TAGFILTER-INBOX context-routing | Unit: orphan task with tags `["note/don-253"]` → `resolveOrphanAddFilepath({ contextNoteFile })`. Explicit `filepath` / `parentNote` keep precedence. | Add resolves to the note file behind the context tag, not `00 Inbox/abyss-active.md`. | unit **pass** (red → green this PR) |
+| BUG-TT-TAGFILTER-INBOX fallback | Unit: task with no context tag / non-context tag (`gtd/next`) / null → Inbox fallback. | `ABYSS_CAPTURE_FALLBACK` stays the honest target. | unit **pass** |
+| BUG-TT-TAGFILTER-INBOX live | Pilot vault: note with inline task; TT filtered view by `note/<slug>`; add sibling; **Synchronize**. | New task lands as inline checkbox in the note's Active Zone (or re-parents like any inline). | **not run** (owner merge first; live vault untouched) |
+
+Regression: `resolveOrphanAddFilepath` precedence (filepath → parentNote → contextNoteFile → projectMappedFile → newTasksFile → default project file → abyss capture → abyss-active) unchanged for all other callers.
+
 ## UX-SET-TASKS-FOLDER-COPY — GTD «Tasks folder» help on the Abyss path (#202)
 
 Issue [#202](https://github.com/semyon-alekseev-noveo/tt-sync/issues/202). Case `UX-SET-TASKS-FOLDER-COPY`. Unit: `src/test/uxSetTasksFolderCopy.test.ts`. Copy only — no sync change.
