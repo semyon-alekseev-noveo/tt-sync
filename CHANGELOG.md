@@ -1,3 +1,13 @@
+### Iteration 2026-11-12 17:10 UTC
+
+- Context: Owner moved down the OFF-matrix queue: #305 (R4) fixed and PR #309 open; next R5 — #306.
+- Target: `AF-FMT-OFF-LIST-MOVE` [#306](https://github.com/semyon-alekseev-noveo/tt-sync/issues/306) — gate the structure-move path on the Abyss config being active, so OFF never relocates vault task lines.
+- Actions log: new pure helper `abyssLineInPlace` in `src/syncScope.ts` (hub mode / flag / scheme+push scope); `persistTasksToFile` now derives `keepLineInPlace` from it. Unit `AF-FMT-OFF-LIST-MOVE` red → green (`src/test/bugFmtOffListMove.test.ts`); full gate green.
+- Validation: `npx vitest run` (1013 tests / 143 files) + `npm run build` pass; `check:cycles` OK (56), `check:sizes` OK.
+- Problems: Live pilot prove for the structure-move gate still **not run** (owner merge first); OFF-body-detach / OFF-no-stubs cases remain (#201 R5 follow-ups / owner).
+- To Be Done: Open PR into `abyss-mapping` with TEST_PLAN / AF / status docs; owner merge; live re-prove on pilot; no release unless asked.
+- References: #306, #201, #305, `src/syncScope.ts`, `src/sync/vault-pull/persistTasksToFile.ts`, `src/test/bugFmtOffListMove.test.ts`, `TEST_PLAN.md`, `ABYSS_FIRST_CASES.md`
+
 ### Iteration 2026-11-12 16:40 UTC
 
 - Context: Owner chose the fix for #299 after the MCP live read confirmed scenario A (task `6aee9c60ec5e9b3831175146` created in the tag-filtered view kept the `note/don-253` tag; `parentId` null; project inbox).
