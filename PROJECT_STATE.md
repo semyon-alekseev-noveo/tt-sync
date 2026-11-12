@@ -31,15 +31,15 @@ Project stage is a separate axis: **pilot soak → Step 8 live gate**. The live 
 | Field | Value |
 |-------|-------|
 | Stage | Pilot soak on `<pilot-vault>`; Step 8 live-vault gate **closed** |
-| Pilot build | **tip `945d182` declared as the test-vault build** (pilot-only, not a release; first green CI since 2.0.96) |
+| Pilot build | **tip `00ff923` declared as the test-vault build** (pilot-only, not a release; supersedes `945d182`, both CI-green) |
 | Last release | **2.0.96**, 2026-11-03 (non-prerelease) |
-| Branch tip | `abyss-mapping` @ `41f63b2`, 2026-11-07 — **70 commits ahead of the tag, unreleased** |
-| CI on tip | **RED** on `41f63b2` / `f2d52c4` / `76cf71c` — `PROC-CI-CYCLES-RED`; **fix ready in the working tree** (cycle broken, allowlist 118 → 56), not pushed |
-| Unit tests | **997 passed / 140 files** (local 2026-11-12) |
+| Branch tip | `abyss-mapping` @ `00ff923` — **unreleased** |
+| CI on tip | **GREEN** on `00ff923` and `945d182`; `PROC-CI-CYCLES-RED` fixed (#300, allowlist 118 → 56) |
+| Unit tests | **1001 passed / 140 files** on the tip; **1005 / 141** with #202 re-landing |
 | Open issues | 16 |
 | Open PRs | 0 |
 
-Consequence: the pilot runs a tip that CI has never validated, and no release has been cut since 2026-11-03.
+Consequence: the pilot build is now CI-validated, but no release has been cut since 2026-11-03. #202 was merged into the wrong branch (see `PROC-PR-STACK-MISBASE`); it is re-landed by `a6e46ad`.
 
 ## Context
 
@@ -70,9 +70,13 @@ Consequence: the pilot runs a tip that CI has never validated, and no release ha
 
 ## Problems
 
-Release blocker (fix ready, not pushed):
+Release blocker (resolved):
 
-- **PROC-CI-CYCLES-RED** — `check:cycles` failed on the tip: `pluginContext.ts | services/EventHandlerService.ts | settings.ts | sync/syncEnabled.ts | ui/settings/settingsstore.ts`, introduced by the Sync-off fix (#296). **Fixed 2026-11-12:** `settings.ts` no longer imports the Svelte store; the store registers itself via `registerSettingsStore` (`src/settings.ts`, `src/ui/settings/settingsstore.ts`). Allowlist shrank **118 → 56** (no cycle added; one edge removed). Local gates: `check:cycles`, `check:sizes`, `vitest run` (997), `build` — all green. Status `unit-only` until pushed and CI is green.
+- **PROC-CI-CYCLES-RED** — `check:cycles` failed on the tip: `pluginContext.ts | services/EventHandlerService.ts | settings.ts | sync/syncEnabled.ts | ui/settings/settingsstore.ts`, introduced by the Sync-off fix (#296). **Fixed 2026-11-12:** `settings.ts` no longer imports the Svelte store; the store registers itself via `registerSettingsStore` (`src/settings.ts`, `src/ui/settings/settingsstore.ts`). Allowlist shrank **118 → 56** (no cycle added; one edge removed). **Merged #300 (`945d182`), CI green** → `merged-tip`.
+
+Process (open):
+
+- **PROC-PR-STACK-MISBASE** — #302 was opened with base `fix/issue-213-status-wipe-guard` (stacked on #301). The owner merged both PRs, but GitHub merged #302 into the *stacked base branch*, not `abyss-mapping`; #301 then merged into `abyss-mapping`. Result: PR #302 shows `MERGED` while its content is absent from the tip (`src/test/uxSetTasksFolderCopy.test.ts` missing on `00ff923`). Rule going forward: after merging a stacked PR, **retarget the child to `abyss-mapping`** (or verify `git show <tip>:<file>`), because "MERGED" is not proof of landing. Re-landed #202 via cherry-pick `a6e46ad` on branch `fix/issue-202-tasks-folder-copy-relaunch`.
 
 Open bugs:
 
@@ -82,12 +86,12 @@ Open bugs:
 - **BUG-OPENNOTE-DELETE-CONFIRM** — Delete/Backspace mid-edit opened PushDeleteTT Confirm; keyup `deletedTaskCheck` dropped, re-prove **not run** (`UX-OBS-TT-SOAK/42-…`) → `unit-only`.
 - **BUG-TT-CREATE-PATH-BYPASS** — create-path audit units pass; pilot path-guard **not run** (`UX-OBS-TT-SOAK/45-…`) → `unit-only`.
 - **BUG-RESET-CACHE-DELETE** — post-Reset Synchronize proposed vault-line deletes for pre-wipe ids; ghost detach now expected honesty, owner Reset→Synchronize ×2 still pending (`25-…` / `50-…`) → `blocked-owner`.
-- **GTD_ARRAY_KEYS** [#213](https://github.com/semyon-alekseev-noveo/tt-sync/issues/213) — `statusListMappings` was missing from the wipe-guard (`src/settingsMerge.ts`). **Fixed 2026-11-12:** added to `GTD_ARRAY_KEYS`; `wouldWipeGtdFromDisk` now mirrors `preserveGtdFromDisk` over all four arrays. Unit `GTD-ARRAY-KEYS` (3 of 4 new tests fail without the fix) → `unit-only`.
+- **GTD_ARRAY_KEYS** [#213](https://github.com/semyon-alekseev-noveo/tt-sync/issues/213) — `statusListMappings` was missing from the wipe-guard (`src/settingsMerge.ts`). **Fixed 2026-11-12:** added to `GTD_ARRAY_KEYS`; `wouldWipeGtdFromDisk` now mirrors `preserveGtdFromDisk` over all four arrays. Unit `GTD-ARRAY-KEYS` (3 of 4 new tests fail without the fix). **Merged #301 (`00ff923`), CI green** → `merged-tip` (pilot rows `not run`).
 
 Open UX / product:
 
 - **UX-NOTICE-*** — create vs reattach Notices + modal cache wording; unit on tip, owner strip-marker prove **not run** (`36-…` / `50-…`) → `blocked-owner`.
-- **UX-SET-TASKS-FOLDER-COPY** [#202](https://github.com/semyon-alekseev-noveo/tt-sync/issues/202) — GTD «Tasks folder» help read like classic per-list mode. **Fixed 2026-11-12:** `tasksFolderHelp()` returns Abyss copy when scheme + Abyss format + push scope are on; classic copy otherwise. Unit `uxSetTasksFolderCopy.test.ts` → `unit-only`.
+- **UX-SET-TASKS-FOLDER-COPY** [#202](https://github.com/semyon-alekseev-noveo/tt-sync/issues/202) — GTD «Tasks folder» help read like classic per-list mode. **Fixed 2026-11-12:** `tasksFolderHelp()` returns Abyss copy when scheme + Abyss format + push scope are on; classic copy otherwise. Unit `uxSetTasksFolderCopy.test.ts`. PR #302 was merged into the stacked base `fix/issue-213-status-wipe-guard` instead of `abyss-mapping` (see `PROC-PR-STACK-MISBASE`), so it never reached the tip; re-landed by cherry-pick `a6e46ad` → `merged-tip` once that PR merges (pilot rows `not run`).
 - **Project-identity layers** [#243](https://github.com/semyon-alekseev-noveo/tt-sync/issues/243) / [#244](https://github.com/semyon-alekseev-noveo/tt-sync/issues/244) (duplicate: parent scheme vs `proj/` tags vs GTD stage naming) and [#245](https://github.com/semyon-alekseev-noveo/tt-sync/issues/245) (real product decision: parent vs tags-only mode). Tip has **no** tags-only identity mode; parent scheme is SoT → `triage`.
 - **FEAT-NOTEBOOK** [#159](https://github.com/semyon-alekseev-noveo/tt-sync/issues/159) — MVP live **pass** ×2; bi-directional still open → `triage`.
 - **Abyss status source** [#185](https://github.com/semyon-alekseev-noveo/tt-sync/issues/185) — read `taskStatuses` / `projectStatuses` from the Abyss Tasks plugin settings. Spec only (`docs/pilot/UX-ABYSS-STATUS-SRC.md`), pilot **not run** → `triage`.
@@ -130,8 +134,8 @@ Ordered. Do not start Step 8 before 1–3 are green.
    - #291 live create Notice (unit already green).
 4. **#299** `BUG-TT-TAGFILTER-INBOX` — **triaged 2026-11-12** (AF row + code facts + open questions in the issue). Next: one MCP read of the repro task's `tags`/`parentId` to pick scenario A (TT keeps the tag) or B (bare task), then answer the 4 product questions. No code before that.
 5. **Collapse #243/#244** into one doc/UX issue and keep #245 as the single product decision (parent vs tags-only).
-6. **#213** — **done 2026-11-12** (wipe-guard + unit + TEST_PLAN). Needs merge; pilot rows in `TEST_PLAN.md` stay `not run`.
-7. **#202** — **done 2026-11-12** (Abyss vs classic help + unit + TEST_PLAN). Needs merge; pilot rows stay `not run`.
+6. **#213** — **merged 2026-11-12** (#301, `00ff923`, CI green) → `merged-tip`. Pilot rows in `TEST_PLAN.md` stay `not run`.
+7. **#202** — **re-landing 2026-11-12**: PR #302 merged into the stacked base, not the tip (`PROC-PR-STACK-MISBASE`). Cherry-pick `a6e46ad` is open for merge; pilot rows stay `not run`.
 8. **#172** enable required `CI / test` on `abyss-mapping` so a red tip cannot be merged again.
 9. **Optional / parked:** #218 (or close #214), #185, #159, #201, #86, #78, #33.
 10. **Step 8 live gate** — only after 1–3 and after the parked Decision #1 config is cleared (`taskIgnoreQuery`).
