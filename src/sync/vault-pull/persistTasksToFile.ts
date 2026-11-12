@@ -10,6 +10,7 @@ import type { ITask } from '@/api/types/Task';
 import { getSettings } from '@/settings';
 import { NewFileMap } from '@/services/NewFileMap';
 import { takePreMergeNoteBase } from '@/sync/preMergeNoteBase';
+import { abyssLineInPlace } from '@/syncScope';
 import log from '@/utils/logger';
 
 export interface PersistTasksHost {
@@ -99,7 +100,7 @@ export async function persistToFile(host: PersistTasksHost,
 				const vaultTask: ITask = { ...task, projectId: vaultProjectId ?? '', parentId: vaultParentId ?? '' };
 
 				//Only check for Project/Parent change if task is in cache.
-				const keepLineInPlace = !!getSettings().newTasksFile?.trim() || getSettings().abyssTasksFormat;
+				const keepLineInPlace = abyssLineInPlace(getSettings());
 				if (!keepLineInPlace && (await host.plugin.taskParser?.isProjectIdChanged(vaultTask, task))) {
 					log.debug('Moving Task: ', task.id, task.title, ' from Project: ', vaultTask.projectId, ' to Project: ', task.projectId);
 					filePath = await host.handleTickTickStructureMove(task, vaultTask, lineText, fileMap);

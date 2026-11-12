@@ -234,6 +234,27 @@ export function scopePushWithoutMarker(): boolean {
 	return !!getSettings().abyssTasksFormat && hasConfiguredPushScope();
 }
 
+/** Settings slice that decides whether vault task lines are managed in place (Abyss engine). */
+export interface AbyssLineInPlaceSettings {
+	newTasksFile?: string | null;
+	abyssTasksFormat?: boolean | null;
+	projectSchemeEnabled?: boolean | null;
+	syncScopeFolders?: readonly string[] | null;
+}
+
+/**
+ * AF-FMT-OFF-LIST-MOVE (#306, R5): may a vault task line stay in place (no structure move)?
+ * True for hub mode (`newTasksFile`) and for the Abyss engine path (flag on, or scheme +
+ * configured push scope while the flag is OFF) — the TickTick-side list change must not
+ * relocate the vault line while the Abyss config is in play.
+ */
+export function abyssLineInPlace(s: AbyssLineInPlaceSettings): boolean {
+	if (s.newTasksFile?.trim()) return true;
+	if (s.abyssTasksFormat) return true;
+	if (s.projectSchemeEnabled && (s.syncScopeFolders ?? []).some(f => !!f?.trim())) return true;
+	return false;
+}
+
 /**
  * Classic per-list mirror files under `TickTickTasksFilePath` (`TTS-*.md` stubs).
  *
