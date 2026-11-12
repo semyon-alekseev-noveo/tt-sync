@@ -87,7 +87,7 @@ Open bugs:
 Open UX / product:
 
 - **UX-NOTICE-*** — create vs reattach Notices + modal cache wording; unit on tip, owner strip-marker prove **not run** (`36-…` / `50-…`) → `blocked-owner`.
-- **UX-SET-TASKS-FOLDER-COPY** [#202](https://github.com/semyon-alekseev-noveo/tt-sync/issues/202) — GTD «Tasks folder» help still reads like classic per-list mode. Copy only → `triage`.
+- **UX-SET-TASKS-FOLDER-COPY** [#202](https://github.com/semyon-alekseev-noveo/tt-sync/issues/202) — GTD «Tasks folder» help read like classic per-list mode. **Fixed 2026-11-12:** `tasksFolderHelp()` returns Abyss copy when scheme + Abyss format + push scope are on; classic copy otherwise. Unit `uxSetTasksFolderCopy.test.ts` → `unit-only`.
 - **Project-identity layers** [#243](https://github.com/semyon-alekseev-noveo/tt-sync/issues/243) / [#244](https://github.com/semyon-alekseev-noveo/tt-sync/issues/244) (duplicate: parent scheme vs `proj/` tags vs GTD stage naming) and [#245](https://github.com/semyon-alekseev-noveo/tt-sync/issues/245) (real product decision: parent vs tags-only mode). Tip has **no** tags-only identity mode; parent scheme is SoT → `triage`.
 - **FEAT-NOTEBOOK** [#159](https://github.com/semyon-alekseev-noveo/tt-sync/issues/159) — MVP live **pass** ×2; bi-directional still open → `triage`.
 - **Abyss status source** [#185](https://github.com/semyon-alekseev-noveo/tt-sync/issues/185) — read `taskStatuses` / `projectStatuses` from the Abyss Tasks plugin settings. Spec only (`docs/pilot/UX-ABYSS-STATUS-SRC.md`), pilot **not run** → `triage`.
@@ -131,7 +131,7 @@ Ordered. Do not start Step 8 before 1–3 are green.
 4. **#299** `BUG-TT-TAGFILTER-INBOX` — **triaged 2026-11-12** (AF row + code facts + open questions in the issue). Next: one MCP read of the repro task's `tags`/`parentId` to pick scenario A (TT keeps the tag) or B (bare task), then answer the 4 product questions. No code before that.
 5. **Collapse #243/#244** into one doc/UX issue and keep #245 as the single product decision (parent vs tags-only).
 6. **#213** — **done 2026-11-12** (wipe-guard + unit + TEST_PLAN). Needs merge; pilot rows in `TEST_PLAN.md` stay `not run`.
-7. **#202** Tasks-folder copy; same batch as #243/#244 Settings wording.
+7. **#202** — **done 2026-11-12** (Abyss vs classic help + unit + TEST_PLAN). Needs merge; pilot rows stay `not run`.
 8. **#172** enable required `CI / test` on `abyss-mapping` so a red tip cannot be merged again.
 9. **Optional / parked:** #218 (or close #214), #185, #159, #201, #86, #78, #33.
 10. **Step 8 live gate** — only after 1–3 and after the parked Decision #1 config is cleared (`taskIgnoreQuery`).

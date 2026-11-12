@@ -6,6 +6,16 @@ Manual cases for behavior changes. Automated tests do not replace a row here.
 
 Pilot means `<pilot-vault>`, manual **Synchronize**, plugin id `tickticksync-abyss`. Do not use `<live-vault>`. A cloud agent does not mark a row passed. Status stays **not run** until a person or a local agent on that Obsidian records what they saw.
 
+## UX-SET-TASKS-FOLDER-COPY — GTD «Tasks folder» help on the Abyss path (#202)
+
+Issue [#202](https://github.com/semyon-alekseev-noveo/tt-sync/issues/202). Case `UX-SET-TASKS-FOLDER-COPY`. Unit: `src/test/uxSetTasksFolderCopy.test.ts`. Copy only — no sync change.
+
+| Case | Steps | Expected | Pilot |
+|------|-------|----------|-------|
+| UX-SET-TASKS-FOLDER-COPY abyss | Pilot config (project scheme + Abyss format + non-empty push scope). Settings → GTD and projects → **Tasks folder**. | Help says no per-list files are created and that the folder is always inside the push scope. No «Folder for list files», no «Move Existing Files». | **not run** |
+| UX-SET-TASKS-FOLDER-COPY classic | Turn Abyss format off (or clear push scope). Reopen the same setting. | Classic copy returns («Folder for list files … Move Existing Files in Defaults»). | **not run** |
+| UX-SET-TASKS-FOLDER-COPY save | Edit the folder value, blur. | Value saves as before; no new validation or placeholder change. | **not run** |
+
 ## GTD-ARRAY-KEYS — `statusListMappings` survives the GTD wipe-guard (#213)
 
 Issue [#213](https://github.com/semyon-alekseev-noveo/tt-sync/issues/213). Case `GTD-ARRAY-KEYS`. Unit: `src/test/settingsPreserveGtd.test.ts`. Guard: `src/settingsMerge.ts` (`GTD_ARRAY_KEYS`, `preserveGtdFromDisk`, `wouldWipeGtdFromDisk`, `buildPersistedSettings`).
