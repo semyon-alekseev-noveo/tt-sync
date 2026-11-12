@@ -6,29 +6,6 @@ Manual cases for behavior changes. Automated tests do not replace a row here.
 
 Pilot means `<pilot-vault>`, manual **Synchronize**, plugin id `tickticksync-abyss`. Do not use `<live-vault>`. A cloud agent does not mark a row passed. Status stays **not run** until a person or a local agent on that Obsidian records what they saw.
 
-## AF-FMT-OFF-LIST-MOVE — structure move gate while abyssTasksFormat OFF (#306)
-
-Issue [#306](https://github.com/semyon-alekseev-noveo/tt-sync/issues/306) (R5 of the OFF matrix, [#201](https://github.com/semyon-alekseev-noveo/tt-sync/issues/201)). Case `AF-FMT-OFF-LIST-MOVE`. Unit: `src/test/bugFmtOffListMove.test.ts` (`abyssLineInPlace`). Fix: `src/syncScope.ts` (`abyssLineInPlace`) + `src/sync/vault-pull/persistTasksToFile.ts` (`keepLineInPlace`).
-
-| Case | Steps | Expected | Pilot |
-|------|-------|----------|-------|
-| AF-FMT-OFF-LIST-MOVE off+config | Unit: OFF + scheme on + push scope → line in place (no structure move). ON → in place. Hub (newTasksFile) → in place. Classic (no config) → move allowed. | OFF never relocates vault task lines while the Abyss config is present. | unit **pass** (red → green this PR) |
-| AF-FMT-OFF-LIST-MOVE live | Pilot: flag OFF + scheme on; TickTick-side list change; Synchronize. | No line relocation. | **not run** (owner merge first; live vault untouched) |
-
-Regression: hub mode / ON behaviour unchanged (helper keeps old gates).
-
-## AF-FMT-OFF-SYMBOL-LOSS — abyssTasksFormat OFF must not collapse checkbox symbols (#305)
-
-Issue [#305](https://github.com/semyon-alekseev-noveo/tt-sync/issues/305) (R4 of the OFF matrix, [#201](https://github.com/semyon-alekseev-noveo/tt-sync/issues/201)). Case `AF-FMT-OFF-SYMBOL-LOSS`. Unit: `src/test/bugFmtOffSymbolLoss.test.ts`. Fix: `src/taskParser/convertToLine.ts` (`else if (isStatusListMapActive(statusListMap))` → restore checkbox char from the TickTick list while `abyssTasksFormat` is OFF).
-
-| Case | Steps | Expected | Pilot |
-|------|-------|----------|-------|
-| AF-FMT-OFF-SYMBOL-LOSS off+map | Unit: task status 0 / list `TTS-nextAction` + `statusListMappings` + `abyssTasksFormat: false` → line keeps `- [!]`. Status 2 → `- [x]`. Cancelled tag → `- [-]`. Unresolvable list → status-tag fallback. | Symbols `[/] [!] [?] [=] [~]` survive OFF when `statusListMappings` is set; fallback to status tag when the list is unresolvable. | unit **pass** (red → green this PR) |
-| AF-FMT-OFF-SYMBOL-LOSS off-no-map | OFF + empty `statusListMappings` → status-tag / `statusMappings` restore (legacy). | Unchanged. | unit **pass** (existing coverage) |
-| AF-FMT-OFF-SYMBOL-LOSS live | Pilot: flag OFF + map set; Synchronize. | Symbols preserved; TickTick list respected; no collapse. | **not run** (owner merge first; live vault untouched) |
-
-Regression: Abyss ON + map set keeps list-driven restore (`useStatusList`); OFF + map set now shares the same list-driven restore (fix); OFF + no map keeps tag-based restore.
-
 ## BUG-TT-TAGFILTER-INBOX — task from a TT tag-filtered view lands in the note (#299)
 
 Issue [#299](https://github.com/semyon-alekseev-noveo/tt-sync/issues/299). Case `BUG-TT-TAGFILTER-INBOX`. Live-read verdict 2026-11-12: task `test-task-10-34` (`6aee9c60ec5e9b3831175146`) created in the tag-filtered view of note `don-253` → **scenario A confirmed** (TT kept the filter tag `note/don-253` on the new task; `parentId` null; project inbox).

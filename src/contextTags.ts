@@ -44,6 +44,24 @@ export function isVaultContextTagMirror(raw: string): boolean {
 	return flat.startsWith('note-') || flat.startsWith('proj-');
 }
 
+/**
+ * BUG-TT-TAGFILTER-INBOX — context tag of a task created inside a TickTick filtered view
+ * (e.g. `note/don-253`, `proj/work-x`), as stored on the TickTick task.
+ * Returns the slug part (`don-253`) or null when the tag is not context-scoped.
+ */
+export function contextTagSlug(tag: string | null | undefined): string | null {
+	const t = (tag ?? '').trim().toLowerCase();
+	if (t.startsWith(NOTE_CTX_PREFIX)) {
+		const slug = slugForContextTag(t.slice(NOTE_CTX_PREFIX.length));
+		return slug || null;
+	}
+	if (t.startsWith(PROJ_CTX_PREFIX)) {
+		const slug = slugForContextTag(t.slice(PROJ_CTX_PREFIX.length));
+		return slug || null;
+	}
+	return null;
+}
+
 export function dedupeTags(tags: string[]): string[] {
 	const out: string[] = [];
 	for (const tag of tags) {

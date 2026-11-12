@@ -18,16 +18,6 @@
 - To Be Done: Open PR into `abyss-mapping` with TEST_PLAN / AF / status docs; owner merge; live re-prove on pilot; no release unless asked.
 - References: #299, `src/contextTags.ts`, `src/sync/vaultImportEligibility.ts`, `src/services/checkDatabase.ts`, `src/repositories/FileMetadataService.ts`, `src/test/vaultImportEligibility.test.ts`, `TEST_PLAN.md`, `ABYSS_FIRST_CASES.md`
 
-### Iteration 2026-11-12 16:55 UTC
-
-- Context: Owner moved on to the next engine issue after the #299 fix PR (#308) was opened; #305 (R4 of the OFF matrix) next.
-- Target: `AF-FMT-OFF-SYMBOL-LOSS` [#305](https://github.com/semyon-alekseev-noveo/tt-sync/issues/305) — lossless pull while `abyssTasksFormat` is OFF when `statusListMappings` is set.
-- Actions log: list-driven restore (`restoreStatusFromList` via `charForList`) now also runs when `abyssTasksFormat` is OFF and the status→list map is active (`src/taskParser/convertToLine.ts`); status-tag fallback when the list is unresolvable. Unit `AF-FMT-OFF-SYMBOL-LOSS` red → green (`src/test/bugFmtOffSymbolLoss.test.ts`); full gate green.
-- Validation: `npx vitest run` (1012 tests / 142 files) + `npm run build` pass; `check:cycles` OK (56), `check:sizes` OK.
-- Problems: Live pilot prove for the OFF-symbol fix still **not run** (owner merge first); OFF + no-map / body-detach / list-move cases remain open (#306 / #201 R1–R3).
-- To Be Done: Open PR into `abyss-mapping` with TEST_PLAN / AF / status docs; owner merge; live re-prove on pilot; no release unless asked.
-- References: #305, #201, `docs/pilot/ABYSS-FORMAT-OFF-MATRIX.md`, `src/taskParser/convertToLine.ts`, `src/statusListMapping.ts`, `src/statusMapping.ts`, `src/test/bugFmtOffSymbolLoss.test.ts`, `TEST_PLAN.md`, `ABYSS_FIRST_CASES.md`
-
 ### Iteration 2026-11-06 15:06 UTC
 
 - Context: Owner merged #296; deploy tip and re-prove #295 Sync-off reactive create/update on pilot.

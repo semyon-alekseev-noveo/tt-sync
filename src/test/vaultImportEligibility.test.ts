@@ -6,6 +6,7 @@ import {
 	ABYSS_CAPTURE_FALLBACK,
 	fileHasSameTitleOtherId,
 	isOpenTaskEligibleForVaultImport,
+	contextTagSlug,
 	normalizeVaultImportTitle,
 	resolveOrphanAddFilepath,
 } from '@/sync/vaultImportEligibility';
@@ -102,5 +103,24 @@ describe('BUG-ORPHAN-STALE-REMATCH', () => {
 			checkDb.indexOf('tasksToResolve.push', checkDb.indexOf('getTaskById(taskId)')),
 		);
 		expect(orphanBlock).toContain('isOpenTaskEligibleForVaultImport');
+	});
+});
+
+describe('BUG-TT-TAGFILTER-INBOX', () => {
+	it('contextTagSlug maps note/<slug> and proj/<slug> context tags to a slug', () => {
+		expect(contextTagSlug('note/don-253')).toBe('don-253');
+		expect(contextTagSlug('note/Don-253')).toBe('don-253');
+		expect(contextTagSlug('proj/work-x')).toBe('work-x');
+		expect(contextTagSlug('gtd/next')).toBeNull();
+		expect(contextTagSlug(null)).toBeNull();
+	});
+
+	it('resolveOrphanAddFilepath prefers the context-tagged note file over the Inbox fallback', async () => {
+		expect(await resolveOrphanAddFilepath({ contextNoteFile: '30 Tasks/don-253.md', projectId: 'inbox130382745' })).toBe('30 Tasks/don-253.md');
+	});
+
+	it('resolveOrphanAddFilepath keeps explicit filepath / parent note ahead of context', async () => {
+		expect(await resolveOrphanAddFilepath({ filepath: 'explicit.md', contextNoteFile: '30 Tasks/don-253.md' })).toBe('explicit.md');
+		expect(await resolveOrphanAddFilepath({ parentNote: '10 Projects/P.md', contextNoteFile: '30 Tasks/don-253.md' })).toBe('10 Projects/P.md');
 	});
 });

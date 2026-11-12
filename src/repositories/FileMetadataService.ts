@@ -8,6 +8,7 @@ import { db } from "@/db/dexie";
 import { getAllFiles, getFile, upsertFile, deleteFile } from "@/db/files";
 import type { ITask } from "@/api/types/Task";
 import { isParkedVaultPath, listStubFilesEnabled } from '@/syncScope';
+import { contextTagSlug } from '@/contextTags';
 import log from "@/utils/logger";
 
 export interface FileMetadata {
@@ -138,6 +139,25 @@ export class FileMetadataService {
 			return file?.path;
 		} catch (error) {
 			log.error(`Error getting filepath for project ${projectId}:`, error);
+			return undefined;
+		}
+	}
+
+	/**
+	 * BUG-TT-TAGFILTER-INBOX — resolve the vault note file behind a context tag
+	 * (`note/<slug>` / `proj/<slug>`) carried by a TickTick task created in a filtered view.
+	 */
+	async getFilepathForNoteTag(tag: string): Promise<string | undefined> {
+		try {
+			const slug = contextTagSlug(tag);
+			if (!slug) return undefined;
+			const files = await getAllFiles();
+			const file = files.find((f) => (f.path.split('/').pop() ?? '').toLowerCase() === slug);
+			if (!file) return undefined;
+			if (isParkedVaultPath(file.path)) return undefined;
+			return file.path;
+		} catch (error) {
+			log.error(`Error getting filepath for note tag ${tag}:`, error);
 			return undefined;
 		}
 	}
