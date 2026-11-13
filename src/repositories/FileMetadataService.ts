@@ -8,7 +8,7 @@ import { db } from "@/db/dexie";
 import { getAllFiles, getFile, upsertFile, deleteFile } from "@/db/files";
 import type { ITask } from "@/api/types/Task";
 import { isParkedVaultPath, listStubFilesEnabled } from '@/syncScope';
-import { contextTagSlug } from '@/contextTags';
+import { contextTagSlug, slugForContextTag } from '@/contextTags';
 import log from "@/utils/logger";
 
 export interface FileMetadata {
@@ -147,12 +147,27 @@ export class FileMetadataService {
 	 * BUG-TT-TAGFILTER-INBOX — resolve the vault note file behind a context tag
 	 * (`note/<slug>` / `proj/<slug>`) carried by a TickTick task created in a filtered view.
 	 */
+	/**
+	 * BUG-TT-TAGFILTER-INBOX (#299): resolve a TickTick context tag (`note/<slug>` /
+	 * `proj/<slug>`) to a vault note path.
+	 *
+	 * Both sides go through `slugForContextTag`: `db.files` stores the extension
+	 * (`DON-253.md`) and note names may carry spaces or mixed case (`Work X.md`),
+	 * while the tag only carries the slug (`don-253`, `work-x`). Comparing the raw
+	 * basename to the slug never matched, so every context tag fell through to the
+	 * Abyss capture file — that was the 2.0.97 live failure.
+	 *
+	 * First match wins; two notes with the same basename in different folders are
+	 * ambiguous by construction.
+	 */
 	async getFilepathForNoteTag(tag: string): Promise<string | undefined> {
 		try {
 			const slug = contextTagSlug(tag);
 			if (!slug) return undefined;
 			const files = await getAllFiles();
-			const file = files.find((f) => (f.path.split('/').pop() ?? '').toLowerCase() === slug);
+			const file = files.find(
+				(f) => slugForContextTag(f.path.split('/').pop() ?? '') === slug,
+			);
 			if (!file) return undefined;
 			if (isParkedVaultPath(file.path)) return undefined;
 			return file.path;
