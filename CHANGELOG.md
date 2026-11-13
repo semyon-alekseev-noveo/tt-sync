@@ -1,3 +1,13 @@
+### Iteration 2026-11-13 04:47 UTC
+
+- Context: Owner asked to refresh the merged items and status docs, then cut a full release. Three fixes merged on 2026-11-12 (#308/#309/#310) but their issues and the snapshot tables were stale.
+- Target: Release **2.0.97** from `abyss-mapping` @ `5190686`; refresh `PROJECT_STATE.md` / `PO_STATUS.md`; mark #299/#305/#306 `merged-tip` (kept open for live prove ×2). No behavior change in this PR.
+- Actions log: updated the status snapshots (tip `5190686`, CI green, 1016 tests / 143 files, 17 open issues); marked #299/#305/#306 `merged-tip` with merge SHAs; bumped `manifest.json` / `package.json` / `versions.json` to 2.0.97; added this CHANGELOG entry. Issues #299/#305/#306 commented on GitHub, kept open.
+- Validation: `npx vitest run` → **1016 passed / 143 files**; `npm run build` OK; `check:cycles` OK (56); `check:sizes` OK (0 exceptions).
+- Problems: Live pilot prove for #299/#305/#306 still **not run**; pilot vault still on 2.0.96 (deploy pending); R1–R3 of #201 pending owner pick.
+- To Be Done: Owner merges this PR; tag `2.0.97` on the merged tip and push; then live prove ×2 on the pilot vault.
+- References: #299, #305, #306, #201, #300, `PROJECT_STATE.md`, `PO_STATUS.md`, `CHANGELOG.md`
+
 ### Iteration 2026-11-12 17:10 UTC
 
 - Context: Owner moved down the OFF-matrix queue: #305 (R4) fixed and PR #309 open; next R5 — #306.
