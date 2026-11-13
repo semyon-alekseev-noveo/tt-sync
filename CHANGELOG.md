@@ -1,3 +1,14 @@
+### Iteration 2026-11-13 16:40 UTC
+
+- Context: **2.0.97 shipped #299 inert.** The live prove on the pilot vault (task tagged `note/don-253` created in TickTick Inbox → **Synchronize**) put the line in `00 Inbox/abyss-active.md:827`; `DON-253.md` was never written (journal `tt->obs` / `line` / `create` / `file: 00 Inbox/abyss-active.md`). Evidence posted on [#299](https://github.com/semyon-alekseev-noveo/tt-sync/issues/299#issuecomment-6849115372).
+- Target: working #299 fix + **release 2.0.98**.
+- Root causes: (1) `FileMetadataService.getFilepathForNoteTag` compared the tag slug (`don-253`) against a `db.files` basename that still carried `.md` (`don-253.md`) → always `undefined`; (2) the context-tag routing from #308 was wired only into the orphan-Add **modal** (`checkDatabase.ts`), never the normal pull path (`VaultSyncCoordinator.determineTargetFile` → `fileForNewTickTickTask`), which went straight to the capture file.
+- Actions log: both lookup sides now go through `slugForContextTag()`; `fileForNewTickTickTask` gained an optional `contextNoteFile` (ahead of the capture and list file); `determineTargetFile` resolves the task's `note/` · `proj/` tag via `NOTE_CTX_PREFIX` / `PROJ_CTX_PREFIX` before falling back. New regression `src/test/bugTagfilterInbox.test.ts` (4 lookup tests + 3 precedence tests) red → green. Bumped `manifest.json` / `package.json` / `package-lock.json` / `versions.json` to **2.0.98**; `TEST_PLAN.md` #299 section rewritten with the fail/pass rows; status snapshots corrected.
+- Validation: `npx vitest run` → **1023 passed / 144 files**; `npm run build` OK; `check:cycles` OK (56); `check:sizes` OK (0 exceptions). **Live prove ×2 on the 2.0.98 pilot build:** `PROVE-299-C` → `DON-253.md:98`, `PROVE-299-D` → `DON-253.md:99`; `abyss-active.md` stayed 76 160 B. All probe tasks deleted and the vault restored byte-exact (`DON-253.md` 4 186 B, `abyss-active.md` identical to the pre-prove backup).
+- Problems: #305 / #306 live proves still **not run** (need `abyssTasksFormat` OFF, a lossy mode — best on a vault copy). The TickTick MCP needed a config fix (`mcp.ticktick`, not `mcp.servers.ticktick`) before `opencode mcp list` reported it connected; the live proves here used the plugin's stored session token + `x-device` against `api.ticktick.com`.
+- To Be Done: Owner merges the fix branch; tag `2.0.98` on the merged tip and verify the release workflow; then #299 can honestly go `shipped`.
+- References: #299, #308, #312, #305, #306, `src/repositories/FileMetadataService.ts`, `src/syncScope.ts`, `src/services/VaultSyncCoordinator.ts`, `src/test/bugTagfilterInbox.test.ts`, `TEST_PLAN.md`
+
 ### Iteration 2026-11-13 05:26 UTC
 
 - Context: **2.0.97** was released (PR #311 merged at `1421e17`, tag pushed, GitHub Release published) and the pilot vault was updated to that build, but the status docs still described the release as "prepared, pending owner merge + tag".

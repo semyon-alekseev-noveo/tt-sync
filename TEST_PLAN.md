@@ -10,15 +10,23 @@ Pilot means `<pilot-vault>`, manual **Synchronize**, plugin id `tickticksync-aby
 
 Issue [#299](https://github.com/semyon-alekseev-noveo/tt-sync/issues/299). Case `BUG-TT-TAGFILTER-INBOX`. Live-read verdict 2026-11-12: task `test-task-10-34` (`6aee9c60ec5e9b3831175146`) created in the tag-filtered view of note `don-253` → **scenario A confirmed** (TT kept the filter tag `note/don-253` on the new task; `parentId` null; project inbox).
 
-Unit: `src/test/vaultImportEligibility.test.ts` (`contextTagSlug`, orphan context routing), `src/contextTags.test.ts` (slug map). Fix wiring: `src/contextTags.ts` (`contextTagSlug`), `src/sync/vaultImportEligibility.ts` (`export { contextTagSlug }`, `resolveOrphanAddFilepath({ contextNoteFile })` precedence), `src/services/checkDatabase.ts` (orphan Add computes context note), `src/repositories/FileMetadataService.ts` (`getFilepathForNoteTag`).
+**2.0.97 was inert.** Live prove on the pilot vault: a TT task tagged `note/don-253` landed in `00 Inbox/abyss-active.md` and `DON-253.md` was never written. Two defects:
+
+1. `FileMetadataService.getFilepathForNoteTag` compared the tag slug (`don-253`) against a `db.files` basename that still carried `.md` (`don-253.md`) → always `undefined`.
+2. The routing was only wired into the orphan-Add **modal** (`checkDatabase.ts`); a normal pull places new inbox tasks via `VaultSyncCoordinator.determineTargetFile` → `fileForNewTickTickTask`, which went straight to the capture file.
+
+Fix (this PR): both sides of the lookup go through `slugForContextTag`; `fileForNewTickTickTask` takes a resolved `contextNoteFile` ahead of the capture/list file and `determineTargetFile` resolves it from the task's `note/` · `proj/` tag.
+
+Unit: `src/test/bugTagfilterInbox.test.ts` (real lookup with `.md` paths + capture-file precedence), `src/test/vaultImportEligibility.test.ts` (`contextTagSlug`, `resolveOrphanAddFilepath` precedence). Wiring: `src/contextTags.ts`, `src/repositories/FileMetadataService.ts`, `src/syncScope.ts` (`fileForNewTickTickTask`), `src/services/VaultSyncCoordinator.ts` (`determineTargetFile`), `src/services/checkDatabase.ts` (modal path, unchanged).
 
 | Case | Steps | Expected | Pilot |
 |------|-------|----------|-------|
-| BUG-TT-TAGFILTER-INBOX context-routing | Unit: orphan task with tags `["note/don-253"]` → `resolveOrphanAddFilepath({ contextNoteFile })`. Explicit `filepath` / `parentNote` keep precedence. | Add resolves to the note file behind the context tag, not `00 Inbox/abyss-active.md`. | unit **pass** (red → green this PR) |
-| BUG-TT-TAGFILTER-INBOX fallback | Unit: task with no context tag / non-context tag (`gtd/next`) / null → Inbox fallback. | `ABYSS_CAPTURE_FALLBACK` stays the honest target. | unit **pass** |
-| BUG-TT-TAGFILTER-INBOX live | Pilot vault: note with inline task; TT filtered view by `note/<slug>`; add sibling; **Synchronize**. | New task lands as inline checkbox in the note's Active Zone (or re-parents like any inline). | **not run** (owner merge first; live vault untouched) |
+| BUG-TT-TAGFILTER-INBOX lookup | Unit: `getFilepathForNoteTag('note/don-253')` with `db.files` holding `30 Tasks/301 Noveo_tasks/DON-253.md`; plus `proj/work-x` → `10 Projects/Work X.md`, parked/partial/non-context → `undefined`. | Resolves the note path; no prefix/partial matches. | unit **pass** (red → green) |
+| BUG-TT-TAGFILTER-INBOX precedence | Unit: `fileForNewTickTickTask` with/without `contextNoteFile`. | Context note wins over the inbox capture; blank path ignored; no context → capture unchanged. | unit **pass** |
+| BUG-TT-TAGFILTER-INBOX live (2.0.97) | Pilot vault on 2.0.97: TT task tagged `note/don-253` in Inbox → **Synchronize**. | Line in `DON-253.md`. | **fail** 2026-11-13 — line went to `abyss-active.md` (journal `tt->obs line create`, file `00 Inbox/abyss-active.md`) |
+| BUG-TT-TAGFILTER-INBOX live (2.0.98 build) | Same, twice, on the 2.0.98 pilot build. | Line in `DON-253.md`; `abyss-active.md` untouched. | **pass ×2** 2026-11-13 (`PROVE-299-C` → `DON-253.md:98`, `PROVE-299-D` → `DON-253.md:99`; `abyss-active.md` stayed 76 160 B) |
 
-Regression: `resolveOrphanAddFilepath` precedence (filepath → parentNote → contextNoteFile → projectMappedFile → newTasksFile → default project file → abyss capture → abyss-active) unchanged for all other callers.
+Regression: `resolveOrphanAddFilepath` precedence (filepath → parentNote → contextNoteFile → projectMappedFile → newTasksFile → default project file → abyss capture → abyss-active) unchanged for all other callers; tasks with no context tag still use the capture file.
 
 ## UX-SET-TASKS-FOLDER-COPY — GTD «Tasks folder» help on the Abyss path (#202)
 

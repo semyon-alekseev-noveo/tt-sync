@@ -13,15 +13,15 @@
 | Поле | Значение |
 |------|----------|
 | Стадия | Пилотный soak на `<pilot-vault>`; **Step 8 (живой vault) не открыт** |
-| Сборка на пилоте | **2.0.97** установлена в пилотном vault 2026-11-13; `main.js` байт-в-байт совпадает с релизным артефактом (`sha256 c5bffeee…35089`). Заменяет ранее объявленные tip-сборки (`5190686` / `ec91fec` / `00ff923` / `945d182`). |
-| Последний релиз | **2.0.97** (2026-11-13, non-prerelease) — https://github.com/semyon-alekseev-noveo/tt-sync/releases/tag/2.0.97 |
-| Верхушка ветки | `abyss-mapping` @ `1421e17` — merge релизного PR #311; **в релизе** |
+| Сборка на пилоте | **2.0.98** (сборка ветки `fix/issue-299-note-tag-ext` @ `6d53d4b`, `main.js` 800 898 B) развёрнута в пилотном vault 2026-11-13 для повторного live-prove #299. До этого стояла байт-проверенная сборка релиза **2.0.97** (`sha256 c5bffeee…35089`). |
+| Последний релиз | **2.0.97** (2026-11-13, non-prerelease) — https://github.com/semyon-alekseev-noveo/tt-sync/releases/tag/2.0.97. **2.0.98 подготовлен, не влит.** |
+| Верхушка ветки | `abyss-mapping` @ `1421e17` — merge релизного PR #311; **в релизе**. Ветка фикса `fix/issue-299-note-tag-ext` @ `6d53d4b` ждёт merge владельца. |
 | CI на верхушке | **ЗЕЛЁНЫЙ** (`1421e17` — и релизный прогон, и прогон ветки; также `5190686`, `78d8a82`, `ffd5065`, `ec91fec`, `00ff923`, `945d182`); `PROC-CI-CYCLES-RED` закрыт (#300, allowlist 118 → 56) |
-| Юнит-тесты | 1016 / 143 файла (2026-11-13, верхушка `1421e17`) |
+| Юнит-тесты | **1023 / 144 файла** на ветке фикса 2.0.98; **1016 / 143** на выпущенной верхушке `1421e17` |
 | Открытых issue | 17 |
-| Открытых PR | 0 |
+| Открытых PR | 1 (фикс #299, ждёт merge владельца) |
 
-Практический вывод: очередь релизов с 2026-11-03 разобрана — **2.0.97** содержит всё до #299 / #305 / #306 включительно. Эти три фикса теперь `shipped`, но **живой prove на пилоте не прогнан**, поэтому issue остаются открытыми. `PROC-PR-STACK-MISBASE` зафиксирован: #302 влился в промежуточную ветку и был пере-влит через #303 (`ec91fec`).
+Практический вывод: **2.0.97 вышел с неработающим фиксом #299.** Живой prove на пилотном vault (2026-11-13) показал, что задача с тегом `note/don-253` уехала в `00 Inbox/abyss-active.md` вместо `DON-253.md`. Две причины: (1) поиск по тегу сравнивал слаг (`don-253`) с basename в `db.files`, где остаётся `.md` → всегда `undefined`; (2) маршрутизация была подключена только к модалке orphan-Add, а не к обычному pull-пути. Оба дефекта исправлены в ветке `fix/issue-299-note-tag-ext`, живой prove **проходит ×2** на сборке 2.0.98. **2.0.98 везёт этот фикс.** #305 / #306 остаются `shipped` без живого prove. `PROC-PR-STACK-MISBASE` зафиксирован: #302 влился в промежуточную ветку и был пере-влит через #303 (`ec91fec`).
 
 
 ## Context
@@ -42,7 +42,8 @@
 
 ## Validation
 
-- **2.0.97 (2026-11-13, выпущен):** все изменения с 2.0.96 — Sync off kill switch (#287/#288), seal реактивных create/update (#295, prove ×2), detach ghost-маркеров после Reset (#290, prove ×2), list-root `note/*` не промоутится в `#system/project` (#284, prove ×2), Settings UX epic #189, ARCH-SYNC intent×identity (#255), Confirm Rebind (#272/#274), TT dup-create prevention (#279–#281), open-note Delete fix (#275), BUG-TT-TAGFILTER-INBOX (#299), GTD_ARRAY_KEYS (#213), UX-SET-TASKS-FOLDER-COPY (#202), AF-FMT-OFF-SYMBOL-LOSS (#305), AF-FMT-OFF-LIST-MOVE (#306), cycle fix (#300). Артефакты: `main.js`, `manifest.json`, `styles.css`, zip.
+- **2.0.97 (2026-11-13, выпущен):** все изменения с 2.0.96 — Sync off kill switch (#287/#288), seal реактивных create/update (#295, prove ×2), detach ghost-маркеров после Reset (#290, prove ×2), list-root `note/*` не промоутится в `#system/project` (#284, prove ×2), Settings UX epic #189, ARCH-SYNC intent×identity (#255), Confirm Rebind (#272/#274), TT dup-create prevention (#279–#281), open-note Delete fix (#275), BUG-TT-TAGFILTER-INBOX (#299 — **фикс оказался нерабочим, см. 2.0.98**), GTD_ARRAY_KEYS (#213), UX-SET-TASKS-FOLDER-COPY (#202), AF-FMT-OFF-SYMBOL-LOSS (#305), AF-FMT-OFF-LIST-MOVE (#306), cycle fix (#300). Артефакты: `main.js`, `manifest.json`, `styles.css`, zip.
+- **2.0.98 (готовится, ветка `fix/issue-299-note-tag-ext`):** рабочий фикс #299 — поиск по context-тегу через `slugForContextTag` и маршрутизация в обычном pull-пути (`determineTargetFile` → `fileForNewTickTickTask`). Live prove ×2 на пилотной сборке.
 - Релиз **2.0.96** (2026-11-03): фикс цикла после **2.0.95** (тег без релиза — публикация остановилась на `check:cycles`).
 - Релиз **2.0.94** (2026-10-27): PROC-RELEASE-GATE в `release.yml` (#30); GAP-COMMENT-EDIT PUT (#63/#173); локальный LWW переписывает строку vault (#174); подсчёт `tasks.file` drift (#175).
 - Релиз **2.0.93** (2026-10-26): NOTE-BODY-2 (TT body → Abyss `- >` на pull) + FEAT-NOTEBOOK MVP (opt-in TT→vault папка) — оба live **pass** ×2.
@@ -98,7 +99,7 @@
 | **ARCH-SYNC-INTENT-IDENTITY** | P0 | **resolved** ([#255](https://github.com/semyon-alekseev-noveo/tt-sync/issues/255)) | Проход идентичности перед разрушительным планом; порог массового удаления считает только destructive. Prove ×2 (`39-…`). |
 | **UX-SYNC-CONFIRM-REBIND** | P1 | **resolved** ([#272](https://github.com/semyon-alekseev-noveo/tt-sync/issues/272)) | Confirm предлагает Rebind. Остаток: `BUG-CONFIRM-REBIND-DUP` — фикс unit, повторный live-prove **не прогонялся** (`41-…`). |
 | **BUG-CREATE-MATCH-UNDEF** | P1 | **unit-only** ([#291](https://github.com/semyon-alekseev-noveo/tt-sync/issues/291)) | Двойной Notice на create: «created» + «Failed to add … reading 'match'». Фикс влит (#293), live-prove **не прогонялся**. |
-| **BUG-TT-TAGFILTER-INBOX** | P1 | **shipped** в 2.0.97 (#308 `ffd5065`); live prove не прогнан ([#299](https://github.com/semyon-alekseev-noveo/tt-sync/issues/299)) | Задача, добавленная в TT в отфильтрованном по тегу заметки виде, уезжает в Inbox вместо строки заметки. Триаж 2026-11-12: AF-строка + факты по коду (теги `note/` только на push, на pull маршрутизации нет, fallback `00 Inbox/abyss-active.md`). Живой MCP-просмотр 2026-11-12 подтвердил сценарий A (задача сохранила `note/don-253`). Фикс 2026-11-12: `contextTagSlug` + orphan-Add routing by context tag (`contextNoteFile`), юнит red → green, сборка зелёная. Влит #308 (`ffd5065`), вышел в 2.0.97 → `shipped`; issue открыт до live prove ×2. |
+| **BUG-TT-TAGFILTER-INBOX** | P1 | **фикс 2.0.97 не работал** → исправлен в ветке `fix/issue-299-note-tag-ext`, live prove ×2 прошёл, ждёт 2.0.98 ([#299](https://github.com/semyon-alekseev-noveo/tt-sync/issues/299)) | Задача, добавленная в TT в отфильтрованном по тегу заметки виде, уезжает в Inbox вместо строки заметки. Живой prove на 2.0.97 (2026-11-13): задача с `note/don-253` попала в `00 Inbox/abyss-active.md` (journal `tt->obs line create`), `DON-253.md` не изменился. Две причины: (1) `FileMetadataService.getFilepathForNoteTag` сравнивал слаг `don-253` с basename `don-253.md` → всегда `undefined`; (2) маршрутизация была только в модалке orphan-Add, а не в обычном pull (`VaultSyncCoordinator.determineTargetFile` → `fileForNewTickTickTask`). Исправлено: обе стороны поиска идут через `slugForContextTag`; `fileForNewTickTickTask` принимает `contextNoteFile` перед capture/list, `determineTargetFile` резолвит его из тега. Регресс-тест red → green; живой prove **×2** на сборке 2.0.98 (`PROVE-299-C` → `DON-253.md:98`, `PROVE-299-D` → `DON-253.md:99`). |
 | **GTD_ARRAY_KEYS** | P2 | **shipped** в 2.0.97 ([#213](https://github.com/semyon-alekseev-noveo/tt-sync/issues/213)) | `statusListMappings` не входил в wipe-guard: пустые дефолты могли затереть настроенную таблицу статус→список. Добавлен в `GTD_ARRAY_KEYS`; `wouldWipeGtdFromDisk` теперь зеркалит `preserveGtdFromDisk` по всем четырём массивам. Юнит `GTD-ARRAY-KEYS`. Влит #301 (`00ff923`), вышел в 2.0.97; пилотные строки `not run`. |
 | **FMT-OFF-LOSSY** | P2 | **analysis** ([#201](https://github.com/semyon-alekseev-noveo/tt-sync/issues/201)) | Выключение `abyssTasksFormat` на настроенном Abyss-пилоте — не переключение режима, а потеря данных: символы `[/] [!] [?] [=] [~]` схлопываются в `[ ]` при pull, тела `- >` отвязываются и тело в TT может очиститься, заглушки `TTS-*` возвращаются, строка может переехать в другой файл. Матрица ON/OFF: `docs/pilot/ABYSS-FORMAT-OFF-MATRIX.md`. Рекомендации R1–R6. R4 → engine issue **#305** — **fixed 2026-11-12**, вышла в 2.0.97 (#309 `78d8a82`); R5 → engine issue **#306** — **fixed 2026-11-12**, вышла в 2.0.97 (#310 `5190686`). R1–R3 — выбор owner. |
 | **AF-FMT-OFF-SYMBOL-LOSS** | P1 | **shipped** в 2.0.97 ([#305](https://github.com/semyon-alekseev-noveo/tt-sync/issues/305)) | `abyssTasksFormat` OFF не должен схлопывать символы чекбоксов на pull при заданной `statusListMappings`. List-driven restore в `convertToLine.ts`; юнит red → green. Влит #309 (`78d8a82`), вышел в 2.0.97; пилот live prove не прогнан, issue открыт. |
@@ -150,14 +151,14 @@
 Порядок. Step 8 не открывать, пока 1–3 не зелёные.
 
 1. **[done 2026-11-12] PROC-CI-CYCLES-RED** — фикс влит #300 (`945d182`), CI зелёный, вышел в 2.0.97.
-2. **Объявление сборки пилота — сделано (2026-11-13):** пилотный vault на релизной сборке **2.0.97** (`sha256` совпадает с релизным артефактом). Ранее объявленные tip-сборки (`5190686` / `ec91fec` / `00ff923` / `945d182`) больше не действуют.
+2. **Объявление сборки пилота — сделано (2026-11-13):** пилотный vault на сборке **2.0.98** (`fix/issue-299-note-tag-ext` @ `6d53d4b`), развёрнута для повторного live-prove #299. До этого — байт-проверенная сборка релиза **2.0.97**. Ранее объявленные tip-сборки (`5190686` / `ec91fec` / `00ff923` / `945d182`) больше не действуют.
 3. **Закрыть хвосты prove** (owner, `docs/pilot/results/UX-OBS-TT-SOAK/50-owner-live-tails-checklist.md`):
    - `41-…` Confirm Rebind dup — prove ×2 на разных фикстурах.
    - `42-…` Delete/Backspace в открытой заметке — prove ×2.
    - `25-…` Reset → Synchronize ×2 (ghost detach теперь ожидаемая честность).
    - `36-…` strip-marker reattach toast + Orphan glance.
    - #291 живой Notice на create (unit уже зелёный).
-4. **#299** `BUG-TT-TAGFILTER-INBOX` — **вышел в 2.0.97** (#308, `ffd5065`); issue открыт до live prove ×2. Следующий шаг: включить Sync в пилотном vault и доказать, что Add из отфильтрованного по тегу вида попадает в файл заметки, а не в Inbox.
+4. **#299** `BUG-TT-TAGFILTER-INBOX` — фикс из 2.0.97 **не работал** (живой prove 2026-11-13). Исправлен в ветке `fix/issue-299-note-tag-ext` (`6d53d4b`), живой prove **×2** на сборке 2.0.98. Дальше: владелец вливает фикс + bump 2.0.98, ставится тег `2.0.98` — тогда `shipped` будет честным.
 5. **Схлопнуть #243/#244** в один doc/UX-issue; #245 оставить единственным продуктовым решением (parent vs tags-only).
 6. **#213** — вышел в 2.0.97 (#301, `00ff923`). Пилотные строки в `TEST_PLAN.md` остаются `not run`.
 7. **#202** — вышел в 2.0.97 (#303, `ec91fec`). Пилотные строки остаются `not run`.

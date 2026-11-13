@@ -31,15 +31,15 @@ Project stage is a separate axis: **pilot soak → Step 8 live gate**. The live 
 | Field | Value |
 |-------|-------|
 | Stage | Pilot soak on `<pilot-vault>`; Step 8 live-vault gate **closed** |
-| Pilot build | **2.0.97** installed in the pilot vault on 2026-11-13; `main.js` is byte-identical to the release asset (`sha256 c5bffeee…35089`). Replaces the earlier declared tip builds (`5190686` / `ec91fec` / `00ff923` / `945d182`). |
-| Last release | **2.0.97**, 2026-11-13 (non-prerelease) — https://github.com/semyon-alekseev-noveo/tt-sync/releases/tag/2.0.97 |
-| Branch tip | `abyss-mapping` @ `1421e17` — merge of the 2.0.97 release PR #311; **released** |
+| Pilot build | **2.0.98** (branch build of `fix/issue-299-note-tag-ext` @ `6d53d4b`, `main.js` 800 898 B) deployed to the pilot vault 2026-11-13 for the #299 live re-prove. The previous pilot build was the byte-verified **2.0.97** release asset (`sha256 c5bffeee…35089`). |
+| Last release | **2.0.97**, 2026-11-13 (non-prerelease) — https://github.com/semyon-alekseev-noveo/tt-sync/releases/tag/2.0.97. **2.0.98 is prepared, not merged.** |
+| Branch tip | `abyss-mapping` @ `1421e17` — merge of the 2.0.97 release PR #311; **released**. Fix branch `fix/issue-299-note-tag-ext` @ `6d53d4b` is **pending owner merge**. |
 | CI on tip | **GREEN** on `1421e17` (release run + branch run), and on `5190686`, `78d8a82`, `ffd5065`, `ec91fec`, `00ff923`, `945d182`; `PROC-CI-CYCLES-RED` fixed (#300, allowlist 118 → 56) |
-| Unit tests | **1016 passed / 143 files** on 2026-11-13 (tip `1421e17`) |
+| Unit tests | **1023 passed / 144 files** on the 2.0.98 fix branch; **1016 / 143** on the released tip `1421e17` |
 | Open issues | 17 |
-| Open PRs | 0 |
+| Open PRs | 1 (#299 fix, pending owner merge) |
 
-Consequence: the release backlog since 2026-11-03 is cleared — **2.0.97** ships everything up to and including #299 / #305 / #306. Those three fixes are now `shipped` but their **live pilot prove is still not run**, so the issues stay open. `PROC-PR-STACK-MISBASE` is recorded: #302 merged into the stacked base and was re-landed by #303 (`ec91fec`).
+Consequence: **2.0.97 was released with #299 inert.** Live prove on the pilot vault (2026-11-13) showed a task tagged `note/don-253` landing in `00 Inbox/abyss-active.md` instead of `DON-253.md`. Two defects: the tag lookup compared a slug against a basename that still carried `.md`, and the routing was only wired into the orphan-Add modal, not the normal pull path. Both are fixed on `fix/issue-299-note-tag-ext`, and the live prove **passes ×2** on the 2.0.98 build. **2.0.98 ships that fix.** #305 / #306 remain `shipped` with live prove not run. `PROC-PR-STACK-MISBASE` is recorded: #302 merged into the stacked base and was re-landed by #303 (`ec91fec`).
 
 ## Context
 
@@ -81,7 +81,7 @@ Process (open):
 Open bugs:
 
 - **BUG-CREATE-MATCH-UNDEF** [#291](https://github.com/semyon-alekseev-noveo/tt-sync/issues/291) — dual Notice on open-note create (`created` + `Failed to add … 'match'`). Fix merged (#293, unit `bugCreateMatchUndef.test.ts`). Live re-prove **not run** → `unit-only`.
-- **BUG-TT-TAGFILTER-INBOX** [#299](https://github.com/semyon-alekseev-noveo/tt-sync/issues/299) — task added in a TT tag-filtered view lands in Inbox instead of the linked note. Filed 2026-11-07. Triage 2026-11-12: AF row written, code facts recorded (context tags are push-only; no pull routing by `note/<slug>`; orphan fallback = `00 Inbox/abyss-active.md`). Live read 2026-11-12 confirmed **scenario A** (task kept the `note/don-253` tag). **Fix shipped in 2.0.97 (#308, `ffd5065`):** `contextTagSlug` (`src/contextTags.ts`) + orphan Add context routing (`contextNoteFile` in `resolveOrphanAddFilepath`) + `FileMetadataService.getFilepathForNoteTag`; unit red → green → `shipped`; live pilot prove **not run** (issue open).
+- **BUG-TT-TAGFILTER-INBOX** [#299](https://github.com/semyon-alekseev-noveo/tt-sync/issues/299) — task added in a TT tag-filtered view lands in Inbox instead of the linked note. Filed 2026-11-07. Triage 2026-11-12: AF row written, code facts recorded (context tags are push-only; no pull routing by `note/<slug>`; orphan fallback = `00 Inbox/abyss-active.md`). Live read 2026-11-12 confirmed **scenario A** (task kept the `note/don-253` tag). **The 2.0.97 fix shipped inert** (#308, `ffd5065`): live prove on the pilot vault 2026-11-13 routed a task tagged `note/don-253` into `00 Inbox/abyss-active.md`; journal `tt->obs line create`, `DON-253.md` never written. Two defects: (1) `FileMetadataService.getFilepathForNoteTag` compared the tag slug (`don-253`) with a `db.files` basename that still carried `.md` → always `undefined`; (2) the routing was only wired into the orphan-Add **modal** (`checkDatabase.ts`), never the normal pull path (`VaultSyncCoordinator.determineTargetFile` → `fileForNewTickTickTask`). **Fixed on `fix/issue-299-note-tag-ext`:** both lookup sides go through `slugForContextTag`; `fileForNewTickTickTask` takes a resolved `contextNoteFile` ahead of the capture/list file and `determineTargetFile` resolves it from the task's `note/` · `proj/` tag. Regression `src/test/bugTagfilterInbox.test.ts` red → green; **live prove ×2 passes** on the 2.0.98 build (`PROVE-299-C` → `DON-253.md:98`, `PROVE-299-D` → `DON-253.md:99`, `abyss-active.md` untouched). Ships in **2.0.98**; issue stays open until owner merge + release.
 - **BUG-CONFIRM-REBIND-DUP** — post-#273 Confirm Rebind `InsertLine` dups beside live same-title siblings; `allowDisplaceLiveSameTitle` fix is unit-only, pilot re-prove **not run** (`UX-OBS-TT-SOAK/41-…`) → `unit-only`.
 - **BUG-OPENNOTE-DELETE-CONFIRM** — Delete/Backspace mid-edit opened PushDeleteTT Confirm; keyup `deletedTaskCheck` dropped, re-prove **not run** (`UX-OBS-TT-SOAK/42-…`) → `unit-only`.
 - **BUG-TT-CREATE-PATH-BYPASS** — create-path audit units pass; pilot path-guard **not run** (`UX-OBS-TT-SOAK/45-…`) → `unit-only`.
@@ -127,14 +127,14 @@ Resolved / closed (keep as history, do not re-open):
 Ordered. Do not start Step 8 before 1–3 are green.
 
 1. **[done 2026-11-12] PROC-CI-CYCLES-RED:** fixed and merged #300 (`945d182`), CI green → shipped in 2.0.97.
-2. **[done 2026-11-13] Pilot declaration:** pilot vault runs the released **2.0.97** build (sha256 matches the release asset). Earlier tip declarations (`5190686` / `ec91fec` / `00ff923` / `945d182`) are superseded.
+2. **[done 2026-11-13] Pilot declaration:** the pilot vault runs the **2.0.98** branch build (`fix/issue-299-note-tag-ext` @ `6d53d4b`), deployed for the #299 live re-prove. Before that it ran the byte-verified **2.0.97** release asset. Earlier tip declarations (`5190686` / `ec91fec` / `00ff923` / `945d182`) are superseded.
 3. **Close the proof tails** (owner, `docs/pilot/results/UX-OBS-TT-SOAK/50-owner-live-tails-checklist.md`):
    - `41-…` Confirm Rebind dup — prove ×2 on different fixtures.
    - `42-…` open-note Delete/Backspace — prove ×2.
    - `25-…` Reset → Synchronize ×2 (ghost detach is now expected honesty).
    - `36-…` strip-marker reattach toast + Orphan glance.
    - #291 live create Notice (unit already green).
-4. **#299** `BUG-TT-TAGFILTER-INBOX` — **shipped in 2.0.97** (#308, `ffd5065`); issue kept open until live pilot prove ×2. Next: enable Sync in the pilot vault and prove the tag-filtered Add lands in the note file, not Inbox.
+4. **#299** `BUG-TT-TAGFILTER-INBOX` — the 2.0.97 fix was **inert** (live-proven broken 2026-11-13). Fixed on `fix/issue-299-note-tag-ext` (`6d53d4b`), live prove **passes ×2** on the 2.0.98 build. Next: owner merges the fix + 2.0.98 bump, tag `2.0.98`, then `shipped` is honest.
 5. **Collapse #243/#244** into one doc/UX issue and keep #245 as the single product decision (parent vs tags-only).
 6. **#213** — shipped in 2.0.97 (#301, `00ff923`). Pilot rows in `TEST_PLAN.md` stay `not run`.
 7. **#202** — shipped in 2.0.97 (#303, `ec91fec`). Pilot rows stay `not run`.
@@ -151,6 +151,7 @@ Ordered. Do not start Step 8 before 1–3 are green.
 - `UX-OBS-TT-SOAK/INDEX.md` has row `52` duplicated and still marks #295 prove as "not run".
 - CI red was not recorded anywhere in the status docs.
 - **Post-2.0.97 pass (2026-11-13):** the snapshot still said "2.0.97 prepared, pending owner merge + tag" and listed #299/#305/#306 as `merged-tip` after the release had shipped. Corrected to `shipped`, branch tip `1421e17`, open PRs 0, pilot build 2.0.97 (sha256-verified against the release asset).
+- **Post-live-prove correction (2026-11-13):** #299 was recorded as `shipped` but its live prove **failed** — 2.0.97 shipped the fix inert. The table above, the #299 entry, and the To-Be-Done item now record the failure, the two root causes, the fix branch, and the pass ×2 on 2.0.98. Lesson: `shipped` for #299 required a live prove, and reading-only validation was not enough.
 
 ## References
 
