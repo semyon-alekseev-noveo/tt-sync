@@ -1,3 +1,13 @@
+### Iteration 2026-11-13 05:26 UTC
+
+- Context: **2.0.97** was released (PR #311 merged at `1421e17`, tag pushed, GitHub Release published) and the pilot vault was updated to that build, but the status docs still described the release as "prepared, pending owner merge + tag".
+- Target: A docs-only correction so `PROJECT_STATE.md` / `PO_STATUS.md` match what actually shipped. No behavior change.
+- Actions log: status snapshots now record **2.0.97 released 2026-11-13**, branch tip `1421e17`, open PRs 0, pilot build 2.0.97; #299 / #305 / #306 / #213 / #202 / #300 flipped from `merged-tip` to `shipped` (still open for live prove ×2 where applicable); local `abyss-mapping` fast-forwarded to `1421e17`.
+- Validation: vault `main.js` sha256 `c5bffeee…35089` is byte-identical to the `2.0.97` release asset; `manifest.json` in the vault reads 2.0.97. Docs-only change — no test run needed, suite unchanged at 1016 / 143.
+- Problems: Live pilot prove for #299 / #305 / #306 still **not run** — the pilot vault has `syncEnabled: false`, and #305/#306 need `abyssTasksFormat` OFF, which is a lossy mode (see `docs/pilot/ABYSS-FORMAT-OFF-MATRIX.md`).
+- To Be Done: Owner runs the live proves on a vault copy (Sync on for #299; OFF-format scratch note for #305/#306), then the issues can close.
+- References: #299, #305, #306, #201, #202, #213, #300, #311, release 2.0.97
+
 ### Iteration 2026-11-13 04:47 UTC
 
 - Context: Owner asked to refresh the merged items and status docs, then cut a full release. Three fixes merged on 2026-11-12 (#308/#309/#310) but their issues and the snapshot tables were stale.
