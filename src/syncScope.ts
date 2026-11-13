@@ -54,13 +54,22 @@ export function taskMatchesSyncLimit(
 /**
  * A task created on the inbox list is written into the Abyss capture note.
  * Other lists still use their own file when the capture note does not apply.
+ *
+ * BUG-TT-TAGFILTER-INBOX (#299): a task created inside a TickTick tag-filtered
+ * view keeps the injected `note/<slug>` (or `proj/<slug>`) context tag, so its
+ * real home is that note — ahead of both the capture note and the list file.
+ * `contextNoteFile` is the vault path already resolved from that tag.
  */
 export function fileForNewTickTickTask(
 	projectId: string | undefined,
 	defaultProjectId: string | undefined,
 	captureFile: string | undefined,
 	listFile: string | undefined,
+	contextNoteFile?: string | undefined,
 ): string | undefined {
+	if (contextNoteFile?.trim()) {
+		return contextNoteFile.trim();
+	}
 	if (projectId && defaultProjectId && projectId === defaultProjectId && captureFile?.trim()) {
 		return captureFile.trim();
 	}

@@ -61,3 +61,29 @@ describe('BUG-TT-TAGFILTER-INBOX', () => {
 		expect(await svc.getFilepathForNoteTag('note/don-2530')).toBeUndefined();
 	});
 });
+
+describe('BUG-TT-TAGFILTER-INBOX: new-task file precedence', () => {
+	it('prefers the context note over the inbox capture file', async () => {
+		const { fileForNewTickTickTask } = await import('@/syncScope');
+
+		expect(
+			fileForNewTickTickTask('inbox1', 'inbox1', '00 Inbox/abyss-active.md', undefined, '30 Tasks/DON-253.md'),
+		).toBe('30 Tasks/DON-253.md');
+	});
+
+	it('still uses the capture file for an inbox task with no context tag', async () => {
+		const { fileForNewTickTickTask } = await import('@/syncScope');
+
+		expect(
+			fileForNewTickTickTask('inbox1', 'inbox1', '00 Inbox/abyss-active.md', undefined, undefined),
+		).toBe('00 Inbox/abyss-active.md');
+	});
+
+	it('ignores a blank context path', async () => {
+		const { fileForNewTickTickTask } = await import('@/syncScope');
+
+		expect(
+			fileForNewTickTickTask('inbox1', 'inbox1', '00 Inbox/abyss-active.md', undefined, '   '),
+		).toBe('00 Inbox/abyss-active.md');
+	});
+});
