@@ -21,6 +21,7 @@ import { getAllProjects } from '@/db/projects';
 import { tagsForCurrentList } from '@/listMapping';
 import { deleteFile, upsertFile } from '@/db/files';
 import { allowVaultUpdate, fileForNewTickTickTask, isListAllowed, isParkedVaultPath, listStubFilesEnabled, normalizeSyncTag, resolveSyncedListIds, taskMatchesSyncLimit, unmatchedEntries } from '@/syncScope';
+import { NOTE_CTX_PREFIX, PROJ_CTX_PREFIX } from '@/contextTags';
 import { FolderSyncService } from '@/services/FolderSyncService';
 import log from '@/utils/logger';
 import { commitVaultText, readNoteForWrite, syncCachedRead, syncRead } from '@/sync/vault-io';
@@ -257,7 +258,23 @@ export class VaultSyncCoordinator {
 				log.debug(`Found task ${task.id} in unassociated file: ${fileWithTask}`);
 				return fileWithTask;
 			}
-			const capture = fileForNewTickTickTask(task.projectId, defaultProjectId, await this.abyssCaptureFile(), undefined);
+			// BUG-TT-TAGFILTER-INBOX (#299): a task added in a TT tag-filtered view keeps
+			// the injected note/<slug> / proj/<slug> tag, so it belongs in that note — not
+			// in the Abyss capture file. This is the path a normal pull takes for a new
+			// inbox task; the 2.0.97 fix only covered the orphan-Add modal.
+			const contextTag = (task.tags ?? []).find(
+				(t) => t.startsWith(NOTE_CTX_PREFIX) || t.startsWith(PROJ_CTX_PREFIX),
+			);
+			const contextNoteFile = contextTag
+				? await this.plugin.fileMetadataService?.getFilepathForNoteTag(contextTag)
+				: undefined;
+			const capture = fileForNewTickTickTask(
+				task.projectId,
+				defaultProjectId,
+				await this.abyssCaptureFile(),
+				undefined,
+				contextNoteFile,
+			);
 			if (capture) {
 				cache.set(task.projectId, capture);
 				return capture;
