@@ -1,3 +1,13 @@
+### Iteration 2026-11-13 09:45 UTC
+
+- Context: #313 merged (`6a91fdf`) and the owner authorized the tag. This records the 2.0.98 release itself.
+- Target: publish **2.0.98** from the merged tip and verify the artifact.
+- Actions log: created tag `2.0.98` on `6a91fdf` and pushed it; the **Release Obsidian plugin** workflow passed (its `test` job = cycles / sizes / npm test / build, plus the ancestor, version-match and no-existing-release gates); GitHub Release published non-prerelease with `main.js`, `manifest.json`, `styles.css`, `tickticksync-abyss.zip`. Issue #299 commented with the release evidence and **closed**. Status snapshots moved to 2.0.98 / tip `6a91fdf` / 16 open issues / 0 open PRs.
+- Validation: `sha256(main.js)` is **`a3113a4b…88e347`** for all three of: the published release asset, a local build from `6a91fdf`, and the pilot vault plugin. So the released bytes are exactly the bytes that passed the #299 live prove ×2. CI on `6a91fdf` green (1023 tests / 144 files).
+- Problems: none in the release path. #305 / #306 live proves still not run (`abyssTasksFormat` OFF is lossy; do it on a vault copy). PR #312 was closed as superseded by #313.
+- To Be Done: optionally prove #305 / #306 on a vault copy; R1–R3 of #201 still pending owner pick.
+- References: release 2.0.98, #313, #299, tag `2.0.98`, `PROJECT_STATE.md`, `PO_STATUS.md`
+
 ### Iteration 2026-11-13 16:40 UTC
 
 - Context: **2.0.97 shipped #299 inert.** The live prove on the pilot vault (task tagged `note/don-253` created in TickTick Inbox → **Synchronize**) put the line in `00 Inbox/abyss-active.md:827`; `DON-253.md` was never written (journal `tt->obs` / `line` / `create` / `file: 00 Inbox/abyss-active.md`). Evidence posted on [#299](https://github.com/semyon-alekseev-noveo/tt-sync/issues/299#issuecomment-6849115372).
