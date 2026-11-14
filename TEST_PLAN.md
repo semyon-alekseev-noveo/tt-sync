@@ -2050,3 +2050,22 @@ Prevention first (no Deduplicate UI). After hierarchy collapse, former subtasks 
 | Case | Pilot | Notes |
 |------|-------|-------|
 | BUG-LISTROOT-NOTE-PROMOTE | unit **pass**; live **pass** ×2 | `UX-OBS-TT-SOAK/47-listroot-note-promote.md` (tip `358690e` / 2.0.96; clean A/B fixtures) |
+
+## AF-FMT-OFF-SYMBOL-LOSS (#305) / AF-FMT-OFF-LIST-MOVE (#306) — live prove on the OFF path
+
+Live prove 2026-11-14, run by the agent, **not** on the pilot or live vault.
+
+**Method.** Isolated scratch vault (`~/obsidian/TTS-fmt-off-prove`, since deleted) opened in a **separate Obsidian instance** (`--user-data-dir=/tmp/…`, so the user's profile, plugin data and IndexedDB were untouched), driven through the DevTools protocol instead of clicks. Plugin build = the published **2.0.98** asset (`sha256 a3113a4b…88e347`). Settings copied from the pilot, then: `abyssTasksFormat: false`, `projectSchemeEnabled: true`, `syncScopeFolders: ["30 Tasks/"]`, `syncedLists: [WIP, nextAction]`, `syncEnabled: false` (manual sync only), no notes but the two stub files the pull creates. Two probe tasks were created and later deleted in TickTick.
+
+| Case | Steps | Expected | Result |
+|------|-------|----------|--------|
+| #305 symbol restore, run 1 | Pull the WIP list (map `/` → WIP) and nextAction (`!` → nextAction) with the flag **OFF** and `statusListMappings` set | Lines render `[/]` and `[!]`, **not** `[ ]` | **pass** — `TTS-WIP.md` → `- [/] PROVE-305-A`, `TTS-nextAction.md` → `- [!] PROVE-305-B` (plus the existing WIP/nextAction tasks, all `[/]` / `[!]`) |
+| #305 symbol restore, run 2 | Move PROVE-305-A WIP → nextAction and PROVE-305-B nextAction → WIP in TickTick, Synchronize | Char follows the **new** list | **pass** — `[/] PROVE-305-A` became `[!] …`, `[!] PROVE-305-B` became `[/] …` |
+| #306 no relocate | Same two moves as above | Lines stay in their original files | observed **no relocate**, but see the caveat — **not** a proof of the gate |
+| #306 negative control | Local control build with `abyssLineInPlace` forced to `return false`, same moves | Line relocates to the new list's file, proving the gate is what holds it | **control did not fire** — `isProjectIdChanged` requires `filepathHasDefaultProjectID`, and flat list stubs carry no default project, so `handleTickTickStructureMove` was unreachable in either build |
+
+**Verdict.**
+
+- **#305: live pass ×2.** With the flag OFF the checkbox symbols survive the pull and track the list. Combined with the unit (`bugFmtOffSymbolLoss.test.ts`) this is the prove-twice pair; the issue can go `shipped` honestly.
+- **#306: still unit-only.** The live run shows the desired behaviour, but the negative control shows the scenario cannot be reached from flat stub files, so the run says nothing about `abyssLineInPlace`. A real live prove needs a **scheme-created project note with a default project**, then a TickTick list change for a task inside it — i.e. the `projectSchemeEnabled` state the pilot has, not just the flag flipped. Until then treat #306 as unit-proven (`bugFmtOffListMove.test.ts`) and say so.
+- Side observation, **not reproduced**: on the very first sync of the scratch vault the `== Added by TickTickSync (Abyss fork) — 2.0.98 ==` header and the first task line ended up on one physical line in `TTS-nextAction.md`, and the sync wrote that file twice. Deleting the file and re-pulling produced the correct `header / blank / ## Active Zone / lines` shape, and a follow-up sync rewrote it correctly. One occurrence, no deterministic repro — worth watching, not yet a case.
