@@ -1,3 +1,13 @@
+### Iteration 2026-11-14 02:30 UTC
+
+- Context: #299 was closed on 2.0.98, and the two remaining `abyssTasksFormat` OFF fixes (#305, #306) still had no live prove. Reading-only validation is exactly what made 2.0.97 wrong, so both were taken live.
+- Target: prove or disprove AF-FMT-OFF-SYMBOL-LOSS (#305) and AF-FMT-OFF-LIST-MOVE (#306) without touching the pilot or live vault.
+- Actions log: built an isolated scratch vault (`~/obsidian/TTS-fmt-off-prove`), opened in a **separate Obsidian instance** (`--user-data-dir=/tmp/opencode/obsidian-prove`) and driven through the DevTools protocol; published 2.0.98 build, `abyssTasksFormat: false`, `projectSchemeEnabled: true`, `syncScopeFolders: ["30 Tasks/"]`, `syncedLists: [WIP, nextAction]`. Two probe tasks created in TickTick, pulled, then moved between lists. Cleanup: probe tasks deleted, scratch vault + profile removed, temporary control build reverted (`dist/main.js` back to `a3113a4b…`).
+- Validation: **#305 live pass ×2** — WIP → `[/]`, nextAction → `[!]` with the flag OFF, and chars followed the list after cross-list moves. **#306 inconclusive** — lines did not relocate, but a control build with `abyssLineInPlace` forced to `false` behaved identically, because `isProjectIdChanged` needs `filepathHasDefaultProjectID` and flat list stubs have none. #305 closed; #306 left open as unit-only. Rows in `TEST_PLAN.md`; no engine change, suite unchanged at 1023 / 144.
+- Problems: #306 needs a different fixture (scheme-created project note with a default project), not a flag flip. One non-reproducible cosmetic artifact: on the very first sync the `== Added by TickTickSync …` header joined the first task line in `TTS-nextAction.md`; re-pulling produced the correct shape.
+- To Be Done: owner proof tails (`UX-OBS-TT-SOAK/50-…`) still gate Step 8; R1–R3 of #201 pending owner pick.
+- References: #305, #306, #201, PR #315, `TEST_PLAN.md`, `docs/pilot/ABYSS-FORMAT-OFF-MATRIX.md`
+
 ### Iteration 2026-11-13 09:45 UTC
 
 - Context: #313 merged (`6a91fdf`) and the owner authorized the tag. This records the 2.0.98 release itself.
