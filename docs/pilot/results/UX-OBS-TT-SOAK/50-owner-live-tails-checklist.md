@@ -4,7 +4,8 @@
 |-------|--------|
 | Gate | UX-OBS-TT-SOAK |
 | Vault | **Thinkpad-tts-test only** (не live-vault) |
-| Tip | текущий `abyss-mapping` (после #288 Sync off; плагин `tickticksync-abyss`) |
+| Tip | `abyss-mapping` @ `82c025e` (2.0.98; после #288 Sync off; плагин `tickticksync-abyss`) |
+| Прогон | **2026-11-14, 2.0.98** — agent через `obsidian-cli eval` (без CDP, без рестарта), vault Thinkpad-tts-test |
 | Cases | `BUG-RESET-CACHE-DELETE` (`24`/`25`), `UX-NOTICE-REATTACH` / `UX-NOTICE-MODAL-COPY` (`36`) |
 | Sources | `24-…`, `25-…`, `36-…`, `TEST_PLAN.md`, `ABYSS_FIRST_CASES.md` |
 
@@ -25,6 +26,8 @@
 ## A. BUG-RESET-CACHE-DELETE (Reset → Sync ×2)
 
 Фикстура из `25`: `30 Tasks/301 Noveo_tasks/DON-253.md` (строки с `%%[ticktick_id:: …]%%`, в т.ч. Merge MR / `6ad3324d80c8b04a254e8109`).
+
+**Статус: pass ×2 — 2026-11-14 (2.0.98).** Reset → `checkPoint` 0, vault не тронут; Sync #1 64.0 s / Sync #2 21.9 s — ни одной orphan-strip / Confirm Deletion модалки; маркеры 178 ↔ 178, DON-253 на месте. Запись в `25-…`.
 
 ### Перед стартом
 
@@ -57,6 +60,8 @@
 
 Юнит уже green; нужен owner tip glance.
 
+**Статус: pass — 2026-11-14 (2.0.98), один прогон** (B1 reattach toast + control create, B2 orphan copy). Второй независимый прогон не делался. Запись в `36-…`.
+
 ### B1. Reattach toast (`UX-NOTICE-REATTACH`)
 
 1. В одном in-scope файле с уже синкнутой строкой **снять только** `%%[ticktick_id:: …]%%` (заголовок строки тот же).
@@ -67,7 +72,7 @@
 ### B2. Orphan / cleanup copy (`UX-NOTICE-MODAL-COPY`)
 
 1. Maintenance → **Check sync cache** (или Orphan / Clean up, если предложит).
-2. **Pass glance:** текст **local sync cache** (не голое «database»); Orphan: Leave alone / Add to vault & cache / Delete from TickTick.
+2. **Pass glance:** текст **local sync cache** (не голое «database»); Orphan: `Leave TickTick alone` / `Add to vault — may duplicate` / `Delete in TickTick` (старые подписи «Add to vault & cache» / «Delete from TickTick» устарели).
 3. Для glance достаточно открыть и прочитать; **не** обязательно Add/Delete. Если Leave alone — ок.
 
 ### Fail / что НЕ жать
