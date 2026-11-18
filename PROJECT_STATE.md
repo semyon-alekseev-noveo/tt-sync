@@ -80,7 +80,7 @@ Process (open):
 
 Open bugs:
 
-- **BUG-CREATE-MATCH-UNDEF** [#291](https://github.com/semyon-alekseev-noveo/tt-sync/issues/291) — dual Notice on open-note create (`created` + `Failed to add … 'match'`). Fix merged (#293, unit `bugCreateMatchUndef.test.ts`). Live re-prove **not run** → `unit-only`.
+- **BUG-CREATE-MATCH-UNDEF** [#291](https://github.com/semyon-alekseev-noveo/tt-sync/issues/291) — dual Notice on open-note create (`created` + `Failed to add … 'match'`). Fix merged (#293, unit `bugCreateMatchUndef.test.ts`). **Live re-prove ×2 pass** 2026-11-17 on 2.0.98 (`UX-OBS-TT-SOAK/53-…`) → `shipped` (verified).
 - **BUG-TT-TAGFILTER-INBOX** [#299](https://github.com/semyon-alekseev-noveo/tt-sync/issues/299) — task added in a TT tag-filtered view lands in Inbox instead of the linked note. Filed 2026-11-07. Triage 2026-11-12: AF row written, code facts recorded (context tags are push-only; no pull routing by `note/<slug>`; orphan fallback = `00 Inbox/abyss-active.md`). Live read 2026-11-12 confirmed **scenario A** (task kept the `note/don-253` tag). **The 2.0.97 fix shipped inert** (#308, `ffd5065`): live prove on the pilot vault 2026-11-13 routed a task tagged `note/don-253` into `00 Inbox/abyss-active.md`; journal `tt->obs line create`, `DON-253.md` never written. Two defects: (1) `FileMetadataService.getFilepathForNoteTag` compared the tag slug (`don-253`) with a `db.files` basename that still carried `.md` → always `undefined`; (2) the routing was only wired into the orphan-Add **modal** (`checkDatabase.ts`), never the normal pull path (`VaultSyncCoordinator.determineTargetFile` → `fileForNewTickTickTask`). **Fixed on `fix/issue-299-note-tag-ext`:** both lookup sides go through `slugForContextTag`; `fileForNewTickTickTask` takes a resolved `contextNoteFile` ahead of the capture/list file and `determineTargetFile` resolves it from the task's `note/` · `proj/` tag. Regression `src/test/bugTagfilterInbox.test.ts` red → green; **live prove ×2 passes** on the 2.0.98 build (`PROVE-299-C` → `DON-253.md:98`, `PROVE-299-D` → `DON-253.md:99`, `abyss-active.md` untouched). **Shipped in 2.0.98 (#313, `6a91fdf`), issue closed 2026-11-13.**
 - **BUG-CONFIRM-REBIND-DUP** — post-#273 Confirm Rebind `InsertLine` dups beside live same-title siblings; `allowDisplaceLiveSameTitle` fix shipped in 2.0.97 (#273). **Live re-prove ×2 pass** 2026-11-17 on 2.0.98 (`UX-OBS-TT-SOAK/41-…`) → `shipped` (verified). Observation: the displaced id re-offers on the next run (Link tombstone is same-run only).
 - **BUG-OPENNOTE-DELETE-CONFIRM** — Delete/Backspace mid-edit opened PushDeleteTT Confirm; keyup `deletedTaskCheck` dropped, re-prove **not run** (`UX-OBS-TT-SOAK/42-…`) → `unit-only`.
@@ -133,7 +133,7 @@ Ordered. Do not start Step 8 before 1–3 are green.
    - `42-…` open-note Delete/Backspace — prove ×2.
    - `25-…` Reset → Synchronize ×2 (ghost detach is now expected honesty).
    - `36-…` strip-marker reattach toast + Orphan glance.
-   - #291 live create Notice (unit already green).
+   - [x] #291 live create Notice — **prove ×2 pass** 2026-11-17 (agent, 2.0.98).
 4. **[done 2026-11-13] #299** `BUG-TT-TAGFILTER-INBOX` — the 2.0.97 fix was **inert** (live-proven broken). Fixed in #313 (`6a91fdf`), live prove ×2 passed, released in **2.0.98**, issue closed.
 5. **Collapse #243/#244** into one doc/UX issue and keep #245 as the single product decision (parent vs tags-only).
 6. **#213** — shipped in 2.0.97 (#301, `00ff923`). Pilot rows in `TEST_PLAN.md` stay `not run`.
