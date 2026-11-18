@@ -46,7 +46,7 @@
 | 39 | ARCH-SYNC #261 pilot prove ×2 | `39-arch-sync-261-prove.md` | **live pass** ×2 @`3729c0b` (after #267); fixtures PKM+Годовые |
 | 40 | Confirm Rebind gap (#259 / plan #38 step 4) | `40-confirm-rebind-gap.md` | **documented**; fix `UX-SYNC-CONFIRM-REBIND` (unit; live **not run**) |
 | 41 | Confirm Rebind InsertLine dups after #273 | `41-confirm-rebind-dup-fail.md` | **live pass ×2** (2026-11-17, 2.0.98) — Link-displace, no twins; unit fix `BUG-CONFIRM-REBIND-DUP` |
-| 42 | Open-note Delete/Backspace Confirm PushDeleteTT | `42-opennote-delete-confirm.md` | **live pass ×2** (2026-11-17, 2.0.98) — no Confirm on editor Delete/Backspace; unit fix `BUG-OPENNOTE-DELETE-CONFIRM` |
+| 42 | Open-note Delete/Backspace Confirm PushDeleteTT | `42-opennote-delete-confirm.md` | **live fail** post-#274; unit fix `BUG-OPENNOTE-DELETE-CONFIRM`; re-prove **not run** |
 | 43 | Conflict resolution: TT-only same-title dedupe DoR | `43-conflict-resolution-tt-dedupe.md` | **won't-fix / cancelled** — DoR **1A/2A/3A** historical; [#276](https://github.com/semyon-alekseev-noveo/tt-sync/issues/276) closed after prevention; no Deduplicate UI |
 | 44 | Same-title TT duplicate **creation** prevention | `44-tt-dup-create-prevention.md` | **live pass** ×2 (after parent-bypass fix); tip@`8528baa` first prove **fail** (inbox); Deduplicate **won't-fix** |
 | 45 | TT orphan cleanup + create-path audit | `45-create-path-audit.md` | Cleanup **done**; units **pass**; ProjectScheme prove **not run**; #276 **closed** won't-fix |
