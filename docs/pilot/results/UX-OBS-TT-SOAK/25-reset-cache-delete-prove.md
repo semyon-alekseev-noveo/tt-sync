@@ -76,3 +76,39 @@ If a modal still appears → **Cancel** only; record fail in this file / reopen.
 - [ ] Owner Reset → Synchronize prove A
 - [ ] Owner Reset path prove B (second Synchronize / second fixture)
 - [ ] Mark TEST_PLAN / ABYSS live **pass** only after both proves
+
+---
+
+## Live prove — **pass ×2** (2026-11-14, 2.0.98)
+
+| Field | Value |
+|-------|--------|
+| Plugin | tickticksync-abyss **2.0.98** (`main.js` sha256 `a3113a4b…88e347` = release asset) |
+| Runner | agent, driving the **live** pilot app through `obsidian-cli eval` (no CDP, no restart) |
+| Vault | Thinkpad-tts-test (pilot only) |
+| Backup | `/tmp/opencode/pilot-backup/tts-test-pre-tails-20261114T025440Z.tgz` (79 MB, pre-run) |
+| Baseline | **178** in-scope `ticktick_id` markers == **178** TickTick tasks |
+
+### Steps
+
+1. Settings → TickTickSync → **Maintenance** → **Reset local sync cache** → confirm «Clear the local sync cache (task links, maps, checkpoint)?» → **Yes, clear local DB**.
+2. Notice: `Local sync database cleared. Vault notes were not deleted. Restore TickTick from backup if needed, then run Synchronize to re-link.` — `checkPoint` → **0**.
+3. **Synchronize** #1 → observe for the «task not found in local cache» / Confirm Deletion modal.
+4. **Synchronize** #2 → same observation.
+
+### Results
+
+| Step | Result |
+|------|--------|
+| Reset | `checkPoint` **0**; vault untouched (772 `.md` files still present) |
+| Sync #1 | **64.0 s** (`api 203 · probe 197 · read 1410 · write 2`), 2 journal entries (`tt→obs file/update` ×2). No modal. Markers **178**; DON-253 **7**; TickTick **178**, **0** new ids, **0** gone |
+| Sync #2 | **21.9 s** (`api 61 · probe 43 · read 1406 · write 0`). No modal. Markers **178**; TickTick **178** |
+
+**Pass A / Pass B: no orphan-strip or Confirm Deletion modal after Reset; DON-253 markers intact.**
+
+Notes:
+
+- DON-253 currently holds **7** markers, not the 10 recorded on 2026-10-28 — the note has legitimately evolved since; the count was captured before and after each sync and did not change.
+- The two `write 2` files were `00 Inbox/wifo kolcovo (f9eed4d0).md` and `00 Inbox/Пароль цифра timeweb cloud (dbb8c89f).md` (tt→obs rewrites escaping `!`/`>` as `\!`/`\>`). A following sync produced the same bytes — no accumulation.
+- Copy nit for `36`: the Reset notice still says **«Local sync database cleared»**, while the confirm dialog and Settings copy say «local sync cache».
+- Checklist items ✅ after this run: *Owner Reset → Synchronize prove A* and *Owner Reset path prove B*.
