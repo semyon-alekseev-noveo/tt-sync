@@ -135,7 +135,7 @@ Ordered. Do not start Step 8 before 1–3 are green.
    - `36-…` strip-marker reattach toast + Orphan glance.
    - [x] #291 live create Notice — **prove ×2 pass** 2026-11-17 (agent, 2.0.98).
 4. **[done 2026-11-13] #299** `BUG-TT-TAGFILTER-INBOX` — the 2.0.97 fix was **inert** (live-proven broken). Fixed in #313 (`6a91fdf`), live prove ×2 passed, released in **2.0.98**, issue closed.
-5. **Collapse #243/#244** into one doc/UX issue and keep #245 as the single product decision (parent vs tags-only).
+5. **[done 2026-11-17] Collapse #243/#244** — #244 closed as duplicate of #243; #245 stays the single product decision (parent vs tags-only).
 6. **#213** — shipped in 2.0.97 (#301, `00ff923`). Pilot rows in `TEST_PLAN.md` stay `not run`.
 7. **#202** — shipped in 2.0.97 (#303, `ec91fec`). Pilot rows stay `not run`.
 8. **#172** enable required `CI / test` on `abyss-mapping` so a red tip cannot be merged again.
