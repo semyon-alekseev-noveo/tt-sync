@@ -129,13 +129,13 @@ Ordered. Do not start Step 8 before 1–3 are green.
 1. **[done 2026-11-12] PROC-CI-CYCLES-RED:** fixed and merged #300 (`945d182`), CI green → shipped in 2.0.97.
 2. **[done 2026-11-13] Pilot declaration:** the pilot vault runs **2.0.98**, byte-identical to the published release asset (`sha256 a3113a4b…88e347`) — the same bytes that passed the #299 live prove ×2. Earlier declarations (2.0.97, and the tip builds `5190686` / `ec91fec` / `00ff923` / `945d182`) are superseded.
 3. **Close the proof tails** (owner, `docs/pilot/results/UX-OBS-TT-SOAK/50-owner-live-tails-checklist.md`):
-   - `41-…` Confirm Rebind dup — prove ×2 on different fixtures.
-   - `42-…` open-note Delete/Backspace — prove ×2.
-   - `25-…` Reset → Synchronize ×2 (ghost detach is now expected honesty).
-   - `36-…` strip-marker reattach toast + Orphan glance.
-   - #291 live create Notice (unit already green).
+   - [x] `41-…` Confirm Rebind dup — **prove ×2 pass** 2026-11-17 (#318).
+   - [x] `42-…` open-note Delete/Backspace — **prove ×2 pass** 2026-11-17 (#319).
+   - [x] `25-…` Reset → Synchronize ×2 — **pass** 2026-11-14 (#317).
+   - [x] `36-…` strip-marker reattach toast + Orphan glance — **pass** 2026-11-14 (#317).
+   - [x] #291 live create Notice — **prove ×2 pass** 2026-11-17 (#320).
 4. **[done 2026-11-13] #299** `BUG-TT-TAGFILTER-INBOX` — the 2.0.97 fix was **inert** (live-proven broken). Fixed in #313 (`6a91fdf`), live prove ×2 passed, released in **2.0.98**, issue closed.
-5. **Collapse #243/#244** into one doc/UX issue and keep #245 as the single product decision (parent vs tags-only).
+5. **[done 2026-11-17] Collapse #243/#244** — #244 closed as duplicate of #243; #245 stays the single product decision (parent vs tags-only).
 6. **#213** — shipped in 2.0.97 (#301, `00ff923`). Pilot rows in `TEST_PLAN.md` stay `not run`.
 7. **#202** — shipped in 2.0.97 (#303, `ec91fec`). Pilot rows stay `not run`.
 8. **#172** enable required `CI / test` on `abyss-mapping` so a red tip cannot be merged again.
