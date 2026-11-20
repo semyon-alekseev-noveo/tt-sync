@@ -45,7 +45,7 @@
 | 38 | Sync intent × identity plan (epic [#255](https://github.com/semyon-alekseev-noveo/tt-sync/issues/255)) | `38-sync-intent-identity-plan.md` | **plan / DoR** — #256–#260 unit landed; #261 prove ×2 **live pass** |
 | 39 | ARCH-SYNC #261 pilot prove ×2 | `39-arch-sync-261-prove.md` | **live pass** ×2 @`3729c0b` (after #267); fixtures PKM+Годовые |
 | 40 | Confirm Rebind gap (#259 / plan #38 step 4) | `40-confirm-rebind-gap.md` | **documented**; fix `UX-SYNC-CONFIRM-REBIND` (unit; live **not run**) |
-| 41 | Confirm Rebind InsertLine dups after #273 | `41-confirm-rebind-dup-fail.md` | **live fail**; unit fix `BUG-CONFIRM-REBIND-DUP`; pilot re-prove **not run** |
+| 41 | Confirm Rebind InsertLine dups after #273 | `41-confirm-rebind-dup-fail.md` | **live pass ×2** (2026-11-17, 2.0.98) — Link-displace, no twins; unit fix `BUG-CONFIRM-REBIND-DUP` |
 | 42 | Open-note Delete/Backspace Confirm PushDeleteTT | `42-opennote-delete-confirm.md` | **live fail** post-#274; unit fix `BUG-OPENNOTE-DELETE-CONFIRM`; re-prove **not run** |
 | 43 | Conflict resolution: TT-only same-title dedupe DoR | `43-conflict-resolution-tt-dedupe.md` | **won't-fix / cancelled** — DoR **1A/2A/3A** historical; [#276](https://github.com/semyon-alekseev-noveo/tt-sync/issues/276) closed after prevention; no Deduplicate UI |
 | 44 | Same-title TT duplicate **creation** prevention | `44-tt-dup-create-prevention.md` | **live pass** ×2 (after parent-bypass fix); tip@`8528baa` first prove **fail** (inbox); Deduplicate **won't-fix** |
@@ -56,6 +56,7 @@
 | 50 | Owner live tails checklist (Reset + NOTICE) | `50-owner-live-tails-checklist.md` | **ready** — owner runs `25` Reset×2 + `36` strip/orphan |
 | 51 | DON-253 Reset→Sync ghost markers + create `.match` | `51-don253-reset-ghost-match.md` | ghost detach live **pass** ×2 @`a1946a6` / #293; create `.match` live **not run** (unit pass) |
 | 52 | Sync off still reactive create/update ([#295](https://github.com/semyon-alekseev-noveo/tt-sync/issues/295)) | `52-sync-off-reactive-create.md` | fully initialized tip@`76cf71c` **live pass ×2** + reload check; first hot-swap run **fail** (stale pre-fix handler); manual Sync optional **not run** |
+| 53 | BUG-CREATE-MATCH-UNDEF create Notice ([#291](https://github.com/semyon-alekseev-noveo/tt-sync/issues/291)) | `53-bug-create-match-undef-prove.md` | **live pass ×2** (2026-11-17, 2.0.98) — single create Notice, no `.match` failure |
 | 34 | #208 held post-restore + AZ wipe root cause | `34-held-post-restore-az-wipe.md` | **root cause**; rematch fix shipped |
 | 35 | #208 Rematch prove ×2 | `35-bug-208-rematch-prove.md` | **pass** prove 1+2; issue closed |
 | — | Identity chain follow-up (rebind epic) | [`../ID-CHAIN-REBIND/`](../ID-CHAIN-REBIND/) | **DoR** epic [#214](https://github.com/semyon-alekseev-noveo/tt-sync/issues/214); Rematch insert ≠ vault-wide rebind |

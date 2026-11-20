@@ -7,7 +7,7 @@
 | Case | `BUG-OPENNOTE-DELETE-CONFIRM` |
 | Vault | Thinkpad-tts-test (pilot) |
 | Tip | after [#274](https://github.com/semyon-alekseev-noveo/tt-sync/pull/274) |
-| Status | **fail** (owner report + screenshot); unit fix pending merge; re-prove **not run** |
+| Status | **live pass ×2** (2026-11-17, 2.0.98) — keyup path removed; no Confirm mid-edit |
 
 ## Inputs
 
@@ -39,5 +39,27 @@ Bug vs earlier “open-note does not Confirm” analysis: that claim was true fo
 ## Checklist
 
 - [x] Live fail recorded (owner screenshot)
-- [ ] Tip with keyup path removed
-- [ ] Re-prove ×2 (different fixtures) after tip
+- [x] Tip with keyup path removed (unit `bugOpennoteDeleteConfirm.test.ts`)
+- [x] Re-prove ×2 (different fixtures) after tip — **pass** 2026-11-17 (see below)
+
+---
+
+## Live re-prove — **pass ×2** (2026-11-17, 2.0.98, pilot vault)
+
+| Field | Value |
+|-------|--------|
+| Plugin | tickticksync-abyss **2.0.98** |
+| Vault | Thinkpad-tts-test (pilot only) |
+| Runner | agent — `obsidian-cli eval` |
+| Method | open the note; delete the marked line in the **editor buffer** (`view.data` — the exact signal `checkFileForDeletedTasks(null)` reads); dispatch `keyup` Backspace/Delete on `document` |
+
+**Harness note:** the Obsidian window is not the OS-focused window under Wayland (`document.hasFocus()` is false), so the in-page focus gate `document.hasFocus() && root.activeElement == contentDOM` was satisfied by overriding `document.hasFocus` to `true` for the run. No plugin code was changed.
+
+| Prove | Note | Editor buffer after delete | Keys | Modal |
+|-------|------|----------------------------|------|-------|
+| A | `30 Tasks/PROVE-42.md` | `# keep` (marked line removed) | Backspace, Delete | **none** |
+| B | `30 Tasks/PROVE-42B.md` | `# keep` (marked line removed) | Delete, Backspace | **none** |
+
+No Sync discrepancies / PushDeleteTT Confirm, no Apply once; TickTick tasks stayed alive. With the legacy keyup path this exact state (marked line gone from `view.data`) opened the Confirm.
+
+Cleanup: both probe notes deleted; both probe TickTick tasks deleted; vault scan has no `PROVE-42`.
