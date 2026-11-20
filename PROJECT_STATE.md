@@ -26,20 +26,20 @@ One definition, used here, in `PO_STATUS.md`, in `TEST_PLAN.md`, and in `docs/pi
 
 Project stage is a separate axis: **pilot soak → Step 8 live gate**. The live gate is **closed** (not started).
 
-## Current status (2026-11-13)
+## Current status (2026-11-20)
 
 | Field | Value |
 |-------|-------|
 | Stage | Pilot soak on `<pilot-vault>`; Step 8 live-vault gate **closed** |
-| Pilot build | **2.0.98** — the pilot vault `main.js` is byte-identical to the published release asset (`sha256 a3113a4b…88e347`), verified 2026-11-13 after the tag. This is also the build that passed the #299 live prove ×2. |
-| Last release | **2.0.98**, 2026-11-13 (non-prerelease) — https://github.com/semyon-alekseev-noveo/tt-sync/releases/tag/2.0.98 |
-| Branch tip | `abyss-mapping` @ `6a91fdf` — merge of the #299 fix + 2.0.98 bump (PR #313); **released** |
-| CI on tip | **GREEN** on `6a91fdf` (branch run + release run), on `1421e17`, and on `5190686`, `78d8a82`, `ffd5065`, `ec91fec`, `00ff923`, `945d182`; `PROC-CI-CYCLES-RED` fixed (#300, allowlist 118 → 56) |
+| Pilot build | **2.0.98** — the pilot vault `main.js` is byte-identical to the published 2.0.98 **and 2.0.99** release assets (`sha256 a3113a4b…88e347`), verified after the tags. This is also the build that passed the #299 live prove ×2. |
+| Last release | **2.0.99**, 2026-11-20 (non-prerelease, docs-only) — https://github.com/semyon-alekseev-noveo/tt-sync/releases/tag/2.0.99 |
+| Branch tip | `abyss-mapping` @ `7dc3db9` — merge of #321 (docs-only, after the tag); tag **2.0.99** = `0381a98` (merge of the 2.0.99 bump, PR #322) |
+| CI on tip | **GREEN** on `0381a98` (2.0.99 release run: cycles / sizes / test / build), and previously on `6a91fdf` (branch + release), `1421e17`, `5190686`, `78d8a82`, `ffd5065`, `ec91fec`, `00ff923`, `945d182`; `7dc3db9` is docs-only. `PROC-CI-CYCLES-RED` fixed (#300, allowlist 118 → 56) |
 | Unit tests | **1023 passed / 144 files** on `6a91fdf` and on the fix branch |
-| Open issues | 15 |
+| Open issues | 14 |
 | Open PRs | 0 |
 
-Consequence: **2.0.98 fixes the #299 regression that 2.0.97 shipped.** Live prove on 2.0.97 routed a task tagged `note/don-253` into `00 Inbox/abyss-active.md`; on 2.0.98 the same scenario lands in `DON-253.md` twice over. Two defects were behind it: the tag lookup compared a slug against a basename that still carried `.md`, and the routing was only wired into the orphan-Add modal, not the normal pull path. #299 is now closed. **#305 is closed too** — live pass ×2 on the OFF path (2026-11-14, isolated scratch vault). **#306 stays open and unit-only**: its scenario is not reachable from flat list stubs, so the live run could not prove the gate (a control build with the gate forced off behaved identically). `PROC-PR-STACK-MISBASE` is recorded: #302 merged into the stacked base and was re-landed by #303 (`ec91fec`).
+Consequence: **2.0.98 fixes the #299 regression that 2.0.97 shipped.** Live prove on 2.0.97 routed a task tagged `note/don-253` into `00 Inbox/abyss-active.md`; on 2.0.98 the same scenario lands in `DON-253.md` twice over. Two defects were behind it: the tag lookup compared a slug against a basename that still carried `.md`, and the routing was only wired into the orphan-Add modal, not the normal pull path. #299 is now closed. **#305 is closed too** — live pass ×2 on the OFF path (2026-11-14, isolated scratch vault). **#306 stays open and unit-only**: its scenario is not reachable from flat list stubs, so the live run could not prove the gate (a control build with the gate forced off behaved identically). `PROC-PR-STACK-MISBASE` is recorded: #302 merged into the stacked base and was re-landed by #303 (`ec91fec`). **2.0.99 is a docs-only release** (proof-tail evidence + #243/#244 collapse); its bundle is byte-identical to 2.0.98.
 
 ## Context
 
