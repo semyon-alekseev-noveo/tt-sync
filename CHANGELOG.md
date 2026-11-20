@@ -1,3 +1,12 @@
+### Iteration 2026-11-20 07:12 UTC
+
+- Context: proof tails `25`/`36` (#317), `41` (#318), `42` (#319), `#291` (#320) landed as docs; #243/#244 collapsed (#321). No code change since 2.0.98.
+- Target: docs-only release **2.0.99**.
+- Actions log: bumped `manifest.json` / `package.json` / `package-lock.json` / `versions.json` to **2.0.99**; status snapshots record the live re-proves (41 / 42 / #291 ×2 pass on 2.0.98; 25 / 36 pass) and the issue collapse.
+- Validation: docs-only; suite unchanged at 1023 / 144. Live release steps: owner merges this bump, tag `2.0.99` on the merged `abyss-mapping` tip, push; the release workflow gates (tests, version match, ancestor, no-retag) publish the GitHub Release.
+- Problems: #306 still unit-only (needs a scheme-created project note with a default project); R1–R3 of #201 pending owner pick.
+- References: #317, #318, #319, #320, #321, #243, #244, release 2.0.99
+
 ### Iteration 2026-11-14 02:30 UTC
 
 - Context: #299 was closed on 2.0.98, and the two remaining `abyssTasksFormat` OFF fixes (#305, #306) still had no live prove. Reading-only validation is exactly what made 2.0.97 wrong, so both were taken live.
