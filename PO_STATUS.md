@@ -1,24 +1,24 @@
 # Product owner brief — TickTickSync Abyss fork (project scheme)
 
-**Обновлено:** 2026-11-13  
+**Обновлено:** 2026-11-20  
 **Audience:** Product owner / decision maker  
 **Repo:** `tickticksync` branch `abyss-mapping`  
 **Test vault:** `<pilot-vault>` (copy only; live vault `<live-vault>` untouched)  
-**Install:** BRAT → `https://github.com/semyon-alekseev-noveo/tt-sync`; plugin id **`tickticksync-abyss`** — `docs/BRAT_INSTALL.md`. Pilot may track **latest** (that track includes pre-releases). Live vault stays **frozen** on the last non-prerelease tag (**2.0.97**) and must not track pre-releases. Preset: `00 Inbox/TTS-data-preset.json`.
+**Install:** BRAT → `https://github.com/semyon-alekseev-noveo/tt-sync`; plugin id **`tickticksync-abyss`** — `docs/BRAT_INSTALL.md`. Pilot may track **latest** (that track includes pre-releases). Live vault stays **frozen** on the last non-prerelease tag (**2.0.99**) and must not track pre-releases. Preset: `00 Inbox/TTS-data-preset.json`.
 
 История изменений — только в `CHANGELOG.md`; здесь — снимок для PO. Канонические значения статусов — в `PROJECT_STATE.md` (§ Status vocabulary).
 
-## Статус (снимок 2026-11-13)
+## Статус (снимок 2026-11-20)
 
 | Поле | Значение |
 |------|----------|
 | Стадия | Пилотный soak на `<pilot-vault>`; **Step 8 (живой vault) не открыт** |
 | Сборка на пилоте | **2.0.98** — `main.js` в пилотном vault байт-в-байт совпадает с опубликованным релизным артефактом (`sha256 a3113a4b…88e347`), проверено 2026-11-13 после тега. Это же сборка, на которой прошёл live prove ×2 по #299. |
-| Последний релиз | **2.0.98** (2026-11-13, non-prerelease) — https://github.com/semyon-alekseev-noveo/tt-sync/releases/tag/2.0.98 |
-| Верхушка ветки | `abyss-mapping` @ `6a91fdf` — merge фикса #299 + bump 2.0.98 (PR #313); **в релизе** |
-| CI на верхушке | **ЗЕЛЁНЫЙ** (`6a91fdf` — прогон ветки и релизный прогон; также `1421e17`, `5190686`, `78d8a82`, `ffd5065`, `ec91fec`, `00ff923`, `945d182`); `PROC-CI-CYCLES-RED` закрыт (#300, allowlist 118 → 56) |
+| Последний релиз | **2.0.99** (2026-11-20, non-prerelease, docs-only) — https://github.com/semyon-alekseev-noveo/tt-sync/releases/tag/2.0.99 |
+| Верхушка ветки | `abyss-mapping` @ `7dc3db9` — merge #321 (docs-only, после тега); тег **2.0.99** = `0381a98` (merge bump 2.0.99, PR #322) |
+| CI на верхушке | **ЗЕЛЁНЫЙ** (`0381a98` — релизный прогон 2.0.99: cycles / sizes / test / build; также `6a91fdf`, `1421e17`, `5190686`, `78d8a82`, `ffd5065`, `ec91fec`, `00ff923`, `945d182`); `7dc3db9` — docs-only. `PROC-CI-CYCLES-RED` закрыт (#300, allowlist 118 → 56) |
 | Юнит-тесты | **1023 / 144 файла** на `6a91fdf` и на ветке фикса |
-| Открытых issue | 15 |
+| Открытых issue | 14 |
 | Открытых PR | 0 |
 
 Практический вывод: **2.0.98 закрывает регрессию #299, которую выпустил 2.0.97.** На 2.0.97 живой prove отправлял задачу с тегом `note/don-253` в `00 Inbox/abyss-active.md`; на 2.0.98 тот же сценарий дважды попал в `DON-253.md`. Причин было две: поиск по тегу сравнивал слаг с basename, где остаётся `.md`, а маршрутизация была подключена только к модалке orphan-Add, а не к обычному pull-пути. Issue #299 закрыт. **#305 тоже закрыт** — живой prove ×2 на OFF-пути (2026-11-14, изолированный scratch-vault). **#306 остаётся открытым и unit-only**: его сценарий недостижим из плоских list-заглушек, живой прогон не доказывает гейт (контрольная сборка с принудительно выключенным гейтом вела себя так же). `PROC-PR-STACK-MISBASE` зафиксирован: #302 влился в промежуточную ветку и был пере-влит через #303 (`ec91fec`).
@@ -26,7 +26,7 @@
 
 ## Context
 
-- Релиз **2.0.98** на `abyss-mapping` (2026-11-13); после него выпусков не было — см. снимок выше. История релизов 2.0.47–2.0.98 — в `CHANGELOG.md` и в разделе Validation.
+- Релиз **2.0.99** на `abyss-mapping` (2026-11-20, docs-only); история релизов 2.0.47–2.0.99 — в `CHANGELOG.md` и в разделе Validation.
 - Abyss-first: задачи живут там, где их кладёт Abyss; TT зеркалит теги/списки и родителей-проекты (`ABYSS_FIRST_PLAN.md`, топология R / CASE-T4 отложена).
 - Комментарии Abyss → TickTick **Comments API** (`syncAbyssCommentsViaApi`, по умолчанию вкл.); описание остаётся в `content`.
 - Живой vault не трогаем; пилот — только `<pilot-vault>`. Ручной синк. Токен `tp_…` из чата — **отозван** (2026-10-25, [#32](https://github.com/semyon-alekseev-noveo/tt-sync/issues/32)).
@@ -43,6 +43,7 @@
 ## Validation
 
 - **2.0.97 (2026-11-13, выпущен):** все изменения с 2.0.96 — Sync off kill switch (#287/#288), seal реактивных create/update (#295, prove ×2), detach ghost-маркеров после Reset (#290, prove ×2), list-root `note/*` не промоутится в `#system/project` (#284, prove ×2), Settings UX epic #189, ARCH-SYNC intent×identity (#255), Confirm Rebind (#272/#274), TT dup-create prevention (#279–#281), open-note Delete fix (#275), BUG-TT-TAGFILTER-INBOX (#299 — **фикс оказался нерабочим, см. 2.0.98**), GTD_ARRAY_KEYS (#213), UX-SET-TASKS-FOLDER-COPY (#202), AF-FMT-OFF-SYMBOL-LOSS (#305), AF-FMT-OFF-LIST-MOVE (#306), cycle fix (#300). Артефакты: `main.js`, `manifest.json`, `styles.css`, zip.
+- Релиз **2.0.99** (2026-11-20, docs-only): доказательства по хвостам prove (`25`/`36` #317, `41` #318, `42` #319, `#291` #320) и схлопывание #243/#244 (#321). Кода с 2.0.98 не менялось — `main.js` байт-в-байт совпадает с 2.0.98 (`sha256 a3113a4b…88e347`). Артефакты: `main.js`, `manifest.json`, `styles.css`, zip.
 - Релиз **2.0.98** (2026-11-13): рабочий фикс #299 — поиск по context-тегу через `slugForContextTag` и маршрутизация в обычном pull-пути (`determineTargetFile` → `fileForNewTickTickTask`). Live prove ×2 на этой же сборке. Артефакты: `main.js` (800 898 B), `manifest.json`, `styles.css`, zip.
 - Релиз **2.0.96** (2026-11-03): фикс цикла после **2.0.95** (тег без релиза — публикация остановилась на `check:cycles`).
 - Релиз **2.0.94** (2026-10-27): PROC-RELEASE-GATE в `release.yml` (#30); GAP-COMMENT-EDIT PUT (#63/#173); локальный LWW переписывает строку vault (#174); подсчёт `tasks.file` drift (#175).
