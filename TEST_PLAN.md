@@ -2067,5 +2067,18 @@ Live prove 2026-11-14, run by the agent, **not** on the pilot or live vault.
 **Verdict.**
 
 - **#305: live pass ×2.** With the flag OFF the checkbox symbols survive the pull and track the list. Combined with the unit (`bugFmtOffSymbolLoss.test.ts`) this is the prove-twice pair; the issue can go `shipped` honestly.
-- **#306: still unit-only.** The live run shows the desired behaviour, but the negative control shows the scenario cannot be reached from flat stub files, so the run says nothing about `abyssLineInPlace`. A real live prove needs a **scheme-created project note with a default project**, then a TickTick list change for a task inside it — i.e. the `projectSchemeEnabled` state the pilot has, not just the flag flipped. Until then treat #306 as unit-proven (`bugFmtOffListMove.test.ts`) and say so.
+- **#306 (2026-11-14): still unit-only.** The live run shows the desired behaviour, but the negative control shows the scenario cannot be reached from flat stub files, so the run says nothing about `abyssLineInPlace`. A real live prove needs a **scheme-created project note with a default project**, then a TickTick list change for a task inside it — i.e. the `projectSchemeEnabled` state the pilot has, not just the flag flipped. Until then treat #306 as unit-proven (`bugFmtOffListMove.test.ts`) and say so.
 - Side observation, **not reproduced**: on the very first sync of the scratch vault the `== Added by TickTickSync (Abyss fork) — 2.0.98 ==` header and the first task line ended up on one physical line in `TTS-nextAction.md`, and the sync wrote that file twice. Deleting the file and re-pulling produced the correct `header / blank / ## Active Zone / lines` shape, and a follow-up sync rewrote it correctly. One occurrence, no deterministic repro — worth watching, not yet a case.
+
+### #306 — live prove ×2 on the pilot with a real default-project fixture (2026-11-21)
+
+Run by the agent on **Thinkpad-tts-test** (pilot only), plugin **2.0.99** (`main.js` = the release bytes `a3113a4b…`), backup `/tmp/opencode/pilot-backup/tts-test-pre-306-20261120.tgz`. Fixture per cycle: a `30 Tasks/PROVE-306*.md` note given `defaultProjectId = WIP` through the real palette command (**set default project for file** → `SetDefaultProjectForFileModal`), flag OFF, TT-side list change WIP → nextAction via the plugin session API, manual Synchronize. Full evidence + honest caveats: `UX-OBS-TT-SOAK/54-fmt-off-list-move-prove.md`.
+
+| Case | Steps | Expected | Result |
+|------|-------|----------|--------|
+| #306 gated run 1 | Move WIP → nextAction in TickTick, Synchronize (flag OFF, shipped build) | Line stays in the fixture note | **pass** — line stayed, marker intact, char tracked the list (`[/]` → `[!]`) |
+| #306 negative control | Same with a local build forcing `abyssLineInPlace → return false` (`dc8f8a9f…`, never shipped) | Line **relocates** to the note owning the target list | **control fired** — line moved; the gate is what held run 1 |
+| #306 gated run 2 (different fixture) | Fresh note `PROVE-306C.md` + task `6b019bc4…`, same move | Line stays | **pass** — line stayed with marker, despite OFF-mode stub files (`30 Tasks/nextAction.md` …) being recreated beside it |
+| Cleanup | Delete stub files + probe notes + probe tasks; `Reset local sync cache` → Synchronize | No marker lost, no modal, no TT delete | **pass** — every `ticktick_id` from the pre-run backup still present; `10 Projects/` + `30 Tasks/` byte-identical to backup; abyss-active re-linked +16 orphan rows (legitimate re-pull) |
+
+**Verdict #306: live pass ×2 + causal control.** The gate holds when the scenario is actually reachable; the issue closes.

@@ -57,6 +57,7 @@
 | 51 | DON-253 Reset→Sync ghost markers + create `.match` | `51-don253-reset-ghost-match.md` | ghost detach live **pass** ×2 @`a1946a6` / #293; create `.match` live **not run** (unit pass) |
 | 52 | Sync off still reactive create/update ([#295](https://github.com/semyon-alekseev-noveo/tt-sync/issues/295)) | `52-sync-off-reactive-create.md` | fully initialized tip@`76cf71c` **live pass ×2** + reload check; first hot-swap run **fail** (stale pre-fix handler); manual Sync optional **not run** |
 | 53 | BUG-CREATE-MATCH-UNDEF create Notice ([#291](https://github.com/semyon-alekseev-noveo/tt-sync/issues/291)) | `53-bug-create-match-undef-prove.md` | **live pass ×2** (2026-11-17, 2.0.98) — single create Notice, no `.match` failure |
+| 54 | AF-FMT-OFF-LIST-MOVE ([#306](https://github.com/semyon-alekseev-noveo/tt-sync/issues/306)) | `54-fmt-off-list-move-prove.md` | **live pass ×2 + negative control** (2026-11-21, 2.0.99) — line stays with the gate, relocates without it; real default-project fixture |
 | 34 | #208 held post-restore + AZ wipe root cause | `34-held-post-restore-az-wipe.md` | **root cause**; rematch fix shipped |
 | 35 | #208 Rematch prove ×2 | `35-bug-208-rematch-prove.md` | **pass** prove 1+2; issue closed |
 | — | Identity chain follow-up (rebind epic) | [`../ID-CHAIN-REBIND/`](../ID-CHAIN-REBIND/) | **DoR** epic [#214](https://github.com/semyon-alekseev-noveo/tt-sync/issues/214); Rematch insert ≠ vault-wide rebind |
