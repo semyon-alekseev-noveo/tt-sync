@@ -7,6 +7,15 @@
 - Problems: #306 still unit-only (needs a scheme-created project note with a default project); R1–R3 of #201 pending owner pick.
 - References: #317, #318, #319, #320, #321, #243, #244, release 2.0.99
 
+### Iteration 2026-11-21 13:00 UTC
+
+- Context: #306 (`AF-FMT-OFF-LIST-MOVE`) shipped unit-only after the 2026-11-14 scratch attempt was inconclusive — flat list stubs have no `defaultProjectId`, so `isProjectIdChanged` → `handleTickTickStructureMove` was unreachable and the negative control could not fire.
+- Target: reach the structure-move path on the pilot with a real default-project fixture and prove the gate ×2 with a causal control (owner chose the pilot + backup path).
+- Actions log: backup `/tmp/opencode/pilot-backup/tts-test-pre-306-20261120.tgz`; two cycles — fixture note (`30 Tasks/PROVE-306{,C}.md`) + palette **set default project for file** (real `SetDefaultProjectForFileModal`), `abyssTasksFormat` OFF, TT-side move WIP → nextAction via the plugin session `projectMove`. Run 1 (shipped gate): line stays, marker intact, char tracks the list. Control (local build `dc8f8a9f…` forcing `abyssLineInPlace → false`, source reverted after build): line relocates — reachability proven. Run 2 (fresh fixture): line stays despite OFF-mode stub recreation. Cleanup: probe tasks deleted in TT, probe notes + stub files deleted, `Reset local sync cache` → Synchronize ×1; verification: every backup `ticktick_id` still present, `10 Projects/` + `30 Tasks/` byte-identical to backup, no modal, abyss-active re-link +16 orphan rows (legitimate re-pull; owner's own TT edits from today included).
+- Validation: evidence `UX-OBS-TT-SOAK/54-fmt-off-list-move-prove.md`; `TEST_PLAN.md` #306 section extended; `ABYSS_FIRST_CASES.md` AF row; `PROJECT_STATE.md` / `PO_STATUS.md` → closed; issue #306 commented + closed. Docs-only branch; engine untouched (`npx vitest run` unchanged at 1023 / 144 from tip).
+- Problems: second gated move after the control churn detached the already-relocated line (`%%tt-detached%%`, text kept) — recorded as an OFF-mode observation, not part of the prove pair.
+- References: #306, #305, #201, `src/syncScope.ts`, `54-fmt-off-list-move-prove.md`
+
 ### Iteration 2026-11-14 02:30 UTC
 
 - Context: #299 was closed on 2.0.98, and the two remaining `abyssTasksFormat` OFF fixes (#305, #306) still had no live prove. Reading-only validation is exactly what made 2.0.97 wrong, so both were taken live.
