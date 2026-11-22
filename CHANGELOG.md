@@ -7,14 +7,14 @@
 - Problems: #306 still unit-only (needs a scheme-created project note with a default project); R1–R3 of #201 pending owner pick.
 - References: #317, #318, #319, #320, #321, #243, #244, release 2.0.99
 
-### Iteration 2026-11-22 04:25 UTC
+### Iteration 2026-11-22 04:05 UTC
 
-- Context: the remaining pre-Step-8 items were scattered across `PROJECT_STATE.md` To Be Done, `ABYSS_FIRST_PLAN.md` Step 8, and pilot notes; nothing could be executed as one sitting.
-- Target: #213 pilot row honestly recorded + one owner-executable Step 8 runbook.
-- Actions log: GTD-ARRAY-KEYS pilot rows in `TEST_PLAN.md` / `ABYSS_FIRST_CASES.md` → **soak pass 2026-11-22** — all four GTD arrays (`statusListMappings`, `syncedLists`, `syncScopeFolders`, `tagListMappings`) hash-identical to the pre-experiment backup after ~10 plugin reloads and two manual data.json restore cycles during the #306/#54 experiments; the contrived early-save race remains unit-only and is labeled as such. New `docs/pilot/STEP8-LIVE-GATE-RUNBOOK.md`: Preconditions (open: #202 glance, Decision #1 — pilot `taskIgnoreQuery` currently `null`, NOTE-L3b/CTX-D2 pre-flight, live backup, 8.0 credentials), install-byte-check, pilot pre-flight, the AF-1…AF-8 + DEL + NOTE-L3b live table, stop conditions, rollback (backup-first because #78 redo-soak is not done on live), sign-off rows. `PROJECT_STATE.md` / `PO_STATUS.md` item 11 point to the runbook.
-- Validation: docs-only; array hashes computed from the backup and live data.json (`ea73713c`/`582d6fca`/`4887d5b5`/`3f34f6b7` both sides).
-- Problems: none new. Gate stays CLOSED — this document does not open it.
-- References: #213, #78, `STEP8-LIVE-GATE-RUNBOOK.md`, `TEST_PLAN.md`
+- Context: R4/R5 (engine) shipped and live-proven; R1–R3 (+R6) were the last open items of #201, each needing an owner pick with no concrete sheet to pick on.
+- Target: one-page decision sheet per option so the owner answers accept/reject per row, nothing else.
+- Actions log: added `docs/pilot/FMT-OFF-R1-R3-DECISIONS.md` — R1 confirm-once warning on manual Synchronize while flag OFF + Abyss config (case `AF-FMT-OFF-WARN`, S); R2 toggle rename + effects copy (case `UX-SET-FMT-OFF-COPY`, S, bundle with R1); R3 status→list table read-only + «inactive» while OFF, reusing the shipped `GTD_TAG_LIST_INACTIVE_*` pattern (case `UX-SET-STATUS-OFF-RO`, S–M); R6 «Leaving Abyss mode» docs page (S). Recommendation: accept all four; each accepted row becomes its own issue + DEV_FLOW case-before-code PR. Status tables point to the sheet.
+- Validation: docs-only; grounding re-read from the matrix §5–§7 and current Settings surfaces (`NotesSettings.svelte` label, `GtdSection.svelte` table, `settingsUxVisibility.ts` banner helpers).
+- Problems: none.
+- References: #201, `docs/pilot/ABYSS-FORMAT-OFF-MATRIX.md`, `docs/pilot/FMT-OFF-R1-R3-DECISIONS.md`
 
 ### Iteration 2026-11-22 03:40 UTC
 
