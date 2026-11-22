@@ -7,6 +7,15 @@
 - Problems: #306 still unit-only (needs a scheme-created project note with a default project); R1–R3 of #201 pending owner pick.
 - References: #317, #318, #319, #320, #321, #243, #244, release 2.0.99
 
+### Iteration 2026-11-22 04:25 UTC
+
+- Context: the remaining pre-Step-8 items were scattered across `PROJECT_STATE.md` To Be Done, `ABYSS_FIRST_PLAN.md` Step 8, and pilot notes; nothing could be executed as one sitting.
+- Target: #213 pilot row honestly recorded + one owner-executable Step 8 runbook.
+- Actions log: GTD-ARRAY-KEYS pilot rows in `TEST_PLAN.md` / `ABYSS_FIRST_CASES.md` → **soak pass 2026-11-22** — all four GTD arrays (`statusListMappings`, `syncedLists`, `syncScopeFolders`, `tagListMappings`) hash-identical to the pre-experiment backup after ~10 plugin reloads and two manual data.json restore cycles during the #306/#54 experiments; the contrived early-save race remains unit-only and is labeled as such. New `docs/pilot/STEP8-LIVE-GATE-RUNBOOK.md`: Preconditions (open: #202 glance, Decision #1 — pilot `taskIgnoreQuery` currently `null`, NOTE-L3b/CTX-D2 pre-flight, live backup, 8.0 credentials), install-byte-check, pilot pre-flight, the AF-1…AF-8 + DEL + NOTE-L3b live table, stop conditions, rollback (backup-first because #78 redo-soak is not done on live), sign-off rows. `PROJECT_STATE.md` / `PO_STATUS.md` item 11 point to the runbook.
+- Validation: docs-only; array hashes computed from the backup and live data.json (`ea73713c`/`582d6fca`/`4887d5b5`/`3f34f6b7` both sides).
+- Problems: none new. Gate stays CLOSED — this document does not open it.
+- References: #213, #78, `STEP8-LIVE-GATE-RUNBOOK.md`, `TEST_PLAN.md`
+
 ### Iteration 2026-11-22 03:40 UTC
 
 - Context: #325 merged under the new gate; the ruleset as first applied (required context `CI / test`) deadlocked PRs — that string matches a push-event status context `ci.yml` never reports for feature branches (PR-only `pull_request` runs). Suffix variants also did not match.

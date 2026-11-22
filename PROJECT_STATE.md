@@ -141,7 +141,7 @@ Ordered. Do not start Step 8 before 1–3 are green.
 8. **[done 2026-11-21] #172** — ruleset `abyss-mapping required CI` (27795106) active: the CI **`test` job** required as check-run context `"test"` (integration 15368), strict. A red tip cannot merge.
 9. **#201** — **analysis published 2026-11-12** (`docs/pilot/ABYSS-FORMAT-OFF-MATRIX.md`). **R4 → #305 live-proven ×2 on 2026-11-14 and closed; R5 → #306 live-proven ×2 + control on 2026-11-21 and closed** (`54-…`, real default-project fixture). R1–R3 (Settings warn / rename / read-only table) pending owner pick.
 10. **Optional / parked:** #218 (or close #214), #185, #159, #86, #78, #33.
-11. **Step 8 live gate** — only after 1–3 and after the parked Decision #1 config is cleared (`taskIgnoreQuery`).
+11. **Step 8 live gate** — runbook drafted 2026-11-22 (`docs/pilot/STEP8-LIVE-GATE-RUNBOOK.md`); still closed until its Preconditions box is green (#202 glance, Decision #1, NOTE-L3b/CTX-D2 pre-flight in the same sitting).
 
 ## Doc drift fixed in this rewrite
 
