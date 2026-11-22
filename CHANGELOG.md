@@ -1,3 +1,12 @@
+### Iteration 2026-11-22 05:00 UTC
+
+- Context: audit after #327/#328 merged back-to-back — the GitHub "update branch" conflict resolution on #328 (`0abe8c0`) resolved `CHANGELOG.md` toward the base side and silently dropped #328's own `04:25` iteration entry. Everything else from both merges verified intact (decision sheet, runbook file, #213 rows, #326 ruleset-correction lines, item-9/11 pointers).
+- Target: restore append-only history honestly.
+- Actions log: re-inserted the `2026-11-22 04:25` block verbatim from `fee3acc` (between 04:05 and 03:40) and recorded this loss-and-restore event itself as the newest iteration. Lesson noted: two open docs PRs both inserting at the CHANGELOG head conflict — the second merge's resolution must be inspected, or the entries should ride one PR.
+- Validation: `git show fee3acc:CHANGELOG.md` block compared to the restored text; grep counts now show 04:25 present once.
+- Problems: none beyond the above.
+- References: #327, #328, `0abe8c0`, `CHANGELOG.md`
+
 ### Iteration 2026-11-20 07:12 UTC
 
 - Context: proof tails `25`/`36` (#317), `41` (#318), `42` (#319), `#291` (#320) landed as docs; #243/#244 collapsed (#321). No code change since 2.0.98.
@@ -15,6 +24,15 @@
 - Validation: docs-only; grounding re-read from the matrix §5–§7 and current Settings surfaces (`NotesSettings.svelte` label, `GtdSection.svelte` table, `settingsUxVisibility.ts` banner helpers).
 - Problems: none.
 - References: #201, `docs/pilot/ABYSS-FORMAT-OFF-MATRIX.md`, `docs/pilot/FMT-OFF-R1-R3-DECISIONS.md`
+
+### Iteration 2026-11-22 04:25 UTC
+
+- Context: the remaining pre-Step-8 items were scattered across `PROJECT_STATE.md` To Be Done, `ABYSS_FIRST_PLAN.md` Step 8, and pilot notes; nothing could be executed as one sitting.
+- Target: #213 pilot row honestly recorded + one owner-executable Step 8 runbook.
+- Actions log: GTD-ARRAY-KEYS pilot rows in `TEST_PLAN.md` / `ABYSS_FIRST_CASES.md` → **soak pass 2026-11-22** — all four GTD arrays (`statusListMappings`, `syncedLists`, `syncScopeFolders`, `tagListMappings`) hash-identical to the pre-experiment backup after ~10 plugin reloads and two manual data.json restore cycles during the #306/#54 experiments; the contrived early-save race remains unit-only and is labeled as such. New `docs/pilot/STEP8-LIVE-GATE-RUNBOOK.md`: Preconditions (open: #202 glance, Decision #1 — pilot `taskIgnoreQuery` currently `null`, NOTE-L3b/CTX-D2 pre-flight, live backup, 8.0 credentials), install-byte-check, pilot pre-flight, the AF-1…AF-8 + DEL + NOTE-L3b live table, stop conditions, rollback (backup-first because #78 redo-soak is not done on live), sign-off rows. `PROJECT_STATE.md` / `PO_STATUS.md` item 11 point to the runbook.
+- Validation: docs-only; array hashes computed from the backup and live data.json (`ea73713c`/`582d6fca`/`4887d5b5`/`3f34f6b7` both sides).
+- Problems: none new. Gate stays CLOSED — this document does not open it.
+- References: #213, #78, `STEP8-LIVE-GATE-RUNBOOK.md`, `TEST_PLAN.md`
 
 ### Iteration 2026-11-22 03:40 UTC
 
