@@ -31,12 +31,12 @@ Project stage is a separate axis: **pilot soak → Step 8 live gate**. The live 
 | Field | Value |
 |-------|-------|
 | Stage | Pilot soak on `<pilot-vault>`; Step 8 live-vault gate **closed** |
-| Pilot build | **2.0.98** — the pilot vault `main.js` is byte-identical to the published 2.0.98 **and 2.0.99** release assets (`sha256 a3113a4b…88e347`), verified after the tags. This is also the build that passed the #299 live prove ×2. |
+| Pilot build | **2.0.99** — the pilot vault plugin was updated after the tag (`manifest.json` 2.0.99, 2026-11-20); `main.js` is byte-identical to the 2.0.98/2.0.99 release assets (`sha256 a3113a4b…88e347` — docs-only release, same bytes), the build that passed the #299/#305/#306 live proves and all proof tails. |
 | Last release | **2.0.99**, 2026-11-20 (non-prerelease, docs-only) — https://github.com/semyon-alekseev-noveo/tt-sync/releases/tag/2.0.99 |
-| Branch tip | `abyss-mapping` @ `7dc3db9` — merge of #321 (docs-only, after the tag); tag **2.0.99** = `0381a98` (merge of the 2.0.99 bump, PR #322) |
+| Branch tip | `abyss-mapping` @ `737a20a` — merge of #324 (the #306 live prove docs); tag **2.0.99** = `0381a98` |
 | CI on tip | **GREEN** on `0381a98` (2.0.99 release run: cycles / sizes / test / build), and previously on `6a91fdf` (branch + release), `1421e17`, `5190686`, `78d8a82`, `ffd5065`, `ec91fec`, `00ff923`, `945d182`; `7dc3db9` is docs-only. `PROC-CI-CYCLES-RED` fixed (#300, allowlist 118 → 56) |
 | Unit tests | **1023 passed / 144 files** on `6a91fdf` and on the fix branch |
-| Open issues | 13 |
+| Open issues | 11 |
 | Open PRs | 0 |
 
 Consequence: **2.0.98 fixes the #299 regression that 2.0.97 shipped.** Live prove on 2.0.97 routed a task tagged `note/don-253` into `00 Inbox/abyss-active.md`; on 2.0.98 the same scenario lands in `DON-253.md` twice over. Two defects were behind it: the tag lookup compared a slug against a basename that still carried `.md`, and the routing was only wired into the orphan-Add modal, not the normal pull path. #299 is now closed. **#305 is closed too** — live pass ×2 on the OFF path (2026-11-14, isolated scratch vault). **#306 closed 2026-11-21** — live pass ×2 + causal negative control on the pilot with real default-project fixtures (`UX-OBS-TT-SOAK/54-…`); the 2026-11-14 scratch run could not reach the path (flat stubs have no default project). `PROC-PR-STACK-MISBASE` is recorded: #302 merged into the stacked base and was re-landed by #303 (`ec91fec`). **2.0.99 is a docs-only release** (proof-tail evidence + #243/#244 collapse); its bundle is byte-identical to 2.0.98.
@@ -85,12 +85,12 @@ Open bugs:
 - **BUG-CONFIRM-REBIND-DUP** — post-#273 Confirm Rebind `InsertLine` dups beside live same-title siblings; `allowDisplaceLiveSameTitle` fix shipped in 2.0.97 (#273). **Live re-prove ×2 pass** 2026-11-17 on 2.0.98 (`UX-OBS-TT-SOAK/41-…`) → `shipped` (verified). Observation: the displaced id re-offers on the next run (Link tombstone is same-run only).
 - **BUG-OPENNOTE-DELETE-CONFIRM** — Delete/Backspace mid-edit opened PushDeleteTT Confirm; keyup `deletedTaskCheck` dropped, re-prove **not run** (`UX-OBS-TT-SOAK/42-…`) → `unit-only`.
 - **BUG-TT-CREATE-PATH-BYPASS** — create-path audit units pass; pilot path-guard **not run** (`UX-OBS-TT-SOAK/45-…`) → `unit-only`.
-- **BUG-RESET-CACHE-DELETE** — post-Reset Synchronize proposed vault-line deletes for pre-wipe ids; ghost detach now expected honesty, owner Reset→Synchronize ×2 still pending (`25-…` / `50-…`) → `blocked-owner`.
+- **BUG-RESET-CACHE-DELETE** — post-Reset Synchronize proposed vault-line deletes for pre-wipe ids; ghost detach is expected honesty. Owner Reset→Synchronize **pass ×2** 2026-11-14 on 2.0.98 (`UX-OBS-TT-SOAK/25-…`, #317) → `resolved`.
 - **GTD_ARRAY_KEYS** [#213](https://github.com/semyon-alekseev-noveo/tt-sync/issues/213) — `statusListMappings` was missing from the wipe-guard (`src/settingsMerge.ts`). **Fixed 2026-11-12:** added to `GTD_ARRAY_KEYS`; `wouldWipeGtdFromDisk` now mirrors `preserveGtdFromDisk` over all four arrays. Unit `GTD-ARRAY-KEYS` (3 of 4 new tests fail without the fix). **Merged #301 (`00ff923`), shipped in 2.0.97** (pilot rows `not run`).
 
 Open UX / product:
 
-- **UX-NOTICE-*** — create vs reattach Notices + modal cache wording; unit on tip, owner strip-marker prove **not run** (`36-…` / `50-…`) → `blocked-owner`.
+- **UX-NOTICE-*** — create vs reattach Notices + modal cache wording; owner live glance **pass** 2026-11-14 on 2.0.98 (`UX-OBS-TT-SOAK/36-…`, #317; single run, labels refreshed in `50-…`) → `resolved`.
 - **UX-SET-TASKS-FOLDER-COPY** [#202](https://github.com/semyon-alekseev-noveo/tt-sync/issues/202) — GTD «Tasks folder» help read like classic per-list mode. **Fixed 2026-11-12:** `tasksFolderHelp()` returns Abyss copy when scheme + Abyss format + push scope are on; classic copy otherwise. Unit `uxSetTasksFolderCopy.test.ts`. #302 merged into the stacked base instead of `abyss-mapping` (`PROC-PR-STACK-MISBASE`); **re-landed by #303 (`ec91fec`), shipped in 2.0.97** (pilot rows `not run`).
 - **Project-identity layers** [#243](https://github.com/semyon-alekseev-noveo/tt-sync/issues/243) / [#244](https://github.com/semyon-alekseev-noveo/tt-sync/issues/244) (duplicate: parent scheme vs `proj/` tags vs GTD stage naming) and [#245](https://github.com/semyon-alekseev-noveo/tt-sync/issues/245) (real product decision: parent vs tags-only mode). Tip has **no** tags-only identity mode; parent scheme is SoT → `triage`.
 - **FEAT-NOTEBOOK** [#159](https://github.com/semyon-alekseev-noveo/tt-sync/issues/159) — MVP live **pass** ×2; bi-directional still open → `triage`.
@@ -103,7 +103,7 @@ Open analysis / perf / process:
 - **AF-FMT-OFF-LIST-MOVE** [#306](https://github.com/semyon-alekseev-noveo/tt-sync/issues/306) — gate the structure-move path on the Abyss config being active so OFF never relocates vault task lines. **Fixed 2026-11-12:** `abyssLineInPlace` in `src/syncScope.ts` + `persistTasksToFile`; unit red → green. **Shipped in 2.0.97 (#310, `5190686`).** The 2026-11-14 live attempt was **inconclusive** (flat stubs make the path unreachable). **Live prove ×2 + causal negative control 2026-11-21** on the pilot with real default-project fixtures (assigned via the palette `set default project for file` modal): gated runs kept the line with the marker intact; a local control build with the gate forced off relocated it (`UX-OBS-TT-SOAK/54-…`). Cleanup verified: no marker lost, scope folders byte-identical to backup. **Issue closed.**
 - **TECH-START-1** [#86](https://github.com/semyon-alekseev-noveo/tt-sync/issues/86) — register scan / defer full pull + full `.md` walk; `RISK-LARGE-VAULT` remainder → `open`.
 - **PILOT-REDO-SOAK** [#78](https://github.com/semyon-alekseev-noveo/tt-sync/issues/78) — redo journal + `Undo last sync` never soaked on a vault → `blocked-owner`.
-- **PROC-RELEASE-GATE** [#172](https://github.com/semyon-alekseev-noveo/tt-sync/issues/172) — enable required status check `CI / test` on `abyss-mapping` → `blocked-owner`.
+- **PROC-RELEASE-GATE** [#172](https://github.com/semyon-alekseev-noveo/tt-sync/issues/172) — required status check `CI / test` on `abyss-mapping`. **Done 2026-11-21:** ruleset `abyss-mapping required CI` (id 27795106) active, strict, context `CI / test` (integration 15368). A red tip can no longer merge. Issue closed.
 - **Repo hygiene** [#33](https://github.com/semyon-alekseev-noveo/tt-sync/issues/33) — personal path in script, floating deps, docs sprawl → `triage`.
 
 Resolved / closed (keep as history, do not re-open):
@@ -138,7 +138,7 @@ Ordered. Do not start Step 8 before 1–3 are green.
 5. **[done 2026-11-17] Collapse #243/#244** — #244 closed as duplicate of #243; #245 stays the single product decision (parent vs tags-only).
 6. **#213** — shipped in 2.0.97 (#301, `00ff923`). Pilot rows in `TEST_PLAN.md` stay `not run`.
 7. **#202** — shipped in 2.0.97 (#303, `ec91fec`). Pilot rows stay `not run`.
-8. **#172** enable required `CI / test` on `abyss-mapping` so a red tip cannot be merged again.
+8. **[done 2026-11-21] #172** — ruleset `abyss-mapping required CI` (27795106) active: `CI / test` required, strict. A red tip cannot merge.
 9. **#201** — **analysis published 2026-11-12** (`docs/pilot/ABYSS-FORMAT-OFF-MATRIX.md`). **R4 → #305 live-proven ×2 on 2026-11-14 and closed; R5 → #306 live-proven ×2 + control on 2026-11-21 and closed** (`54-…`, real default-project fixture). R1–R3 (Settings warn / rename / read-only table) pending owner pick.
 10. **Optional / parked:** #218 (or close #214), #185, #159, #86, #78, #33.
 11. **Step 8 live gate** — only after 1–3 and after the parked Decision #1 config is cleared (`taskIgnoreQuery`).

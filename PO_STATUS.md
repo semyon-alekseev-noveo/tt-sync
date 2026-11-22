@@ -13,12 +13,12 @@
 | Поле | Значение |
 |------|----------|
 | Стадия | Пилотный soak на `<pilot-vault>`; **Step 8 (живой vault) не открыт** |
-| Сборка на пилоте | **2.0.98** — `main.js` в пилотном vault байт-в-байт совпадает с опубликованным релизным артефактом (`sha256 a3113a4b…88e347`), проверено 2026-11-13 после тега. Это же сборка, на которой прошёл live prove ×2 по #299. |
+| Сборка на пилоте | **2.0.99** — `manifest.json` обновлён после тега (2026-11-20); `main.js` байт-в-байт с артефактами 2.0.98/2.0.99 (`sha256 a3113a4b…88e347`, docs-only релиз) — та же сборка, на которой прошли prove #299/#305/#306 и все хвосты. |
 | Последний релиз | **2.0.99** (2026-11-20, non-prerelease, docs-only) — https://github.com/semyon-alekseev-noveo/tt-sync/releases/tag/2.0.99 |
 | Верхушка ветки | `abyss-mapping` @ `7dc3db9` — merge #321 (docs-only, после тега); тег **2.0.99** = `0381a98` (merge bump 2.0.99, PR #322) |
 | CI на верхушке | **ЗЕЛЁНЫЙ** (`0381a98` — релизный прогон 2.0.99: cycles / sizes / test / build; также `6a91fdf`, `1421e17`, `5190686`, `78d8a82`, `ffd5065`, `ec91fec`, `00ff923`, `945d182`); `7dc3db9` — docs-only. `PROC-CI-CYCLES-RED` закрыт (#300, allowlist 118 → 56) |
 | Юнит-тесты | **1023 / 144 файла** на `6a91fdf` и на ветке фикса |
-| Открытых issue | 13 |
+| Открытых issue | 11 |
 | Открытых PR | 0 |
 
 Практический вывод: **2.0.98 закрывает регрессию #299, которую выпустил 2.0.97.** На 2.0.97 живой prove отправлял задачу с тегом `note/don-253` в `00 Inbox/abyss-active.md`; на 2.0.98 тот же сценарий дважды попал в `DON-253.md`. Причин было две: поиск по тегу сравнивал слаг с basename, где остаётся `.md`, а маршрутизация была подключена только к модалке orphan-Add, а не к обычному pull-пути. Issue #299 закрыт. **#305 тоже закрыт** — живой prove ×2 на OFF-пути (2026-11-14, изолированный scratch-vault). **#306 остаётся открытым и unit-only**: его сценарий недостижим из плоских list-заглушек, живой прогон не доказывает гейт (контрольная сборка с принудительно выключенным гейтом вела себя так же). `PROC-PR-STACK-MISBASE` зафиксирован: #302 влился в промежуточную ветку и был пере-влит через #303 (`ec91fec`).
@@ -107,8 +107,8 @@
 | **AF-FMT-OFF-LIST-MOVE** | P2 | **closed** — 2.0.97 + live prove ×2 2026-11-21 ([#306](https://github.com/semyon-alekseev-noveo/tt-sync/issues/306)) | Перенос строки блокируется, пока активен Abyss-config. `abyssLineInPlace` в `src/syncScope.ts` + `persistTasksToFile`; юнит red → green. Влит #310 (`5190686`), вышел в 2.0.97. Первый живой prove (2026-11-14) не дал результата (плоские заглушки делают путь недостижимым). **Живой prove ×2 + причинный контроль 2026-11-21** на пилоте с настоящими default-project фикстурами (палитра «set default project for file»): гейт держит строку, сборка с выключенным гейтом её переносит (`54-…`). Issue закрыт. |
 | **UX-SET-TASKS-FOLDER-COPY** | P3 | **shipped** в 2.0.97 ([#202](https://github.com/semyon-alekseev-noveo/tt-sync/issues/202)) | Help у GTD «Tasks folder» читался как классический режим per-list файлов. Теперь на Abyss/GTD пути текст говорит, что list-зеркал нет и папка всегда в push scope; на классическом пути остаётся старый текст. #302 влился в промежуточную ветку, а не в `abyss-mapping` (`PROC-PR-STACK-MISBASE`); пере-влит #303 (`ec91fec`), вышел в 2.0.97. Пилотные строки `not run`. |
 | **BUG-OPENNOTE-DELETE-CONFIRM** | P1 | **live pass ×2** (2026-11-17, 2.0.98) | Delete/Backspace в открытой заметке вызывал PushDeleteTT Confirm. Фикс unit (keyup `deletedTaskCheck` убран); повторной live-prove **×2 pass** (`42-…`). |
-| **BUG-RESET-CACHE-DELETE** | P1 | **blocked-owner** | После Reset Synchronize предлагал удалить строки vault по pre-wipe id. Теперь ghost detach ожидаем; owner Reset→Synchronize ×2 всё ещё не прогнан (`25-…` / `50-…`). |
-| **UX-NOTICE** | P2 | **blocked-owner** | Тексты create vs reattach и модалки кэша. Unit на верхушке; owner strip-marker prove **не прогонялся** (`36-…` / `50-…`). |
+| **BUG-RESET-CACHE-DELETE** | P1 | **resolved** (pass ×2 2026-11-14, #317) | После Reset Synchronize предлагал удалить строки vault по pre-wipe id. Ghost detach — ожидаемая честность; owner Reset→Synchronize ×2 **pass** (`25-…`). |
+| **UX-NOTICE** | P2 | **resolved** (pass 2026-11-14, #317) | Тексты create vs reattach и модалки кэша — owner glance **pass** (`36-…`, один прогон); подписи в чеклисте `50` обновлены. |
 | **BUG-COMMENT-1** | P1 | resolved в 2.0.47 | Комментарии не синкались при неизменном hash; нужен live-soak NOTE-L3b |
 | **BUG-TAG-1** | P2 | mitigated в 2.0.47 | Дубли `note/`/`proj/`; на «грязных» задачах нужен один re-sync (CTX-D2) |
 | **BUG-SYNC-SILENT-FAIL** | P1 | fixed on this branch | `getUpdatedTasks` бросает `TickTickPullError`, `syncTickTickWithDexie` пробрасывает, `synchronizationInner` возвращает `{ok:false}`. Notice: «Sync failed: …». Чекпоинт не двигается. Не релиз |
@@ -153,7 +153,7 @@
 
 1. **[done 2026-11-12] PROC-CI-CYCLES-RED** — фикс влит #300 (`945d182`), CI зелёный, вышел в 2.0.97.
 2. **Объявление сборки пилота — сделано (2026-11-13):** пилотный vault на **2.0.98**, байт-в-байт с релизным артефактом (`sha256 a3113a4b…88e347`) — те же байты, что прошли live prove ×2 по #299. Ранее объявленные сборки (2.0.97 и tip-сборки `5190686` / `ec91fec` / `00ff923` / `945d182`) больше не действуют.
-3. **Закрыть хвосты prove** (owner, `docs/pilot/results/UX-OBS-TT-SOAK/50-owner-live-tails-checklist.md`):
+3. **[done 2026-11-21] Закрыть хвосты prove** (`docs/pilot/results/UX-OBS-TT-SOAK/50-owner-live-tails-checklist.md`) — все пять закрыты:
    - [x] `41-…` — prove ×2 pass 2026-11-17 (#318).
    - [x] `42-…` — prove ×2 pass 2026-11-17 (#319).
    - [x] `25-…` — Reset → Synchronize ×2 pass 2026-11-14 (#317).
@@ -163,7 +163,7 @@
 5. **[done 2026-11-17] #243/#244 схлопнуты** — #244 закрыт как duplicate #243; #245 остаётся единственным продуктовым решением (parent vs tags-only).
 6. **#213** — вышел в 2.0.97 (#301, `00ff923`). Пилотные строки в `TEST_PLAN.md` остаются `not run`.
 7. **#202** — вышел в 2.0.97 (#303, `ec91fec`). Пилотные строки остаются `not run`.
-8. **#172** — включить обязательный `CI / test` на `abyss-mapping`, чтобы красная верхушка больше не вливалась.
+8. **[done 2026-11-21] #172** — ruleset `abyss-mapping required CI` (27795106) активен: обязателен `CI / test`, strict. Красная верхушка больше не вольётся.
 9. **#201** — **анализ опубликован 2026-11-12** (`docs/pilot/ABYSS-FORMAT-OFF-MATRIX.md`). Вывод: выключение `abyssTasksFormat` — не переключатель режима, а **потеря данных**: символы `[/] [!] [?] [=] [~]` схлопываются в `[ ]`, тела `- >` отвязываются, заглушки `TTS-*` возвращаются. **R4 → #305 живой prove ×2 (2026-11-14), закрыт; R5 → #306 вышел, но остаётся unit-only** (нужен project-note с default project, не плоская заглушка). R1–R3 (Settings: предупреждение / переименование / read-only таблица) — выбор owner.
 10. **Опционально / parked:** #218 (или закрыть #214), #185, #159, #86, #78, #33.
 11. **Step 8 (живой vault)** — только после 1–3 и после снятия parked Decision #1 (`taskIgnoreQuery`).

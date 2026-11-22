@@ -7,6 +7,15 @@
 - Problems: #306 still unit-only (needs a scheme-created project note with a default project); R1–R3 of #201 pending owner pick.
 - References: #317, #318, #319, #320, #321, #243, #244, release 2.0.99
 
+### Iteration 2026-11-21 14:30 UTC
+
+- Context: after #324 merged, the owner-gated queue was #172 (required CI), #139 (evidence never committed), and stale status rows from the merged proof tails.
+- Target: land the merge-safety gate, close #139 honestly, and refresh `PROJECT_STATE.md` / `PO_STATUS.md` to the real state (11 open issues, pilot 2.0.99, all proof tails done).
+- Actions log: applied ruleset `abyss-mapping required CI` (id 27795106, active, strict, context `CI / test`, integration 15368 — the exact JSON from #172) and closed #172; reconstructed the never-committed `ABYSS-NEST-GTD/137b-…` evidence file verbatim from the #139 issue body (no new observations), added the INDEX row, closed #139; status docs updated (tip `737a20a`, open issues 11, pilot build 2.0.99 manifest with identical `main.js`, `BUG-RESET-CACHE-DELETE` / `UX-NOTICE` rows → resolved per #317, To-Be-Done items 3 and 8 done).
+- Validation: ruleset verified via `GET /rulesets/27795106`; legacy `/branches/.../protection` 404 is expected (rulesets don't populate it). Docs-only branch; engine untouched.
+- Problems: none new. Step 8 now waits only on Decision #1 (`taskIgnoreQuery`).
+- References: #172, #139, ruleset 27795106, `ABYSS-NEST-GTD/137b-…`, `PROJECT_STATE.md`, `PO_STATUS.md`
+
 ### Iteration 2026-11-21 13:00 UTC
 
 - Context: #306 (`AF-FMT-OFF-LIST-MOVE`) shipped unit-only after the 2026-11-14 scratch attempt was inconclusive — flat list stubs have no `defaultProjectId`, so `isProjectIdChanged` → `handleTickTickStructureMove` was unreachable and the negative control could not fire.
