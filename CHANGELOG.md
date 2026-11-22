@@ -7,6 +7,15 @@
 - Problems: #306 still unit-only (needs a scheme-created project note with a default project); R1–R3 of #201 pending owner pick.
 - References: #317, #318, #319, #320, #321, #243, #244, release 2.0.99
 
+### Iteration 2026-11-22 04:05 UTC
+
+- Context: R4/R5 (engine) shipped and live-proven; R1–R3 (+R6) were the last open items of #201, each needing an owner pick with no concrete sheet to pick on.
+- Target: one-page decision sheet per option so the owner answers accept/reject per row, nothing else.
+- Actions log: added `docs/pilot/FMT-OFF-R1-R3-DECISIONS.md` — R1 confirm-once warning on manual Synchronize while flag OFF + Abyss config (case `AF-FMT-OFF-WARN`, S); R2 toggle rename + effects copy (case `UX-SET-FMT-OFF-COPY`, S, bundle with R1); R3 status→list table read-only + «inactive» while OFF, reusing the shipped `GTD_TAG_LIST_INACTIVE_*` pattern (case `UX-SET-STATUS-OFF-RO`, S–M); R6 «Leaving Abyss mode» docs page (S). Recommendation: accept all four; each accepted row becomes its own issue + DEV_FLOW case-before-code PR. Status tables point to the sheet.
+- Validation: docs-only; grounding re-read from the matrix §5–§7 and current Settings surfaces (`NotesSettings.svelte` label, `GtdSection.svelte` table, `settingsUxVisibility.ts` banner helpers).
+- Problems: none.
+- References: #201, `docs/pilot/ABYSS-FORMAT-OFF-MATRIX.md`, `docs/pilot/FMT-OFF-R1-R3-DECISIONS.md`
+
 ### Iteration 2026-11-22 03:40 UTC
 
 - Context: #325 merged under the new gate; the ruleset as first applied (required context `CI / test`) deadlocked PRs — that string matches a push-event status context `ci.yml` never reports for feature branches (PR-only `pull_request` runs). Suffix variants also did not match.
