@@ -7,6 +7,14 @@
 - Problems: #306 still unit-only (needs a scheme-created project note with a default project); R1–R3 of #201 pending owner pick.
 - References: #317, #318, #319, #320, #321, #243, #244, release 2.0.99
 
+### Iteration 2026-11-22 03:40 UTC
+
+- Context: #325 merged under the new gate; the ruleset as first applied (required context `CI / test`) deadlocked PRs — that string matches a push-event status context `ci.yml` never reports for feature branches (PR-only `pull_request` runs). Suffix variants also did not match.
+- Target: record the corrected required-check config in the status docs.
+- Actions log: ruleset 27795106 PUT → required `context: "test"`, `integration_id: 15368` (Actions check-run name matching); #325 flipped `blocked → clean` and merged (live proof: pending required check disabled merge, green check enabled it). Follow-up comment posted on #172 warning the issue's JSON must not be re-applied verbatim.
+- Validation: `GET /rulesets/27795106` shows the new context, conditions and enforcement intact; `pulls/325 mergeable_state: clean` observed. Docs-only branch; engine untouched.
+- References: #172, #325, ruleset 27795106
+
 ### Iteration 2026-11-21 14:30 UTC
 
 - Context: after #324 merged, the owner-gated queue was #172 (required CI), #139 (evidence never committed), and stale status rows from the merged proof tails.
