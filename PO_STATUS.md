@@ -166,7 +166,7 @@
 8. **[done 2026-11-21] #172** — ruleset `abyss-mapping required CI` (27795106) активен: обязателен check-run **`test`** (job workflow CI, context `"test"`, integration 15368; строка `CI / test` для PR-only workflow не матчится и блокировала merge), strict. Красная верхушка больше не вольётся.
 9. **#201** — **анализ опубликован 2026-11-12** (`docs/pilot/ABYSS-FORMAT-OFF-MATRIX.md`). Вывод: выключение `abyssTasksFormat` — не переключатель режима, а **потеря данных**: символы `[/] [!] [?] [=] [~]` схлопываются в `[ ]`, тела `- >` отвязываются, заглушки `TTS-*` возвращаются. **R4 → #305 живой prove ×2 (2026-11-14), закрыт; R5 → #306 живой prove ×2 + причинный контроль (2026-11-21, `54-…`), закрыт.** **R1–R3 + R6 — лист решений составлен 2026-11-22** (`docs/pilot/FMT-OFF-R1-R3-DECISIONS.md`): таблица accept/reject по каждому, ждёт owner.
 10. **Опционально / parked:** #218 (или закрыть #214), #185, #159, #86, #78, #33.
-11. **Step 8 (живой vault)** — только после 1–3 и после снятия parked Decision #1 (`taskIgnoreQuery`).
+11. **Step 8 (живой vault)** — ранбук составлен 2026-11-22 (`docs/pilot/STEP8-LIVE-GATE-RUNBOOK.md`); гейт закрыт, пока блок Preconditions не зелёный (#202 glance, Decision #1, NOTE-L3b/CTX-D2 pre-flight в этом же прогоне).
 
 
 
