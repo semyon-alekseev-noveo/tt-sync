@@ -7,6 +7,15 @@
 - Problems: none.
 - References: #202, #201, `FMT-OFF-R1-R3-DECISIONS.md`
 
+### Iteration 2026-11-22 07:05 UTC
+
+- Context: decision sheet accepted all (R1+R2 bundled, R3, R6) by the owner 2026-11-22; R1/R2 are this PR.
+- Target: `AF-FMT-OFF-WARN` (manual Synchronize confirms once per session while flag OFF + Abyss config) + `UX-SET-FMT-OFF-COPY` (toggle label states the danger + four-effect summary).
+- Actions log: new `src/sync/fmtOffWarn.ts` (pure predicate on the settings slice; session-once `confirmFmtOffSyncBeforeRun` with injectable ask; Modal Sync anyway / Cancel; Esc = cancel, Cancel not remembered, Accept remembered); wired at the three manual entry points only — palette `tts-sync` + ribbon via `main.synchronizeNow`, Maintenance button via `ManualSyncOperations.handleManualSync`; `scheduledSynchronization` and reactive paths untouched. `NotesSettings.svelte` label + effects block. Failing-first unit `src/test/afFmtOffWarn.test.ts` (14 cases, red before the module existed). AF case rows + TEST_PLAN section in this PR. The R2 copy forward-references the R6 page (`LEAVING-ABYSS-MODE`) shipped in the next PR — R3 and R6 follow on separate branches.
+- Validation: `npx vitest run` → **1037 passed / 145 files**; `npm run build` OK; `check:cycles` 56 (no new edge); `check:sizes` 0 exceptions.
+- Problems: pilot rows for R1/R2 `not run` (each needs the flag OFF — do them during Step 8 pre-flight or a scratch session; unit + wiring asserts cover the logic). Merge order vs the open docs PR #330: both touch the CHANGELOG head — #330 first, this branch rebased after.
+- References: #201, `FMT-OFF-R1-R3-DECISIONS.md`, `afFmtOffWarn.test.ts`, `src/sync/fmtOffWarn.ts`
+
 ### Iteration 2026-11-22 05:00 UTC
 
 - Context: audit after #327/#328 merged back-to-back — the GitHub "update branch" conflict resolution on #328 (`0abe8c0`) resolved `CHANGELOG.md` toward the base side and silently dropped #328's own `04:25` iteration entry. Everything else from both merges verified intact (decision sheet, runbook file, #213 rows, #326 ruleset-correction lines, item-9/11 pointers).

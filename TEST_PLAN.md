@@ -2082,3 +2082,17 @@ Run by the agent on **Thinkpad-tts-test** (pilot only), plugin **2.0.99** (`main
 | Cleanup | Delete stub files + probe notes + probe tasks; `Reset local sync cache` → Synchronize | No marker lost, no modal, no TT delete | **pass** — every `ticktick_id` from the pre-run backup still present; `10 Projects/` + `30 Tasks/` byte-identical to backup; abyss-active re-linked +16 orphan rows (legitimate re-pull) |
 
 **Verdict #306: live pass ×2 + causal control.** The gate holds when the scenario is actually reachable; the issue closes.
+
+## PR — AF-FMT-OFF-WARN + UX-SET-FMT-OFF-COPY (R1+R2 of #201, decision sheet accepted 2026-11-22)
+
+Behavior change: manual Synchronize can now be blocked by a one-time confirm. Existing behavior unchanged when the flag is ON or any config part is missing.
+
+| Case | Steps | Expected | Pilot |
+|------|-------|----------|-------|
+| R1 warn once | Flag OFF + Abyss config (scheme + status→list + push scope). Palette **Synchronize**. | Modal «Abyss format is OFF…»; **Cancel** → nothing runs (no journal write, no Notice). **Sync anyway** → sync runs normally. | **not run** |
+| R1 session memory | After accepting, Synchronize again in the same session. | No second modal. Plugin reload → asks again. | **not run** |
+| R1 no false gate | Flag ON; palette/ribbon/Maintenance Synchronize. | No modal, sync identical to before. | **not run** |
+| R1 background paths | With flag OFF + config and `syncEnabled` on: interval tick / open-note settle fires. | No modal ever for non-manual triggers. | **not run** (unit wiring asserts) |
+| R2 label | Settings → Task & note format. | Label «Abyss Tasks format — turning this off changes how lists and symbols sync» + effects summary visible; toggle works as before. | **not run** |
+
+Unit: `src/test/afFmtOffWarn.test.ts` (14 cases: predicate truth table, session-once with injected ask, Cancel-not-remembered, main.ts + Maintenance wiring source asserts, no-gate on `scheduledSynchronization`, R2 copy asserts). Gate: full suite 1037 / 145; `check:cycles` 56; `check:sizes` 0 exceptions; build OK.

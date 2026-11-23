@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { getSettings, updateSettings } from '@/settings';
+	import { confirmFmtOffSyncBeforeRun } from '@/sync/fmtOffWarn';
 	import { settingsStore } from '@/ui/settings/settingsstore';
 	import type TickTickSync from '@/main';
 	import { Notice, Setting } from 'obsidian';
@@ -44,6 +45,10 @@
 	async function handleManualSync() {
 		if (!getSettings().token) {
 			new Notice('Please log in from settings first');
+			return;
+		}
+		// AF-FMT-OFF-WARN (R1): same one-time confirm as the palette/ribbon path.
+		if (!(await confirmFmtOffSyncBeforeRun(plugin.app))) {
 			return;
 		}
 		try {

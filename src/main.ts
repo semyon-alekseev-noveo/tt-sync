@@ -27,6 +27,7 @@ import { installWriteTraceWatch } from '@/services/writeTrace';
 
 import { getSettings, mergeDeviceLists, updateSettings } from './settings';
 import { formatPluginLoadedNotice, formatSyncResultNotice, type SyncRunResult } from '@/sync/result';
+import { confirmFmtOffSyncBeforeRun } from '@/sync/fmtOffWarn';
 import { isAutomaticSyncEnabled, reconcileSyncEnabledFromDisk } from '@/sync/syncEnabled';
 import { waitForStartupSync } from '@/sync/startupDelay';
 import {
@@ -753,6 +754,11 @@ export default class TickTickSync extends Plugin implements PluginContext {
 	}
 
 	private async synchronizeNow() {
+		// AF-FMT-OFF-WARN (R1): manual Synchronize confirms once per session while the
+		// flag is OFF and the Abyss config is present. Scheduled/reactive are not gated.
+		if (!(await confirmFmtOffSyncBeforeRun(this.app))) {
+			return;
+		}
 		const result = await this.scheduledSynchronization();
 		new Notice(formatSyncResultNotice(result));
 	}
