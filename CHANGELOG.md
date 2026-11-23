@@ -1,3 +1,12 @@
+### Iteration 2026-11-22 06:10 UTC
+
+- Context: owner answers arrived — #202 Tasks-folder copy glance **pass** (Abyss row, 2.0.99), decision sheet **accept all** (R1, R2 bundled, R3, R6); Decision #1 re-explained plainly, answer pending.
+- Target: record the two answers; open the accepted implementation queue.
+- Actions log: TEST_PLAN #202 rows (abyss pass / classic+save not run with the 30 s note), AF case row, PROJECT_STATE/PO_STATUS problem + TBD rows updated; FMT-OFF sheet gains a Resolution section naming the follow-up case IDs (`AF-FMT-OFF-WARN`, `UX-SET-FMT-OFF-COPY`, `UX-SET-STATUS-OFF-RO`, `LEAVING-ABYSS-MODE`).
+- Validation: docs-only; the three code PRs follow (R1+R2 first).
+- Problems: none.
+- References: #202, #201, `FMT-OFF-R1-R3-DECISIONS.md`
+
 ### Iteration 2026-11-22 05:00 UTC
 
 - Context: audit after #327/#328 merged back-to-back — the GitHub "update branch" conflict resolution on #328 (`0abe8c0`) resolved `CHANGELOG.md` toward the base side and silently dropped #328's own `04:25` iteration entry. Everything else from both merges verified intact (decision sheet, runbook file, #213 rows, #326 ruleset-correction lines, item-9/11 pointers).
