@@ -254,10 +254,16 @@
 
 		<div class="setting-item">
 			<div class="setting-item-info">
-				<div class="setting-item-name">Abyss Tasks format</div>
+				<div class="setting-item-name">Abyss Tasks format — turning this off changes how lists and symbols sync</div>
 				<div class="setting-item-description">
 					Store notes as <code>- &gt; </code> description lines and <code>- </code> comment lines. Overrides
 					note delimiter when enabled.
+				</div>
+				<div class="setting-item-description">
+					While OFF with the Abyss config present: checkbox symbols follow the status → list map (kept lossless),
+					bodies under checkboxes may detach from the task line, tags rewrite in classic style, and list stubs
+					can reappear. A manual Synchronize in that state asks for confirmation once per session
+					(see «Leaving Abyss mode» in Settings docs).
 				</div>
 			</div>
 			<div class="setting-item-control">
