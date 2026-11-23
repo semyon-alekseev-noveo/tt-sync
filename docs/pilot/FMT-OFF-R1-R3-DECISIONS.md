@@ -53,4 +53,8 @@ Short `docs/pilot/LEAVING-ABYSS-MODE.md` with the safe sequence (matrix §5 note
 | R3 read-only table | ☐ | ☐ | |
 | R6 docs page | ☐ | ☐ | |
 
+## Resolution (2026-11-22)
+
+Owner: **accept all** (R1, R2 bundled; R3; R6). Accepted rows become issues + DEV_FLOW case-before-code PRs: R1+R2 → `AF-FMT-OFF-WARN` + `UX-SET-FMT-OFF-COPY`; R3 → `UX-SET-STATUS-OFF-RO`; R6 → docs page `LEAVING-ABYSS-MODE`.
+
 Accepted rows become issues referencing this sheet; each PR updates `ABYSS_FIRST_CASES.md` + `TEST_PLAN.md` per DEV_FLOW before code.

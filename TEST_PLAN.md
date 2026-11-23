@@ -34,9 +34,9 @@ Issue [#202](https://github.com/semyon-alekseev-noveo/tt-sync/issues/202). Case 
 
 | Case | Steps | Expected | Pilot |
 |------|-------|----------|-------|
-| UX-SET-TASKS-FOLDER-COPY abyss | Pilot config (project scheme + Abyss format + non-empty push scope). Settings → GTD and projects → **Tasks folder**. | Help says no per-list files are created and that the folder is always inside the push scope. No «Folder for list files», no «Move Existing Files». | **not run** |
-| UX-SET-TASKS-FOLDER-COPY classic | Turn Abyss format off (or clear push scope). Reopen the same setting. | Classic copy returns («Folder for list files … Move Existing Files in Defaults»). | **not run** |
-| UX-SET-TASKS-FOLDER-COPY save | Edit the folder value, blur. | Value saves as before; no new validation or placeholder change. | **not run** |
+| UX-SET-TASKS-FOLDER-COPY abyss | Pilot config (project scheme + Abyss format + non-empty push scope). Settings → GTD and projects → **Tasks folder**. | Help says no per-list files are created and that the folder is always inside the push scope. No «Folder for list files», no «Move Existing Files». | owner glance **pass** 2026-11-22 (pilot, 2.0.99 — Abyss copy rendered) |
+| UX-SET-TASKS-FOLDER-COPY classic | Turn Abyss format off (or clear push scope). Reopen the same setting. | Classic copy returns («Folder for list files … Move Existing Files in Defaults»). | **not run** (needs flag OFF — unit covers the predicate) |
+| UX-SET-TASKS-FOLDER-COPY save | Edit the folder value, blur. | Value saves as before; no new validation or placeholder change. | **not run** (30s if owner is in Settings) |
 
 ## GTD-ARRAY-KEYS — `statusListMappings` survives the GTD wipe-guard (#213)
 
